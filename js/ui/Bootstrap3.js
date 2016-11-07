@@ -1,4 +1,4 @@
-define(["exports", "UIBase", "UIPrimitives"], function (exports, _UIBase) {
+define(["exports", "./UIBase", "./UIPrimitives"], function (exports, _UIBase) {
     "use strict";
 
     Object.defineProperty(exports, "__esModule", {

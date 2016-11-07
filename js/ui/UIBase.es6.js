@@ -1,6 +1,6 @@
-import * as Utils from "Utils";
-import {NodeWrapper} from "NodeWrapper";
-import {DOMAttributes, ATTRIBUTE_NAMES_MAP} from "DOMAttributes";
+import * as Utils from "../base/Utils";
+import {NodeWrapper} from "./NodeWrapper";
+import {DOMAttributes, ATTRIBUTE_NAMES_MAP} from "./DOMAttributes";
 
 var UI = {
     renderingStack: [], //keeps track of objects that are redrawing, to know where to assign refs automatically
@@ -103,12 +103,9 @@ class UIElement extends NodeWrapper {
         this.setOptions(element.options);
     }
 
-    //TODO: should be renamed to getDocumentTag or getTag ?
+    //TODO: should be renamed to getDocumentTag or getTag, or getHTMLTag ?
     getPrimitiveTag() {
-        if (this.options && this.options.hasOwnProperty("primitiveTag")) {
-            return this.options.primitiveTag;
-        }
-        return "div";
+        return this.options.primitiveTag || "div";
     }
 
     static create(parentNode, options) {
@@ -437,6 +434,14 @@ UI.createElement = function (tag, options) {
 
     options = options || {};
 
+    if (!options.children || arguments.length > 2) {
+        options.children = [];
+
+        for (let i = 2; i < arguments.length; i += 1) {
+            options.children.push(arguments[i]);
+        }
+
+    }
     options.children = [];
 
     for (let i = 2; i < arguments.length; i += 1) {
@@ -453,7 +458,7 @@ UI.createElement = function (tag, options) {
                     name: options.ref
                 };
             } else {
-                throw Error("Failed to link ref, there needs to be an element in the rendering stack");
+                throw Error("Failed to automatically link ref, there needs to be an element in the rendering stack");
             }
         }
 

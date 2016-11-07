@@ -1,9 +1,9 @@
-import {UI} from "UIBase";
-import "UIPrimitives";
-import * as math from "math";
-import {CreateAllowedAttributesMap} from "DOMAttributes";
-import {Color} from "Color";
-import {Transition} from "Transition";
+import {UI} from "./UIBase";
+import "./UIPrimitives";
+import * as math from "../math";
+import {CreateAllowedAttributesMap} from "./DOMAttributes";
+import {Color} from "./Color";
+import {Transition} from "./Transition";
 
 UI.SVG = {};
 

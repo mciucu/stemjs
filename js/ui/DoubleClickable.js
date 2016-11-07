@@ -1,4 +1,4 @@
-define(["UIBase"], function (_UIBase) {
+define(["./UIBase"], function (_UIBase) {
     "use strict";
 
     function _classCallCheck(instance, Constructor) {

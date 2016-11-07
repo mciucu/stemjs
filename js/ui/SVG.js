@@ -1,4 +1,4 @@
-define(["exports", "UIBase", "math", "DOMAttributes", "Color", "Transition", "UIPrimitives"], function (exports, _UIBase, _math, _DOMAttributes, _Color, _Transition) {
+define(["exports", "./UIBase", "../math", "./DOMAttributes", "./Color", "./Transition", "./UIPrimitives"], function (exports, _UIBase, _math, _DOMAttributes, _Color, _Transition) {
     "use strict";
 
     Object.defineProperty(exports, "__esModule", {

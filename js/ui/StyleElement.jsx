@@ -1,7 +1,7 @@
 // TODO: not sure is this needs to actually be *.jsx
-import {UI} from "UIBase";
-import {Dispatchable} from "Dispatcher";
-import {DOMAttributes} from "DOMAttributes";
+import {UI} from "./UIBase";
+import {Dispatchable} from "../base/Dispatcher";
+import {DOMAttributes} from "./DOMAttributes";
 
 // TODO: should this be actually better done throught the dynamic CSS API, without doing through the DOM?
 UI.StyleInstance = class StyleInstance extends UI.TextElement {
@@ -172,7 +172,6 @@ class StyleSet extends Dispatchable {
     }
 
     update() {
-        let start = performance.now();
         this.dispatch("beforeUpdate", this);
         let children = [];
         for (let value of this.elements) {
@@ -183,7 +182,6 @@ class StyleSet extends Dispatchable {
         }
         this.styleElement.options.children = children;
         this.styleElement.redraw();
-        console.log("Duration: ", (performance.now() - start));
     }
 }
 
@@ -220,24 +218,6 @@ class ExclusiveClassSet {
         }
     }
 }
-
-// Disable for now
-// UI.ConstructorStyleSetMixin = function (BaseClass) {
-//     if (!(BaseClass instanceof UI.ConstructorInitMixin)) {
-//         BaseClass = UI.ConstructorInitMixin(BaseClass);
-//     }
-//
-//     class ConstructorStyleSetMixin extends BaseClass {
-//         static getStyleSet(options={}) {
-//             if (!this.prototype.css) {
-//                 this.prototype.css = new StyleSet(options);
-//             }
-//             return this.prototype.css;
-//         }
-//     }
-//
-//     return ConstructorStyleSetMixin;
-// };
 
 function wrapCSS(context, style) {
     let result = {};

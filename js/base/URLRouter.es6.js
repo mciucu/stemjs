@@ -1,5 +1,5 @@
-import * as Utils from "Utils";
-import {Dispatchable} from "Dispatcher";
+import * as Utils from "./Utils";
+import {Dispatchable} from "./Dispatcher";
 
 class URLRouterClass extends Dispatchable {
     constructor() {

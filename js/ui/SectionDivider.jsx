@@ -1,6 +1,6 @@
 // This whole file needs a refactoring
-import {UI} from "UIBase";
-import {Device} from "Device";
+import {UI} from "./UIBase";
+import {Device} from "../base/Device";
 
 // options.orientation is the orientation of the divided elements
 UI.DividerBar = class DividerBar extends UI.Element {

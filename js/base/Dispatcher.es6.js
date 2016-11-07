@@ -1,4 +1,4 @@
-class DispatcherCallback {
+class DispatcherHandle {
     constructor(dispatcher, callback) {
         this.dispatcher = dispatcher;
         this.callback = callback;
@@ -14,27 +14,30 @@ class DispatcherCallback {
 }
 
 class Dispatcher {
-    constructor(options={}) {
+    constructor(options = {}) {
         this.options = options;
         this.listeners = [];
     }
 
     addListener(callback) {
+        if (!(typeof callback === "function")) {
+            console.error("The listener needs to be a function: ", callback);
+            return;
+        }
         for (let i = 0; i < this.listeners.length; i += 1) {
-            if (this.listeners[i].callback === callback) {
-                console.error("Can't re-register for the same callback: ", this.name, " ", callback);
-                return this.listeners[i];
+            if (this.listeners[i] === callback) {
+                console.error("Can't re-register for the same callback: ", this, " ", callback);
+                return new DispatcherHandle(this, this.listeners[i]);
             }
         }
 
-        let dispatcherCallback = new DispatcherCallback(this, callback);
-        this.listeners.push(dispatcherCallback);
-        return dispatcherCallback;
+        this.listeners.push(callback);
+        return new DispatcherHandle(this, callback);
     };
 
     removeListener(callback) {
         for (let i = 0; i < this.listeners.length; i += 1) {
-            if (this.listeners[i].callback === callback) {
+            if (this.listeners[i] === callback) {
                 // Erase and return
                 return this.listeners.splice(i, 1)[0];
             }
@@ -44,17 +47,12 @@ class Dispatcher {
     dispatch(payload) {
         for (let i = 0; i < this.listeners.length; i += 1) {
             let listener = this.listeners[i];
-            // TODO: maybe optimize for cases with 1-2 arguments?
-            listener.callback(...arguments);
+            listener(...arguments);
         }
     };
 }
 
 class Dispatchable {
-    constructor() {
-    }
-
-    // TODO: this should probably be used with a @lazy decorator
     get dispatchers() {
         if (!this.hasOwnProperty("_dispatchers")) {
             this._dispatchers = new Map();
@@ -80,6 +78,9 @@ class Dispatchable {
     }
 
     addListener(name, callback) {
+        if (Array.isArray(name)) {
+            return new CleanupJobs(name.map(x => this.addListener(x, callback)));
+        }
         let dispatcher = this.getDispatcher(name);
         if (!dispatcher) {
             dispatcher = new Dispatcher();
@@ -103,7 +104,7 @@ class Dispatchable {
 Dispatcher.Global = new Dispatchable();
 
 class RunOnce {
-    run(callback, timeout=0) {
+    run(callback, timeout = 0) {
         if (this.timeout) {
             return;
         }
@@ -115,7 +116,7 @@ class RunOnce {
 }
 
 class CleanupJobs {
-    constructor(jobs=[]) {
+    constructor(jobs = []) {
         this.jobs = jobs;
     }
 
@@ -135,21 +136,19 @@ class CleanupJobs {
     }
 }
 
-function Cleanable(BaseClass) {
-    return class Cleanable extends BaseClass {
-        addCleanupTask(cleanupJob) {
-            if (!this.hasOwnProperty("_cleanupJobs")) {
-                this._cleanupJobs = new CleanupJobs();
-            }
-            this._cleanupJobs.add(cleanupJob);
+let CleanupMixin = (BaseClass) => class Cleanup extends BaseClass {
+    addCleanupTask(cleanupJob) {
+        if (!this.hasOwnProperty("_cleanupJobs")) {
+            this._cleanupJobs = new CleanupJobs();
         }
+        this._cleanupJobs.add(cleanupJob);
+    }
 
-        cleanup() {
-            if (this._cleanupJobs) {
-                this._cleanupJobs.cleanup();
-            }
+    cleanup() {
+        if (this._cleanupJobs) {
+            this._cleanupJobs.cleanup();
         }
     }
 }
 
-export {Dispatcher, Dispatchable, RunOnce, CleanupJobs, Cleanable};
+export {Dispatcher, Dispatchable, RunOnce, CleanupJobs, CleanupMixin};

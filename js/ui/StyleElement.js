@@ -1,4 +1,4 @@
-define(["exports", "UIBase", "Dispatcher", "DOMAttributes"], function (exports, _UIBase, _Dispatcher, _DOMAttributes) {
+define(["exports", "./UIBase", "../base/Dispatcher", "./DOMAttributes"], function (exports, _UIBase, _Dispatcher, _DOMAttributes) {
     "use strict";
 
     Object.defineProperty(exports, "__esModule", {
@@ -378,7 +378,6 @@ define(["exports", "UIBase", "Dispatcher", "DOMAttributes"], function (exports, 
         }, {
             key: "update",
             value: function update() {
-                var start = performance.now();
                 this.dispatch("beforeUpdate", this);
                 var children = [];
                 var _iteratorNormalCompletion3 = true;
@@ -411,7 +410,6 @@ define(["exports", "UIBase", "Dispatcher", "DOMAttributes"], function (exports, 
 
                 this.styleElement.options.children = children;
                 this.styleElement.redraw();
-                console.log("Duration: ", performance.now() - start);
             }
         }]);
 
@@ -478,24 +476,6 @@ define(["exports", "UIBase", "Dispatcher", "DOMAttributes"], function (exports, 
 
         return ExclusiveClassSet;
     }();
-
-    // Disable for now
-    // UI.ConstructorStyleSetMixin = function (BaseClass) {
-    //     if (!(BaseClass instanceof UI.ConstructorInitMixin)) {
-    //         BaseClass = UI.ConstructorInitMixin(BaseClass);
-    //     }
-    //
-    //     class ConstructorStyleSetMixin extends BaseClass {
-    //         static getStyleSet(options={}) {
-    //             if (!this.prototype.css) {
-    //                 this.prototype.css = new StyleSet(options);
-    //             }
-    //             return this.prototype.css;
-    //         }
-    //     }
-    //
-    //     return ConstructorStyleSetMixin;
-    // };
 
     function wrapCSS(context, style) {
         var result = {};

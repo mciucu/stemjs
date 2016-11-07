@@ -1,5 +1,5 @@
 // Plugins should be used to extends on runtime the functionality of a class
-import {Dispatchable} from "Dispatcher";
+import {Dispatchable} from "./Dispatcher";
 
 class Plugin extends Dispatchable {
     constructor(parent) {

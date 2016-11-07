@@ -1,4 +1,4 @@
-define(["exports", "Dispatcher"], function (exports, _Dispatcher) {
+define(["exports", "../base/Dispatcher"], function (exports, _Dispatcher) {
     "use strict";
 
     Object.defineProperty(exports, "__esModule", {

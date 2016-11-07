@@ -1,93 +1,4 @@
-// TODO: may be better to split this file
-import {Dispatchable, CleanupJobs} from "Dispatcher";
-
-class GlobalStateClass extends Dispatchable {
-    constructor() {
-        super();
-        this.stores = new Map();
-        // TODO: applyEvent should have a bind decorator instead of this
-        this.applyEventWrapper = (event) => {
-            this.applyEvent(event);
-        }
-    }
-
-    getStore(objectType) {
-        objectType = objectType.toLowerCase();
-        return this.stores.get(objectType);
-    }
-
-    addStore(store) {
-        let objectType = store.objectType.toLowerCase();
-        if (!this.stores.has(objectType)) {
-            this.stores.set(objectType, store);
-        } else {
-            throw Error("GlobalState: Adding a store for an existing object type: " + store.objectType);
-        }
-    }
-
-    applyEvent(event) {
-        if (Array.isArray(event)) {
-            for (let individualEvent of event) {
-                this.applyEvent(individualEvent);
-            }
-            return;
-        }
-        if (!event.hasOwnProperty("objectType")) {
-            console.error("GlobalState: Event does not contain 'objectType' property: ", event);
-            return;
-        }
-        let store = this.getStore(event.objectType);
-        if (store) {
-            return store.applyEvent(event);
-        } else {
-            console.log("GlobalState: Missing store for event: ", event);
-        }
-    }
-
-    // TODO: should just pass the other arguments after object type to the store get
-    get(objectType, objectId) {
-        let store = this.getStore(objectType);
-        if (store) {
-            return store.get(objectId);
-        } else {
-            console.error("GlobalState: Can't find store ", objectType);
-            return null;
-        }
-    }
-
-    // TODO: this logic is a bit messy, does a topological sort of dependencies (consider merging next 2 methods)
-    importStateAndRemove(objectType, stateMap) {
-        let objects = stateMap.get(objectType);
-        stateMap.delete(objectType);
-
-        let store = this.getStore(objectType);
-
-        if (!store) {
-            console.error("GlobalState: Can't find store ", objectType);
-            return;
-        }
-        for (let dependency of store.getDependencies()) {
-            this.importStateAndRemove(dependency.toLowerCase(), stateMap);
-        }
-        objects = objects || [];
-        for (let object of objects) {
-            // TODO: this makes the assumption that a store should implement fakeCreate, not sure if it should
-            store.fakeCreate(object);
-        }
-    }
-
-    importState(state) {
-        let stateMap = new Map();
-        for (let objectType in state) {
-            stateMap.set(objectType.toLowerCase(), state[objectType]);
-        }
-        while (stateMap.size > 0) {
-            let allKeys = stateMap.keys();
-            let objectType = allKeys.next().value;
-            this.importStateAndRemove(objectType, stateMap);
-        }
-    }
-}
+import {Dispatchable, CleanupJobs} from "../base/Dispatcher";
 
 class StoreObject extends Dispatchable {
     constructor(obj) {
@@ -105,13 +16,16 @@ class StoreObject extends Dispatchable {
         return this.addListener("update", callback);
     }
 
-    // Add a listener on updated from events with this specific type.
+    addDeleteListener(callback) {
+        return this.addListener("delete", callback);
+    }
+
+    // Add a listener on updates from events with this specific type.
     // Can accept an array as eventType
     // Returns an object that implements the Cleanup interface.
     addEventListener(eventType, callback) {
         if (Array.isArray(eventType)) {
-            // let jobs = eventType.map(type => this.addEventListener(type, callback));
-            // return new CleanupJobs(jobs);
+            // return new CleanupJobs(eventType.map(x => this.addEventListener(x, callback)));
 
             let cleanupJobs = new CleanupJobs();
             for (let type of eventType) {
@@ -158,9 +72,6 @@ class BaseStore extends Dispatchable {
     getDependencies() {
         return this.options.dependencies || [];
     }
-
-    // These methods should be implemented when inheriting (abstract)
-    fakeCreate(obj) {}
 }
 
 class GenericObjectStore extends BaseStore {
@@ -225,9 +136,12 @@ class GenericObjectStore extends BaseStore {
     }
 
     applyDeleteEvent(event) {
-        let objDeleted = this.objects.delete(event.objectId);
-        objDeleted.dispatch("delete", event, objDeleted);
-        this.dispatch("delete", objDeleted, event);
+        let objDeleted = this.objects.get(event.objectId);
+        if (objDeleted) {
+            this.objects.delete(event.objectId);
+            objDeleted.dispatch("delete", event, objDeleted);
+            this.dispatch("delete", objDeleted, event);
+        }
         return objDeleted;
     }
 
@@ -252,6 +166,13 @@ class GenericObjectStore extends BaseStore {
                 return;
             }
             return this.applyEventToObject(obj, event);
+        }
+    }
+
+    importState(objects) {
+        objects = objects || [];
+        for (let obj of objects) {
+            this.fakeCreate(obj);
         }
     }
 
@@ -299,10 +220,35 @@ class GenericObjectStore extends BaseStore {
     }
 }
 
-var GlobalState = new GlobalStateClass();
+class SingletonStore extends BaseStore {
+    constructor(objectType, options={}) {
+        super(objectType, SingletonStore, options);
+    }
 
-if (window) {
-    window.GlobalState = GlobalState;
+    get() {
+        return this;
+    }
+
+    all() {
+        return [this];
+    }
+
+    applyEvent(event) {
+        this.update(event);
+        this.dispatch("update", event, this);
+    }
+
+    importState(obj) {
+        Object.assign(this, obj);
+        this.dispatch("update", event, this);
+    }
+
+    addUpdateListener(callback) {
+        return this.addListener("update", callback);
+    }
 }
 
-export {GlobalStateClass, GlobalState, StoreObject, GenericObjectStore, BaseStore};
+// Use the same logic as StoreObject when listening to events
+SingletonStore.prototype.addEventListener = StoreObject.prototype.addEventListener;
+
+export {StoreObject, BaseStore, GenericObjectStore, SingletonStore};

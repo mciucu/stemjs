@@ -1,49 +1,5 @@
-import * as Utils from "Utils";
-import {Ajax} from "Ajax";
-import {Cleanable} from "Dispatcher";
-import {StoreObject, BaseStore} from "GlobalState";
-
-// TODO: should this be in another file?
-// TODO: this should extend BaseStore, and copy the methods from StoreObject
-class SingletonStore extends StoreObject {
-    constructor(objectType, options={}) {
-        super();
-        this.objectType = objectType;
-        this.options = options;
-        if (this.getState()) {
-            this.getState().addStore(this);
-        }
-    }
-
-    get() {
-        return this;
-    }
-
-    all() {
-        return [this];
-    }
-
-    getState() {
-        // Allow explicit no state
-        if (this.options.hasOwnProperty("state")) {
-            return this.options.state;
-        } else {
-            return GlobalState;
-        }
-    }
-
-    getDependencies() {
-        return this.options.dependencies || [];
-    }
-
-    applyEvent(event) {
-        this.update(event);
-    }
-
-    fakeCreate(obj) {
-        Object.assign(this, obj);
-    }
-}
+import * as Utils from "../base/Utils";
+import {Ajax} from "../base/Ajax";
 
 function AjaxFetchMixin(BaseStoreClass) {
     return class AjaxFetchMixin extends BaseStoreClass {
@@ -174,17 +130,13 @@ function VirtualStoreObjectMixin(BaseStoreObjectClass) {
             if (!this.id.startsWith("temp-")) {
                 console.error("This is only meant to replace temporary ids!");
             }
-            let store = this.constructor.store;
-            //TODO: should not access members of store direcly, use a method
-            store.objects.delete(this.id);
             this.id = newId;
-            store.objects.set(this.id, this);
-            store.dispatch("updateObjectId", this, oldId);
             this.dispatch("updateId", {oldId: oldId});
         }
     }
 }
 
+// TODO: there's still a bug in this class when not properly matching virtual obj sometimes I think
 function VirtualStoreMixin(BaseStoreClass) {
     return class VirtualStoreMixin extends BaseStoreClass {
         static generateVirtualId() {
@@ -209,7 +161,11 @@ function VirtualStoreMixin(BaseStoreClass) {
         }
 
         applyUpdateObjectId(object, event) {
+            let oldId = object.id;
             object.updateId(event.objectId);
+            this.objects.delete(oldId);
+            this.objects.set(object.id, object);
+            this.dispatch("updateObjectId", object, oldId);
         }
 
         applyCreateEvent(event, sendDispatch=true) {
@@ -225,57 +181,29 @@ function VirtualStoreMixin(BaseStoreClass) {
     }
 }
 
-// TODO: not sure if the pattern used by the next class is good
 // Mixin class meant for easier adding listeners to store objects, while also adding those listeners to cleanup jobs
 // Should probably be used by UI elements that want to add listeners to store objects
-function StoreObjectSubscribable(BaseClass) {
-    // TODO: is this the best way to ensure Cleanable inheritance?
-    if (!(BaseClass instanceof Cleanable)) {
-        BaseClass = Cleanable(BaseClass);
+// BaseClass needs to implement addCleanupTask
+var StateSubscribableMixin = (BaseClass) => class StateSubscribableMixin extends BaseClass {
+    attachListener(obj, eventName, callback) {
+        this.addCleanupTask(obj.addListener(eventName, callback));
     }
-    class StoreObjectSubscribable extends BaseClass {
-        setStoreObject(obj) {
-            if (this.storeObject) {
-                console.error("You already have a store object: ", this.storeObject, " and want to set it to ", obj);
-            }
-            this.storeObject = obj;
-        }
 
-        getStoreObject() {
-            if (!this.storeObject) {
-                console.error("You need to specify either a callback or call setStoreObject before");
-            }
-            return this.storeObject;
-        }
-
-        addListener(obj, eventName, callback) {
-            if (!callback) {
-                callback = eventName;
-                eventName = obj;
-                obj = this.getStoreObject();
-            }
-            this.addCleanupTask(obj.addListener(eventName, callback));
-        }
-
-        addUpdateListener(obj, callback) {
-            if (!callback) {
-                callback = obj;
-                obj = this.getStoreObject();
-            }
-            this.addCleanupTask(obj.addUpdateListener(callback));
-        }
-
-        addEventListener(obj, eventType, callback) {
-            if (!callback) {
-                callback = eventType;
-                eventType = obj;
-                obj = this.getStoreObject();
-            }
-            this.addCleanupTask(obj.addEventListener(eventType, callback));
-        }
+    attachUpdateListener(obj, callback) {
+        this.addCleanupTask(obj.addUpdateListener(callback));
     }
-    
-    return StoreObjectSubscribable;
-}
 
-export {AjaxFetchMixin, VirtualStoreMixin, VirtualStoreObjectMixin, StoreObjectSubscribable, SingletonStore};
+    attachCreateListener(obj, callback) {
+        this.addCleanupTask(obj.addCreateListener(callback));
+    }
+
+    attachDeleteListener(obj, callback) {
+        this.addCleanupTask(obj.addDeleteListener(callback));
+    }
+
+    attachEventListener(obj, eventType, callback) {
+        this.addCleanupTask(obj.addEventListener(eventType, callback));
+    }
+};
+
+export {AjaxFetchMixin, VirtualStoreMixin, VirtualStoreObjectMixin, StateSubscribableMixin};

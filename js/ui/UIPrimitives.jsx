@@ -1,7 +1,7 @@
-import {UI} from "UIBase";
-import {Device} from "Device";
-import "Draggable";
-import {Dispatchable} from "Dispatcher";
+import {UI} from "./UIBase";
+import {Device} from "../base/Device";
+import "./Draggable";
+import {Dispatchable} from "../base/Dispatcher";
 
 UI.Orientation = {
     HORIZONTAL: 1,

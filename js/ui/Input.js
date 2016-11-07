@@ -1,4 +1,4 @@
-define(["UIBase", "DOMAttributes", "UIPrimitives"], function (_UIBase, _DOMAttributes) {
+define(["./UIBase", "./DOMAttributes", "./UIPrimitives"], function (_UIBase, _DOMAttributes) {
     "use strict";
 
     function _classCallCheck(instance, Constructor) {

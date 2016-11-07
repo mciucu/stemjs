@@ -1,4 +1,4 @@
-define(["UIBase", "Switcher"], function (_UIBase) {
+define(["./UIBase", "./Switcher"], function (_UIBase) {
     "use strict";
 
     var _slicedToArray = function () {

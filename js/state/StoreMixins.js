@@ -1,10 +1,10 @@
-define(["exports", "Utils", "Ajax", "Dispatcher", "GlobalState"], function (exports, _Utils, _Ajax, _Dispatcher, _GlobalState) {
+define(["exports", "../base/Utils", "../base/Ajax"], function (exports, _Utils, _Ajax) {
     "use strict";
 
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
-    exports.SingletonStore = exports.StoreObjectSubscribable = exports.VirtualStoreObjectMixin = exports.VirtualStoreMixin = exports.AjaxFetchMixin = undefined;
+    exports.StateSubscribableMixin = exports.VirtualStoreObjectMixin = exports.VirtualStoreMixin = exports.AjaxFetchMixin = undefined;
 
     var Utils = _interopRequireWildcard(_Utils);
 
@@ -98,64 +98,6 @@ define(["exports", "Utils", "Ajax", "Dispatcher", "GlobalState"], function (expo
         if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
     }
 
-    var SingletonStore = function (_StoreObject) {
-        _inherits(SingletonStore, _StoreObject);
-
-        function SingletonStore(objectType) {
-            var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-            _classCallCheck(this, SingletonStore);
-
-            var _this = _possibleConstructorReturn(this, (SingletonStore.__proto__ || Object.getPrototypeOf(SingletonStore)).call(this));
-
-            _this.objectType = objectType;
-            _this.options = options;
-            if (_this.getState()) {
-                _this.getState().addStore(_this);
-            }
-            return _this;
-        }
-
-        _createClass(SingletonStore, [{
-            key: "get",
-            value: function get() {
-                return this;
-            }
-        }, {
-            key: "all",
-            value: function all() {
-                return [this];
-            }
-        }, {
-            key: "getState",
-            value: function getState() {
-                // Allow explicit no state
-                if (this.options.hasOwnProperty("state")) {
-                    return this.options.state;
-                } else {
-                    return GlobalState;
-                }
-            }
-        }, {
-            key: "getDependencies",
-            value: function getDependencies() {
-                return this.options.dependencies || [];
-            }
-        }, {
-            key: "applyEvent",
-            value: function applyEvent(event) {
-                this.update(event);
-            }
-        }, {
-            key: "fakeCreate",
-            value: function fakeCreate(obj) {
-                Object.assign(this, obj);
-            }
-        }]);
-
-        return SingletonStore;
-    }(_GlobalState.StoreObject);
-
     function AjaxFetchMixin(BaseStoreClass) {
         return function (_BaseStoreClass) {
             _inherits(AjaxFetchMixin, _BaseStoreClass);
@@ -169,7 +111,7 @@ define(["exports", "Utils", "Ajax", "Dispatcher", "GlobalState"], function (expo
             _createClass(AjaxFetchMixin, [{
                 key: "fetch",
                 value: function fetch(id, successCallback, errorCallback) {
-                    var _this3 = this;
+                    var _this2 = this;
 
                     var forceFetch = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
@@ -186,7 +128,7 @@ define(["exports", "Utils", "Ajax", "Dispatcher", "GlobalState"], function (expo
                     this.fetchJobs.push({ id: id, success: successCallback, error: errorCallback });
                     if (!this.fetchTimeout) {
                         this.fetchTimeout = setTimeout(function () {
-                            _this3.executeAjaxFetch();
+                            _this2.executeAjaxFetch();
                         }, this.options.fetchTimeoutDuration || 0);
                     }
                 }
@@ -200,7 +142,7 @@ define(["exports", "Utils", "Ajax", "Dispatcher", "GlobalState"], function (expo
             }, {
                 key: "getFetchRequestObject",
                 value: function getFetchRequestObject(ids, fetchJobs) {
-                    var _this4 = this;
+                    var _this3 = this;
 
                     var requestData = this.getFetchRequestData(ids, fetchJobs);
 
@@ -213,7 +155,7 @@ define(["exports", "Utils", "Ajax", "Dispatcher", "GlobalState"], function (expo
                         cache: false,
                         success: function success(data) {
                             if (data.error) {
-                                console.error("Failed to fetch objects of type ", _this4.objectType, ":\n", data.error);
+                                console.error("Failed to fetch objects of type ", _this3.objectType, ":\n", data.error);
                                 var _iteratorNormalCompletion = true;
                                 var _didIteratorError = false;
                                 var _iteratorError = undefined;
@@ -252,11 +194,11 @@ define(["exports", "Utils", "Ajax", "Dispatcher", "GlobalState"], function (expo
                                 for (var _iterator2 = fetchJobs[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
                                     var _fetchJob = _step2.value;
 
-                                    var obj = _this4.get(_fetchJob.id);
+                                    var obj = _this3.get(_fetchJob.id);
                                     if (obj) {
                                         _fetchJob.success(obj);
                                     } else {
-                                        console.error("Failed to fetch object ", _fetchJob.id, " of type ", _this4.objectType);
+                                        console.error("Failed to fetch object ", _fetchJob.id, " of type ", _this3.objectType);
                                         if (_fetchJob.error) {
                                             _fetchJob.error();
                                         }
@@ -421,12 +363,7 @@ define(["exports", "Utils", "Ajax", "Dispatcher", "GlobalState"], function (expo
                     if (!this.id.startsWith("temp-")) {
                         console.error("This is only meant to replace temporary ids!");
                     }
-                    var store = this.constructor.store;
-                    //TODO: should not access members of store direcly, use a method
-                    store.objects.delete(this.id);
                     this.id = newId;
-                    store.objects.set(this.id, this);
-                    store.dispatch("updateObjectId", this, oldId);
                     this.dispatch("updateId", { oldId: oldId });
                 }
             }]);
@@ -435,6 +372,7 @@ define(["exports", "Utils", "Ajax", "Dispatcher", "GlobalState"], function (expo
         }(BaseStoreObjectClass);
     }
 
+    // TODO: there's still a bug in this class when not properly matching virtual obj sometimes I think
     function VirtualStoreMixin(BaseStoreClass) {
         return function (_BaseStoreClass2) {
             _inherits(VirtualStoreMixin, _BaseStoreClass2);
@@ -463,7 +401,11 @@ define(["exports", "Utils", "Ajax", "Dispatcher", "GlobalState"], function (expo
             }, {
                 key: "applyUpdateObjectId",
                 value: function applyUpdateObjectId(object, event) {
+                    var oldId = object.id;
                     object.updateId(event.objectId);
+                    this.objects.delete(oldId);
+                    this.objects.set(object.id, object);
+                    this.dispatch("updateObjectId", object, oldId);
                 }
             }, {
                 key: "applyCreateEvent",
@@ -494,80 +436,52 @@ define(["exports", "Utils", "Ajax", "Dispatcher", "GlobalState"], function (expo
         }(BaseStoreClass);
     }
 
-    // TODO: not sure if the pattern used by the next class is good
     // Mixin class meant for easier adding listeners to store objects, while also adding those listeners to cleanup jobs
     // Should probably be used by UI elements that want to add listeners to store objects
-    function StoreObjectSubscribable(BaseClass) {
-        // TODO: is this the best way to ensure Cleanable inheritance?
-        if (!(BaseClass instanceof _Dispatcher.Cleanable)) {
-            BaseClass = (0, _Dispatcher.Cleanable)(BaseClass);
-        }
+    // BaseClass needs to implement addCleanupTask
+    var StateSubscribableMixin = function StateSubscribableMixin(BaseClass) {
+        return function (_BaseClass) {
+            _inherits(StateSubscribableMixin, _BaseClass);
 
-        var StoreObjectSubscribable = function (_BaseClass) {
-            _inherits(StoreObjectSubscribable, _BaseClass);
+            function StateSubscribableMixin() {
+                _classCallCheck(this, StateSubscribableMixin);
 
-            function StoreObjectSubscribable() {
-                _classCallCheck(this, StoreObjectSubscribable);
-
-                return _possibleConstructorReturn(this, (StoreObjectSubscribable.__proto__ || Object.getPrototypeOf(StoreObjectSubscribable)).apply(this, arguments));
+                return _possibleConstructorReturn(this, (StateSubscribableMixin.__proto__ || Object.getPrototypeOf(StateSubscribableMixin)).apply(this, arguments));
             }
 
-            _createClass(StoreObjectSubscribable, [{
-                key: "setStoreObject",
-                value: function setStoreObject(obj) {
-                    if (this.storeObject) {
-                        console.error("You already have a store object: ", this.storeObject, " and want to set it to ", obj);
-                    }
-                    this.storeObject = obj;
-                }
-            }, {
-                key: "getStoreObject",
-                value: function getStoreObject() {
-                    if (!this.storeObject) {
-                        console.error("You need to specify either a callback or call setStoreObject before");
-                    }
-                    return this.storeObject;
-                }
-            }, {
-                key: "addListener",
-                value: function addListener(obj, eventName, callback) {
-                    if (!callback) {
-                        callback = eventName;
-                        eventName = obj;
-                        obj = this.getStoreObject();
-                    }
+            _createClass(StateSubscribableMixin, [{
+                key: "attachListener",
+                value: function attachListener(obj, eventName, callback) {
                     this.addCleanupTask(obj.addListener(eventName, callback));
                 }
             }, {
-                key: "addUpdateListener",
-                value: function addUpdateListener(obj, callback) {
-                    if (!callback) {
-                        callback = obj;
-                        obj = this.getStoreObject();
-                    }
+                key: "attachUpdateListener",
+                value: function attachUpdateListener(obj, callback) {
                     this.addCleanupTask(obj.addUpdateListener(callback));
                 }
             }, {
-                key: "addEventListener",
-                value: function addEventListener(obj, eventType, callback) {
-                    if (!callback) {
-                        callback = eventType;
-                        eventType = obj;
-                        obj = this.getStoreObject();
-                    }
+                key: "attachCreateListener",
+                value: function attachCreateListener(obj, callback) {
+                    this.addCleanupTask(obj.addCreateListener(callback));
+                }
+            }, {
+                key: "attachDeleteListener",
+                value: function attachDeleteListener(obj, callback) {
+                    this.addCleanupTask(obj.addDeleteListener(callback));
+                }
+            }, {
+                key: "attachEventListener",
+                value: function attachEventListener(obj, eventType, callback) {
                     this.addCleanupTask(obj.addEventListener(eventType, callback));
                 }
             }]);
 
-            return StoreObjectSubscribable;
+            return StateSubscribableMixin;
         }(BaseClass);
-
-        return StoreObjectSubscribable;
-    }
+    };
 
     exports.AjaxFetchMixin = AjaxFetchMixin;
     exports.VirtualStoreMixin = VirtualStoreMixin;
     exports.VirtualStoreObjectMixin = VirtualStoreObjectMixin;
-    exports.StoreObjectSubscribable = StoreObjectSubscribable;
-    exports.SingletonStore = SingletonStore;
+    exports.StateSubscribableMixin = StateSubscribableMixin;
 });

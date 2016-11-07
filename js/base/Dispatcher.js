@@ -63,15 +63,15 @@ define(["exports"], function (exports) {
         };
     }();
 
-    var DispatcherCallback = function () {
-        function DispatcherCallback(dispatcher, callback) {
-            _classCallCheck(this, DispatcherCallback);
+    var DispatcherHandle = function () {
+        function DispatcherHandle(dispatcher, callback) {
+            _classCallCheck(this, DispatcherHandle);
 
             this.dispatcher = dispatcher;
             this.callback = callback;
         }
 
-        _createClass(DispatcherCallback, [{
+        _createClass(DispatcherHandle, [{
             key: "remove",
             value: function remove() {
                 this.dispatcher.removeListener(this.callback);
@@ -83,7 +83,7 @@ define(["exports"], function (exports) {
             }
         }]);
 
-        return DispatcherCallback;
+        return DispatcherHandle;
     }();
 
     var Dispatcher = function () {
@@ -99,22 +99,25 @@ define(["exports"], function (exports) {
         _createClass(Dispatcher, [{
             key: "addListener",
             value: function addListener(callback) {
+                if (!(typeof callback === "function")) {
+                    console.error("The listener needs to be a function: ", callback);
+                    return;
+                }
                 for (var i = 0; i < this.listeners.length; i += 1) {
-                    if (this.listeners[i].callback === callback) {
-                        console.error("Can't re-register for the same callback: ", this.name, " ", callback);
-                        return this.listeners[i];
+                    if (this.listeners[i] === callback) {
+                        console.error("Can't re-register for the same callback: ", this, " ", callback);
+                        return new DispatcherHandle(this, this.listeners[i]);
                     }
                 }
 
-                var dispatcherCallback = new DispatcherCallback(this, callback);
-                this.listeners.push(dispatcherCallback);
-                return dispatcherCallback;
+                this.listeners.push(callback);
+                return new DispatcherHandle(this, callback);
             }
         }, {
             key: "removeListener",
             value: function removeListener(callback) {
                 for (var i = 0; i < this.listeners.length; i += 1) {
-                    if (this.listeners[i].callback === callback) {
+                    if (this.listeners[i] === callback) {
                         // Erase and return
                         return this.listeners.splice(i, 1)[0];
                     }
@@ -125,8 +128,7 @@ define(["exports"], function (exports) {
             value: function dispatch(payload) {
                 for (var i = 0; i < this.listeners.length; i += 1) {
                     var listener = this.listeners[i];
-                    // TODO: maybe optimize for cases with 1-2 arguments?
-                    listener.callback.apply(listener, arguments);
+                    listener.apply(undefined, arguments);
                 }
             }
         }]);
@@ -138,9 +140,6 @@ define(["exports"], function (exports) {
         function Dispatchable() {
             _classCallCheck(this, Dispatchable);
         }
-
-        // TODO: this should probably be used with a @lazy decorator
-
 
         _createClass(Dispatchable, [{
             key: "getDispatcher",
@@ -164,6 +163,13 @@ define(["exports"], function (exports) {
         }, {
             key: "addListener",
             value: function addListener(name, callback) {
+                var _this = this;
+
+                if (Array.isArray(name)) {
+                    return new CleanupJobs(name.map(function (x) {
+                        return _this.addListener(x, callback);
+                    }));
+                }
                 var dispatcher = this.getDispatcher(name);
                 if (!dispatcher) {
                     dispatcher = new Dispatcher();
@@ -207,7 +213,7 @@ define(["exports"], function (exports) {
         _createClass(RunOnce, [{
             key: "run",
             value: function run(callback) {
-                var _this = this;
+                var _this2 = this;
 
                 var timeout = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
 
@@ -216,7 +222,7 @@ define(["exports"], function (exports) {
                 }
                 this.timeout = setTimeout(function () {
                     callback();
-                    _this.timeout = null;
+                    _this2.timeout = null;
                 }, timeout);
             }
         }]);
@@ -278,17 +284,17 @@ define(["exports"], function (exports) {
         return CleanupJobs;
     }();
 
-    function Cleanable(BaseClass) {
+    var CleanupMixin = function CleanupMixin(BaseClass) {
         return function (_BaseClass) {
-            _inherits(Cleanable, _BaseClass);
+            _inherits(Cleanup, _BaseClass);
 
-            function Cleanable() {
-                _classCallCheck(this, Cleanable);
+            function Cleanup() {
+                _classCallCheck(this, Cleanup);
 
-                return _possibleConstructorReturn(this, (Cleanable.__proto__ || Object.getPrototypeOf(Cleanable)).apply(this, arguments));
+                return _possibleConstructorReturn(this, (Cleanup.__proto__ || Object.getPrototypeOf(Cleanup)).apply(this, arguments));
             }
 
-            _createClass(Cleanable, [{
+            _createClass(Cleanup, [{
                 key: "addCleanupTask",
                 value: function addCleanupTask(cleanupJob) {
                     if (!this.hasOwnProperty("_cleanupJobs")) {
@@ -305,13 +311,13 @@ define(["exports"], function (exports) {
                 }
             }]);
 
-            return Cleanable;
+            return Cleanup;
         }(BaseClass);
-    }
+    };
 
     exports.Dispatcher = Dispatcher;
     exports.Dispatchable = Dispatchable;
     exports.RunOnce = RunOnce;
     exports.CleanupJobs = CleanupJobs;
-    exports.Cleanable = Cleanable;
+    exports.CleanupMixin = CleanupMixin;
 });

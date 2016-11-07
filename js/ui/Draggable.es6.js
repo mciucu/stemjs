@@ -1,4 +1,4 @@
-import {UI} from "UIBase";
+import {UI} from "./UIBase";
 
 // TODO: simplify this if possible
 // TODO: rename to DraggableMixin?

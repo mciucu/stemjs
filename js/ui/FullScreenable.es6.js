@@ -1,4 +1,4 @@
-import {UI} from "UIBase";
+import {UI} from "./UIBase";
 
 function callFirstMethodAvailable(obj, methodNames) {
     for (let methodName of methodNames) {

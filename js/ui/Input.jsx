@@ -1,6 +1,6 @@
-import {UI} from "UIBase";
-import "UIPrimitives";
-import {CreateAllowedAttributesMap} from "DOMAttributes";
+import {UI} from "./UIBase";
+import "./UIPrimitives";
+import {CreateAllowedAttributesMap} from "./DOMAttributes";
 
 UI.Form = class Form extends UI.Element {
     getPrimitiveTag() {

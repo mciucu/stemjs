@@ -1,4 +1,4 @@
-import {UI} from "UIBase";
+import {UI} from "./UIBase";
 
 UI.Switcher = class Switcher extends UI.Element {
     constructor(options) {

@@ -1,4 +1,4 @@
-define(["exports", "UIBase", "StyleElement", "DoubleClickable", "Draggable", "FullScreenable", "UIPrimitives", "Input", "SectionDivider", "Table", "SVG", "Switcher", "TabArea", "Modal", "Bootstrap3", "CodeEditor", "EmojiUI"], function (exports, _UIBase) {
+define(["exports", "./UIBase", "./StyleElement", "./DoubleClickable", "./Draggable", "./FullScreenable", "./UIPrimitives", "./Input", "./SectionDivider", "./Table", "./SVG", "./Switcher", "./TabArea", "./Modal", "./Bootstrap3", "./CodeEditor"], function (exports, _UIBase) {
   "use strict";
 
   Object.defineProperty(exports, "__esModule", {

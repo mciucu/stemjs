@@ -1,4 +1,4 @@
-import {UI} from "UIBase";
+import {UI} from "./UIBase";
 
 UI.FloatingWindow = class FloatingWindow extends UI.Element {
     getDefaultOptions() {

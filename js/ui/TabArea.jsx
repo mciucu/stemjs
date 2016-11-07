@@ -1,5 +1,5 @@
-import {UI} from "UIBase";
-import "Switcher";
+import {UI} from "./UIBase";
+import "./Switcher";
 
 UI.BasicTabTitle = class BasicTabTitle extends UI.Element {
     getPrimitiveTag() {

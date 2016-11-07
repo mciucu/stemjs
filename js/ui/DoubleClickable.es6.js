@@ -1,4 +1,4 @@
-import {UI} from "UIBase";
+import {UI} from "./UIBase";
 
 UI.DoubleClickable = function(BaseClass) {
     return class DoubleClickable extends BaseClass {

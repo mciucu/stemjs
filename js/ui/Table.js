@@ -1,4 +1,4 @@
-define(["UIBase", "Utils"], function (_UIBase, _Utils) {
+define(["./UIBase", "../base/Utils"], function (_UIBase, _Utils) {
     "use strict";
 
     var Utils = _interopRequireWildcard(_Utils);

@@ -2,10 +2,10 @@
 class Device {
     static isTouchDevice() {
         if (!this.hasOwnProperty("_isTouchDevice")) {
-            this._isTouchDevice = !!(('createTouch' in window.document) ||
+            this._isTouchDevice = !!(("createTouch" in window.document) ||
                                             (navigator.MaxTouchPoints > 0) ||
                                             (navigator.msMaxTouchPoints > 0) ||
-                                            ('ontouchstart' in window));
+                                            ("ontouchstart" in window));
         }
         return this._isTouchDevice;
     }

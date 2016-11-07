@@ -1,5 +1,5 @@
 // Wrapper over the ace code editor, needs ace to be globally loaded
-import {UI} from "UIBase";
+import {UI} from "./UIBase";
 
 UI.CodeEditor = class CodeEditor extends UI.Element {
     setOptions(options) {

@@ -1,5 +1,5 @@
-import {UI} from "UIBase";
-import "UIPrimitives";
+import {UI} from "./UIBase";
+import "./UIPrimitives";
 
 function BootstrapMixin(BaseClass, bootstrapClassName) {
     class BootstrapClass extends BaseClass {

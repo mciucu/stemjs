@@ -1,4 +1,4 @@
-define(["UIBase"], function (_UIBase) {
+define(["./UIBase"], function (_UIBase) {
     "use strict";
 
     function _classCallCheck(instance, Constructor) {
@@ -318,7 +318,7 @@ define(["UIBase"], function (_UIBase) {
                         "div",
                         { style: { position: "absolute", right: "10px", zIndex: "10" } },
                         _UIBase.UI.createElement(_UIBase.UI.Button, { type: "button", className: "close", "data-dismiss": "modal", "aria-label": "Close",
-                            label: "×", onClick: function onClick() {
+                            label: "\xD7", onClick: function onClick() {
                                 return _this7.hide();
                             } })
                     );

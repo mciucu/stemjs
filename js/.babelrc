@@ -1,0 +1,6 @@
+{
+    "plugins": [
+        ["transform-react-jsx", { "pragma": "UI.createElement" }],
+    ],
+    "presets": ["es2015-rollup"]
+}

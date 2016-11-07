@@ -1,5 +1,5 @@
-import {UI} from "UIBase";
-import * as Utils from "Utils";
+import {UI} from "./UIBase";
+import * as Utils from "../base/Utils";
 
 // TODO: the whole table architecture probably needs a rethinking
 UI.TableRow = class TableRow extends UI.Element {

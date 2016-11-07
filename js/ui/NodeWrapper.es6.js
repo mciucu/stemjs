@@ -1,4 +1,4 @@
-import {Dispatchable} from "Dispatcher";
+import {Dispatchable} from "../base/Dispatcher";
 
 // Generic class through which we interact with HTML nodes
 class NodeWrapper extends Dispatchable {
