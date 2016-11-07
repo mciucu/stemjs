@@ -18,6 +18,3 @@ export default {
     ],
     dest: "stem.js"
 };
-
-// TODO: insert in the bundle the source code for require and the require_config file
-//cat js/ext/min/require.min.js require_config.js  rollupbundle.js > requirebundle.js
