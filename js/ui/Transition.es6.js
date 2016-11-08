@@ -11,7 +11,7 @@ class Transition {
     }
 
     hasDependencyOn(t) {
-        for (let transition in this.dependsOn) {
+        for (let transition of this.dependsOn) {
             if (transition === t) {
                 return true;
             }
@@ -358,6 +358,7 @@ class TransitionList {
     }
 
     sortByStartTime() {
+        // TODO: this comparator should be global
         this.transitions.sort((a, b) => {
             if (!equal(a.startTime, b.startTime, 0.001)) {
                 return b.startTime - a.startTime;
