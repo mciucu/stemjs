@@ -5098,11 +5098,33 @@ var Transition = function () {
     createClass(Transition, [{
         key: "hasDependencyOn",
         value: function hasDependencyOn(t) {
-            for (var transition in this.dependsOn) {
-                if (transition === t) {
-                    return true;
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = this.dependsOn[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var transition = _step.value;
+
+                    if (transition === t) {
+                        return true;
+                    }
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
                 }
             }
+
             return false;
         }
     }, {
@@ -5528,6 +5550,7 @@ var TransitionList = function () {
     }, {
         key: "sortByStartTime",
         value: function sortByStartTime() {
+            // TODO: this comparator should be global
             this.transitions.sort(function (a, b) {
                 if (!equal(a.startTime, b.startTime, 0.001)) {
                     return b.startTime - a.startTime;
