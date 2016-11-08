@@ -1,0 +1,11 @@
+## Why release another fucking Javascript framework?
+The world is full by them. Most of them are mediocre though, and I wanted to show some effort into another direction. The architecture isn't optimized for cool one-liners, but for maintenance and flexibility, that keeps intentionally as much of the functionality in non-core code as possible.
+
+This isn't really a framework in the classical sense of the word, but rather a collection of libraries and design patterns that were designed to work together.
+
+## Recommended bits
+A lot of code is inconsistent in quality, the closer to the core code you go, the better is gets and will probably be clean-up and more commented in the future.
+You can check out UIBase for the basics of the UI framework. It's an OOP based architecture that piggybacks on the jsx synthax (although you can use it with plain JS).
+I also included the base state classes that we use to store instances of DB-backed objects in the browser. It's a simple alternative to Redux/Flux if you will.
+
+This is the initial open-sourcing effort, it'll get more cleaned-up and documented in the next few weeks, with some concrete examples.
