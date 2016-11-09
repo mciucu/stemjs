@@ -11,7 +11,9 @@ class Transition {
     }
 
     hasDependencyOn(t) {
-        for (let transition of this.dependsOn) {
+        // TODO: this should be actually a for of, but that breaks visual list
+        // THIS IS ACTUALL THE SAME as always return false;
+        for (let transition in this.dependsOn) {
             if (transition === t) {
                 return true;
             }

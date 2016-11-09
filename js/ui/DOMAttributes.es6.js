@@ -94,7 +94,11 @@ class DOMAttributes {
         if (options.hasOwnProperty("style")) {
             this.styleMap = new Map();
             for (let key in options.style) {
-                this.styleMap.set(key, options.style[key]);
+                let value = options.style[key];
+                if (typeof value === "function") {
+                    value = value();
+                }
+                this.styleMap.set(key, value);
             }
         }
     }
@@ -102,6 +106,9 @@ class DOMAttributes {
     setAttribute(key, value, node) {
         if (value === undefined) {
             return;
+        }
+        if (typeof value === "function") {
+            value = value();
         }
         this.attributes.set(key, value);
         if (node) {
@@ -113,6 +120,9 @@ class DOMAttributes {
     setStyle(key, value, node) {
         if (value === undefined) {
             return;
+        }
+        if (typeof value === "function") {
+            value = value();
         }
         if (!this.styleMap) {
             this.styleMap = new Map();

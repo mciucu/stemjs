@@ -81,123 +81,6 @@ function defaultComparator(a, b) {
     return a.toString() < b.toString() ? -1 : 1;
 }
 
-var asyncGenerator = function () {
-  function AwaitValue(value) {
-    this.value = value;
-  }
-
-  function AsyncGenerator(gen) {
-    var front, back;
-
-    function send(key, arg) {
-      return new Promise(function (resolve, reject) {
-        var request = {
-          key: key,
-          arg: arg,
-          resolve: resolve,
-          reject: reject,
-          next: null
-        };
-
-        if (back) {
-          back = back.next = request;
-        } else {
-          front = back = request;
-          resume(key, arg);
-        }
-      });
-    }
-
-    function resume(key, arg) {
-      try {
-        var result = gen[key](arg);
-        var value = result.value;
-
-        if (value instanceof AwaitValue) {
-          Promise.resolve(value.value).then(function (arg) {
-            resume("next", arg);
-          }, function (arg) {
-            resume("throw", arg);
-          });
-        } else {
-          settle(result.done ? "return" : "normal", result.value);
-        }
-      } catch (err) {
-        settle("throw", err);
-      }
-    }
-
-    function settle(type, value) {
-      switch (type) {
-        case "return":
-          front.resolve({
-            value: value,
-            done: true
-          });
-          break;
-
-        case "throw":
-          front.reject(value);
-          break;
-
-        default:
-          front.resolve({
-            value: value,
-            done: false
-          });
-          break;
-      }
-
-      front = front.next;
-
-      if (front) {
-        resume(front.key, front.arg);
-      } else {
-        back = null;
-      }
-    }
-
-    this._invoke = send;
-
-    if (typeof gen.return !== "function") {
-      this.return = undefined;
-    }
-  }
-
-  if (typeof Symbol === "function" && Symbol.asyncIterator) {
-    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
-      return this;
-    };
-  }
-
-  AsyncGenerator.prototype.next = function (arg) {
-    return this._invoke("next", arg);
-  };
-
-  AsyncGenerator.prototype.throw = function (arg) {
-    return this._invoke("throw", arg);
-  };
-
-  AsyncGenerator.prototype.return = function (arg) {
-    return this._invoke("return", arg);
-  };
-
-  return {
-    wrap: function (fn) {
-      return function () {
-        return new AsyncGenerator(fn.apply(this, arguments));
-      };
-    },
-    await: function (value) {
-      return new AwaitValue(value);
-    }
-  };
-}();
-
-
-
-
-
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -906,6 +789,8 @@ function CreateAllowedAttributesMap(oldAttributesMap, allowedAttributesArray) {
 //TODO: should be as few of these as possible
 var ATTRIBUTE_NAMES_MAP = CreateAllowedAttributesMap([["id"], ["action"], ["colspan"], ["default"], ["disabled", { noValue: true }], ["fixed"], ["forAttr", { domName: "for" }], ["hidden"], ["href"], ["rel"], ["minHeight"], ["minWidth"], ["role"], ["target"], ["HTMLtitle", { domName: "title" }], ["type"], ["placeholder"], ["src"], ["height"], ["width"]]);
 
+//["value"], // Value is intentionally disabled
+
 var DOMAttributes = function () {
     function DOMAttributes(options) {
         var attributeNamesMap = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ATTRIBUTE_NAMES_MAP;
@@ -955,7 +840,11 @@ var DOMAttributes = function () {
         if (options.hasOwnProperty("style")) {
             this.styleMap = new Map();
             for (var key in options.style) {
-                this.styleMap.set(key, options.style[key]);
+                var _value = options.style[key];
+                if (typeof _value === "function") {
+                    _value = _value();
+                }
+                this.styleMap.set(key, _value);
             }
         }
     }
@@ -965,6 +854,9 @@ var DOMAttributes = function () {
         value: function setAttribute(key, value, node) {
             if (value === undefined) {
                 return;
+            }
+            if (typeof value === "function") {
+                value = value();
             }
             this.attributes.set(key, value);
             if (node) {
@@ -977,6 +869,9 @@ var DOMAttributes = function () {
         value: function setStyle(key, value, node) {
             if (value === undefined) {
                 return;
+            }
+            if (typeof value === "function") {
+                value = value();
             }
             if (!this.styleMap) {
                 this.styleMap = new Map();
@@ -1110,8 +1005,8 @@ var DOMAttributes = function () {
                 //         node.classList.add(cls);
                 //     }
             } else {
-                node.removeAttribute("class");
-            }
+                    node.removeAttribute("class");
+                }
 
             node.removeAttribute("style");
             if (this.styleMap) {
@@ -1152,6 +1047,7 @@ var DOMAttributes = function () {
 var UI = {
     renderingStack: [] };
 
+//keeps track of objects that are redrawing, to know where to assign refs automatically
 UI.TextElement = function () {
     function UITextElement(options) {
         classCallCheck(this, UITextElement);
@@ -2600,6 +2496,7 @@ UI.FullScreenable = function (BaseClass) {
 };
 
 // Primitive utils for wrapping browser info
+
 var Device = function () {
     function Device() {
         classCallCheck(this, Device);
@@ -3096,6 +2993,7 @@ UI.ScrollableMixin = function (_UI$Element6) {
         }
     }, {
         key: "applyScrollPosition",
+        // visibleChildrenOffsets: {}
         value: function applyScrollPosition() {
             this.node.scrollTop = this.options.scrollTop || this.node.scrollTop;
         }
@@ -4813,7 +4711,9 @@ var isZero = function isZero(val) {
 };
 
 // Simulate C/C++ rand() function
-
+var rand = function rand(mod) {
+    return Math.floor(Math.random() * mod);
+};
 
 var equal = function equal(val1, val2) {
     var epsilon = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : EPS;
@@ -4821,7 +4721,11 @@ var equal = function equal(val1, val2) {
     return isZero(val1 - val2, epsilon);
 };
 
+var equalPoints = function equalPoints(p1, p2) {
+    var epsilon = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : EPS;
 
+    return isZero(p1.x - p2.x, epsilon) && isZero(p1.y - p2.y, epsilon);
+};
 
 // Compute square of a number
 var sqr = function sqr(x) {
@@ -4833,21 +4737,44 @@ var distance = function distance(p1, p2) {
     return Math.sqrt(sqr(p1.x - p2.x) + sqr(p1.y - p2.y));
 };
 
+var signedDistancePointLine = function signedDistancePointLine(point, line) {
+    return (line.a * point.x + line.b * point.y + line.c) / Math.sqrt(sqr(line.a) + sqr(line.b));
+};
 
+var distancePointLine = function distancePointLine(point, line) {
+    return Math.abs(signedDistancePointLine(point, line));
+};
 
+var pointOnSegment = function pointOnSegment(point, segmentStart, segmentEnd, epsilon) {
+    epsilon = epsilon || EPS;
+    return Math.abs(distance(point, segmentStart) + distance(point, segmentEnd) - distance(segmentStart, segmentEnd)) <= epsilon;
+};
 
+var perpendicularFoot = function perpendicularFoot(point, line) {
+    var distance = (line.a * point.x + line.b * point.y + line.c) / (sqr(line.a) + sqr(line.b));
+    return {
+        x: point.x - line.a * distance,
+        y: point.y - line.b * distance
+    };
+};
 
-
-
-
-
-
+var lineEquation = function lineEquation(A, B) {
+    return {
+        a: B.y - A.y,
+        b: A.x - B.x,
+        c: A.y * B.x - A.x * B.y
+    };
+};
 
 // Compute angle between 2 points in grad
-
+var angleGrad = function angleGrad(p1, p2) {
+    return gradian(angleRad(p1, p2));
+};
 
 // Transform gradian in radian
-
+var radian = function radian(angle) {
+    return angle * Math.PI / 180;
+};
 
 // Transform radian in gradian
 var gradian = function gradian(angle) {
@@ -4866,11 +4793,29 @@ var crossProduct = function crossProduct(p1, p2, p0) {
     return (p1.x - p0.x) * (p2.y - p0.y) - (p1.y - p0.y) * (p2.x - p0.x);
 };
 
+var rotatePoint = function rotatePoint(point, orig, angle) {
+    // TODO: WTF, default argument value in the middle of argument list?
+    orig = orig || { x: 0, y: 0 };
+    return {
+        x: Math.cos(angle) * (point.x - orig.x) - Math.sin(angle) * (point.y - orig.y) + orig.x,
+        y: Math.sin(angle) * (point.x - orig.x) + Math.cos(angle) * (point.y - orig.y) + orig.y
+    };
+};
 
+var translatePoint = function translatePoint(point, dx, dy) {
+    return {
+        x: point.x + dx,
+        y: point.y + dy
+    };
+};
 
-
-
-
+var scalePoint = function scalePoint(point, orig, sx, sy) {
+    sy = sy || sx;
+    return {
+        x: (point.x - orig.x) * sx + orig.x,
+        y: (point.y - orig.y) * sy + orig.y
+    };
+};
 
 var polarToCartesian = function polarToCartesian(angle, radius, orig) {
     orig = orig || { x: 0, y: 0 };
@@ -4878,6 +4823,129 @@ var polarToCartesian = function polarToCartesian(angle, radius, orig) {
         x: radius * Math.cos(angle) + orig.x,
         y: radius * Math.sin(angle) + orig.y
     };
+};
+
+var circlesIntersection = function circlesIntersection(circle1, circle2) {
+    var points;
+    var centerDistance;
+    // TODO(@all) These vars are magic. Find out what they do and add comments
+    var l;
+    var h;
+
+    centerDistance = distance(circle1, circle2);
+    if (centerDistance > circle1.r + circle2.r) {
+        return [];
+    }
+
+    l = (sqr(circle1.r) - sqr(circle2.r) + sqr(centerDistance)) / (2 * centerDistance);
+    if (sqr(circle1.r) - sqr(l) < 0) {
+        return [];
+    }
+
+    h = Math.sqrt(sqr(circle1.r) - sqr(l));
+
+    points = [];
+    points.push({
+        x: l / centerDistance * (circle2.x - circle1.x) + h / centerDistance * (circle2.y - circle1.y) + circle1.x,
+        y: l / centerDistance * (circle2.y - circle1.y) - h / centerDistance * (circle2.x - circle1.x) + circle1.y
+    });
+    points.push({
+        x: l / centerDistance * (circle2.x - circle1.x) - h / centerDistance * (circle2.y - circle1.y) + circle1.x,
+        y: l / centerDistance * (circle2.y - circle1.y) + h / centerDistance * (circle2.x - circle1.x) + circle1.y
+    });
+
+    return points;
+};
+
+var bound = function bound(value, minValue, maxValue) {
+    if (value < minValue) {
+        return minValue;
+    }
+    if (value > maxValue) {
+        return maxValue;
+    }
+    return value;
+};
+
+var getVector = function getVector(startPoint, endPoint) {
+    return {
+        x: endPoint.x - startPoint.x,
+        y: endPoint.y - startPoint.y
+    };
+};
+
+var vectorLength = function vectorLength(vector) {
+    return distance({ x: 0, y: 0 }, vector);
+};
+
+var normalizeVector = function normalizeVector(vector) {
+    var len = vectorLength(vector);
+    if (Math.abs(len) < EPS) {
+        return {
+            x: 0,
+            y: 0
+        };
+    }
+    return {
+        x: vector.x / len,
+        y: vector.y / len
+    };
+};
+
+var scaleVector = function scaleVector(vector, scalar) {
+    return {
+        x: vector.x * scalar,
+        y: vector.y * scalar
+    };
+};
+
+var addVectors = function addVectors(vector1, vector2) {
+    return {
+        x: vector1.x + vector2.x,
+        y: vector1.y + vector2.y
+    };
+};
+
+var subtractVectors = function subtractVectors(vector1, vector2) {
+    return {
+        x: vector1.x - vector2.x,
+        y: vector1.y - vector2.y
+    };
+};
+
+var triangleArea = function triangleArea(point1, point2, point3) {
+    return 0.5 * Math.abs(crossProduct(point1, point2, point3));
+};
+
+var inRange = function inRange(value, minValue, maxValue) {
+    if (isNaN(value)) {
+        return false;
+    }
+    return minValue <= value && value <= maxValue;
+};
+
+var interpolationValue = function interpolationValue(interpolationArray, X) {
+    var Y = 0;
+    var aux;
+    var i;
+    var j;
+
+    for (i = 0; i < interpolationArray.length; i += 1) {
+        if (interpolationArray.x === X) {
+            return interpolationArray.y;
+        }
+    }
+    for (i = 0; i < interpolationArray.length; i += 1) {
+        aux = interpolationArray[i].y;
+        for (j = 0; j < interpolationArray.length; j += 1) {
+            if (i !== j) {
+                aux = aux * (X - interpolationArray[j].x) / (interpolationArray[i].x - interpolationArray[j].x);
+            }
+        }
+        Y += aux;
+    }
+
+    return Y;
 };
 
 var COLORS_BY_NAME = {
@@ -5098,33 +5166,13 @@ var Transition = function () {
     createClass(Transition, [{
         key: "hasDependencyOn",
         value: function hasDependencyOn(t) {
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
-
-            try {
-                for (var _iterator = this.dependsOn[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var transition = _step.value;
-
-                    if (transition === t) {
-                        return true;
-                    }
-                }
-            } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
-                    }
-                } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
-                    }
+            // TODO: this should be actually a for of, but that breaks visual list
+            // THIS IS ACTUALL THE SAME as always return false;
+            for (var transition in this.dependsOn) {
+                if (transition === t) {
+                    return true;
                 }
             }
-
             return false;
         }
     }, {
@@ -7689,7 +7737,7 @@ UI.Modal = function (_UI$Element2) {
                     "div",
                     { style: { position: "absolute", right: "10px", zIndex: "10" } },
                     UI.createElement(UI.Button, { type: "button", className: "close", "data-dismiss": "modal", "aria-label": "Close",
-                        label: "\xD7", onClick: function onClick() {
+                        label: "×", onClick: function onClick() {
                             return _this7.hide();
                         } })
                 );
@@ -8315,7 +8363,9 @@ UI.CollapsiblePanel = function (_UI$CardPanel) {
     function CollapsiblePanel(options) {
         classCallCheck(this, CollapsiblePanel);
 
+
         // If options.collapsed is set, use that value. otherwise it is collapsed
+
         var _this10 = possibleConstructorReturn(this, (CollapsiblePanel.__proto__ || Object.getPrototypeOf(CollapsiblePanel)).call(this, options));
 
         _this10.collapsed = options.collapsed != null ? options.collapsed : true;
@@ -10117,6 +10167,10 @@ exports.wrapCSS = wrapCSS;
 exports.hover = hover;
 exports.focus = focus;
 exports.active = active;
+exports.Transition = Transition;
+exports.Modifier = Modifier;
+exports.TransitionList = TransitionList;
+exports.Color = Color;
 exports.StateClass = StateClass;
 exports.GlobalState = GlobalState$1;
 exports.StoreObject = StoreObject;
@@ -10127,6 +10181,38 @@ exports.AjaxFetchMixin = AjaxFetchMixin;
 exports.VirtualStoreMixin = VirtualStoreMixin;
 exports.VirtualStoreObjectMixin = VirtualStoreObjectMixin;
 exports.StateSubscribableMixin = StateSubscribableMixin;
+exports.EPS = EPS;
+exports.isZero = isZero;
+exports.rand = rand;
+exports.equal = equal;
+exports.equalPoints = equalPoints;
+exports.sqr = sqr;
+exports.distance = distance;
+exports.signedDistancePointLine = signedDistancePointLine;
+exports.distancePointLine = distancePointLine;
+exports.pointOnSegment = pointOnSegment;
+exports.perpendicularFoot = perpendicularFoot;
+exports.lineEquation = lineEquation;
+exports.angleGrad = angleGrad;
+exports.radian = radian;
+exports.gradian = gradian;
+exports.angleRad = angleRad;
+exports.crossProduct = crossProduct;
+exports.rotatePoint = rotatePoint;
+exports.translatePoint = translatePoint;
+exports.scalePoint = scalePoint;
+exports.polarToCartesian = polarToCartesian;
+exports.circlesIntersection = circlesIntersection;
+exports.bound = bound;
+exports.getVector = getVector;
+exports.vectorLength = vectorLength;
+exports.normalizeVector = normalizeVector;
+exports.scaleVector = scaleVector;
+exports.addVectors = addVectors;
+exports.subtractVectors = subtractVectors;
+exports.triangleArea = triangleArea;
+exports.inRange = inRange;
+exports.interpolationValue = interpolationValue;
 exports.Dispatcher = Dispatcher;
 exports.Dispatchable = Dispatchable;
 exports.RunOnce = RunOnce;
