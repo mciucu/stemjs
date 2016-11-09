@@ -81,6 +81,123 @@ function defaultComparator(a, b) {
     return a.toString() < b.toString() ? -1 : 1;
 }
 
+var asyncGenerator = function () {
+  function AwaitValue(value) {
+    this.value = value;
+  }
+
+  function AsyncGenerator(gen) {
+    var front, back;
+
+    function send(key, arg) {
+      return new Promise(function (resolve, reject) {
+        var request = {
+          key: key,
+          arg: arg,
+          resolve: resolve,
+          reject: reject,
+          next: null
+        };
+
+        if (back) {
+          back = back.next = request;
+        } else {
+          front = back = request;
+          resume(key, arg);
+        }
+      });
+    }
+
+    function resume(key, arg) {
+      try {
+        var result = gen[key](arg);
+        var value = result.value;
+
+        if (value instanceof AwaitValue) {
+          Promise.resolve(value.value).then(function (arg) {
+            resume("next", arg);
+          }, function (arg) {
+            resume("throw", arg);
+          });
+        } else {
+          settle(result.done ? "return" : "normal", result.value);
+        }
+      } catch (err) {
+        settle("throw", err);
+      }
+    }
+
+    function settle(type, value) {
+      switch (type) {
+        case "return":
+          front.resolve({
+            value: value,
+            done: true
+          });
+          break;
+
+        case "throw":
+          front.reject(value);
+          break;
+
+        default:
+          front.resolve({
+            value: value,
+            done: false
+          });
+          break;
+      }
+
+      front = front.next;
+
+      if (front) {
+        resume(front.key, front.arg);
+      } else {
+        back = null;
+      }
+    }
+
+    this._invoke = send;
+
+    if (typeof gen.return !== "function") {
+      this.return = undefined;
+    }
+  }
+
+  if (typeof Symbol === "function" && Symbol.asyncIterator) {
+    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
+      return this;
+    };
+  }
+
+  AsyncGenerator.prototype.next = function (arg) {
+    return this._invoke("next", arg);
+  };
+
+  AsyncGenerator.prototype.throw = function (arg) {
+    return this._invoke("throw", arg);
+  };
+
+  AsyncGenerator.prototype.return = function (arg) {
+    return this._invoke("return", arg);
+  };
+
+  return {
+    wrap: function (fn) {
+      return function () {
+        return new AsyncGenerator(fn.apply(this, arguments));
+      };
+    },
+    await: function (value) {
+      return new AwaitValue(value);
+    }
+  };
+}();
+
+
+
+
+
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
     throw new TypeError("Cannot call a class as a function");
@@ -789,8 +906,6 @@ function CreateAllowedAttributesMap(oldAttributesMap, allowedAttributesArray) {
 //TODO: should be as few of these as possible
 var ATTRIBUTE_NAMES_MAP = CreateAllowedAttributesMap([["id"], ["action"], ["colspan"], ["default"], ["disabled", { noValue: true }], ["fixed"], ["forAttr", { domName: "for" }], ["hidden"], ["href"], ["rel"], ["minHeight"], ["minWidth"], ["role"], ["target"], ["HTMLtitle", { domName: "title" }], ["type"], ["placeholder"], ["src"], ["height"], ["width"]]);
 
-//["value"], // Value is intentionally disabled
-
 var DOMAttributes = function () {
     function DOMAttributes(options) {
         var attributeNamesMap = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ATTRIBUTE_NAMES_MAP;
@@ -1005,8 +1120,8 @@ var DOMAttributes = function () {
                 //         node.classList.add(cls);
                 //     }
             } else {
-                    node.removeAttribute("class");
-                }
+                node.removeAttribute("class");
+            }
 
             node.removeAttribute("style");
             if (this.styleMap) {
@@ -1047,7 +1162,6 @@ var DOMAttributes = function () {
 var UI = {
     renderingStack: [] };
 
-//keeps track of objects that are redrawing, to know where to assign refs automatically
 UI.TextElement = function () {
     function UITextElement(options) {
         classCallCheck(this, UITextElement);
@@ -2496,7 +2610,6 @@ UI.FullScreenable = function (BaseClass) {
 };
 
 // Primitive utils for wrapping browser info
-
 var Device = function () {
     function Device() {
         classCallCheck(this, Device);
@@ -2993,7 +3106,6 @@ UI.ScrollableMixin = function (_UI$Element6) {
         }
     }, {
         key: "applyScrollPosition",
-        // visibleChildrenOffsets: {}
         value: function applyScrollPosition() {
             this.node.scrollTop = this.options.scrollTop || this.node.scrollTop;
         }
@@ -7737,7 +7849,7 @@ UI.Modal = function (_UI$Element2) {
                     "div",
                     { style: { position: "absolute", right: "10px", zIndex: "10" } },
                     UI.createElement(UI.Button, { type: "button", className: "close", "data-dismiss": "modal", "aria-label": "Close",
-                        label: "×", onClick: function onClick() {
+                        label: "\xD7", onClick: function onClick() {
                             return _this7.hide();
                         } })
                 );
@@ -8363,9 +8475,7 @@ UI.CollapsiblePanel = function (_UI$CardPanel) {
     function CollapsiblePanel(options) {
         classCallCheck(this, CollapsiblePanel);
 
-
         // If options.collapsed is set, use that value. otherwise it is collapsed
-
         var _this10 = possibleConstructorReturn(this, (CollapsiblePanel.__proto__ || Object.getPrototypeOf(CollapsiblePanel)).call(this, options));
 
         _this10.collapsed = options.collapsed != null ? options.collapsed : true;

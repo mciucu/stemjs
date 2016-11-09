@@ -9,3 +9,8 @@ You can check out UIBase for the basics of the UI framework. It's an OOP based a
 I also included the base state classes that we use to store instances of DB-backed objects in the browser. It's a simple alternative to Redux/Flux if you will.
 
 This is the initial open-sourcing effort, it'll get more cleaned-up and documented in the next few weeks, with some concrete examples.
+
+## Build requirements
+The source bundle is build with rollup, which you can install with:
+`npm install --global rollup`
+To call it, just run `rollup -c` in the root project folder.

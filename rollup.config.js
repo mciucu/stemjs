@@ -7,7 +7,7 @@ let includePathOptions = {
 };
 
 export default {
-    entry: "js/Stem.es6.js",
+    entry: "src/Stem.es6.js",
     format: "umd",
     // moduleId: "stem",
     moduleName: "stem",
