@@ -1,4 +1,4 @@
-## Why release another fucking Javascript framework?
+## Why release another Javascript UI framework?
 The world is full by them. Most of them are mediocre though, and I wanted to show some effort into another direction. The architecture isn't optimized for cool one-liners, but for maintenance and flexibility, that keeps intentionally as much of the functionality in non-core code as possible.
 
 This isn't really a framework in the classical sense of the word, but rather a collection of libraries and design patterns that were designed to work together.
@@ -14,3 +14,7 @@ This is the initial open-sourcing effort, it'll get more cleaned-up and document
 The source bundle is build with rollup, which you can install with:
 `npm install --global rollup`
 To call it, just run `rollup -c` in the root project folder.
+
+## License
+The license is the MIT one, except that I removed the pesky clause that forces people to include the licence if they copy/paste code.
+So, pretty much an explicit public domain.
