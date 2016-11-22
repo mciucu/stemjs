@@ -115,9 +115,8 @@ class Dispatchable {
         delete this._dispatchers;
     }
 
-    // These function don't really belong here, no better place to put them for now
-
-    //Add anything that needs to be called on cleanup here (dispatchers, etc)
+    // These function don't really belong here, but they don't really hurt here and I don't want a long proto chain
+    // Add anything that needs to be called on cleanup here (dispatchers, etc)
     addCleanupJob(cleanupJob) {
         if (!this.hasOwnProperty("_cleanupJobs")) {
             this._cleanupJobs = new CleanupJobs();
@@ -131,22 +130,24 @@ class Dispatchable {
             this._cleanupJobs.cleanup();
         }
     }
+}
 
-    // TODO: should use attachListener( nomenclature?
-    addListenerTo(obj) {
+// Creates a method that calls the method methodName on obj, and adds the result as a cleanup task
+function getAttachCleanupJobMethod(methodName) {
+    return function (obj) {
         let args = Array.prototype.slice.call(arguments, 1);
-        let handler = obj.addListener(...args);
-        this.addCleanupJob(handler);
-        return handler;
-    }
-
-    addEventListenerTo(obj) {
-        let args = Array.prototype.slice.call(arguments, 1);
-        let handler = obj.addEventListener(...args);
+        let handler = obj[methodName](...args);
         this.addCleanupJob(handler);
         return handler;
     }
 }
+
+// Not sure if these should be added here, but meh
+Dispatchable.prototype.attachListener = getAttachCleanupJobMethod("addListener");
+Dispatchable.prototype.attachEventListener = getAttachCleanupJobMethod("addEventListener");
+Dispatchable.prototype.attachCreateListener = getAttachCleanupJobMethod("addCreateListener");
+Dispatchable.prototype.attachUpdateListener = getAttachCleanupJobMethod("addUpdateListener");
+Dispatchable.prototype.attachDeleteListener = getAttachCleanupJobMethod("addDeleteListener");
 
 Dispatcher.Global = new Dispatchable();
 
@@ -183,4 +184,4 @@ class CleanupJobs {
     }
 }
 
-export {Dispatcher, Dispatchable, RunOnce, CleanupJobs};
+export {Dispatcher, Dispatchable, RunOnce, CleanupJobs, getAttachCleanupJobMethod};

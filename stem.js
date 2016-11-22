@@ -6,6 +6,10 @@
 
 // TODO: should this be renamed to "toUnwrappedArray"?
 function unwrapArray(elements) {
+    if (arguments.length > 1) {
+        elements = [].concat(Array.prototype.slice.call(arguments));
+    }
+
     if (!elements) {
         return [];
     }
@@ -14,16 +18,17 @@ function unwrapArray(elements) {
         return [elements];
     }
 
+    // Check if the passed in array is valid, and try to return it if possible to preserve references
     var allProperElements = true;
     for (var i = 0; i < elements.length; i++) {
-        if (Array.isArray(elements[i]) || !elements[i]) {
+        if (Array.isArray(elements[i]) || elements[i] == null) {
             allProperElements = false;
             break;
         }
     }
 
     if (allProperElements) {
-        // return the exact same array as was passed in
+        // Return the exact same array as was passed in
         return elements;
     }
 
@@ -43,6 +48,7 @@ function unwrapArray(elements) {
     return result;
 }
 
+// Split the passed in array into arrays with at most maxChunkSize elements
 function splitInChunks(array, maxChunkSize) {
     var chunks = [];
     while (array.length > 0) {
@@ -81,118 +87,22 @@ function defaultComparator(a, b) {
     return a.toString() < b.toString() ? -1 : 1;
 }
 
-var asyncGenerator = function () {
-  function AwaitValue(value) {
-    this.value = value;
-  }
+function slugify(string) {
+    string = string.trim();
 
-  function AsyncGenerator(gen) {
-    var front, back;
+    string = string.replace(/[^a-zA-Z0-9-\s]/g, ""); // remove anything non-latin alphanumeric
+    string = string.replace(/\s+/g, "-"); // replace whitespace with dashes
+    string = string.replace(/-{2,}/g, "-"); // remove consecutive dashes
+    string = string.toLowerCase();
 
-    function send(key, arg) {
-      return new Promise(function (resolve, reject) {
-        var request = {
-          key: key,
-          arg: arg,
-          resolve: resolve,
-          reject: reject,
-          next: null
-        };
+    return string;
+}
 
-        if (back) {
-          back = back.next = request;
-        } else {
-          front = back = request;
-          resume(key, arg);
-        }
-      });
-    }
-
-    function resume(key, arg) {
-      try {
-        var result = gen[key](arg);
-        var value = result.value;
-
-        if (value instanceof AwaitValue) {
-          Promise.resolve(value.value).then(function (arg) {
-            resume("next", arg);
-          }, function (arg) {
-            resume("throw", arg);
-          });
-        } else {
-          settle(result.done ? "return" : "normal", result.value);
-        }
-      } catch (err) {
-        settle("throw", err);
-      }
-    }
-
-    function settle(type, value) {
-      switch (type) {
-        case "return":
-          front.resolve({
-            value: value,
-            done: true
-          });
-          break;
-
-        case "throw":
-          front.reject(value);
-          break;
-
-        default:
-          front.resolve({
-            value: value,
-            done: false
-          });
-          break;
-      }
-
-      front = front.next;
-
-      if (front) {
-        resume(front.key, front.arg);
-      } else {
-        back = null;
-      }
-    }
-
-    this._invoke = send;
-
-    if (typeof gen.return !== "function") {
-      this.return = undefined;
-    }
-  }
-
-  if (typeof Symbol === "function" && Symbol.asyncIterator) {
-    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
-      return this;
-    };
-  }
-
-  AsyncGenerator.prototype.next = function (arg) {
-    return this._invoke("next", arg);
-  };
-
-  AsyncGenerator.prototype.throw = function (arg) {
-    return this._invoke("throw", arg);
-  };
-
-  AsyncGenerator.prototype.return = function (arg) {
-    return this._invoke("return", arg);
-  };
-
-  return {
-    wrap: function (fn) {
-      return function () {
-        return new AsyncGenerator(fn.apply(this, arguments));
-      };
-    },
-    await: function (value) {
-      return new AwaitValue(value);
-    }
-  };
-}();
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+};
 
 
 
@@ -226,7 +136,20 @@ var createClass = function () {
 
 
 
+var defineProperty = function (obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
 
+  return obj;
+};
 
 var _extends = Object.assign || function (target) {
   for (var i = 1; i < arguments.length; i++) {
@@ -397,6 +320,8 @@ var DispatcherHandle = function () {
         key: "remove",
         value: function remove() {
             this.dispatcher.removeListener(this.callback);
+            this.dispatcher = undefined;
+            this.callback = undefined;
         }
     }, {
         key: "cleanup",
@@ -434,6 +359,14 @@ var Dispatcher = function () {
             return new DispatcherHandle(this, callback);
         }
     }, {
+        key: "addListenerOnce",
+        value: function addListenerOnce(callback) {
+            var handler = this.addListener(function () {
+                callback.apply(undefined, arguments);
+                handler.remove();
+            });
+        }
+    }, {
         key: "removeListener",
         value: function removeListener(callback) {
             for (var i = 0; i < this.listeners.length; i += 1) {
@@ -444,9 +377,15 @@ var Dispatcher = function () {
             }
         }
     }, {
+        key: "removeAllListeners",
+        value: function removeAllListeners() {
+            this.listeners = [];
+        }
+    }, {
         key: "dispatch",
         value: function dispatch(payload) {
-            for (var i = 0; i < this.listeners.length; i += 1) {
+            // We're going in reverse here, because some listeners can remove themselves after being called
+            for (var i = this.listeners.length - 1; i >= 0; i -= 1) {
                 var listener = this.listeners[i];
                 listener.apply(undefined, arguments);
             }
@@ -507,7 +446,28 @@ var Dispatchable = function () {
     }, {
         key: "cleanup",
         value: function cleanup() {
+            this.runCleanupJobs();
             delete this._dispatchers;
+        }
+
+        // These function don't really belong here, but they don't really hurt here and I don't want a long proto chain
+        // Add anything that needs to be called on cleanup here (dispatchers, etc)
+
+    }, {
+        key: "addCleanupJob",
+        value: function addCleanupJob(cleanupJob) {
+            if (!this.hasOwnProperty("_cleanupJobs")) {
+                this._cleanupJobs = new CleanupJobs();
+            }
+            this._cleanupJobs.add(cleanupJob);
+            return cleanupJob;
+        }
+    }, {
+        key: "runCleanupJobs",
+        value: function runCleanupJobs() {
+            if (this._cleanupJobs) {
+                this._cleanupJobs.cleanup();
+            }
         }
     }, {
         key: "dispatchers",
@@ -520,6 +480,25 @@ var Dispatchable = function () {
     }]);
     return Dispatchable;
 }();
+
+// Creates a method that calls the method methodName on obj, and adds the result as a cleanup task
+
+
+function getAttachCleanupJobMethod(methodName) {
+    return function (obj) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        var handler = obj[methodName].apply(obj, toConsumableArray(args));
+        this.addCleanupJob(handler);
+        return handler;
+    };
+}
+
+// Not sure if these should be added here, but meh
+Dispatchable.prototype.attachListener = getAttachCleanupJobMethod("addListener");
+Dispatchable.prototype.attachEventListener = getAttachCleanupJobMethod("addEventListener");
+Dispatchable.prototype.attachCreateListener = getAttachCleanupJobMethod("addCreateListener");
+Dispatchable.prototype.attachUpdateListener = getAttachCleanupJobMethod("addUpdateListener");
+Dispatchable.prototype.attachDeleteListener = getAttachCleanupJobMethod("addDeleteListener");
 
 Dispatcher.Global = new Dispatchable();
 
@@ -540,7 +519,7 @@ var RunOnce = function () {
             }
             this.timeout = setTimeout(function () {
                 callback();
-                _this2.timeout = null;
+                _this2.timeout = undefined;
             }, timeout);
         }
     }]);
@@ -599,37 +578,6 @@ var CleanupJobs = function () {
     return CleanupJobs;
 }();
 
-var CleanupMixin = function CleanupMixin(BaseClass) {
-    return function (_BaseClass) {
-        inherits(Cleanup, _BaseClass);
-
-        function Cleanup() {
-            classCallCheck(this, Cleanup);
-            return possibleConstructorReturn(this, (Cleanup.__proto__ || Object.getPrototypeOf(Cleanup)).apply(this, arguments));
-        }
-
-        createClass(Cleanup, [{
-            key: "addCleanupTask",
-            value: function addCleanupTask(cleanupJob) {
-                if (!this.hasOwnProperty("_cleanupJobs")) {
-                    this._cleanupJobs = new CleanupJobs();
-                }
-                this._cleanupJobs.add(cleanupJob);
-            }
-        }, {
-            key: "cleanup",
-            value: function cleanup() {
-                if (this._cleanupJobs) {
-                    this._cleanupJobs.cleanup();
-                }
-            }
-        }]);
-        return Cleanup;
-    }(BaseClass);
-};
-
-// Generic class through which we interact with HTML nodes
-
 var NodeWrapper = function (_Dispatchable) {
     inherits(NodeWrapper, _Dispatchable);
 
@@ -663,6 +611,9 @@ var NodeWrapper = function (_Dispatchable) {
 
     }, {
         key: "uniqueId",
+
+
+        // TODO: rethink this!
         value: function uniqueId() {
             if (!this.hasOwnProperty("uniqueIdStr")) {
                 // TODO: should this be global?
@@ -700,6 +651,9 @@ var NodeWrapper = function (_Dispatchable) {
         value: function getStyle(attribute) {
             return window.getComputedStyle(this.node, null).getPropertyValue(attribute);
         }
+
+        // TODO: should be called isInDocument
+
     }, {
         key: "isInDOM",
         value: function isInDOM() {
@@ -906,6 +860,8 @@ function CreateAllowedAttributesMap(oldAttributesMap, allowedAttributesArray) {
 //TODO: should be as few of these as possible
 var ATTRIBUTE_NAMES_MAP = CreateAllowedAttributesMap([["id"], ["action"], ["colspan"], ["default"], ["disabled", { noValue: true }], ["fixed"], ["forAttr", { domName: "for" }], ["hidden"], ["href"], ["rel"], ["minHeight"], ["minWidth"], ["role"], ["target"], ["HTMLtitle", { domName: "title" }], ["type"], ["placeholder"], ["src"], ["height"], ["width"]]);
 
+//["value"], // Value is intentionally disabled
+
 var DOMAttributes = function () {
     function DOMAttributes(options) {
         var attributeNamesMap = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ATTRIBUTE_NAMES_MAP;
@@ -1030,6 +986,7 @@ var DOMAttributes = function () {
                     }
                 }
             } else {
+                classes = String(classes);
                 this.addClass(classes.split(/[\s,]+/), node);
             }
         }
@@ -1120,8 +1077,8 @@ var DOMAttributes = function () {
                 //         node.classList.add(cls);
                 //     }
             } else {
-                node.removeAttribute("class");
-            }
+                    node.removeAttribute("class");
+                }
 
             node.removeAttribute("style");
             if (this.styleMap) {
@@ -1162,6 +1119,7 @@ var DOMAttributes = function () {
 var UI = {
     renderingStack: [] };
 
+//keeps track of objects that are redrawing, to know where to assign refs automatically
 UI.TextElement = function () {
     function UITextElement(options) {
         classCallCheck(this, UITextElement);
@@ -1201,7 +1159,9 @@ UI.TextElement = function () {
         }
     }, {
         key: "cleanup",
-        value: function cleanup() {}
+        value: function cleanup() {
+            // Nothing to do for plain text elements
+        }
     }, {
         key: "copyState",
         value: function copyState(element) {
@@ -1313,18 +1273,6 @@ var UIElement = function (_NodeWrapper) {
             this.node = document.createElement(this.getPrimitiveTag());
             return this.node;
         }
-
-        //Add anything that needs to be called on cleanup here (dispatchers, etc)
-
-    }, {
-        key: "addCleanupTask",
-        value: function addCleanupTask(task) {
-            // TODO: this field should be an instance of CleanupJobs
-            if (!this.cleanupTasks) {
-                this.cleanupTasks = [];
-            }
-            this.cleanupTasks.push(task);
-        }
     }, {
         key: "destroyNode",
         value: function destroyNode() {
@@ -1332,64 +1280,34 @@ var UIElement = function (_NodeWrapper) {
             this.node.remove();
             this.node = undefined;
         }
-    }, {
-        key: "runCleanupTasks",
-        value: function runCleanupTasks() {
-            if (this.cleanupTasks) {
-                var _iteratorNormalCompletion = true;
-                var _didIteratorError = false;
-                var _iteratorError = undefined;
-
-                try {
-                    for (var _iterator = this.cleanupTasks[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                        var task = _step.value;
-
-                        task.cleanup();
-                    }
-                } catch (err) {
-                    _didIteratorError = true;
-                    _iteratorError = err;
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion && _iterator.return) {
-                            _iterator.return();
-                        }
-                    } finally {
-                        if (_didIteratorError) {
-                            throw _iteratorError;
-                        }
-                    }
-                }
-            }
-        }
 
         // Abstract, gets called when removing DOM node associated with the
 
     }, {
         key: "cleanup",
         value: function cleanup() {
-            this.runCleanupTasks();
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
+            this.runCleanupJobs();
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
 
             try {
-                for (var _iterator2 = this.children[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                    var child = _step2.value;
+                for (var _iterator = this.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var child = _step.value;
 
                     child.cleanup();
                 }
             } catch (err) {
-                _didIteratorError2 = true;
-                _iteratorError2 = err;
+                _didIteratorError = true;
+                _iteratorError = err;
             } finally {
                 try {
-                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                        _iterator2.return();
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
                     }
                 } finally {
-                    if (_didIteratorError2) {
-                        throw _iteratorError2;
+                    if (_didIteratorError) {
+                        throw _iteratorError;
                     }
                 }
             }
@@ -1514,16 +1432,32 @@ var UIElement = function (_NodeWrapper) {
     }, {
         key: "setAttribute",
         value: function setAttribute(key, value) {
-            // TODO: what to do about preserving this on the next redraw
-            this.domAttributes.setAttribute(key, value, this.node);
+            this.options[key] = value;
+
+            if (typeof value === "function") {
+                value = value(this);
+            }
+
+            if (this.node) {
+                this.node.setAttribute(key, value);
+            }
         }
     }, {
         key: "setStyle",
         value: function setStyle(attributeName, value) {
-            this.options.style = this.options.style || {};
-            this.options.style[attributeName] = value;
+            if (this.options.style) {
+                this.options.style[attributeName] = value;
+            } else {
+                this.options.style = defineProperty({}, attributeName, value);
+            }
 
-            this.domAttributes.setStyle(attributeName, value, this.node);
+            if (typeof value === "function") {
+                value = value(this);
+            }
+
+            if (this.node) {
+                this.node.style[attributeName] = value;
+            }
         }
     }, {
         key: "addClass",
@@ -1756,8 +1690,9 @@ UI.str = function (value) {
     return new UI.TextElement({ value: value });
 };
 
+// TODO: code shouldn't use UIElement directly, but through UI.Element
+
 // TODO: not sure is this needs to actually be *.jsx
-// TODO: should this be actually better done throught the dynamic CSS API, without doing through the DOM?
 UI.StyleInstance = function (_UI$TextElement) {
     inherits(StyleInstance, _UI$TextElement);
 
@@ -1956,215 +1891,6 @@ UI.DynamicStyleElement = function (_UI$StyleElement) {
     return DynamicStyleElement;
 }(UI.StyleElement);
 
-// Class meant to group multiple classes inside a single <style> element, for convenience
-
-var StyleSet = function (_Dispatchable) {
-    inherits(StyleSet, _Dispatchable);
-
-    function StyleSet() {
-        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        classCallCheck(this, StyleSet);
-
-        var _this4 = possibleConstructorReturn(this, (StyleSet.__proto__ || Object.getPrototypeOf(StyleSet)).call(this));
-
-        _this4.options = options;
-        _this4.elements = new Set();
-        if (_this4.options.updateOnResize) {
-            window.addEventListener("resize", function () {
-                _this4.update();
-            });
-        }
-        var styleElementOptions = {
-            children: [],
-            name: _this4.options.name
-        };
-        _this4.styleElement = UI.StyleElement.create(document.head, styleElementOptions);
-        return _this4;
-    }
-
-    createClass(StyleSet, [{
-        key: "css",
-        value: function css(style) {
-            if (arguments.length > 1) {
-                style = Object.assign.apply(Object, [{}].concat(Array.prototype.slice.call(arguments)));
-            }
-            var element = new UI.DynamicStyleElement({ style: style });
-            this.elements.add(element);
-            var styleInstances = element.renderHTML();
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
-
-            try {
-                for (var _iterator2 = styleInstances[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                    var styleInstance = _step2.value;
-
-                    this.styleElement.appendChild(styleInstance);
-                }
-            } catch (err) {
-                _didIteratorError2 = true;
-                _iteratorError2 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                        _iterator2.return();
-                    }
-                } finally {
-                    if (_didIteratorError2) {
-                        throw _iteratorError2;
-                    }
-                }
-            }
-
-            return element;
-        }
-    }, {
-        key: "keyframe",
-        value: function keyframe(styles) {
-            throw Error("Not implemented yet!");
-        }
-    }, {
-        key: "addBeforeUpdateListener",
-        value: function addBeforeUpdateListener(callback) {
-            return this.addListener("beforeUpdate", callback);
-        }
-    }, {
-        key: "update",
-        value: function update() {
-            this.dispatch("beforeUpdate", this);
-            var children = [];
-            var _iteratorNormalCompletion3 = true;
-            var _didIteratorError3 = false;
-            var _iteratorError3 = undefined;
-
-            try {
-                for (var _iterator3 = this.elements[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                    var value = _step3.value;
-
-                    if (value instanceof UI.StyleElement) {
-                        var styleElements = value.renderHTML();
-                        children.push.apply(children, toConsumableArray(styleElements));
-                    }
-                }
-            } catch (err) {
-                _didIteratorError3 = true;
-                _iteratorError3 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                        _iterator3.return();
-                    }
-                } finally {
-                    if (_didIteratorError3) {
-                        throw _iteratorError3;
-                    }
-                }
-            }
-
-            this.styleElement.options.children = children;
-            this.styleElement.redraw();
-        }
-    }]);
-    return StyleSet;
-}(Dispatchable);
-
-// Helper class, meant to only keep one class active for an element from a set of classes
-// TODO: move to another file
-
-
-var ExclusiveClassSet = function () {
-    function ExclusiveClassSet(classList, element) {
-        classCallCheck(this, ExclusiveClassSet);
-
-        // TODO: check that classList is an array (or at least iterable)
-        this.classList = classList;
-        this.element = element;
-    }
-
-    createClass(ExclusiveClassSet, [{
-        key: "set",
-        value: function set(element, classInstance) {
-            if (!classInstance) {
-                classInstance = element;
-                element = this.element;
-            }
-            var _iteratorNormalCompletion4 = true;
-            var _didIteratorError4 = false;
-            var _iteratorError4 = undefined;
-
-            try {
-                for (var _iterator4 = this.classList[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                    var cls = _step4.value;
-
-                    if (cls === classInstance) {
-                        element.addClass(cls);
-                    } else {
-                        element.removeClass(cls);
-                    }
-                }
-            } catch (err) {
-                _didIteratorError4 = true;
-                _iteratorError4 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
-                        _iterator4.return();
-                    }
-                } finally {
-                    if (_didIteratorError4) {
-                        throw _iteratorError4;
-                    }
-                }
-            }
-        }
-    }], [{
-        key: "fromObject",
-        value: function fromObject(obj, element) {
-            var classList = [];
-            for (var key in obj) {
-                if (obj.hasOwnProperty(key)) {
-                    classList.push(obj[key]);
-                }
-            }
-            return Object.assign(new ExclusiveClassSet(classList, element), obj);
-        }
-    }]);
-    return ExclusiveClassSet;
-}();
-
-function wrapCSS(context, style) {
-    var result = {};
-    result[context] = style;
-    return result;
-}
-
-function hover(style) {
-    return wrapCSS(":hover", style);
-}
-
-function active(style) {
-    return wrapCSS(":active", style);
-}
-
-function focus(style) {
-    return wrapCSS(":focus", style);
-}
-
-var styleMap = new WeakMap();
-
-function css(style) {
-    if (arguments.length > 1) {
-        style = Object.assign.apply(Object, [{}].concat(Array.prototype.slice.call(arguments)));
-    }
-    // If using the exact same object, return the same class
-    var styleWrapper = styleMap.get(style);
-    if (!styleWrapper) {
-        styleWrapper = UI.DynamicStyleElement.create(document.body, { style: style });
-        styleMap.set(style, styleWrapper);
-    }
-    return styleWrapper;
-}
-
 UI.DoubleClickable = function (BaseClass) {
     return function (_BaseClass) {
         inherits(DoubleClickable, _BaseClass);
@@ -2279,8 +2005,6 @@ UI.DoubleClickable = function (BaseClass) {
     }(BaseClass);
 };
 
-// TODO: simplify this if possible
-// TODO: rename to DraggableMixin?
 UI.Draggable = function (BaseClass) {
     var Draggable = function (_BaseClass) {
         inherits(Draggable, _BaseClass);
@@ -2609,7 +2333,158 @@ UI.FullScreenable = function (BaseClass) {
     }(BaseClass);
 };
 
+var translationMap = null;
+
+// Keep a set of all UI Element that need to be updated when the language changes
+// Can't use a weak set here unfortunately because we need iteration
+// That's why we must make sure to remove all nodes from the set when destroying them
+UI.TranslationElements = new Set();
+
+UI.TranslationTextElement = function (_UI$TextElement) {
+    inherits(TranslationTextElement, _UI$TextElement);
+
+    function TranslationTextElement(value) {
+        classCallCheck(this, TranslationTextElement);
+
+        if (arguments.length === 1) {
+            var _this = possibleConstructorReturn(this, (TranslationTextElement.__proto__ || Object.getPrototypeOf(TranslationTextElement)).call(this, value));
+        } else {
+            var _this = possibleConstructorReturn(this, (TranslationTextElement.__proto__ || Object.getPrototypeOf(TranslationTextElement)).call(this, ""));
+
+            _this.setValue.apply(_this, arguments);
+        }
+        return possibleConstructorReturn(_this);
+    }
+
+    createClass(TranslationTextElement, [{
+        key: "setValue",
+        value: function setValue(value) {
+            if (arguments.length > 1) {
+                this.value = Array.from(arguments);
+            } else {
+                this.value = value;
+            }
+            if (this.node) {
+                this.redraw();
+            }
+        }
+    }, {
+        key: "evaluateSprintf",
+        value: function evaluateSprintf(string) {
+            throw Error("Not yet implemented");
+        }
+    }, {
+        key: "evaluate",
+        value: function evaluate(strings) {
+            for (var _len = arguments.length, values = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+                values[_key - 1] = arguments[_key];
+            }
+
+            if (!Array.isArray(strings)) {
+                return this.evaluateSprintf.apply(this, arguments);
+                // This means strings is a string with the sprintf pattern
+            } else {
+                    // Using template literals https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Template_literals
+                    if (arguments.length != strings.length) {
+                        console.error("Invalid arguments to evaluate ", Array.from(arguments));
+                    }
+                    var result = strings[0];
+                    for (var i = 1; i < arguments.length; i++) {
+                        result += arguments[i];
+                        result += strings[i];
+                    }
+                    return result;
+                }
+        }
+    }, {
+        key: "getValue",
+        value: function getValue() {
+            var value = this.value;
+            if (Array.isArray(this.value)) {
+                var _translationMap2;
+
+                value = translationMap && (_translationMap2 = translationMap).get.apply(_translationMap2, toConsumableArray(value)) || this.evaluate.apply(this, toConsumableArray(value));
+            } else {
+                value = translationMap && translationMap.get(value) || value;
+            }
+            return value;
+        }
+    }, {
+        key: "redraw",
+        value: function redraw() {
+            get$1(TranslationTextElement.prototype.__proto__ || Object.getPrototypeOf(TranslationTextElement.prototype), "redraw", this).call(this);
+            UI.TranslationElements.add(this);
+        }
+    }, {
+        key: "cleanup",
+        value: function cleanup() {
+            UI.TranslationElements.delete(this);
+            get$1(TranslationTextElement.prototype.__proto__ || Object.getPrototypeOf(TranslationTextElement.prototype), "cleanup", this).call(this);
+        }
+    }]);
+    return TranslationTextElement;
+}(UI.TextElement);
+
+// This method is a shorthand notation to create a new translatable text element
+// TODO: should also support being used as a string template
+UI.T = function (str) {
+    return new UI.TranslationTextElement(str);
+};
+
+// TODO @mciucu this should be wrapped in a way that previous requests that arrive later don't get processed
+// TODO: should this be done with promises?
+// Function to be called with a translation map
+// The translationMap object needs to implement .get(value) to return the translation for value
+function setTranslationMap(_translationMap) {
+    translationMap = _translationMap;
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+        for (var _iterator = UI.TranslationElements.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var textElement = _step.value;
+
+            textElement.redraw();
+        }
+    } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+                _iterator.return();
+            }
+        } finally {
+            if (_didIteratorError) {
+                throw _iteratorError;
+            }
+        }
+    }
+}
+
+var languageStore = null;
+
+// This function should be called to set the language store to watch for changes
+// The languageStore argumenent needs to implement .getLocale(), addListener("localChange", (language) =>{})
+// The language objects need to implement .buildTranslation(callback), where callback should be called with a translationMap
+function setLanguageStore(_languageStore) {
+    languageStore = _languageStore;
+
+    var currentLocale = languageStore.getLocale();
+    // If there's a default language already set, build the translation table for it
+    if (currentLocale) {
+        currentLocale.buildTranslation(setTranslationMap);
+    }
+
+    // Add a listener for whenever the language changes
+    languageStore.addListener("localeChange", function (language) {
+        language.buildTranslation(setTranslationMap);
+    });
+}
+
 // Primitive utils for wrapping browser info
+
 var Device = function () {
     function Device() {
         classCallCheck(this, Device);
@@ -3106,6 +2981,7 @@ UI.ScrollableMixin = function (_UI$Element6) {
         }
     }, {
         key: "applyScrollPosition",
+        // visibleChildrenOffsets: {}
         value: function applyScrollPosition() {
             this.node.scrollTop = this.options.scrollTop || this.node.scrollTop;
         }
@@ -3326,9 +3202,6 @@ UI.ConstructorInitMixin = function (BaseClass) {
 
     return ConstructorInitMixin;
 };
-
-UI.body = new UI.Element();
-UI.body.node = document.body;
 
 UI.Form = function (_UI$Element) {
     inherits(Form, _UI$Element);
@@ -3918,8 +3791,7 @@ UI.Select = function (_UI$Element8) {
     return Select;
 }(UI.Element);
 
-// This whole file needs a refactoring
-// options.orientation is the orientation of the divided elements
+// This whole file needs a refactoring, it's awfully written
 UI.DividerBar = function (_UI$Element) {
     inherits(DividerBar, _UI$Element);
 
@@ -3973,7 +3845,6 @@ UI.SectionDivider = function (_UI$Element2) {
         var _this2 = possibleConstructorReturn(this, (SectionDivider.__proto__ || Object.getPrototypeOf(SectionDivider)).call(this, options));
 
         _this2.orientation = _this2.options.orientation || UI.Orientation.VERTICAL;
-        _this2.childrenSize = 0;
         _this2.uncollapsedSizes = new WeakMap();
         return _this2;
     }
@@ -4286,7 +4157,6 @@ UI.SectionDivider = function (_UI$Element2) {
     return SectionDivider;
 }(UI.Element);
 
-// TODO: the whole table architecture probably needs a rethinking
 UI.TableRow = function (_UI$Element) {
     inherits(TableRow, _UI$Element);
 
@@ -5276,15 +5146,40 @@ var Transition = function () {
     }
 
     createClass(Transition, [{
+        key: "toString",
+        value: function toString() {
+            return "{\n" + "   context: " + this.context + "\n" + "   duration: " + this.duration + "\n" + "   startTime: " + this.startTime + "\n" + "   dependsOn: " + this.dependsOn + "\n" + "   func: " + this.func.toString() + "\n" + "}\n";
+        }
+    }, {
         key: "hasDependencyOn",
         value: function hasDependencyOn(t) {
-            // TODO: this should be actually a for of, but that breaks visual list
-            // THIS IS ACTUALL THE SAME as always return false;
-            for (var transition in this.dependsOn) {
-                if (transition === t) {
-                    return true;
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = this.dependsOn[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var transition = _step.value;
+
+                    if (transition === t) {
+                        return true;
+                    }
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
                 }
             }
+
             return false;
         }
     }, {
@@ -5448,6 +5343,11 @@ var Modifier = function (_Transition) {
     }
 
     createClass(Modifier, [{
+        key: "toString",
+        value: function toString() {
+            return "{\n" + "   context: " + this.context + "\n" + "   duration: " + this.duration + "\n" + "   startTime: " + this.startTime + "\n" + "   dependsOn: " + this.dependsOn + "\n" + "   func: " + this.func.toString() + "\n" + "   reverseFunc: " + this.reverseFunc.toString() + "\n" + "}\n";
+        }
+    }, {
         key: "forceStart",
         value: function forceStart() {
             this.restart();
@@ -5496,13 +5396,18 @@ var TransitionList = function () {
     }
 
     createClass(TransitionList, [{
+        key: "toString",
+        value: function toString() {
+            return "{\n" + "   context: " + this.context + "\n" + "   duration: " + this.duration + "\n" + "   startTime: " + this.startTime + "\n" + "   dependsOn: " + this.dependsOn + "\n" + "   transitions: [" + (this.transitions.length ? this.transitions[0].toString() : "") + " ...]\n" + "}\n";
+        }
+    }, {
         key: "add",
         value: function add(transition) {
             var forceFinish = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
 
             for (var i = 0; i < transition.dependsOn.length; i += 1) {
                 if (transition.dependsOn[i].getEndTime() > transition.startTime) {
-                    console.error("A transition depends on one that ends after its start!");
+                    console.error(transition.toString() + "\ndepends on\n" + transition.dependsOn[i].toString() + "\n" + "which ends after its start!");
                 }
             }
             if (forceFinish) {
@@ -5519,7 +5424,7 @@ var TransitionList = function () {
             transition.setStartTime(this.getLength());
             for (var i = 0; i < transition.dependsOn.length; i += 1) {
                 if (transition.dependsOn[i].getEndTime() > transition.startTime) {
-                    console.error("A transition depends on one that ends after its start!");
+                    console.error(transition.toString() + "\ndepends on\n" + transition.dependsOn[i].toString() + "\n" + "which ends after its start!");
                 }
             }
             if (forceFinish) {
@@ -5873,8 +5778,7 @@ UI.SVG.Element = function (_UI$Element) {
             }
             if (this.constructor.getDefaultOptions) {
                 var defaultOptions = this.constructor.getDefaultOptions();
-                // TODO: use object.assign and make sure everything work on the right level
-                options = $.extend(true, {}, defaultOptions, options);
+                options = Object.assign({}, defaultOptions, options);
             }
 
             get$1(SVGElement.prototype.__proto__ || Object.getPrototypeOf(SVGElement.prototype), "setOptions", this).call(this, options);
@@ -5883,7 +5787,7 @@ UI.SVG.Element = function (_UI$Element) {
         key: "saveState",
         value: function saveState() {
             var state = {};
-            state.options = $.extend(true, {}, this.options);
+            state.options = Object.assign({}, this.options);
             return state;
         }
     }, {
@@ -6161,6 +6065,44 @@ UI.SVG.RawSVG = function (_UI$SVG$SVGRoot) {
     return RawSVG;
 }(UI.SVG.SVGRoot);
 
+UI.SVG.AnimatedSVG = function (_UI$SVG$SVGRoot2) {
+    inherits(AnimatedSVG, _UI$SVG$SVGRoot2);
+
+    function AnimatedSVG() {
+        classCallCheck(this, AnimatedSVG);
+        return possibleConstructorReturn(this, (AnimatedSVG.__proto__ || Object.getPrototypeOf(AnimatedSVG)).apply(this, arguments));
+    }
+
+    createClass(AnimatedSVG, [{
+        key: "onMount",
+        value: function onMount() {
+            var _this8 = this;
+
+            if (this.options.transition) {
+                (function () {
+                    _this8.options.transition.setStartTime(Date.now());
+                    var animationWrapper = function animationWrapper() {
+                        if (_this8.options.transition.isStopped()) {
+                            if (_this8.options.repeat) {
+                                _this8.options.transition.setStartTime(Date.now());
+                                _this8.options.transition.restart();
+                                requestAnimationFrame(animationWrapper);
+                            }
+                            return;
+                        }
+                        if (!_this8.options.transition.pauseTime) {
+                            _this8.options.transition.nextStep();
+                        }
+                        requestAnimationFrame(animationWrapper);
+                    };
+                    requestAnimationFrame(animationWrapper);
+                })();
+            }
+        }
+    }]);
+    return AnimatedSVG;
+}(UI.SVG.SVGRoot);
+
 UI.SVG.Group = function (_UI$SVG$Element2) {
     inherits(SVGGroup, _UI$SVG$Element2);
 
@@ -6349,125 +6291,9 @@ UI.SVG.Circle = function (_UI$SVG$Element6) {
     return SVGCircle;
 }(UI.SVG.Element);
 
-UI.SVG.HandDrawnCircle = function (_UI$SVG$Element7) {
-    inherits(SVGHandDrawnCircle, _UI$SVG$Element7);
-
-    function SVGHandDrawnCircle() {
-        classCallCheck(this, SVGHandDrawnCircle);
-        return possibleConstructorReturn(this, (SVGHandDrawnCircle.__proto__ || Object.getPrototypeOf(SVGHandDrawnCircle)).apply(this, arguments));
-    }
-
-    createClass(SVGHandDrawnCircle, [{
-        key: "getPrimitiveTag",
-        value: function getPrimitiveTag() {
-            return "path";
-        }
-    }, {
-        key: "setParameters",
-        value: function setParameters(parameters) {
-            Object.assign(this.options, parameters);
-            this.setAttribute("d", this.getPath());
-            this.setAttribute("transform", this.getTransform());
-        }
-    }, {
-        key: "setCenter",
-        value: function setCenter(x, y) {
-            this.options.x = x;
-            this.options.y = y;
-            this.setAttribute("transform", this.getTransform());
-        }
-    }, {
-        key: "setRadius",
-        value: function setRadius(r) {
-            this.options.r = r;
-            this.setAttribute("d", this.getPath());
-        }
-    }, {
-        key: "getDOMAttributes",
-        value: function getDOMAttributes() {
-            var attr = get$1(SVGHandDrawnCircle.prototype.__proto__ || Object.getPrototypeOf(SVGHandDrawnCircle.prototype), "getDOMAttributes", this).call(this);
-            attr.setAttribute("d", this.getPath());
-            attr.setAttribute("transform", this.getTransform());
-            return attr;
-        }
-    }, {
-        key: "getPath",
-        value: function getPath() {
-            var r = this.options.r;
-            var dR1 = this.options.minDeltaR;
-            var dR2 = this.options.maxDeltaR;
-            var minAngle = this.options.minStartingAngle;
-            var maxAngle = this.options.maxStartingAngle;
-            var minDAngle = this.options.minOverlap;
-            var maxDAngle = this.options.maxOverlap;
-            var c = 0.551915024494;
-            var beta = Math.atan(c);
-            var d = Math.sqrt(c * c + 1);
-            var alpha = (minAngle + Math.random() * (maxAngle - minAngle)) * Math.PI / 180;
-
-            var path = 'M' + [r * Math.sin(alpha), r * Math.cos(alpha)];
-            path += ' C' + [d * r * Math.sin(alpha + beta), d * r * Math.cos(alpha + beta)];
-
-            for (var i = 0; i < 4; i += 1) {
-                var dAngle = minDAngle + Math.random() * (maxDAngle - minDAngle);
-                alpha += Math.PI / 2 * (1 + dAngle);
-                r *= 1 + dR1 + Math.random() * (dR2 - dR1);
-                path += ' ' + (i ? 'S' : '') + [d * r * Math.sin(alpha - beta), d * r * Math.cos(alpha - beta)];
-                path += ' ' + [r * Math.sin(alpha), r * Math.cos(alpha)];
-            }
-
-            return path;
-        }
-    }, {
-        key: "getTransform",
-        value: function getTransform() {
-            var minL = this.options.minSquash;
-            var maxL = this.options.maxSquash;
-            var minAlpha = this.options.minSquashAngle;
-            var maxAlpha = this.options.maxSquashAngle;
-            var alpha = minAlpha + Math.random() * (maxAlpha - minAlpha);
-            var lambda = minL + Math.random() * (maxL - minL);
-
-            return 'translate(' + [this.options.x, this.options.y] + ') ' + 'rotate(' + alpha + ') scale(1, ' + lambda + ') rotate(' + -alpha + ')';
-        }
-    }], [{
-        key: "getDefaultOptions",
-        value: function getDefaultOptions() {
-            return {
-                minDeltaR: 0.1, // When the circle overlaps, the R decides the
-                maxDeltaR: 0.1, // ratio between the diameter of the circle and the
-                // "imperfection" at its union, and DeltaR is the
-                // difference between R and 1 (bigger -> more like a spiral)
-
-                minStartingAngle: 0, // Where the overlapping starts (0-360)
-                maxStartingAngle: 0,
-
-                minOverlap: 0.15, // How much the circle goes over itself (ratio to circumference)
-                maxOverlap: 0.15,
-
-                minSquash: 0.7, // How alike it is to an ellipse (1 is perfectly circular)
-                maxSquash: 0.7,
-
-                minSquashAngle: 150, // Angle of the axis by which its elliptical
-                maxSquashAngle: 150,
-
-                r: 19, // Radius
-
-                x: 0, // Center
-                y: 0,
-
-                fill: "transparent",
-                stroke: "black",
-                strokeWidth: "2px"
-            };
-        }
-    }]);
-    return SVGHandDrawnCircle;
-}(UI.SVG.Element);
-
 //TODO Complete this class
-UI.SVG.Ellipse = function (_UI$SVG$Element8) {
-    inherits(SVGEllipse, _UI$SVG$Element8);
+UI.SVG.Ellipse = function (_UI$SVG$Element7) {
+    inherits(SVGEllipse, _UI$SVG$Element7);
 
     function SVGEllipse() {
         classCallCheck(this, SVGEllipse);
@@ -6536,8 +6362,8 @@ UI.SVG.CircleArc = function (_UI$SVG$Path) {
     return SVGCircleArc;
 }(UI.SVG.Path);
 
-UI.SVG.Rect = function (_UI$SVG$Element9) {
-    inherits(SVGRect, _UI$SVG$Element9);
+UI.SVG.Rect = function (_UI$SVG$Element8) {
+    inherits(SVGRect, _UI$SVG$Element8);
 
     function SVGRect() {
         classCallCheck(this, SVGRect);
@@ -6623,8 +6449,8 @@ UI.SVG.Rect = function (_UI$SVG$Element9) {
     return SVGRect;
 }(UI.SVG.Element);
 
-UI.SVG.Line = function (_UI$SVG$Element10) {
-    inherits(SVGLine, _UI$SVG$Element10);
+UI.SVG.Line = function (_UI$SVG$Element9) {
+    inherits(SVGLine, _UI$SVG$Element9);
 
     function SVGLine() {
         classCallCheck(this, SVGLine);
@@ -6680,8 +6506,8 @@ UI.SVG.Line = function (_UI$SVG$Element10) {
     return SVGLine;
 }(UI.SVG.Element);
 
-UI.SVG.Text = function (_UI$SVG$Element11) {
-    inherits(SVGText, _UI$SVG$Element11);
+UI.SVG.Text = function (_UI$SVG$Element10) {
+    inherits(SVGText, _UI$SVG$Element10);
 
     function SVGText() {
         classCallCheck(this, SVGText);
@@ -6815,14 +6641,14 @@ UI.SVG.Text = function (_UI$SVG$Element11) {
     }, {
         key: "moveTransition",
         value: function moveTransition(coords, duration) {
-            var _this18 = this;
+            var _this19 = this;
 
             var dependsOn = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
             var startTime = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
 
             return new Transition({
                 func: function func(t, context) {
-                    _this18.setPosition((1 - t) * context.x + t * coords.x, (1 - t) * context.y + t * coords.y);
+                    _this19.setPosition((1 - t) * context.x + t * coords.x, (1 - t) * context.y + t * coords.y);
                 },
                 context: {
                     x: this.options.x,
@@ -6836,14 +6662,14 @@ UI.SVG.Text = function (_UI$SVG$Element11) {
     }, {
         key: "changeFillTransition",
         value: function changeFillTransition(color, duration) {
-            var _this19 = this;
+            var _this20 = this;
 
             var dependsOn = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
             var startTime = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
 
             return new Transition({
                 func: function func(t, context) {
-                    _this19.setColor(Color.interpolate(context.color, color, t), true);
+                    _this20.setColor(Color.interpolate(context.color, color, t), true);
                 },
                 context: {
                     color: this.getColor()
@@ -6873,8 +6699,8 @@ UI.SVG.Text = function (_UI$SVG$Element11) {
 
 UI.SVG.Text.domAttributesMap = CreateAllowedAttributesMap(UI.SVG.Element.domAttributesMap, [["fontFamily", { domName: "font-family" }]]);
 
-UI.SVG.TextArea = function (_UI$SVG$Element12) {
-    inherits(SVGTextArea, _UI$SVG$Element12);
+UI.SVG.TextArea = function (_UI$SVG$Element11) {
+    inherits(SVGTextArea, _UI$SVG$Element11);
 
     function SVGTextArea() {
         classCallCheck(this, SVGTextArea);
@@ -7019,8 +6845,8 @@ UI.SVG.CSAIconPath = function (_UI$SVG$Path3) {
     return SVGCSAIconPath;
 }(UI.SVG.Path);
 
-UI.SVG.CSAIconSVG = function (_UI$SVG$SVGRoot2) {
-    inherits(SVGCSAIconSVG, _UI$SVG$SVGRoot2);
+UI.SVG.CSAIconSVG = function (_UI$SVG$SVGRoot3) {
+    inherits(SVGCSAIconSVG, _UI$SVG$SVGRoot3);
 
     function SVGCSAIconSVG() {
         classCallCheck(this, SVGCSAIconSVG);
@@ -7279,6 +7105,7 @@ UI.Switcher = function (_UI$Element) {
     return Switcher;
 }(UI.Element);
 
+// TODO: all of the classes here need to be implemented with StyleSets
 UI.BasicTabTitle = function (_UI$Element) {
     inherits(BasicTabTitle, _UI$Element);
 
@@ -7302,14 +7129,33 @@ UI.BasicTabTitle = function (_UI$Element) {
             return attr;
         }
     }, {
+        key: "canOverwrite",
+        value: function canOverwrite(existingElement) {
+            // Disable reusing with different panels, since we want to attach listeners to the panel
+            return get$1(BasicTabTitle.prototype.__proto__ || Object.getPrototypeOf(BasicTabTitle.prototype), "canOverwrite", this).call(this, existingElement) && this.options.panel === existingElement.options.panel;
+        }
+    }, {
         key: "setActive",
         value: function setActive(active) {
+            var _this2 = this;
+
             this.options.active = active;
+            this.redraw();
             if (active) {
-                this.addClass("active");
-            } else {
-                this.removeClass("active");
+                var activeTabDispatcher = this.options.activeTabDispatcher;
+
+                activeTabDispatcher.dispatch(this.options.panel);
+                activeTabDispatcher.addListenerOnce(function (panel) {
+                    if (panel != _this2.options.panel) {
+                        _this2.setActive(false);
+                    }
+                });
             }
+        }
+    }, {
+        key: "getTitle",
+        value: function getTitle() {
+            return this.options.title || this.options.panel.getTitle();
         }
     }, {
         key: "renderHTML",
@@ -7318,26 +7164,31 @@ UI.BasicTabTitle = function (_UI$Element) {
             if (this.options.href) {
                 hrefOption.href = this.options.href;
             }
-            if (!this.options.title) {
-                this.options.title = this.options.panel.getTitle();
-            }
             return [UI.createElement(
                 "a",
                 _extends({}, hrefOption, { className: "tabTitle unselectable pointer-cursor csa-tab" }),
                 UI.createElement(
                     "div",
                     { className: "csa-tab-title" },
-                    this.options.title
+                    this.getTitle()
                 )
             )];
         }
     }, {
         key: "onMount",
         value: function onMount() {
-            var _this2 = this;
+            var _this3 = this;
+
+            if (this.options.active) {
+                this.setActive(true);
+            }
 
             this.addClickListener(function () {
-                _this2.dispatch("setActive");
+                _this3.setActive(true);
+            });
+
+            this.attachListener(this.options.panel, "show", function () {
+                _this3.setActive(true);
             });
         }
     }]);
@@ -7347,13 +7198,9 @@ UI.BasicTabTitle = function (_UI$Element) {
 UI.TabTitleArea = function (_UI$Element2) {
     inherits(TabTitleArea, _UI$Element2);
 
-    function TabTitleArea(options) {
+    function TabTitleArea() {
         classCallCheck(this, TabTitleArea);
-
-        var _this3 = possibleConstructorReturn(this, (TabTitleArea.__proto__ || Object.getPrototypeOf(TabTitleArea)).call(this, options));
-
-        _this3.activeTab = null;
-        return _this3;
+        return possibleConstructorReturn(this, (TabTitleArea.__proto__ || Object.getPrototypeOf(TabTitleArea)).apply(this, arguments));
     }
 
     createClass(TabTitleArea, [{
@@ -7364,45 +7211,13 @@ UI.TabTitleArea = function (_UI$Element2) {
             attr.setAttribute("role", "tablist");
             return attr;
         }
-    }, {
-        key: "setActiveTab",
-        value: function setActiveTab(tab) {
-            if (this.activeTab) {
-                this.activeTab.setActive(false);
-            }
-            this.activeTab = tab;
-            this.activeTab.setActive(true);
-        }
-    }, {
-        key: "appendTab",
-        value: function appendTab(tab) {
-            var _this4 = this;
-
-            this.appendChild(tab);
-            if (tab.options.active) {
-                this.activeTab = tab;
-                this.setActiveTab(tab);
-            }
-            tab.addClickListener(function () {
-                _this4.setActiveTab(tab);
-            });
-        }
-    }, {
-        key: "onMount",
-        value: function onMount() {
-            for (var i = 0; i < this.options.children.length; i += 1) {
-                var child = this.options.children[i];
-                if (child.options.active) {
-                    this.setActiveTab(child);
-                }
-            }
-        }
     }]);
     return TabTitleArea;
 }(UI.Element);
 
 // Inactive class for the moment, should extend UI.BasicTabTitle
-UI.SVGTabTitle = function (_UI$Element3) {
+
+var SVGTabTitle = function (_UI$Element3) {
     inherits(SVGTabTitle, _UI$Element3);
 
     function SVGTabTitle() {
@@ -7485,7 +7300,7 @@ UI.TabArea = function (_UI$Element4) {
 
         var _this7 = possibleConstructorReturn(this, (TabArea.__proto__ || Object.getPrototypeOf(TabArea)).call(this, options));
 
-        _this7.tabTitleMap = new WeakMap();
+        _this7.activeTabDispatcher = new Dispatcher();
         return _this7;
     }
 
@@ -7501,9 +7316,9 @@ UI.TabArea = function (_UI$Element4) {
     }, {
         key: "createTabPanel",
         value: function createTabPanel(panel) {
-            var tab = UI.createElement(UI.BasicTabTitle, { panel: panel, active: panel.options.active, href: panel.options.tabHref });
+            var tab = UI.createElement(UI.BasicTabTitle, { panel: panel, activeTabDispatcher: this.activeTabDispatcher, active: panel.options.active, href: panel.options.tabHref });
 
-            //TODO: Don't modify the tab panel class!!!!
+            //TODO: Don't modify the panel element!!!!
             var panelClass = " tab-panel nopad";
             if (!this.options.variableHeightPanels) {
                 panelClass += " auto-height-child";
@@ -7513,69 +7328,78 @@ UI.TabArea = function (_UI$Element4) {
             return [tab, panel];
         }
     }, {
-        key: "connectTabTitleToPanel",
-        value: function connectTabTitleToPanel(panel, tab) {
-            if (this.tabTitleMap.get(panel) === tab) {
-                return;
-            }
-            this.tabTitleMap.set(panel, tab);
-            this.addTabListeners(tab, panel);
-        }
-    }, {
         key: "appendChild",
         value: function appendChild(panel, doMount) {
-            this.options.children.push(panel);
-
             var _createTabPanel = this.createTabPanel(panel),
                 _createTabPanel2 = slicedToArray(_createTabPanel, 2),
                 tabTitle = _createTabPanel2[0],
                 tabPanel = _createTabPanel2[1];
 
-            this.titleArea.appendTab(tabTitle);
-            // TODO: consider the best default for inserting
+            this.options.children.push(panel);
+
+            this.titleArea.appendChild(tabTitle);
             this.switcherArea.appendChild(tabPanel, doMount || true);
-            this.connectTabTitleToPanel(panel, tabTitle);
         }
     }, {
         key: "renderHTML",
         value: function renderHTML() {
-            var tabTitles = [],
-                tabPanels = [];
-            for (var i = 0; i < this.options.children.length; i += 1) {
-                var panel = this.options.children[i];
+            var tabTitles = [];
+            var tabPanels = [];
+            var activeTab = void 0;
 
-                var _createTabPanel3 = this.createTabPanel(panel),
-                    _createTabPanel4 = slicedToArray(_createTabPanel3, 2),
-                    tabTitle = _createTabPanel4[0],
-                    tabPanel = _createTabPanel4[1];
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
 
-                tabTitles.push(tabTitle);
-                tabPanels.push(tabPanel);
+            try {
+                for (var _iterator = this.options.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var panel = _step.value;
+
+                    var _createTabPanel3 = this.createTabPanel(panel),
+                        _createTabPanel4 = slicedToArray(_createTabPanel3, 2),
+                        tabTitle = _createTabPanel4[0],
+                        tabPanel = _createTabPanel4[1];
+
+                    if (tabTitle.options.active) {
+                        activeTab = tabTitle;
+                    }
+
+                    tabTitles.push(tabTitle);
+                    tabPanels.push(tabPanel);
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
             }
-            if (this.options.variableHeightPanels) {
-                this.switcherClass = "";
-            } else {
-                this.switcherClass = "auto-height";
+
+            if (!activeTab && tabTitles.length > 0) {
+                tabTitles[0].options.active = true;
             }
+
+            var switcherClass = "";
+            if (!this.options.variableHeightPanels) {
+                switcherClass = "auto-height";
+            }
+
             return [UI.createElement(
                 UI.TabTitleArea,
                 { ref: "titleArea" },
                 tabTitles
             ), UI.createElement(
                 UI.Switcher,
-                { ref: "switcherArea", className: this.switcherClass },
+                { ref: "switcherArea", className: switcherClass, lazyRender: this.options.lazyRender },
                 tabPanels
             )];
-        }
-    }, {
-        key: "redraw",
-        value: function redraw() {
-            get$1(TabArea.prototype.__proto__ || Object.getPrototypeOf(TabArea.prototype), "redraw", this).call(this);
-            for (var i = 0; i < this.options.children.length; i += 1) {
-                var panel = this.options.children[i];
-                var tab = this.titleArea.children[i];
-                this.connectTabTitleToPanel(panel, tab);
-            }
         }
     }, {
         key: "getActive",
@@ -7583,27 +7407,16 @@ UI.TabArea = function (_UI$Element4) {
             return this.switcherArea.getActive();
         }
     }, {
-        key: "addTabListeners",
-        value: function addTabListeners(tab, panel) {
+        key: "onMount",
+        value: function onMount() {
             var _this8 = this;
 
-            this.addListener("resize", function () {
-                panel.dispatch("resize");
-            });
-            //TODO: should not be a function, but a dispatcher
-            panel.showTabPanel = function () {
-                if (_this8.getActive() === panel) {
-                    return;
-                }
+            this.attachListener(this.activeTabDispatcher, function (panel) {
                 _this8.switcherArea.setActive(panel);
-                _this8.titleArea.setActiveTab(tab);
-            };
-            panel.addListener("show", function () {
-                panel.showTabPanel();
             });
-            tab.addListener("setActive", function () {
-                panel.dispatch("resize");
-                panel.showTabPanel();
+
+            this.addListener("resize", function () {
+                _this8.switcherArea.dispatch("resize");
             });
         }
     }]);
@@ -7849,7 +7662,7 @@ UI.Modal = function (_UI$Element2) {
                     "div",
                     { style: { position: "absolute", right: "10px", zIndex: "10" } },
                     UI.createElement(UI.Button, { type: "button", className: "close", "data-dismiss": "modal", "aria-label": "Close",
-                        label: "\xD7", onClick: function onClick() {
+                        label: "×", onClick: function onClick() {
                             return _this7.hide();
                         } })
                 );
@@ -8015,6 +7828,11 @@ UI.ActionModal = function (_UI$Modal2) {
             return this.options.level || UI.Level.DEFAULT;
         }
     }, {
+        key: "getCloseName",
+        value: function getCloseName() {
+            return "Close";
+        }
+    }, {
         key: "getGivenChildren",
         value: function getGivenChildren() {
             return [this.getHeader(), this.getBody(), this.getFooter()];
@@ -8065,7 +7883,7 @@ UI.ActionModal = function (_UI$Modal2) {
         value: function getFooterContent() {
             var _this14 = this;
 
-            return [UI.createElement(UI.TemporaryMessageArea, { ref: "messageArea" }), UI.createElement(UI.Button, { level: UI.Level.DEFAULT, label: "Close", onClick: function onClick() {
+            return [UI.createElement(UI.TemporaryMessageArea, { ref: "messageArea" }), UI.createElement(UI.Button, { level: UI.Level.DEFAULT, label: this.getCloseName(), onClick: function onClick() {
                     return _this14.hide();
                 } }), UI.createElement(UI.Button, { level: this.getActionLevel(), label: this.getActionName(), onClick: function onClick() {
                     return _this14.action();
@@ -8475,7 +8293,9 @@ UI.CollapsiblePanel = function (_UI$CardPanel) {
     function CollapsiblePanel(options) {
         classCallCheck(this, CollapsiblePanel);
 
+
         // If options.collapsed is set, use that value. otherwise it is collapsed
+
         var _this10 = possibleConstructorReturn(this, (CollapsiblePanel.__proto__ || Object.getPrototypeOf(CollapsiblePanel)).call(this, options));
 
         _this10.collapsed = options.collapsed != null ? options.collapsed : true;
@@ -8652,6 +8472,15 @@ UI.CodeEditor = function (_UI$Element) {
         key: "setOptions",
         value: function setOptions(options) {
             get$1(CodeEditor.prototype.__proto__ || Object.getPrototypeOf(CodeEditor.prototype), "setOptions", this).call(this, options);
+
+            if (this.options.aceMode) {
+                this.options.aceMode = this.options.aceMode.toLowerCase();
+            }
+
+            if (this.options.aceMode === "cpp" || this.options.aceMode === "c") {
+                this.options.aceMode = "c_cpp";
+            }
+
             if (this.ace) {
                 this.applyAceOptions();
             }
@@ -8942,9 +8771,223 @@ UI.StaticCodeHighlighter = function (_UI$CodeEditor) {
     return StaticCodeHighlighter;
 }(UI.CodeEditor);
 
-// Mixin classes
-// Generic UI widget classes
-// TODO: these next files should not be globally imported
+var StyleSet = function (_Dispatchable) {
+    inherits(StyleSet, _Dispatchable);
+
+    function StyleSet() {
+        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        classCallCheck(this, StyleSet);
+
+        var _this = possibleConstructorReturn(this, (StyleSet.__proto__ || Object.getPrototypeOf(StyleSet)).call(this));
+
+        _this.options = options;
+        _this.elements = new Set();
+        if (_this.options.updateOnResize) {
+            window.addEventListener("resize", function () {
+                _this.update();
+            });
+        }
+        var styleElementOptions = {
+            children: [],
+            name: _this.options.name
+        };
+        _this.styleElement = UI.StyleElement.create(document.head, styleElementOptions);
+        return _this;
+    }
+
+    createClass(StyleSet, [{
+        key: "ensureFirstUpdate",
+        value: function ensureFirstUpdate() {
+            if (!this._firstUpdate) {
+                this._firstUpdate = true;
+                // Call all listeners before update for the very first time, to update any possible variables
+                this.dispatch("beforeUpdate", this);
+            }
+        }
+    }, {
+        key: "css",
+        value: function css(style) {
+            this.ensureFirstUpdate();
+            if (arguments.length > 1) {
+                style = Object.assign.apply(Object, [{}].concat(Array.prototype.slice.call(arguments)));
+            }
+            var element = new UI.DynamicStyleElement({ style: style });
+            this.elements.add(element);
+            var styleInstances = element.renderHTML();
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = styleInstances[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var styleInstance = _step.value;
+
+                    this.styleElement.appendChild(styleInstance);
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+
+            return element;
+        }
+    }, {
+        key: "keyframe",
+        value: function keyframe(styles) {
+            this.ensureFirstUpdate();
+            throw Error("Not implemented yet!");
+        }
+    }, {
+        key: "addBeforeUpdateListener",
+        value: function addBeforeUpdateListener(callback) {
+            return this.addListener("beforeUpdate", callback);
+        }
+    }, {
+        key: "update",
+        value: function update() {
+            this.dispatch("beforeUpdate", this);
+            var children = [];
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
+
+            try {
+                for (var _iterator2 = this.elements[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    var value = _step2.value;
+
+                    if (value instanceof UI.StyleElement) {
+                        var styleElements = value.renderHTML();
+                        children.push.apply(children, toConsumableArray(styleElements));
+                    }
+                }
+            } catch (err) {
+                _didIteratorError2 = true;
+                _iteratorError2 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                        _iterator2.return();
+                    }
+                } finally {
+                    if (_didIteratorError2) {
+                        throw _iteratorError2;
+                    }
+                }
+            }
+
+            this.styleElement.options.children = children;
+            this.styleElement.redraw();
+        }
+    }]);
+    return StyleSet;
+}(Dispatchable);
+
+// Helper class, meant to only keep one class active for an element from a set of classes
+// TODO: move to another file
+
+
+var ExclusiveClassSet = function () {
+    function ExclusiveClassSet(classList, element) {
+        classCallCheck(this, ExclusiveClassSet);
+
+        // TODO: check that classList is an array (or at least iterable)
+        this.classList = classList;
+        this.element = element;
+    }
+
+    createClass(ExclusiveClassSet, [{
+        key: "set",
+        value: function set(element, classInstance) {
+            if (!classInstance) {
+                classInstance = element;
+                element = this.element;
+            }
+            var _iteratorNormalCompletion3 = true;
+            var _didIteratorError3 = false;
+            var _iteratorError3 = undefined;
+
+            try {
+                for (var _iterator3 = this.classList[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                    var cls = _step3.value;
+
+                    if (cls === classInstance) {
+                        element.addClass(cls);
+                    } else {
+                        element.removeClass(cls);
+                    }
+                }
+            } catch (err) {
+                _didIteratorError3 = true;
+                _iteratorError3 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                        _iterator3.return();
+                    }
+                } finally {
+                    if (_didIteratorError3) {
+                        throw _iteratorError3;
+                    }
+                }
+            }
+        }
+    }], [{
+        key: "fromObject",
+        value: function fromObject(obj, element) {
+            var classList = [];
+            for (var key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    classList.push(obj[key]);
+                }
+            }
+            return Object.assign(new ExclusiveClassSet(classList, element), obj);
+        }
+    }]);
+    return ExclusiveClassSet;
+}();
+
+function wrapCSS(context, style) {
+    var result = {};
+    result[context] = style;
+    return result;
+}
+
+function hover(style) {
+    return wrapCSS(":hover", style);
+}
+
+function active(style) {
+    return wrapCSS(":active", style);
+}
+
+function focus(style) {
+    return wrapCSS(":focus", style);
+}
+
+var styleMap = new WeakMap();
+
+function css(style) {
+    if (arguments.length > 1) {
+        style = Object.assign.apply(Object, [{}].concat(Array.prototype.slice.call(arguments)));
+    }
+    // If using the exact same object, return the same class
+    var styleWrapper = styleMap.get(style);
+    if (!styleWrapper) {
+        styleWrapper = UI.DynamicStyleElement.create(document.body, { style: style });
+        styleMap.set(style, styleWrapper);
+    }
+    return styleWrapper;
+}
 
 var StateClass = function (_Dispatchable) {
     inherits(StateClass, _Dispatchable);
@@ -9815,7 +9858,7 @@ function VirtualStoreObjectMixin(BaseStoreObjectClass) {
                     return;
                 }
                 var oldId = this.id;
-                if (!this.id.startsWith("temp-")) {
+                if (!this.hasTemporaryId()) {
                     console.error("This is only meant to replace temporary ids!");
                 }
                 this.id = newId;
@@ -9856,9 +9899,12 @@ function VirtualStoreMixin(BaseStoreClass) {
             }
         }, {
             key: "applyUpdateObjectId",
-            value: function applyUpdateObjectId(object, event) {
+            value: function applyUpdateObjectId(object, id) {
+                if (object.id === id) {
+                    return;
+                }
                 var oldId = object.id;
-                object.updateId(event.objectId);
+                object.updateId(id);
                 this.objects.delete(oldId);
                 this.objects.set(object.id, object);
                 this.dispatch("updateObjectId", object, oldId);
@@ -9871,7 +9917,7 @@ function VirtualStoreMixin(BaseStoreClass) {
                 if (event.virtualId) {
                     var existingVirtualObject = this.getVirtualObject(event);
                     if (existingVirtualObject) {
-                        this.applyUpdateObjectId(existingVirtualObject, event);
+                        this.applyUpdateObjectId(existingVirtualObject, event.objectId);
                     }
                 }
 
@@ -9891,47 +9937,2213 @@ function VirtualStoreMixin(BaseStoreClass) {
     }(BaseStoreClass);
 }
 
-// Mixin class meant for easier adding listeners to store objects, while also adding those listeners to cleanup jobs
-// Should probably be used by UI elements that want to add listeners to store objects
-// BaseClass needs to implement addCleanupTask
-var StateSubscribableMixin = function StateSubscribableMixin(BaseClass) {
-    return function (_BaseClass) {
-        inherits(StateSubscribableMixin, _BaseClass);
+// TODO: this file is in dire need of a rewrite
+var StringStream = function () {
+    function StringStream(string, options) {
+        classCallCheck(this, StringStream);
 
-        function StateSubscribableMixin() {
-            classCallCheck(this, StateSubscribableMixin);
-            return possibleConstructorReturn(this, (StateSubscribableMixin.__proto__ || Object.getPrototypeOf(StateSubscribableMixin)).apply(this, arguments));
+        this.string = string;
+        this.pointer = 0;
+    }
+
+    createClass(StringStream, [{
+        key: "done",
+        value: function done() {
+            return this.pointer >= this.string.length;
+        }
+    }, {
+        key: "advance",
+        value: function advance() {
+            var steps = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+
+            this.pointer += steps;
+        }
+    }, {
+        key: "char",
+        value: function char() {
+            var ch = this.string.charAt(this.pointer);
+            this.pointer += 1;
+            return ch;
+        }
+    }, {
+        key: "whitespace",
+        value: function whitespace() {
+            var whitespaceChar = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : /\s/;
+
+            var whitespaceStart = this.pointer;
+
+            while (!this.done() && whitespaceChar.test(this.at(0))) {
+                this.pointer += 1;
+            }
+
+            // Return the actual whitespace in case it is needed
+            return this.string.substring(whitespaceStart, this.pointer);
         }
 
-        createClass(StateSubscribableMixin, [{
-            key: "attachListener",
-            value: function attachListener(obj, eventName, callback) {
-                this.addCleanupTask(obj.addListener(eventName, callback));
+        // Gets first encountered non-whitespace substring
+
+    }, {
+        key: "word",
+        value: function word() {
+            var validChars = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : /\S/;
+            var skipWhitespace = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+
+            if (skipWhitespace) {
+                this.whitespace();
             }
-        }, {
-            key: "attachUpdateListener",
-            value: function attachUpdateListener(obj, callback) {
-                this.addCleanupTask(obj.addUpdateListener(callback));
+
+            var wordStart = this.pointer;
+            while (!this.done() && validChars.test(this.at(0))) {
+                this.pointer += 1;
             }
-        }, {
-            key: "attachCreateListener",
-            value: function attachCreateListener(obj, callback) {
-                this.addCleanupTask(obj.addCreateListener(callback));
+            return this.string.substring(wordStart, this.pointer);
+        }
+    }, {
+        key: "number",
+        value: function number() {
+            var skipWhitespace = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
+            if (skipWhitespace) {
+                this.whitespace();
             }
-        }, {
-            key: "attachDeleteListener",
-            value: function attachDeleteListener(obj, callback) {
-                this.addCleanupTask(obj.addDeleteListener(callback));
+
+            var nanString = "NaN";
+            if (this.startsWith(nanString)) {
+                this.advance(nanString.length);
+                return NaN;
             }
-        }, {
-            key: "attachEventListener",
-            value: function attachEventListener(obj, eventType, callback) {
-                this.addCleanupTask(obj.addEventListener(eventType, callback));
+
+            var sign = "+";
+            if (this.at(0) === "-" || this.at(0) === "+") {
+                sign = this.char();
+            }
+
+            var infinityString = "Infinity";
+            if (this.startsWith(infinityString)) {
+                this.advance(infinityString.length);
+                return sign === "+" ? Infinity : -Infinity;
+            }
+
+            var isDigit = function isDigit(char) {
+                return char >= "0" || char <= "9";
+            };
+
+            if (this.at(0) === "0" && (this.at(1) === "X" || this.at(1) === "x")) {
+                // hexadecimal number
+                this.advance(2);
+
+                var isHexDigit = function isHexDigit(char) {
+                    return isDigit(char) || char >= "A" && char <= "F" || char >= "a" && char <= "f";
+                };
+
+                var _numberStart = this.pointer;
+                while (!this.done() && isHexDigit(this.at(0))) {
+                    this.pointer += 1;
+                }
+
+                return parseInt(sign + this.string.substring(_numberStart), 16);
+            }
+
+            var numberStart = this.pointer;
+            while (!this.done() && isDigit(this.at(1))) {
+                this.pointer += 1;
+                if (this.peek === ".") {
+                    this.advance(1);
+                    while (!this.done() && isDigit(this.at(1))) {
+                        this.pointer += 1;
+                    }
+                    break;
+                }
+            }
+            return parseFloat(sign + this.string.substring(numberStart, this.pointer));
+        }
+
+        // Gets everything up to delimiter, usually end of line, limited to maxLength
+
+    }, {
+        key: "line",
+        value: function line() {
+            var delimiter = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : /\r*\n/;
+            var maxLength = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Infinity;
+
+            if (delimiter instanceof RegExp) {
+                // Treat regex differently. It will probably be slower.
+                var str = this.string.substring(this.pointer);
+                var delimiterMatch = str.match(delimiter);
+
+                var _delimiterIndex = void 0,
+                    delimiterLength = void 0;
+                if (delimiterMatch === null) {
+                    // End of string encountered
+                    _delimiterIndex = str.length;
+                    delimiterLength = 0;
+                } else {
+                    _delimiterIndex = delimiterMatch.index;
+                    delimiterLength = delimiterMatch[0].length;
+                }
+
+                if (_delimiterIndex >= maxLength) {
+                    this.pointer += maxLength;
+                    return str.substring(0, maxLength);
+                }
+
+                this.advance(_delimiterIndex + delimiterLength);
+                return str.substring(0, _delimiterIndex);
+            }
+
+            var delimiterIndex = this.string.indexOf(delimiter, this.pointer);
+
+            if (delimiterIndex === -1) {
+                delimiterIndex = this.string.length;
+            }
+
+            if (delimiterIndex - this.pointer > maxLength) {
+                var _result = this.string.substring(this.pointer, this.pointer + maxLength);
+                this.advance(maxLength);
+                return _result;
+            }
+
+            var result = this.string.substring(this.pointer, delimiterIndex);
+            this.pointer = delimiterIndex + delimiter.length;
+            return result;
+        }
+
+        // The following methods have no side effects
+
+        // Access char at offset position, relative to current pointer
+
+    }, {
+        key: "at",
+        value: function at(index) {
+            return this.string.charAt(this.pointer + index);
+        }
+    }, {
+        key: "peek",
+        value: function peek() {
+            var length = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+
+            return this.string.substring(this.pointer, this.pointer + length);
+        }
+    }, {
+        key: "startsWith",
+        value: function startsWith(prefix) {
+            if (prefix instanceof RegExp) {
+                // we modify the regex to only check for the beginning of the string
+                prefix = new RegExp("^" + prefix.toString().slice(1, -1));
+                return prefix.test(this.string.substring(this.pointer));
+            }
+            return this.peek(prefix.length) === prefix;
+        }
+
+        // Returns first position of match
+
+    }, {
+        key: "search",
+        value: function search(pattern) {
+            var position = void 0;
+            if (pattern instanceof RegExp) {
+                position = this.string.substring(this.pointer).search(pattern);
+            } else {
+                position = this.string.indexOf(pattern, this.pointer) - this.pointer;
+            }
+            return position < 0 ? -1 : position;
+        }
+    }, {
+        key: "clone",
+        value: function clone() {
+            var newStream = new this.constructor(this.string);
+            newStream.pointer = this.pointer;
+            return newStream;
+        }
+    }]);
+    return StringStream;
+}();
+
+function kmp(input) {
+    if (input.length === 0) {
+        return [];
+    }
+
+    var prefix = [0];
+    var prefixLength = 0;
+
+    for (var i = 1; i < input.length; i += 1) {
+        while (prefixLength > 0 && input[i] !== input[prefixLength]) {
+            prefixLength = prefix[prefixLength];
+        }
+
+        if (input[i] === input[prefixLength]) {
+            prefixLength += 1;
+        }
+
+        prefix.push(prefixLength);
+    }
+    return prefix;
+}
+
+var ModifierAutomation = function () {
+    // build automaton from string
+
+    function ModifierAutomation(options) {
+        var _this = this;
+
+        classCallCheck(this, ModifierAutomation);
+
+        this.options = options;
+        this.steps = 0;
+        this.startNode = {
+            value: null,
+            startNode: true
+        };
+        this.node = this.startNode;
+
+        var lastNode = this.startNode;
+
+        var char = options.pattern.charAt(0);
+        var startPatternNode = {
+            value: char,
+            startNode: true
+        };
+
+        var patternPrefix = kmp(options.pattern);
+        var patternNode = [startPatternNode];
+
+        if (options.leftWhitespace) {
+            (function () {
+                // We don't want to match if the first char is not preceeded by whitespace
+                var whitespaceNode = {
+                    value: " ",
+                    whitespaceNode: true
+                };
+                whitespaceNode.next = function (input) {
+                    if (input === char) return startPatternNode;
+                    return (/\s/.test(input) ? whitespaceNode : _this.startNode
+                    );
+                };
+                lastNode.next = function (input) {
+                    return (/\s/.test(input) ? whitespaceNode : _this.startNode
+                    );
+                };
+                _this.node = whitespaceNode;
+            })();
+        } else {
+            lastNode.next = function (input) {
+                return input === char ? startPatternNode : _this.startNode;
+            };
+        }
+        lastNode = startPatternNode;
+
+        var _loop = function _loop(i) {
+            var char = options.pattern[i];
+            var newNode = {
+                value: char
+            };
+            patternNode.push(newNode);
+
+            var backNode = patternPrefix[i - 1] === 0 ? _this.startNode : patternNode[patternPrefix[i - 1] - 1];
+
+            lastNode.next = function (input) {
+                if (input === char) {
+                    return newNode;
+                }
+
+                return backNode.next(input);
+            };
+            lastNode = newNode;
+        };
+
+        for (var i = 1; i < options.pattern.length; i += 1) {
+            _loop(i);
+        }
+        lastNode.patternLastNode = true;
+
+        if (options.captureContent) {
+            (function () {
+                _this.capture = [];
+                var captureNode = {
+                    value: "",
+                    captureNode: true
+                };
+
+                // We treat the first character separately in order to support empty capture
+                var char = options.endPattern.charAt(0);
+                var endCaptureNode = {
+                    value: char
+                };
+
+                var endPatternPrefix = kmp(options.endPattern);
+                var endPatternNodes = [endCaptureNode];
+
+                lastNode.next = captureNode.next = function (input) {
+                    return input === char ? endCaptureNode : captureNode;
+                };
+
+                lastNode = endCaptureNode;
+
+                var _loop2 = function _loop2(_i) {
+                    var char = options.endPattern[_i];
+                    var newNode = {
+                        value: char
+                    };
+                    endPatternNodes.push(newNode);
+
+                    var backNode = endPatternPrefix[_i - 1] === 0 ? captureNode : endPatternNodes[endPatternPrefix[_i - 1] - 1];
+
+                    lastNode.next = function (input) {
+                        if (input === char) {
+                            return newNode;
+                        }
+                        return backNode.next(input);
+                    };
+                    lastNode = newNode;
+                };
+
+                for (var _i = 1; _i < options.endPattern.length; _i += 1) {
+                    _loop2(_i);
+                }
+
+                lastNode.endPatternLastNode = true;
+            })();
+        }
+
+        lastNode.endNode = true;
+        lastNode.next = function (input) {
+            return _this.startNode.next(input);
+        };
+    }
+
+    createClass(ModifierAutomation, [{
+        key: "nextState",
+        value: function nextState(input) {
+            this.steps += 1;
+
+            this.node = this.node.next(input);
+
+            if (this.node.startNode) {
+                this.steps = 0;
+                delete this.patternStep;
+                delete this.endPatternStep;
+            }
+
+            if (this.node.patternLastNode) {
+                this.patternStep = this.steps - this.options.pattern.length + 1;
+            }
+            if (this.node.endPatternLastNode) {
+                // TODO(@all): Shouldn't it be this.options.endPattern.length instead of this.options.pattern.length?
+                this.endPatternStep = this.steps - this.options.pattern.length + 1;
+            }
+
+            return this.node;
+        }
+    }, {
+        key: "done",
+        value: function done() {
+            return this.node.endNode;
+        }
+    }]);
+    return ModifierAutomation;
+}();
+
+var Modifier$1 = function () {
+    function Modifier(options) {
+        classCallCheck(this, Modifier);
+    }
+
+    createClass(Modifier, [{
+        key: "modify",
+        value: function modify(currentArray, originalString) {
+            var matcher = new ModifierAutomation({
+                pattern: this.pattern,
+                captureContent: this.captureContent, // TODO: some elements should not wrap
+                endPattern: this.endPattern,
+                leftWhitespace: this.leftWhitespace
+            });
+
+            var arrayLocation = 0;
+            var currentElement = currentArray[arrayLocation];
+            var newArray = [];
+
+            for (var i = 0; i < originalString.length; i += 1) {
+                var char = originalString[i];
+
+                if (i >= currentElement.end) {
+                    newArray.push(currentElement);
+
+                    arrayLocation += 1;
+                    currentElement = currentArray[arrayLocation];
+                }
+
+                if (currentElement.isJSX) {
+                    matcher.nextState("\\" + char); // prevent char from advancing automata
+                    continue;
+                }
+
+                matcher.nextState(char);
+
+                if (matcher.done()) {
+                    var modifierStart = i - (matcher.steps - matcher.patternStep);
+                    var modifierEnd = i - (matcher.steps - matcher.endPatternStep) + this.endPattern.length;
+
+                    var modifierCapture = [];
+
+                    while (newArray.length > 0 && modifierStart <= newArray[newArray.length - 1].start) {
+                        var element = newArray.pop();
+
+                        modifierCapture.push(element);
+                    }
+
+                    if (newArray.length > 0 && modifierStart < newArray[newArray.length - 1].end) {
+                        var _element = newArray.pop();
+                        newArray.push({
+                            isString: true,
+                            start: _element.start,
+                            end: modifierStart
+                        });
+                        modifierCapture.push({
+                            isString: true,
+                            start: modifierStart,
+                            end: _element.end
+                        });
+                    }
+
+                    if (currentElement.start < modifierStart) {
+                        newArray.push({
+                            isString: true,
+                            start: currentElement.start,
+                            end: modifierStart
+                        });
+                    }
+                    modifierCapture.reverse();
+
+                    // this is the end of the capture
+                    modifierCapture.push({
+                        isString: true,
+                        start: Math.max(currentElement.start, modifierStart),
+                        end: modifierEnd
+                    });
+
+                    newArray.push({
+                        content: this.wrap(this.processChildren(modifierCapture, originalString)),
+                        start: modifierStart,
+                        end: modifierEnd
+                    });
+
+                    // We split the current element to in two(one will be captured, one replaces the current element
+                    currentElement = {
+                        isString: true,
+                        start: modifierEnd,
+                        end: currentElement.end
+                    };
+                }
+            }
+
+            if (currentElement.start < originalString.length) {
+                newArray.push(currentElement);
+            }
+
+            return newArray;
+        }
+    }, {
+        key: "processChildren",
+        value: function processChildren(capture, originalString) {
+            var _this2 = this;
+
+            return capture.map(function (element) {
+                return _this2.processChild(element, originalString);
+            });
+        }
+    }, {
+        key: "processChild",
+        value: function processChild(element, originalString) {
+            if (element.isDummy) {
+                return "";
+            }if (element.isString) {
+                return originalString.substring(element.start, element.end);
+            } else {
+                return element.content;
+            }
+        }
+    }]);
+    return Modifier;
+}();
+
+function InlineModifierMixin(BaseModifierClass) {
+    return function (_BaseModifierClass) {
+        inherits(InlineModifier, _BaseModifierClass);
+
+        function InlineModifier(options) {
+            classCallCheck(this, InlineModifier);
+
+            var _this3 = possibleConstructorReturn(this, (InlineModifier.__proto__ || Object.getPrototypeOf(InlineModifier)).call(this, options));
+
+            _this3.captureContent = true;
+            return _this3;
+        }
+
+        createClass(InlineModifier, [{
+            key: "wrap",
+            value: function wrap(content) {
+                if (content.length > 0) {
+                    content[0] = content[0].substring(content[0].indexOf(this.pattern) + this.pattern.length);
+
+                    var lastElement = content.pop();
+                    lastElement = lastElement.substring(0, lastElement.lastIndexOf(this.endPattern));
+                    content.push(lastElement);
+
+                    return {
+                        tag: this.tag,
+                        children: content
+                    };
+                }
             }
         }]);
-        return StateSubscribableMixin;
-    }(BaseClass);
-};
+        return InlineModifier;
+    }(BaseModifierClass);
+}
+
+function LineStartModifierMixin(BaseModifierClass) {
+    return function (_BaseModifierClass2) {
+        inherits(LineStartModifier, _BaseModifierClass2);
+
+        function LineStartModifier(options) {
+            classCallCheck(this, LineStartModifier);
+
+            var _this4 = possibleConstructorReturn(this, (LineStartModifier.__proto__ || Object.getPrototypeOf(LineStartModifier)).call(this, options));
+
+            _this4.groupConsecutive = false;
+            return _this4;
+        }
+
+        createClass(LineStartModifier, [{
+            key: "isValidElement",
+            value: function isValidElement(element) {
+                return element.content && element.content.tag === "p" && element.content.children.length > 0 && !element.content.children[0].tag && // child is text string
+                element.content.children[0].startsWith(this.pattern);
+            }
+        }, {
+            key: "modify",
+            value: function modify(currentArray, originalString) {
+                var newArray = [];
+
+                for (var i = 0; i < currentArray.length; i += 1) {
+                    var element = currentArray[i];
+                    if (this.isValidElement(element)) {
+                        if (this.groupConsecutive) {
+                            var elements = [];
+
+                            var start = void 0,
+                                end = void 0;
+                            start = currentArray[i].start;
+                            while (i < currentArray.length && this.isValidElement(currentArray[i])) {
+                                elements.push(this.wrapItem(currentArray[i].content.children));
+
+                                i += 1;
+                            }
+                            // we make sure no elements are skipped
+                            i -= 1;
+
+                            end = currentArray[i].end;
+
+                            newArray.push({
+                                start: start,
+                                end: end,
+                                content: this.wrap(elements)
+                            });
+                        } else {
+                            // We use object assign here to keep the start and end properties. (Maybe along with others)
+                            var newElement = Object.assign({}, element, {
+                                content: this.wrap(element.content.children)
+                            });
+                            newArray.push(newElement);
+                        }
+                    } else {
+                        newArray.push(element);
+                    }
+                }
+                return newArray;
+            }
+        }, {
+            key: "wrapItem",
+            value: function wrapItem(content) {
+                var firstChild = content[0];
+
+                var patternIndex = firstChild.indexOf(this.pattern);
+                var patternEnd = patternIndex + this.pattern.length;
+
+                content[0] = firstChild.substring(patternEnd);
+
+                return {
+                    tag: this.itemTag,
+                    children: content
+                };
+            }
+        }, {
+            key: "wrap",
+            value: function wrap(content) {
+                return {
+                    tag: this.tag,
+                    children: content
+                };
+            }
+        }]);
+        return LineStartModifier;
+    }(BaseModifierClass);
+}
+
+function RawContentModifierMixin(BaseModifierClass) {
+    return function (_BaseModifierClass3) {
+        inherits(RawContentModifier, _BaseModifierClass3);
+
+        function RawContentModifier() {
+            classCallCheck(this, RawContentModifier);
+            return possibleConstructorReturn(this, (RawContentModifier.__proto__ || Object.getPrototypeOf(RawContentModifier)).apply(this, arguments));
+        }
+
+        createClass(RawContentModifier, [{
+            key: "processChildren",
+            value: function processChildren(children, originalString) {
+                if (children.length === 0) {
+                    return [];
+                }
+
+                return [originalString.substring(children[0].start, children[children.length - 1].end)];
+            }
+        }]);
+        return RawContentModifier;
+    }(BaseModifierClass);
+}
+
+var CodeModifier = function (_Modifier) {
+    inherits(CodeModifier, _Modifier);
+
+    function CodeModifier(options) {
+        classCallCheck(this, CodeModifier);
+
+        var _this6 = possibleConstructorReturn(this, (CodeModifier.__proto__ || Object.getPrototypeOf(CodeModifier)).call(this, options));
+
+        _this6.pattern = "```";
+        _this6.endPattern = "\n```";
+        _this6.leftWhitespace = true;
+        _this6.captureContent = true;
+        return _this6;
+    }
+
+    createClass(CodeModifier, [{
+        key: "processChildren",
+        value: function processChildren(capture, originalString) {
+            this.codeOptions = null;
+            if (capture.length > 0) {
+                var codeBlock = originalString.substring(capture[0].start, capture[capture.length - 1].end);
+
+                codeBlock = codeBlock.substring(codeBlock.indexOf(this.pattern) + this.pattern.length);
+                codeBlock = codeBlock.substring(0, codeBlock.lastIndexOf(this.endPattern));
+
+                var firstLineEnd = codeBlock.indexOf("\n") + 1;
+                var firstLine = codeBlock.substring(0, firstLineEnd).trim();
+                codeBlock = codeBlock.substring(firstLineEnd);
+
+                if (firstLine.length > 0) {
+                    this.codeOptions = {};
+                    var lineStream = new StringStream(firstLine);
+                    this.codeOptions.aceMode = lineStream.word();
+
+                    Object.assign(this.codeOptions, MarkupParser.parseOptions(lineStream));
+                }
+
+                return codeBlock;
+            }
+            return "";
+        }
+    }, {
+        key: "wrap",
+        value: function wrap(content, options) {
+            var codeHighlighter = {
+                tag: "CodeSnippet",
+                value: content
+            };
+
+            var codeOptions = {
+                aceMode: "c_cpp",
+                maxLines: 32
+            };
+
+            if (this.codeOptions) {
+                Object.assign(codeOptions, this.codeOptions);
+                delete this.codeOptions;
+            }
+
+            Object.assign(codeOptions, codeHighlighter);
+            return codeOptions;
+        }
+    }]);
+    return CodeModifier;
+}(Modifier$1);
+
+var HeaderModifier = function (_LineStartModifierMix) {
+    inherits(HeaderModifier, _LineStartModifierMix);
+
+    function HeaderModifier(options) {
+        classCallCheck(this, HeaderModifier);
+
+        var _this7 = possibleConstructorReturn(this, (HeaderModifier.__proto__ || Object.getPrototypeOf(HeaderModifier)).call(this, options));
+
+        _this7.pattern = "#";
+        return _this7;
+    }
+
+    createClass(HeaderModifier, [{
+        key: "wrap",
+        value: function wrap(content) {
+            var firstChild = content[0];
+
+            var hashtagIndex = firstChild.indexOf("#");
+            var hashtagEnd = hashtagIndex + 1;
+            var headerLevel = 1;
+
+            var nextChar = firstChild.charAt(hashtagEnd);
+            if (nextChar >= "1" && nextChar <= "6") {
+                headerLevel = parseInt(nextChar);
+                hashtagEnd += 1;
+            } else if (nextChar === "#") {
+                while (headerLevel < 6 && firstChild.charAt(hashtagEnd) === "#") {
+                    headerLevel += 1;
+                    hashtagEnd += 1;
+                }
+            }
+
+            content[0] = firstChild.substring(hashtagEnd);
+            return {
+                tag: "h" + headerLevel,
+                children: content
+            };
+        }
+    }]);
+    return HeaderModifier;
+}(LineStartModifierMixin(Modifier$1));
+
+var HorizontalRuleModifier = function (_LineStartModifierMix2) {
+    inherits(HorizontalRuleModifier, _LineStartModifierMix2);
+
+    function HorizontalRuleModifier(options) {
+        classCallCheck(this, HorizontalRuleModifier);
+
+        var _this8 = possibleConstructorReturn(this, (HorizontalRuleModifier.__proto__ || Object.getPrototypeOf(HorizontalRuleModifier)).call(this, options));
+
+        _this8.pattern = "---";
+        return _this8;
+    }
+
+    createClass(HorizontalRuleModifier, [{
+        key: "wrap",
+        value: function wrap(content) {
+            return {
+                tag: "hr"
+            };
+        }
+    }]);
+    return HorizontalRuleModifier;
+}(LineStartModifierMixin(Modifier$1));
+
+var UnorderedListModifier = function (_LineStartModifierMix3) {
+    inherits(UnorderedListModifier, _LineStartModifierMix3);
+
+    function UnorderedListModifier(options) {
+        classCallCheck(this, UnorderedListModifier);
+
+        var _this9 = possibleConstructorReturn(this, (UnorderedListModifier.__proto__ || Object.getPrototypeOf(UnorderedListModifier)).call(this, options));
+
+        _this9.tag = "ul";
+        _this9.itemTag = "li";
+        _this9.pattern = "- ";
+        _this9.groupConsecutive = true;
+        return _this9;
+    }
+
+    return UnorderedListModifier;
+}(LineStartModifierMixin(Modifier$1));
+
+var OrderedListModifier = function (_LineStartModifierMix4) {
+    inherits(OrderedListModifier, _LineStartModifierMix4);
+
+    function OrderedListModifier(options) {
+        classCallCheck(this, OrderedListModifier);
+
+        var _this10 = possibleConstructorReturn(this, (OrderedListModifier.__proto__ || Object.getPrototypeOf(OrderedListModifier)).call(this, options));
+
+        _this10.tag = "ol";
+        _this10.itemTag = "li";
+        _this10.pattern = "1. ";
+        _this10.groupConsecutive = true;
+        return _this10;
+    }
+
+    return OrderedListModifier;
+}(LineStartModifierMixin(Modifier$1));
+
+var ParagraphModifier = function (_Modifier2) {
+    inherits(ParagraphModifier, _Modifier2);
+
+    function ParagraphModifier() {
+        classCallCheck(this, ParagraphModifier);
+        return possibleConstructorReturn(this, (ParagraphModifier.__proto__ || Object.getPrototypeOf(ParagraphModifier)).apply(this, arguments));
+    }
+
+    createClass(ParagraphModifier, [{
+        key: "modify",
+        value: function modify(currentArray, originalString) {
+            var newArray = [];
+            var capturedContent = [];
+            var arrayLocation = 0;
+            var currentElement = currentArray[arrayLocation];
+            var lineStart = 0;
+
+            for (var i = 0; i < originalString.length; i += 1) {
+                if (i >= currentElement.end) {
+                    capturedContent.push(currentElement);
+                    arrayLocation += 1;
+                    currentElement = currentArray[arrayLocation];
+                }
+
+                if (currentElement.isJSX) {
+                    continue;
+                }
+
+                if (originalString[i] === "\n") {
+                    if (currentElement.start < i) {
+                        capturedContent.push({
+                            isString: true,
+                            start: currentElement.start,
+                            end: i
+                        });
+                    }
+
+                    newArray.push({
+                        content: this.wrap(this.processChildren(capturedContent, originalString)),
+                        start: lineStart,
+                        end: i + 1
+                    });
+                    capturedContent = [];
+                    lineStart = i + 1;
+
+                    if (originalString[i + 1] === "\n") {
+                        var start = void 0,
+                            end = void 0;
+                        start = i;
+
+                        while (i + 1 < originalString.length && originalString[i + 1] === "\n") {
+                            i += 1;
+                        }
+                        end = i + 1;
+
+                        newArray.push({
+                            content: {
+                                tag: "br"
+                            },
+                            start: start,
+                            end: end
+                        });
+
+                        lineStart = i + 1;
+                    } else {
+                        // TODO: these dummies break code. Refactor!
+                        // newArray.push({
+                        //     isDummy: true,
+                        //     start: i,
+                        //     end: i + 1,
+                        // });
+                    }
+
+                    currentElement = {
+                        isString: true,
+                        start: lineStart,
+                        end: currentElement.end
+                    };
+                }
+            }
+
+            if (currentElement.start < originalString.length) {
+                capturedContent.push(currentElement);
+            }
+            if (capturedContent.length > 0) {
+                newArray.push({
+                    content: this.wrap(this.processChildren(capturedContent, originalString)),
+                    start: lineStart,
+                    end: originalString.length
+                });
+            }
+            return newArray;
+        }
+    }, {
+        key: "wrap",
+        value: function wrap(capture) {
+            return {
+                tag: "p",
+                children: capture
+            };
+        }
+    }]);
+    return ParagraphModifier;
+}(Modifier$1);
+
+var StrongModifier = function (_InlineModifierMixin) {
+    inherits(StrongModifier, _InlineModifierMixin);
+
+    function StrongModifier(options) {
+        classCallCheck(this, StrongModifier);
+
+        var _this12 = possibleConstructorReturn(this, (StrongModifier.__proto__ || Object.getPrototypeOf(StrongModifier)).call(this, options));
+
+        _this12.leftWhitespace = true;
+        _this12.pattern = "*";
+        _this12.endPattern = "*";
+        _this12.tag = "strong";
+        return _this12;
+    }
+
+    return StrongModifier;
+}(InlineModifierMixin(Modifier$1));
+
+var ItalicModifier = function (_InlineModifierMixin2) {
+    inherits(ItalicModifier, _InlineModifierMixin2);
+
+    function ItalicModifier(options) {
+        classCallCheck(this, ItalicModifier);
+
+        var _this13 = possibleConstructorReturn(this, (ItalicModifier.__proto__ || Object.getPrototypeOf(ItalicModifier)).call(this, options));
+
+        _this13.leftWhitespace = true;
+        _this13.pattern = "/";
+        _this13.endPattern = "/";
+        _this13.tag = "em";
+        return _this13;
+    }
+
+    return ItalicModifier;
+}(InlineModifierMixin(Modifier$1));
+
+var InlineCodeModifier = function (_RawContentModifierMi) {
+    inherits(InlineCodeModifier, _RawContentModifierMi);
+
+    function InlineCodeModifier(options) {
+        classCallCheck(this, InlineCodeModifier);
+
+        var _this14 = possibleConstructorReturn(this, (InlineCodeModifier.__proto__ || Object.getPrototypeOf(InlineCodeModifier)).call(this, options));
+
+        _this14.pattern = "`";
+        _this14.endPattern = "`";
+        _this14.tag = "code";
+        return _this14;
+    }
+
+    createClass(InlineCodeModifier, [{
+        key: "processChildren",
+        value: function processChildren(children, originalString) {
+            if (children.length === 0) {
+                return [];
+            }
+
+            return [originalString.substring(children[0].start, children[children.length - 1].end)];
+        }
+    }]);
+    return InlineCodeModifier;
+}(RawContentModifierMixin(InlineModifierMixin(Modifier$1)));
+
+var InlineLatexModifier = function (_RawContentModifierMi2) {
+    inherits(InlineLatexModifier, _RawContentModifierMi2);
+
+    function InlineLatexModifier(options) {
+        classCallCheck(this, InlineLatexModifier);
+
+        var _this15 = possibleConstructorReturn(this, (InlineLatexModifier.__proto__ || Object.getPrototypeOf(InlineLatexModifier)).call(this, options));
+
+        _this15.pattern = "$";
+        _this15.endPattern = "$";
+        _this15.tag = "var";
+        return _this15;
+    }
+
+    return InlineLatexModifier;
+}(RawContentModifierMixin(InlineModifierMixin(Modifier$1)));
+
+var LinkModifier = function (_Modifier3) {
+    inherits(LinkModifier, _Modifier3);
+
+    function LinkModifier() {
+        classCallCheck(this, LinkModifier);
+        return possibleConstructorReturn(this, (LinkModifier.__proto__ || Object.getPrototypeOf(LinkModifier)).apply(this, arguments));
+    }
+
+    createClass(LinkModifier, [{
+        key: "modify",
+        value: function modify(currentArray, originalString) {
+            var _this17 = this;
+
+            var newArray = [];
+            var arrayLocation = 0;
+            var currentElement = currentArray[arrayLocation];
+            var lineStart = 0;
+
+            var checkAndAddUrl = function checkAndAddUrl(start, end) {
+                var substr = originalString.substring(start, end);
+                if (_this17.constructor.isCorrectUrl(substr)) {
+                    if (currentElement.start < start) {
+                        newArray.push({
+                            isString: true,
+                            start: currentElement.start,
+                            end: start
+                        });
+                    }
+
+                    newArray.push({
+                        isJSX: true,
+                        content: {
+                            tag: "a",
+                            href: substr,
+                            children: [_this17.constructor.trimProtocol(substr)],
+                            target: "_blank"
+                        },
+                        start: start,
+                        end: end
+                    });
+
+                    currentElement = {
+                        isString: true,
+                        start: end,
+                        end: currentElement.end
+                    };
+                }
+            };
+
+            for (var i = 0; i < originalString.length; i += 1) {
+                if (i >= currentElement.end) {
+                    newArray.push(currentElement);
+                    arrayLocation += 1;
+                    currentElement = currentArray[arrayLocation];
+                }
+
+                if (currentElement.isJSX) {
+                    continue;
+                }
+
+                if (/\s/.test(originalString[i])) {
+                    checkAndAddUrl(lineStart, i);
+                    lineStart = i + 1;
+                }
+            }
+            if (lineStart < originalString.length) {
+                checkAndAddUrl(lineStart, originalString.length);
+            }
+            if (currentElement.start < originalString.length) {
+                newArray.push(currentElement);
+            }
+            return newArray;
+        }
+    }], [{
+        key: "isCorrectUrl",
+        value: function isCorrectUrl(str) {
+            if (str.startsWith("http://") || str.startsWith("https://")) {
+                return true;
+            }
+        }
+    }, {
+        key: "trimProtocol",
+        value: function trimProtocol(str) {
+            if (str[4] === 's') {
+                return str.substring(8, str.length);
+            }
+            return str.substring(7, str.length);
+        }
+    }]);
+    return LinkModifier;
+}(Modifier$1);
+
+var MarkupModifier = Modifier$1;
+
+var MarkupParser = function () {
+    function MarkupParser(options) {
+        classCallCheck(this, MarkupParser);
+
+        options = options || {};
+
+        this.modifiers = options.modifiers || this.constructor.modifiers;
+        this.uiElements = options.uiElements || new Map();
+    }
+
+    createClass(MarkupParser, [{
+        key: "parse",
+        value: function parse(content) {
+            if (!content) return [];
+
+            var result = [];
+
+            var arr = this.parseUIElements(content);
+
+            for (var i = this.modifiers.length - 1; i >= 0; i -= 1) {
+                var modifier = this.modifiers[i];
+
+                arr = modifier.modify(arr, content);
+            }
+
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = arr[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var el = _step.value;
+
+                    if (el.isDummy) {
+                        // just skip it
+                    } else if (el.isString) {
+                            result.push(content.substring(el.start, el.end));
+                        } else {
+                            result.push(el.content);
+                        }
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+
+            return result;
+        }
+    }, {
+        key: "parseUIElements",
+        value: function parseUIElements(content) {
+            var stream = new StringStream(content);
+
+            var result = [];
+            var textStart = 0;
+
+            while (!stream.done()) {
+                var char = stream.char();
+
+                if (char === "<" && /[a-zA-Z]/.test(stream.at(0))) {
+                    stream.pointer -= 1; //step back to beginning of ui element
+                    var elementStart = stream.pointer;
+                    var uiElement = void 0;
+                    try {
+                        uiElement = this.parseUIElement(stream);
+                    } catch (e) {
+                        // failed to parse jsx element
+                        continue;
+                    }
+
+                    if (this.uiElements.has(uiElement.tag)) {
+                        result.push({
+                            isString: true,
+                            start: textStart,
+                            end: elementStart
+                        });
+
+                        result.push({
+                            content: uiElement,
+                            isJSX: true,
+                            start: elementStart,
+                            end: stream.pointer
+                        });
+                        textStart = stream.pointer;
+                    }
+                }
+            }
+
+            if (textStart < content.length) {
+                result.push({
+                    isString: true,
+                    start: textStart,
+                    end: content.length
+                });
+            }
+
+            return result;
+        }
+    }, {
+        key: "parseUIElement",
+        value: function parseUIElement(stream) {
+            var delimiter = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : /\/?>/;
+
+            // content should be of type <ClassName option1="string" option2={{jsonObject: true}} />
+            // TODO: support nested elements like <ClassName><NestedClass /></ClassName>
+
+            stream.whitespace();
+            if (stream.done()) {
+                return null;
+            }
+
+            if (stream.at(0) !== "<") {
+                throw Error("Invalid UIElement declaration.");
+            }
+
+            var result = {};
+
+            stream.char(); // skip the '<'
+
+            result.tag = stream.word();
+            stream.whitespace();
+
+            Object.assign(result, this.parseOptions(stream, delimiter));
+            stream.line(delimiter);
+
+            return result;
+        }
+    }, {
+        key: "parseOptions",
+        value: function parseOptions(stream, optionsEnd) {
+            return this.constructor.parseOptions(stream, optionsEnd);
+        }
+
+        // optionsEnd cannot include whitespace or start with '='
+
+    }, {
+        key: "parseTextLine",
+        value: function parseTextLine(stream) {
+            var lastModifier = new Map();
+
+            var capturedContent = [];
+
+            // This will always be set to the last closed modifier
+            var capturedEnd = -1;
+
+            var textStart = stream.pointer;
+            var contentStart = stream.pointer;
+
+            while (!stream.done()) {
+                if (stream.startsWith(/\s+\r*\n/)) {
+                    // end of line, stop here
+                    break;
+                }
+
+                if (stream.at(0) === "<") {
+                    capturedContent.push({
+                        content: stream.string.substring(contentStart, stream.pointer),
+                        start: contentStart,
+                        end: stream.pointer
+                    });
+                    var uiElementStart = stream.pointer;
+                    var uiElement = this.parseUIElement(stream, /\/*>/);
+                    capturedContent.push({
+                        content: uiElement,
+                        start: uiElementStart,
+                        end: stream.pointer
+                    });
+                    contentStart = stream.pointer;
+                    continue;
+                }
+
+                var char = stream.char();
+
+                if (char === "\\") {
+                    // escape next character
+                    char += stream.char();
+                }
+            }
+
+            var remainingContent = stream.string.substring(textStart, stream.pointer);
+            if (remainingContent.length > 0) {
+                capturedContent.push(remainingContent);
+            }
+            stream.line(); // delete line endings
+
+            return capturedContent;
+        }
+    }], [{
+        key: "parseOptions",
+        value: function parseOptions(stream, optionsEnd) {
+            var options = {};
+
+            stream.whitespace();
+
+            while (!stream.done()) {
+                // argument name is anything that comes before whitespace or '='
+                stream.whitespace();
+
+                var validOptionName = /[\w$]/;
+                var optionName = void 0;
+                if (validOptionName.test(stream.at(0))) {
+                    optionName = stream.word(validOptionName);
+                }
+
+                stream.whitespace();
+
+                if (optionsEnd && stream.search(optionsEnd) === 0) {
+                    options[optionName] = true;
+                    break;
+                }
+                if (!optionName) {
+                    throw Error("Invalid option name");
+                }
+
+                if (stream.peek() === "=") {
+                    stream.char();
+                    stream.whitespace();
+
+                    if (stream.done()) {
+                        throw Error("No argument given for option: " + optionName);
+                    }
+
+                    if (stream.peek() === '"') {
+                        // We have a string here
+                        var optionString = "";
+                        var foundStringEnd = false;
+
+                        stream.char();
+                        while (!stream.done()) {
+                            var char = stream.char();
+                            if (char === '"') {
+                                foundStringEnd = true;
+                                break;
+                            }
+                            optionString += char;
+                        }
+
+                        if (!foundStringEnd) {
+                            // You did not close that string
+                            throw Error("Argument string not closed: " + optionString);
+                        }
+                        options[optionName] = optionString;
+                    } else if (stream.peek() === '{') {
+                        // Once you pop, the fun don't stop
+                        var bracketCount = 0;
+
+                        var validJSON = false;
+                        var jsonString = "";
+                        stream.char();
+
+                        while (!stream.done()) {
+                            var _char = stream.char();
+                            if (_char === '{') {
+                                bracketCount += 1;
+                            } else if (_char === '}') {
+                                if (bracketCount > 0) {
+                                    bracketCount -= 1;
+                                } else {
+                                    // JSON ends here
+                                    options[optionName] = jsonString.length > 0 ? this.parseJSON5(jsonString) : undefined;
+                                    validJSON = true;
+                                    break;
+                                }
+                            }
+                            jsonString += _char;
+                        }
+                        if (!validJSON) {
+                            throw Error("Invalid JSON argument for option: " + optionName + ". Input: " + jsonString);
+                        }
+                    } else {
+                        throw Error("Invalid argument for option: " + optionName + ". Need string or JSON.");
+                    }
+                } else {
+                    options[optionName] = true;
+                }
+                stream.whitespace();
+            }
+
+            return options;
+        }
+    }]);
+    return MarkupParser;
+}();
+
+MarkupParser.modifiers = [new CodeModifier(), new HeaderModifier(), new HorizontalRuleModifier(), new UnorderedListModifier(), new OrderedListModifier(), new ParagraphModifier(), new InlineCodeModifier(), new InlineLatexModifier(), new StrongModifier(), new ItalicModifier(), new LinkModifier()];
+
+// json5.js
+// This file is based directly off of Douglas Crockford's json_parse.js:
+// https://github.com/douglascrockford/JSON-js/blob/master/json_parse.js
+MarkupParser.parseJSON5 = function () {
+    // This is a function that can parse a JSON5 text, producing a JavaScript
+    // data structure. It is a simple, recursive descent parser. It does not use
+    // eval or regular expressions, so it can be used as a model for implementing
+    // a JSON5 parser in other languages.
+
+    // We are defining the function inside of another function to avoid creating
+    // global variables.
+
+    var at = void 0,
+        // The index of the current character
+    lineNumber = void 0,
+        // The current line number
+    columnNumber = void 0,
+        // The current column number
+    ch = void 0; // The current character
+    var escapee = {
+        "'": "'",
+        '"': '"',
+        '\\': '\\',
+        '/': '/',
+        '\n': '', // Replace escaped newlines in strings w/ empty string
+        b: '\b',
+        f: '\f',
+        n: '\n',
+        r: '\r',
+        t: '\t'
+    };
+    var text = void 0;
+
+    var renderChar = function renderChar(chr) {
+        return chr === '' ? 'EOF' : "'" + chr + "'";
+    };
+
+    var error = function error(m) {
+        // Call error when something is wrong.
+
+        var error = new SyntaxError();
+        // beginning of message suffix to agree with that provided by Gecko - see https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
+        error.message = m + " at line " + lineNumber + " column " + columnNumber + " of the JSON5 data. Still to read: " + JSON.stringify(text.substring(at - 1, at + 19));
+        error.at = at;
+        // These two property names have been chosen to agree with the ones in Gecko, the only popular
+        // environment which seems to supply this info on JSON.parse
+        error.lineNumber = lineNumber;
+        error.columnNumber = columnNumber;
+        throw error;
+    };
+
+    var next = function next(c) {
+        // If a c parameter is provided, verify that it matches the current character.
+
+        if (c && c !== ch) {
+            error("Expected " + renderChar(c) + " instead of " + renderChar(ch));
+        }
+
+        // Get the next character. When there are no more characters,
+        // return the empty string.
+
+        ch = text.charAt(at);
+        at++;
+        columnNumber++;
+        if (ch === '\n' || ch === '\r' && peek() !== '\n') {
+            lineNumber++;
+            columnNumber = 0;
+        }
+        return ch;
+    };
+
+    var peek = function peek() {
+        // Get the next character without consuming it or
+        // assigning it to the ch varaible.
+
+        return text.charAt(at);
+    };
+
+    var identifier = function identifier() {
+        // Parse an identifier. Normally, reserved words are disallowed here, but we
+        // only use this for unquoted object keys, where reserved words are allowed,
+        // so we don't check for those here. References:
+        // - http://es5.github.com/#x7.6
+        // - https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Core_Language_Features#Variables
+        // - http://docstore.mik.ua/orelly/webprog/jscript/ch02_07.htm
+        // TODO Identifiers can have Unicode "letters" in them; add support for those.
+        var key = ch;
+
+        // Identifiers must start with a letter, _ or $.
+        if (ch !== '_' && ch !== '$' && (ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z')) {
+            error("Bad identifier as unquoted key");
+        }
+
+        // Subsequent characters can contain digits.
+        while (next() && (ch === '_' || ch === '$' || ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9')) {
+            key += ch;
+        }
+
+        return key;
+    };
+
+    var number = function number() {
+        // Parse a number value.
+        var number,
+            sign = '',
+            string = '',
+            base = 10;
+
+        if (ch === '-' || ch === '+') {
+            sign = ch;
+            next(ch);
+        }
+
+        // support for Infinity (could tweak to allow other words):
+        if (ch === 'I') {
+            number = word();
+            if (typeof number !== 'number' || isNaN(number)) {
+                error('Unexpected word for number');
+            }
+            return sign === '-' ? -number : number;
+        }
+
+        // support for NaN
+        if (ch === 'N') {
+            number = word();
+            if (!isNaN(number)) {
+                error('expected word to be NaN');
+            }
+            // ignore sign as -NaN also is NaN
+            return number;
+        }
+
+        if (ch === '0') {
+            string += ch;
+            next();
+            if (ch === 'x' || ch === 'X') {
+                string += ch;
+                next();
+                base = 16;
+            } else if (ch >= '0' && ch <= '9') {
+                error('Octal literal');
+            }
+        }
+
+        switch (base) {
+            case 10:
+                while (ch >= '0' && ch <= '9') {
+                    string += ch;
+                    next();
+                }
+                if (ch === '.') {
+                    string += '.';
+                    while (next() && ch >= '0' && ch <= '9') {
+                        string += ch;
+                    }
+                }
+                if (ch === 'e' || ch === 'E') {
+                    string += ch;
+                    next();
+                    if (ch === '-' || ch === '+') {
+                        string += ch;
+                        next();
+                    }
+                    while (ch >= '0' && ch <= '9') {
+                        string += ch;
+                        next();
+                    }
+                }
+                break;
+            case 16:
+                while (ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'F' || ch >= 'a' && ch <= 'f') {
+                    string += ch;
+                    next();
+                }
+                break;
+        }
+
+        if (sign === '-') {
+            number = -string;
+        } else {
+            number = +string;
+        }
+
+        if (!isFinite(number)) {
+            error("Bad number");
+        } else {
+            return number;
+        }
+    };
+
+    var string = function string() {
+        // Parse a string value.
+        var hex = void 0,
+            i = void 0,
+            string = '',
+            uffff = void 0;
+        var delim = void 0; // double quote or single quote
+
+        // When parsing for string values, we must look for ' or " and \ characters.
+
+        if (ch === '"' || ch === "'") {
+            delim = ch;
+            while (next()) {
+                if (ch === delim) {
+                    next();
+                    return string;
+                } else if (ch === '\\') {
+                    next();
+                    if (ch === 'u') {
+                        uffff = 0;
+                        for (i = 0; i < 4; i += 1) {
+                            hex = parseInt(next(), 16);
+                            if (!isFinite(hex)) {
+                                break;
+                            }
+                            uffff = uffff * 16 + hex;
+                        }
+                        string += String.fromCharCode(uffff);
+                    } else if (ch === '\r') {
+                        if (peek() === '\n') {
+                            next();
+                        }
+                    } else if (typeof escapee[ch] === 'string') {
+                        string += escapee[ch];
+                    } else {
+                        break;
+                    }
+                } else if (ch === '\n') {
+                    // unescaped newlines are invalid; see:
+                    // https://github.com/aseemk/json5/issues/24
+                    // TODO this feels special-cased; are there other
+                    // invalid unescaped chars?
+                    break;
+                } else {
+                    string += ch;
+                }
+            }
+        }
+        error("Bad string");
+    };
+
+    var inlineComment = function inlineComment() {
+        // Skip an inline comment, assuming this is one. The current character should
+        // be the second / character in the // pair that begins this inline comment.
+        // To finish the inline comment, we look for a newline or the end of the text.
+
+        if (ch !== '/') {
+            error("Not an inline comment");
+        }
+
+        do {
+            next();
+            if (ch === '\n' || ch === '\r') {
+                next();
+                return;
+            }
+        } while (ch);
+    };
+
+    var blockComment = function blockComment() {
+        // Skip a block comment, assuming this is one. The current character should be
+        // the * character in the /* pair that begins this block comment.
+        // To finish the block comment, we look for an ending */ pair of characters,
+        // but we also watch for the end of text before the comment is terminated.
+
+        if (ch !== '*') {
+            error("Not a block comment");
+        }
+
+        do {
+            next();
+            while (ch === '*') {
+                next('*');
+                if (ch === '/') {
+                    next('/');
+                    return;
+                }
+            }
+        } while (ch);
+
+        error("Unterminated block comment");
+    };
+
+    var comment = function comment() {
+        // Skip a comment, whether inline or block-level, assuming this is one.
+        // Comments always begin with a / character.
+
+        if (ch !== '/') {
+            error("Not a comment");
+        }
+
+        next('/');
+
+        if (ch === '/') {
+            inlineComment();
+        } else if (ch === '*') {
+            blockComment();
+        } else {
+            error("Unrecognized comment");
+        }
+    };
+
+    var white = function white() {
+        // Skip whitespace and comments.
+        // Note that we're detecting comments by only a single / character.
+        // This works since regular expressions are not valid JSON(5), but this will
+        // break if there are other valid values that begin with a / character!
+
+        while (ch) {
+            if (ch === '/') {
+                comment();
+            } else if (/\s/.test(ch)) {
+                next();
+            } else {
+                return;
+            }
+        }
+    };
+
+    var word = function word() {
+        // true, false, or null.
+
+        switch (ch) {
+            case 't':
+                next('t');
+                next('r');
+                next('u');
+                next('e');
+                return true;
+            case 'f':
+                next('f');
+                next('a');
+                next('l');
+                next('s');
+                next('e');
+                return false;
+            case 'n':
+                next('n');
+                next('u');
+                next('l');
+                next('l');
+                return null;
+            case 'I':
+                next('I');
+                next('n');
+                next('f');
+                next('i');
+                next('n');
+                next('i');
+                next('t');
+                next('y');
+                return Infinity;
+            case 'N':
+                next('N');
+                next('a');
+                next('N');
+                return NaN;
+        }
+        error("Unexpected " + renderChar(ch));
+    };
+
+    var value = void 0;
+
+    var array = function array() {
+        // Parse an array value.
+        var array = [];
+
+        if (ch === '[') {
+            next('[');
+            white();
+            while (ch) {
+                if (ch === ']') {
+                    next(']');
+                    return array; // Potentially empty array
+                }
+                // ES5 allows omitting elements in arrays, e.g. [,] and
+                // [,null]. We don't allow this in JSON5.
+                if (ch === ',') {
+                    error("Missing array element");
+                } else {
+                    array.push(value());
+                }
+                white();
+                // If there's no comma after this value, this needs to
+                // be the end of the array.
+                if (ch !== ',') {
+                    next(']');
+                    return array;
+                }
+                next(',');
+                white();
+            }
+        }
+        error("Bad array");
+    };
+
+    var object = function object() {
+        // Parse an object value.
+
+        var key,
+            object = {};
+
+        if (ch === '{') {
+            next('{');
+            white();
+            while (ch) {
+                if (ch === '}') {
+                    next('}');
+                    return object; // Potentially empty object
+                }
+
+                // Keys can be unquoted. If they are, they need to be
+                // valid JS identifiers.
+                if (ch === '"' || ch === "'") {
+                    key = string();
+                } else {
+                    key = identifier();
+                }
+
+                white();
+                next(':');
+                object[key] = value();
+                white();
+                // If there's no comma after this pair, this needs to be
+                // the end of the object.
+                if (ch !== ',') {
+                    next('}');
+                    return object;
+                }
+                next(',');
+                white();
+            }
+        }
+        error("Bad object");
+    };
+
+    value = function value() {
+        // Parse a JSON value. It could be an object, an array, a string, a number,
+        // or a word.
+
+        white();
+        switch (ch) {
+            case '{':
+                return object();
+            case '[':
+                return array();
+            case '"':
+            case "'":
+                return string();
+            case '-':
+            case '+':
+            case '.':
+                return number();
+            default:
+                return ch >= '0' && ch <= '9' ? number() : word();
+        }
+    };
+
+    // Return the json_parse function. It will have access to all of the above
+    // functions and variables.
+
+    return function (source, reviver) {
+        var result;
+
+        text = String(source);
+        at = 0;
+        lineNumber = 1;
+        columnNumber = 1;
+        ch = ' ';
+        result = value();
+        white();
+        if (ch) {
+            error("Syntax error");
+        }
+
+        // If there is a reviver function, we recursively walk the new structure,
+        // passing each name/value pair to the reviver function for possible
+        // transformation, starting with a temporary root object that holds the result
+        // in an empty key. If there is not a reviver function, we simply return the
+        // result.
+
+        return typeof reviver === 'function' ? function walk(holder, key) {
+            var k,
+                v,
+                value = holder[key];
+            if (value && (typeof value === "undefined" ? "undefined" : _typeof(value)) === 'object') {
+                for (k in value) {
+                    if (Object.prototype.hasOwnProperty.call(value, k)) {
+                        v = walk(value, k);
+                        if (v !== undefined) {
+                            value[k] = v;
+                        } else {
+                            delete value[k];
+                        }
+                    }
+                }
+            }
+            return reviver.call(holder, key, value);
+        }({ '': result }, '') : result;
+    };
+}();
+
+function TestStringStream() {
+    var tests = [];
+
+    tests.push(function () {
+        var ss = new StringStream("Ala bala    portocala");
+
+        var temp = void 0;
+
+        temp = ss.char();
+        if (temp !== "A") {
+            throw Error("char seems to fail. Expected: 'A' , got '" + temp + "'");
+        }
+
+        temp = ss.word();
+        if (temp !== "la") {
+            throw Error("word seems to fail. Expected: 'la' , got '" + temp + "'");
+        }
+
+        temp = ss.word();
+        if (temp !== "bala") {
+            throw Error("word seems to fail. Expected: 'bala' , got '" + temp + "'");
+        }
+
+        temp = ss.word();
+        if (temp !== "portocala") {
+            throw Error("word seems to fail. Expected: 'portocala' , got '" + temp + "'");
+        }
+    });
+
+    tests.push(function () {
+        var ss = new StringStream("Ala bala    portocala");
+
+        var temp = void 0;
+
+        temp = ss.word();
+        if (temp !== "Ala") {
+            throw Error("word seems to fail. Expected: 'Ala' , got '" + temp + "'");
+        }
+
+        temp = ss.char();
+        if (temp !== " ") {
+            throw Error("word seems to fail. Expected: ' ' , got '" + temp + "'");
+        }
+
+        temp = ss.line();
+        if (temp !== "bala    portocala") {
+            throw Error("line seems to fail. Expected: 'bala    portocala' , got '" + temp + "'");
+        }
+    });
+
+    tests.push(function () {
+        var ss = new StringStream("Buna bate toba\n Bunica bate tare\nBunica bate tobaaa \nCu maciuca-n casa mare!");
+
+        var temp = void 0;
+
+        temp = ss.line();
+        if (temp !== "Buna bate toba") {
+            throw Error("line seems to fail. Expected: 'Buna bate toba' , got '" + temp + "'");
+        }
+
+        temp = ss.word();
+        if (temp !== "Bunica") {
+            throw Error("word seems to fail. Expected: 'Bunica' , got '" + temp + "'");
+        }
+
+        temp = ss.line("\n");
+        if (temp !== " bate tare") {
+            throw Error("line seems to fail. Expected: ' bate tare' , got '" + temp + "'");
+        }
+
+        temp = ss.line("\n", 11);
+        if (temp !== "Bunica bate") {
+            throw Error("line seems to fail. Expected: 'Bunica bate' , got '" + temp + "'");
+        }
+
+        temp = ss.word();
+        if (temp !== "tobaaa") {
+            throw Error("line seems to fail. Expected: 'tobaaa' , got '" + temp + "'");
+        }
+
+        ss.char();
+        temp = ss.line();
+        if (temp !== "") {
+            throw Error("line seems to fail. Expected: '' , got '" + temp + "'");
+        }
+
+        temp = ss.line('\n', 100);
+        if (temp !== "Cu maciuca-n casa mare!") {
+            throw Error("line seems to fail. Expected: 'Cu maciuca-n casa mare!' , got '" + temp + "'");
+        }
+    });
+
+    var numFailed = 0;
+    for (var i = 0; i < tests.length; i += 1) {
+        try {
+            tests[i]();
+            console.log("Test ", i, " ran successfully.");
+        } catch (e) {
+            numFailed += 1;
+            console.log("Failed StringStream test ", i, "! Reason: ", e);
+        }
+    }
+
+    console.log("Finished running all tests. Failed: ", numFailed);
+}
+
+UI.MarkupClassMap = function () {
+    function MarkupClassMap(fallback) {
+        classCallCheck(this, MarkupClassMap);
+
+        this.classMap = new Map();
+        this.fallback = fallback;
+    }
+
+    createClass(MarkupClassMap, [{
+        key: "addClass",
+        value: function addClass(className, classObject) {
+            this.classMap.set(className, classObject);
+        }
+    }, {
+        key: "registerDependencies",
+        value: function registerDependencies(dependencies) {
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = dependencies[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var dependency = _step.value;
+
+                    if (dependency && dependency.registerMarkup) {
+                        dependency.registerMarkup(this);
+                    }
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+        }
+    }, {
+        key: "getClass",
+        value: function getClass(className) {
+            var classObject = this.classMap.get(className);
+            if (!classObject && this.fallback) {
+                classObject = this.fallback.getClass(className);
+            }
+            return classObject;
+        }
+    }, {
+        key: "get",
+        value: function get(className) {
+            return this.getClass(className);
+        }
+    }, {
+        key: "has",
+        value: function has(className) {
+            return this.getClass(className);
+        }
+    }], [{
+        key: "addClass",
+        value: function addClass(className, classObject) {
+            this.GLOBAL.addClass(className, classObject);
+        }
+    }]);
+    return MarkupClassMap;
+}();
+
+UI.MarkupClassMap.GLOBAL = new UI.MarkupClassMap();
+
+UI.MarkupRenderer = function (_UI$Panel) {
+    inherits(MarkupRenderer, _UI$Panel);
+
+    function MarkupRenderer() {
+        classCallCheck(this, MarkupRenderer);
+        return possibleConstructorReturn(this, (MarkupRenderer.__proto__ || Object.getPrototypeOf(MarkupRenderer)).apply(this, arguments));
+    }
+
+    createClass(MarkupRenderer, [{
+        key: "setOptions",
+        value: function setOptions(options) {
+            if (!options.classMap) {
+                options.classMap = new UI.MarkupClassMap(UI.MarkupClassMap.GLOBAL);
+            }
+            if (!options.parser) {
+                options.parser = new MarkupParser({
+                    uiElements: options.classMap
+                });
+            }
+            get$1(MarkupRenderer.prototype.__proto__ || Object.getPrototypeOf(MarkupRenderer.prototype), "setOptions", this).call(this, options);
+
+            this.setValue(this.options.value || "");
+            if (this.options.classMap) {
+                this.classMap = this.options.classMap;
+            }
+        }
+    }, {
+        key: "setValue",
+        value: function setValue(value) {
+            if (typeof value === "string") {
+                this.options.rawValue = value;
+                try {
+                    value = this.options.parser.parse(value);
+                } catch (e) {
+                    console.error("Can't parse ", value, e);
+                    value = {
+                        tag: "span",
+                        children: [value]
+                    };
+                }
+            }
+            this.options.value = value;
+        }
+    }, {
+        key: "reparse",
+        value: function reparse() {
+            if (this.options.rawValue) {
+                this.setValue(this.options.rawValue);
+            }
+        }
+    }, {
+        key: "registerDependencies",
+        value: function registerDependencies(dependencies) {
+            if (dependencies.length > 0) {
+                this.classMap.registerDependencies(dependencies);
+                this.reparse();
+            }
+        }
+    }, {
+        key: "addClass",
+        value: function addClass(className, classObject) {
+            this.classMap.addClass(className, classObject);
+        }
+    }, {
+        key: "getClass",
+        value: function getClass(className) {
+            return this.classMap.getClass(className);
+        }
+    }, {
+        key: "convertToUI",
+        value: function convertToUI(value) {
+            if (value instanceof UI.TextElement || value instanceof UI.Element) {
+                // TODO: investigate this!
+                return value;
+            }
+
+            if (typeof value === "string") {
+                return new UI.TextElement(value);
+            }
+            if (Array.isArray(value)) {
+                var result = new Array(value.length);
+                for (var i = 0; i < value.length; i += 1) {
+                    result[i] = this.convertToUI(value[i]);
+                }
+                return result;
+            }
+            if (value.children) {
+                value.children = this.convertToUI(value.children);
+            }
+
+            var classObject = this.getClass(value.tag) || value.tag;
+
+            // TODO: maybe just copy to another object, not delete?
+            //delete value.tag;
+            return UI.createElement.apply(UI, [classObject, value].concat(toConsumableArray(value.children || [])));
+        }
+    }, {
+        key: "renderHTML",
+        value: function renderHTML() {
+            return this.convertToUI(this.options.value);
+        }
+    }]);
+    return MarkupRenderer;
+}(UI.Panel);
+
+UI.MarkupClassMap.addClass("CodeSnippet", UI.StaticCodeHighlighter);
+UI.MarkupClassMap.addClass("Link", UI.Link);
+UI.MarkupClassMap.addClass("Image", UI.Image);
 
 // Plugins should be used to extends on runtime the functionality of a class
 var Plugin = function (_Dispatchable) {
@@ -10277,6 +12489,8 @@ exports.wrapCSS = wrapCSS;
 exports.hover = hover;
 exports.focus = focus;
 exports.active = active;
+exports.setLanguageStore = setLanguageStore;
+exports.setTranslationMap = setTranslationMap;
 exports.Transition = Transition;
 exports.Modifier = Modifier;
 exports.TransitionList = TransitionList;
@@ -10290,7 +12504,17 @@ exports.SingletonStore = SingletonStore;
 exports.AjaxFetchMixin = AjaxFetchMixin;
 exports.VirtualStoreMixin = VirtualStoreMixin;
 exports.VirtualStoreObjectMixin = VirtualStoreObjectMixin;
-exports.StateSubscribableMixin = StateSubscribableMixin;
+exports.StringStream = StringStream;
+exports.MarkupModifier = MarkupModifier;
+exports.CodeModifier = CodeModifier;
+exports.HeaderModifier = HeaderModifier;
+exports.ParagraphModifier = ParagraphModifier;
+exports.InlineCodeModifier = InlineCodeModifier;
+exports.InlineLatexModifier = InlineLatexModifier;
+exports.StrongModifier = StrongModifier;
+exports.LinkModifier = LinkModifier;
+exports.MarkupParser = MarkupParser;
+exports.TestStringStream = TestStringStream;
 exports.EPS = EPS;
 exports.isZero = isZero;
 exports.rand = rand;
@@ -10327,7 +12551,7 @@ exports.Dispatcher = Dispatcher;
 exports.Dispatchable = Dispatchable;
 exports.RunOnce = RunOnce;
 exports.CleanupJobs = CleanupJobs;
-exports.CleanupMixin = CleanupMixin;
+exports.getAttachCleanupJobMethod = getAttachCleanupJobMethod;
 exports.Ajax = Ajax;
 exports.Plugin = Plugin;
 exports.Pluginable = Pluginable;
@@ -10335,6 +12559,7 @@ exports.unwrapArray = unwrapArray;
 exports.splitInChunks = splitInChunks;
 exports.isIterable = isIterable;
 exports.defaultComparator = defaultComparator;
+exports.slugify = slugify;
 exports.URLRouter = URLRouter;
 exports.Deque = Deque;
 

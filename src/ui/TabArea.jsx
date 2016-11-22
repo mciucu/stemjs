@@ -62,7 +62,7 @@ UI.BasicTabTitle = class BasicTabTitle extends UI.Element {
             this.setActive(true);
         });
 
-        this.addListenerTo(this.options.panel, "show", () => {
+        this.attachListener(this.options.panel, "show", () => {
             this.setActive(true);
         });
     }
@@ -210,7 +210,7 @@ UI.TabArea = class TabArea extends UI.Element {
     }
 
     onMount() {
-        this.addListenerTo(this.activeTabDispatcher, (panel) => {
+        this.attachListener(this.activeTabDispatcher, (panel) => {
             this.switcherArea.setActive(panel);
         });
 

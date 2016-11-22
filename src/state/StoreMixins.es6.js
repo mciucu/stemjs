@@ -184,29 +184,4 @@ function VirtualStoreMixin(BaseStoreClass) {
     }
 }
 
-// Mixin class meant for easier adding listeners to store objects, while also adding those listeners to cleanup jobs
-// Should probably be used by UI elements that want to add listeners to store objects
-// BaseClass needs to implement addCleanupTask
-var StateSubscribableMixin = (BaseClass) => class StateSubscribableMixin extends BaseClass {
-    attachListener(obj, eventName, callback) {
-        this.addCleanupTask(obj.addListener(eventName, callback));
-    }
-
-    attachUpdateListener(obj, callback) {
-        this.addCleanupTask(obj.addUpdateListener(callback));
-    }
-
-    attachCreateListener(obj, callback) {
-        this.addCleanupTask(obj.addCreateListener(callback));
-    }
-
-    attachDeleteListener(obj, callback) {
-        this.addCleanupTask(obj.addDeleteListener(callback));
-    }
-
-    attachEventListener(obj, eventType, callback) {
-        this.addCleanupTask(obj.addEventListener(eventType, callback));
-    }
-};
-
-export {AjaxFetchMixin, VirtualStoreMixin, VirtualStoreObjectMixin, StateSubscribableMixin};
+export {AjaxFetchMixin, VirtualStoreMixin, VirtualStoreObjectMixin};
