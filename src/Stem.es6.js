@@ -14,5 +14,6 @@ export * from "base/Dispatcher";
 export * from "base/Ajax";
 export * from "base/Plugin";
 export * from "base/Utils";
+export * from "base/Time";
 export * from "base/URLRouter";
 export * from "data-structures/Deque";

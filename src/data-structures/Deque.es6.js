@@ -33,15 +33,12 @@ class Deque {
         } else {
             //Just balance the elements in the middle of the array
             let optimalOffset = (capacity / 2 - length / 2) | 0;
-            // Move either descending or ascending, to not overwrite values
+            this._values.copyWithin(optimalOffset, this._offset, this._offset + this._length);
+            // Remove references, to not mess up gc
             if (optimalOffset < this._offset) {
-                for (let i = 0; i < length; i += 1) {
-                    this._values[i + optimalOffset] = this._values[i + this._offset];
-                }
+                this._values.fill(undefined, optimalOffset + this._length, this._offset + this._length);
             } else {
-                for (let i = length - 1; i >= 0; i -= 1) {
-                    this._values[i + optimalOffset] = this._values[i + this._offset];
-                }
+                this._values.fill(undefined, this._offset + this._length, optimalOffset + this._length);
             }
             this._offset = optimalOffset;
         }

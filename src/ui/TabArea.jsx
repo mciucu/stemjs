@@ -1,6 +1,6 @@
 // TODO: all of the classes here need to be implemented with StyleSets
 import {UI} from "./UIBase";
-import {Dispatcher} from "../base/Dispatcher";
+import {SingleActiveElementDispatcher} from "../base/Dispatcher";
 import "./Switcher";
 
 UI.BasicTabTitle = class BasicTabTitle extends UI.Element {
@@ -18,6 +18,7 @@ UI.BasicTabTitle = class BasicTabTitle extends UI.Element {
 
     canOverwrite(existingElement) {
         // Disable reusing with different panels, since we want to attach listeners to the panel
+        // TODO: might want to just return the key as this.options.panel
         return super.canOverwrite(existingElement) &&
                 this.options.panel === existingElement.options.panel;
     }
@@ -26,13 +27,8 @@ UI.BasicTabTitle = class BasicTabTitle extends UI.Element {
         this.options.active = active;
         this.redraw();
         if (active) {
-            let activeTabDispatcher = this.options.activeTabDispatcher;
-
-            activeTabDispatcher.dispatch(this.options.panel);
-            activeTabDispatcher.addListenerOnce((panel) => {
-                if (panel != this.options.panel) {
-                    this.setActive(false);
-                }
+            this.options.activeTabDispatcher.setActive(this.options.panel, () => {
+                this.setActive(false);
             });
         }
     }
@@ -137,7 +133,7 @@ class SVGTabTitle extends UI.Element  {
 UI.TabArea = class TabArea extends UI.Element {
     constructor(options) {
         super(options);
-        this.activeTabDispatcher = new Dispatcher();
+        this.activeTabDispatcher = new SingleActiveElementDispatcher();
     }
 
     getDOMAttributes() {

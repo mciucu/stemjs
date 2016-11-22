@@ -60,6 +60,7 @@ class Dispatcher {
     dispatch(payload) {
         // We're going in reverse here, because some listeners can remove themselves after being called
         for (let i = this.listeners.length - 1; i >= 0; i -= 1) {
+            // TODO: optimize common cases
             let listener = this.listeners[i];
             listener(...arguments);
         }
@@ -184,4 +185,22 @@ class CleanupJobs {
     }
 }
 
-export {Dispatcher, Dispatchable, RunOnce, CleanupJobs, getAttachCleanupJobMethod};
+// Class that can be used to pass around ownership of a resource.
+// It informs the previous owner of the change (once) and dispatches the new element for all listeners
+// TODO: a better name
+class SingleActiveElementDispatcher extends Dispatcher {
+    setActive(element, onChange) {
+        if (element === this._activeElement) {
+            return;
+        }
+        this._activeElement = element;
+        this.dispatch(element);
+        this.addListenerOnce((newElement) => {
+            if (newElement != element) {
+                onChange(newElement);
+            }
+        });
+    }
+}
+
+export {Dispatcher, Dispatchable, RunOnce, CleanupJobs, SingleActiveElementDispatcher, getAttachCleanupJobMethod};

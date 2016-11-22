@@ -110,7 +110,7 @@ class UIElement extends NodeWrapper {
         return this.options.primitiveTag || "div";
     }
 
-    static create(parentNode, options) {
+    static create(parentNode, options={}) {
         let uiElement = new this(options);
         uiElement.mount(parentNode, null);
         return uiElement;
