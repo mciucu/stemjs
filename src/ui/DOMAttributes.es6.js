@@ -144,6 +144,7 @@ class DOMAttributes {
                 }
             }
         } else {
+            classes = String(classes);
             this.addClass(classes.split(/[\s,]+/), node);
         }
     }

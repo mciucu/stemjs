@@ -13,4 +13,8 @@ class ServerTime {
     }
 }
 
+function getUnixTime() {
+    return Date.now() / 1000.0;
+}
+
 export {ServerTime};

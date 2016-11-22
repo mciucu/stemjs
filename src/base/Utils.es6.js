@@ -1,5 +1,9 @@
 // TODO: should this be renamed to "toUnwrappedArray"?
 export function unwrapArray(elements) {
+    if (arguments.length > 1) {
+        elements = [...arguments];
+    }
+
     if (!elements) {
         return [];
     }
@@ -8,16 +12,17 @@ export function unwrapArray(elements) {
         return [elements];
     }
 
+    // Check if the passed in array is valid, and try to return it if possible to preserve references
     let allProperElements = true;
     for (let i = 0; i < elements.length; i++) {
-        if (Array.isArray(elements[i]) || !elements[i]) {
+        if (Array.isArray(elements[i]) || elements[i] == null) {
             allProperElements = false;
             break;
         }
     }
 
     if (allProperElements) {
-        // return the exact same array as was passed in
+        // Return the exact same array as was passed in
         return elements;
     }
 
@@ -37,6 +42,7 @@ export function unwrapArray(elements) {
     return result;
 }
 
+// Split the passed in array into arrays with at most maxChunkSize elements
 export function splitInChunks(array, maxChunkSize) {
     let chunks = [];
     while (array.length > 0) {
@@ -73,4 +79,15 @@ export function defaultComparator(a, b) {
         return 0;
     }
     return a.toString() < b.toString() ? -1 : 1;
+}
+
+export function slugify(string) {
+    string = string.trim();
+
+    string = string.replace((/[^a-zA-Z0-9-\s]/g), ""); // remove anything non-latin alphanumeric
+    string = string.replace((/\s+/g), "-"); // replace whitespace with dashes
+    string = string.replace((/-{2,}/g), "-"); // remove consecutive dashes
+    string = string.toLowerCase();
+
+    return string;
 }

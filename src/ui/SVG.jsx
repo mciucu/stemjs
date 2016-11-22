@@ -27,8 +27,7 @@ UI.SVG.Element = class SVGElement extends UI.Element {
         }
         if (this.constructor.getDefaultOptions) {
             let defaultOptions = this.constructor.getDefaultOptions();
-            // TODO: use object.assign and make sure everything work on the right level
-            options = $.extend(true, {}, defaultOptions, options);
+            options = Object.assign({}, defaultOptions, options);
         }
 
         super.setOptions(options);
@@ -36,7 +35,7 @@ UI.SVG.Element = class SVGElement extends UI.Element {
 
     saveState() {
         let state = {};
-        state.options = $.extend(true, {}, this.options);
+        state.options = Object.assign({}, this.options);
         return state;
     }
 
@@ -272,6 +271,29 @@ UI.SVG.RawSVG = class RawSVG extends UI.SVG.SVGRoot {
     }
 };
 
+UI.SVG.AnimatedSVG = class AnimatedSVG extends UI.SVG.SVGRoot {
+    onMount() {
+        if (this.options.transition) {
+            this.options.transition.setStartTime(Date.now());
+            let animationWrapper = () => {
+                if (this.options.transition.isStopped()) {
+                    if (this.options.repeat) {
+                        this.options.transition.setStartTime(Date.now());
+                        this.options.transition.restart();
+                        requestAnimationFrame(animationWrapper);
+                    }
+                    return;
+                }
+                if (!this.options.transition.pauseTime) {
+                    this.options.transition.nextStep();
+                }
+                requestAnimationFrame(animationWrapper);
+            };
+            requestAnimationFrame(animationWrapper);
+        }
+    }
+};
+
 UI.SVG.Group = class SVGGroup extends UI.SVG.Element {
     getPrimitiveTag() {
         return "g";
@@ -387,104 +409,6 @@ UI.SVG.Circle = class SVGCircle extends UI.SVG.Element {
                 "a" + r + " " + r + " 0 0 1 " + (-r) + " " + r +    // Move to S
                 "a" + r + " " + r + " 0 0 1 " + (-r) + " " + (-r);  // Finally, move back to W
         return new UI.SVG.Path({d: pathString});
-    }
-};
-
-UI.SVG.HandDrawnCircle = class SVGHandDrawnCircle extends UI.SVG.Element {
-    getPrimitiveTag() {
-        return "path";
-    }
-
-    static getDefaultOptions() {
-        return {
-            minDeltaR: 0.1,       // When the circle overlaps, the R decides the
-            maxDeltaR: 0.1,        // ratio between the diameter of the circle and the
-                                   // "imperfection" at its union, and DeltaR is the
-                                   // difference between R and 1 (bigger -> more like a spiral)
-
-            minStartingAngle: 0,   // Where the overlapping starts (0-360)
-            maxStartingAngle: 0,
-
-            minOverlap: 0.15,      // How much the circle goes over itself (ratio to circumference)
-            maxOverlap: 0.15,
-
-            minSquash: 0.7,        // How alike it is to an ellipse (1 is perfectly circular)
-            maxSquash: 0.7,
-
-            minSquashAngle: 150,      // Angle of the axis by which its elliptical
-            maxSquashAngle: 150,
-
-            r: 19,                  // Radius
-
-            x: 0,                   // Center
-            y: 0,
-
-            fill: "transparent",
-            stroke: "black",
-            strokeWidth: "2px"
-        }
-    }
-
-    setParameters(parameters) {
-        Object.assign(this.options, parameters);
-        this.setAttribute("d", this.getPath());
-        this.setAttribute("transform", this.getTransform());
-    }
-
-    setCenter(x, y) {
-        this.options.x = x;
-        this.options.y = y;
-        this.setAttribute("transform", this.getTransform());
-    }
-    setRadius(r) {
-        this.options.r = r;
-        this.setAttribute("d", this.getPath());
-    }
-
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
-        attr.setAttribute("d", this.getPath());
-        attr.setAttribute("transform", this.getTransform());
-        return attr;
-    }
-
-    getPath() {
-        let r = this.options.r;
-        let dR1 = this.options.minDeltaR;
-        let dR2 = this.options.maxDeltaR;
-        let minAngle = this.options.minStartingAngle;
-        let maxAngle = this.options.maxStartingAngle;
-        let minDAngle = this.options.minOverlap;
-        let maxDAngle = this.options.maxOverlap;
-        let c = 0.551915024494;
-        let beta = Math.atan(c);
-        let d = Math.sqrt(c*c+1);
-        let alpha = (minAngle + Math.random()*(maxAngle - minAngle))*Math.PI/180;
-
-        let path = 'M' + [r * Math.sin(alpha), r * Math.cos(alpha)];
-        path += ' C' + [d * r * Math.sin(alpha + beta), d * r * Math.cos(alpha + beta)];
-
-        for (let i = 0; i < 4; i += 1) {
-            let dAngle = minDAngle + Math.random() * (maxDAngle - minDAngle);
-            alpha += Math.PI/2 * (1 + dAngle);
-            r *= (1 + dR1 + Math.random() * (dR2 - dR1));
-            path += ' ' + (i ? 'S' : '') + [d * r * Math.sin(alpha - beta), d * r * Math.cos(alpha - beta)];
-            path += ' ' + [r * Math.sin(alpha), r * Math.cos(alpha)];
-        }
-
-        return path;
-    }
-
-    getTransform() {
-        let minL = this.options.minSquash;
-        let maxL = this.options.maxSquash;
-        let minAlpha = this.options.minSquashAngle;
-        let maxAlpha = this.options.maxSquashAngle;
-        let alpha = (minAlpha + Math.random() * (maxAlpha - minAlpha));
-        let lambda = (minL + Math.random() * (maxL - minL));
-
-        return 'translate(' + [this.options.x, this.options.y] + ') ' +
-            'rotate(' + alpha + ') scale(1, ' + lambda + ') rotate(' + (-alpha) + ')';
     }
 };
 

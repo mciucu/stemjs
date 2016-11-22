@@ -1,4 +1,4 @@
-// This whole file needs a refactoring
+// This whole file needs a refactoring, it's awfully written
 import {UI} from "./UIBase";
 import {Device} from "../base/Device";
 
@@ -48,7 +48,6 @@ UI.SectionDivider = class SectionDivider extends UI.Element {
     constructor(options) {
         super(options);
         this.orientation = this.options.orientation || UI.Orientation.VERTICAL;
-        this.childrenSize = 0;
         this.uncollapsedSizes = new WeakMap();
     }
 

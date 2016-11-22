@@ -10,10 +10,18 @@ class Transition {
         this.speedFactor = 1;
     }
 
+    toString() {
+        return  "{\n"+
+                "   context: " + this.context + "\n"+
+                "   duration: " + this.duration + "\n"+
+                "   startTime: " + this.startTime + "\n"+
+                "   dependsOn: " + this.dependsOn + "\n"+
+                "   func: " + this.func.toString() + "\n"+
+                "}\n";
+    }
+
     hasDependencyOn(t) {
-        // TODO: this should be actually a for of, but that breaks visual list
-        // THIS IS ACTUALL THE SAME as always return false;
-        for (let transition in this.dependsOn) {
+        for (let transition of this.dependsOn) {
             if (transition === t) {
                 return true;
             }
@@ -143,6 +151,17 @@ class Modifier extends Transition {
         this.context = options.context;
     }
 
+    toString() {
+        return  "{\n"+
+                "   context: " + this.context + "\n"+
+                "   duration: " + this.duration + "\n"+
+                "   startTime: " + this.startTime + "\n"+
+                "   dependsOn: " + this.dependsOn + "\n"+
+                "   func: " + this.func.toString() + "\n"+
+                "   reverseFunc: " + this.reverseFunc.toString() + "\n"+
+                "}\n";
+    }
+
     forceStart() {
         this.restart();
         this.reverseFunc(this.context);
@@ -179,10 +198,20 @@ class TransitionList {
         this.dependsOn = [];
     }
 
+    toString() {
+        return  "{\n"+
+                "   context: " + this.context + "\n"+
+                "   duration: " + this.duration + "\n"+
+                "   startTime: " + this.startTime + "\n"+
+                "   dependsOn: " + this.dependsOn + "\n"+
+                "   transitions: [" + (this.transitions.length ? this.transitions[0].toString() : "") + " ...]\n"+
+                "}\n";
+    }
+
     add(transition, forceFinish=true) {
         for (let i = 0; i < transition.dependsOn.length; i += 1) {
             if (transition.dependsOn[i].getEndTime() > transition.startTime) {
-                console.error("A transition depends on one that ends after its start!");
+                console.error(transition.toString() + "\ndepends on\n" + transition.dependsOn[i].toString() + "\n" + "which ends after its start!");
             }
         }
         if (forceFinish) {
@@ -196,7 +225,7 @@ class TransitionList {
         transition.setStartTime(this.getLength());
         for (let i = 0; i < transition.dependsOn.length; i += 1) {
             if (transition.dependsOn[i].getEndTime() > transition.startTime) {
-                console.error("A transition depends on one that ends after its start!");
+                console.error(transition.toString() + "\ndepends on\n" + transition.dependsOn[i].toString() + "\n" + "which ends after its start!");
             }
         }
         if (forceFinish) {

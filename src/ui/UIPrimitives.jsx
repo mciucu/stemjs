@@ -454,6 +454,3 @@ UI.ConstructorInitMixin = function (BaseClass) {
 
     return ConstructorInitMixin;
 };
-
-UI.body = new UI.Element();
-UI.body.node = document.body;

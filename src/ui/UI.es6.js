@@ -8,6 +8,7 @@ import "./Draggable";
 import "./FullScreenable";
 
 // Generic UI widget classes
+import "./Translation";
 import "./UIPrimitives";
 import "./Input";
 import "./SectionDivider";

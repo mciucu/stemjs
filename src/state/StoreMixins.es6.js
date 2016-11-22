@@ -127,7 +127,7 @@ function VirtualStoreObjectMixin(BaseStoreObjectClass) {
                 return;
             }
             let oldId = this.id;
-            if (!this.id.startsWith("temp-")) {
+            if (!this.hasTemporaryId()) {
                 console.error("This is only meant to replace temporary ids!");
             }
             this.id = newId;
@@ -160,9 +160,12 @@ function VirtualStoreMixin(BaseStoreClass) {
             return this.objects.get(id);
         }
 
-        applyUpdateObjectId(object, event) {
+        applyUpdateObjectId(object, id) {
+            if (object.id === id) {
+                return;
+            }
             let oldId = object.id;
-            object.updateId(event.objectId);
+            object.updateId(id);
             this.objects.delete(oldId);
             this.objects.set(object.id, object);
             this.dispatch("updateObjectId", object, oldId);
@@ -172,7 +175,7 @@ function VirtualStoreMixin(BaseStoreClass) {
             if (event.virtualId) {
                 let existingVirtualObject = this.getVirtualObject(event);
                 if (existingVirtualObject) {
-                    this.applyUpdateObjectId(existingVirtualObject, event);
+                    this.applyUpdateObjectId(existingVirtualObject, event.objectId);
                 }
             }
 

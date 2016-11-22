@@ -3,6 +3,8 @@ The world is full by them. Most of them are mediocre though, and I wanted to sho
 
 This isn't really a framework in the classical sense of the word, but rather a collection of libraries and design patterns that were designed to work together.
 
+This framework is being used for about a year at csacademy.com, and it really works a lot better for use than any other solution out there.
+
 ## Recommended bits
 A lot of code is inconsistent in quality, the closer to the core code you go, the better is gets and will probably be clean-up and more commented in the future.
 You can check out UIBase for the basics of the UI framework. It's an OOP based architecture that piggybacks on the jsx synthax (although you can use it with plain JS).

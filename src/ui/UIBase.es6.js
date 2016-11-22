@@ -38,7 +38,9 @@ UI.TextElement = class UITextElement {
         return Node.TEXT_NODE;
     }
 
-    cleanup() {}
+    cleanup() {
+        // Nothing to do for plain text elements
+    }
 
     copyState(element) {
         this.setValue(element.getValue());
@@ -131,32 +133,15 @@ class UIElement extends NodeWrapper {
         return this.node;
     }
 
-    //Add anything that needs to be called on cleanup here (dispatchers, etc)
-    addCleanupTask(task) {
-        // TODO: this field should be an instance of CleanupJobs
-        if (!this.cleanupTasks) {
-            this.cleanupTasks = [];
-        }
-        this.cleanupTasks.push(task);
-    }
-
     destroyNode() {
         this.cleanup();
         this.node.remove();
         this.node = undefined;
     }
 
-    runCleanupTasks() {
-        if (this.cleanupTasks) {
-            for (let task of this.cleanupTasks) {
-                task.cleanup();
-            }
-        }
-    }
-
     // Abstract, gets called when removing DOM node associated with the
     cleanup() {
-        this.runCleanupTasks();
+        this.runCleanupJobs();
         for (let child of this.children) {
             child.cleanup();
         }
@@ -274,15 +259,33 @@ class UIElement extends NodeWrapper {
     }
 
     setAttribute(key, value) {
-        // TODO: what to do about preserving this on the next redraw
-        this.domAttributes.setAttribute(key, value, this.node);
+        this.options[key] = value;
+
+        if (typeof value === "function") {
+            value = value(this);
+        }
+
+        if (this.node) {
+            this.node.setAttribute(key, value);
+        }
     }
 
     setStyle(attributeName, value) {
-        this.options.style = this.options.style || {};
-        this.options.style[attributeName] = value;
+        if (this.options.style) {
+            this.options.style[attributeName] = value;
+        } else {
+            this.options.style = {
+                [attributeName]: value
+            }
+        }
 
-        this.domAttributes.setStyle(attributeName, value, this.node);
+        if (typeof value === "function") {
+            value = value(this);
+        }
+
+        if (this.node) {
+            this.node.style[attributeName] = value;
+        }
     }
 
     addClass(className) {

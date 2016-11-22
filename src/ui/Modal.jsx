@@ -296,6 +296,10 @@ UI.ActionModal = class ActionModal extends UI.Modal {
         return this.options.level || UI.Level.DEFAULT;
     }
 
+    getCloseName() {
+        return "Close";
+    }
+
     getGivenChildren() {
         return [
             this.getHeader(),
@@ -331,7 +335,7 @@ UI.ActionModal = class ActionModal extends UI.Modal {
     getFooterContent() {
         return [
             <UI.TemporaryMessageArea ref="messageArea"/>,
-            <UI.Button level={UI.Level.DEFAULT} label="Close" onClick={() => this.hide()}/>,
+            <UI.Button level={UI.Level.DEFAULT} label={this.getCloseName()} onClick={() => this.hide()}/>,
             <UI.Button level={this.getActionLevel()} label={this.getActionName()} onClick={() => this.action()}/>
         ];
     }

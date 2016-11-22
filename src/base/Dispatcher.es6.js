@@ -6,6 +6,8 @@ class DispatcherHandle {
 
     remove() {
         this.dispatcher.removeListener(this.callback);
+        this.dispatcher = undefined;
+        this.callback = undefined;
     }
 
     cleanup() {
@@ -35,6 +37,13 @@ class Dispatcher {
         return new DispatcherHandle(this, callback);
     };
 
+    addListenerOnce(callback) {
+        let handler = this.addListener(function () {
+            callback(...arguments);
+            handler.remove();
+        });
+    }
+
     removeListener(callback) {
         for (let i = 0; i < this.listeners.length; i += 1) {
             if (this.listeners[i] === callback) {
@@ -44,8 +53,13 @@ class Dispatcher {
         }
     };
 
+    removeAllListeners() {
+        this.listeners = [];
+    }
+
     dispatch(payload) {
-        for (let i = 0; i < this.listeners.length; i += 1) {
+        // We're going in reverse here, because some listeners can remove themselves after being called
+        for (let i = this.listeners.length - 1; i >= 0; i -= 1) {
             let listener = this.listeners[i];
             listener(...arguments);
         }
@@ -97,7 +111,40 @@ class Dispatchable {
     }
 
     cleanup() {
+        this.runCleanupJobs();
         delete this._dispatchers;
+    }
+
+    // These function don't really belong here, no better place to put them for now
+
+    //Add anything that needs to be called on cleanup here (dispatchers, etc)
+    addCleanupJob(cleanupJob) {
+        if (!this.hasOwnProperty("_cleanupJobs")) {
+            this._cleanupJobs = new CleanupJobs();
+        }
+        this._cleanupJobs.add(cleanupJob);
+        return cleanupJob;
+    }
+
+    runCleanupJobs() {
+        if (this._cleanupJobs) {
+            this._cleanupJobs.cleanup();
+        }
+    }
+
+    // TODO: should use attachListener( nomenclature?
+    addListenerTo(obj) {
+        let args = Array.prototype.slice.call(arguments, 1);
+        let handler = obj.addListener(...args);
+        this.addCleanupJob(handler);
+        return handler;
+    }
+
+    addEventListenerTo(obj) {
+        let args = Array.prototype.slice.call(arguments, 1);
+        let handler = obj.addEventListener(...args);
+        this.addCleanupJob(handler);
+        return handler;
     }
 }
 
@@ -110,7 +157,7 @@ class RunOnce {
         }
         this.timeout = setTimeout(() => {
             callback();
-            this.timeout = null;
+            this.timeout = undefined;
         }, timeout);
     }
 }
@@ -136,19 +183,4 @@ class CleanupJobs {
     }
 }
 
-let CleanupMixin = (BaseClass) => class Cleanup extends BaseClass {
-    addCleanupTask(cleanupJob) {
-        if (!this.hasOwnProperty("_cleanupJobs")) {
-            this._cleanupJobs = new CleanupJobs();
-        }
-        this._cleanupJobs.add(cleanupJob);
-    }
-
-    cleanup() {
-        if (this._cleanupJobs) {
-            this._cleanupJobs.cleanup();
-        }
-    }
-}
-
-export {Dispatcher, Dispatchable, RunOnce, CleanupJobs, CleanupMixin};
+export {Dispatcher, Dispatchable, RunOnce, CleanupJobs};

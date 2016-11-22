@@ -1,6 +1,7 @@
 import {Dispatchable} from "../base/Dispatcher";
 
 // Generic class through which we interact with HTML nodes
+// TODO: is there a reason to keep this intermediary class?
 class NodeWrapper extends Dispatchable {
     constructor(domNode, options) {
         super();
@@ -27,6 +28,7 @@ class NodeWrapper extends Dispatchable {
         return this._element;
     }
 
+    // TODO: rethink this!
     uniqueId() {
         if (!this.hasOwnProperty("uniqueIdStr")) {
         // TODO: should this be global?
@@ -63,6 +65,7 @@ class NodeWrapper extends Dispatchable {
         return window.getComputedStyle(this.node, null).getPropertyValue(attribute);
     }
 
+    // TODO: should be called isInDocument
     isInDOM() {
         return document.body.contains(this.node);
     }

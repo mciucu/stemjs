@@ -4,6 +4,15 @@ import {UI} from "./UIBase";
 UI.CodeEditor = class CodeEditor extends UI.Element {
     setOptions(options) {
         super.setOptions(options);
+
+        if (this.options.aceMode) {
+            this.options.aceMode = this.options.aceMode.toLowerCase();
+        }
+
+        if (this.options.aceMode === "cpp" || this.options.aceMode === "c") {
+            this.options.aceMode = "c_cpp";
+        }
+
         if (this.ace) {
             this.applyAceOptions();
         }
