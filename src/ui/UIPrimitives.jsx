@@ -1,6 +1,6 @@
 import {UI} from "./UIBase";
 import {Device} from "../base/Device";
-import "./Draggable";
+import {Draggable} from "./Draggable";
 import {Dispatchable} from "../base/Dispatcher";
 
 UI.Orientation = {
@@ -55,7 +55,7 @@ UI.Panel = class Panel extends UI.Element {
     }
 };
 
-UI.SlideBar = class SlideBar extends UI.Draggable(UI.Element) {
+UI.SlideBar = class SlideBar extends Draggable(UI.Element) {
     constructor(options) {
         super(options);
     }

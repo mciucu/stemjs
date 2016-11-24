@@ -144,8 +144,8 @@ function getAttachCleanupJobMethod(methodName) {
 }
 
 // Not sure if these should be added here, but meh
-Dispatchable.prototype.attachListener = getAttachCleanupJobMethod("addListener");
-Dispatchable.prototype.attachEventListener = getAttachCleanupJobMethod("addEventListener");
+Dispatchable.prototype.attachListener       = getAttachCleanupJobMethod("addListener");
+Dispatchable.prototype.attachEventListener  = getAttachCleanupJobMethod("addEventListener");
 Dispatchable.prototype.attachCreateListener = getAttachCleanupJobMethod("addCreateListener");
 Dispatchable.prototype.attachUpdateListener = getAttachCleanupJobMethod("addUpdateListener");
 Dispatchable.prototype.attachDeleteListener = getAttachCleanupJobMethod("addDeleteListener");
@@ -175,7 +175,11 @@ class CleanupJobs {
 
     cleanup() {
         for (let job of this.jobs) {
-            job.cleanup();
+            if (typeof job.cleanup === "function") {
+                job.cleanup();
+            } else {
+                job();
+            }
         }
         this.jobs = [];
     }
@@ -189,17 +193,23 @@ class CleanupJobs {
 // It informs the previous owner of the change (once) and dispatches the new element for all listeners
 // TODO: a better name
 class SingleActiveElementDispatcher extends Dispatcher {
-    setActive(element, onChange) {
-        if (element === this._activeElement) {
+    setActive(element, onChange, forceDispatch) {
+        if (!forceDispatch && element === this._active) {
             return;
         }
-        this._activeElement = element;
+        this._active = element;
         this.dispatch(element);
-        this.addListenerOnce((newElement) => {
-            if (newElement != element) {
-                onChange(newElement);
-            }
-        });
+        if (onChange) {
+            this.addListenerOnce((newElement) => {
+                if (newElement != element) {
+                    onChange(newElement);
+                }
+            });
+        }
+    }
+
+    getActive() {
+        return this._active;
     }
 }
 

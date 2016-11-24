@@ -386,6 +386,7 @@ var Dispatcher = function () {
         value: function dispatch(payload) {
             // We're going in reverse here, because some listeners can remove themselves after being called
             for (var i = this.listeners.length - 1; i >= 0; i -= 1) {
+                // TODO: optimize common cases
                 var listener = this.listeners[i];
                 listener.apply(undefined, arguments);
             }
@@ -550,7 +551,11 @@ var CleanupJobs = function () {
                 for (var _iterator = this.jobs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                     var job = _step.value;
 
-                    job.cleanup();
+                    if (typeof job.cleanup === "function") {
+                        job.cleanup();
+                    } else {
+                        job();
+                    }
                 }
             } catch (err) {
                 _didIteratorError = true;
@@ -577,6 +582,44 @@ var CleanupJobs = function () {
     }]);
     return CleanupJobs;
 }();
+
+// Class that can be used to pass around ownership of a resource.
+// It informs the previous owner of the change (once) and dispatches the new element for all listeners
+// TODO: a better name
+
+
+var SingleActiveElementDispatcher = function (_Dispatcher) {
+    inherits(SingleActiveElementDispatcher, _Dispatcher);
+
+    function SingleActiveElementDispatcher() {
+        classCallCheck(this, SingleActiveElementDispatcher);
+        return possibleConstructorReturn(this, (SingleActiveElementDispatcher.__proto__ || Object.getPrototypeOf(SingleActiveElementDispatcher)).apply(this, arguments));
+    }
+
+    createClass(SingleActiveElementDispatcher, [{
+        key: "setActive",
+        value: function setActive(element, onChange, forceDispatch) {
+            if (!forceDispatch && element === this._active) {
+                return;
+            }
+            this._active = element;
+            this.dispatch(element);
+            if (onChange) {
+                this.addListenerOnce(function (newElement) {
+                    if (newElement != element) {
+                        onChange(newElement);
+                    }
+                });
+            }
+        }
+    }, {
+        key: "getActive",
+        value: function getActive() {
+            return this._active;
+        }
+    }]);
+    return SingleActiveElementDispatcher;
+}(Dispatcher);
 
 var NodeWrapper = function (_Dispatchable) {
     inherits(NodeWrapper, _Dispatchable);
@@ -732,12 +775,6 @@ var NodeWrapper = function (_Dispatchable) {
             this.addDOMListener("click", callback);
         }
     }, {
-        key: "setClickListener",
-        value: function setClickListener(callback) {
-            // TODO: remove old click listener
-            this.addClickListener(callback);
-        }
-    }, {
         key: "removeClickListener",
         value: function removeClickListener(callback) {
             this.removeDOMListener("click", callback);
@@ -857,34 +894,34 @@ function CreateAllowedAttributesMap(oldAttributesMap, allowedAttributesArray) {
     return allowedAttributesMap;
 }
 
-//TODO: should be as few of these as possible
+// Should be as few of these as possible
 var ATTRIBUTE_NAMES_MAP = CreateAllowedAttributesMap([["id"], ["action"], ["colspan"], ["default"], ["disabled", { noValue: true }], ["fixed"], ["forAttr", { domName: "for" }], ["hidden"], ["href"], ["rel"], ["minHeight"], ["minWidth"], ["role"], ["target"], ["HTMLtitle", { domName: "title" }], ["type"], ["placeholder"], ["src"], ["height"], ["width"]]);
 
 //["value"], // Value is intentionally disabled
 
 var DOMAttributes = function () {
-    function DOMAttributes(options) {
-        var attributeNamesMap = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ATTRIBUTE_NAMES_MAP;
+    function DOMAttributes(options, attributeNamesMap) {
         classCallCheck(this, DOMAttributes);
 
-        this.attributes = new Map();
-        //this.className = null;
-        this.classes = new Set();
-        this.styleMap = null;
-        //TODO: the set of allowed name should be static in the constructor
+        var attributesMap = void 0;
 
         for (var attributeName in options) {
-            // No hasOwnProperty for perfomance
+            // TODO: Take care of bootstrap bullshit, this should not be in here, add it yourself
             if (attributeName.startsWith("data-") || attributeName.startsWith("aria-")) {
-                this.attributes.set(attributeName, options[attributeName]);
+                if (!attributesMap) {
+                    attributesMap = new Map();
+                }
+
+                attributesMap.set(attributeName, options[attributeName]);
+                continue;
             }
 
-            if (attributeNamesMap.has(attributeName)) {
-
-                var attribute = attributeNamesMap.get(attributeName);
+            // No hasOwnProperty check for perfomance
+            var attributeProperties = attributeNamesMap.get(attributeName);
+            if (attributeProperties) {
                 var value = options[attributeName];
 
-                if (attribute.noValue) {
+                if (attributeProperties.noValue) {
                     if (value) {
                         value = "";
                     } else {
@@ -892,37 +929,40 @@ var DOMAttributes = function () {
                     }
                 }
 
-                this.attributes.set(attribute.domName, value);
-            }
-        }
-
-        if (options.hasOwnProperty("classes")) {
-            // User filter here to prevent empty classes
-            this.classes = new Set(options.classes.filter(function (cls) {
-                return cls;
-            }));
-        } else if (options.hasOwnProperty("className")) {
-            // regex matches any whitespace character or comma
-            this.classes = new Set((options.className + "").split(/[\s,]+/).filter(function (cls) {
-                return cls;
-            }));
-        }
-
-        if (options.hasOwnProperty("style")) {
-            this.styleMap = new Map();
-            for (var key in options.style) {
-                var _value = options.style[key];
-                if (typeof _value === "function") {
-                    _value = _value();
+                if (!attributesMap) {
+                    attributesMap = new Map();
                 }
-                this.styleMap.set(key, _value);
+
+                attributesMap.set(attributeProperties.domName, value);
             }
         }
+
+        if (attributesMap) {
+            this.attributes = attributesMap;
+        }
+
+        if (options.classes) {
+            // User filter here to prevent empty classes
+            this.classes = new Set(options.classes);
+        } else if (options.className) {
+            this.className = String(options.className);
+        } else {
+            this.classes = new Set();
+        }
+
+        this.styleMap = options.style || {};
     }
+
+    // TODO: there's no real use-case for this method
+
 
     createClass(DOMAttributes, [{
         key: "setAttribute",
         value: function setAttribute(key, value, node) {
+            if (!this.attributes) {
+                this.attributes = new Map();
+            }
+
             if (value === undefined) {
                 return;
             }
@@ -945,9 +985,9 @@ var DOMAttributes = function () {
                 value = value();
             }
             if (!this.styleMap) {
-                this.styleMap = new Map();
+                this.styleMap = {};
             }
-            this.styleMap.set(key, value);
+            this.styleMap[key] = value;
             if (node && node.style[key] !== value) {
                 node.style[key] = value;
             }
@@ -956,6 +996,11 @@ var DOMAttributes = function () {
         key: "addClass",
         value: function addClass(classes, node) {
             if (!classes) return;
+
+            if (!this.classes && this.className) {
+                this.classes = new Set(this.className.split(" "));
+                this.className = undefined;
+            }
 
             if (Array.isArray(classes)) {
                 var _iteratorNormalCompletion3 = true;
@@ -987,13 +1032,18 @@ var DOMAttributes = function () {
                 }
             } else {
                 classes = String(classes);
-                this.addClass(classes.split(/[\s,]+/), node);
+                this.addClass(classes.split(" "), node);
             }
         }
     }, {
         key: "removeClass",
         value: function removeClass(classes, node) {
             if (!classes) return;
+
+            if (!this.classes && this.className) {
+                this.classes = new Set(this.className.split(" "));
+                this.className = undefined;
+            }
 
             if (Array.isArray(classes)) {
                 var _iteratorNormalCompletion4 = true;
@@ -1024,91 +1074,82 @@ var DOMAttributes = function () {
                     }
                 }
             } else {
-                this.removeClass(classes.split(/[\s,]+/), node);
+                this.removeClass(classes.split(" "), node);
             }
         }
     }, {
         key: "apply",
         value: function apply(node) {
-            //TODO: attributes and styles should be synched (remove missing ones)
-            var _iteratorNormalCompletion5 = true;
-            var _didIteratorError5 = false;
-            var _iteratorError5 = undefined;
-
-            try {
-                for (var _iterator5 = this.attributes[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-                    var _step5$value = slicedToArray(_step5.value, 2),
-                        key = _step5$value[0],
-                        value = _step5$value[1];
-
-                    if (typeof value !== "undefined") {
-                        node.setAttribute(key, value);
+            if (this.attributes) {
+                // First update existing node attributes and delete old ones
+                var nodeAttributes = node.attributes;
+                for (var i = nodeAttributes.length - 1; i >= 0; i--) {
+                    var attr = nodeAttributes[i];
+                    var key = attr.name;
+                    if (this.attributes.has(key)) {
+                        var value = this.attributes.get(key);
+                        if (typeof value !== "undefined") {
+                            node.setAttribute(key, value);
+                        } else {
+                            node.removeAttribute(key);
+                        }
+                        this.attributes.delete(key);
                     } else {
                         node.removeAttribute(key);
                     }
                 }
+                // Add new attributes
+                var _iteratorNormalCompletion5 = true;
+                var _didIteratorError5 = false;
+                var _iteratorError5 = undefined;
 
-                // node.removeAttribute("class");
-            } catch (err) {
-                _didIteratorError5 = true;
-                _iteratorError5 = err;
-            } finally {
                 try {
-                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
-                        _iterator5.return();
+                    for (var _iterator5 = this.attributes[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                        var _step5$value = slicedToArray(_step5.value, 2),
+                            _key = _step5$value[0],
+                            _value = _step5$value[1];
+
+                        if (typeof _value !== "undefined") {
+                            node.setAttribute(_key, _value);
+                        }
                     }
+                } catch (err) {
+                    _didIteratorError5 = true;
+                    _iteratorError5 = err;
                 } finally {
-                    if (_didIteratorError5) {
-                        throw _iteratorError5;
+                    try {
+                        if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                            _iterator5.return();
+                        }
+                    } finally {
+                        if (_didIteratorError5) {
+                            throw _iteratorError5;
+                        }
                     }
                 }
             }
 
-            if (this.classes && this.classes.size > 0) {
+            if (this.className) {
+                node.className = this.className;
+            } else if (this.classes && this.classes.size > 0) {
                 node.className = Array.from(this.classes).join(" ");
                 // TODO: find out which solution is best
                 // This solution works for svg nodes as well
-                //for (let cls of this.classes) {
+                // for (let cls of this.classes) {
                 //    node.classList.add(cls);
-                //}
-                // if (this.classes && this.classes.size > 0) {
-                //     node.className = "";
-                //     for (let cls of this.classes) {
-                //         node.classList.add(cls);
-                //     }
+                // }
             } else {
                     node.removeAttribute("class");
                 }
 
             node.removeAttribute("style");
             if (this.styleMap) {
-                var _iteratorNormalCompletion6 = true;
-                var _didIteratorError6 = false;
-                var _iteratorError6 = undefined;
-
-                try {
-                    for (var _iterator6 = this.styleMap[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-                        var _step6$value = slicedToArray(_step6.value, 2),
-                            key = _step6$value[0],
-                            value = _step6$value[1];
-
-                        if (node.style[key] !== value) {
-                            node.style[key] = value;
-                        }
+                for (var _key2 in this.styleMap) {
+                    var _value2 = this.styleMap[_key2];
+                    if (typeof _value2 === "function") {
+                        _value2 = _value2();
                     }
-                } catch (err) {
-                    _didIteratorError6 = true;
-                    _iteratorError6 = err;
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion6 && _iterator6.return) {
-                            _iterator6.return();
-                        }
-                    } finally {
-                        if (_didIteratorError6) {
-                            throw _iteratorError6;
-                        }
-                    }
+                    node.style[_key2] = _value2;
                 }
             }
         }
@@ -1120,9 +1161,13 @@ var UI = {
     renderingStack: [] };
 
 //keeps track of objects that are redrawing, to know where to assign refs automatically
-UI.TextElement = function () {
+UI.TextElement = function (_Dispatchable) {
+    inherits(UITextElement, _Dispatchable);
+
     function UITextElement(options) {
         classCallCheck(this, UITextElement);
+
+        var _this = possibleConstructorReturn(this, (UITextElement.__proto__ || Object.getPrototypeOf(UITextElement)).call(this));
 
         var value = "";
         if (typeof options === "string" || options instanceof String || typeof options === "number" || options instanceof Number) {
@@ -1131,10 +1176,11 @@ UI.TextElement = function () {
         } else {
             value = options.value || value;
         }
-        this.setValue(value);
+        _this.setValue(value);
         if (options) {
-            this.options = options;
+            _this.options = options;
         }
+        return _this;
     }
 
     createClass(UITextElement, [{
@@ -1155,12 +1201,8 @@ UI.TextElement = function () {
     }, {
         key: "getPrimitiveTag",
         value: function getPrimitiveTag() {
+            // This isn't used anywhere
             return Node.TEXT_NODE;
-        }
-    }, {
-        key: "cleanup",
-        value: function cleanup() {
-            // Nothing to do for plain text elements
         }
     }, {
         key: "copyState",
@@ -1170,7 +1212,8 @@ UI.TextElement = function () {
     }, {
         key: "createNode",
         value: function createNode() {
-            this.node = document.createTextNode(this.value);
+            var value = this.getValue();
+            this.node = document.createTextNode(value);
             return this.node;
         }
     }, {
@@ -1195,16 +1238,11 @@ UI.TextElement = function () {
                     this.node.nodeValue = newValue;
                 }
             }
-            //TODO: make common with UI.Element
-            if (this.options && this.options.ref) {
-                var obj = this.options.ref.parent;
-                var name = this.options.ref.name;
-                obj[name] = this;
-            }
+            this.applyRef();
         }
     }]);
     return UITextElement;
-}();
+}(Dispatchable);
 
 //Some changes to the basic API for UI.Element need to be mirrored in UI.TextElement
 
@@ -1216,11 +1254,11 @@ var UIElement = function (_NodeWrapper) {
 
         options = options || {};
 
-        var _this = possibleConstructorReturn(this, (UIElement.__proto__ || Object.getPrototypeOf(UIElement)).call(this, null, options, true));
+        var _this2 = possibleConstructorReturn(this, (UIElement.__proto__ || Object.getPrototypeOf(UIElement)).call(this, null, options, true));
 
-        _this.children = [];
-        _this.setOptions(options);
-        return _this;
+        _this2.children = [];
+        _this2.setOptions(options);
+        return _this2;
     }
 
     createClass(UIElement, [{
@@ -1318,8 +1356,7 @@ var UIElement = function (_NodeWrapper) {
     }, {
         key: "applyRef",
         value: function applyRef() {
-            // TODO: remove old field names
-            if (this.options.ref) {
+            if (this.options && this.options.ref) {
                 var obj = this.options.ref.parent;
                 var name = this.options.ref.name;
                 obj[name] = this;
@@ -1365,8 +1402,8 @@ var UIElement = function (_NodeWrapper) {
                 for (var i = 0; i < newChildren.length; i += 1) {
                     newChildren[i].redraw();
                 }
-                //TODO: also handle ref stuff here
                 this.applyDOMAttributes();
+                this.applyRef();
                 return;
             }
 
@@ -1378,7 +1415,7 @@ var UIElement = function (_NodeWrapper) {
                 var prevChildNode = _i > 0 ? newChildren[_i - 1].node : null;
                 var currentChildNode = prevChildNode ? prevChildNode.nextSibling : domNode.firstChild;
 
-                // Not an UIElement, to be converted to a TextElement
+                // Not a UIElement, to be converted to a TextElement
                 if (!newChild.getPrimitiveTag) {
                     newChild = newChildren[_i] = new UI.TextElement(newChild);
                 }
@@ -1505,17 +1542,12 @@ var UIElement = function (_NodeWrapper) {
             if (!this.hasOwnProperty(arrayName)) {
                 this[arrayName] = [];
             }
-
-            while (index >= this[arrayName].length) {
-                this[arrayName].push(null);
-            }
-
             return { parent: this[arrayName], name: index };
         }
     }, {
         key: "mount",
         value: function mount(parent, nextSiblingNode) {
-            var _this2 = this;
+            var _this3 = this;
 
             if (!parent.node) {
                 parent = new NodeWrapper(parent);
@@ -1532,8 +1564,8 @@ var UIElement = function (_NodeWrapper) {
             if (this.options.onClick) {
                 this.onClickHandler = function (event) {
                     UI.event = event;
-                    if (_this2.options.onClick) {
-                        _this2.options.onClick(_this2);
+                    if (_this3.options.onClick) {
+                        _this3.options.onClick(_this3);
                     }
                 };
                 this.addClickListener(this.onClickHandler);
@@ -1623,7 +1655,9 @@ var UIElement = function (_NodeWrapper) {
         }
     }], [{
         key: "create",
-        value: function create(parentNode, options) {
+        value: function create(parentNode) {
+            var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
             var uiElement = new this(options);
             uiElement.mount(parentNode, null);
             return uiElement;
@@ -1631,6 +1665,11 @@ var UIElement = function (_NodeWrapper) {
     }]);
     return UIElement;
 }(NodeWrapper);
+
+// Some methods are shared between all elements
+
+
+UI.TextElement.prototype.applyRef = UIElement.prototype.applyRef;
 
 UIElement.domAttributesMap = ATTRIBUTE_NAMES_MAP;
 
@@ -1688,6 +1727,29 @@ UI.Element = UIElement;
 
 UI.str = function (value) {
     return new UI.TextElement({ value: value });
+};
+
+UI.Primitive = function (Type, tag) {
+    if (!tag) {
+        tag = Type;
+        Type = UI.Element;
+    }
+    return function (_Type) {
+        inherits(Primitive, _Type);
+
+        function Primitive() {
+            classCallCheck(this, Primitive);
+            return possibleConstructorReturn(this, (Primitive.__proto__ || Object.getPrototypeOf(Primitive)).apply(this, arguments));
+        }
+
+        createClass(Primitive, [{
+            key: "getPrimitiveTag",
+            value: function getPrimitiveTag() {
+                return tag;
+            }
+        }]);
+        return Primitive;
+    }(Type);
 };
 
 // TODO: code shouldn't use UIElement directly, but through UI.Element
@@ -1891,7 +1953,7 @@ UI.DynamicStyleElement = function (_UI$StyleElement) {
     return DynamicStyleElement;
 }(UI.StyleElement);
 
-UI.DoubleClickable = function (BaseClass) {
+var DoubleClickable = function DoubleClickable(BaseClass) {
     return function (_BaseClass) {
         inherits(DoubleClickable, _BaseClass);
 
@@ -2005,8 +2067,10 @@ UI.DoubleClickable = function (BaseClass) {
     }(BaseClass);
 };
 
-UI.Draggable = function (BaseClass) {
-    var Draggable = function (_BaseClass) {
+// TODO: simplify this if possible
+// TODO: rename to DraggableMixin?
+var Draggable = function Draggable(BaseClass) {
+    return function (_BaseClass) {
         inherits(Draggable, _BaseClass);
 
         function Draggable() {
@@ -2195,8 +2259,6 @@ UI.Draggable = function (BaseClass) {
         }]);
         return Draggable;
     }(BaseClass);
-
-    return Draggable;
 };
 
 function callFirstMethodAvailable(obj, methodNames) {
@@ -2631,8 +2693,8 @@ UI.Panel = function (_UI$Element) {
     return Panel;
 }(UI.Element);
 
-UI.SlideBar = function (_UI$Draggable) {
-    inherits(SlideBar, _UI$Draggable);
+UI.SlideBar = function (_Draggable) {
+    inherits(SlideBar, _Draggable);
 
     function SlideBar(options) {
         classCallCheck(this, SlideBar);
@@ -2707,7 +2769,7 @@ UI.SlideBar = function (_UI$Draggable) {
         }
     }]);
     return SlideBar;
-}(UI.Draggable(UI.Element));
+}(Draggable(UI.Element));
 
 UI.Link = function (_UI$Element2) {
     inherits(Link, _UI$Element2);
@@ -7106,7 +7168,7 @@ UI.Switcher = function (_UI$Element) {
 }(UI.Element);
 
 // TODO: all of the classes here need to be implemented with StyleSets
-UI.BasicTabTitle = function (_UI$Element) {
+var BasicTabTitle = function (_UI$Element) {
     inherits(BasicTabTitle, _UI$Element);
 
     function BasicTabTitle() {
@@ -7132,6 +7194,7 @@ UI.BasicTabTitle = function (_UI$Element) {
         key: "canOverwrite",
         value: function canOverwrite(existingElement) {
             // Disable reusing with different panels, since we want to attach listeners to the panel
+            // TODO: might want to just return the key as this.options.panel
             return get$1(BasicTabTitle.prototype.__proto__ || Object.getPrototypeOf(BasicTabTitle.prototype), "canOverwrite", this).call(this, existingElement) && this.options.panel === existingElement.options.panel;
         }
     }, {
@@ -7142,13 +7205,8 @@ UI.BasicTabTitle = function (_UI$Element) {
             this.options.active = active;
             this.redraw();
             if (active) {
-                var activeTabDispatcher = this.options.activeTabDispatcher;
-
-                activeTabDispatcher.dispatch(this.options.panel);
-                activeTabDispatcher.addListenerOnce(function (panel) {
-                    if (panel != _this2.options.panel) {
-                        _this2.setActive(false);
-                    }
+                this.options.activeTabDispatcher.setActive(this.options.panel, function () {
+                    _this2.setActive(false);
                 });
             }
         }
@@ -7187,13 +7245,18 @@ UI.BasicTabTitle = function (_UI$Element) {
                 _this3.setActive(true);
             });
 
-            this.attachListener(this.options.panel, "show", function () {
-                _this3.setActive(true);
-            });
+            // TODO: less assumptions here
+            if (this.options.panel && this.options.panel.addListener) {
+                this.attachListener(this.options.panel, "show", function () {
+                    _this3.setActive(true);
+                });
+            }
         }
     }]);
     return BasicTabTitle;
 }(UI.Element);
+
+
 
 UI.TabTitleArea = function (_UI$Element2) {
     inherits(TabTitleArea, _UI$Element2);
@@ -7215,7 +7278,7 @@ UI.TabTitleArea = function (_UI$Element2) {
     return TabTitleArea;
 }(UI.Element);
 
-// Inactive class for the moment, should extend UI.BasicTabTitle
+// Inactive class for the moment, should extend BasicTabTitle
 
 var SVGTabTitle = function (_UI$Element3) {
     inherits(SVGTabTitle, _UI$Element3);
@@ -7300,11 +7363,19 @@ UI.TabArea = function (_UI$Element4) {
 
         var _this7 = possibleConstructorReturn(this, (TabArea.__proto__ || Object.getPrototypeOf(TabArea)).call(this, options));
 
-        _this7.activeTabDispatcher = new Dispatcher();
+        _this7.activeTabDispatcher = new SingleActiveElementDispatcher();
         return _this7;
     }
 
     createClass(TabArea, [{
+        key: "setOptions",
+        value: function setOptions(options) {
+            options = Object.assign({
+                autoActive: true
+            }, options);
+            get$1(TabArea.prototype.__proto__ || Object.getPrototypeOf(TabArea.prototype), "setOptions", this).call(this, options);
+        }
+    }, {
         key: "getDOMAttributes",
         value: function getDOMAttributes() {
             var attr = get$1(TabArea.prototype.__proto__ || Object.getPrototypeOf(TabArea.prototype), "getDOMAttributes", this).call(this);
@@ -7316,7 +7387,7 @@ UI.TabArea = function (_UI$Element4) {
     }, {
         key: "createTabPanel",
         value: function createTabPanel(panel) {
-            var tab = UI.createElement(UI.BasicTabTitle, { panel: panel, activeTabDispatcher: this.activeTabDispatcher, active: panel.options.active, href: panel.options.tabHref });
+            var tab = UI.createElement(BasicTabTitle, { panel: panel, activeTabDispatcher: this.activeTabDispatcher, active: panel.options.active, href: panel.options.tabHref });
 
             //TODO: Don't modify the panel element!!!!
             var panelClass = " tab-panel nopad";
@@ -7339,6 +7410,28 @@ UI.TabArea = function (_UI$Element4) {
 
             this.titleArea.appendChild(tabTitle);
             this.switcherArea.appendChild(tabPanel, doMount || true);
+        }
+    }, {
+        key: "getTitleArea",
+        value: function getTitleArea(tabTitles) {
+            return UI.createElement(
+                UI.TabTitleArea,
+                { ref: "titleArea" },
+                tabTitles
+            );
+        }
+    }, {
+        key: "getSwitcher",
+        value: function getSwitcher(tabPanels) {
+            var switcherClass = "";
+            if (!this.options.variableHeightPanels) {
+                switcherClass = "auto-height";
+            }
+            return UI.createElement(
+                UI.Switcher,
+                { ref: "switcherArea", className: switcherClass, lazyRender: this.options.lazyRender },
+                tabPanels
+            );
         }
     }, {
         key: "renderHTML",
@@ -7382,29 +7475,26 @@ UI.TabArea = function (_UI$Element4) {
                 }
             }
 
-            if (!activeTab && tabTitles.length > 0) {
+            if (this.options.autoActive && !activeTab && tabTitles.length > 0) {
                 tabTitles[0].options.active = true;
             }
 
-            var switcherClass = "";
-            if (!this.options.variableHeightPanels) {
-                switcherClass = "auto-height";
-            }
-
-            return [UI.createElement(
-                UI.TabTitleArea,
-                { ref: "titleArea" },
-                tabTitles
-            ), UI.createElement(
-                UI.Switcher,
-                { ref: "switcherArea", className: switcherClass, lazyRender: this.options.lazyRender },
-                tabPanels
-            )];
+            return [this.getTitleArea(tabTitles), this.getSwitcher(tabPanels)];
+        }
+    }, {
+        key: "setActive",
+        value: function setActive(panel) {
+            this.activeTabDispatcher.setActive(panel);
         }
     }, {
         key: "getActive",
         value: function getActive() {
-            return this.switcherArea.getActive();
+            return this.activeTabDispatcher.getActive();
+        }
+    }, {
+        key: "onSetActive",
+        value: function onSetActive(panel) {
+            this.switcherArea.setActive(panel);
         }
     }, {
         key: "onMount",
@@ -7412,7 +7502,7 @@ UI.TabArea = function (_UI$Element4) {
             var _this8 = this;
 
             this.attachListener(this.activeTabDispatcher, function (panel) {
-                _this8.switcherArea.setActive(panel);
+                _this8.onSetActive(panel);
             });
 
             this.addListener("resize", function () {
@@ -8536,12 +8626,14 @@ UI.CodeEditor = function (_UI$Element) {
             if (this.options.value) {
                 this.setValue(this.options.value, -1);
             }
-            var langTools = "/static/js/ext/ace/ext-language_tools.js";
-            require([langTools], function () {
-                _this2.setBasicAutocompletion(_this2.options.enableBasicAutocompletion);
-                _this2.setLiveAutocompletion(_this2.options.enableLiveAutocompletion);
-                _this2.setSnippets(_this2.options.enableSnippets);
-            });
+            if (this.options.hasOwnProperty("enableBasicAutocompletion") || this.options.hasOwnProperty("enableLiveAutocompletion")) {
+                var langTools = "/static/js/ext/ace/ext-language_tools.js";
+                require([langTools], function () {
+                    _this2.setBasicAutocompletion(_this2.options.enableBasicAutocompletion);
+                    _this2.setLiveAutocompletion(_this2.options.enableLiveAutocompletion);
+                    _this2.setSnippets(_this2.options.enableSnippets);
+                });
+            }
         }
     }, {
         key: "redraw",
@@ -8988,6 +9080,66 @@ function css(style) {
     }
     return styleWrapper;
 }
+
+var FAIcon = function (_UI$Primitive) {
+    inherits(FAIcon, _UI$Primitive);
+
+    function FAIcon() {
+        classCallCheck(this, FAIcon);
+        return possibleConstructorReturn(this, (FAIcon.__proto__ || Object.getPrototypeOf(FAIcon)).apply(this, arguments));
+    }
+
+    createClass(FAIcon, [{
+        key: "getIcon",
+        value: function getIcon() {
+            return this.options.icon;
+        }
+    }, {
+        key: "getDOMAttributes",
+        value: function getDOMAttributes() {
+            var attr = get$1(FAIcon.prototype.__proto__ || Object.getPrototypeOf(FAIcon.prototype), "getDOMAttributes", this).call(this);
+
+            attr.addClass("fa");
+            attr.addClass("fa-" + this.getIcon());
+
+            return attr;
+        }
+    }, {
+        key: "setIcon",
+        value: function setIcon(icon) {
+            this.options.icon = icon;
+            this.redraw();
+        }
+    }]);
+    return FAIcon;
+}(UI.Primitive("i"));
+
+var FACollapseIcon = function (_FAIcon) {
+    inherits(FACollapseIcon, _FAIcon);
+
+    function FACollapseIcon() {
+        classCallCheck(this, FACollapseIcon);
+        return possibleConstructorReturn(this, (FACollapseIcon.__proto__ || Object.getPrototypeOf(FACollapseIcon)).apply(this, arguments));
+    }
+
+    createClass(FACollapseIcon, [{
+        key: "getIcon",
+        value: function getIcon() {
+            if (this.options.collapsed) {
+                return "angle-right";
+            } else {
+                return "angle-down";
+            }
+        }
+    }, {
+        key: "setCollapsed",
+        value: function setCollapsed(collapsed) {
+            this.options.collapsed = collapsed;
+            this.redraw();
+        }
+    }]);
+    return FACollapseIcon;
+}(FAIcon);
 
 var StateClass = function (_Dispatchable) {
     inherits(StateClass, _Dispatchable);
@@ -12235,6 +12387,43 @@ var Pluginable = function Pluginable(BaseClass) {
     }(BaseClass);
 };
 
+// File meant to handle server time/client time differences
+
+var ServerTime = function () {
+    function ServerTime() {
+        classCallCheck(this, ServerTime);
+    }
+
+    createClass(ServerTime, null, [{
+        key: "getServerOffset",
+        value: function getServerOffset() {}
+    }, {
+        key: "now",
+        value: function now() {
+            // TODO: user performance.timing to figure out when the server time was received
+        }
+    }, {
+        key: "update",
+        value: function update(serverTime, estimatedLatency) {}
+    }]);
+    return ServerTime;
+}();
+
+var DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
+
+// times should be in unix seconds
+// TODO: should be in the time file
+function isDifferentDay(timaA, timeB) {
+    if (Math.max(timaA, timeB) - Math.min(timaA, timeB) > DAY_IN_MILLISECONDS / 1000) {
+        return true;
+    }
+    // Check if different day of the week, when difference is less than a day
+    if (moment.unix(timaA).day() !== moment.unix(timeB).day()) {
+        return true;
+    }
+    return false;
+}
+
 var URLRouterClass = function (_Dispatchable) {
     inherits(URLRouterClass, _Dispatchable);
 
@@ -12372,15 +12561,12 @@ var Deque = function () {
             } else {
                 //Just balance the elements in the middle of the array
                 var _optimalOffset = capacity / 2 - length / 2 | 0;
-                // Move either descending or ascending, to not overwrite values
+                this._values.copyWithin(_optimalOffset, this._offset, this._offset + this._length);
+                // Remove references, to not mess up gc
                 if (_optimalOffset < this._offset) {
-                    for (var _i = 0; _i < length; _i += 1) {
-                        this._values[_i + _optimalOffset] = this._values[_i + this._offset];
-                    }
+                    this._values.fill(undefined, _optimalOffset + this._length, this._offset + this._length);
                 } else {
-                    for (var _i2 = length - 1; _i2 >= 0; _i2 -= 1) {
-                        this._values[_i2 + _optimalOffset] = this._values[_i2 + this._offset];
-                    }
+                    this._values.fill(undefined, this._offset + this._length, _optimalOffset + this._length);
                 }
                 this._offset = _optimalOffset;
             }
@@ -12495,6 +12681,11 @@ exports.Transition = Transition;
 exports.Modifier = Modifier;
 exports.TransitionList = TransitionList;
 exports.Color = Color;
+exports.BasicTabTitle = BasicTabTitle;
+exports.FAIcon = FAIcon;
+exports.FACollapseIcon = FACollapseIcon;
+exports.DoubleClickable = DoubleClickable;
+exports.Draggable = Draggable;
 exports.StateClass = StateClass;
 exports.GlobalState = GlobalState$1;
 exports.StoreObject = StoreObject;
@@ -12551,6 +12742,7 @@ exports.Dispatcher = Dispatcher;
 exports.Dispatchable = Dispatchable;
 exports.RunOnce = RunOnce;
 exports.CleanupJobs = CleanupJobs;
+exports.SingleActiveElementDispatcher = SingleActiveElementDispatcher;
 exports.getAttachCleanupJobMethod = getAttachCleanupJobMethod;
 exports.Ajax = Ajax;
 exports.Plugin = Plugin;
@@ -12560,6 +12752,9 @@ exports.splitInChunks = splitInChunks;
 exports.isIterable = isIterable;
 exports.defaultComparator = defaultComparator;
 exports.slugify = slugify;
+exports.DAY_IN_MILLISECONDS = DAY_IN_MILLISECONDS;
+exports.isDifferentDay = isDifferentDay;
+exports.ServerTime = ServerTime;
 exports.URLRouter = URLRouter;
 exports.Deque = Deque;
 

@@ -66,12 +66,15 @@ UI.CodeEditor = class CodeEditor extends UI.Element {
         if (this.options.value) {
             this.setValue(this.options.value, -1);
         }
-        let langTools ="/static/js/ext/ace/ext-language_tools.js";
-        require([langTools], () => {
-            this.setBasicAutocompletion(this.options.enableBasicAutocompletion);
-            this.setLiveAutocompletion(this.options.enableLiveAutocompletion);
-            this.setSnippets(this.options.enableSnippets);
-        });
+        if (this.options.hasOwnProperty("enableBasicAutocompletion") ||
+            this.options.hasOwnProperty("enableLiveAutocompletion")) {
+            let langTools ="/static/js/ext/ace/ext-language_tools.js";
+            require([langTools], () => {
+                this.setBasicAutocompletion(this.options.enableBasicAutocompletion);
+                this.setLiveAutocompletion(this.options.enableLiveAutocompletion);
+                this.setSnippets(this.options.enableSnippets);
+            });
+        }
     }
 
     redraw() {

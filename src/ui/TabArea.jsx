@@ -3,7 +3,7 @@ import {UI} from "./UIBase";
 import {SingleActiveElementDispatcher} from "../base/Dispatcher";
 import "./Switcher";
 
-UI.BasicTabTitle = class BasicTabTitle extends UI.Element {
+class BasicTabTitle extends UI.Element {
     getPrimitiveTag() {
         return "li";
     }
@@ -58,9 +58,12 @@ UI.BasicTabTitle = class BasicTabTitle extends UI.Element {
             this.setActive(true);
         });
 
-        this.attachListener(this.options.panel, "show", () => {
-            this.setActive(true);
-        });
+        // TODO: less assumptions here
+        if (this.options.panel && this.options.panel.addListener) {
+            this.attachListener(this.options.panel, "show", () => {
+                this.setActive(true);
+            });
+        }
     }
 };
 
@@ -73,7 +76,7 @@ UI.TabTitleArea = class TabTitleArea extends UI.Element {
     }
 };
 
-// Inactive class for the moment, should extend UI.BasicTabTitle
+// Inactive class for the moment, should extend BasicTabTitle
 class SVGTabTitle extends UI.Element  {
     setOptions(options) {
         super.setOptions(options);
@@ -136,6 +139,13 @@ UI.TabArea = class TabArea extends UI.Element {
         this.activeTabDispatcher = new SingleActiveElementDispatcher();
     }
 
+    setOptions(options) {
+        options = Object.assign({
+            autoActive: true,
+        }, options);
+        super.setOptions(options);
+    }
+
     getDOMAttributes() {
         let attr = super.getDOMAttributes();
         if (!this.options.variableHeightPanels) {
@@ -145,7 +155,7 @@ UI.TabArea = class TabArea extends UI.Element {
     }
 
     createTabPanel(panel) {
-        let tab = <UI.BasicTabTitle panel={panel} activeTabDispatcher={this.activeTabDispatcher} active={panel.options.active} href={panel.options.tabHref} />;
+        let tab = <BasicTabTitle panel={panel} activeTabDispatcher={this.activeTabDispatcher} active={panel.options.active} href={panel.options.tabHref} />;
 
         //TODO: Don't modify the panel element!!!!
         let panelClass = " tab-panel nopad";
@@ -166,6 +176,22 @@ UI.TabArea = class TabArea extends UI.Element {
         this.switcherArea.appendChild(tabPanel, doMount || true);
     };
 
+    getTitleArea(tabTitles) {
+        return <UI.TabTitleArea ref="titleArea">
+                {tabTitles}
+            </UI.TabTitleArea>;
+    }
+
+    getSwitcher(tabPanels) {
+        let switcherClass = "";
+        if (!this.options.variableHeightPanels) {
+            switcherClass = "auto-height";
+        }
+        return <UI.Switcher ref="switcherArea" className={switcherClass} lazyRender={this.options.lazyRender}>
+                {tabPanels}
+            </UI.Switcher>;
+    }
+
     renderHTML() {
         let tabTitles = []
         let tabPanels = [];
@@ -182,32 +208,31 @@ UI.TabArea = class TabArea extends UI.Element {
             tabPanels.push(tabPanel);
         }
 
-        if (!activeTab && tabTitles.length > 0) {
+        if (this.options.autoActive && !activeTab && tabTitles.length > 0) {
             tabTitles[0].options.active = true;
-        }
-        
-        let switcherClass = "";
-        if (!this.options.variableHeightPanels) {
-            switcherClass = "auto-height";
         }
 
         return [
-            <UI.TabTitleArea ref="titleArea">
-                {tabTitles}
-            </UI.TabTitleArea>,
-            <UI.Switcher ref="switcherArea" className={switcherClass} lazyRender={this.options.lazyRender}>
-                {tabPanels}
-            </UI.Switcher>
+            this.getTitleArea(tabTitles),
+            this.getSwitcher(tabPanels),
         ];
     };
 
+    setActive(panel) {
+        this.activeTabDispatcher.setActive(panel);
+    }
+
     getActive() {
-        return this.switcherArea.getActive();
+        return this.activeTabDispatcher.getActive();
+    }
+
+    onSetActive(panel) {
+        this.switcherArea.setActive(panel);
     }
 
     onMount() {
         this.attachListener(this.activeTabDispatcher, (panel) => {
-            this.switcherArea.setActive(panel);
+            this.onSetActive(panel);
         });
 
         this.addListener("resize", () => {
@@ -215,3 +240,5 @@ UI.TabArea = class TabArea extends UI.Element {
         });
     }
 };
+
+export {BasicTabTitle};

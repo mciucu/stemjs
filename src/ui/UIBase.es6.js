@@ -1,13 +1,15 @@
-import * as Utils from "../base/Utils";
+import {unwrapArray} from "../base/Utils";
 import {NodeWrapper} from "./NodeWrapper";
+import {Dispatchable} from "../base/Dispatcher";
 import {DOMAttributes, ATTRIBUTE_NAMES_MAP} from "./DOMAttributes";
 
 var UI = {
     renderingStack: [], //keeps track of objects that are redrawing, to know where to assign refs automatically
 };
 
-UI.TextElement = class UITextElement {
+UI.TextElement = class UITextElement extends Dispatchable {
     constructor(options) {
+        super();
         let value = "";
         if (typeof options === "string" || options instanceof String || typeof options === "number" || options instanceof Number) {
             value = String(options);
@@ -35,11 +37,8 @@ UI.TextElement = class UITextElement {
     }
 
     getPrimitiveTag() {
+        // This isn't used anywhere
         return Node.TEXT_NODE;
-    }
-
-    cleanup() {
-        // Nothing to do for plain text elements
     }
 
     copyState(element) {
@@ -47,7 +46,8 @@ UI.TextElement = class UITextElement {
     }
 
     createNode() {
-        this.node = document.createTextNode(this.value);
+        let value = this.getValue();
+        this.node = document.createTextNode(value);
         return this.node;
     }
 
@@ -69,12 +69,7 @@ UI.TextElement = class UITextElement {
                 this.node.nodeValue = newValue;
             }
         }
-        //TODO: make common with UI.Element
-        if (this.options && this.options.ref) {
-            let obj = this.options.ref.parent;
-            let name = this.options.ref.name;
-            obj[name] = this;
-        }
+        this.applyRef();
     }
 };
 
@@ -150,8 +145,7 @@ class UIElement extends NodeWrapper {
     }
 
     applyRef() {
-        // TODO: remove old field names
-        if (this.options.ref) {
+        if (this.options && this.options.ref) {
             let obj = this.options.ref.parent;
             let name = this.options.ref.name;
             obj[name] = this;
@@ -187,15 +181,15 @@ class UIElement extends NodeWrapper {
         }
 
         UI.renderingStack.push(this);
-        let newChildren = Utils.unwrapArray(this.renderHTML());
+        let newChildren = unwrapArray(this.renderHTML());
         UI.renderingStack.pop();
 
         if (newChildren === this.children) {
             for (let i = 0; i < newChildren.length; i += 1) {
                 newChildren[i].redraw();
             }
-            //TODO: also handle ref stuff here
             this.applyDOMAttributes();
+            this.applyRef();
             return;
         }
 
@@ -207,7 +201,7 @@ class UIElement extends NodeWrapper {
             let prevChildNode = (i > 0) ? newChildren[i - 1].node : null;
             let currentChildNode = (prevChildNode) ? prevChildNode.nextSibling : domNode.firstChild;
 
-            // Not an UIElement, to be converted to a TextElement
+            // Not a UIElement, to be converted to a TextElement
             if (!newChild.getPrimitiveTag) {
                 newChild = newChildren[i] = new UI.TextElement(newChild);
             }
@@ -326,11 +320,6 @@ class UIElement extends NodeWrapper {
         if (!this.hasOwnProperty(arrayName)) {
             this[arrayName] = [];
         }
-
-        while (index >= this[arrayName].length) {
-            this[arrayName].push(null);
-        }
-
         return {parent: this[arrayName], name: index};
     }
 
@@ -427,6 +416,9 @@ class UIElement extends NodeWrapper {
     }
 }
 
+// Some methods are shared between all elements
+UI.TextElement.prototype.applyRef = UIElement.prototype.applyRef;
+
 UIElement.domAttributesMap = ATTRIBUTE_NAMES_MAP;
 
 UI.createElement = function (tag, options) {
@@ -451,7 +443,7 @@ UI.createElement = function (tag, options) {
         options.children.push(arguments[i]);
     }
 
-    options.children = Utils.unwrapArray(options.children);
+    options.children = unwrapArray(options.children);
 
     if (options.ref) {
         if (typeof options.ref === "string") {
@@ -485,6 +477,18 @@ UI.Element = UIElement;
 
 UI.str = function (value) {
     return new UI.TextElement({value: value});
+};
+
+UI.Primitive = (Type, tag) => {
+    if (!tag) {
+        tag = Type;
+        Type = UI.Element;
+    }
+    return class Primitive extends Type {
+        getPrimitiveTag() {
+            return tag;
+        }
+    }
 };
 
 // TODO: code shouldn't use UIElement directly, but through UI.Element

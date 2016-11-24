@@ -134,11 +134,6 @@ class NodeWrapper extends Dispatchable {
         this.addDOMListener("click", callback);
     }
 
-    setClickListener(callback) {
-        // TODO: remove old click listener
-        this.addClickListener(callback);
-    }
-
     removeClickListener(callback) {
         this.removeDOMListener("click", callback);
     }

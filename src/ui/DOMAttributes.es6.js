@@ -27,7 +27,7 @@ function CreateAllowedAttributesMap(oldAttributesMap, allowedAttributesArray) {
     return allowedAttributesMap;
 }
 
-//TODO: should be as few of these as possible
+// Should be as few of these as possible
 const ATTRIBUTE_NAMES_MAP = CreateAllowedAttributesMap([
     ["id"],
     ["action"],
@@ -53,25 +53,26 @@ const ATTRIBUTE_NAMES_MAP = CreateAllowedAttributesMap([
 ]);
 
 class DOMAttributes {
-    constructor(options, attributeNamesMap=ATTRIBUTE_NAMES_MAP) {
-        this.attributes = new Map();
-        //this.className = null;
-        this.classes = new Set();
-        this.styleMap = null;
-        //TODO: the set of allowed name should be static in the constructor
+    constructor(options, attributeNamesMap) {
+        let attributesMap;
 
         for (let attributeName in options) {
-            // No hasOwnProperty for perfomance
+            // TODO: Take care of bootstrap bullshit, this should not be in here, add it yourself
             if (attributeName.startsWith("data-") || attributeName.startsWith("aria-")) {
-                this.attributes.set(attributeName, options[attributeName]);
+                if (!attributesMap) {
+                    attributesMap = new Map();
+                }
+
+                attributesMap.set(attributeName, options[attributeName]);
+                continue;
             }
 
-            if (attributeNamesMap.has(attributeName)) {
-
-                let attribute = attributeNamesMap.get(attributeName);
+            // No hasOwnProperty check for perfomance
+            let attributeProperties = attributeNamesMap.get(attributeName);
+            if (attributeProperties) {
                 let value = options[attributeName];
 
-                if (attribute.noValue) {
+                if (attributeProperties.noValue) {
                     if (value) {
                         value = "";
                     } else {
@@ -79,31 +80,36 @@ class DOMAttributes {
                     }
                 }
 
-                this.attributes.set(attribute.domName, value);
-            }
-        }
-
-        if (options.hasOwnProperty("classes")) {
-            // User filter here to prevent empty classes
-            this.classes = new Set(options.classes.filter(cls => cls));
-        } else if (options.hasOwnProperty("className")) {
-            // regex matches any whitespace character or comma
-            this.classes = new Set((options.className + "").split(/[\s,]+/).filter(cls => cls));
-        }
-
-        if (options.hasOwnProperty("style")) {
-            this.styleMap = new Map();
-            for (let key in options.style) {
-                let value = options.style[key];
-                if (typeof value === "function") {
-                    value = value();
+                if (!attributesMap) {
+                    attributesMap = new Map();
                 }
-                this.styleMap.set(key, value);
+
+                attributesMap.set(attributeProperties.domName, value);
             }
         }
+
+        if (attributesMap) {
+            this.attributes = attributesMap;
+        }
+
+        if (options.classes) {
+            // User filter here to prevent empty classes
+            this.classes = new Set(options.classes);
+        } else if (options.className) {
+            this.className = String(options.className);
+        } else {
+            this.classes = new Set();
+        }
+
+        this.styleMap = options.style || {};
     }
 
+    // TODO: there's no real use-case for this method
     setAttribute(key, value, node) {
+        if (!this.attributes) {
+            this.attributes = new Map();
+        }
+
         if (value === undefined) {
             return;
         }
@@ -125,9 +131,9 @@ class DOMAttributes {
             value = value();
         }
         if (!this.styleMap) {
-            this.styleMap = new Map();
+            this.styleMap = {};
         }
-        this.styleMap.set(key, value);
+        this.styleMap[key] = value;
         if (node && node.style[key] !== value) {
             node.style[key] = value;
         }
@@ -135,6 +141,11 @@ class DOMAttributes {
 
     addClass(classes, node) {
         if (!classes) return;
+
+        if (!this.classes && this.className) {
+            this.classes = new Set(this.className.split(" "));
+            this.className = undefined;
+        }
 
         if (Array.isArray(classes)) {
             for (let cls of classes) {
@@ -145,12 +156,17 @@ class DOMAttributes {
             }
         } else {
             classes = String(classes);
-            this.addClass(classes.split(/[\s,]+/), node);
+            this.addClass(classes.split(" "), node);
         }
     }
 
     removeClass(classes, node) {
         if (!classes) return;
+
+        if (!this.classes && this.className) {
+            this.classes = new Set(this.className.split(" "));
+            this.className = undefined;
+        }
 
         if (Array.isArray(classes)) {
             for (let cls of classes) {
@@ -160,43 +176,58 @@ class DOMAttributes {
                 }
             }
         } else {
-            this.removeClass(classes.split(/[\s,]+/), node);
+            this.removeClass(classes.split(" "), node);
         }
     }
 
     apply(node) {
-        //TODO: attributes and styles should be synched (remove missing ones)
-        for (let [key, value] of this.attributes) {
-            if (typeof value !== "undefined") {
-                node.setAttribute(key, value);
-            } else {
-                node.removeAttribute(key);
+        if (this.attributes) {
+            // First update existing node attributes and delete old ones
+            let nodeAttributes = node.attributes;
+            for (let i = nodeAttributes.length - 1; i >= 0; i--) {
+                let attr = nodeAttributes[i];
+                let key = attr.name;
+                if (this.attributes.has(key)) {
+                    let value = this.attributes.get(key);
+                    if (typeof value !== "undefined") {
+                        node.setAttribute(key, value);
+                    } else {
+                        node.removeAttribute(key);
+                    }
+                    this.attributes.delete(key);
+                } else {
+                    node.removeAttribute(key);
+                }
+            }
+            // Add new attributes
+            for (let [key, value] of this.attributes) {
+                if (typeof value !== "undefined") {
+                    node.setAttribute(key, value);
+                }
             }
         }
 
-        // node.removeAttribute("class");
-        if (this.classes && this.classes.size > 0) {
+        if (this.className) {
+            node.className = this.className;
+        } else if (this.classes && this.classes.size > 0) {
             node.className = Array.from(this.classes).join(" ");
             // TODO: find out which solution is best
             // This solution works for svg nodes as well
-            //for (let cls of this.classes) {
+            // for (let cls of this.classes) {
             //    node.classList.add(cls);
-            //}
-        // if (this.classes && this.classes.size > 0) {
-        //     node.className = "";
-        //     for (let cls of this.classes) {
-        //         node.classList.add(cls);
-        //     }
+            // }
         } else {
             node.removeAttribute("class");
         }
 
         node.removeAttribute("style");
         if (this.styleMap) {
-            for (let [key, value] of this.styleMap) {
-                if (node.style[key] !== value) {
-                    node.style[key] = value;
+            for (let key in this.styleMap) {
+                let value = this.styleMap[key];
+                if (typeof value === "function") {
+                    value = value();
                 }
+                node.style[key] = value;
             }
         }
     }
