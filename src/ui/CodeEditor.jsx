@@ -88,6 +88,7 @@ UI.CodeEditor = class CodeEditor extends UI.Element {
     onMount() {
         if (!window.ace) {
             console.error("You need to have the ace library loaded to get this working");
+            return;
         }
         this.ace = ace.edit(this.node);
 

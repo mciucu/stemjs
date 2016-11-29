@@ -1,6 +1,21 @@
 // This whole file needs a refactoring, it's awfully written
 import {UI} from "./UIBase";
 import {Device} from "../base/Device";
+import {StyleSet} from "./Style";
+
+class SectionDividerStyleSet extends StyleSet {
+    constructor() {
+        super(...arguments);
+        // TODO: bind here to getters?
+        this.horizontalDivider = this.css({
+            cursor: "row-resize",
+        });
+
+        this.verticalDivider = this.css({
+            cursor: "col-resize",
+        })
+    }
+}
 
 // options.orientation is the orientation of the divided elements
 UI.DividerBar = class DividerBar extends UI.Element {
@@ -47,8 +62,11 @@ UI.DividerBar = class DividerBar extends UI.Element {
 UI.SectionDivider = class SectionDivider extends UI.Element {
     constructor(options) {
         super(options);
-        this.orientation = this.options.orientation || UI.Orientation.VERTICAL;
         this.uncollapsedSizes = new WeakMap();
+    }
+
+    getOrientation() {
+        return this.options.orientation || UI.Orientation.VERTICAL;
     }
 
     hideBars() {
@@ -72,7 +90,7 @@ UI.SectionDivider = class SectionDivider extends UI.Element {
     }
 
     getDimension(element) {
-        if (this.orientation === UI.Orientation.HORIZONTAL) {
+        if (this.getOrientation() === UI.Orientation.HORIZONTAL) {
             return element.getWidth();
         } else {
             return element.getHeight();
@@ -80,7 +98,7 @@ UI.SectionDivider = class SectionDivider extends UI.Element {
     }
 
     setDimension(element, size) {
-        if (this.orientation === UI.Orientation.HORIZONTAL) {
+        if (this.getOrientation() === UI.Orientation.HORIZONTAL) {
             element.setWidth(size);
         } else {
             element.setHeight(size);
@@ -88,9 +106,9 @@ UI.SectionDivider = class SectionDivider extends UI.Element {
     }
 
     getMinDimension(element) {
-        if (this.orientation === UI.Orientation.HORIZONTAL && element.options.hasOwnProperty("minWidth")) {
+        if (this.getOrientation() === UI.Orientation.HORIZONTAL && element.options.hasOwnProperty("minWidth")) {
             return element.options.minWidth;
-        } else if (this.orientation === UI.Orientation.VERTICAL && element.options.hasOwnProperty("minHeight")) {
+        } else if (this.getOrientation() === UI.Orientation.VERTICAL && element.options.hasOwnProperty("minHeight")) {
             return element.options.minHeight;
         } else {
             return 100.0 / (this.children.length - 1) / 4;
@@ -223,9 +241,9 @@ UI.SectionDivider = class SectionDivider extends UI.Element {
                     let updateDimension = (event) => {
                         let delta;
 
-                        if (this.orientation === UI.Orientation.HORIZONTAL) {
+                        if (this.getOrientation() === UI.Orientation.HORIZONTAL) {
                             delta = Device.getEventX(event) - currentX;
-                        } else if (this.orientation === UI.Orientation.VERTICAL) {
+                        } else if (this.getOrientation() === UI.Orientation.VERTICAL) {
                             delta = Device.getEventY(event) - currentY;
                         }
 
@@ -282,6 +300,7 @@ UI.SectionDivider = class SectionDivider extends UI.Element {
     }
 
     renderHTML() {
+        // TODO: use a Style for the Divider bars
         return [this.dividedChildren(),
             <UI.StyleElement>
                 <UI.StyleInstance selector=".sectionDividerHorizontal:hover" attributes={{"cursor": "row-resize"}} />
@@ -292,7 +311,8 @@ UI.SectionDivider = class SectionDivider extends UI.Element {
     redraw() {
         super.redraw();
         // Safari bug fix
-        if (this.orientation === UI.Orientation.HORIZONTAL) {
+        // TODO: this isn't a proper solution, children elements should not be modified
+        if (this.getOrientation() === UI.Orientation.HORIZONTAL) {
             for (let i = 0; i < this.children.length - 1; i += 2) {
                 this.children[i].setStyle("vertical-align", "top");
             }
@@ -304,7 +324,7 @@ UI.SectionDivider = class SectionDivider extends UI.Element {
         this.dividers = 0;
         for (let child of this.options.children) {
             if (children.length > 0) {
-                children.push(<UI.DividerBar ref={"divider" + this.dividers} orientation={this.orientation}/>);
+                children.push(<UI.DividerBar ref={"divider" + this.dividers} orientation={this.getOrientation()}/>);
                 this.dividers += 1;
             }
             children.push(child);

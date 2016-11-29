@@ -332,11 +332,15 @@ UI.ActionModal = class ActionModal extends UI.Modal {
         return content ? <div className="modal-footer">{content}</div> : null;
     }
 
+    getActionButton() {
+        return <UI.Button level={this.getActionLevel()} label={this.getActionName()} onClick={() => this.action()}/>;
+    }
+
     getFooterContent() {
         return [
             <UI.TemporaryMessageArea ref="messageArea"/>,
             <UI.Button level={UI.Level.DEFAULT} label={this.getCloseName()} onClick={() => this.hide()}/>,
-            <UI.Button level={this.getActionLevel()} label={this.getActionName()} onClick={() => this.action()}/>
+            this.getActionButton(),
         ];
     }
 
