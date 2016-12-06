@@ -339,6 +339,14 @@ UI.TextArea = class TextArea extends UI.Element {
         this.options.value = value;
         this.node.value = value;
     }
+
+    onInput(callback) {
+        this.addDOMListener("input change", callback);
+    }
+
+    onKeyUp(callback) {
+        this.addDOMListener("keyup", callback);
+    }
 };
 
 UI.InputField = class InputField extends UI.Element {

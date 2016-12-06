@@ -1,6 +1,8 @@
 // TODO: simplify this if possible
 // TODO: rename to DraggableMixin?
 let Draggable = (BaseClass) => class Draggable extends BaseClass {
+    // @lazyinit
+    // clickCallbacks = new Map();
     addClickListener(callback) {
         this.ensureFieldExists("_clickCallbacks", x => new Map());
 

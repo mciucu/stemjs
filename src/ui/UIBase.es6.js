@@ -1,5 +1,4 @@
 import {unwrapArray} from "../base/Utils";
-import {NodeWrapper} from "./NodeWrapper";
 import {Dispatchable} from "../base/Dispatcher";
 import {DOMAttributes, ATTRIBUTE_NAMES_MAP} from "./DOMAttributes";
 
@@ -7,7 +6,29 @@ var UI = {
     renderingStack: [], //keeps track of objects that are redrawing, to know where to assign refs automatically
 };
 
-UI.TextElement = class UITextElement extends Dispatchable {
+class BaseUIElement extends Dispatchable {
+    canOverwrite(existingChild) {
+        return this.constructor === existingChild.constructor &&
+               this.getPrimitiveTag() === existingChild.getPrimitiveTag();
+    }
+
+    applyRef() {
+        if (this.options && this.options.ref) {
+            let obj = this.options.ref.parent;
+            let name = this.options.ref.name;
+            obj[name] = this;
+        }
+    }
+
+    // TODO: should be renamed to destroy
+    destroyNode() {
+        this.cleanup();
+        this.node.remove();
+        this.node = undefined; // Clear for gc
+    }
+}
+
+UI.TextElement = class UITextElement extends BaseUIElement {
     constructor(options) {
         super();
         let value = "";
@@ -32,12 +53,7 @@ UI.TextElement = class UITextElement extends Dispatchable {
         parent.node.insertBefore(this.node, nextSibling);
     }
 
-    canOverwrite(existingChild) {
-        return existingChild.constructor === this.constructor;
-    }
-
     getPrimitiveTag() {
-        // This isn't used anywhere
         return Node.TEXT_NODE;
     }
 
@@ -46,8 +62,7 @@ UI.TextElement = class UITextElement extends Dispatchable {
     }
 
     createNode() {
-        let value = this.getValue();
-        this.node = document.createTextNode(value);
+        this.node = document.createTextNode("");
         return this.node;
     }
 
@@ -74,21 +89,17 @@ UI.TextElement = class UITextElement extends Dispatchable {
 };
 
 //Some changes to the basic API for UI.Element need to be mirrored in UI.TextElement
-class UIElement extends NodeWrapper {
-    constructor(options) {
-        options = options || {};
-        super(null, options, true);
+class UIElement extends BaseUIElement {
+    constructor(options={}) {
+        super();
         this.children = [];
+        this.options = options; // TODO: this is a hack, to not break all the code that references this.options in setOptions
         this.setOptions(options);
     };
 
     setOptions(options) {
-        this.options = options || {};
+        this.options = options;
         this.options.children = this.options.children || [];
-
-        if (options.hasOwnProperty("class")) {
-            console.error("Invalid UIElement attribute: class. Did you mean className?");
-        }
     }
 
     updateOptions(options) {
@@ -105,20 +116,23 @@ class UIElement extends NodeWrapper {
         return this.options.primitiveTag || "div";
     }
 
-    static create(parentNode, options={}) {
+    static create(parentNode, options) {
         let uiElement = new this(options);
         uiElement.mount(parentNode, null);
         return uiElement;
     }
 
+    // TODO: should be renamed to renderContent
     getGivenChildren() {
         return this.options.children || [];
     }
 
+    // TODO: this shouldn't be in UI.Element
     getTitle() {
         return this.options.title || "";
     }
 
+    // TODO: should be renamed to render()
     renderHTML() {
         return this.options.children;
     };
@@ -126,12 +140,6 @@ class UIElement extends NodeWrapper {
     createNode() {
         this.node = document.createElement(this.getPrimitiveTag());
         return this.node;
-    }
-
-    destroyNode() {
-        this.cleanup();
-        this.node.remove();
-        this.node = undefined;
     }
 
     // Abstract, gets called when removing DOM node associated with the
@@ -142,19 +150,6 @@ class UIElement extends NodeWrapper {
         }
         this.clearNode();
         super.cleanup();
-    }
-
-    applyRef() {
-        if (this.options && this.options.ref) {
-            let obj = this.options.ref.parent;
-            let name = this.options.ref.name;
-            obj[name] = this;
-        }
-    }
-
-    canOverwrite(existingChild) {
-        return this.constructor === existingChild.constructor &&
-                this.getPrimitiveTag() === existingChild.getPrimitiveTag();
     }
 
     overwriteChild(existingChild, newChild) {
@@ -176,7 +171,7 @@ class UIElement extends NodeWrapper {
 
     redraw() {
         if (!this.node) {
-            console.warn("Element not yet mounted. Redraw aborted!", this);
+            console.error("Element not yet mounted. Redraw aborted!", this);
             return false;
         }
 
@@ -225,16 +220,14 @@ class UIElement extends NodeWrapper {
             }
         }
 
-        let newChildrenNodes = new Set();
-        for (let i = 0; i < newChildren.length; i += 1) {
-            newChildrenNodes.add(newChildren[i].node);
-        }
+        if (this.children.length) {
+            // Remove children that don't need to be here
+            let newChildrenSet = new Set(newChildren);
 
-        for (let i = 0; i < this.children.length; i += 1) {
-            if (!newChildrenNodes.has(this.children[i].node)) {
-                //TODO: should call this.children[i].destroyNode()
-                this.children[i].cleanup();
-                domNode.removeChild(this.children[i].node);
+            for (let i = 0; i < this.children.length; i += 1) {
+                if (!newChildrenSet.has(this.children[i])) {
+                    this.children[i].destroyNode();
+                }
             }
         }
 
@@ -255,11 +248,10 @@ class UIElement extends NodeWrapper {
     setAttribute(key, value) {
         this.options[key] = value;
 
-        if (typeof value === "function") {
-            value = value(this);
-        }
-
         if (this.node) {
+            if (typeof value === "function") {
+                value = value(this);
+            }
             this.node.setAttribute(key, value);
         }
     }
@@ -273,11 +265,10 @@ class UIElement extends NodeWrapper {
             }
         }
 
-        if (typeof value === "function") {
-            value = value(this);
-        }
-
         if (this.node) {
+            if (typeof value === "function") {
+                value = value(this);
+            }
             this.node.style[attributeName] = value;
         }
     }
@@ -325,7 +316,9 @@ class UIElement extends NodeWrapper {
 
     mount(parent, nextSiblingNode) {
         if (!parent.node) {
-            parent = new NodeWrapper(parent);
+            let parentWrapper = new UI.Element();
+            parentWrapper.node = parent;
+            parent = parentWrapper;
         }
         this.parent = parent;
         if (!this.node) {
@@ -414,10 +407,160 @@ class UIElement extends NodeWrapper {
     hide() {
         this.addClass("hidden");
     }
-}
 
-// Some methods are shared between all elements
-UI.TextElement.prototype.applyRef = UIElement.prototype.applyRef;
+    insertChildNodeBefore(childElement, nextSiblingNode) {
+        this.node.insertBefore(childElement.node, nextSiblingNode);
+    }
+
+    // TODO: should be renamed emptyNode()
+    clearNode() {
+        while (this.node && this.node.lastChild) {
+            this.node.removeChild(this.node.lastChild);
+        }
+    }
+
+    // TODO: element method should be removed, there's no need to jquery dependencies
+    get element() {
+        if (!this._element) {
+            this._element = $(this.node);
+        }
+        return this._element;
+    }
+
+    // TODO: rethink this!
+    uniqueId() {
+        if (!this.hasOwnProperty("uniqueIdStr")) {
+        // TODO: should this be global?
+            if (!this.constructor.hasOwnProperty("objectCount")) {
+                this.constructor.objectCount = 0;
+            }
+            this.constructor.objectCount += 1;
+            this.uniqueIdStr = this.constructor.objectCount + "R" + Math.random().toString(36).substr(2);
+        }
+        return this.uniqueIdStr;
+    }
+
+    getOffset() {
+        let node = this.node;
+        if (!node) {
+            return {left: 0, top: 0};
+        }
+        let nodePosition = (node.style ? node.style.position : null);
+        let left = 0;
+        let top = 0;
+        while (node) {
+            let nodeStyle = node.style || {};
+            if (nodePosition === "absolute" && nodeStyle.position === "relative") {
+                return {left: left, top: top};
+            }
+            left += node.offsetLeft;
+            top += node.offsetTop;
+            node = node.offsetParent;
+        }
+        return {left: left, top: top};
+    }
+
+    getStyle(attribute) {
+        // TODO: WHY THIS?
+        return window.getComputedStyle(this.node, null).getPropertyValue(attribute);
+    }
+
+    // TODO: should be called isInDocument
+    isInDOM() {
+        return document.body.contains(this.node);
+    }
+
+    getWidthOrHeight(parameter) {
+        let node = this.node;
+        if (!node) {
+            return 0;
+        }
+        let value = parseFloat(parameter === "width" ? node.offsetWidth : node.offsetHeight);
+        // If for unknown reasons this happens, maybe this will work
+        if (value == null) {
+            value = parseFloat(this.getStyle(parameter));
+        }
+        if (isNaN(value)) {
+            value = 0;
+        }
+        if (this.getStyle("box-sizing") === "border-box") {
+            let attributes = ["padding-", "border-"];
+            let directions = {
+                width: ["left", "right"],
+                height: ["top", "bottom"]
+            };
+            for (let i = 0; i < 2; i += 1) {
+                for (let j = 0; j < 2; j += 1) {
+                    value -= parseFloat(this.getStyle(attributes[i] + directions[parameter][j]));
+                }
+            }
+        }
+        return value;
+    }
+
+    getHeight() {
+        return this.getWidthOrHeight("height");
+    };
+
+    getWidth() {
+        return this.getWidthOrHeight("width");
+    }
+
+    setHeight(value) {
+        if (typeof value === "number") {
+            value += "px";
+        }
+        this.setStyle("height", value);
+        this.dispatch("resize");
+    };
+
+    setWidth(value) {
+        if (typeof value === "number") {
+            value += "px";
+        }
+        this.setStyle("width", value);
+        this.dispatch("resize");
+    }
+
+    // TODO: rename to addNodeListener
+    addDOMListener(name, callback) {
+        this.node.addEventListener(name, callback);
+    }
+
+    removeDOMListener(name, callback) {
+        this.node.removeEventListener(name, callback);
+    }
+
+    addClickListener(callback) {
+        this.addDOMListener("click", callback);
+    }
+
+    removeClickListener(callback) {
+        this.removeDOMListener("click", callback);
+    }
+
+    addDoubleClickListener(callback) {
+        this.addDOMListener("dblclick", callback);
+    }
+
+    removeDoubleClickListener(callback) {
+        this.removeDOMListener("dblclick", callback);
+    }
+
+    // TODO: we need a consistent nomenclature, should be called addChangeListener
+    onChange(callback) {
+        this.addDOMListener("change", callback);
+    }
+
+    // TODO: this should be done with decorators
+    ensureFieldExists(name, value) {
+        if (!this.hasOwnProperty(name)) {
+            this[name] = value(this);
+        }
+        return this[name];
+    }
+
+}
 
 UIElement.domAttributesMap = ATTRIBUTE_NAMES_MAP;
 
@@ -463,6 +606,10 @@ UI.createElement = function (tag, options) {
         }
 
         options.key = "_ref" + options.ref.name;
+    }
+
+    if (options.hasOwnProperty("class")) {
+        console.error("Invalid UI Element attribute: class. Did you mean className?");
     }
 
     if (typeof tag === "string") {

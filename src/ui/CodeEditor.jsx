@@ -3,6 +3,18 @@ import {UI} from "./UIBase";
 
 UI.CodeEditor = class CodeEditor extends UI.Element {
     setOptions(options) {
+        let defaultOptions = {
+            aceMode: "text",
+            readOnly: false,
+            aceTheme: "dawn",
+            fontSize: 14,
+            tabSize: 4,
+            showLineNumber: true,
+            showPrintMargin: false,
+            printMarginSize: 80,
+        };
+        options = Object.assign(defaultOptions, options);
+
         super.setOptions(options);
 
         if (this.options.aceMode) {
@@ -20,18 +32,8 @@ UI.CodeEditor = class CodeEditor extends UI.Element {
 
     applyAceOptions() {
         //set the language mode
-        this.ace.getSession().setMode("ace/mode/" + (this.options.aceMode || "text"));
+        this.ace.getSession().setMode("ace/mode/" + this.options.aceMode);
 
-        let defaultOptions = {
-            readOnly: false,
-            aceTheme: "dawn",
-            fontSize: 14,
-            tabSize: 4,
-            showLineNumber: true,
-            showPrintMargin: false,
-            printMarginSize: 80,
-        };
-        this.options = Object.assign(defaultOptions, this.options);
         this.setAceTheme(this.options.aceTheme);
         this.setAceFontSize(this.options.fontSize);
         this.setAceTabSize(this.options.tabSize);
@@ -80,14 +82,21 @@ UI.CodeEditor = class CodeEditor extends UI.Element {
     redraw() {
         if (this.ace) {
             this.ace.resize();
+            this.applyRef();
             return;
         }
         super.redraw();
     }
 
+    static requireAce(callback) {
+        throw Error("You need to implement requireAce");
+    }
+
     onMount() {
         if (!window.ace) {
-            console.error("You need to have the ace library loaded to get this working");
+            this.constructor.requireAce(() => {
+                this.onMount();
+            });
             return;
         }
         this.ace = ace.edit(this.node);
@@ -247,13 +256,12 @@ UI.CodeEditor = class CodeEditor extends UI.Element {
 };
 
 UI.StaticCodeHighlighter = class StaticCodeHighlighter extends UI.CodeEditor {
-    onMount() {
-        super.onMount();
-        //default font
-        this.ace.setFontSize(this.options.fontSize || this.getData("font-size", 13));
-        // Make not editable by user
-        this.setReadOnly(true);
-        // Enable code wrapping
-        this.ace.getSession().setUseWrapMode(true);
+    setOptions(options) {
+        options = Object.assign({
+            fontSize: 13,
+            readOnly: true,
+            lineWrapping: true,
+        }, options);
+        super.setOptions(options);
     }
 };

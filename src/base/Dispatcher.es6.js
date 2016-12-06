@@ -29,7 +29,7 @@ class Dispatcher {
         for (let i = 0; i < this.listeners.length; i += 1) {
             if (this.listeners[i] === callback) {
                 console.error("Can't re-register for the same callback: ", this, " ", callback);
-                return new DispatcherHandle(this, this.listeners[i]);
+                return;
             }
         }
 
@@ -58,11 +58,15 @@ class Dispatcher {
     }
 
     dispatch(payload) {
-        // We're going in reverse here, because some listeners can remove themselves after being called
-        for (let i = this.listeners.length - 1; i >= 0; i -= 1) {
-            // TODO: optimize common cases
+        for (let i = 0; i < this.listeners.length; ) {
             let listener = this.listeners[i];
+            // TODO: optimize common cases
             listener(...arguments);
+            // In case the current listener deleted itself, keep the loop counter the same
+            // If it deleted listeners that were executed before it, that's just wrong and there are no guaranteed about
+            if (listener === this.listeners[i]) {
+                i++;
+            }
         }
     };
 }

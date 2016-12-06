@@ -187,6 +187,9 @@ class DOMAttributes {
             for (let i = nodeAttributes.length - 1; i >= 0; i--) {
                 let attr = nodeAttributes[i];
                 let key = attr.name;
+                if (key === "style" || key === "class") {
+                    continue;
+                }
                 if (this.attributes.has(key)) {
                     let value = this.attributes.get(key);
                     if (typeof value !== "undefined") {

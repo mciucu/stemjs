@@ -13,7 +13,7 @@ class NodeWrapper extends Dispatchable {
         this.node.insertBefore(childElement.node, nextSiblingNode);
     }
 
-    // TODO: should this be merged with the cleanup method?
+    // TODO: should be renamed emptyNode()
     clearNode() {
         while (this.node && this.node.lastChild) {
             this.node.removeChild(this.node.lastChild);

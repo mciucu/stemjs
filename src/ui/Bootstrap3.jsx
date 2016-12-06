@@ -118,7 +118,7 @@ UI.Button = class Button extends BootstrapMixin(UI.Element, "btn") {
 
 UI.StateButton = class StateButton extends UI.Button {
     setOptions(options) {
-        options.state = this.options.state || options.state || UI.ActionStatus.DEFAULT;
+        options.state = (this.options && this.options.state) || options.state || UI.ActionStatus.DEFAULT;
 
         super.setOptions(options);
 

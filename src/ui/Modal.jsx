@@ -289,7 +289,7 @@ UI.ErrorModal = class ErrorModal extends UI.Modal {
 
 UI.ActionModal = class ActionModal extends UI.Modal {
     getActionName() {
-        return this.options.actionName || this.options.label;
+        return this.options.actionName;
     }
 
     getActionLevel() {
@@ -349,8 +349,18 @@ UI.ActionModal = class ActionModal extends UI.Modal {
 
 UI.ActionModalButton = function(ActionModal) {
     return class ActionModalButton extends UI.Button {
+        getModalOptions() {
+            let modalOptions = {
+                actionName: this.options.label,
+                level: this.options.level
+            };
+
+            Object.assign(modalOptions, this.options.modalOptions);
+            return modalOptions;
+        }
+
         onMount() {
-            this.modal = <ActionModal {...this.options}/>;
+            this.modal = <ActionModal {...this.getModalOptions()}/>;
             this.addClickListener(() => this.modal.show());
         }
     };
