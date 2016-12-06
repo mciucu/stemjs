@@ -91,3 +91,8 @@ export function slugify(string) {
 
     return string;
 }
+
+export function deepCopy() {
+    // TODO: should implement this without jQuery
+	return $.extend(true, ...arguments);
+}

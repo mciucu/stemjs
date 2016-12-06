@@ -1,19 +1,58 @@
 // TODO: all of the classes here need to be implemented with StyleSets
 import {UI} from "./UIBase";
 import {SingleActiveElementDispatcher} from "../base/Dispatcher";
+import {css, hover, focus, active, ExclusiveClassSet, StyleSet} from "Style";
 import "./Switcher";
+
+class TabAreaStyle extends StyleSet {
+    constructor() {
+        super();
+
+        this.activeTab = this.css({
+            "color": "#555 !important",
+            "cursor": "default !important",
+            "background-color": "#fff !important",
+            "border": "1px solid #ddd !important",
+            "border-bottom-color": "transparent !important",
+        });
+
+        this.tab = this.css({
+            "user-select": "none",
+            "margin-bottom": "-1px",
+            "text-decoration": "none !important",
+            "float": "left",
+            "margin-right": "2px",
+            "line-height": "1.42857143",
+            "border": "1px solid transparent",
+            "border-radius": "4px 4px 0 0",
+            "position": "relative",
+            "display": "block",
+            "padding": "8px",
+            "padding-left": "10px",
+            "padding-right": "10px",
+            ":hover": {
+                "cursor": "pointer",
+                "background-color": "#eee",
+                "color": "#555",
+                "border": "1px solid #ddd",
+                "border-bottom-color": "transparent",
+            },
+        });
+
+        this.nav = this.css({
+            "border-bottom": "1px solid #ddd",
+            "padding-left": "0",
+            "margin-bottom": "0",
+            "list-style": "none",
+        });
+    }
+}
+
+let tabAreaStyle = new TabAreaStyle();
 
 class BasicTabTitle extends UI.Element {
     getPrimitiveTag() {
-        return "li";
-    }
-
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
-        if (this.options.active) {
-            attr.addClass("active");
-        }
-        return attr;
+        return "span";
     }
 
     canOverwrite(existingElement) {
@@ -42,9 +81,13 @@ class BasicTabTitle extends UI.Element {
         if (this.options.href) {
             hrefOption.href = this.options.href;
         }
+        let activeTab = "";
+        if (this.options.active) {
+            activeTab = tabAreaStyle.activeTab;
+        }
         return [
-            <a {...hrefOption} className="tabTitle unselectable pointer-cursor csa-tab">
-                <div className="csa-tab-title">{this.getTitle()}</div>
+            <a {...hrefOption}  className={`${activeTab} ${tabAreaStyle.tab}`}>
+                {this.getTitle()}
             </a>
         ];
     }
@@ -70,8 +113,7 @@ class BasicTabTitle extends UI.Element {
 UI.TabTitleArea = class TabTitleArea extends UI.Element {
     getDOMAttributes() {
         let attr = super.getDOMAttributes();
-        attr.addClass("nav nav-tabs collapsible-tabs");
-        attr.setAttribute("role", "tablist");
+        attr.addClass(tabAreaStyle.nav);
         return attr;
     }
 };
@@ -178,8 +220,8 @@ UI.TabArea = class TabArea extends UI.Element {
 
     getTitleArea(tabTitles) {
         return <UI.TabTitleArea ref="titleArea">
-                {tabTitles}
-            </UI.TabTitleArea>;
+            {tabTitles}
+        </UI.TabTitleArea>;
     }
 
     getSwitcher(tabPanels) {
@@ -214,6 +256,7 @@ UI.TabArea = class TabArea extends UI.Element {
 
         return [
             this.getTitleArea(tabTitles),
+            <div style={{clear: "both"}}></div>,
             this.getSwitcher(tabPanels),
         ];
     };

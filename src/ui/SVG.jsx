@@ -4,6 +4,7 @@ import * as math from "../math";
 import {CreateAllowedAttributesMap} from "./DOMAttributes";
 import {Color} from "./Color";
 import {Transition} from "./Transition";
+import {deepCopy} from "../base/Utils";
 
 UI.SVG = {};
 
@@ -27,7 +28,7 @@ UI.SVG.Element = class SVGElement extends UI.Element {
         }
         if (this.constructor.getDefaultOptions) {
             let defaultOptions = this.constructor.getDefaultOptions();
-            options = Object.assign({}, defaultOptions, options);
+            options = deepCopy({}, defaultOptions, options);
         }
 
         super.setOptions(options);
