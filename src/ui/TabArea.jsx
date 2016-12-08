@@ -20,13 +20,12 @@ class TabAreaStyle extends StyleSet {
             "user-select": "none",
             "margin-bottom": "-1px",
             "text-decoration": "none !important",
-            "float": "left",
+            "display": "inline-block",
             "margin-right": "2px",
             "line-height": "1.42857143",
             "border": "1px solid transparent",
             "border-radius": "4px 4px 0 0",
             "position": "relative",
-            "display": "block",
             "padding": "8px",
             "padding-left": "10px",
             "padding-right": "10px",
@@ -48,6 +47,7 @@ class TabAreaStyle extends StyleSet {
     }
 }
 
+// TODO: this should not be instantiated before first needed!
 let tabAreaStyle = new TabAreaStyle();
 
 class BasicTabTitle extends UI.Element {
@@ -66,14 +66,25 @@ class BasicTabTitle extends UI.Element {
         this.options.active = active;
         this.redraw();
         if (active) {
-            this.options.activeTabDispatcher.setActive(this.options.panel, () => {
+            this.options.activeTabDispatcher.setActive(this.getPanel(), () => {
                 this.setActive(false);
             });
         }
     }
 
+    getPanel() {
+        return this.options.panel;
+    }
+
     getTitle() {
-        return this.options.title || this.options.panel.getTitle();
+        if (this.options.title) {
+            return this.options.title;
+        }
+        let panel = this.getPanel();
+        if (typeof panel.getTitle === "function") {
+            return panel.getTitle();
+        }
+        return panel.options.title;
     }
 
     renderHTML() {
@@ -117,63 +128,6 @@ UI.TabTitleArea = class TabTitleArea extends UI.Element {
         return attr;
     }
 };
-
-// Inactive class for the moment, should extend BasicTabTitle
-class SVGTabTitle extends UI.Element  {
-    setOptions(options) {
-        super.setOptions(options);
-        this.options.angle = options.angle || "0";
-        this.options.strokeWidth = options.strokeWidth || "2";
-    };
-
-    getPrimitiveTag() {
-        return "li";
-    };
-
-    setLabel(label) {
-        this.options.label = label;
-        this.redraw();
-    };
-
-    redraw() {
-        super.redraw();
-        setTimeout(() => {
-            let strokeWidth = parseFloat(this.options.strokeWidth);
-            let mainHeight = 1.4 * this.tabTitle.getHeight();
-            let angleWidth = Math.tan(this.options.angle / 180 * Math.PI) * mainHeight;
-            let mainWidth = this.tabTitle.getWidth() + 1.2 * this.tabTitle.getHeight();
-            let tabHeight = mainHeight;
-            let tabWidth = mainWidth + 2 * angleWidth;
-
-            let svgWidth = tabWidth + 2 * strokeWidth;
-            let svgHeight = tabHeight + strokeWidth;
-
-            let pathString = "M " + strokeWidth + " " + (svgHeight + strokeWidth / 2) + " l " + angleWidth + " -" +
-                        svgHeight + " l " + mainWidth + " 0 l " + angleWidth + " " + svgHeight;
-
-            this.tabSvg.setWidth(svgWidth);
-            this.tabSvg.setHeight(svgHeight);
-            //TODO Check if this is working. It might not.
-            this.tabPath.setPath(pathString);
-            this.tabTitle.setStyle("top",tabHeight / 6 + strokeWidth);
-            this.tabTitle.setStyle("left", angleWidth + strokeWidth + 0.6 * this.tabTitle.getHeight() + "px");
-            console.log(angleWidth);
-            this.setStyle("margin-right", -(angleWidth + 2 * strokeWidth));
-            this.setStyle("z-index", 100);
-        }, 0);
-    }
-
-    renderHTML() {
-        return [
-            <UI.SVG.SVGRoot ref="tabSvg" style={{width: "0px", height: "0px"}}>
-                <UI.SVG.Path ref="tabPath" d=""/>
-            </UI.SVG.SVGRoot>,
-            //TODO Rename this to labelPanel
-            <UI.Panel ref="tabTitle" style={{pointerEvents: "none", position: "absolute"}}>
-                {this.options.label}
-            </UI.Panel>];
-    };
-}
 
 UI.TabArea = class TabArea extends UI.Element {
     constructor(options) {

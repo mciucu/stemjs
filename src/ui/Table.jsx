@@ -51,8 +51,8 @@ UI.CollapsibleTableRow = class CollapsibleTableRow extends UI.TableRow {
         this.collapseButton.addClickListener((event) => {
             this.collapsed = (this.collapsed != true);
             this.collapseButton.toggleClass("collapsed");
-            // TODO (@kira): Find out how to do this
-            this.collapsible.element.collapse("toggle");
+            // TODO (@kira): Find out how to do this properly
+            $(this.collapsible.node).collapse("toggle");
         });
     }
 

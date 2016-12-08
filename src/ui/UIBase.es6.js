@@ -20,9 +20,17 @@ class BaseUIElement extends Dispatchable {
         }
     }
 
-    // TODO: should be renamed to destroy
+    removeRef() {
+        if (this.options && this.options.ref) {
+            let obj = this.options.ref.parent;
+            let name = this.options.ref.name;
+            obj[name] = undefined;
+        }
+    }
+
     destroyNode() {
         this.cleanup();
+        this.removeRef();
         this.node.remove();
         this.node = undefined; // Clear for gc
     }
@@ -31,7 +39,7 @@ class BaseUIElement extends Dispatchable {
 UI.TextElement = class UITextElement extends BaseUIElement {
     constructor(options) {
         super();
-        let value = "";
+        let value;
         if (typeof options === "string" || options instanceof String || typeof options === "number" || options instanceof Number) {
             value = String(options);
             options = null;
@@ -88,7 +96,7 @@ UI.TextElement = class UITextElement extends BaseUIElement {
     }
 };
 
-//Some changes to the basic API for UI.Element need to be mirrored in UI.TextElement
+
 class UIElement extends BaseUIElement {
     constructor(options={}) {
         super();
@@ -103,15 +111,18 @@ class UIElement extends BaseUIElement {
     }
 
     updateOptions(options) {
-        let updatedOptions = Object.assign(this.options, options);
-        this.setOptions(updatedOptions);
+        Object.assign(this.options, options);
+        this.setOptions(this.options);
+        this.redraw();
     }
 
+    // Used when we want to reuse the current element, with the options from the passed in argument
+    // Is only called when element.canOverwrite(this) is true
     copyState(element) {
         this.setOptions(element.options);
     }
 
-    //TODO: should be renamed to getDocumentTag or getTag, or getHTMLTag ?
+    //TODO: should be renamed to getNodeType
     getPrimitiveTag() {
         return this.options.primitiveTag || "div";
     }
@@ -125,11 +136,6 @@ class UIElement extends BaseUIElement {
     // TODO: should be renamed to renderContent
     getGivenChildren() {
         return this.options.children || [];
-    }
-
-    // TODO: this shouldn't be in UI.Element
-    getTitle() {
-        return this.options.title || "";
     }
 
     // TODO: should be renamed to render()
@@ -273,6 +279,7 @@ class UIElement extends BaseUIElement {
         }
     }
 
+    // TODO: rewrite to not use this.domAttributes
     addClass(className) {
         this.domAttributes.addClass(String(className), this.node);
     }
@@ -293,14 +300,10 @@ class UIElement extends BaseUIElement {
         }
     }
 
+    // TODO: a more expressive way to do this would be to be able to walk to proto chain
+    // TODO: to call something like addExtraAttributes(attr);
     getDOMAttributes() {
-        if (this.constructor.extraDOMAttributes) {
-            let domAttributes = super.getDOMAttributes();
-            this.extraDOMAttributes(domAttributes);
-            return domAttributes;
-        } else {
-            return new DOMAttributes(this.options, this.constructor.domAttributesMap);
-        }
+        return new DOMAttributes(this.options, this.constructor.domAttributesMap);
     }
 
     refLink(name) {
@@ -328,23 +331,24 @@ class UIElement extends BaseUIElement {
 
         parent.insertChildNodeBefore(this, nextSiblingNode);
 
-        // TODO: this should be cleaned up
+        // TODO: not a great pattern to have this here
         if (this.options.onClick) {
             this.onClickHandler = (event) => {
                 UI.event = event;
                 if (this.options.onClick) {
-                    this.options.onClick(this);
+                    this.options.onClick(this, event);
                 }
             };
             this.addClickListener(this.onClickHandler);
-            //TODO: THIS NEEDS TO BE REMOVED
         }
         this.onMount();
     }
 
-    onMount() {}
+    onMount() {
+        // Nothing by default
+    }
 
-    // You need to overwrite this if this.options.children !== this.children
+    // You need to overwrite the next child manipulation rutines if this.options.children !== this.children
     appendChild(child) {
         if (this.children !== this.options.children) {
             throw "Can't properly handle appendChild, you need to implement it for " + this.constructor;
@@ -419,14 +423,6 @@ class UIElement extends BaseUIElement {
         }
     }
 
-    // TODO: element method should be removed, there's no need to jquery dependencies
-    get element() {
-        if (!this._element) {
-            this._element = $(this.node);
-        }
-        return this._element;
-    }
-
     // TODO: rethink this!
     uniqueId() {
         if (!this.hasOwnProperty("uniqueIdStr")) {
@@ -470,6 +466,7 @@ class UIElement extends BaseUIElement {
         return document.body.contains(this.node);
     }
 
+    // TODO: not sure about this method
     getWidthOrHeight(parameter) {
         let node = this.node;
         if (!node) {
@@ -572,14 +569,6 @@ UI.createElement = function (tag, options) {
 
     options = options || {};
 
-    if (!options.children || arguments.length > 2) {
-        options.children = [];
-
-        for (let i = 2; i < arguments.length; i += 1) {
-            options.children.push(arguments[i]);
-        }
-
-    }
     options.children = [];
 
     for (let i = 2; i < arguments.length; i += 1) {
@@ -602,7 +591,7 @@ UI.createElement = function (tag, options) {
 
         if (options.key) {
             console.error("Warning! UI Element cannot have both a key and a ref fieldname. Key will be overriden.\n" +
-                          "Are you using the options from another object?", options);
+                          "Are you using the options from another object? Shame!", options);
         }
 
         options.key = "_ref" + options.ref.name;
@@ -639,4 +628,4 @@ UI.Primitive = (Type, tag) => {
 };
 
 // TODO: code shouldn't use UIElement directly, but through UI.Element
-export {UIElement, UI, ATTRIBUTE_NAMES_MAP};
+export {UIElement, UI};

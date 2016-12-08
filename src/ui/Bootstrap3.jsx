@@ -198,6 +198,14 @@ UI.RadioButtonGroup = class RadioButtonGroup extends BootstrapMixin(UI.Element, 
         return this.buttons;
     }
 
+    onMount() {
+        super.onMount();
+        if (this.index == null) {
+            this.index = 0;
+            this.buttons[this.index].addClass("active");
+        }
+    }
+
     getIndex() {
         return this.index;
     }
@@ -207,7 +215,9 @@ UI.RadioButtonGroup = class RadioButtonGroup extends BootstrapMixin(UI.Element, 
     }
 
     setIndex(index) {
+        this.buttons[this.index].removeClass("active");
         this.index = index;
+        this.buttons[this.index].addClass("active");
         this.dispatch("setIndex", {value: this.options.givenOptions[index]});
     }
 };
@@ -235,7 +245,7 @@ UI.BootstrapLabel = class BootstrapLabel extends BootstrapMixin(UI.Element, "lab
     }
 };
 
-UI.CardPanel = class CardPanel extends BootstrapMixin(UI.Element, "panel") {
+UI.CardPanel = class CardPanel extends BootstrapMixin(UI.Panel, "panel") {
     setOptions(options) {
         super.setOptions(options);
         this.options.level = this.options.level || UI.Level.DEFAULT;
