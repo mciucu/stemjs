@@ -828,13 +828,23 @@ class InlineCodeModifier extends RawContentModifierMixin(InlineModifierMixin(Mod
     }
 }
 
-class InlineLatexModifier extends RawContentModifierMixin(InlineModifierMixin(Modifier)) {
+class InlineVarModifier extends RawContentModifierMixin(InlineModifierMixin(Modifier)) {
     constructor(options) {
         super(options);
 
         this.pattern = "$";
         this.endPattern = "$";
         this.tag = "var";
+    }
+}
+
+class InlineLatexModifier extends RawContentModifierMixin(InlineModifierMixin(Modifier)) {
+    constructor(options) {
+        super(options);
+
+        this.pattern = "$$";
+        this.endPattern = "$$";
+        this.tag = "Latex";
     }
 }
 
@@ -1185,6 +1195,7 @@ MarkupParser.modifiers = [
     new ParagraphModifier(),
     new InlineCodeModifier(),
     new InlineLatexModifier(),
+    new InlineVarModifier(),
     new StrongModifier(),
     new ItalicModifier(),
     new LinkModifier()

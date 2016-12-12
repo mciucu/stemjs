@@ -24,7 +24,9 @@ class BaseUIElement extends Dispatchable {
         if (this.options && this.options.ref) {
             let obj = this.options.ref.parent;
             let name = this.options.ref.name;
-            obj[name] = undefined;
+            if (obj[name] === this) {
+                obj[name] = undefined;
+            }
         }
     }
 
@@ -114,6 +116,10 @@ class UIElement extends BaseUIElement {
         Object.assign(this.options, options);
         this.setOptions(this.options);
         this.redraw();
+    }
+
+    setChildren() {
+        this.updateOptions({children: unwrapArray(Array.from(arguments))})
     }
 
     // Used when we want to reuse the current element, with the options from the passed in argument
