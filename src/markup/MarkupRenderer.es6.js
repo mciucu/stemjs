@@ -125,7 +125,7 @@ UI.MarkupRenderer = class MarkupRenderer extends UI.Panel {
         return UI.createElement(classObject, value, ...(value.children || []));
     }
 
-    renderHTML() {
+    render() {
         return this.convertToUI(this.options.value);
     }
 };

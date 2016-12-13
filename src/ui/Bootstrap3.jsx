@@ -1,4 +1,5 @@
 import {UI} from "./UIBase";
+import {StyleSet} from "Style";
 import "./UIPrimitives";
 
 function BootstrapMixin(BaseClass, bootstrapClassName) {
@@ -8,8 +9,8 @@ function BootstrapMixin(BaseClass, bootstrapClassName) {
             this.options.level = this.options.level || UI.Level.DEFAULT;
         }
 
-        getDOMAttributes() {
-            let attr = super.getDOMAttributes();
+        getNodeAttributes() {
+            let attr = super.getNodeAttributes();
 
             attr.addClass(this.constructor.bootstrapClass());
             if (this.getLevel()) {
@@ -36,8 +37,8 @@ function BootstrapMixin(BaseClass, bootstrapClassName) {
 }
 
 UI.Button = class Button extends BootstrapMixin(UI.Element, "btn") {
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
 
         if (this.getSize()) {
             attr.addClass(this.constructor.bootstrapClass() + "-" + this.getSize());
@@ -51,11 +52,11 @@ UI.Button = class Button extends BootstrapMixin(UI.Element, "btn") {
         this.options.label = options.label || "";
     }
 
-    getPrimitiveTag() {
+    getNodeType() {
         return "button";
     }
 
-    renderHTML() {
+    render() {
         // TODO: Label was converted to string. Fix it.
         return [this.beforeChildren(), this.options.label, this.options.children];
     };
@@ -147,13 +148,13 @@ UI.StateButton = class StateButton extends UI.Button {
         this.redraw();
     }
 
-    renderHTML() {
+    render() {
         let stateOptions = this.options.statusOptions[this.options.state - 1];
 
         this.options.label = stateOptions.label;
         this.options.faIcon = stateOptions.faIcon;
 
-        return super.renderHTML();
+        return super.render();
     }
 };
 
@@ -187,7 +188,7 @@ UI.AjaxButton = class AjaxButton extends UI.StateButton {
 };
 
 UI.RadioButtonGroup = class RadioButtonGroup extends BootstrapMixin(UI.Element, "btn-group") {
-    renderHTML() {
+    render() {
         this.buttons = [];
         for (let i = 0; i < this.options.givenOptions.length; i += 1) {
             let handler = () => {
@@ -223,12 +224,12 @@ UI.RadioButtonGroup = class RadioButtonGroup extends BootstrapMixin(UI.Element, 
 };
 
 UI.BootstrapLabel = class BootstrapLabel extends BootstrapMixin(UI.Element, "label") {
-    getPrimitiveTag() {
+    getNodeType() {
         return "span";
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
         if (this.options.faIcon) {
             attr.addClass("fa fa-" + this.options.faIcon);
         }
@@ -240,7 +241,7 @@ UI.BootstrapLabel = class BootstrapLabel extends BootstrapMixin(UI.Element, "lab
         this.redraw();
     }
 
-    renderHTML() {
+    render() {
         return [this.options.label];
     }
 };
@@ -251,7 +252,7 @@ UI.CardPanel = class CardPanel extends BootstrapMixin(UI.Panel, "panel") {
         this.options.level = this.options.level || UI.Level.DEFAULT;
     }
 
-    renderHTML() {
+    render() {
         return [
             <div className="panel-heading">{this.getTitle()}</div>,
             <div className="panel-body" style={this.options.bodyStyle}>{this.getGivenChildren()}</div>,
@@ -259,49 +260,124 @@ UI.CardPanel = class CardPanel extends BootstrapMixin(UI.Panel, "panel") {
     }
 };
 
+class CollapsibleStyle extends StyleSet {
+    constructor() {
+        super();
+
+        this.collapsed = this.css({
+            "display": "none",
+        });
+
+        this.collapsing = this.css({
+            "height": "0",
+            "transition-timing-function": "ease",
+            "transition-duration": ".3s",
+            "transition-property": "height, padding-top, padding-bottom",
+            "position": "relative",
+            "overflow": "hidden",
+            "display": "block",
+        });
+
+        this.noPadding = this.css({
+            "padding-top": "0 !important",
+            "padding-bottom": "0 !important",
+        })
+    }
+}
+
+let collapsibleStyle = new CollapsibleStyle();
+
 //TODO: remove all bootstrap logic
 UI.CollapsiblePanel = class CollapsiblePanel extends UI.CardPanel {
     constructor(options) {
         super(options);
-
         // If options.collapsed is set, use that value. otherwise it is collapsed
         this.collapsed = (options.collapsed != null) ? options.collapsed : true;
     }
 
     onMount() {
         this.expandLink.addClickListener(() => {
-            if (this.collapsed) {
-                this.collapsed = false;
-            } else {
-                this.collapsed = true;
-            }
+            this.togglePanel();
         });
     }
 
-    renderHTML() {
-        let bodyId = "body" + this.uniqueId();
-        let collapsedHeaderClass = "";
-        let collapsedBodyClass = " in";
+    togglePanel() {
+        if (!this.collapsing) {
+            if (this.collapsed) {
+                this.expand();
+            } else {
+                this.collapse();
+            }
+        }
+    }
+
+    expand() {
+        // TODO: use this.options.collapsed instead
+        this.collapsed = false;
+        this.expandLink.removeClass("collapsed");
+        this.contentArea.removeClass(collapsibleStyle.collapsed);
+        let contentStyleHeight = this.contentArea.node.style.height;
+        let contentHeight = this.contentArea.getHeight();
+        this.contentArea.addClass(collapsibleStyle.collapsing);
+        setTimeout(() => {
+            this.contentArea.removeClass(collapsibleStyle.noPadding);
+            this.contentArea.setHeight(contentHeight);
+            let transitionEndFunction = () => {
+                /* TODO: test height change with classes */
+                this.contentArea.setHeight(contentStyleHeight);
+                this.contentArea.removeClass(collapsibleStyle.collapsing);
+                this.contentArea.removeDOMListener("webkitTransitionEnd", transitionEndFunction);
+                this.collapsing = false;
+            };
+            this.contentArea.addNodeListener("webkitTransitionEnd", transitionEndFunction);
+            this.collapsing = true;
+        });
+    }
+
+    collapse() {
+        this.collapsed = true;
+        let contentStyleHeight = this.contentArea.node.style.height;
+        this.contentArea.setHeight(this.contentArea.getHeight());
+        this.contentArea.addClass(collapsibleStyle.collapsing);
+        setTimeout(() => {
+            this.contentArea.addClass(collapsibleStyle.noPadding);
+            this.contentArea.setHeight(0);
+            let transitionEndFunction = () => {
+                this.expandLink.addClass("collapsed");
+                this.contentArea.addClass(collapsibleStyle.collapsed);
+                this.contentArea.removeClass(collapsibleStyle.collapsing);
+                this.contentArea.setHeight(contentStyleHeight);
+                this.contentArea.removeDOMListener("webkitTransitionEnd", transitionEndFunction);
+                this.collapsing = false;
+            };
+            this.contentArea.addNodeListener("webkitTransitionEnd", transitionEndFunction);
+            this.collapsing = true;
+        });
+    }
+
+    render() {
         let autoHeightClass = "";
+        let collapsedPanelClass = "";
+        let collapsedHeadingClass = "";
+        let expandLinkClass = "";
+
         if (this.options.autoHeight) {
             autoHeightClass = "auto-height ";
         }
         if (this.collapsed) {
-            collapsedHeaderClass = " collapsed";
-            collapsedBodyClass = "";
+            collapsedHeadingClass = "collapsed";
+            collapsedPanelClass = collapsibleStyle.collapsed;
         }
-
+        //TODO: remove panel-heading and panel-title (bootstrap stuff)
         return [
-            <div className="panel-heading" role="tab">
+            <div className="panel-heading">
                 <h4 className="panel-title">
-                    <a ref="expandLink" data-toggle="collapse" href={"#" + bodyId}  className={"panelCollapseButton" + collapsedHeaderClass}
-                        aria-expanded="true" aria-controls={bodyId} >
+                    <a ref="expandLink"  className={`panelCollapseButton ${collapsedHeadingClass}`}>
                         {this.getTitle()}
                     </a>
                 </h4>
             </div>,
-            <div ref="contentArea" id={bodyId} className={autoHeightClass + "panel-collapse collapse" + collapsedBodyClass}
-                 role="tabpanel" aria-expanded="false">
+            <div ref="contentArea" className={`panel-content ${autoHeightClass} ${collapsedPanelClass}`}>
                 {this.getGivenChildren()}
             </div>
         ];
@@ -319,6 +395,7 @@ UI.DelayedCollapsiblePanel = class DelayedCollapsiblePanel extends UI.Collapsibl
                 this.contentArea.redraw();
                 this.delayedMount();
             }
+            this.togglePanel();
         });
     }
 
@@ -331,7 +408,7 @@ UI.DelayedCollapsiblePanel = class DelayedCollapsiblePanel extends UI.Collapsibl
 };
 
 UI.ProgressBar = class ProgressBar extends BootstrapMixin(UI.Element, "progress") {
-    renderHTML() {
+    render() {
         let valueInPercent = (this.options.value || 0) * 100;
 
         let barOptions = {

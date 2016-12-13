@@ -52,11 +52,11 @@ UI.StyleInstance = class StyleInstance extends UI.TextElement {
 };
 
 UI.StyleElement = class StyleElement extends UI.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "style";
     }
 
-    getDOMAttributes() {
+    getNodeAttributes() {
         // TODO: allow custom style attributes (media, scoped, etc)
         let attr = new DOMAttributes({});
         attr.setAttribute("name", this.options.name);
@@ -113,7 +113,7 @@ UI.DynamicStyleElement = class DynamicStyleElement extends UI.StyleElement {
         return result;
     }
 
-    renderHTML() {
+    render() {
         return this.getStyleInstances("." + this.getClassName(), this.options.style || {});
     }
 

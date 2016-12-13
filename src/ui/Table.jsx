@@ -3,11 +3,11 @@ import * as Utils from "../base/Utils";
 
 // TODO: the whole table architecture probably needs a rethinking
 UI.TableRow = class TableRow extends UI.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "tr";
     }
 
-    renderHTML() {
+    render() {
         let rowCells = [];
 
         for (let column of this.options.columns) {
@@ -23,12 +23,12 @@ UI.TableRow = class TableRow extends UI.Element {
 };
 
 UI.TableRowInCollapsibleTable = class TableRowInCollapsibleTable extends UI.TableRow {
-    getPrimitiveTag() {
+    getNodeType() {
         return "tbody";
     }
 
-    renderHTML() {
-        return <tr>{super.renderHTML()}</tr>;
+    render() {
+        return <tr>{super.render()}</tr>;
     }
 };
 
@@ -43,7 +43,7 @@ UI.CollapsibleTableRow = class CollapsibleTableRow extends UI.TableRow {
         }
     }
 
-    getPrimitiveTag() {
+    getNodeType() {
         return "tbody";
     }
 
@@ -71,12 +71,12 @@ UI.CollapsibleTableRow = class CollapsibleTableRow extends UI.TableRow {
         return true;
     }
 
-    renderHTML() {
+    render() {
         let noPaddingHiddenRowStyle = {
             padding: 0,
         };
 
-        let rowCells = super.renderHTML();
+        let rowCells = super.render();
 
         return [
             <tr className="panel-heading">{rowCells}</tr>,
@@ -99,15 +99,15 @@ UI.Table = class Table extends UI.Element {
         this.entries = options.entries || [];
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
 
         attr.addClass("ui-table table table-stripped");
 
         return attr;
     }
 
-    getPrimitiveTag() {
+    getNodeType() {
         return "table";
     }
 
@@ -122,7 +122,7 @@ UI.Table = class Table extends UI.Element {
         };
     }
 
-    renderHTML() {
+    render() {
         return [
             <thead>
                 {this.renderTableHead()}
@@ -193,8 +193,8 @@ UI.SortableTableInterface = function(BaseTableClass) {
             this.columnSortingOrder = options.columnSortingOrder || [];
         }
 
-        getDOMAttributes() {
-            let attr = super.getDOMAttributes();
+        getNodeAttributes() {
+            let attr = super.getNodeAttributes();
 
             attr.addClass("ui-sortable-table");
 
@@ -305,7 +305,7 @@ UI.CollapsibleTableInterface = function(BaseTableClass) {
             }
         }
 
-        renderHTML() {
+        render() {
             return [
                 <thead>
                     {this.renderTableHead()}
@@ -318,8 +318,8 @@ UI.CollapsibleTableInterface = function(BaseTableClass) {
             return UI.CollapsibleTableRow;
         }
 
-        getDOMAttributes() {
-            let attr = super.getDOMAttributes();
+        getNodeAttributes() {
+            let attr = super.getNodeAttributes();
             attr.addClass("ui-collapsible-table");
             return attr;
         }

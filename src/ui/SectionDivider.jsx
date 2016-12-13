@@ -24,8 +24,8 @@ UI.DividerBar = class DividerBar extends UI.Element {
         this.orientation = this.options.orientation || UI.Orientation.HORIZONTAL;
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
         if (this.orientation === UI.Orientation.VERTICAL) {
             attr.addClass("sectionDividerHorizontal");
             attr.setStyle("width", "100%");
@@ -37,7 +37,7 @@ UI.DividerBar = class DividerBar extends UI.Element {
         return attr;
     }
 
-    renderHTML() {
+    render() {
         if (this.orientation === UI.Orientation.VERTICAL) {
             return [
                 <div style={{height: "3px", width: "100%"}}></div>,
@@ -283,8 +283,8 @@ UI.SectionDivider = class SectionDivider extends UI.Element {
                     document.body.addEventListener("mousemove", dragMousemove);
                     document.body.addEventListener("mouseup", dragMouseup);
                 };
-                this["divider" + i].addDOMListener("touchstart", mousedownFunc);
-                this["divider" + i].addDOMListener("mousedown", mousedownFunc);
+                this["divider" + i].addNodeListener("touchstart", mousedownFunc);
+                this["divider" + i].addNodeListener("mousedown", mousedownFunc);
             }
         } else {
             for (let i = 0; i < this.dividers; i += 1) {
@@ -299,7 +299,7 @@ UI.SectionDivider = class SectionDivider extends UI.Element {
         });
     }
 
-    renderHTML() {
+    render() {
         // TODO: use a Style for the Divider bars
         return [this.dividedChildren(),
             <UI.StyleElement>

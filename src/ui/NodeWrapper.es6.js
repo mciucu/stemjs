@@ -66,7 +66,7 @@ class NodeWrapper extends Dispatchable {
     }
 
     // TODO: should be called isInDocument
-    isInDOM() {
+    isInDocument() {
         return document.body.contains(this.node);
     }
 
@@ -122,7 +122,7 @@ class NodeWrapper extends Dispatchable {
         this.dispatch("resize");
     }
 
-    addDOMListener(name, callback) {
+    addNodeListener(name, callback) {
         this.node.addEventListener(name, callback);
     }
 
@@ -131,7 +131,7 @@ class NodeWrapper extends Dispatchable {
     }
 
     addClickListener(callback) {
-        this.addDOMListener("click", callback);
+        this.addNodeListener("click", callback);
     }
 
     removeClickListener(callback) {
@@ -139,7 +139,7 @@ class NodeWrapper extends Dispatchable {
     }
 
     addDoubleClickListener(callback) {
-        this.addDOMListener("dblclick", callback);
+        this.addNodeListener("dblclick", callback);
     }
 
     removeDoubleClickListener(callback) {
@@ -147,8 +147,8 @@ class NodeWrapper extends Dispatchable {
     }
 
     // TODO: we need a consistent nomenclature, should be called addChangeListener
-    onChange(callback) {
-        this.addDOMListener("change", callback);
+    addChangeListener(callback) {
+        this.addNodeListener("change", callback);
     }
 
     // TODO: this should be done with decorators

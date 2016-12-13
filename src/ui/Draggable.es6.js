@@ -134,8 +134,8 @@ let Draggable = (BaseClass) => class Draggable extends BaseClass {
     addDragListener(listeners) {
         let listenerWrapper = this.createDragListenerWrapper(listeners);
         let touchListenerWrapper = this.createTouchDragListenerWrapper(listeners);
-        this.addDOMListener("touchstart", touchListenerWrapper.onWrapperStart);
-        this.addDOMListener("mousedown", listenerWrapper.onWrapperStart);
+        this.addNodeListener("touchstart", touchListenerWrapper.onWrapperStart);
+        this.addNodeListener("mousedown", listenerWrapper.onWrapperStart);
         // TODO: Replace with our body
         document.body.addEventListener("touchend", touchListenerWrapper.onWrapperEnd);
         document.body.addEventListener("mouseup", listenerWrapper.onWrapperEnd);

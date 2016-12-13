@@ -51,7 +51,7 @@ class TabAreaStyle extends StyleSet {
 let tabAreaStyle = new TabAreaStyle();
 
 class BasicTabTitle extends UI.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "span";
     }
 
@@ -87,7 +87,7 @@ class BasicTabTitle extends UI.Element {
         return panel.options.title;
     }
 
-    renderHTML() {
+    render() {
         let hrefOption = {};
         if (this.options.href) {
             hrefOption.href = this.options.href;
@@ -122,8 +122,8 @@ class BasicTabTitle extends UI.Element {
 };
 
 UI.TabTitleArea = class TabTitleArea extends UI.Element {
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
         attr.addClass(tabAreaStyle.nav);
         return attr;
     }
@@ -142,8 +142,8 @@ UI.TabArea = class TabArea extends UI.Element {
         super.setOptions(options);
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
         if (!this.options.variableHeightPanels) {
             attr.addClass("auto-height-parent");
         }
@@ -188,7 +188,7 @@ UI.TabArea = class TabArea extends UI.Element {
             </UI.Switcher>;
     }
 
-    renderHTML() {
+    render() {
         let tabTitles = []
         let tabPanels = [];
         let activeTab;
@@ -210,7 +210,6 @@ UI.TabArea = class TabArea extends UI.Element {
 
         return [
             this.getTitleArea(tabTitles),
-            <div style={{clear: "both"}}></div>,
             this.getSwitcher(tabPanels),
         ];
     };

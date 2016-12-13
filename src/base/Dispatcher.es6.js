@@ -197,16 +197,16 @@ class CleanupJobs {
 // It informs the previous owner of the change (once) and dispatches the new element for all listeners
 // TODO: a better name
 class SingleActiveElementDispatcher extends Dispatcher {
-    setActive(element, onChange, forceDispatch) {
+    setActive(element, addChangeListener, forceDispatch) {
         if (!forceDispatch && element === this._active) {
             return;
         }
         this._active = element;
         this.dispatch(element);
-        if (onChange) {
+        if (addChangeListener) {
             this.addListenerOnce((newElement) => {
                 if (newElement != element) {
-                    onChange(newElement);
+                    addChangeListener(newElement);
                 }
             });
         }

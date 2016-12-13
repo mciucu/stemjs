@@ -92,6 +92,13 @@ export function slugify(string) {
     return string;
 }
 
+export function suffixNumber(value, suffix) {
+    if (typeof value === "number" || value instanceof Number) {
+        return value + suffix;
+    }
+    return value;
+}
+
 export function deepCopy() {
     // TODO: should implement this without jQuery
 	return $.extend(true, ...arguments);

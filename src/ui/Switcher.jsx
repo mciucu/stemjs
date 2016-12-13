@@ -20,7 +20,7 @@ UI.Switcher = class Switcher extends UI.Element {
         }
     }
 
-    renderHTML() {
+    render() {
         return this.activeChild || this.options.children[0];
     }
 
@@ -45,9 +45,9 @@ UI.Switcher = class Switcher extends UI.Element {
         this.applyDOMAttributes();
         this.applyRef();
 
-        // This renderHTML may be required to update this.options.children
+        // This render may be required to update this.options.children
         UI.renderingStack.push(this);
-        this.renderHTML();
+        this.render();
         UI.renderingStack.pop();
 
         if (this.options.children.length == 0) {
@@ -155,7 +155,7 @@ UI.Switcher = class Switcher extends UI.Element {
 
     onMount() {
         this.addListener("shouldRedrawChild", (event) => {
-            if (event.child.isInDOM()) {
+            if (event.child.isInDocument()) {
                 event.child.redraw();
             } else {
                 this.getChildProperties(event.child).isUpToDate = false;

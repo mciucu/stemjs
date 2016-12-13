@@ -3,12 +3,12 @@ import "./UIPrimitives";
 import {CreateAllowedAttributesMap} from "./DOMAttributes";
 
 UI.Form = class Form extends UI.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "form";
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
         attr.addClass("form form-horizontal");
         return attr;
     }
@@ -19,12 +19,12 @@ UI.Form = class Form extends UI.Element {
 };
 
 UI.Input = class Input extends UI.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "input";
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
 
         let type = this.getInputType();
         if (type) {
@@ -55,17 +55,17 @@ UI.Input = class Input extends UI.Element {
     }
 
     onInput(callback) {
-        this.addDOMListener("input change", callback);
+        this.addNodeListener("input change", callback);
     }
 
     onKeyUp(callback) {
-        this.addDOMListener("keyup", callback);
+        this.addNodeListener("keyup", callback);
     }
 };
 
 UI.FormControl = class FormControl extends UI.Input {
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
         attr.addClass("form-control");
         return attr;
     }
@@ -79,8 +79,8 @@ UI.FormSettingsGroup = class FormSettingsGroup extends UI.Element {
         this.options.contentWidth = this.options.contentWidth || "59%";
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
         attr.addClass("form-group");
         return attr;
     }
@@ -104,7 +104,7 @@ UI.FormSettingsGroup = class FormSettingsGroup extends UI.Element {
         };
     }
 
-    renderHTML() {
+    render() {
         let labelStyle = Object.assign(this.getLabelStyle(), {width: this.options.labelWidth});
         labelStyle = Object.assign(labelStyle, this.options.labelStyle);
         let contentStyle = Object.assign(this.getContentStyle(), {width: this.options.contentWidth});
@@ -130,8 +130,8 @@ UI.FormGroup = class FormGroup extends UI.Element {
         this.options.errorFieldWidth = this.options.errorFieldWidth || "48%";
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
         attr.addClass("form-group");
         return attr;
     }
@@ -146,7 +146,7 @@ UI.FormGroup = class FormGroup extends UI.Element {
         };
     }
 
-    renderHTML() {
+    render() {
         let labelStyle = Object.assign(this.getDefaultStyle(), {width: this.options.labelWidth});
         labelStyle = Object.assign(labelStyle, this.options.style);
         let contentStyle = Object.assign(this.getDefaultStyle(), {width: this.options.contentWidth});
@@ -310,7 +310,7 @@ UI.CheckboxInput.domAttributesMap = CreateAllowedAttributesMap(UI.Element.domAtt
 ]);
 
 UI.TextArea = class TextArea extends UI.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "textarea";
     }
 
@@ -341,16 +341,16 @@ UI.TextArea = class TextArea extends UI.Element {
     }
 
     onInput(callback) {
-        this.addDOMListener("input change", callback);
+        this.addNodeListener("input change", callback);
     }
 
     onKeyUp(callback) {
-        this.addDOMListener("keyup", callback);
+        this.addNodeListener("keyup", callback);
     }
 };
 
 UI.InputField = class InputField extends UI.Element {
-    renderHTML() {
+    render() {
     }
 };
 
@@ -358,11 +358,11 @@ UI.Slider = class Slider extends UI.Element {
 };
 
 UI.Select = class Select extends UI.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "select";
     }
 
-    renderHTML() {
+    render() {
         this.givenOptions = this.options.options || [];
         let selectOptions = [];
 

@@ -14,7 +14,7 @@ const FIREFOX_SVG_STYLE_ELEMENTS = [
 
 UI.SVG.Element = class SVGElement extends UI.Element {
     createNode() {
-        this.node = document.createElementNS("http://www.w3.org/2000/svg", this.getPrimitiveTag());
+        this.node = document.createElementNS("http://www.w3.org/2000/svg", this.getNodeType());
         return this.node;
     }
 
@@ -54,8 +54,8 @@ UI.SVG.Element = class SVGElement extends UI.Element {
         this.setOptions(state.options);
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
         attr.classes = null;
 
         let transform = this.getTransform();
@@ -252,7 +252,7 @@ UI.SVG.Element.domAttributesMap = CreateAllowedAttributesMap(UI.Element.domAttri
 ]);
 
 UI.SVG.SVGRoot = class SVGRoot extends UI.SVG.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "svg";
     }
 
@@ -296,7 +296,7 @@ UI.SVG.AnimatedSVG = class AnimatedSVG extends UI.SVG.SVGRoot {
 };
 
 UI.SVG.Group = class SVGGroup extends UI.SVG.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "g";
     }
 
@@ -308,19 +308,19 @@ UI.SVG.Group = class SVGGroup extends UI.SVG.Element {
 };
 
 UI.SVG.Defs = class SVGDefs extends UI.SVG.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "defs";
     }
 };
 
 UI.SVG.ClipPath = class ClipPath extends UI.SVG.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "clipPath";
     }
 };
 
 UI.SVG.Path = class SVGPath extends UI.SVG.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "path";
     }
 
@@ -330,8 +330,8 @@ UI.SVG.Path = class SVGPath extends UI.SVG.Element {
         }
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
         attr.setAttribute("d", this.getPath());
         return attr;
     }
@@ -359,7 +359,7 @@ UI.SVG.Path = class SVGPath extends UI.SVG.Element {
 };
 
 UI.SVG.Circle = class SVGCircle extends UI.SVG.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "circle";
     }
 
@@ -370,8 +370,8 @@ UI.SVG.Circle = class SVGCircle extends UI.SVG.Element {
         };
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
         attr.setAttribute("r", this.options.radius);
         attr.setAttribute("cx", this.options.center.x);
         attr.setAttribute("cy", this.options.center.y);
@@ -415,12 +415,12 @@ UI.SVG.Circle = class SVGCircle extends UI.SVG.Element {
 
 //TODO Complete this class
 UI.SVG.Ellipse = class SVGEllipse extends UI.SVG.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "ellipse";
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
         attr.setAttribute("rx", this.options.rx);
         attr.setAttribute("ry", this.options.ry);
         return attr;
@@ -464,7 +464,7 @@ UI.SVG.CircleArc = class SVGCircleArc extends UI.SVG.Path {
 };
 
 UI.SVG.Rect = class SVGRect extends UI.SVG.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "rect";
     }
 
@@ -479,8 +479,8 @@ UI.SVG.Rect = class SVGRect extends UI.SVG.Element {
         };
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
 
         attr.setAttribute("x", this.options.x);
         attr.setAttribute("y", this.options.y);
@@ -530,7 +530,7 @@ UI.SVG.Rect = class SVGRect extends UI.SVG.Element {
 };
 
 UI.SVG.Line = class SVGLine extends UI.SVG.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "line";
     }
 
@@ -545,8 +545,8 @@ UI.SVG.Line = class SVGLine extends UI.SVG.Element {
         };
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
 
         attr.setAttribute("x1", this.options.x1);
         attr.setAttribute("y1", this.options.y1);
@@ -572,7 +572,7 @@ UI.SVG.Line = class SVGLine extends UI.SVG.Element {
 };
 
 UI.SVG.Text = class SVGText extends UI.SVG.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "text";
     }
 
@@ -602,8 +602,8 @@ UI.SVG.Text = class SVGText extends UI.SVG.Element {
         }
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
 
         let allowedAttrNames = new Map([
             ["dx", "dx"],
@@ -624,7 +624,7 @@ UI.SVG.Text = class SVGText extends UI.SVG.Element {
         return attr;
     }
 
-    renderHTML() {
+    render() {
         return [<UI.TextElement ref="textElement" value={this.options.text + ""} />];
     }
 
@@ -763,7 +763,7 @@ UI.SVG.TextArea = class SVGTextArea extends UI.SVG.Element {
         this.redraw();
     }
 
-    renderHTML() {
+    render() {
 
     }
 };
@@ -775,8 +775,8 @@ UI.SVG.Polygon = class Polygon extends UI.SVG.Path {
         };
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
         attr.setAttribute("d", this.getPolygonPath());
         return attr;
     }
@@ -825,7 +825,7 @@ UI.SVG.CSAIconSVG = class SVGCSAIconSVG extends UI.SVG.SVGRoot {
         this.options.height = this.options.size;
     }
 
-    renderHTML() {
+    render() {
         return [<UI.SVG.CSAIconPath size={this.options.size}/>];
     }
 };

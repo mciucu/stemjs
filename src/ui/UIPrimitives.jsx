@@ -60,8 +60,8 @@ UI.SlideBar = class SlideBar extends Draggable(UI.Element) {
         super(options);
     }
 
-    getDOMAttributes() {
-        let attributes = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attributes = super.getNodeAttributes();
         attributes.setStyle("display", "inline-block");
         attributes.setStyle("position", "relative");
         attributes.setStyle("cursor", "pointer");
@@ -72,7 +72,7 @@ UI.SlideBar = class SlideBar extends Draggable(UI.Element) {
         return this.options.value * this.options.width - (this.options.barWidth / 2);
     }
 
-    renderHTML() {
+    render() {
         return [
             <UI.ProgressBar ref="progressBar" active="true" value={this.options.value} disableTransition={true}
                             style={{
@@ -124,12 +124,12 @@ UI.SlideBar = class SlideBar extends Draggable(UI.Element) {
 };
 
 UI.Link = class Link extends UI.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "a";
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
         attr.setStyle("cursor", "pointer");
         return attr;
     }
@@ -148,13 +148,13 @@ UI.Link = class Link extends UI.Element {
         return options;
     }
 
-    renderHTML() {
+    render() {
         return [this.options.value];
     }
 };
 
 UI.Image = class Image extends UI.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "img";
     }
 };
@@ -179,16 +179,16 @@ UI.TemporaryMessageArea = class TemporaryMessageArea extends UI.Element {
         super.setOptions(options);
     }
 
-    getPrimitiveTag() {
+    getNodeType() {
         return "span";
     }
 
-    renderHTML() {
+    render() {
         return [<UI.TextElement ref="textElement" value={this.options.value || ""}/>];
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
         // TODO: nope, not like this
         attr.setStyle("marginLeft", this.options.margin + "px");
         attr.setStyle("marginRight", this.options.margin + "px");
@@ -387,16 +387,16 @@ UI.InfiniteScrollable = class InfiniteScrollable extends UI.ScrollableMixin {
 };
 
 UI.TimePassedSpan = class TimePassedSpan extends UI.Element {
-    getPrimitiveTag() {
+    getNodeType() {
         return "span";
     }
 
-    renderHTML() {
+    render() {
         return this.getTimeDeltaDisplay(this.options.timeStamp);
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
         attr.setStyle("color", "#AAA");
         return attr;
     }

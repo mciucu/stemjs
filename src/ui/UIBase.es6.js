@@ -9,7 +9,7 @@ var UI = {
 class BaseUIElement extends Dispatchable {
     canOverwrite(existingChild) {
         return this.constructor === existingChild.constructor &&
-               this.getPrimitiveTag() === existingChild.getPrimitiveTag();
+               this.getNodeType() === existingChild.getNodeType();
     }
 
     applyRef() {
@@ -39,6 +39,7 @@ class BaseUIElement extends Dispatchable {
 }
 
 UI.TextElement = class UITextElement extends BaseUIElement {
+    // TODO: probably simplify this constructor
     constructor(options) {
         super();
         let value;
@@ -63,7 +64,7 @@ UI.TextElement = class UITextElement extends BaseUIElement {
         parent.node.insertBefore(this.node, nextSibling);
     }
 
-    getPrimitiveTag() {
+    getNodeType() {
         return Node.TEXT_NODE;
     }
 
@@ -128,9 +129,8 @@ class UIElement extends BaseUIElement {
         this.setOptions(element.options);
     }
 
-    //TODO: should be renamed to getNodeType
-    getPrimitiveTag() {
-        return this.options.primitiveTag || "div";
+    getNodeType() {
+        return this.options.nodeType || "div";
     }
 
     static create(parentNode, options) {
@@ -144,13 +144,12 @@ class UIElement extends BaseUIElement {
         return this.options.children || [];
     }
 
-    // TODO: should be renamed to render()
-    renderHTML() {
+    render() {
         return this.options.children;
     };
 
     createNode() {
-        this.node = document.createElement(this.getPrimitiveTag());
+        this.node = document.createElement(this.getNodeType());
         return this.node;
     }
 
@@ -188,7 +187,7 @@ class UIElement extends BaseUIElement {
         }
 
         UI.renderingStack.push(this);
-        let newChildren = unwrapArray(this.renderHTML());
+        let newChildren = unwrapArray(this.render());
         UI.renderingStack.pop();
 
         if (newChildren === this.children) {
@@ -209,7 +208,7 @@ class UIElement extends BaseUIElement {
             let currentChildNode = (prevChildNode) ? prevChildNode.nextSibling : domNode.firstChild;
 
             // Not a UIElement, to be converted to a TextElement
-            if (!newChild.getPrimitiveTag) {
+            if (!newChild.getNodeType) {
                 newChild = newChildren[i] = new UI.TextElement(newChild);
             }
 
@@ -253,7 +252,7 @@ class UIElement extends BaseUIElement {
     }
 
     applyDOMAttributes() {
-        this.domAttributes = this.getDOMAttributes();
+        this.domAttributes = this.getNodeAttributes();
         this.domAttributes.apply(this.node);
     }
 
@@ -308,7 +307,7 @@ class UIElement extends BaseUIElement {
 
     // TODO: a more expressive way to do this would be to be able to walk to proto chain
     // TODO: to call something like addExtraAttributes(attr);
-    getDOMAttributes() {
+    getNodeAttributes() {
         return new DOMAttributes(this.options, this.constructor.domAttributesMap);
     }
 
@@ -429,19 +428,17 @@ class UIElement extends BaseUIElement {
         }
     }
 
-    // TODO: rethink this!
+    // TODO: rethink this, should probably be in utils
     uniqueId() {
         if (!this.hasOwnProperty("uniqueIdStr")) {
-        // TODO: should this be global?
-            if (!this.constructor.hasOwnProperty("objectCount")) {
-                this.constructor.objectCount = 0;
-            }
-            this.constructor.objectCount += 1;
+            // TODO: should this be global?
+            this.constructor.objectCount = (this.constructor.objectCount || 0) + 1;
             this.uniqueIdStr = this.constructor.objectCount + "R" + Math.random().toString(36).substr(2);
         }
         return this.uniqueIdStr;
     }
 
+    // TODO: this doesn't belong here
     getOffset() {
         let node = this.node;
         if (!node) {
@@ -467,38 +464,18 @@ class UIElement extends BaseUIElement {
         return window.getComputedStyle(this.node, null).getPropertyValue(attribute);
     }
 
-    // TODO: should be called isInDocument
-    isInDOM() {
+    isInDocument() {
         return document.body.contains(this.node);
     }
 
-    // TODO: not sure about this method
+    // TODO: this method also doesn't belong here
     getWidthOrHeight(parameter) {
         let node = this.node;
         if (!node) {
             return 0;
         }
         let value = parseFloat(parameter === "width" ? node.offsetWidth : node.offsetHeight);
-        // If for unknown reasons this happens, maybe this will work
-        if (value == null) {
-            value = parseFloat(this.getStyle(parameter));
-        }
-        if (isNaN(value)) {
-            value = 0;
-        }
-        if (this.getStyle("box-sizing") === "border-box") {
-            let attributes = ["padding-", "border-"];
-            let directions = {
-                width: ["left", "right"],
-                height: ["top", "bottom"]
-            };
-            for (let i = 0; i < 2; i += 1) {
-                for (let j = 0; j < 2; j += 1) {
-                    value -= parseFloat(this.getStyle(attributes[i] + directions[parameter][j]));
-                }
-            }
-        }
-        return value;
+        return value || 0;
     }
 
     getHeight() {
@@ -525,8 +502,7 @@ class UIElement extends BaseUIElement {
         this.dispatch("resize");
     }
 
-    // TODO: rename to addNodeListener
-    addDOMListener(name, callback) {
+    addNodeListener(name, callback) {
         this.node.addEventListener(name, callback);
     }
 
@@ -535,7 +511,7 @@ class UIElement extends BaseUIElement {
     }
 
     addClickListener(callback) {
-        this.addDOMListener("click", callback);
+        this.addNodeListener("click", callback);
     }
 
     removeClickListener(callback) {
@@ -543,19 +519,18 @@ class UIElement extends BaseUIElement {
     }
 
     addDoubleClickListener(callback) {
-        this.addDOMListener("dblclick", callback);
+        this.addNodeListener("dblclick", callback);
     }
 
     removeDoubleClickListener(callback) {
         this.removeDOMListener("dblclick", callback);
     }
 
-    // TODO: we need a consistent nomenclature, should be called addChangeListener
-    onChange(callback) {
-        this.addDOMListener("change", callback);
+    addChangeListener(callback) {
+        this.addNodeListener("change", callback);
     }
 
-    // TODO: this should be done with decorators
+    // TODO: this should be done with decorators, remove this method
     ensureFieldExists(name, value) {
         if (!this.hasOwnProperty(name)) {
             this[name] = value(this);
@@ -608,7 +583,7 @@ UI.createElement = function (tag, options) {
     }
 
     if (typeof tag === "string") {
-        options.primitiveTag = tag;
+        options.nodeType = tag;
         tag = UIElement;
     }
 
@@ -618,19 +593,27 @@ UI.createElement = function (tag, options) {
 UI.Element = UIElement;
 
 UI.str = function (value) {
-    return new UI.TextElement({value: value});
+    return new UI.TextElement(value);
 };
 
-UI.Primitive = (Type, tag) => {
-    if (!tag) {
-        tag = Type;
-        Type = UI.Element;
+let primitiveMap = new WeakMap();
+
+UI.Primitive = (BaseClass, nodeType) => {
+    if (!nodeType) {
+        nodeType = BaseClass;
+        BaseClass = UI.Element;
     }
-    return class Primitive extends Type {
-        getPrimitiveTag() {
-            return tag;
+    let resultClass = primitiveMap.get(BaseClass);
+    if (resultClass) {
+        return resultClass;
+    }
+    resultClass = class Primitive extends BaseClass {
+        getNodeType() {
+            return nodeType;
         }
-    }
+    };
+    primitiveMap.set(BaseClass, resultClass);
+    return resultClass;
 };
 
 // TODO: code shouldn't use UIElement directly, but through UI.Element

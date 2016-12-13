@@ -12,7 +12,7 @@ UI.FloatingWindow = class FloatingWindow extends UI.Element {
         super.setOptions(options);
     }
 
-    renderHTML() {
+    render() {
         return [this.options.children, this.getStyleElement()];
     }
 
@@ -42,8 +42,8 @@ UI.FloatingWindow = class FloatingWindow extends UI.Element {
         </UI.StyleElement>;
     }
 
-    getDOMAttributes() {
-        let attr = super.getDOMAttributes();
+    getNodeAttributes() {
+        let attr = super.getNodeAttributes();
         attr.setStyle("z-index", "2016");
         return attr;
     }
@@ -60,7 +60,7 @@ UI.FloatingWindow = class FloatingWindow extends UI.Element {
 
     show() {
         // TODO: refactor this to use this.parent and UI.Element appendChild
-        if (!this.isInDOM()) {
+        if (!this.isInDocument()) {
             this.parentNode.appendChild(this.node);
             this.redraw();
             setTimeout(() => {
@@ -90,10 +90,10 @@ UI.FloatingWindow = class FloatingWindow extends UI.Element {
 
     hide() {
         // TODO: refactor this to use this.parent and UI.Element removeChild
-        if (this.isInDOM()) {
+        if (this.isInDocument()) {
             this.fadeOut();
             setTimeout(() => {
-                if (this.isInDOM()) {
+                if (this.isInDocument()) {
                     this.parentNode.removeChild(this.node);
                 }
             }, this.options.transitionTime);
@@ -113,14 +113,14 @@ UI.VolatileFloatingWindow = class VolatileFloatingWindow extends UI.FloatingWind
     }
 
     show() {
-        if (!this.isInDOM()) {
+        if (!this.isInDocument()) {
             this.bindWindowListeners();
             super.show();
         }
     }
 
     hide() {
-        if (this.isInDOM()) {
+        if (this.isInDocument()) {
             this.unbindWindowListeners();
             super.hide();
         }
@@ -148,7 +148,7 @@ UI.Modal = class Modal extends UI.Element {
         super.setOptions(options);
     }
 
-    renderHTML() {
+    render() {
         return [
             <UI.Panel ref="modalContainer" className="hidden" style={this.getContainerStyle()}>
                 {this.getBehindPanel()}

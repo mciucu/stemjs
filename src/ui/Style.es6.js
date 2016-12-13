@@ -37,7 +37,7 @@ class StyleSet extends Dispatchable {
         }
         let element = new UI.DynamicStyleElement({style: style});
         this.elements.add(element);
-        let styleInstances = element.renderHTML();
+        let styleInstances = element.render();
         for (let styleInstance of styleInstances) {
             this.styleElement.appendChild(styleInstance);
         }
@@ -58,7 +58,7 @@ class StyleSet extends Dispatchable {
         let children = [];
         for (let value of this.elements) {
             if (value instanceof UI.StyleElement) {
-                let styleElements = value.renderHTML();
+                let styleElements = value.render();
                 children.push(...styleElements);
             }
         }
