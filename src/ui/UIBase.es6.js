@@ -99,7 +99,6 @@ UI.TextElement = class UITextElement extends BaseUIElement {
     }
 };
 
-
 class UIElement extends BaseUIElement {
     constructor(options={}) {
         super();
@@ -114,13 +113,12 @@ class UIElement extends BaseUIElement {
     }
 
     updateOptions(options) {
-        Object.assign(this.options, options);
-        this.setOptions(this.options);
+        this.setOptions(Object.assign(this.options, options));
         this.redraw();
     }
 
-    setChildren() {
-        this.updateOptions({children: unwrapArray(Array.from(arguments))})
+    setChildren(...args) {
+        this.updateOptions({children: unwrapArray(args)})
     }
 
     // Used when we want to reuse the current element, with the options from the passed in argument
@@ -194,9 +192,9 @@ class UIElement extends BaseUIElement {
             for (let i = 0; i < newChildren.length; i += 1) {
                 newChildren[i].redraw();
             }
-            this.applyDOMAttributes();
+            this.applyNodeAttributes();
             this.applyRef();
-            return;
+            return true;
         }
 
         let domNode = this.node;
@@ -212,7 +210,6 @@ class UIElement extends BaseUIElement {
                 newChild = newChildren[i] = new UI.TextElement(newChild);
             }
 
-            // this means we are an UIElement
             let newChildKey = (newChild.options && newChild.options.key) || ("autokey" + i);
             let existingChild = childrenKeyMap.get(newChildKey);
 
@@ -244,14 +241,14 @@ class UIElement extends BaseUIElement {
 
         this.children = newChildren;
 
-        this.applyDOMAttributes();
+        this.applyNodeAttributes();
 
         this.applyRef();
 
         return true;
     }
 
-    applyDOMAttributes() {
+    applyNodeAttributes() {
         this.domAttributes = this.getNodeAttributes();
         this.domAttributes.apply(this.node);
     }

@@ -163,7 +163,7 @@ UI.Image = class Image extends UI.Element {
 UI.RawHTML = class RawHTML extends UI.Element {
     redraw() {
         this.node.innerHTML = this.options.__innerHTML;
-        this.applyDOMAttributes();
+        this.applyNodeAttributes();
     }
 };
 
@@ -202,7 +202,7 @@ UI.TemporaryMessageArea = class TemporaryMessageArea extends UI.Element {
 
     setColor(color) {
         this.setStyle("color", color);
-        this.applyDOMAttributes();
+        this.applyNodeAttributes();
     }
 
     showMessage(message, color="black", displayDuration=2000) {

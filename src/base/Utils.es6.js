@@ -100,6 +100,43 @@ export function suffixNumber(value, suffix) {
 }
 
 export function deepCopy() {
-    // TODO: should implement this without jQuery
-	return $.extend(true, ...arguments);
+	let target = arguments[0] || {};
+	// Handle case when target is a string or something (possible in deep copy)
+	if (typeof target !== "object" && typeof target !== "function") {
+		target = {};
+	}
+
+	for (let i = 1; i < arguments.length; i += 1) {
+        let options = arguments[i];
+        if (options == null) {
+            continue;
+        }
+
+        // Extend the base object
+        for (let [key, value] of Object.entries(options)) {
+            if (value === undefined) {
+                continue;
+            }
+
+            // Recurse if we're merging plain objects or arrays
+            // TODO: should implement this without jQuery
+            if ($.isPlainObject(value) || (Array.isArray(value))) {
+                let clone;
+                let src = target[key];
+
+                if (Array.isArray(value)) {
+                    clone = (src && Array.isArray(src)) ? src : [];
+                } else {
+                    // TODO: should implement this without jQuery
+                    clone = (src && $.isPlainObject(src)) ? src : {};
+                }
+
+                target[key] = deepCopy(clone, value);
+            } else {
+                target[key] = value;
+            }
+        }
+	}
+
+	return target;
 }

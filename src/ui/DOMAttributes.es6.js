@@ -1,4 +1,4 @@
-// TODO: this file needs to be revisited
+// TODO: this file needs to be revisited and renamed DOM -> Node
 function CreateAllowedAttributesMap(oldAttributesMap, allowedAttributesArray) {
     let allowedAttributesMap = new Map(oldAttributesMap);
 

@@ -314,8 +314,8 @@ UI.TextArea = class TextArea extends UI.Element {
         return "textarea";
     }
 
-    applyDOMAttributes() {
-        super.applyDOMAttributes();
+    applyNodeAttributes() {
+        super.applyNodeAttributes();
         this.node.readOnly = this.options.readOnly || false;
     }
 

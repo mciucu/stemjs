@@ -1,5 +1,5 @@
 import {UI} from "./UIBase";
-import {StyleSet} from "Style";
+import {hover, StyleSet} from "Style";
 import "./UIPrimitives";
 
 function BootstrapMixin(BaseClass, bootstrapClassName) {
@@ -25,7 +25,7 @@ function BootstrapMixin(BaseClass, bootstrapClassName) {
 
         setLevel(level) {
             this.options.level = level;
-            this.applyDOMAttributes();
+            this.applyNodeAttributes();
         }
 
         static bootstrapClass() {
@@ -83,6 +83,7 @@ UI.Button = class Button extends BootstrapMixin(UI.Element, "btn") {
     getFaIcon() {
         return this.options.faIcon;
     }
+
     setFaIcon(value) {
         this.options.faIcon = value;
         this.redraw();
@@ -281,18 +282,60 @@ class CollapsibleStyle extends StyleSet {
         this.noPadding = this.css({
             "padding-top": "0 !important",
             "padding-bottom": "0 !important",
-        })
+        });
+    }
+}
+
+class CollapsiblePanelStyle extends StyleSet {
+    constructor() {
+        super();
+
+        this.heading = this.css({
+            "padding": "10px 15px",
+            "border-bottom": "1px solid transparent",
+            "border-top-left-radius": "3px",
+            "border-top-right-radius": "3px",
+            "background-color": "#f5f5f5",
+        });
+
+        this.button = this.css({
+            "margin-top": "0",
+            "margin-bottom": "0",
+            "font-size": "16px",
+            "color": "inherit",
+            "cursor": "pointer",
+            ":hover": {
+                "color": "inherit",
+            },
+            ":before": {
+                "font-family": "'Glyphicons Halflings'",
+                "content": "\"\\e114\"",
+                "color": "grey",
+                "float": "left",
+            }
+        });
+
+        this.collapsedButton = this.css({
+            ":before": {
+                "content": "\"\\e080\"",
+            },
+        });
+
+        this.content = this.css({
+            "padding": "5px",
+        });
     }
 }
 
 let collapsibleStyle = new CollapsibleStyle();
+let collapsiblePanelStyle = new CollapsiblePanelStyle();
 
-//TODO: remove all bootstrap logic
+
 UI.CollapsiblePanel = class CollapsiblePanel extends UI.CardPanel {
     constructor(options) {
         super(options);
         // If options.collapsed is set, use that value. otherwise it is collapsed
-        this.collapsed = (options.collapsed != null) ? options.collapsed : true;
+        options.collapsed = options.collapsed || true;
     }
 
     onMount() {
@@ -303,7 +346,7 @@ UI.CollapsiblePanel = class CollapsiblePanel extends UI.CardPanel {
 
     togglePanel() {
         if (!this.collapsing) {
-            if (this.collapsed) {
+            if (this.options.collapsed) {
                 this.expand();
             } else {
                 this.collapse();
@@ -312,9 +355,8 @@ UI.CollapsiblePanel = class CollapsiblePanel extends UI.CardPanel {
     }
 
     expand() {
-        // TODO: use this.options.collapsed instead
-        this.collapsed = false;
-        this.expandLink.removeClass("collapsed");
+        this.options.collapsed = false;
+        this.expandLink.removeClass(collapsiblePanelStyle.collapsedButton);
         this.contentArea.removeClass(collapsibleStyle.collapsed);
         let contentStyleHeight = this.contentArea.node.style.height;
         let contentHeight = this.contentArea.getHeight();
@@ -323,19 +365,18 @@ UI.CollapsiblePanel = class CollapsiblePanel extends UI.CardPanel {
             this.contentArea.removeClass(collapsibleStyle.noPadding);
             this.contentArea.setHeight(contentHeight);
             let transitionEndFunction = () => {
-                /* TODO: test height change with classes */
                 this.contentArea.setHeight(contentStyleHeight);
                 this.contentArea.removeClass(collapsibleStyle.collapsing);
-                this.contentArea.removeDOMListener("webkitTransitionEnd", transitionEndFunction);
+                this.contentArea.removeDOMListener("transitionend", transitionEndFunction);
                 this.collapsing = false;
             };
-            this.contentArea.addNodeListener("webkitTransitionEnd", transitionEndFunction);
+            this.contentArea.addNodeListener("transitionend", transitionEndFunction);
             this.collapsing = true;
         });
     }
 
     collapse() {
-        this.collapsed = true;
+        this.options.collapsed = true;
         let contentStyleHeight = this.contentArea.node.style.height;
         this.contentArea.setHeight(this.contentArea.getHeight());
         this.contentArea.addClass(collapsibleStyle.collapsing);
@@ -343,14 +384,14 @@ UI.CollapsiblePanel = class CollapsiblePanel extends UI.CardPanel {
             this.contentArea.addClass(collapsibleStyle.noPadding);
             this.contentArea.setHeight(0);
             let transitionEndFunction = () => {
-                this.expandLink.addClass("collapsed");
+                this.expandLink.addClass(collapsiblePanelStyle.collapsedButton);
                 this.contentArea.addClass(collapsibleStyle.collapsed);
                 this.contentArea.removeClass(collapsibleStyle.collapsing);
                 this.contentArea.setHeight(contentStyleHeight);
-                this.contentArea.removeDOMListener("webkitTransitionEnd", transitionEndFunction);
+                this.contentArea.removeDOMListener("transitionend", transitionEndFunction);
                 this.collapsing = false;
             };
-            this.contentArea.addNodeListener("webkitTransitionEnd", transitionEndFunction);
+            this.contentArea.addNodeListener("transitionend", transitionEndFunction);
             this.collapsing = true;
         });
     }
@@ -364,20 +405,18 @@ UI.CollapsiblePanel = class CollapsiblePanel extends UI.CardPanel {
         if (this.options.autoHeight) {
             autoHeightClass = "auto-height ";
         }
-        if (this.collapsed) {
-            collapsedHeadingClass = "collapsed";
+        if (this.options.collapsed) {
+            collapsedHeadingClass = collapsiblePanelStyle.collapsedButton;
             collapsedPanelClass = collapsibleStyle.collapsed;
         }
-        //TODO: remove panel-heading and panel-title (bootstrap stuff)
+
         return [
-            <div className="panel-heading">
-                <h4 className="panel-title">
-                    <a ref="expandLink"  className={`panelCollapseButton ${collapsedHeadingClass}`}>
-                        {this.getTitle()}
-                    </a>
-                </h4>
+            <div className={collapsiblePanelStyle.heading}>
+                <a ref="expandLink"  className={`${collapsiblePanelStyle.button} ${collapsedHeadingClass}`}>
+                    {this.getTitle()}
+                </a>
             </div>,
-            <div ref="contentArea" className={`panel-content ${autoHeightClass} ${collapsedPanelClass}`}>
+            <div ref="contentArea" className={`${collapsiblePanelStyle.content} ${autoHeightClass} ${collapsedPanelClass}`}>
                 {this.getGivenChildren()}
             </div>
         ];

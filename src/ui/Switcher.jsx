@@ -42,7 +42,7 @@ UI.Switcher = class Switcher extends UI.Element {
 
     redraw() {
         //basic things for our current node
-        this.applyDOMAttributes();
+        this.applyNodeAttributes();
         this.applyRef();
 
         // This render may be required to update this.options.children
