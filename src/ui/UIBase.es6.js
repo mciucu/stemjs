@@ -30,7 +30,10 @@ class BaseUIElement extends Dispatchable {
         }
     }
 
+    onUnmount() {}
+
     destroyNode() {
+        this.onUnmount();
         this.cleanup();
         this.removeRef();
         this.node.remove();
@@ -248,6 +251,16 @@ class UIElement extends BaseUIElement {
         return true;
     }
 
+    getNodeAttributes() {
+        let attr = new DOMAttributes(this.options, this.constructor.domAttributesMap);
+        this.extraNodeAttributes(attr);
+        return attr;
+    }
+
+    extraNodeAttributes(attr) {
+        // Overwrite this if you want to add any other attributes from the default ones
+    }
+
     applyNodeAttributes() {
         this.domAttributes = this.getNodeAttributes();
         this.domAttributes.apply(this.node);
@@ -300,12 +313,6 @@ class UIElement extends BaseUIElement {
         } else {
             this.removeClass(className);
         }
-    }
-
-    // TODO: a more expressive way to do this would be to be able to walk to proto chain
-    // TODO: to call something like addExtraAttributes(attr);
-    getNodeAttributes() {
-        return new DOMAttributes(this.options, this.constructor.domAttributesMap);
     }
 
     refLink(name) {

@@ -1,6 +1,6 @@
 {
   "name": "stem-core",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Frontend framework",
   "main": "src/Stem.es6.js",
   "scripts": {
@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/mciucu/stemjs#readme",
   "devDependencies": {
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-plugin-transform-react-jsx": "^6.8.0",
     "babel-preset-es2015": "^6.18.0",
     "babel-preset-es2015-rollup": "^1.2.0",
