@@ -97,11 +97,9 @@ class DOMAttributes {
             this.classes = new Set(options.classes);
         } else if (options.className) {
             this.className = String(options.className);
-        } else {
-            this.classes = new Set();
         }
 
-        this.styleMap = options.style || {};
+        this.style = options.style;
     }
 
     // TODO: there's no real use-case for this method
@@ -130,10 +128,10 @@ class DOMAttributes {
         if (typeof value === "function") {
             value = value();
         }
-        if (!this.styleMap) {
-            this.styleMap = {};
+        if (!this.style) {
+            this.style = {};
         }
-        this.styleMap[key] = value;
+        this.style[key] = value;
         if (node && node.style[key] !== value) {
             node.style[key] = value;
         }
@@ -145,6 +143,10 @@ class DOMAttributes {
         if (!this.classes && this.className) {
             this.classes = new Set(this.className.split(" "));
             this.className = undefined;
+        }
+
+        if (!this.classes) {
+            this.classes = new Set();
         }
 
         if (Array.isArray(classes)) {
@@ -224,9 +226,9 @@ class DOMAttributes {
         }
 
         node.removeAttribute("style");
-        if (this.styleMap) {
-            for (let key in this.styleMap) {
-                let value = this.styleMap[key];
+        if (this.style) {
+            for (let key in this.style) {
+                let value = this.style[key];
                 if (typeof value === "function") {
                     value = value();
                 }

@@ -1,6 +1,7 @@
 import * as Utils from "./Utils";
 import {Dispatchable} from "./Dispatcher";
 
+// TODO: might need a redesign, to handle full urls
 class URLRouterClass extends Dispatchable {
     constructor() {
         super();

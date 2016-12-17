@@ -42,19 +42,13 @@ class BaseUIElement extends Dispatchable {
 }
 
 UI.TextElement = class UITextElement extends BaseUIElement {
-    // TODO: probably simplify this constructor
-    constructor(options) {
+    constructor(value="") {
         super();
-        let value;
-        if (typeof options === "string" || options instanceof String || typeof options === "number" || options instanceof Number) {
-            value = String(options);
-            options = null;
+        if (value && value.value) {
+            this.value = value.value;
+            this.options = value;
         } else {
-            value = options.value || value;
-        }
-        this.setValue(value);
-        if (options) {
-            this.options = options;
+            this.value = (value != null) ? value : "";
         }
     }
 
@@ -62,8 +56,10 @@ UI.TextElement = class UITextElement extends BaseUIElement {
         this.parent = parent;
         if (!this.node) {
             this.createNode();
+            this.applyRef();
+        } else {
+            this.redraw();
         }
-        this.redraw();
         parent.node.insertBefore(this.node, nextSibling);
     }
 
@@ -72,28 +68,29 @@ UI.TextElement = class UITextElement extends BaseUIElement {
     }
 
     copyState(element) {
-        this.setValue(element.getValue());
+        this.value = element.value;
+        this.options = element.options;
     }
 
     createNode() {
-        this.node = document.createTextNode("");
-        return this.node;
+        return this.node = document.createTextNode(this.getValue());
     }
 
     setValue(value) {
-        this.value = String(value);
+        this.value = (value != null) ? value : "";
         if (this.node) {
             this.redraw();
         }
     }
 
     getValue() {
-        return this.value;
+        return String(this.value);
     }
 
     redraw() {
         if (this.node) {
             let newValue = this.getValue();
+            // TODO: check if this is best for performance
             if (this.node.nodeValue !== newValue) {
                 this.node.nodeValue = newValue;
             }
@@ -150,8 +147,7 @@ class UIElement extends BaseUIElement {
     };
 
     createNode() {
-        this.node = document.createElement(this.getNodeType());
-        return this.node;
+        return this.node = document.createElement(this.getNodeType());
     }
 
     // Abstract, gets called when removing DOM node associated with the
@@ -359,6 +355,7 @@ class UIElement extends BaseUIElement {
 
     // You need to overwrite the next child manipulation rutines if this.options.children !== this.children
     appendChild(child) {
+        // TODO: the next check should be done with a decorator
         if (this.children !== this.options.children) {
             throw "Can't properly handle appendChild, you need to implement it for " + this.constructor;
         }
@@ -508,9 +505,12 @@ class UIElement extends BaseUIElement {
 
     addNodeListener(name, callback) {
         this.node.addEventListener(name, callback);
+        return {
+            remove: () => this.removeNodeListener(name, callback),
+        }
     }
 
-    removeDOMListener(name, callback) {
+    removeNodeListener(name, callback) {
         this.node.removeEventListener(name, callback);
     }
 
@@ -519,7 +519,7 @@ class UIElement extends BaseUIElement {
     }
 
     removeClickListener(callback) {
-        this.removeDOMListener("click", callback);
+        this.removeNodeListener("click", callback);
     }
 
     addDoubleClickListener(callback) {
@@ -527,21 +527,12 @@ class UIElement extends BaseUIElement {
     }
 
     removeDoubleClickListener(callback) {
-        this.removeDOMListener("dblclick", callback);
+        this.removeNodeListener("dblclick", callback);
     }
 
     addChangeListener(callback) {
         this.addNodeListener("change", callback);
     }
-
-    // TODO: this should be done with decorators, remove this method
-    ensureFieldExists(name, value) {
-        if (!this.hasOwnProperty(name)) {
-            this[name] = value(this);
-        }
-        return this[name];
-    }
-
 }
 
 UIElement.domAttributesMap = ATTRIBUTE_NAMES_MAP;

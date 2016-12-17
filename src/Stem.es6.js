@@ -21,3 +21,7 @@ export * from "base/Utils";
 export * from "base/Time";
 export * from "base/URLRouter";
 export * from "data-structures/Deque";
+// TODO: should all decorators be in (exported from) the same file?
+export * from "decorators/Deprecate";
+export * from "decorators/LazyInitialize";
+export * from "decorators/ReadOnly";

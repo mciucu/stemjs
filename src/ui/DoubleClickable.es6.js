@@ -1,4 +1,12 @@
 let DoubleClickable = (BaseClass) => class DoubleClickable extends BaseClass {
+    // TODO: this should be done with decorators, remove this method
+    ensureFieldExists(name, value) {
+        if (!this.hasOwnProperty(name)) {
+            this[name] = value(this);
+        }
+        return this[name];
+    }
+
     addClickListener(callback) {
         this.ensureFieldExists("_singleClickCallbacks", x => new Map());
 

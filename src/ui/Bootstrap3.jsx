@@ -1,6 +1,7 @@
 import {UI} from "./UIBase";
 import {hover, StyleSet} from "Style";
 import "./UIPrimitives";
+import {GlobalStyle} from "./GlobalStyle";
 
 function BootstrapMixin(BaseClass, bootstrapClassName) {
     class BootstrapClass extends BaseClass {
@@ -43,6 +44,10 @@ UI.Button = class Button extends BootstrapMixin(UI.Element, "btn") {
         if (this.getSize()) {
             attr.addClass(this.constructor.bootstrapClass() + "-" + this.getSize());
         }
+
+        // if (this.getSize()) {
+        //     attr.addClass(GlobalStyle.Button.Size(this.getSize()));
+        // }
 
         return attr;
     }
@@ -367,7 +372,7 @@ UI.CollapsiblePanel = class CollapsiblePanel extends UI.CardPanel {
             let transitionEndFunction = () => {
                 this.contentArea.setHeight(contentStyleHeight);
                 this.contentArea.removeClass(collapsibleStyle.collapsing);
-                this.contentArea.removeDOMListener("transitionend", transitionEndFunction);
+                this.contentArea.removeNodeListener("transitionend", transitionEndFunction);
                 this.collapsing = false;
             };
             this.contentArea.addNodeListener("transitionend", transitionEndFunction);
@@ -388,7 +393,7 @@ UI.CollapsiblePanel = class CollapsiblePanel extends UI.CardPanel {
                 this.contentArea.addClass(collapsibleStyle.collapsed);
                 this.contentArea.removeClass(collapsibleStyle.collapsing);
                 this.contentArea.setHeight(contentStyleHeight);
-                this.contentArea.removeDOMListener("transitionend", transitionEndFunction);
+                this.contentArea.removeNodeListener("transitionend", transitionEndFunction);
                 this.collapsing = false;
             };
             this.contentArea.addNodeListener("transitionend", transitionEndFunction);

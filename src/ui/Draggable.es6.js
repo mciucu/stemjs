@@ -1,6 +1,14 @@
 // TODO: simplify this if possible
 // TODO: rename to DraggableMixin?
 let Draggable = (BaseClass) => class Draggable extends BaseClass {
+    // TODO: this should be done with decorators, remove this method
+    ensureFieldExists(name, value) {
+        if (!this.hasOwnProperty(name)) {
+            this[name] = value(this);
+        }
+        return this[name];
+    }
+
     // @lazyinit
     // clickCallbacks = new Map();
     addClickListener(callback) {
@@ -154,10 +162,10 @@ let Draggable = (BaseClass) => class Draggable extends BaseClass {
                     this._dragListeners[i].onDrag === listeners.onDrag &&
                     this._dragListeners[i].onEnd === listeners.onEnd) {
 
-                    this.removeDOMListener("touchstart", this._dragListeners[i].onWrapperStart);
+                    this.removeNodeListener("touchstart", this._dragListeners[i].onWrapperStart);
                     document.body.removeEventListener("touchmove", this._dragListeners[i].onWrapperDrag);
                     document.body.removeEventListener("touchmove", this._dragListeners[i].onWrapperEnd);
-                    this.removeDOMListener("mousedown", this._dragListeners[i].onWrapperStart);
+                    this.removeNodeListener("mousedown", this._dragListeners[i].onWrapperStart);
                     document.body.removeEventListener("mousemove", this._dragListeners[i].onWrapperDrag);
                     document.body.removeEventListener("mousemove", this._dragListeners[i].onWrapperEnd);
 

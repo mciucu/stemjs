@@ -181,6 +181,8 @@ class CleanupJobs {
         for (let job of this.jobs) {
             if (typeof job.cleanup === "function") {
                 job.cleanup();
+            } else if (typeof job.remove === "function" ) {
+                job.remove();
             } else {
                 job();
             }
