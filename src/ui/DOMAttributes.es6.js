@@ -52,6 +52,8 @@ const ATTRIBUTE_NAMES_MAP = CreateAllowedAttributesMap([
     //["value"], // Value is intentionally disabled
 ]);
 
+
+// TODO: should all the logic from this class be moved to UI.Element or UI.createElement ??
 class DOMAttributes {
     constructor(options, attributeNamesMap) {
         let attributesMap;
@@ -140,13 +142,13 @@ class DOMAttributes {
     addClass(classes, node) {
         if (!classes) return;
 
-        if (!this.classes && this.className) {
-            this.classes = new Set(this.className.split(" "));
-            this.className = undefined;
-        }
-
         if (!this.classes) {
-            this.classes = new Set();
+            if (this.className) {
+                this.classes = new Set(this.className.split(" "));
+                this.className = undefined;
+            } else {
+                this.classes = new Set();
+            }
         }
 
         if (Array.isArray(classes)) {
@@ -165,9 +167,13 @@ class DOMAttributes {
     removeClass(classes, node) {
         if (!classes) return;
 
-        if (!this.classes && this.className) {
-            this.classes = new Set(this.className.split(" "));
-            this.className = undefined;
+        if (!this.classes) {
+            if (this.className) {
+                this.classes = new Set(this.className.split(" "));
+                this.className = undefined;
+            } else {
+                this.classes = new Set();
+            }
         }
 
         if (Array.isArray(classes)) {

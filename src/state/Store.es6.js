@@ -7,7 +7,7 @@ class StoreObject extends Dispatchable {
     };
 
     // By default, applying an event just shallow copies the fields from event.data
-    update(event) {
+    applyEvent(event) {
         Object.assign(this, event.data);
     };
 
@@ -109,7 +109,7 @@ class GenericObjectStore extends BaseStore {
         if (existingObject) {
             let refreshEvent = Object.assign({}, event);
             refreshEvent.type = "refresh";
-            existingObject.update(refreshEvent);
+            existingObject.applyEvent(refreshEvent);
             existingObject.dispatch("update", event);
             return existingObject;
         } else {
@@ -146,7 +146,7 @@ class GenericObjectStore extends BaseStore {
     }
 
     applyEventToObject(obj, event) {
-        obj.update(event);
+        obj.applyEvent(event);
         obj.dispatch("update", event);
         this.dispatch("update", obj, event);
         return obj;
@@ -234,7 +234,7 @@ class SingletonStore extends BaseStore {
     }
 
     applyEvent(event) {
-        this.update(event);
+        Object.assign(this, event.data);
         this.dispatch("update", event, this);
     }
 

@@ -166,6 +166,9 @@ class UIElement extends BaseUIElement {
     }
 
     getElementKeyMap(elements) {
+        if (!elements || !elements.length) {
+            return;
+        }
         let childrenKeyMap = new Map();
 
         for (let i = 0; i < elements.length; i += 1) {
@@ -210,7 +213,7 @@ class UIElement extends BaseUIElement {
             }
 
             let newChildKey = (newChild.options && newChild.options.key) || ("autokey" + i);
-            let existingChild = childrenKeyMap.get(newChildKey);
+            let existingChild = childrenKeyMap && childrenKeyMap.get(newChildKey);
 
             if (existingChild && newChildren[i].canOverwrite(existingChild)) {
                 // We're replacing an existing child element, it might be the very same object
@@ -591,6 +594,7 @@ UI.str = function (value) {
     return new UI.TextElement(value);
 };
 
+// Keep a map for every base class, and for each base class keep a map for each nodeType, to cache classes
 let primitiveMap = new WeakMap();
 
 UI.Primitive = (BaseClass, nodeType) => {
@@ -598,16 +602,25 @@ UI.Primitive = (BaseClass, nodeType) => {
         nodeType = BaseClass;
         BaseClass = UI.Element;
     }
-    let resultClass = primitiveMap.get(BaseClass);
+    let baseClassPrimitiveMap = primitiveMap.get(BaseClass);
+    if (!baseClassPrimitiveMap) {
+        baseClassPrimitiveMap = new Map();
+        primitiveMap.set(BaseClass, baseClassPrimitiveMap);
+    }
+    let resultClass = baseClassPrimitiveMap.get(nodeType);
     if (resultClass) {
         return resultClass;
     }
     resultClass = class Primitive extends BaseClass {
+        static get name() {
+            return "Primitive-" + nodeType;
+        }
+
         getNodeType() {
             return nodeType;
         }
     };
-    primitiveMap.set(BaseClass, resultClass);
+    baseClassPrimitiveMap.set(nodeType, resultClass);
     return resultClass;
 };
 
