@@ -1,9 +1,5 @@
 // TODO: should this be renamed to "toUnwrappedArray"?
 export function unwrapArray(elements) {
-    if (arguments.length > 1) {
-        elements = [...arguments];
-    }
-
     if (!elements) {
         return [];
     }

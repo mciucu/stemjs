@@ -1,4 +1,5 @@
-// TODO: this file needs to be revisited and renamed DOM -> Node
+// TODO: this file needs to be cleaned up and renamed DOM -> Node
+// TODO: most of the functionality here can probably be moved to UI.Element
 function CreateAllowedAttributesMap(oldAttributesMap, allowedAttributesArray) {
     let allowedAttributesMap = new Map(oldAttributesMap);
 
@@ -59,19 +60,8 @@ class DOMAttributes {
         let attributesMap;
 
         for (let attributeName in options) {
-            // TODO: Take care of bootstrap bullshit, this should not be in here, add it yourself
-            if (attributeName.startsWith("data-") || attributeName.startsWith("aria-")) {
-                if (!attributesMap) {
-                    attributesMap = new Map();
-                }
-
-                attributesMap.set(attributeName, options[attributeName]);
-                continue;
-            }
-
-            // No hasOwnProperty check for perfomance
             let attributeProperties = attributeNamesMap.get(attributeName);
-            if (attributeProperties) {
+            if (attributeProperties || attributeName.startsWith("aria-")) {
                 let value = options[attributeName];
 
                 if (attributeProperties.noValue) {
@@ -125,6 +115,7 @@ class DOMAttributes {
 
     setStyle(key, value, node) {
         if (value === undefined) {
+            // TODO: why return here and not remove the old value?
             return;
         }
         if (typeof value === "function") {

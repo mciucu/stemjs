@@ -41,13 +41,13 @@ UI.Button = class Button extends BootstrapMixin(UI.Element, "btn") {
     getNodeAttributes() {
         let attr = super.getNodeAttributes();
 
-        if (this.getSize()) {
-            attr.addClass(this.constructor.bootstrapClass() + "-" + this.getSize());
-        }
-
         // if (this.getSize()) {
-        //     attr.addClass(GlobalStyle.Button.Size(this.getSize()));
+        //     attr.addClass(this.constructor.bootstrapClass() + "-" + this.getSize());
         // }
+
+        if (this.getSize()) {
+            attr.addClass(GlobalStyle.Button.Size(this.getSize()));
+        }
 
         return attr;
     }

@@ -1,16 +1,14 @@
+import {lazyInit} from "../decorators/Decorators";
+
 let DoubleClickable = (BaseClass) => class DoubleClickable extends BaseClass {
-    // TODO: this should be done with decorators, remove this method
-    ensureFieldExists(name, value) {
-        if (!this.hasOwnProperty(name)) {
-            this[name] = value(this);
-        }
-        return this[name];
-    }
+    @lazyInit
+    singleClickCallbacks = new Map();
+
+    @lazyInit
+    doubleClickCallbacks = new Map();
 
     addClickListener(callback) {
-        this.ensureFieldExists("_singleClickCallbacks", x => new Map());
-
-        if (this._singleClickCallbacks.has(callback)) {
+        if (this.singleClickCallbacks.has(callback)) {
             return;
         }
 
@@ -36,7 +34,7 @@ let DoubleClickable = (BaseClass) => class DoubleClickable extends BaseClass {
                 });
             }
         };
-        this._singleClickCallbacks.set(callback, callbackWrapper);
+        this.singleClickCallbacks.set(callback, callbackWrapper);
         super.addClickListener(callbackWrapper);
     }
 
@@ -45,20 +43,15 @@ let DoubleClickable = (BaseClass) => class DoubleClickable extends BaseClass {
     }
 
     removeClickListener(callback) {
-        if (!this._singleClickCallbacks) {
-            return;
-        }
-        let callbackWrapper = this._singleClickCallbacks.get(callback);
+        let callbackWrapper = this.singleClickCallbacks.get(callback);
         if (callbackWrapper) {
-            this._singleClickCallbacks.delete(callback);
+            this.singleClickCallbacks.delete(callback);
             super.removeClickListener(callbackWrapper);
         }
     }
 
     addDoubleClickListener(callback) {
-        this.ensureFieldExists("_doubleClickCallbacks", x => new Map());
-
-        if (this._doubleClickCallbacks.has(callback)) {
+        if (this.doubleClickCallbacks.has(callback)) {
             return;
         }
 
@@ -81,17 +74,14 @@ let DoubleClickable = (BaseClass) => class DoubleClickable extends BaseClass {
                 callback();
             }
         };
-        this._doubleClickCallbacks.set(callback, callbackWrapper);
+        this.doubleClickCallbacks.set(callback, callbackWrapper);
         super.addClickListener(callbackWrapper);
     }
 
     removeDoubleClickListener(callback) {
-        if (!this._doubleClickCallbacks) {
-            return;
-        }
-        let callbackWrapper = this._doubleClickCallbacks.get(callback);
+        let callbackWrapper = this.doubleClickCallbacks.get(callback);
         if (callbackWrapper) {
-            this._doubleClickCallbacks.delete(callback);
+            this.doubleClickCallbacks.delete(callback);
             super.removeClickListener(callbackWrapper);
         }
     }

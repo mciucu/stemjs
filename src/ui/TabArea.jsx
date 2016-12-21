@@ -9,39 +9,16 @@ class TabAreaStyle extends StyleSet {
         super();
 
         this.activeTab = this.css({
-            "color": "#555 !important",
-            "cursor": "default !important",
-            "background-color": "#fff !important",
-            "border": "1px solid #ddd !important",
-            "border-bottom-color": "transparent !important",
+
         });
 
         this.tab = this.css({
             "user-select": "none",
-            "margin-bottom": "-1px",
-            "text-decoration": "none !important",
             "display": "inline-block",
-            "margin-right": "2px",
-            "line-height": "1.42857143",
-            "border": "1px solid transparent",
-            "border-radius": "4px 4px 0 0",
             "position": "relative",
-            "padding": "8px",
-            "padding-left": "10px",
-            "padding-right": "10px",
-            ":hover": {
-                "cursor": "pointer",
-                "background-color": "#eee",
-                "color": "#555",
-                "border": "1px solid #ddd",
-                "border-bottom-color": "transparent",
-            },
         });
 
         this.nav = this.css({
-            "border-bottom": "1px solid #ddd",
-            "padding-left": "0",
-            "margin-bottom": "0",
             "list-style": "none",
         });
     }
@@ -72,6 +49,10 @@ class BasicTabTitle extends UI.Element {
         }
     }
 
+    getStyleSet() {
+        return this.options.styleSet || this.constructor.styleSet || tabAreaStyle;
+    }
+
     getPanel() {
         return this.options.panel;
     }
@@ -92,12 +73,15 @@ class BasicTabTitle extends UI.Element {
         if (this.options.href) {
             hrefOption.href = this.options.href;
         }
+        let tab = this.getStyleSet().tab;
+
         let activeTab = "";
         if (this.options.active) {
-            activeTab = tabAreaStyle.activeTab;
+            activeTab = this.getStyleSet().activeTab;
         }
+
         return [
-            <a {...hrefOption}  className={`${activeTab} ${tabAreaStyle.tab}`}>
+            <a {...hrefOption}  className={`${activeTab} ${tab}`}>
                 {this.getTitle()}
             </a>
         ];
@@ -122,11 +106,6 @@ class BasicTabTitle extends UI.Element {
 };
 
 UI.TabTitleArea = class TabTitleArea extends UI.Element {
-    getNodeAttributes() {
-        let attr = super.getNodeAttributes();
-        attr.addClass(tabAreaStyle.nav);
-        return attr;
-    }
 };
 
 UI.TabArea = class TabArea extends UI.Element {
@@ -144,21 +123,23 @@ UI.TabArea = class TabArea extends UI.Element {
 
     getNodeAttributes() {
         let attr = super.getNodeAttributes();
+        attr.setStyle("display", "flex");
+        attr.setStyle("flex-direction", "column");
+        // attr.setStyle("display", "none");
         if (!this.options.variableHeightPanels) {
-            attr.addClass("auto-height-parent");
+            // attr.addClass("auto-height-parent");
         }
         return attr;
     }
 
+    getStyleSet() {
+        return this.options.styleSet || this.constructor.styleSet || tabAreaStyle;
+    }
+
     createTabPanel(panel) {
-        let tab = <BasicTabTitle panel={panel} activeTabDispatcher={this.activeTabDispatcher} active={panel.options.active} href={panel.options.tabHref} />;
+        let tab = <BasicTabTitle panel={panel} activeTabDispatcher={this.activeTabDispatcher} active={panel.options.active} href={panel.options.tabHref} styleSet={this.getStyleSet()} />;
 
         //TODO: Don't modify the panel element!!!!
-        let panelClass = " tab-panel nopad";
-        if (!this.options.variableHeightPanels) {
-            panelClass += " auto-height-child";
-        }
-        panel.options.className = (panel.options.className || "") + panelClass;
 
         return [tab, panel];
     }
@@ -173,19 +154,17 @@ UI.TabArea = class TabArea extends UI.Element {
     };
 
     getTitleArea(tabTitles) {
-        return <UI.TabTitleArea ref="titleArea">
+        return <UI.TabTitleArea ref="titleArea" className={this.getStyleSet().nav}>
             {tabTitles}
         </UI.TabTitleArea>;
     }
 
     getSwitcher(tabPanels) {
-        let switcherClass = "";
-        if (!this.options.variableHeightPanels) {
-            switcherClass = "auto-height";
-        }
-        return <UI.Switcher ref="switcherArea" className={switcherClass} lazyRender={this.options.lazyRender}>
-                {tabPanels}
-            </UI.Switcher>;
+        // TODO: This should have the ex "auto-height" if not variable height children
+        // className="auto-height"
+        return <UI.Switcher style={{"flex": "1", "overflow": "auto", }} ref="switcherArea" lazyRender={this.options.lazyRender}>
+            {tabPanels}
+        </UI.Switcher>;
     }
 
     render() {

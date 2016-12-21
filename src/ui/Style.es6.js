@@ -11,7 +11,7 @@ class StyleSet extends Dispatchable {
         this.options = options;
         this.elements = new Set();
         if (this.options.updateOnResize) {
-            window.addEventListener("resize", () => {
+            this.attachEventListener(window, "resize", () => {
                 this.update();
             });
         }
@@ -19,7 +19,7 @@ class StyleSet extends Dispatchable {
             children: [],
             name: this.options.name,
         };
-        this.styleElement = UI.StyleElement.create(document.head, styleElementOptions);
+        this.styleElement = UI.StyleElement.create(options.parent || document.head, styleElementOptions);
     }
 
     ensureFirstUpdate() {

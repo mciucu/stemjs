@@ -1,6 +1,7 @@
 import {unwrapArray} from "../base/Utils";
 import {Dispatchable} from "../base/Dispatcher";
 import {DOMAttributes, ATTRIBUTE_NAMES_MAP} from "./DOMAttributes";
+import {lazyInitialize} from "../decorators/LazyInitialize";
 
 var UI = {
     renderingStack: [], //keeps track of objects that are redrawing, to know where to assign refs automatically
@@ -612,9 +613,10 @@ UI.Primitive = (BaseClass, nodeType) => {
         return resultClass;
     }
     resultClass = class Primitive extends BaseClass {
-        static get name() {
-            return "Primitive-" + nodeType;
-        }
+        // TODO: This crashes in PhantomJS
+        // static get name() {
+        //     return "Primitive-" + nodeType;
+        // }
 
         getNodeType() {
             return nodeType;
