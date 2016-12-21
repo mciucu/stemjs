@@ -60,8 +60,19 @@ class DOMAttributes {
         let attributesMap;
 
         for (let attributeName in options) {
+            // TODO: Take care of bootstrap bullshit, this should not be in here, add it yourself
+            if (attributeName.startsWith("data-") || attributeName.startsWith("aria-")) {
+                if (!attributesMap) {
+                    attributesMap = new Map();
+                }
+
+                attributesMap.set(attributeName, options[attributeName]);
+                continue;
+            }
+
+            // No hasOwnProperty check for perfomance
             let attributeProperties = attributeNamesMap.get(attributeName);
-            if (attributeProperties || attributeName.startsWith("aria-")) {
+            if (attributeProperties) {
                 let value = options[attributeName];
 
                 if (attributeProperties.noValue) {

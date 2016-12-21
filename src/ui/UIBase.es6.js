@@ -45,7 +45,7 @@ class BaseUIElement extends Dispatchable {
 UI.TextElement = class UITextElement extends BaseUIElement {
     constructor(value="") {
         super();
-        if (value && value.value) {
+        if (value && value.hasOwnProperty("value")) {
             this.value = value.value;
             this.options = value;
         } else {
