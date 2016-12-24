@@ -108,9 +108,17 @@ class UIElement extends BaseUIElement {
         this.setOptions(options);
     };
 
+    getDefaultOptions() {}
+
+    getPreservedOptions() {}
+
     setOptions(options) {
+        // TODO: should this be here or in createElement?
+        let defaultOptions = this.getDefaultOptions();
+        if (defaultOptions) {
+            options = Object.assign(defaultOptions, options);
+        }
         this.options = options;
-        this.options.children = this.options.children || [];
     }
 
     updateOptions(options) {
@@ -125,7 +133,12 @@ class UIElement extends BaseUIElement {
     // Used when we want to reuse the current element, with the options from the passed in argument
     // Is only called when element.canOverwrite(this) is true
     copyState(element) {
-        this.setOptions(element.options);
+        let options = element.options;
+        let preservedOptions = this.getPreservedOptions();
+        if (preservedOptions) {
+            options = Object.assign({}, options, preservedOptions);
+        }
+        this.setOptions(options);
     }
 
     getNodeType() {
