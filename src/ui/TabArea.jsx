@@ -2,30 +2,63 @@
 import {UI} from "./UIBase";
 import {SingleActiveElementDispatcher} from "../base/Dispatcher";
 import {css, hover, focus, active, ExclusiveClassSet, StyleSet} from "Style";
+import {lazyCSS, lazyInheritCSS} from "../decorators/LazyCSS";
 import "./Switcher";
 
-class TabAreaStyle extends StyleSet {
-    constructor() {
-        super();
+class BaseTabAreaStyle extends StyleSet {
+    @lazyCSS
+    tab = {
+        "user-select": "none",
+        "display": "inline-block",
+        "position": "relative",
+    };
 
-        this.activeTab = this.css({
+    @lazyCSS
+    activeTab = {};
 
-        });
-
-        this.tab = this.css({
-            "user-select": "none",
-            "display": "inline-block",
-            "position": "relative",
-        });
-
-        this.nav = this.css({
-            "list-style": "none",
-        });
-    }
+    @lazyCSS
+    nav = {
+        "list-style": "none",
+    };
 }
 
-// TODO: this should not be instantiated before first needed!
-let tabAreaStyle = new TabAreaStyle();
+class DefaultTabAreaStyle extends BaseTabAreaStyle {
+    @lazyInheritCSS
+    tab = {
+        "margin-bottom": "-1px",
+        "text-decoration": "none !important",
+        "margin-right": "2px",
+        "line-height": "1.42857143",
+        "border": "1px solid transparent",
+        "border-radius": "4px 4px 0 0",
+        "padding": "8px",
+        "padding-left": "10px",
+        "padding-right": "10px",
+        ":hover": {
+            "cursor": "pointer",
+            "background-color": "#eee",
+            "color": "#555",
+            "border": "1px solid #ddd",
+            "border-bottom-color": "transparent",
+        },
+    };
+
+    @lazyInheritCSS
+    activeTab = {
+        "color": "#555 !important",
+        "cursor": "default !important",
+        "background-color": "#fff !important",
+        "border": "1px solid #ddd !important",
+        "border-bottom-color": "transparent !important",
+    };
+
+    @lazyInheritCSS
+    nav = {
+        "border-bottom": "1px solid #ddd",
+        "padding-left": "0",
+        "margin-bottom": "0",
+    };
+}
 
 class BasicTabTitle extends UI.Element {
     getNodeType() {
@@ -109,37 +142,33 @@ UI.TabTitleArea = class TabTitleArea extends UI.Element {
 };
 
 UI.TabArea = class TabArea extends UI.Element {
-    constructor(options) {
-        super(options);
-        this.activeTabDispatcher = new SingleActiveElementDispatcher();
+    // TODO: should be a lazy property, must fix decorator first
+    static styleSet = new DefaultTabAreaStyle();
+
+    activeTabDispatcher = new SingleActiveElementDispatcher()
+
+    getDefaultOptions() {
+        return {
+            autoActive: true, // means the first Tab will be automatically selected
+        }
     }
 
-    setOptions(options) {
-        options = Object.assign({
-            autoActive: true,
-        }, options);
-        super.setOptions(options);
-    }
-
-    getNodeAttributes() {
-        let attr = super.getNodeAttributes();
+    extraNodeAttributes(attr) {
+        // TODO: these shoudl not be in here!
         attr.setStyle("display", "flex");
         attr.setStyle("flex-direction", "column");
         // attr.setStyle("display", "none");
         if (!this.options.variableHeightPanels) {
             // attr.addClass("auto-height-parent");
         }
-        return attr;
     }
 
     getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet || tabAreaStyle;
+        return this.options.styleSet || this.constructor.styleSet;
     }
 
     createTabPanel(panel) {
         let tab = <BasicTabTitle panel={panel} activeTabDispatcher={this.activeTabDispatcher} active={panel.options.active} href={panel.options.tabHref} styleSet={this.getStyleSet()} />;
-
-        //TODO: Don't modify the panel element!!!!
 
         return [tab, panel];
     }

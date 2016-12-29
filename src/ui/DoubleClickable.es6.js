@@ -1,10 +1,10 @@
 import {lazyInit} from "../decorators/Decorators";
 
 let DoubleClickable = (BaseClass) => class DoubleClickable extends BaseClass {
-    @lazyInit
+    // @lazyInit
     singleClickCallbacks = new Map();
 
-    @lazyInit
+    // @lazyInit
     doubleClickCallbacks = new Map();
 
     addClickListener(callback) {

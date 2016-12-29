@@ -1,19 +1,13 @@
-// TODO: simplify this if possible
-// TODO: rename to DraggableMixin?
+import {lazyInit} from "../decorators/Decorators";
+
 let Draggable = (BaseClass) => class Draggable extends BaseClass {
-    // TODO: this should be done with decorators, remove this method
-    ensureFieldExists(name, value) {
-        if (!this.hasOwnProperty(name)) {
-            this[name] = value(this);
-        }
-        return this[name];
-    }
+    @lazyInit
+    _clickCallbacks = new Map();
 
-    // @lazyinit
-    // clickCallbacks = new Map();
+    @lazyInit
+    _clickDragListeners = new Map();
+
     addClickListener(callback) {
-        this.ensureFieldExists("_clickCallbacks", x => new Map());
-
         if (this._clickCallbacks.has(callback)) {
             return;
         }
@@ -25,9 +19,6 @@ let Draggable = (BaseClass) => class Draggable extends BaseClass {
         this._clickCallbacks.set(callback, callbackWrapper);
         super.addClickListener(callbackWrapper);
 
-        if (!this.hasOwnProperty("_clickDragListeners")) {
-            this._clickDragListeners = new Map();
-        }
         if (this._clickDragListeners.has(callback)) {
             return;
         }
@@ -48,9 +39,6 @@ let Draggable = (BaseClass) => class Draggable extends BaseClass {
     }
 
     removeClickListener(callback) {
-        if (!this._clickCallbacks) {
-            return;
-        }
         let callbackWrapper = this._clickCallbacks.get(callback);
         if (callbackWrapper) {
             this._clickCallbacks.delete(callback);

@@ -98,10 +98,6 @@ UI.Switcher = class Switcher extends UI.Element {
         return child;
     }
 
-    getActiveIndex() {
-        return this.getChildIndex(this.activeChild);
-    }
-
     getActive() {
         return this.activeChild;
     }
@@ -143,14 +139,6 @@ UI.Switcher = class Switcher extends UI.Element {
 
     hasChild(element) {
         return this.childMap.has(element);
-    }
-
-    getChild(index) {
-        return this.options.children[index];
-    }
-
-    getChildIndex(element) {
-        return this.options.children.indexOf(element);
     }
 
     onMount() {
