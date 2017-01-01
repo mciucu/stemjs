@@ -3,23 +3,22 @@
 import {UI} from "./UIBase";
 import {Device} from "../base/Device";
 import {StyleSet} from "./Style";
+import {lazyCSS} from "../decorators/LazyCSS";
 
 class SectionDividerStyleSet extends StyleSet {
-    constructor() {
-        super(...arguments);
-        // TODO: bind here to getters?
-        this.horizontalDivider = this.css({
-            cursor: "row-resize",
-        });
-
-        this.verticalDivider = this.css({
-            cursor: "col-resize",
-        })
-    }
+    @lazyCSS
+    horizontalDivider = {
+        cursor: "row-resize"
+    };
+    
+    @lazyCSS
+    verticalDivider = {
+        cursor: "col-resize",
+    };
 }
 
 // options.orientation is the orientation of the divided elements
-UI.DividerBar = class DividerBar extends UI.Element {
+class DividerBar extends UI.Element {
     constructor(options) {
         super(options);
         this.orientation = this.options.orientation || UI.Orientation.HORIZONTAL;
@@ -60,7 +59,7 @@ UI.DividerBar = class DividerBar extends UI.Element {
     - All the children it's dividing
     - An option on how to redivide the sizes of the children
  */
-UI.SectionDivider = class SectionDivider extends UI.Element {
+class SectionDivider extends UI.Element {
     constructor(options) {
         super(options);
         this.uncollapsedSizes = new WeakMap();
@@ -314,6 +313,7 @@ UI.SectionDivider = class SectionDivider extends UI.Element {
         // Safari bug fix
         // TODO: this isn't a proper solution, children elements should not be modified
         if (this.getOrientation() === UI.Orientation.HORIZONTAL) {
+            // TODO: this should be done through CSS classes
             for (let i = 0; i < this.children.length - 1; i += 2) {
                 this.children[i].setStyle("vertical-align", "top");
             }
@@ -325,7 +325,7 @@ UI.SectionDivider = class SectionDivider extends UI.Element {
         this.dividers = 0;
         for (let child of this.options.children) {
             if (children.length > 0) {
-                children.push(<UI.DividerBar ref={"divider" + this.dividers} orientation={this.getOrientation()}/>);
+                children.push(<DividerBar ref={"divider" + this.dividers} orientation={this.getOrientation()}/>);
                 this.dividers += 1;
             }
             children.push(child);
@@ -333,3 +333,5 @@ UI.SectionDivider = class SectionDivider extends UI.Element {
         return children;
     }
 };
+
+export {SectionDivider}

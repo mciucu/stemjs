@@ -6,7 +6,6 @@ import "./StyleElement";
 import "./Translation";
 import "./UIPrimitives";
 import "./Input";
-import "./SectionDivider";
 import "./Table";
 import "./SVG";
 import "./Switcher";

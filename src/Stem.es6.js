@@ -9,6 +9,7 @@ export * from "ui/FontAwesome";
 export * from "ui/DoubleClickable";
 export * from "ui/Draggable";
 export * from "ui/FullScreenable";
+export * from "ui/SectionDivider";
 export * from "state/State";
 export * from "state/Store";
 export * from "state/StoreMixins";
