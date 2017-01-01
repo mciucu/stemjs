@@ -1,5 +1,6 @@
 // Wrapper over the ace code editor, needs ace to be globally loaded
 // TODO: should not be in the UI namespace
+// TODO: should be renamed to AceCodeEditor?
 import {UI} from "./UIBase";
 
 UI.CodeEditor = class CodeEditor extends UI.Element {

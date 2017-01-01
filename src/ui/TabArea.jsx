@@ -1,7 +1,6 @@
-// TODO: all of the classes here need to be implemented with StyleSets
 import {UI} from "./UIBase";
 import {SingleActiveElementDispatcher} from "../base/Dispatcher";
-import {css, hover, focus, active, ExclusiveClassSet, StyleSet} from "Style";
+import {StyleSet} from "Style";
 import {lazyCSS, lazyInheritCSS} from "../decorators/LazyCSS";
 import "./Switcher";
 
@@ -138,10 +137,10 @@ class BasicTabTitle extends UI.Element {
     }
 };
 
-UI.TabTitleArea = class TabTitleArea extends UI.Element {
+class TabTitleArea extends UI.Element {
 };
 
-UI.TabArea = class TabArea extends UI.Element {
+class TabArea extends UI.Element {
     // TODO: should be a lazy property, must fix decorator first
     static styleSet = new DefaultTabAreaStyle();
 
@@ -185,9 +184,9 @@ UI.TabArea = class TabArea extends UI.Element {
     };
 
     getTitleArea(tabTitles) {
-        return <UI.TabTitleArea ref="titleArea" className={this.getStyleSet().nav}>
+        return <TabTitleArea ref="titleArea" className={this.getStyleSet().nav}>
             {tabTitles}
-        </UI.TabTitleArea>;
+        </TabTitleArea>;
     }
 
     getSwitcher(tabPanels) {
@@ -247,4 +246,4 @@ UI.TabArea = class TabArea extends UI.Element {
     }
 };
 
-export {BasicTabTitle};
+export {TabTitleArea, BasicTabTitle, TabArea};
