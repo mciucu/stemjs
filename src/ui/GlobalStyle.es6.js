@@ -5,12 +5,6 @@ import {lazyCSS} from "../decorators/Decorators";
 var GlobalStyle = {};
 
 class ButtonStyle extends StyleSet {
-    constructor() {
-        super({
-            parent: document.body,
-        });
-    }
-
     @lazyCSS
     EXTRA_SMALL = {
         padding: "1px 5px",
