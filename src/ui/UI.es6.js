@@ -2,11 +2,6 @@ import {UIElement, UI} from "./UIBase";
 
 import "./StyleElement";
 
-// Mixin classes
-import "./DoubleClickable";
-import "./Draggable";
-import "./FullScreenable";
-
 // Generic UI widget classes
 import "./Translation";
 import "./UIPrimitives";

@@ -1,3 +1,6 @@
+// TODO: need to have Switcher properly work with a redraw
+// TODO: also move out of UI namespace
+
 import {UI} from "./UIBase";
 
 UI.Switcher = class Switcher extends UI.Element {
@@ -151,3 +154,5 @@ UI.Switcher = class Switcher extends UI.Element {
         });
     }
 };
+
+// export {Switcher};

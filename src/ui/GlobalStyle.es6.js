@@ -7,8 +7,6 @@ var GlobalStyle = {};
 class ButtonStyle extends StyleSet {
     constructor() {
         super({
-            name: ButtonStyle.name,
-            updateOnResize: true,
             parent: document.body,
         });
     }
@@ -45,6 +43,8 @@ class ButtonStyle extends StyleSet {
         }
     }
 }
+
+// TODO: this should be lazy, at the first access
 GlobalStyle.Button = new ButtonStyle();
 
 export {GlobalStyle};

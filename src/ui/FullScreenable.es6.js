@@ -1,5 +1,8 @@
-import {UI} from "./UIBase";
+/*
+* Implements a Class Factory, to be able to create element that can be easily set to full screen
+*/
 
+// TODO: is this a good pattern, and should this method live somewhere else?
 function callFirstMethodAvailable(obj, methodNames) {
     for (let methodName of methodNames) {
         if (typeof obj[methodName] === "function") {
@@ -35,7 +38,8 @@ const FULL_SCREEN_CHANGE_EVENTS = [
 
 
 // TODO: lowercase the s in screen?
-UI.FullScreenable = function (BaseClass) {
+// TODO: this should not be directly in UI namespace
+let FullScreenable = function (BaseClass) {
     return class FullScreenable extends BaseClass {
         enterFullScreen() {
             this.attachEnterFullscreenHandler();
@@ -89,3 +93,5 @@ UI.FullScreenable = function (BaseClass) {
         }
     };
 };
+
+export {FullScreenable};

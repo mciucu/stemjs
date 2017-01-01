@@ -1,4 +1,5 @@
 // This whole file needs a refactoring, it's awfully written
+// Move SectionDivider out of the UI namespace
 import {UI} from "./UIBase";
 import {Device} from "../base/Device";
 import {StyleSet} from "./Style";

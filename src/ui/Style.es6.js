@@ -5,9 +5,15 @@ import {Dispatchable} from "../base/Dispatcher";
 // Class meant to group multiple classes inside a single <style> element, for convenience
 // TODO: should probably be implemented with document.styleSheet
 // TODO: pattern should be more robust, to be able to only update classes
+// TODO: should probably be renamed to StyleSheet?
 class StyleSet extends Dispatchable {
     constructor(options={}) {
         super();
+        options = Object.assign({
+            updateOnResize: false,
+            parent: document.head,
+            name: options.name || this.constructor.getElementName(), // call only if needed
+        }, options);
         this.options = options;
         this.elements = new Set();
         if (this.options.updateOnResize) {
@@ -19,7 +25,16 @@ class StyleSet extends Dispatchable {
             children: [],
             name: this.options.name,
         };
-        this.styleElement = UI.StyleElement.create(options.parent || document.head, styleElementOptions);
+        this.styleElement = UI.StyleElement.create(options.parent, styleElementOptions);
+    }
+
+    static getElementName() {
+        this.elementNameCounter = (this.elementNameCounter || 0) + 1;
+        let name = this.constructor.name;
+        if (this.elementNameCounter > 1) {
+            name += "-" + this.elementNameCounter;
+        }
+        return name;
     }
 
     ensureFirstUpdate() {
@@ -121,6 +136,7 @@ function focus(style) {
 
 let styleMap = new WeakMap();
 
+// TODO: deprecate this global css method?
 function css(style) {
     if (arguments.length > 1) {
         style = Object.assign({}, ...arguments);

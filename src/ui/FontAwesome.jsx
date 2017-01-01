@@ -1,3 +1,4 @@
+// Contains classes to abstract some generic Font Awesome usecases.
 import {UI} from "./UIBase";
 
 class FAIcon extends UI.Primitive("i") {

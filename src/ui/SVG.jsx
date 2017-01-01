@@ -20,6 +20,7 @@ UI.SVG.Element = class SVGElement extends UI.Element {
 
     setOptions(options) {
         if (options.hasOwnProperty("style")) {
+            // TODO: this should be in getNodeAttributes
             for (let attributeName of FIREFOX_SVG_STYLE_ELEMENTS) {
                 if (options.style.hasOwnProperty(attributeName) && !options.hasOwnProperty(attributeName)) {
                     options[attributeName] = options.style[attributeName];

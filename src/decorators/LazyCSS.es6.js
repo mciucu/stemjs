@@ -1,3 +1,5 @@
+// TODO: this file should be refactored
+// consider lazyCSS -> styleRule/styleRule(styleRule.INHERIT)
 import {decorate, createDefaultSetter} from './Utils';
 import {lazyInitialize} from './LazyInitialize'
 

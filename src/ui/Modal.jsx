@@ -186,6 +186,7 @@ UI.Modal = class Modal extends UI.Element {
     getModalWindow() {
         let closeButton = null;
         if (this.options.closeButton) {
+            // TODO: this should be in a method
             closeButton = <div style={{position: "absolute", right: "10px", zIndex: "10"}}>
                 <UI.Button type="button" className="close" 
                            label="&times;" onClick={() => this.hide()}/>

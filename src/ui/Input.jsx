@@ -1,3 +1,4 @@
+// TODO: this file was started with a lot of old patterns, that need to be updated
 import {UI} from "./UIBase";
 import "./UIPrimitives";
 import {CreateAllowedAttributesMap} from "./DOMAttributes";

@@ -1,3 +1,4 @@
+// TODO: this file existed to hold generic classes in a period of fast prototyping, not really aplicable now
 import {UI} from "./UIBase";
 import {Device} from "../base/Device";
 import {Draggable} from "./Draggable";
@@ -153,34 +154,23 @@ UI.Link = class Link extends UI.Element {
     }
 };
 
-UI.Image = class Image extends UI.Element {
-    getNodeType() {
-        return "img";
-    }
+UI.Image = class Image extends UI.Primitive("img") {
 };
 
-// Beware coder: If you ever use this class, you need to document why!
+// Beware coder: If you ever use this class, you need to have a good reason!
 UI.RawHTML = class RawHTML extends UI.Element {
     redraw() {
         this.node.innerHTML = this.options.__innerHTML;
         this.applyNodeAttributes();
+        this.applyRef();
     }
 };
 
-UI.TemporaryMessageArea = class TemporaryMessageArea extends UI.Element {
-    static getDefaultOptions() {
+UI.TemporaryMessageArea = class TemporaryMessageArea extends UI.Primitive("span") {
+    getDefaultOptions() {
         return {
             margin: 10
         };
-    }
-
-    setOptions(options) {
-        options = Object.assign(this.constructor.getDefaultOptions(), options);
-        super.setOptions(options);
-    }
-
-    getNodeType() {
-        return "span";
     }
 
     render() {

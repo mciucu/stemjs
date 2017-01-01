@@ -83,7 +83,7 @@ class BasicTabTitle extends UI.Element {
     }
 
     getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet || tabAreaStyle;
+        return this.options.styleSet || this.constructor.styleSet;
     }
 
     getPanel() {
@@ -168,7 +168,9 @@ UI.TabArea = class TabArea extends UI.Element {
     }
 
     createTabPanel(panel) {
-        let tab = <BasicTabTitle panel={panel} activeTabDispatcher={this.activeTabDispatcher} active={panel.options.active} href={panel.options.tabHref} styleSet={this.getStyleSet()} />;
+        let tab = <BasicTabTitle panel={panel} activeTabDispatcher={this.activeTabDispatcher}
+                                 active={panel.options.active} href={panel.options.tabHref}
+                                 styleSet={this.getStyleSet()} />;
 
         return [tab, panel];
     }
