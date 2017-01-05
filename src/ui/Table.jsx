@@ -2,11 +2,7 @@ import {UI} from "./UIBase";
 import * as Utils from "../base/Utils";
 
 // TODO: the whole table architecture probably needs a rethinking
-UI.TableRow = class TableRow extends UI.Element {
-    getNodeType() {
-        return "tr";
-    }
-
+UI.TableRow = class TableRow extends UI.Primitive("tr") {
     render() {
         let rowCells = [];
 
@@ -33,13 +29,9 @@ UI.TableRowInCollapsibleTable = class TableRowInCollapsibleTable extends UI.Tabl
 };
 
 UI.CollapsibleTableRow = class CollapsibleTableRow extends UI.TableRow {
-    constructor(options) {
-        super(options);
-
-        if (options.collapsed != null) {
-            this.collapsed = options.collapsed;
-        } else {
-            this.collapsed = true;
+    getDefaultOptions() {
+        return {
+            collapsed: true,
         }
     }
 

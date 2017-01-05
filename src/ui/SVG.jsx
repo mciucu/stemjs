@@ -1,7 +1,7 @@
 import {UI} from "./UIBase";
 import "./UIPrimitives";
 import * as math from "../math";
-import {CreateAllowedAttributesMap} from "./DOMAttributes";
+import {CreateNodeAttributesMap} from "./NodeAttributes";
 import {Color} from "./Color";
 import {Transition} from "./Transition";
 import {deepCopy} from "../base/Utils";
@@ -231,7 +231,7 @@ UI.SVG.Element = class SVGElement extends UI.Element {
     }
 };
 
-UI.SVG.Element.domAttributesMap = CreateAllowedAttributesMap(UI.Element.domAttributesMap, [
+UI.SVG.Element.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
     ["fill"],
     ["height"],
     ["opacity"],
@@ -711,7 +711,7 @@ UI.SVG.Text = class SVGText extends UI.SVG.Element {
     }
 };
 
-UI.SVG.Text.domAttributesMap = CreateAllowedAttributesMap(UI.SVG.Element.domAttributesMap, [
+UI.SVG.Text.domAttributesMap = CreateNodeAttributesMap(UI.SVG.Element.domAttributesMap, [
     ["fontFamily", {domName: "font-family"}]
 ]);
 

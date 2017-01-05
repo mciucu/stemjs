@@ -136,3 +136,9 @@ export function deepCopy() {
 
 	return target;
 }
+
+export function objectFromKeyValue(key, value) {
+    return {
+        [key]: value,
+    }
+}

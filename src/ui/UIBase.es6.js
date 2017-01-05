@@ -1,6 +1,6 @@
 import {unwrapArray} from "../base/Utils";
 import {Dispatchable} from "../base/Dispatcher";
-import {DOMAttributes, ATTRIBUTE_NAMES_MAP} from "./DOMAttributes";
+import {NodeAttributes} from "./NodeAttributes";
 import {lazyInitialize} from "../decorators/LazyInitialize";
 
 var UI = {
@@ -26,7 +26,7 @@ class BaseUIElement extends Dispatchable {
             let obj = this.options.ref.parent;
             let name = this.options.ref.name;
             if (obj[name] === this) {
-                obj[name] = undefined;
+                obj[name] = undefined; //TODO: better delete from obj?
             }
         }
     }
@@ -265,7 +265,7 @@ class UIElement extends BaseUIElement {
     }
 
     getNodeAttributes() {
-        let attr = new DOMAttributes(this.options, this.constructor.domAttributesMap);
+        let attr = new NodeAttributes(this.options, this.constructor.domAttributesMap);
         this.extraNodeAttributes(attr);
         return attr;
     }
@@ -290,30 +290,48 @@ class UIElement extends BaseUIElement {
         }
     }
 
-    setStyle(attributeName, value) {
-        if (this.options.style) {
-            this.options.style[attributeName] = value;
-        } else {
-            this.options.style = {
-                [attributeName]: value
-            }
-        }
+    setStyle(key, value) {
+        this.options.style = this.options.style || {};
+
+        this.options.style[key] = value;
 
         if (this.node) {
             if (typeof value === "function") {
                 value = value(this);
             }
-            this.node.style[attributeName] = value;
+            this.node.style[key] = value;
         }
     }
 
-    // TODO: rewrite to not use this.domAttributes
     addClass(className) {
-        this.domAttributes.addClass(String(className), this.node);
+        let classArray;
+        if (!Array.isArray(className)) {
+            classArray = String(className).trim().split(" ");
+        } else {
+            classArray = className.map(x => String(x));
+        }
+        for (let classInstance of classArray) {
+            this.options.className = NodeAttributes.addClassTo(this.options.className, classInstance);
+            if (this.node) {
+                this.node.classList.add(classInstance);
+            }
+        }
     }
 
     removeClass(className) {
-        this.domAttributes.removeClass(String(className), this.node);
+        let classArray;
+        if (!Array.isArray(className)) {
+            classArray = String(className).trim().split(" ");
+        } else {
+            classArray = className.map(x => String(x));
+        }
+        for (let classInstance of classArray) {
+            this.options.className = NodeAttributes.removeClassFrom(this.options.className, classInstance);
+            if (this.node) {
+                this.node.classList.remove(classInstance);
+            }
+
+        }
     }
 
     hasClass(className) {
@@ -478,7 +496,8 @@ class UIElement extends BaseUIElement {
     }
 
     getStyle(attribute) {
-        // TODO: WHY THIS?
+        // return this.options.style[attribute];
+        // TODO: WHY THIS? remove this!!!
         return window.getComputedStyle(this.node, null).getPropertyValue(attribute);
     }
 
@@ -552,7 +571,7 @@ class UIElement extends BaseUIElement {
     }
 }
 
-UIElement.domAttributesMap = ATTRIBUTE_NAMES_MAP;
+UIElement.domAttributesMap = NodeAttributes.defaultAttributesMap;
 
 UI.createElement = function (tag, options) {
     if (!tag) {

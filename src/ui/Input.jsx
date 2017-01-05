@@ -1,7 +1,7 @@
 // TODO: this file was started with a lot of old patterns, that need to be updated
 import {UI} from "./UIBase";
 import "./UIPrimitives";
-import {CreateAllowedAttributesMap} from "./DOMAttributes";
+import {CreateNodeAttributesMap} from "./NodeAttributes";
 
 UI.Form = class Form extends UI.Element {
     getNodeType() {
@@ -176,7 +176,7 @@ UI.FormGroup = class FormGroup extends UI.Element {
     }
 };
 
-UI.Input.domAttributesMap = CreateAllowedAttributesMap(UI.Element.domAttributesMap, [
+UI.Input.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
     ["autocomplete"],
     ["autofocus", {noValue: true}],
     ["formaction"],
@@ -195,7 +195,7 @@ UI.SubmitInput = class SubmitInput extends UI.Input {
     }
 };
 
-UI.SubmitInput.domAttributesMap = CreateAllowedAttributesMap(UI.Element.domAttributesMap, [
+UI.SubmitInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
     ["formenctype"],
     ["formmethod"],
     ["formnovalidate"],
@@ -225,7 +225,7 @@ UI.NumberInputInterface = function(BaseInputClass) {
         }
     };
 
-    numberInput.domAttributesMap = CreateAllowedAttributesMap(UI.Element.domAttributesMap, [
+    numberInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
         ["min"],
         ["max"],
         ["step"],
@@ -274,7 +274,7 @@ UI.FileInputInterface = function(BaseInputClass) {
         }
     };
 
-    fileInput.domAttributesMap = CreateAllowedAttributesMap(UI.Element.domAttributesMap, [
+    fileInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
         ["multipleFiles", {domName: "multiple", noValue: true}],
         ["fileTypes", {domName: "accept"}],
     ]);
@@ -306,7 +306,7 @@ UI.CheckboxInput = class CheckboxInput extends UI.Input {
     }
 };
 
-UI.CheckboxInput.domAttributesMap = CreateAllowedAttributesMap(UI.Element.domAttributesMap, [
+UI.CheckboxInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
     ["checked", {noValue: true}]
 ]);
 

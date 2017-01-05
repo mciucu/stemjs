@@ -1,6 +1,7 @@
-// TODO: this file needs to be cleaned up and renamed DOM -> Node
 // TODO: most of the functionality here can probably be moved to UI.Element
-function CreateAllowedAttributesMap(oldAttributesMap, allowedAttributesArray) {
+
+// TODO: this method should be made static in NodeAttributes
+function CreateNodeAttributesMap(oldAttributesMap, allowedAttributesArray) {
     let allowedAttributesMap = new Map(oldAttributesMap);
 
     for (let attribute of allowedAttributesArray || []) {
@@ -8,10 +9,7 @@ function CreateAllowedAttributesMap(oldAttributesMap, allowedAttributesArray) {
         if (!Array.isArray(attribute)) {
             attribute = [attribute];
         }
-        if (attribute.length < 2) {
-            attribute.push({});
-        }
-        allowedAttributesMap.set(attribute[0], attribute[1]);
+        allowedAttributesMap.set(attribute[0], attribute[1] || {});
     }
 
     for (let [key, value] of allowedAttributesMap) {
@@ -28,39 +26,26 @@ function CreateAllowedAttributesMap(oldAttributesMap, allowedAttributesArray) {
     return allowedAttributesMap;
 }
 
-// Should be as few of these as possible
-const ATTRIBUTE_NAMES_MAP = CreateAllowedAttributesMap([
-    ["id"],
-    ["action"],
-    ["colspan"],
-    ["default"],
-    ["disabled", {noValue: true}],
-    ["fixed"],
-    ["forAttr", {domName: "for"}],
-    ["hidden"],
-    ["href"],
-    ["rel"],
-    ["minHeight"],
-    ["minWidth"],
-    ["role"],
-    ["target"],
-    ["HTMLtitle", {domName: "title"}],
-    ["type"],
-    ["placeholder"],
-    ["src"],
-    ["height"],
-    ["width"],
-    //["value"], // Value is intentionally disabled
-]);
+class ClassNameSet extends Set {
+    // Can't use classic super in constructor since Set is build-in type and will throw an error
+    // TODO: see if could still be made to have this as constructor
+    static create(className) {
+        let value = new Set(String(className || "").split(" "));
+        value.__proto__ = this.prototype;
+        return value;
+    }
 
+    toString() {
+        return Array.from(this).join(" ");
+    }
+}
 
 // TODO: should all the logic from this class be moved to UI.Element or UI.createElement ??
-class DOMAttributes {
+class NodeAttributes {
     constructor(options, attributeNamesMap) {
         let attributesMap;
 
         for (let attributeName in options) {
-            // TODO: Take care of bootstrap bullshit, this should not be in here, add it yourself
             if (attributeName.startsWith("data-") || attributeName.startsWith("aria-")) {
                 if (!attributesMap) {
                     attributesMap = new Map();
@@ -70,7 +55,6 @@ class DOMAttributes {
                 continue;
             }
 
-            // No hasOwnProperty check for perfomance
             let attributeProperties = attributeNamesMap.get(attributeName);
             if (attributeProperties) {
                 let value = options[attributeName];
@@ -95,17 +79,15 @@ class DOMAttributes {
             this.attributes = attributesMap;
         }
 
-        if (options.classes) {
-            // User filter here to prevent empty classes
-            this.classes = new Set(options.classes);
-        } else if (options.className) {
-            this.className = String(options.className);
+        if (options.className) {
+            this.className = options.className;
         }
 
         this.style = options.style;
     }
 
     // TODO: there's no real use-case for this method
+    // TODO: merge this with UI.Element
     setAttribute(key, value, node) {
         if (!this.attributes) {
             this.attributes = new Map();
@@ -119,11 +101,12 @@ class DOMAttributes {
         }
         this.attributes.set(key, value);
         if (node) {
-            // TODO: check here if different
+            // TODO: check here if different?
             node.setAttribute(key, value);
         }
     }
 
+    // TODO: merge this with UI.Element
     setStyle(key, value, node) {
         if (value === undefined) {
             // TODO: why return here and not remove the old value?
@@ -132,61 +115,78 @@ class DOMAttributes {
         if (typeof value === "function") {
             value = value();
         }
-        if (!this.style) {
-            this.style = {};
-        }
+        this.style = this.style || {};
         this.style[key] = value;
         if (node && node.style[key] !== value) {
             node.style[key] = value;
         }
     }
 
-    addClass(classes, node) {
-        if (!classes) return;
+    static getClassArray(classes) {
+        if (!classes) {
+            return [];
+        }
+        if (Array.isArray(classes)) {
+            return classes.map(x => String(x).trim());
+        } else {
+            return String(classes).trim().split(" ");
+        }
+    }
 
-        if (!this.classes) {
-            if (this.className) {
-                this.classes = new Set(this.className.split(" "));
-                this.className = undefined;
-            } else {
-                this.classes = new Set();
+    // TODO: this logic should be merged with UI.Element
+    // Add a class to a string, returns the result
+    static addClassTo(className, classInstance) {
+        classInstance = String(classInstance);
+        if (!className) {
+            return classInstance;
+        } else {
+            return className + " " + classInstance;
+        }
+    }
+
+    static removeClassFrom(className, classInstance) {
+        let classArray = this.getClassArray(className);
+        let result = "";
+        for (let cls of classArray) {
+            if (cls != classInstance) {
+                if (result) {
+                    result += " ";
+                }
+                result += cls;
             }
         }
+        return result;
+    }
 
-        if (Array.isArray(classes)) {
-            for (let cls of classes) {
-                this.classes.add(cls);
-                if (node) {
-                    node.classList.add(cls);
-                }
+    getClassNameSet() {
+        if (!(this.className instanceof ClassNameSet)) {
+            this.className = ClassNameSet.create(this.className || "");
+        }
+        return this.className;
+    }
+
+    addClass(classes, node) {
+        classes = this.constructor.getClassArray(classes);
+
+        let classNameSet = this.getClassNameSet();
+
+        for (let cls of classes) {
+            classNameSet.add(cls);
+            if (node) {
+                node.classList.add(cls);
             }
-        } else {
-            classes = String(classes);
-            this.addClass(classes.split(" "), node);
         }
     }
 
     removeClass(classes, node) {
-        if (!classes) return;
+        classes = this.constructor.getClassArray(classes);
+        let classNameSet = this.getClassNameSet();
 
-        if (!this.classes) {
-            if (this.className) {
-                this.classes = new Set(this.className.split(" "));
-                this.className = undefined;
-            } else {
-                this.classes = new Set();
+        for (let cls of classes) {
+            classNameSet.delete(cls);
+            if (node) {
+                node.classList.remove(cls);
             }
-        }
-
-        if (Array.isArray(classes)) {
-            for (let cls of classes) {
-                this.classes.delete(cls);
-                if (node) {
-                    node.classList.remove(cls);
-                }
-            }
-        } else {
-            this.removeClass(classes.split(" "), node);
         }
     }
 
@@ -221,12 +221,10 @@ class DOMAttributes {
         }
 
         if (this.className) {
-            node.className = this.className;
-        } else if (this.classes && this.classes.size > 0) {
-            node.className = Array.from(this.classes).join(" ");
+            node.className = String(this.className);
             // TODO: find out which solution is best
             // This solution works for svg nodes as well
-            // for (let cls of this.classes) {
+            // for (let cls of this.getClassNameSet()) {
             //    node.classList.add(cls);
             // }
         } else {
@@ -246,4 +244,29 @@ class DOMAttributes {
     }
 }
 
-export {CreateAllowedAttributesMap, DOMAttributes, ATTRIBUTE_NAMES_MAP};
+// Default node attributes, should be as few of these as possible
+NodeAttributes.defaultAttributesMap = CreateNodeAttributesMap([
+    ["id"],
+    ["action"],
+    ["colspan"],
+    ["default"],
+    ["disabled", {noValue: true}],
+    ["fixed"],
+    ["forAttr", {domName: "for"}],
+    ["hidden"],
+    ["href"],
+    ["rel"],
+    ["minHeight"],
+    ["minWidth"],
+    ["role"],
+    ["target"],
+    ["HTMLtitle", {domName: "title"}],
+    ["type"],
+    ["placeholder"],
+    ["src"],
+    ["height"],
+    ["width"],
+    //["value"], // Value is intentionally disabled
+]);
+
+export {CreateNodeAttributesMap, NodeAttributes};

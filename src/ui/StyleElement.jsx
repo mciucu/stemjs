@@ -1,6 +1,6 @@
 // TODO: not sure is this needs to actually be *.jsx
 import {UI} from "./UIBase";
-import {DOMAttributes} from "./DOMAttributes";
+import {NodeAttributes} from "./NodeAttributes";
 
 // TODO: should this be actually better done throught the dynamic CSS API, without doing through the DOM?
 UI.StyleInstance = class StyleInstance extends UI.TextElement {
@@ -58,8 +58,10 @@ UI.StyleElement = class StyleElement extends UI.Element {
 
     getNodeAttributes() {
         // TODO: allow custom style attributes (media, scoped, etc)
-        let attr = new DOMAttributes({});
-        attr.setAttribute("name", this.options.name);
+        let attr = new NodeAttributes({});
+        if (this.options.name) {
+            attr.setAttribute("name", this.options.name);
+        }
         return attr;
     }
 };

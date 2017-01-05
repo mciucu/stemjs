@@ -1,5 +1,6 @@
 export * from "ui/UI";
 export * from "ui/Style";
+export * from "ui/StyleSheet";
 export * from "ui/Translation";
 export * from "ui/StyleElement";
 export * from "ui/Transition";

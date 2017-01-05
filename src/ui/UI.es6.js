@@ -6,14 +6,12 @@ import "./StyleElement";
 import "./Translation";
 import "./UIPrimitives";
 import "./Input";
-import "./Table";
+import "./Table";    // TODO: remove
 import "./SVG";
-import "./Switcher";
-import "./TabArea";
-import "./Modal";
+import "./Switcher"; // TODO: remove
+import "./Modal";    // TODO: remove
 import "./Bootstrap3";
 
-// TODO: these next files should not be globally imported
-import "./CodeEditor";
+import "./CodeEditor"; // TODO: remove
 
 export {UIElement, UI};
