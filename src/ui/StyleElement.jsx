@@ -1,5 +1,6 @@
 // TODO: not sure is this needs to actually be *.jsx
 import {UI} from "./UIBase";
+import {dashCase} from "../base/Utils";
 import {NodeAttributes} from "./NodeAttributes";
 
 // TODO: should this be actually better done throught the dynamic CSS API, without doing through the DOM?
@@ -29,9 +30,8 @@ UI.StyleInstance = class StyleInstance extends UI.TextElement {
                 continue;
             }
             // TODO: if key starts with vendor-, replace it with the browser specific one (and the plain one)
-            // TODO: if key is camelCase, it should be changed to dash-case here
             // TODO: on some attributes, do we want to automatically add a px suffix?
-            str += key + ":" + value + ";"
+            str += dashCase(key) + ":" + value + ";"
         }
         return str + "}"
     }

@@ -6,7 +6,9 @@ import "./StyleElement";
 import "./Translation";
 import "./UIPrimitives";
 import "./Input";
-import "./Table";    // TODO: remove
+import "./table/Table";
+import "./table/CollapsibleTable";
+import "./table/SortableTable";
 import "./SVG";
 import "./Switcher"; // TODO: remove
 import "./Modal";    // TODO: remove

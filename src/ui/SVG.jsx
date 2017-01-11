@@ -57,7 +57,7 @@ UI.SVG.Element = class SVGElement extends UI.Element {
 
     getNodeAttributes() {
         let attr = super.getNodeAttributes();
-        attr.classes = null;
+        attr.className = null;
 
         let transform = this.getTransform();
         if (transform) {
@@ -800,34 +800,6 @@ UI.SVG.Polygon = class Polygon extends UI.SVG.Path {
     setPoints(points) {
         this.options.points = points;
         this.setPath(this.getPolygonPath());
-    }
-};
-
-// TODO: move this somewhere else
-UI.SVG.CSAIconPath = class SVGCSAIconPath extends UI.SVG.Path {
-    setOptions(options) {
-        this.options = options;
-        this.options.x = options.x || "0";
-        this.options.y = options.y || "0";
-        this.options.size = options.size || 45;
-        let ux = this.options.size / 1646;
-        let uy = 0.8 * this.options.size / 1479;
-        this.options.d = ' m '+(823)*ux +' '+(1194)*uy  +' l '+(0)*ux +' '+(-152)*uy  +' l '+(-191)*ux +' '+(0)*uy  +' l '+(191)*ux +' '+(-330)*uy  +' l '+(191)*ux +' '+(330)*uy  +' l '+(-191)*ux +' '+(0)*uy  +' l '+(0)*ux +' '+(152)*uy  +' l '+(257)*ux +' '+(0)*uy  +' l '+(173)*ux +' '+(100)*uy  +' a '+(194)*ux +' '+(194)*uy  + ' 0 1 0 '+(100)*ux +' '+(-173)*uy  +' l '+(-173)*ux +' '+(-100)*uy  +' l '+(-256)*ux +' '+(-464)*uy  +' l '+(0)*ux +' '+(-200)*uy  +' a '+(194)*ux +' '+(194)*uy  + ' 0 1 0 '+(-200)*ux +' '+(0)*uy  +' l '+(0)*ux +' '+(200)*uy  +' l '+(-256)*ux +' '+(464)*uy  +' l '+(-173)*ux +' '+(100)*uy  +' a '+(194)*ux +' '+(194)*uy  + ' 0 1 0 '+(100)*ux +' '+(173)*uy  +' l '+(173)*ux +' '+(-100)*uy  +'  z';
-        this.options.fill = options.fill || "white";
-        this.options.stroke = options.stroke || "none";
-    }
-};
-
-UI.SVG.CSAIconSVG = class SVGCSAIconSVG extends UI.SVG.SVGRoot {
-    setOptions(options) {
-        this.options = options;
-        this.options.size = this.options.size || 45;
-        this.options.width = this.options.size;
-        this.options.height = this.options.size;
-    }
-
-    render() {
-        return [<UI.SVG.CSAIconPath size={this.options.size}/>];
     }
 };
 

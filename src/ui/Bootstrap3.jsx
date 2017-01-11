@@ -5,11 +5,6 @@ import {GlobalStyle} from "./GlobalStyle";
 
 function BootstrapMixin(BaseClass, bootstrapClassName) {
     class BootstrapClass extends BaseClass {
-        setOptions(options) {
-            super.setOptions(options);
-            this.options.level = this.options.level || UI.Level.DEFAULT;
-        }
-
         getNodeAttributes() {
             let attr = super.getNodeAttributes();
 
@@ -35,21 +30,37 @@ function BootstrapMixin(BaseClass, bootstrapClassName) {
     }
 
     return BootstrapClass;
-}
+};
 
-UI.Button = class Button extends BootstrapMixin(UI.Element, "btn") {
-    getNodeAttributes() {
-        let attr = super.getNodeAttributes();
+class SimpleStyledElement extends UI.Element {
+    getLevel() {
+        return this.options.level || (this.parent && this.parent.options && this.parent.options.level);
+    }
 
-        // if (this.getSize()) {
-        //     attr.addClass(this.constructor.bootstrapClass() + "-" + this.getSize());
-        // }
+    setLevel(level) {
+        this.updateOptions({level});
+    }
+
+    getSize() {
+        return this.options.size || (this.parent && this.parent.options && this.parent.options.size);
+    }
+
+    setSize(size) {
+        this.updateOptions({size});
+    }
+};
+
+UI.Button = class Button extends SimpleStyledElement {
+    extraNodeAttributes(attr) {
+        attr.addClass(GlobalStyle.Button.DEFAULT);
 
         if (this.getSize()) {
             attr.addClass(GlobalStyle.Button.Size(this.getSize()));
         }
 
-        return attr;
+        if (this.getLevel()) {
+            attr.addClass(GlobalStyle.Button.Level(this.getLevel()));
+        }
     }
 
     setOptions(options) {
@@ -62,7 +73,6 @@ UI.Button = class Button extends BootstrapMixin(UI.Element, "btn") {
     }
 
     render() {
-        // TODO: Label was converted to string. Fix it.
         return [this.beforeChildren(), this.options.label, this.options.children];
     };
 
@@ -72,15 +82,6 @@ UI.Button = class Button extends BootstrapMixin(UI.Element, "btn") {
 
     setLabel(label) {
         this.options.label = label;
-        this.redraw();
-    }
-
-    getSize() {
-        return this.options.size || "";
-    }
-
-    setSize(size) {
-        this.options.size = size;
         this.redraw();
     }
 
@@ -193,24 +194,37 @@ UI.AjaxButton = class AjaxButton extends UI.StateButton {
     }
 };
 
-UI.RadioButtonGroup = class RadioButtonGroup extends BootstrapMixin(UI.Element, "btn-group") {
+UI.ButtonGroup = class ButtonGroup extends SimpleStyledElement {
+    getDefaultOptions() {
+        return {
+            orientation: UI.Orientation.HORIZONTAL,
+        };
+    }
+
+    extraNodeAttributes(attr) {
+        attr.addClass(GlobalStyle.ButtonGroup.Orientation(this.options.orientation));
+    }
+};
+
+UI.RadioButtonGroup = class RadioButtonGroup extends SimpleStyledElement {
+    setOptions(options) {
+        super.setOptions(options);
+        this.index = this.options.index || 0;
+    }
+
+    extraNodeAttributes(attr) {
+        attr.addClass(GlobalStyle.RadioButtonGroup.DEFAULT);
+    }
+
     render() {
         this.buttons = [];
         for (let i = 0; i < this.options.givenOptions.length; i += 1) {
-            let handler = () => {
-                this.setIndex(i);
-            };
-            this.buttons.push(<UI.Button key={i} onClick={handler} label={this.options.givenOptions[i].toString()} level={this.options.buttonsLevel}/>);
+            this.buttons.push(
+                <UI.Button key={i} onClick={() => {this.setIndex(i);}} size={this.getSize()}
+                  label={this.options.givenOptions[i].toString()} level={this.getLevel()}
+                  className={this.index === i ? "active" : ""}/>);
         }
         return this.buttons;
-    }
-
-    onMount() {
-        super.onMount();
-        if (this.index == null) {
-            this.index = 0;
-            this.buttons[this.index].addClass("active");
-        }
     }
 
     getIndex() {
@@ -222,10 +236,15 @@ UI.RadioButtonGroup = class RadioButtonGroup extends BootstrapMixin(UI.Element, 
     }
 
     setIndex(index) {
+        this.dispatch("setIndex", {
+            index: index,
+            oldIndex: this.index,
+            value: this.options.givenOptions[index],
+            oldValue: this.options.givenOptions[this.index]
+        });
         this.buttons[this.index].removeClass("active");
         this.index = index;
         this.buttons[this.index].addClass("active");
-        this.dispatch("setIndex", {value: this.options.givenOptions[index]});
     }
 };
 

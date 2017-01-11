@@ -29,7 +29,7 @@ UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement 
         }
     }
 
-    evaluateSprintf(string, ...values) {
+    evaluateSprintf(str, ...values) {
         throw Error("Not yet implemented");
     }
 
@@ -56,19 +56,18 @@ UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement 
         if (Array.isArray(this.value)) {
             value = (translationMap && translationMap.get(...value)) || this.evaluate(...value);
         } else {
+            // TODO: if translationMap.get() returns "", keep, skip only if returning null
             value = (translationMap && translationMap.get(value)) || value;
         }
         return value;
     }
 
-    redraw() {
-        super.redraw();
+    onMount() {
         UI.TranslationElements.add(this);
     }
 
-    cleanup() {
+    onUnmount() {
         UI.TranslationElements.delete(this);
-        super.cleanup();
     }
 };
 
@@ -83,6 +82,9 @@ UI.T = (str) => {
 // Function to be called with a translation map
 // The translationMap object needs to implement .get(value) to return the translation for value
 function setTranslationMap(_translationMap) {
+    if (translationMap === _translationMap) {
+        return;
+    }
     translationMap = _translationMap;
     for (let textElement of UI.TranslationElements.values()) {
         textElement.redraw();
@@ -109,4 +111,8 @@ function setLanguageStore(_languageStore) {
     });
 }
 
-export {setLanguageStore, setTranslationMap};
+function getTranslationMap() {
+    return translationMap;
+}
+
+export {setLanguageStore, setTranslationMap, getTranslationMap};

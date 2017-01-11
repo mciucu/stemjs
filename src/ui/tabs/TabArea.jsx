@@ -1,67 +1,14 @@
-import {UI} from "./UIBase";
-import {SingleActiveElementDispatcher} from "../base/Dispatcher";
-import {StyleSet} from "Style";
-import {lazyCSS, lazyInheritCSS} from "../decorators/LazyCSS";
-import "./Switcher";
+import {UI} from "../UIBase";
+import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
+import {DefaultTabAreaStyle} from "./Style";
+import "../Switcher";
 
-class BaseTabAreaStyle extends StyleSet {
-    @lazyCSS
-    tab = {
-        "user-select": "none",
-        "display": "inline-block",
-        "position": "relative",
-    };
-
-    @lazyCSS
-    activeTab = {};
-
-    @lazyCSS
-    nav = {
-        "list-style": "none",
-    };
-}
-
-class DefaultTabAreaStyle extends BaseTabAreaStyle {
-    @lazyInheritCSS
-    tab = {
-        "margin-bottom": "-1px",
-        "text-decoration": "none !important",
-        "margin-right": "2px",
-        "line-height": "1.42857143",
-        "border": "1px solid transparent",
-        "border-radius": "4px 4px 0 0",
-        "padding": "8px",
-        "padding-left": "10px",
-        "padding-right": "10px",
-        ":hover": {
-            "cursor": "pointer",
-            "background-color": "#eee",
-            "color": "#555",
-            "border": "1px solid #ddd",
-            "border-bottom-color": "transparent",
-        },
-    };
-
-    @lazyInheritCSS
-    activeTab = {
-        "color": "#555 !important",
-        "cursor": "default !important",
-        "background-color": "#fff !important",
-        "border": "1px solid #ddd !important",
-        "border-bottom-color": "transparent !important",
-    };
-
-    @lazyInheritCSS
-    nav = {
-        "border-bottom": "1px solid #ddd",
-        "padding-left": "0",
-        "margin-bottom": "0",
-    };
-}
-
-class BasicTabTitle extends UI.Element {
-    getNodeType() {
-        return "span";
+class BasicTabTitle extends UI.Primitive("a") {
+    extraNodeAttributes(attr) {
+        attr.addClass(this.getStyleSet().tab);
+        if (this.options.active) {
+            attr.addClass(this.getStyleSet().activeTab);
+        }
     }
 
     canOverwrite(existingElement) {
@@ -101,22 +48,7 @@ class BasicTabTitle extends UI.Element {
     }
 
     render() {
-        let hrefOption = {};
-        if (this.options.href) {
-            hrefOption.href = this.options.href;
-        }
-        let tab = this.getStyleSet().tab;
-
-        let activeTab = "";
-        if (this.options.active) {
-            activeTab = this.getStyleSet().activeTab;
-        }
-
-        return [
-            <a {...hrefOption}  className={`${activeTab} ${tab}`}>
-                {this.getTitle()}
-            </a>
-        ];
+        return this.getTitle();
     }
 
     onMount() {
@@ -142,9 +74,9 @@ class TabTitleArea extends UI.Element {
 
 class TabArea extends UI.Element {
     // TODO: should be a lazy property, must fix decorator first
-    static styleSet = new DefaultTabAreaStyle();
+    static styleSet = DefaultTabAreaStyle.getInstance();
 
-    activeTabDispatcher = new SingleActiveElementDispatcher()
+    activeTabDispatcher = new SingleActiveElementDispatcher();
 
     getDefaultOptions() {
         return {
@@ -192,13 +124,13 @@ class TabArea extends UI.Element {
     getSwitcher(tabPanels) {
         // TODO: This should have the ex "auto-height" if not variable height children
         // className="auto-height"
-        return <UI.Switcher style={{"flex": "1", "overflow": "auto", }} ref="switcherArea" lazyRender={this.options.lazyRender}>
+        return <UI.Switcher style={{flex: "1", overflow: "auto", }} ref="switcherArea" lazyRender={this.options.lazyRender}>
             {tabPanels}
         </UI.Switcher>;
     }
 
     render() {
-        let tabTitles = []
+        let tabTitles = [];
         let tabPanels = [];
         let activeTab;
 
@@ -246,4 +178,5 @@ class TabArea extends UI.Element {
     }
 };
 
+export * from "./Style";
 export {TabTitleArea, BasicTabTitle, TabArea};

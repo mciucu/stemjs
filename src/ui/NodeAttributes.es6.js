@@ -1,6 +1,4 @@
-// TODO: most of the functionality here can probably be moved to UI.Element
-
-// TODO: this method should be made static in NodeAttributes
+// TODO: this method should be made static in NodeAttributes probably
 function CreateNodeAttributesMap(oldAttributesMap, allowedAttributesArray) {
     let allowedAttributesMap = new Map(oldAttributesMap);
 
@@ -12,20 +10,21 @@ function CreateNodeAttributesMap(oldAttributesMap, allowedAttributesArray) {
         allowedAttributesMap.set(attribute[0], attribute[1] || {});
     }
 
-    for (let [key, value] of allowedAttributesMap) {
-        if (!value) {
-            value = {};
-        }
+    allowedAttributesMap.reverseNameMap = new Map();
 
-        if (!value.domName) {
-            value.domName = key;
-        }
+    for (let [key, value] of allowedAttributesMap) {
+        value = value || {};
+
+        value.domName = value.domName || key;
+
+        allowedAttributesMap.reverseNameMap.set(value.domName, key);
 
         allowedAttributesMap.set(key, value);
     }
     return allowedAttributesMap;
 }
 
+// A class that can be used to work with a className field as with a Set, while having a toString() usable in the DOM
 class ClassNameSet extends Set {
     // Can't use classic super in constructor since Set is build-in type and will throw an error
     // TODO: see if could still be made to have this as constructor
@@ -40,88 +39,48 @@ class ClassNameSet extends Set {
     }
 }
 
-// TODO: should all the logic from this class be moved to UI.Element or UI.createElement ??
 class NodeAttributes {
-    constructor(options, attributeNamesMap) {
-        let attributesMap;
-
-        for (let attributeName in options) {
-            if (attributeName.startsWith("data-") || attributeName.startsWith("aria-")) {
-                if (!attributesMap) {
-                    attributesMap = new Map();
-                }
-
-                attributesMap.set(attributeName, options[attributeName]);
-                continue;
-            }
-
-            let attributeProperties = attributeNamesMap.get(attributeName);
-            if (attributeProperties) {
-                let value = options[attributeName];
-
-                if (attributeProperties.noValue) {
-                    if (value) {
-                        value = "";
-                    } else {
-                        value = undefined;
-                    }
-                }
-
-                if (!attributesMap) {
-                    attributesMap = new Map();
-                }
-
-                attributesMap.set(attributeProperties.domName, value);
-            }
+    constructor(obj) {
+        Object.assign(this, obj);
+        // className and style should be deep copied to be modifiable, the others shallow copied
+        if (this.className instanceof ClassNameSet) {
+            this.className = ClassNameSet.create(String(this.className));
         }
-
-        if (attributesMap) {
-            this.attributes = attributesMap;
+        if (this.style) {
+            this.style = Object.assign({}, this.style);
         }
-
-        if (options.className) {
-            this.className = options.className;
-        }
-
-        this.style = options.style;
     }
 
-    // TODO: there's no real use-case for this method
-    // TODO: merge this with UI.Element
-    setAttribute(key, value, node) {
-        if (!this.attributes) {
-            this.attributes = new Map();
+    // TODO: should this use the domName or the reverseName? Still needs work
+    setAttribute(key, value, node, attributesMap=this.constructor.defaultAttributesMap) {
+        // TODO: might want to find a better way than whitelistAttributes field to do this
+        if (!attributesMap.has(key)) {
+            this.whitelistedAttributes = this.whitelistedAttributes || {};
+            this.whitelistedAttributes[key] = true;
         }
-
-        if (value === undefined) {
-            return;
-        }
-        if (typeof value === "function") {
-            value = value();
-        }
-        this.attributes.set(key, value);
+        this[key] = value;
         if (node) {
-            // TODO: check here if different?
-            node.setAttribute(key, value);
+            this.applyAttribute(key, node, attributesMap);
         }
     }
 
-    // TODO: merge this with UI.Element
     setStyle(key, value, node) {
         if (value === undefined) {
+            console.error("Style is being removed");
             // TODO: why return here and not remove the old value?
             return;
         }
+        this.style = this.style || {};
+        this.style[key] = value;
         if (typeof value === "function") {
             value = value();
         }
-        this.style = this.style || {};
-        this.style[key] = value;
         if (node && node.style[key] !== value) {
             node.style[key] = value;
         }
     }
 
+    // TODO: should just be a regular method?
     static getClassArray(classes) {
         if (!classes) {
             return [];
@@ -131,31 +90,6 @@ class NodeAttributes {
         } else {
             return String(classes).trim().split(" ");
         }
-    }
-
-    // TODO: this logic should be merged with UI.Element
-    // Add a class to a string, returns the result
-    static addClassTo(className, classInstance) {
-        classInstance = String(classInstance);
-        if (!className) {
-            return classInstance;
-        } else {
-            return className + " " + classInstance;
-        }
-    }
-
-    static removeClassFrom(className, classInstance) {
-        let classArray = this.getClassArray(className);
-        let result = "";
-        for (let cls of classArray) {
-            if (cls != classInstance) {
-                if (result) {
-                    result += " ";
-                }
-                result += cls;
-            }
-        }
-        return result;
     }
 
     getClassNameSet() {
@@ -168,10 +102,8 @@ class NodeAttributes {
     addClass(classes, node) {
         classes = this.constructor.getClassArray(classes);
 
-        let classNameSet = this.getClassNameSet();
-
         for (let cls of classes) {
-            classNameSet.add(cls);
+            this.getClassNameSet().add(cls);
             if (node) {
                 node.classList.add(cls);
             }
@@ -180,44 +112,89 @@ class NodeAttributes {
 
     removeClass(classes, node) {
         classes = this.constructor.getClassArray(classes);
-        let classNameSet = this.getClassNameSet();
 
         for (let cls of classes) {
-            classNameSet.delete(cls);
+            this.getClassNameSet().delete(cls);
             if (node) {
                 node.classList.remove(cls);
             }
         }
     }
 
-    apply(node) {
-        if (this.attributes) {
-            // First update existing node attributes and delete old ones
-            let nodeAttributes = node.attributes;
-            for (let i = nodeAttributes.length - 1; i >= 0; i--) {
-                let attr = nodeAttributes[i];
-                let key = attr.name;
-                if (key === "style" || key === "class") {
-                    continue;
+    applyAttribute(key, node, attributesMap) {
+        let attributeOptions = attributesMap.get(key);
+        if (!attributeOptions) {
+            if (this.whitelistedAttributes && (key in this.whitelistedAttributes)) {
+                attributeOptions = {
+                    domName: key,
                 }
-                if (this.attributes.has(key)) {
-                    let value = this.attributes.get(key);
-                    if (typeof value !== "undefined") {
-                        node.setAttribute(key, value);
+            } else {
+                return;
+            }
+        }
+        let value = this[key];
+        if (typeof value === "function") {
+            value = value();
+        }
+        if (attributeOptions.noValue) {
+            if (value) {
+                value = "";
+            } else {
+                value = undefined;
+            }
+        }
+        if (typeof value !== "undefined") {
+            node.setAttribute(attributeOptions.domName, value);
+        } else {
+            node.removeAttribute(attributeOptions.domName);
+        }
+    }
+
+    apply(node, attributesMap) {
+        let addedAttributes = {};
+        let whitelistedAttributes = this.whitelistedAttributes || {};
+
+        // First update existing node attributes and delete old ones
+        // TODO: optimize to not run this if the node was freshly created
+        let nodeAttributes = node.attributes;
+        for (let i = nodeAttributes.length - 1; i >= 0; i--) {
+            let attr = nodeAttributes[i];
+            let attributeName = attr.name;
+            if (attributeName === "style" || attributeName === "class") {
+                // TODO: maybe should do work here?
+                continue;
+            }
+
+            let key = attributesMap.reverseNameMap.get(attributeName);
+
+            // TODO: this is wrong since it doesn't do reverse mapping
+            if (this.hasOwnProperty(key)) {
+                let value = this[key];
+                let attributeOptions = attributesMap.get(key);
+                if (attributeOptions && attributeOptions.noValue) {
+                    if (value) {
+                        value = "";
                     } else {
-                        node.removeAttribute(key);
+                        value = undefined;
                     }
-                    this.attributes.delete(key);
+                }
+                if (value != null) {
+                    node.setAttribute(attributeName, value);
+                    addedAttributes[key] = true;
                 } else {
-                    node.removeAttribute(key);
+                    node.removeAttribute(attributeName);
                 }
+            } else {
+                node.removeAttribute(attributeName);
             }
-            // Add new attributes
-            for (let [key, value] of this.attributes) {
-                if (typeof value !== "undefined") {
-                    node.setAttribute(key, value);
-                }
+        }
+        // Add new attributes
+        for (let key in this) {
+            if (addedAttributes[key]) {
+                continue;
             }
+            this.applyAttribute(key, node, attributesMap);
+            // TODO: also whitelist data- and aria- keys here
         }
 
         if (this.className) {
@@ -252,7 +229,7 @@ NodeAttributes.defaultAttributesMap = CreateNodeAttributesMap([
     ["default"],
     ["disabled", {noValue: true}],
     ["fixed"],
-    ["forAttr", {domName: "for"}],
+    ["forAttr", {domName: "for"}], // TODO: have a consistent nomenclature for there!
     ["hidden"],
     ["href"],
     ["rel"],

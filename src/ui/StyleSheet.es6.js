@@ -1,32 +1,47 @@
 import {Dispatchable} from "../base/Dispatcher";
+import {dashCase} from "../base/Utils";
 
-class StyleRuleInstance extends Dispatchable {
+class StyleRuleInstance {
     constructor(styleSheet, index, selector, style) {
-        super();
+        // super();
         if (index == -1) {
             index = styleSheet.cssRules.length;
         }
         this.selector = selector;
         this.styleSheet = styleSheet;
-        let ruleText = selector + "{}";
+        this.style = style;
+        let ruleText = this.getCSSText();
         let insertedIndex = styleSheet.insertRule(ruleText, index);
         this.cssRule = styleSheet.cssRules[insertedIndex];
-        this.apply(style);
+    }
+
+    getCSSText() {
+        let style = this.style;
+        let text = this.selector + "{";
+        for (let key of Object.keys(style)) {
+            let value = style[key];
+            if (typeof value === "function") {
+                value = value();
+            }
+            // Ignore keys with null or undefined value
+            if (value == null) {
+                continue;
+            }
+            // TODO: if key starts with vendor-, replace it with the browser specific one (and the plain one)
+            // TODO: on some attributes, do we want to automatically add a px suffix?
+            text += dashCase(key) + ":" + value + ";";
+        }
+        return text + "}";
     }
 
     setAttribute(key, value) {
-        if (typeof value === "function") {
-            value = value();
-        }
-        // TODO: If key should be in units, add the suffix here if you want
-        this.cssRule.style[key] = value;
+        this.style[key] = value;
+        this.update();
     }
 
     apply(style) {
         this.style = style;
-        for (let key of Object.keys(style)) {
-            this.setAttribute(key, style[key]);
-        }
+        this.cssRule.cssText = this.getCSSText();
     }
 
     update() {
@@ -36,9 +51,9 @@ class StyleRuleInstance extends Dispatchable {
 
 const ALLOWED_SELECTOR_STARTS = new Set([":", ">", " ", "+", "~", "[", "."]);
 
-class StyleRuleGroup extends Dispatchable {
+class StyleRuleGroup {
     constructor(styleSheet, style) {
-        super();
+        // super();
         this.styleSheet = styleSheet; // this is the native CSSStyleSheet
         this.className = this.constructor.getClassName();
         this.selectorMap = new Map();
@@ -128,7 +143,7 @@ class StyleSheet extends Dispatchable {
         options = Object.assign({
             updateOnResize: false,
             parent: document.head,
-            // name: options.name || this.constructor.getElementName(), // call only if needed
+            name: options.name || this.constructor.getElementName(), // call only if needed
         }, options);
 
         this.options = options;
@@ -150,6 +165,19 @@ class StyleSheet extends Dispatchable {
         }
     }
 
+    static getInstance() {
+        return (this.singletonInstance = this.singletonInstance || new this());
+    }
+
+    static getElementName() {
+        this.elementNameCounter = (this.elementNameCounter || 0) + 1;
+        let name = this.constructor.name;
+        if (this.elementNameCounter > 1) {
+            name += "-" + this.elementNameCounter;
+        }
+        return name;
+    }
+
     getNativeStyleSheet() {
         return this.styleElement.sheet;
     }
@@ -162,7 +190,15 @@ class StyleSheet extends Dispatchable {
         }
     }
 
-    css(style) {
+    css() {
+        return this.styleRule(...arguments);
+    }
+
+    setDisabled(disabled) {
+        this.getNativeStyleSheet().disabled = disabled;
+    }
+
+    styleRule(style) {
         this.ensureFirstUpdate();
         if (arguments.length > 1) {
             style = Object.assign({}, ...arguments);
@@ -170,10 +206,6 @@ class StyleSheet extends Dispatchable {
         let element = new StyleRuleGroup(this.getNativeStyleSheet(), style);
         this.elements.add(element);
         return element;
-    }
-
-    setDisabled(disabled) {
-        this.getNativeStyleSheet().disabled = disabled;
     }
 
     keyframe(keyframe) {

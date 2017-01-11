@@ -142,3 +142,18 @@ export function objectFromKeyValue(key, value) {
         [key]: value,
     }
 }
+
+export function dashCase(str) {
+    let rez = "";
+    for (let i = 0; i < str.length; i++) {
+        if ("A" <= str[i] && str[i] <= "Z") {
+            if (i > 0) {
+                rez += "-";
+            }
+            rez += str[i].toLowerCase();
+        } else {
+            rez += str[i];
+        }
+    }
+    return (rez == str) ? str : rez;
+}

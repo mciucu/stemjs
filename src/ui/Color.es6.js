@@ -141,8 +141,41 @@ const COLORS_BY_NAME = {
     yellowgreen: "#9acd32"
 };
 
+/*
+ * This class contains methods for operating with colors. Its objects are kept in hsva format with normalized
+ * attributes (each attribute has value between 0 and 1 inclusive), and can be converted from/to rgba.
+ */
 class Color {
+    constructor(color) {
+        if (color) {
+            this.setColor(color);
+        }
+    }
+
+    setColor(color) {
+        this.color = this.constructor.parseColor(color);
+    }
+
+    getColor() {
+        let rgba = this.getRgba();
+        return `rgba(${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${rgba[3]})`;
+    }
+
+    /*
+     * @param color A color string of the types: native name, hex3, hex6, rgb, rgba, hsl, hsla
+     *              or a Color object, or a hsla color array
+     */
     static parseColor(color) {
+        if (color instanceof Color) {
+            return color.color;
+        } else if (color instanceof Array) {
+            // Add the alpha parameter at the end
+            if (color.length === 3) {
+                color.push(1);
+            }
+            return color;
+        }
+
         color = color.trim().toLowerCase();
 
         // Check if color is given by name
@@ -150,10 +183,12 @@ class Color {
             color = COLORS_BY_NAME[color];
         }
 
+        let values = [];
+
         // Check for hex3 (e.g. "#f00")
         let hex3 = color.match(/^#([0-9a-f]{3})$/i);
         if (hex3) {
-            return [
+            values = [
                 parseInt(hex3[1].charAt(0), 16) * 0x11,
                 parseInt(hex3[1].charAt(1), 16) * 0x11,
                 parseInt(hex3[1].charAt(2), 16) * 0x11,
@@ -164,7 +199,7 @@ class Color {
         // Check for hex6 (e.g. "#ff0000")
         let hex6 = color.match(/^#([0-9a-f]{6})$/i);
         if (hex6) {
-            return [
+            values = [
                 parseInt(hex6[1].substr(0, 2), 16),
                 parseInt(hex6[1].substr(2, 2), 16),
                 parseInt(hex6[1].substr(4, 2), 16),
@@ -173,9 +208,9 @@ class Color {
         }
 
         // Check for rgba (e.g. "rgba(255, 0, 0, 0.5)")
-        var rgba = color.match(/^rgba\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+.*\d*)\s*\)$/i);
+        let rgba = color.match(/^rgba\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+.*\d*)\s*\)$/i);
         if (rgba) {
-            return [
+            values = [
                 parseInt(rgba[1]),
                 parseInt(rgba[2]),
                 parseInt(rgba[3]),
@@ -184,34 +219,289 @@ class Color {
         }
 
         // Check for rgb (e.g. "rgb(255, 0, 0)")
-        var rgb = color.match(/^rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
+        let rgb = color.match(/^rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
         if (rgb) {
-            return [
+            values = [
                 parseInt(rgb[1]),
                 parseInt(rgb[2]),
                 parseInt(rgb[3]),
                 1
             ];
         }
+/*
+        // Check for hsl (e.g. "hsl(360, 100%, 50%)"
+        let hsl = color.match(/^hsl\s*\(\s*(\d+)\s*,\s*(\d+)\s*%\s*,\s*(\d+)\s*%\s*\)$/i);
+        if (hsl) {
+            values = this.constructor.hslaToRgba(...hsl.slice(1));
+        }
 
-        // TODO(@wefgef): Add hsl support
+        // Check for hsla (e.g. "hsla(360, 100%, 50%, 0.5)"
+        let hsla = color.match(/^hsla\s*\(\s*(\d+)\s*,\s*(\d+)\s*%\s*,\s*(\d+)\s*%\s*,\s*(\d+.*\d*)\s*\)$/i);
+        if (hsla) {
+            values = this.constructor.hslaToRgba(...hsla.slice(1));
+        }
+*/
+        return values;
+    }
+/*
+    static hsvaToRgba(h, s, v, a = 1) {
+        let r, g, b, i, f, p, q, t;
+        i = Math.floor(h * 6);
+        f = h * 6 - i;
+        p = v * (1 - s);
+        q = v * (1 - f * s);
+        t = v * (1 - (1 - f) * s);
+        switch (i % 6) {
+            case 0: r = v, g = t, b = p; break;
+            case 1: r = q, g = v, b = p; break;
+            case 2: r = p, g = v, b = t; break;
+            case 3: r = p, g = q, b = v; break;
+            case 4: r = t, g = p, b = v; break;
+            case 5: r = v, g = p, b = q; break;
+        }
+        return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255), a];
     }
 
-    static buildRGBA(colorArray) {
-        return "rgba(" + colorArray[0] + "," + colorArray[1] + "," + colorArray[2] + "," + colorArray[3] + ")";
+    static rgbaToHsva(r, g, b, a = 1) {
+        let max = Math.max(r, g, b);
+        let min = Math.min(r, g, b);
+        let diff = max - min;
+        let s = (max === 0 ? 0 : diff / max);
+        let v = max / 255;
+        let h;
+
+        switch (max) {
+            case min: h = 0; break;
+            case r: h = (g - b) + diff * (g < b ? 6: 0); h /= 6 * diff; break;
+            case g: h = (b - r) + diff * 2; h /= 6 * diff; break;
+            case b: h = (r - g) + diff * 4; h /= 6 * diff; break;
+        }
+
+        return [h, s, v, a];
     }
+
+    static hslaToRgba(h, s, l, a = 1) {
+        h /= 360; s /= 100; l /= 100;
+
+        let r, g, b;
+
+        if(s == 0){
+            r = g = b = l; // achromatic
+        }else{
+            let hueToRgb = (p, q, t) => {
+                if(t < 0) {
+                    t += 1;
+                } else if(t > 1) {
+                    t -= 1;
+                }
+
+                if (t < 1/6) {
+                    return p + (q - p) * 6 * t;
+                } else if (t < 1/2) {
+                    return q;
+                } else if (t < 2/3) {
+                    return p + (q - p) * (2/3 - t) * 6;
+                } else {
+                    return p;
+                }
+            };
+
+            let q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            let p = 2 * l - q;
+            r = hueToRgb(p, q, h + 1/3);
+            g = hueToRgb(p, q, h);
+            b = hueToRgb(p, q, h - 1/3);
+        }
+
+        return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255), a];
+    }
+
+    static rgbaToHsla(r, g, b, a = 1) {
+        r /= 255, g /= 255, b /= 255;
+
+        let max = Math.max(r, g, b);
+        let min = Math.min(r, g, b);
+        let h, s, l = (max + min) / 2;
+
+        if (max == min) {
+            h = s = 0; // achromatic
+        } else {
+            let d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+                case r:
+                    h = (g - b) / d + (g < b ? 6 : 0); break;
+                case g:
+                    h = (b - r) / d + 2; break;
+                case b:
+                    h = (r - g) / d + 4; break;
+            }
+            h /= 6;
+        }
+
+        return [h, s, l, a];
+    }
+*/
 
     // TODO: this should be implemented as a factory that generates an interpolator object, that just takes in a t
-    static interpolate(firstColor, secondColor, t) {
+    static interpolate(firstColor, secondColor, t = 0.5) {
         let firstColorArray = Color.parseColor(firstColor);
         let secondColorArray = Color.parseColor(secondColor);
-        return Color.buildRGBA([
+
+        return Color.convertToRgba([
             parseInt(firstColorArray[0] * (1 - t) + secondColorArray[0] * t),
             parseInt(firstColorArray[1] * (1 - t) + secondColorArray[1] * t),
             parseInt(firstColorArray[2] * (1 - t) + secondColorArray[2] * t),
-            firstColorArray[3] * (1 - t) + secondColorArray[3] * t
+            parseInt(firstColorArray[3] * (1 - t) + secondColorArray[3] * t)
         ]);
     }
+
+    static convertToRgba(rgba) {
+        return `rgba(${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${rgba[3]})`;
+    }
+
+    static isLight(color) {
+        let values = Color.parseColor(color);
+        return values[0] * 0.3 + values[1] * 0.59 + values[2] * 0.11 > 188;
+    }
+
+/*
+    setRgba(value, index = -1) {
+        if (index !== -1) {
+            let rgba = this.getRgba();
+            rgba[index] = value;
+            this.color = rgba;
+        } else {
+            this.color = Color.rgbaToHsva(...value);
+        }
+    }
+
+    getRgba() {
+        return Color.hsvaToRgba(this.color);
+    }
+
+    addRgba(amount, index = -1) {
+        let rgba = Color.hsvaToRgba(this.color);
+        let setInRange = (rgba) => {
+            for (let i = 0; i < 3; i += 1) {
+                if (rgba[i] > 255) {
+                    rgba[i] = 255;
+                } else if (rgba[i] < 0) {
+                    rgba[i] = 0;
+                }
+            }
+            if (rgba[3] > 1) {
+                rgba[3] = 1;
+            } else if (rgba[3] < 0){
+                rgba[3] = 0;
+            }
+        };
+        if (index !== -1) {
+            rgba[index] += amount;
+        } else {
+            if (amount.length === 3) {
+                amount.push(0);
+            }
+            for (let i  = 0; i < 4; i += 1) {
+                rgba[i] += amount[i];
+            }
+        }
+        setInRange(rgba);
+        this.setRgba(rgba);
+    }
+
+    setHsva(value, index = -1) {
+        if (index !== -1) {
+            this.color[index] = value;
+        } else {
+            this.color = value;
+        }
+    }
+
+    getHsva() {
+        return this.color;
+    }
+
+    addHsva(amount, index = -1) {
+        let hsva = this.color;
+        let setInrange = (hsva) => {
+            if (hsva[0] > 1) {
+                hsva[0] -= 1;
+            } else if (hsva[0] < 0) {
+                hsva[0] += 1;
+            }
+            for (let i = 1; i < 4; i += 1) {
+                if (hsva[i] > 1) {
+                    hsva[i] = 1;
+                } else if (hsva[i] < 0) {
+                    hsva[i] = 0;
+                }
+            }
+        };
+        if (index !== -1) {
+            hsva[index] += amount
+        }
+        if (hsva.length === 3) {
+            hsva.push(1);
+        }
+        if (amount.length === 3) {
+            amount.push(0);
+        }
+        hsva[0] += amount[0];
+        if (hsva[0] > 1) {
+            hsva[0] -= 1;
+        } else if (hsva[0] < 0) {
+            hsva[0] += 1;
+        }
+        for (let i = 1; i < 4; i += 1) {
+            hsva[i] += amount[i];
+            if (hsva[i] < 0) {
+                hsva[i] = 0;
+            } else if (hsva[i] > 1) {
+                hsva[i] = 1;
+            }
+        }
+        this.color = hsva;
+    }
+*/
 }
 
-export {Color};
+function lighten(color, amount) {
+    if (amount >= 0) {
+        return Color.interpolate(color, "#fff", amount);
+    } else {
+        return darken(color, -amount);
+    }
+};
+
+function darken(color, amount) {
+    if (amount >= 0) {
+        let rgba = Color.parseColor(Color.interpolate(color, "#000", amount));
+        for (let i = 0; i < 3; i += 1) {
+            let root = Math.pow(255 - rgba[i], 0.7);
+            rgba[i] = parseInt(rgba[i] - root * amount);
+            if (rgba[i] < 0) {
+                rgba[i] = 0;
+            }
+        }
+        return Color.convertToRgba(rgba);
+    } else {
+        return lighten(color, -amount);
+    }
+};
+
+function buildColors(color) {
+    let colors = [];
+    let darkenPercents;
+    if (Color.isLight(color)) {
+        darkenPercents = [0, 0.05, 0.1, 0.15, 0.3, 0.8];
+    } else {
+        darkenPercents = [0, 0.1, 0.2, 0.23, 0.1, -1];
+    }
+    for (let i = 0; i < darkenPercents.length; i += 1) {
+        colors.push(darken(color, darkenPercents[i]));
+    }
+    return colors;
+}
+
+export {Color, lighten, darken, buildColors};

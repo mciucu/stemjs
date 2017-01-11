@@ -1,3 +1,4 @@
+// This file will probably be deprecated in time by StyleSheet, but the API will be backwards compatible, so use it
 import {UI} from "./UIBase";
 import "./StyleElement";
 import {Dispatchable} from "../base/Dispatcher";
@@ -26,6 +27,10 @@ class StyleSet extends Dispatchable {
             name: this.options.name,
         };
         this.styleElement = UI.StyleElement.create(options.parent, styleElementOptions);
+    }
+
+    static getInstance() {
+        return (this.singletonInstance = this.singletonInstance || new this());
     }
 
     static getElementName() {

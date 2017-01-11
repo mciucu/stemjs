@@ -34,6 +34,7 @@ UI.Size = {
     SMALL: "sm",
     DEFAULT: "default",
     LARGE: "lg",
+    EXTRA_LARGE: "xl",
 };
 
 UI.VoteStatus = {

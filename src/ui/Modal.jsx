@@ -188,7 +188,7 @@ UI.Modal = class Modal extends UI.Element {
         if (this.options.closeButton) {
             // TODO: this should be in a method
             closeButton = <div style={{position: "absolute", right: "10px", zIndex: "10"}}>
-                <UI.Button type="button" className="close" 
+                <UI.Button className="close" size={UI.Size.EXTRA_LARGE}
                            label="&times;" onClick={() => this.hide()}/>
             </div>;
         }
@@ -340,7 +340,7 @@ UI.ActionModal = class ActionModal extends UI.Modal {
     getFooterContent() {
         return [
             <UI.TemporaryMessageArea ref="messageArea"/>,
-            <UI.Button level={UI.Level.DEFAULT} label={this.getCloseName()} onClick={() => this.hide()}/>,
+            <UI.Button label={this.getCloseName()} onClick={() => this.hide()}/>,
             this.getActionButton(),
         ];
     }

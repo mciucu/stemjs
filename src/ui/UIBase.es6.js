@@ -1,7 +1,6 @@
 import {unwrapArray} from "../base/Utils";
 import {Dispatchable} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
-import {lazyInitialize} from "../decorators/LazyInitialize";
 
 var UI = {
     renderingStack: [], //keeps track of objects that are redrawing, to know where to assign refs automatically
@@ -29,6 +28,10 @@ class BaseUIElement extends Dispatchable {
                 obj[name] = undefined; //TODO: better delete from obj?
             }
         }
+    }
+
+    onMount() {
+        // Nothing by default
     }
 
     onUnmount() {}
@@ -62,6 +65,7 @@ UI.TextElement = class UITextElement extends BaseUIElement {
             this.redraw();
         }
         parent.node.insertBefore(this.node, nextSibling);
+        this.onMount();
     }
 
     getNodeType() {
@@ -264,77 +268,45 @@ class UIElement extends BaseUIElement {
         return true;
     }
 
-    getNodeAttributes() {
-        let attr = new NodeAttributes(this.options, this.constructor.domAttributesMap);
-        this.extraNodeAttributes(attr);
+    getNodeAttributes(returnCopy=true) {
+        if (returnCopy) {
+            return new NodeAttributes(this.options);
+        }
+        let attr = this.options;
+        attr.__proto__ = NodeAttributes.prototype;
         return attr;
     }
 
-    extraNodeAttributes(attr) {
-        // Overwrite this if you want to add any other attributes from the default ones
-    }
-
     applyNodeAttributes() {
-        this.domAttributes = this.getNodeAttributes();
-        this.domAttributes.apply(this.node);
+        let attr;
+        if (this.extraNodeAttributes) {
+            // Create a copy of options, that is modifiable
+            attr = this.getNodeAttributes(true);
+            this.extraNodeAttributes(attr);
+        } else {
+            attr = this.getNodeAttributes(false);
+        }
+        attr.apply(this.node, this.constructor.domAttributesMap);
     }
 
     setAttribute(key, value) {
-        this.options[key] = value;
-
-        if (this.node) {
-            if (typeof value === "function") {
-                value = value(this);
-            }
-            this.node.setAttribute(key, value);
-        }
+        this.getNodeAttributes(false).setAttribute(key, value, this.node, this.constructor.domAttributesMap);
     }
 
     setStyle(key, value) {
-        this.options.style = this.options.style || {};
-
-        this.options.style[key] = value;
-
-        if (this.node) {
-            if (typeof value === "function") {
-                value = value(this);
-            }
-            this.node.style[key] = value;
-        }
+        this.getNodeAttributes(false).setStyle(key, value, this.node);
     }
 
     addClass(className) {
-        let classArray;
-        if (!Array.isArray(className)) {
-            classArray = String(className).trim().split(" ");
-        } else {
-            classArray = className.map(x => String(x));
-        }
-        for (let classInstance of classArray) {
-            this.options.className = NodeAttributes.addClassTo(this.options.className, classInstance);
-            if (this.node) {
-                this.node.classList.add(classInstance);
-            }
-        }
+        this.getNodeAttributes(false).addClass(className, this.node);
     }
 
     removeClass(className) {
-        let classArray;
-        if (!Array.isArray(className)) {
-            classArray = String(className).trim().split(" ");
-        } else {
-            classArray = className.map(x => String(x));
-        }
-        for (let classInstance of classArray) {
-            this.options.className = NodeAttributes.removeClassFrom(this.options.className, classInstance);
-            if (this.node) {
-                this.node.classList.remove(classInstance);
-            }
-
-        }
+        this.getNodeAttributes(false).removeClass(className, this.node);
     }
 
     hasClass(className) {
+        // TODO: should use NodeAttributes
         return this.node && this.node.classList.contains(className);
     }
 
@@ -382,10 +354,6 @@ class UIElement extends BaseUIElement {
             this.addClickListener(this.onClickHandler);
         }
         this.onMount();
-    }
-
-    onMount() {
-        // Nothing by default
     }
 
     // You need to overwrite the next child manipulation rutines if this.options.children !== this.children
@@ -571,8 +539,6 @@ class UIElement extends BaseUIElement {
     }
 }
 
-UIElement.domAttributesMap = NodeAttributes.defaultAttributesMap;
-
 UI.createElement = function (tag, options) {
     if (!tag) {
         console.error("Create element needs a valid object tag, did you mistype a class name?");
@@ -620,6 +586,8 @@ UI.createElement = function (tag, options) {
 
     return new tag(options);
 };
+
+UIElement.domAttributesMap = NodeAttributes.defaultAttributesMap;
 
 UI.Element = UIElement;
 

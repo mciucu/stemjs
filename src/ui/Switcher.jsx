@@ -3,7 +3,7 @@
 
 import {UI} from "./UIBase";
 
-UI.Switcher = class Switcher extends UI.Element {
+class Switcher extends UI.Element {
     constructor(options) {
         super(options);
         this.childMap = new WeakMap();
@@ -155,4 +155,6 @@ UI.Switcher = class Switcher extends UI.Element {
     }
 };
 
-// export {Switcher};
+UI.Switcher = Switcher;
+
+export {Switcher};
