@@ -95,6 +95,16 @@ export function suffixNumber(value, suffix) {
     return value;
 }
 
+export function isPlainObject(obj) {
+    if (typeof obj !== "object" || obj.nodeType) {
+        return false;
+    }
+    if (obj.constructor && obj.constructor != Object) {
+        return false;
+    }
+    return true;
+}
+
 export function deepCopy() {
 	let target = arguments[0] || {};
 	// Handle case when target is a string or something (possible in deep copy)
@@ -103,32 +113,27 @@ export function deepCopy() {
 	}
 
 	for (let i = 1; i < arguments.length; i += 1) {
-        let options = arguments[i];
-        if (options == null) {
+        let obj = arguments[i];
+        if (obj == null) {
             continue;
         }
 
         // Extend the base object
-        for (let [key, value] of Object.entries(options)) {
-            if (value === undefined) {
-                continue;
-            }
-
+        for (let [key, value] of Object.entries(obj)) {
             // Recurse if we're merging plain objects or arrays
-            // TODO: should implement this without jQuery
-            if ($.isPlainObject(value) || (Array.isArray(value))) {
+            if (isPlainObject(value) || Array.isArray(value)) {
                 let clone;
                 let src = target[key];
 
                 if (Array.isArray(value)) {
                     clone = (src && Array.isArray(src)) ? src : [];
                 } else {
-                    // TODO: should implement this without jQuery
-                    clone = (src && $.isPlainObject(src)) ? src : {};
+                    clone = (src && isPlainObject(src)) ? src : {};
                 }
 
                 target[key] = deepCopy(clone, value);
             } else {
+                // TODO: if value has .clone() method, use that?
                 target[key] = value;
             }
         }
