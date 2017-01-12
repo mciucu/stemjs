@@ -1248,7 +1248,7 @@ var UIElement = function (_BaseUIElement2) {
                 options = Object.assign({}, options, preservedOptions);
             }
             this.setOptions(options);
-            this.addListenersFromOptions(this.options);
+            this.addListenersFromOptions();
         }
     }, {
         key: "getNodeType",
@@ -1463,8 +1463,10 @@ var UIElement = function (_BaseUIElement2) {
         }
     }, {
         key: "addListenersFromOptions",
-        value: function addListenersFromOptions(options) {
+        value: function addListenersFromOptions() {
             var _this4 = this;
+
+            var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.options;
 
             var _loop = function _loop(opt) {
                 if (typeof opt === "string" && opt.startsWith("on") && opt.length > 2) {
@@ -1522,7 +1524,7 @@ var UIElement = function (_BaseUIElement2) {
 
             parent.insertChildNodeBefore(this, nextSiblingNode);
 
-            this.addListenersFromOptions(this.options);
+            this.addListenersFromOptions();
 
             this.onMount();
         }

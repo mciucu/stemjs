@@ -143,7 +143,7 @@ class UIElement extends BaseUIElement {
             options = Object.assign({}, options, preservedOptions);
         }
         this.setOptions(options);
-        this.addListenersFromOptions(this.options);
+        this.addListenersFromOptions();
     }
 
     getNodeType() {
@@ -319,7 +319,7 @@ class UIElement extends BaseUIElement {
         }
     }
 
-    addListenersFromOptions(options) {
+    addListenersFromOptions(options=this.options) {
         for (const opt in options) {
             if (typeof opt === "string" && opt.startsWith("on") && opt.length > 2) {
                 const eventType = opt.substring(2);
@@ -370,7 +370,7 @@ class UIElement extends BaseUIElement {
 
         parent.insertChildNodeBefore(this, nextSiblingNode);
 
-        this.addListenersFromOptions(this.options);
+        this.addListenersFromOptions();
 
         this.onMount();
     }
