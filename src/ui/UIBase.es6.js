@@ -143,6 +143,7 @@ class UIElement extends BaseUIElement {
             options = Object.assign({}, options, preservedOptions);
         }
         this.setOptions(options);
+        this.addListenersFromOptions(this.options);
     }
 
     getNodeType() {
@@ -318,6 +319,32 @@ class UIElement extends BaseUIElement {
         }
     }
 
+    addListenersFromOptions(options) {
+        for (const opt in options) {
+            if (typeof opt === "string" && opt.startsWith("on") && opt.length > 2) {
+                const eventType = opt.substring(2);
+
+                const addListenerMethodName = "add" + eventType + "Listener";
+                const handlerMethodName = "on" + eventType + "Handler";
+
+                // The handlerMethod might have been previously added 
+                // by a previous call to this function or manually by the user
+                if (typeof this[addListenerMethodName] === "function" && !this.hasOwnProperty(handlerMethodName)) {
+                    this[handlerMethodName] = (event) => {
+                        UI.event = event;
+                        if (this.options[opt]) {
+                            this.options[opt](this, event);
+                        }
+                    };
+
+                    // Actually add the listener
+                    this[addListenerMethodName](this[handlerMethodName]);
+                }
+            }
+        }
+    }
+
+
     refLink(name) {
         return {parent: this, name: name};
     }
@@ -343,16 +370,8 @@ class UIElement extends BaseUIElement {
 
         parent.insertChildNodeBefore(this, nextSiblingNode);
 
-        // TODO: not a great pattern to have this here
-        if (this.options.onClick) {
-            this.onClickHandler = (event) => {
-                UI.event = event;
-                if (this.options.onClick) {
-                    this.options.onClick(this, event);
-                }
-            };
-            this.addClickListener(this.onClickHandler);
-        }
+        this.addListenersFromOptions(this.options);
+
         this.onMount();
     }
 
