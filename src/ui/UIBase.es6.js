@@ -319,10 +319,10 @@ class UIElement extends BaseUIElement {
         }
     }
 
-    addListenersFromOptions(options=this.options) {
-        for (const opt in options) {
-            if (typeof opt === "string" && opt.startsWith("on") && opt.length > 2) {
-                const eventType = opt.substring(2);
+    addListenersFromOptions() {
+        for (const key in this.options) {
+            if (typeof key === "string" && key.startsWith("on") && key.length > 2) {
+                const eventType = key.substring(2);
 
                 const addListenerMethodName = "add" + eventType + "Listener";
                 const handlerMethodName = "on" + eventType + "Handler";
@@ -332,8 +332,8 @@ class UIElement extends BaseUIElement {
                 if (typeof this[addListenerMethodName] === "function" && !this.hasOwnProperty(handlerMethodName)) {
                     this[handlerMethodName] = (event) => {
                         UI.event = event;
-                        if (this.options[opt]) {
-                            this.options[opt](this, event);
+                        if (this.options[key]) {
+                            this.options[key](this, event);
                         }
                     };
 
