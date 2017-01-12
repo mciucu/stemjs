@@ -3,6 +3,7 @@ The world is full by them. Most of them are mediocre though, and I wanted to sho
 
 This isn't really a framework in the classical sense of the word, but rather a collection of libraries and design patterns that were designed to work together.
 
+Check out the docs at https://stemjs.org/docs/
 This framework is being used for about a year at csacademy.com, and it really works a lot better for use than any other solution out there.
 
 ## Recommended bits
