@@ -51,6 +51,10 @@ class SimpleStyledElement extends UI.Element {
 };
 
 UI.Button = class Button extends SimpleStyledElement {
+    getNodeType() {
+        return "button";
+    }
+
     extraNodeAttributes(attr) {
         attr.addClass(GlobalStyle.Button.DEFAULT);
 
@@ -63,17 +67,14 @@ UI.Button = class Button extends SimpleStyledElement {
         }
     }
 
-    setOptions(options) {
-        super.setOptions(options);
-        this.options.label = options.label || "";
-    }
-
-    getNodeType() {
-        return "button";
+    defaultOptions() {
+        return {
+            label: ""
+        };
     }
 
     render() {
-        return [this.beforeChildren(), this.options.label, this.options.children];
+        return [this.beforeChildren(), this.getLabel(), super.render()];
     };
 
     getLabel() {
@@ -81,8 +82,7 @@ UI.Button = class Button extends SimpleStyledElement {
     }
 
     setLabel(label) {
-        this.options.label = label;
-        this.redraw();
+        this.updateOptions({label: label});
     }
 
     //TODO: this should live in a base iconable class, of which you'd only use this.beforeChildren
@@ -108,13 +108,13 @@ UI.Button = class Button extends SimpleStyledElement {
     };
 
     beforeChildren() {
-        if (!this.options.faIcon) {
+        if (!this.getFaIcon()) {
             return null;
         }
         let iconOptions = {
-            className: "fa fa-" + this.options.faIcon,
+            className: "fa fa-" + this.getFaIcon(),
         };
-        if (this.options.label) {
+        if (this.getLabel()) {
             iconOptions.style = {
                 paddingRight: "5px",
             }

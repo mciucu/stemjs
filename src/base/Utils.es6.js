@@ -96,7 +96,7 @@ export function suffixNumber(value, suffix) {
 }
 
 export function isPlainObject(obj) {
-    if (typeof obj !== "object" || obj.nodeType) {
+    if (!obj || typeof obj !== "object" || obj.nodeType) {
         return false;
     }
     if (obj.constructor && obj.constructor != Object) {
@@ -121,7 +121,7 @@ export function deepCopy() {
         // Extend the base object
         for (let [key, value] of Object.entries(obj)) {
             // Recurse if we're merging plain objects or arrays
-            if (isPlainObject(value) || Array.isArray(value)) {
+            if (value && isPlainObject(value) || Array.isArray(value)) {
                 let clone;
                 let src = target[key];
 

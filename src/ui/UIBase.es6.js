@@ -117,7 +117,6 @@ class UIElement extends BaseUIElement {
     getPreservedOptions() {}
 
     setOptions(options) {
-        // TODO: should this be here or in createElement?
         let defaultOptions = this.getDefaultOptions();
         if (defaultOptions) {
             options = Object.assign(defaultOptions, options);
@@ -327,12 +326,13 @@ class UIElement extends BaseUIElement {
                 const addListenerMethodName = "add" + eventType + "Listener";
                 const handlerMethodName = "on" + eventType + "Handler";
 
-                // The handlerMethod might have been previously added 
+                // The handlerMethod might have been previously added
                 // by a previous call to this function or manually by the user
                 if (typeof this[addListenerMethodName] === "function" && !this.hasOwnProperty(handlerMethodName)) {
                     this[handlerMethodName] = (event) => {
                         UI.event = event;
                         if (this.options[key]) {
+                            // TODO: arguments should be (event, this)!
                             this.options[key](this, event);
                         }
                     };
@@ -632,11 +632,6 @@ UI.Primitive = (BaseClass, nodeType) => {
         return resultClass;
     }
     resultClass = class Primitive extends BaseClass {
-        // TODO: This crashes in PhantomJS
-        // static get name() {
-        //     return "Primitive-" + nodeType;
-        // }
-
         getNodeType() {
             return nodeType;
         }
