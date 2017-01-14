@@ -1,7 +1,8 @@
 import {UI} from "./UIBase";
 import {hover, StyleSet} from "Style";
-import "./UIPrimitives";
+import {Panel} from "./UIPrimitives";
 import {GlobalStyle} from "./GlobalStyle";
+import {Ajax} from "../base/Ajax";
 
 function BootstrapMixin(BaseClass, bootstrapClassName) {
     class BootstrapClass extends BaseClass {
@@ -168,7 +169,7 @@ UI.StateButton = class StateButton extends UI.Button {
 UI.AjaxButton = class AjaxButton extends UI.StateButton {
     ajaxCall(data) {
         this.setState(UI.ActionStatus.RUNNING);
-        $.ajax({
+        Ajax.request({
             url: data.url,
             type: data.type,
             dataType: data.dataType,
@@ -271,7 +272,7 @@ UI.BootstrapLabel = class BootstrapLabel extends BootstrapMixin(UI.Element, "lab
     }
 };
 
-UI.CardPanel = class CardPanel extends BootstrapMixin(UI.Panel, "panel") {
+UI.CardPanel = class CardPanel extends BootstrapMixin(Panel, "panel") {
     setOptions(options) {
         super.setOptions(options);
         this.options.level = this.options.level || UI.Level.DEFAULT;

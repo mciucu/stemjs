@@ -1,4 +1,6 @@
 // TODO: this file was started with a lot of old patterns, that need to be updated
+// TODO: remove everything from UI namespace, export instead
+// TODO: need a major clean-up
 import {UI} from "./UIBase";
 import "./UIPrimitives";
 import {CreateNodeAttributesMap} from "./NodeAttributes";

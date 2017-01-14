@@ -1,4 +1,4 @@
-// TODO: this file existed to hold generic classes in a period of fast prototyping, not really aplicable now
+// TODO: this file existed to hold generic classes in a period of fast prototyping, has a lot of old code
 import {UI} from "./UIBase";
 import {Device} from "../base/Device";
 import {Draggable} from "./Draggable";
@@ -50,14 +50,14 @@ UI.ActionStatus = {
     FAILED: 4,
 };
 
-//TODO: should panel be a generic element that just encapsulates something while exposing a title?
-UI.Panel = class Panel extends UI.Element {
+// A very simple class, all this does is implement the `getTitle()` method
+class Panel extends UI.Element {
     getTitle() {
         return this.options.title;
     }
-};
+}
 
-UI.SlideBar = class SlideBar extends Draggable(UI.Element) {
+class SlideBar extends Draggable(UI.Element) {
     constructor(options) {
         super(options);
     }
@@ -125,22 +125,18 @@ UI.SlideBar = class SlideBar extends Draggable(UI.Element) {
     }
 };
 
-UI.Link = class Link extends UI.Element {
-    getNodeType() {
-        return "a";
+class Link extends UI.Primitive("a") {
+    extraNodeAttributes(attr) {
+        attr.setStyle("cursor", "pointer");
     }
 
-    getNodeAttributes() {
-        let attr = super.getNodeAttributes();
-        attr.setStyle("cursor", "pointer");
-        return attr;
+    getDefaultOptions() {
+        return {
+            newTab: true,
+        }
     }
 
     setOptions(options) {
-        options = Object.assign({
-            newTab: true,
-        }, options);
-
         super.setOptions(options);
 
         if (this.options.newTab) {
@@ -153,21 +149,25 @@ UI.Link = class Link extends UI.Element {
     render() {
         return [this.options.value];
     }
-};
+}
 
-UI.Image = class Image extends UI.Primitive("img") {
-};
+class Image extends UI.Primitive("img") {
+}
 
-// Beware coder: If you ever use this class, you need to have a good reason!
-UI.RawHTML = class RawHTML extends UI.Element {
+// Beware coder: If you ever use this class, you should have a well documented reason
+class RawHTML extends UI.Element {
+    getInnerHTML() {
+        return this.options.innerHTML || this.options.__innerHTML;
+    }
+
     redraw() {
-        this.node.innerHTML = this.options.__innerHTML;
+        this.node.innerHTML = this.getInnerHTML();
         this.applyNodeAttributes();
         this.applyRef();
     }
-};
+}
 
-UI.TemporaryMessageArea = class TemporaryMessageArea extends UI.Primitive("span") {
+class TemporaryMessageArea extends UI.Primitive("span") {
     getDefaultOptions() {
         return {
             margin: 10
@@ -193,7 +193,6 @@ UI.TemporaryMessageArea = class TemporaryMessageArea extends UI.Primitive("span"
 
     setColor(color) {
         this.setStyle("color", color);
-        this.applyNodeAttributes();
     }
 
     showMessage(message, color="black", displayDuration=2000) {
@@ -212,10 +211,10 @@ UI.TemporaryMessageArea = class TemporaryMessageArea extends UI.Primitive("span"
             this.clearValueTimeout = null;
         }
     }
-};
+}
 
 // Just putting in a lot of methods, to try to think of an interface
-UI.ScrollableMixin = class ScrollableMixin extends UI.Element {
+class ScrollableMixin extends UI.Element {
     getDesiredExcessHeightTop() {
         return 600;
     }
@@ -316,7 +315,7 @@ UI.ScrollableMixin = class ScrollableMixin extends UI.Element {
 };
 
 //TODO: this class would need some binary searches
-UI.InfiniteScrollable = class InfiniteScrollable extends UI.ScrollableMixin {
+class InfiniteScrollable extends ScrollableMixin {
     setOptions(options) {
         options = Object.assign({
             entries: [],
@@ -375,21 +374,19 @@ UI.InfiniteScrollable = class InfiniteScrollable extends UI.ScrollableMixin {
         let uiElement = this.renderEntry(entry);
         this.insertChild(uiElement, index);
     }
-};
+}
 
-UI.TimePassedSpan = class TimePassedSpan extends UI.Element {
-    getNodeType() {
-        return "span";
-    }
-
+class TimePassedSpan extends UI.Primitive("span") {
     render() {
         return this.getTimeDeltaDisplay(this.options.timeStamp);
     }
 
-    getNodeAttributes() {
-        let attr = super.getNodeAttributes();
-        attr.setStyle("color", "#AAA");
-        return attr;
+    getDefaultOptions() {
+        return {
+            style: {
+                color: "#aaa"
+            }
+        }
     }
 
     getTimeDeltaDisplay(timeStamp) {
@@ -416,17 +413,22 @@ UI.TimePassedSpan = class TimePassedSpan extends UI.Element {
                 this.TIME_DISPATCHER.dispatch("updateTimeValue");
             }, 5000);
         }
-        this.TIME_DISPATCHER.addListener("updateTimeValue", callback);
+        return this.TIME_DISPATCHER.addListener("updateTimeValue", callback);
     }
 
     onMount() {
-        this.constructor.addIntervalListener(() => {
+        this._updateListener = this.constructor.addIntervalListener(() => {
             this.redraw();
         })
     }
+
+    onUnmount() {
+        this._updateListener && this._updateListener.remove();
+    }
 };
 
-UI.ConstructorInitMixin = function (BaseClass) {
+// TODO: deprecate this, to use lazyInit decorators
+export function ConstructorInitMixin(BaseClass) {
     class ConstructorInitMixin extends BaseClass {
         static ensureInit() {
             if (!this._haveInit) {
@@ -445,3 +447,6 @@ UI.ConstructorInitMixin = function (BaseClass) {
 
     return ConstructorInitMixin;
 };
+
+
+export {Link, Panel, Image, RawHTML, TimePassedSpan, TemporaryMessageArea, SlideBar, ScrollableMixin, InfiniteScrollable};

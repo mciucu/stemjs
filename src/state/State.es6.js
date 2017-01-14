@@ -1,4 +1,4 @@
-import {Dispatchable, CleanupJobs} from "../base/Dispatcher";
+import {Dispatchable} from "../base/Dispatcher";
 
 class StateClass extends Dispatchable {
     constructor() {

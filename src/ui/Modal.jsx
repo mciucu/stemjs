@@ -1,6 +1,8 @@
+// TODO: need to redo with a StyleSheet
 import {UI} from "./UIBase";
+import {Panel, TemporaryMessageArea} from "./UIPrimitives";
 
-UI.FloatingWindow = class FloatingWindow extends UI.Element {
+class FloatingWindow extends UI.Element {
     getDefaultOptions() {
         return {
             transitionTime: 0
@@ -99,9 +101,9 @@ UI.FloatingWindow = class FloatingWindow extends UI.Element {
             }, this.options.transitionTime);
         }
     }
-};
+}
 
-UI.VolatileFloatingWindow = class VolatileFloatingWindow extends UI.FloatingWindow {
+class VolatileFloatingWindow extends FloatingWindow {
     bindWindowListeners() {
         this.hideListener = this.hideListener || (() => {this.hide();});
 
@@ -134,26 +136,21 @@ UI.VolatileFloatingWindow = class VolatileFloatingWindow extends UI.FloatingWind
             event.stopPropagation();
         });
     }
-};
+}
 
-UI.Modal = class Modal extends UI.Element {
-    static getDefaultOptions() {
+class Modal extends UI.Element {
+    getDefaultOptions() {
         return {
             closeButton: true
         };
     }
 
-    setOptions(options) {
-        options = Object.assign(this.constructor.getDefaultOptions(), options);
-        super.setOptions(options);
-    }
-
     render() {
         return [
-            <UI.Panel ref="modalContainer" className="hidden" style={this.getContainerStyle()}>
+            <Panel ref="modalContainer" className="hidden" style={this.getContainerStyle()}>
                 {this.getBehindPanel()}
                 {this.getModalWindow()}
-            </UI.Panel>
+            </Panel>
         ];
     }
 
@@ -171,7 +168,7 @@ UI.Modal = class Modal extends UI.Element {
     }
 
     getBehindPanel() {
-        return <UI.Panel ref="behindPanel" className="hidden-animated" style={this.getBehindPanelStyle()}/>;
+        return <Panel ref="behindPanel" className="hidden-animated" style={this.getBehindPanelStyle()}/>;
     }
 
     getBehindPanelStyle() {
@@ -193,12 +190,12 @@ UI.Modal = class Modal extends UI.Element {
             </div>;
         }
 
-        return <UI.FloatingWindow ref="modalWindow" style={this.getModalWindowStyle()}>
+        return <FloatingWindow ref="modalWindow" style={this.getModalWindowStyle()}>
             {closeButton}
             <div className="modal-dialog" style={{margin: "0px", height: "100%", width: "100%"}}>
                 {this.getGivenChildren()}
             </div>
-        </UI.FloatingWindow>;
+        </FloatingWindow>;
     }
 
     getModalWindowStyle() {
@@ -258,9 +255,9 @@ UI.Modal = class Modal extends UI.Element {
         })
     }
 
-};
+}
 
-UI.ErrorModal = class ErrorModal extends UI.Modal {
+class ErrorModal extends Modal {
     getGivenChildren() {
         return [
             this.getHeader(),
@@ -286,9 +283,9 @@ UI.ErrorModal = class ErrorModal extends UI.Modal {
             <UI.Button level={UI.Level.DANGER} label="Dismiss" onClick={() => this.hide()}/>
         </div>;
     }
-};
+}
 
-UI.ActionModal = class ActionModal extends UI.Modal {
+class ActionModal extends Modal {
     getActionName() {
         return this.options.actionName;
     }
@@ -339,16 +336,16 @@ UI.ActionModal = class ActionModal extends UI.Modal {
 
     getFooterContent() {
         return [
-            <UI.TemporaryMessageArea ref="messageArea"/>,
+            <TemporaryMessageArea ref="messageArea"/>,
             <UI.Button label={this.getCloseName()} onClick={() => this.hide()}/>,
             this.getActionButton(),
         ];
     }
 
     action() {}
-};
+}
 
-UI.ActionModalButton = function(ActionModal) {
+function ActionModalButton(ActionModal) {
     return class ActionModalButton extends UI.Button {
         getModalOptions() {
             let modalOptions = {
@@ -365,4 +362,6 @@ UI.ActionModalButton = function(ActionModal) {
             this.addClickListener(() => this.modal.show());
         }
     };
-};
+}
+
+export {FloatingWindow, VolatileFloatingWindow, Modal, ErrorModal, ActionModal, ActionModalButton};

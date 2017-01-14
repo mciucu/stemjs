@@ -1,3 +1,4 @@
+// TODO: this whole file is mosly here to not break compatibility with pre-Stem code, need refactoring
 export var EPS = 1e-6;
 
 // Check if a value is equal to zero. Use epsilon check.

@@ -1,3 +1,5 @@
+// TODO: this whole file needs a rewrite
+// TODO: remove all raphael/snap dependencies here
 import {UI} from "./UIBase";
 import "./UIPrimitives";
 import * as math from "../math";
@@ -212,6 +214,7 @@ UI.SVG.Element = class SVGElement extends UI.Element {
         return this.parent.getSvg();
     }
 
+    // TODO: remove these methods, add them from somewhere else if you want them
     getRaphael() {
         if (!this.hasOwnProperty("_raphael")) {
             this._raphael = this.createRaphael();

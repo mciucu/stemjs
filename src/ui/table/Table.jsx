@@ -1,7 +1,7 @@
 import {UI} from "../UIBase";
 
 // TODO: the whole table architecture probably needs a rethinking
-UI.TableRow = class TableRow extends UI.Primitive("tr") {
+class TableRow extends UI.Primitive("tr") {
     render() {
         let rowCells = [];
 
@@ -38,7 +38,7 @@ class Table extends UI.Element {
     }
 
     getRowClass() {
-        return UI.TableRow;
+        return TableRow;
     }
 
     getRowOptions(entry) {
@@ -109,8 +109,6 @@ class Table extends UI.Element {
             this.columnDefaults(this.columns[i], i);
         }
     }
-};
+}
 
-UI.Table = Table;
-
-export {Table};
+export {Table, TableRow};

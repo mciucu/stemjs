@@ -2,7 +2,7 @@ import {UI} from "../UIBase";
 import {Table} from "./Table";
 import {defaultComparator} from "../../base/Utils";
 
-UI.SortableTableInterface = function(BaseTableClass) {
+function SortableTableInterface(BaseTableClass) {
     return class SortableTable extends BaseTableClass {
         setOptions(options) {
             super.setOptions(options);
@@ -105,6 +105,8 @@ UI.SortableTableInterface = function(BaseTableClass) {
             }
         }
     };
-};
+}
 
-UI.SortableTable = UI.SortableTableInterface(Table);
+let SortableTable = SortableTableInterface(Table);
+
+export {SortableTable, SortableTableInterface};

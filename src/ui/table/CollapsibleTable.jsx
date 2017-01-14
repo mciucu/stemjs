@@ -1,7 +1,7 @@
 import {UI} from "../UIBase";
-import {Table} from "./Table";
+import {Table, TableRow} from "./Table";
 
-UI.TableRowInCollapsibleTable = class TableRowInCollapsibleTable extends UI.TableRow {
+class TableRowInCollapsibleTable extends TableRow {
     getNodeType() {
         return "tbody";
     }
@@ -9,17 +9,17 @@ UI.TableRowInCollapsibleTable = class TableRowInCollapsibleTable extends UI.Tabl
     render() {
         return <tr>{super.render()}</tr>;
     }
-};
+}
 
-UI.CollapsibleTableRow = class CollapsibleTableRow extends UI.TableRow {
+class CollapsibleTableRow extends TableRow {
+    getNodeType() {
+        return "tbody";
+    }
+
     getDefaultOptions() {
         return {
             collapsed: true,
         }
-    }
-
-    getNodeType() {
-        return "tbody";
     }
 
     onMount() {
@@ -31,6 +31,7 @@ UI.CollapsibleTableRow = class CollapsibleTableRow extends UI.TableRow {
         });
     }
 
+    // TODO: Very bad redraw practice here
     redraw() {
         if (!super.redraw()) {
             return false;
@@ -64,9 +65,9 @@ UI.CollapsibleTableRow = class CollapsibleTableRow extends UI.TableRow {
             </tr>
         ];
     }
-};
+}
 
-UI.CollapsibleTableInterface = function(BaseTableClass) {
+function CollapsibleTableInterface(BaseTableClass) {
     return class CollapsibleTable extends BaseTableClass {
         setOptions(options) {
             super.setOptions(options);
@@ -100,7 +101,7 @@ UI.CollapsibleTableInterface = function(BaseTableClass) {
                 value: (entry) => {
                     let rowClass = this.getRowClass(entry);
                     // TODO: Fix it lad!
-                    if (rowClass === UI.CollapsibleTableRow || rowClass.prototype instanceof UI.CollapsibleTableRow) {
+                    if (rowClass === CollapsibleTableRow || rowClass.prototype instanceof CollapsibleTableRow) {
                         return <a ref="collapseButton" className="rowCollapseButton collapsed"/>;
                     }
                     return <a ref="collapseButton"/>;
@@ -114,6 +115,8 @@ UI.CollapsibleTableInterface = function(BaseTableClass) {
             super.setColumns([collapseColumn].concat(columns));
         }
     };
-};
+}
 
-UI.CollapsibleTable = UI.CollapsibleTableInterface(Table);
+let CollapsibleTable = CollapsibleTableInterface(Table);
+
+export {CollapsibleTable, CollapsibleTableInterface, CollapsibleTableRow, TableRowInCollapsibleTable};

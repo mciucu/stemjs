@@ -74,6 +74,7 @@ class BaseStore extends Dispatchable {
     }
 }
 
+// Store type primarily intended to store objects that come from a server DB, and have a unique numeric .id field
 class GenericObjectStore extends BaseStore {
     constructor(objectType, ObjectWrapper=StoreObject, options={}) {
         super(...arguments);

@@ -13,7 +13,7 @@ const COLOR = {
     INFO: "#5bc0de",
     WARNING: "#f0ad4e",
     DANGER: "#d9534f",
-    GOOGLE: "#de4b39",
+    GOOGLE: "#de4b39", // TODO: WTF Denis?
     FACEBOOK: "#3b5998",
 };
 

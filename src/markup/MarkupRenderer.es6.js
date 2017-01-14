@@ -1,8 +1,9 @@
 import {UI} from "../ui/UI";
 import {MarkupParser} from "./MarkupParser";
+import {StaticCodeHighlighter, Panel} from "../ui/UI";
 
-// Class that for every markup tag returns the UI class to instanciate for that element
-UI.MarkupClassMap = class MarkupClassMap {
+// Class that for every markup tag returns the UI class to instantiate for that element
+class MarkupClassMap {
     constructor(fallback) {
         this.classMap = new Map();
         this.fallback = fallback;
@@ -41,12 +42,12 @@ UI.MarkupClassMap = class MarkupClassMap {
     }
 };
 
-UI.MarkupClassMap.GLOBAL = new UI.MarkupClassMap();
+MarkupClassMap.GLOBAL = new MarkupClassMap();
 
-UI.MarkupRenderer = class MarkupRenderer extends UI.Panel {
+class MarkupRenderer extends Panel {
     setOptions(options) {
         if (!options.classMap) {
-            options.classMap = new UI.MarkupClassMap(UI.MarkupClassMap.GLOBAL);
+            options.classMap = new MarkupClassMap(MarkupClassMap.GLOBAL);
         }
         if (!options.parser) {
             options.parser = new MarkupParser({
@@ -108,11 +109,7 @@ UI.MarkupRenderer = class MarkupRenderer extends UI.Panel {
             return new UI.TextElement(value);
         }
         if (Array.isArray(value)) {
-            let result = new Array(value.length);
-            for (let i = 0; i < value.length; i += 1) {
-                result[i] = this.convertToUI(value[i]);
-            }
-            return result;
+            return value.map(x => this.convertToUI(x));
         }
         if (value.children) {
             value.children = this.convertToUI(value.children);
@@ -128,8 +125,10 @@ UI.MarkupRenderer = class MarkupRenderer extends UI.Panel {
     render() {
         return this.convertToUI(this.options.value);
     }
-};
+}
 
-UI.MarkupClassMap.addClass("CodeSnippet", UI.StaticCodeHighlighter);
-UI.MarkupClassMap.addClass("Link", UI.Link);
-UI.MarkupClassMap.addClass("Image", UI.Image);
+MarkupClassMap.addClass("CodeSnippet", StaticCodeHighlighter);
+MarkupClassMap.addClass("Link", UI.Link);
+MarkupClassMap.addClass("Image", UI.Image);
+
+export {MarkupClassMap, MarkupRenderer};

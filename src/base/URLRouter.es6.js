@@ -1,4 +1,4 @@
-import * as Utils from "./Utils";
+import {unwrapArray} from "./Utils";
 import {Dispatchable} from "./Dispatcher";
 
 // TODO: might need a redesign, to handle full urls
@@ -29,7 +29,7 @@ class URLRouterClass extends Dispatchable {
         let args = Array.from(arguments);
 
         // we allow the function to be called with an array of arguments
-        args = Utils.unwrapArray(args);
+        args = unwrapArray(args);
 
         let newPath = "#" + args.join("/");
 
@@ -46,7 +46,7 @@ class URLRouterClass extends Dispatchable {
         let args = Array.from(arguments);
 
         // we allow the function to be called with an array of arguments
-        args = Utils.unwrapArray(args);
+        args = unwrapArray(args);
 
         let newPath = window.location.origin + window.location.pathname + "#" + args.join("/");
         window.open(newPath, "_blank");

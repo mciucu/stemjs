@@ -4,7 +4,7 @@ import {dashCase} from "../base/Utils";
 import {NodeAttributes} from "./NodeAttributes";
 
 // TODO: should this be actually better done throught the dynamic CSS API, without doing through the DOM?
-UI.StyleInstance = class StyleInstance extends UI.TextElement {
+class StyleInstance extends UI.TextElement {
     constructor(options) {
         super(options);
         this.setOptions(options);
@@ -49,13 +49,9 @@ UI.StyleInstance = class StyleInstance extends UI.TextElement {
         this.attributes.delete(name);
         this.redraw();
     }
-};
+}
 
-UI.StyleElement = class StyleElement extends UI.Element {
-    getNodeType() {
-        return "style";
-    }
-
+class StyleElement extends UI.Primitive("style") {
     getNodeAttributes() {
         // TODO: allow custom style attributes (media, scoped, etc)
         let attr = new NodeAttributes({});
@@ -64,12 +60,12 @@ UI.StyleElement = class StyleElement extends UI.Element {
         }
         return attr;
     }
-};
+}
 
 const ALLOWED_SELECTOR_STARTS = new Set([":", ">", " ", "+", "~", "[", "."]);
 
 // TODO: figure out how to work with animation frames, this only creates a wrapper class
-UI.DynamicStyleElement = class DynamicStyleElement extends UI.StyleElement {
+class DynamicStyleElement extends StyleElement {
     toString() {
         return this.getClassName();
     }
@@ -110,7 +106,7 @@ UI.DynamicStyleElement = class DynamicStyleElement extends UI.StyleElement {
         }
 
         if (haveOwnStyle) {
-            result.unshift(new UI.StyleInstance({selector: selector, key: selector, attributes: ownStyle}));
+            result.unshift(new StyleInstance({selector: selector, key: selector, attributes: ownStyle}));
         }
         return result;
     }
@@ -131,4 +127,6 @@ UI.DynamicStyleElement = class DynamicStyleElement extends UI.StyleElement {
     getStyleObject() {
         return this.options.style;
     }
-};
+}
+
+export {StyleInstance, StyleElement, DynamicStyleElement}

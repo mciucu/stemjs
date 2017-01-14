@@ -1,17 +1,16 @@
 // This whole file needs a refactoring, it's awfully written
-// Move SectionDivider out of the UI namespace
 import {UI} from "./UIBase";
 import {Device} from "../base/Device";
 import {StyleSet} from "./Style";
-import {lazyCSS} from "../decorators/LazyCSS";
+import {styleRule} from "../decorators/Style";
 
 class SectionDividerStyleSet extends StyleSet {
-    @lazyCSS
+    @styleRule
     horizontalDivider = {
         cursor: "row-resize"
     };
     
-    @lazyCSS
+    @styleRule
     verticalDivider = {
         cursor: "col-resize",
     };
@@ -332,6 +331,6 @@ class SectionDivider extends UI.Element {
         }
         return children;
     }
-};
+}
 
 export {SectionDivider}

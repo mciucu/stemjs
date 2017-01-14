@@ -1,6 +1,6 @@
 // This file will probably be deprecated in time by StyleSheet, but the API will be backwards compatible, so use it
 import {UI} from "./UIBase";
-import "./StyleElement";
+import {StyleElement, DynamicStyleElement} from "./StyleElement";
 import {Dispatchable} from "../base/Dispatcher";
 
 // Class meant to group multiple classes inside a single <style> element, for convenience
@@ -26,7 +26,7 @@ class StyleSet extends Dispatchable {
             children: [],
             name: this.options.name,
         };
-        this.styleElement = UI.StyleElement.create(options.parent, styleElementOptions);
+        this.styleElement = StyleElement.create(options.parent, styleElementOptions);
     }
 
     static getInstance() {
@@ -55,7 +55,7 @@ class StyleSet extends Dispatchable {
         if (arguments.length > 1) {
             style = Object.assign({}, ...arguments);
         }
-        let element = new UI.DynamicStyleElement({style: style});
+        let element = new DynamicStyleElement({style: style});
         this.elements.add(element);
         let styleInstances = element.render();
         for (let styleInstance of styleInstances) {
@@ -77,7 +77,7 @@ class StyleSet extends Dispatchable {
         this.dispatch("beforeUpdate", this);
         let children = [];
         for (let value of this.elements) {
-            if (value instanceof UI.StyleElement) {
+            if (value instanceof StyleElement) {
                 let styleElements = value.render();
                 children.push(...styleElements);
             }
@@ -141,7 +141,7 @@ function focus(style) {
 
 let styleMap = new WeakMap();
 
-// TODO: deprecate this global css method?
+// TODO: deprecate this global css method, or at least rewrite it
 function css(style) {
     if (arguments.length > 1) {
         style = Object.assign({}, ...arguments);
@@ -149,7 +149,7 @@ function css(style) {
     // If using the exact same object, return the same class
     let styleWrapper = styleMap.get(style);
     if (!styleWrapper) {
-        styleWrapper = UI.DynamicStyleElement.create(document.body, {style: style});
+        styleWrapper = DynamicStyleElement.create(document.body, {style: style});
         styleMap.set(style, styleWrapper);
     }
     return styleWrapper;

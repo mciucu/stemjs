@@ -599,6 +599,7 @@ UI.createElement = function (tag, options) {
     }
 
     if (typeof tag === "string") {
+        // TODO: should return UI.Primitive(tag)?
         options.nodeType = tag;
         tag = UIElement;
     }

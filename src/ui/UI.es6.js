@@ -1,19 +1,44 @@
-import {UIElement, UI} from "./UIBase";
+export * from "./UIBase.es6";
 
-import "./StyleElement";
+export * from "./StyleElement";
 
-// Generic UI widget classes
-import "./Translation";
-import "./UIPrimitives";
+export * from "./UIPrimitives";
 import "./Input";
-import "./table/Table";
-import "./table/CollapsibleTable";
-import "./table/SortableTable";
 import "./SVG";
-import "./Switcher"; // TODO: remove
-import "./Modal";    // TODO: remove
 import "./Bootstrap3";
 
-import "./CodeEditor"; // TODO: remove
+export * from "./Translation";
+export * from "./Switcher";
+export * from "tabs/TabArea";
 
-export {UIElement, UI};
+export * from "./table/Table";
+export * from "./table/CollapsibleTable";
+export * from "./table/SortableTable";
+
+export * from "./Modal";
+export * from "./DateTimePicker";
+export * from "./CodeEditor";
+
+// TEMP: adding this stuff to UI namespace, to not break old code
+// import {UI} from "./UIBase";
+//
+// import * as StyleElementExports from "./StyleElement";
+// Object.assign(UI, StyleElementExports);
+//
+// import * as SwitcherExports from "./Switcher";
+// Object.assign(UI, SwitcherExports);
+//
+// import * as ModalExports from "./Modal";
+// Object.assign(UI, ModalExports);
+//
+// import * as CodeEditorExports from "./CodeEditor";
+// Object.assign(UI, CodeEditorExports);
+//
+// import * as TableExports from "./table/Table"
+// Object.assign(UI, TableExports);
+//
+// import * as CollapsibleTableExport from "./table/CollapsibleTable";
+// Object.assign(UI, CollapsibleTableExport);
+//
+// import * as SortableTableExport from "./table/SortableTable";
+// Object.assign(UI, SortableTableExport);

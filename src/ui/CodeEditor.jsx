@@ -1,9 +1,8 @@
 // Wrapper over the ace code editor, needs ace to be globally loaded
-// TODO: should not be in the UI namespace
 // TODO: should be renamed to AceCodeEditor?
 import {UI} from "./UIBase";
 
-UI.CodeEditor = class CodeEditor extends UI.Element {
+class CodeEditor extends UI.Element {
     setOptions(options) {
         let defaultOptions = {
             aceMode: "text",
@@ -251,13 +250,13 @@ UI.CodeEditor = class CodeEditor extends UI.Element {
         if (scrolledToBottom) {
             // TODO: Include scroll lock option!
             // TODO: See if scrolling to bottom can be done better
-            // !!!!!TODO: for some reason the scroll bar height is not being updated, this needs to be fixed!!!!
+            // TODO: for some reason the scroll bar height is not being updated, this needs to be fixed
             this.ace.scrollToLine(this.ace.getSession().getLength() - 1, true, true, function () {});
         }
     };
-};
+}
 
-UI.StaticCodeHighlighter = class StaticCodeHighlighter extends UI.CodeEditor {
+class StaticCodeHighlighter extends CodeEditor {
     setOptions(options) {
         options = Object.assign({
             fontSize: 13,
@@ -266,4 +265,6 @@ UI.StaticCodeHighlighter = class StaticCodeHighlighter extends UI.CodeEditor {
         }, options);
         super.setOptions(options);
     }
-};
+}
+
+export {CodeEditor, StaticCodeHighlighter};
