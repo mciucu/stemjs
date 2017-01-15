@@ -10,6 +10,7 @@ import "./Bootstrap3";
 export * from "./Translation";
 export * from "./Switcher";
 export * from "tabs/TabArea";
+export * from "./SectionDivider";
 
 export * from "./table/Table";
 export * from "./table/CollapsibleTable";
