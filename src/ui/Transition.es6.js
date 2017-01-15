@@ -151,6 +151,7 @@ class Modifier extends Transition {
         this.context = options.context;
     }
 
+    // WTF, so basically JSON.stringify??
     toString() {
         return  "{\n"+
                 "   context: " + this.context + "\n"+
