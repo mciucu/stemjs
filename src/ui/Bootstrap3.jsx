@@ -4,10 +4,12 @@ import {Panel} from "./UIPrimitives";
 import {GlobalStyle} from "./GlobalStyle";
 import {Ajax} from "../base/Ajax";
 
+
 function BootstrapMixin(BaseClass, bootstrapClassName) {
     class BootstrapClass extends BaseClass {
         getNodeAttributes() {
             let attr = super.getNodeAttributes();
+
 
             attr.addClass(this.constructor.bootstrapClass());
             if (this.getLevel()) {
@@ -16,57 +18,93 @@ function BootstrapMixin(BaseClass, bootstrapClassName) {
             return attr;
         }
 
+
         getLevel() {
             return this.options.level || "";
         }
+
 
         setLevel(level) {
             this.options.level = level;
             this.applyNodeAttributes();
         }
 
+
         static bootstrapClass() {
             return bootstrapClassName;
         }
     }
 
+
     return BootstrapClass;
-};
+}
+
 
 class SimpleStyledElement extends UI.Element {
     getLevel() {
         return this.options.level || (this.parent && this.parent.options && this.parent.options.level);
     }
 
+
     setLevel(level) {
         this.updateOptions({level});
     }
+
 
     getSize() {
         return this.options.size || (this.parent && this.parent.options && this.parent.options.size);
     }
 
+
     setSize(size) {
         this.updateOptions({size});
     }
-};
+}
 
-UI.Button = class Button extends SimpleStyledElement {
-    getNodeType() {
-        return "button";
+
+class Label extends UI.Primitive(SimpleStyledElement, "a") {
+    extraNodeAttributes(attr) {
+        attr.addClass(GlobalStyle.Label.DEFAULT);
+
+
+        if (this.getSize()) {
+            attr.addClass(GlobalStyle.Label.Size(this.getSize()));
+        }
+
+
+        if (this.getLevel()) {
+            attr.addClass(GlobalStyle.Label.Level(this.getLevel()));
+        }
     }
 
+
+    setLabel(label) {
+        this.options.label = label;
+        this.redraw();
+    }
+
+
+    render() {
+        return [this.options.label];
+    }
+}
+
+
+class Button extends UI.Primitive(SimpleStyledElement, "button") {
     extraNodeAttributes(attr) {
         attr.addClass(GlobalStyle.Button.DEFAULT);
+
 
         if (this.getSize()) {
             attr.addClass(GlobalStyle.Button.Size(this.getSize()));
         }
 
+
         if (this.getLevel()) {
             attr.addClass(GlobalStyle.Button.Level(this.getLevel()));
         }
     }
+
 
     defaultOptions() {
         return {
@@ -74,39 +112,48 @@ UI.Button = class Button extends SimpleStyledElement {
         };
     }
 
+
     render() {
         return [this.beforeChildren(), this.getLabel(), super.render()];
     };
+
 
     getLabel() {
         return this.options.label;
     }
 
+
     setLabel(label) {
         this.updateOptions({label: label});
     }
+
 
     //TODO: this should live in a base iconable class, of which you'd only use this.beforeChildren
     getFaIcon() {
         return this.options.faIcon;
     }
 
+
     setFaIcon(value) {
         this.options.faIcon = value;
         this.redraw();
     }
 
+
     disable() {
         this.node.disabled = true;
     }
+
 
     enable() {
         this.node.disabled = false;
     }
 
+
     setEnabled(enabled) {
         this.node.disabled = !enabled;
     };
+
 
     beforeChildren() {
         if (!this.getFaIcon()) {
@@ -121,15 +168,19 @@ UI.Button = class Button extends SimpleStyledElement {
             }
         }
 
+
         return <span {...iconOptions} />;
     }
-};
+}
 
-UI.StateButton = class StateButton extends UI.Button {
+
+class StateButton extends Button {
     setOptions(options) {
         options.state = (this.options && this.options.state) || options.state || UI.ActionStatus.DEFAULT;
 
+
         super.setOptions(options);
+
 
         this.options.statusOptions = this.options.statusOptions || [];
         for (let i = 0; i < 4; i += 1) {
@@ -143,6 +194,7 @@ UI.StateButton = class StateButton extends UI.Button {
         }
     }
 
+
     setState(status) {
         this.options.state = status;
         if (status === UI.ActionStatus.DEFAULT) {
@@ -153,20 +205,25 @@ UI.StateButton = class StateButton extends UI.Button {
         } else if (status === UI.ActionStatus.FAILED) {
         }
 
+
         this.redraw();
     }
+
 
     render() {
         let stateOptions = this.options.statusOptions[this.options.state - 1];
 
+
         this.options.label = stateOptions.label;
         this.options.faIcon = stateOptions.faIcon;
 
+
         return super.render();
     }
-};
+}
 
-UI.AjaxButton = class AjaxButton extends UI.StateButton {
+
+class AjaxButton extends StateButton {
     ajaxCall(data) {
         this.setState(UI.ActionStatus.RUNNING);
         Ajax.request({
@@ -193,29 +250,34 @@ UI.AjaxButton = class AjaxButton extends UI.StateButton {
             }
         });
     }
-};
+}
 
-UI.ButtonGroup = class ButtonGroup extends SimpleStyledElement {
+
+class ButtonGroup extends SimpleStyledElement {
     getDefaultOptions() {
         return {
             orientation: UI.Orientation.HORIZONTAL,
         };
     }
 
+
     extraNodeAttributes(attr) {
         attr.addClass(GlobalStyle.ButtonGroup.Orientation(this.options.orientation));
     }
-};
+}
 
-UI.RadioButtonGroup = class RadioButtonGroup extends SimpleStyledElement {
+
+class RadioButtonGroup extends SimpleStyledElement {
     setOptions(options) {
         super.setOptions(options);
         this.index = this.options.index || 0;
     }
 
+
     extraNodeAttributes(attr) {
         attr.addClass(GlobalStyle.RadioButtonGroup.DEFAULT);
     }
+
 
     render() {
         this.buttons = [];
@@ -228,13 +290,16 @@ UI.RadioButtonGroup = class RadioButtonGroup extends SimpleStyledElement {
         return this.buttons;
     }
 
+
     getIndex() {
         return this.index;
     }
 
+
     getValue() {
         return this.options.givenOptions[this.index];
     }
+
 
     setIndex(index) {
         this.dispatch("setIndex", {
@@ -247,12 +312,14 @@ UI.RadioButtonGroup = class RadioButtonGroup extends SimpleStyledElement {
         this.index = index;
         this.buttons[this.index].addClass("active");
     }
-};
+}
 
-UI.BootstrapLabel = class BootstrapLabel extends BootstrapMixin(UI.Element, "label") {
+
+class BootstrapLabel extends BootstrapMixin(UI.Element, "label") {
     getNodeType() {
         return "span";
     }
+
 
     getNodeAttributes() {
         let attr = super.getNodeAttributes();
@@ -262,21 +329,25 @@ UI.BootstrapLabel = class BootstrapLabel extends BootstrapMixin(UI.Element, "lab
         return attr;
     }
 
+
     setLabel(label) {
         this.options.label = label;
         this.redraw();
     }
 
+
     render() {
         return [this.options.label];
     }
-};
+}
 
-UI.CardPanel = class CardPanel extends BootstrapMixin(Panel, "panel") {
+
+class CardPanel extends BootstrapMixin(Panel, "panel") {
     setOptions(options) {
         super.setOptions(options);
         this.options.level = this.options.level || UI.Level.DEFAULT;
     }
+
 
     render() {
         return [
@@ -284,15 +355,18 @@ UI.CardPanel = class CardPanel extends BootstrapMixin(Panel, "panel") {
             <div className="panel-body" style={this.options.bodyStyle}>{this.getGivenChildren()}</div>,
         ];
     }
-};
+}
+
 
 class CollapsibleStyle extends StyleSet {
     constructor() {
         super();
 
+
         this.collapsed = this.css({
             "display": "none",
         });
+
 
         this.collapsing = this.css({
             "height": "0",
@@ -304,6 +378,7 @@ class CollapsibleStyle extends StyleSet {
             "display": "block",
         });
 
+
         this.noPadding = this.css({
             "padding-top": "0 !important",
             "padding-bottom": "0 !important",
@@ -311,9 +386,11 @@ class CollapsibleStyle extends StyleSet {
     }
 }
 
+
 class CollapsiblePanelStyle extends StyleSet {
     constructor() {
         super();
+
 
         this.heading = this.css({
             "padding": "10px 15px",
@@ -322,6 +399,7 @@ class CollapsiblePanelStyle extends StyleSet {
             "border-top-right-radius": "3px",
             "background-color": "#f5f5f5",
         });
+
 
         this.button = this.css({
             "margin-top": "0",
@@ -340,11 +418,13 @@ class CollapsiblePanelStyle extends StyleSet {
             }
         });
 
+
         this.collapsedButton = this.css({
             ":before": {
                 "content": "\"\\e080\"",
             },
         });
+
 
         this.content = this.css({
             "padding": "5px",
@@ -352,22 +432,25 @@ class CollapsiblePanelStyle extends StyleSet {
     }
 }
 
+
 let collapsibleStyle = new CollapsibleStyle();
 let collapsiblePanelStyle = new CollapsiblePanelStyle();
 
 
-UI.CollapsiblePanel = class CollapsiblePanel extends UI.CardPanel {
+class CollapsiblePanel extends CardPanel {
     constructor(options) {
         super(options);
         // If options.collapsed is set, use that value. otherwise it is collapsed
         options.collapsed = options.collapsed || true;
     }
 
+
     onMount() {
         this.expandLink.addClickListener(() => {
             this.togglePanel();
         });
     }
+
 
     togglePanel() {
         if (!this.collapsing) {
@@ -378,6 +461,7 @@ UI.CollapsiblePanel = class CollapsiblePanel extends UI.CardPanel {
             }
         }
     }
+
 
     expand() {
         this.options.collapsed = false;
@@ -400,6 +484,7 @@ UI.CollapsiblePanel = class CollapsiblePanel extends UI.CardPanel {
         });
     }
 
+
     collapse() {
         this.options.collapsed = true;
         let contentStyleHeight = this.contentArea.node.style.height;
@@ -421,11 +506,13 @@ UI.CollapsiblePanel = class CollapsiblePanel extends UI.CardPanel {
         });
     }
 
+
     render() {
         let autoHeightClass = "";
         let collapsedPanelClass = "";
         let collapsedHeadingClass = "";
         let expandLinkClass = "";
+
 
         if (this.options.autoHeight) {
             autoHeightClass = "auto-height ";
@@ -435,20 +522,21 @@ UI.CollapsiblePanel = class CollapsiblePanel extends UI.CardPanel {
             collapsedPanelClass = collapsibleStyle.collapsed;
         }
 
-        return [
-            <div className={collapsiblePanelStyle.heading}>
-                <a ref="expandLink"  className={`${collapsiblePanelStyle.button} ${collapsedHeadingClass}`}>
-                    {this.getTitle()}
-                </a>
-            </div>,
-            <div ref="contentArea" className={`${collapsiblePanelStyle.content} ${autoHeightClass} ${collapsedPanelClass}`}>
-                {this.getGivenChildren()}
-            </div>
+
+        return [<div className={collapsiblePanelStyle.heading}>
+                    <a ref="expandLink"  className={`${collapsiblePanelStyle.button} ${collapsedHeadingClass}`}>
+                        {this.getTitle()}
+                    </a>
+                </div>,
+                <div ref="contentArea" className={`${collapsiblePanelStyle.content} ${autoHeightClass} ${collapsedPanelClass}`}>
+                    {this.getGivenChildren()}
+                </div>
         ];
     }
-};
+}
 
-UI.DelayedCollapsiblePanel = class DelayedCollapsiblePanel extends UI.CollapsiblePanel {
+
+class DelayedCollapsiblePanel extends CollapsiblePanel {
     onMount() {
         this.expandLink.addClickListener(() => {
             if (!this._haveExpanded) {
@@ -463,17 +551,20 @@ UI.DelayedCollapsiblePanel = class DelayedCollapsiblePanel extends UI.Collapsibl
         });
     }
 
+
     getGivenChildren() {
         if (!this._haveExpanded) {
             return [];
         }
         return this.getDelayedChildren();
     }
-};
+}
 
-UI.ProgressBar = class ProgressBar extends BootstrapMixin(UI.Element, "progress") {
+
+class ProgressBar extends BootstrapMixin(UI.Element, "progress") {
     render() {
         let valueInPercent = (this.options.value || 0) * 100;
+
 
         let barOptions = {
             className: "progress-bar",
@@ -488,12 +579,14 @@ UI.ProgressBar = class ProgressBar extends BootstrapMixin(UI.Element, "progress"
             },
         };
 
+
         if (this.options.disableTransition) {
             Object.assign(barOptions.style, {
                 transition: "none",
                 "-webkit-transition": "none"
             });
         }
+
 
         if (this.options.level) {
             barOptions.className += " progress-bar-" + this.options.level;
@@ -508,10 +601,12 @@ UI.ProgressBar = class ProgressBar extends BootstrapMixin(UI.Element, "progress"
             barOptions.style.backgroundColor = this.options.color;
         }
 
+
         return <div {...barOptions}>
             <span className="progress-span">{this.options.label}</span>
         </div>;
     }
+
 
     set(value) {
         if (value < 0)
@@ -521,8 +616,7 @@ UI.ProgressBar = class ProgressBar extends BootstrapMixin(UI.Element, "progress"
         this.options.value = value;
         this.redraw();
     }
-};
+}
 
-UI.BootstrapMixin = BootstrapMixin;
-
-export {BootstrapMixin};
+export {BootstrapMixin, SimpleStyledElement, Label, Button, StateButton, AjaxButton, ButtonGroup, RadioButtonGroup, BootstrapLabel,
+        CardPanel, CollapsiblePanelStyle, CollapsiblePanel, DelayedCollapsiblePanel, ProgressBar};

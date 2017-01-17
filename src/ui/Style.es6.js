@@ -30,7 +30,10 @@ class StyleSet extends Dispatchable {
     }
 
     static getInstance() {
-        return (this.singletonInstance = this.singletonInstance || new this());
+        if (!this.hasOwnProperty("singletonInstance")) {
+            this.singletonInstance = new this();
+        }
+        return this.singletonInstance;
     }
 
     static getElementName() {

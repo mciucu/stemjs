@@ -25,7 +25,7 @@ class BaseUIElement extends Dispatchable {
             let obj = this.options.ref.parent;
             let name = this.options.ref.name;
             if (obj[name] === this) {
-                obj[name] = undefined; //TODO: better delete from obj?
+                obj[name] = undefined;
             }
         }
     }
@@ -268,13 +268,18 @@ class UIElement extends BaseUIElement {
         return true;
     }
 
-    getNodeAttributes(returnCopy=true) {
-        if (returnCopy) {
-            return new NodeAttributes(this.options);
-        }
+    getOptionsAsNodeAttributes() {
         let attr = this.options;
         attr.__proto__ = NodeAttributes.prototype;
         return attr;
+    }
+
+    getNodeAttributes(returnCopy=true) {
+        if (returnCopy) {
+            return new NodeAttributes(this.options);
+        } else {
+            return this.getOptionsAsNodeAttributes();
+        }
     }
 
     applyNodeAttributes() {
@@ -290,19 +295,19 @@ class UIElement extends BaseUIElement {
     }
 
     setAttribute(key, value) {
-        this.getNodeAttributes(false).setAttribute(key, value, this.node, this.constructor.domAttributesMap);
+        this.getOptionsAsNodeAttributes().setAttribute(key, value, this.node, this.constructor.domAttributesMap);
     }
 
     setStyle(key, value) {
-        this.getNodeAttributes(false).setStyle(key, value, this.node);
+        this.getOptionsAsNodeAttributes().setStyle(key, value, this.node);
     }
 
     addClass(className) {
-        this.getNodeAttributes(false).addClass(className, this.node);
+        this.getOptionsAsNodeAttributes().addClass(className, this.node);
     }
 
     removeClass(className) {
-        this.getNodeAttributes(false).removeClass(className, this.node);
+        this.getOptionsAsNodeAttributes().removeClass(className, this.node);
     }
 
     hasClass(className) {
@@ -356,11 +361,17 @@ class UIElement extends BaseUIElement {
         return {parent: this[arrayName], name: index};
     }
 
+    bindToNode(node, doRedraw) {
+        this.node = node;
+        if (doRedraw) {
+            this.redraw();
+        }
+        return this;
+    }
+
     mount(parent, nextSiblingNode) {
         if (!parent.node) {
-            let parentWrapper = new UI.Element();
-            parentWrapper.node = parent;
-            parent = parentWrapper;
+            parent = new UI.Element().bindToNode(parent);
         }
         this.parent = parent;
         if (!this.node) {

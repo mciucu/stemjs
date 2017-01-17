@@ -37,6 +37,7 @@ UI.Size = {
     EXTRA_LARGE: "xl",
 };
 
+// TODO: why is this here?
 UI.VoteStatus = {
     NONE: null,
     LIKE: 1,

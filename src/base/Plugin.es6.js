@@ -1,4 +1,4 @@
-// Plugins should be used to extends on runtime the functionality of a class
+// Plugins should be used to extends on runtime the functionality of a class, to easily split functionality
 import {Dispatchable} from "./Dispatcher";
 
 class Plugin extends Dispatchable {

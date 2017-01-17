@@ -1,6 +1,6 @@
 import {UI} from "../ui/UI";
 import {MarkupParser} from "./MarkupParser";
-import {StaticCodeHighlighter, Panel} from "../ui/UI";
+import {StaticCodeHighlighter, Panel, Link, Image} from "../ui/UI";
 
 // Class that for every markup tag returns the UI class to instantiate for that element
 class MarkupClassMap {
@@ -128,7 +128,7 @@ class MarkupRenderer extends Panel {
 }
 
 MarkupClassMap.addClass("CodeSnippet", StaticCodeHighlighter);
-MarkupClassMap.addClass("Link", UI.Link);
-MarkupClassMap.addClass("Image", UI.Image);
+MarkupClassMap.addClass("Link", Link);
+MarkupClassMap.addClass("Image", Image);
 
 export {MarkupClassMap, MarkupRenderer};

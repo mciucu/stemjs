@@ -188,8 +188,8 @@ class ButtonStyle extends StyleSet {
 };
 
 
-GlobalStyle.Button = new ButtonStyle();
-GlobalStyle.RadioButtonGroup = new RadioButtonGroupStyle();
-GlobalStyle.ButtonGroup = new ButtonGroupStyle();
+GlobalStyle.Button = ButtonStyle.getInstance();
+GlobalStyle.RadioButtonGroup = RadioButtonGroupStyle.getInstance();
+GlobalStyle.ButtonGroup = ButtonGroupStyle.getInstance();
 
 export {GlobalStyle};

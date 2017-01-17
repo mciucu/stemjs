@@ -1,15 +1,52 @@
 // TODO: this file was started with a lot of old patterns, that need to be updated
 // TODO: remove everything from UI namespace, export instead
 // TODO: need a major clean-up
+import {StyleSet} from "./Style";
+import {styleRule} from "../decorators/Style";
 import {UI} from "./UIBase";
-import "./UIPrimitives";
 import {CreateNodeAttributesMap} from "./NodeAttributes";
 
-UI.Form = class Form extends UI.Element {
-    getNodeType() {
-        return "form";
-    }
+class FormStyle extends StyleSet {
+    @styleRule
+    formControl = {
+        display: "block",
+        width: "100%",
+        height: "34px",
+        padding: "6px 12px",
+        fontSize: "14px",
+        lineHeight: "1.42857143",
+        color: "#555",
+        backgroundColor: "#fff",
+        border: "1px solid #ccc",
+        borderRadius: "4px",
+        boxShadow: "inset 0 1px 1px rgba(0, 0, 0, .075)",
+        transition: "border-color ease-in-out .15s, box-shadow ease-in-out .15s",
+        ":focus": {
+            borderColor: "#66afe9",
+            outline: "0",
+            boxShadow: "inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6)",
+        },
+        "[disabled]": {
+          opacity: "1",
+          cursor: "not-allowed",
+        },
+        "[readonly]": {
+          opacity: "1",
+        },
+    };
 
+    @styleRule
+    formGroup = {
+        marginBottom: "15px",
+    };
+
+    @styleRule
+    hasError = {
+        color: "#a94442",
+    }
+}
+
+class Form extends UI.Primitive("form") {
     getNodeAttributes() {
         let attr = super.getNodeAttributes();
         attr.addClass("form form-horizontal");
@@ -19,13 +56,9 @@ UI.Form = class Form extends UI.Element {
     onMount() {
         // Insert here code to not refresh page
     }
-};
+}
 
-UI.Input = class Input extends UI.Element {
-    getNodeType() {
-        return "input";
-    }
-
+class Input extends UI.Primitive("input") {
     getNodeAttributes() {
         let attr = super.getNodeAttributes();
 
@@ -64,17 +97,25 @@ UI.Input = class Input extends UI.Element {
     onKeyUp(callback) {
         this.addNodeListener("keyup", callback);
     }
-};
+}
 
-UI.FormControl = class FormControl extends UI.Input {
+class FormControl extends Input {
+    static styleSet = FormStyle.getInstance();
+
     getNodeAttributes() {
         let attr = super.getNodeAttributes();
-        attr.addClass("form-control");
+        attr.addClass(this.getStyleSet().formControl);
         return attr;
     }
-};
 
-UI.FormSettingsGroup = class FormSettingsGroup extends UI.Element {
+    getStyleSet() {
+        return this.options.styleSet || this.constructor.styleSet;
+    }
+}
+
+class FormSettingsGroup extends UI.Element {
+    static styleSet = FormStyle.getInstance();
+
     setOptions(options) {
         super.setOptions(options);
 
@@ -84,8 +125,12 @@ UI.FormSettingsGroup = class FormSettingsGroup extends UI.Element {
 
     getNodeAttributes() {
         let attr = super.getNodeAttributes();
-        attr.addClass("form-group");
+        attr.addClass(this.getStyleSet().FormGroup);
         return attr;
+    }
+
+    getStyleSet() {
+        return this.options.styleSet || this.constructor.styleSet;
     }
 
     getLabelStyle() {
@@ -123,9 +168,9 @@ UI.FormSettingsGroup = class FormSettingsGroup extends UI.Element {
         }
         return [label, content];
     }
-};
+}
 
-UI.FormGroup = class FormGroup extends UI.Element {
+class FormGroup extends UI.Element {
     setOptions(options) {
         super.setOptions(options);
         this.options.labelWidth = this.options.labelWidth || "16%";
@@ -169,16 +214,16 @@ UI.FormGroup = class FormGroup extends UI.Element {
 
     setError(errorMessage) {
         this.errorField.node.textContent = errorMessage;
-        this.addClass("has-error");
+        this.addClass(this.getStyleSet().hasError);
     }
 
     removeError() {
         this.errorField.node.textContent = "";
-        this.removeClass("has-error");
+        this.removeClass(this.getStyleSet().hasError);
     }
-};
+}
 
-UI.Input.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
+Input.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
     ["autocomplete"],
     ["autofocus", {noValue: true}],
     ["formaction"],
@@ -191,20 +236,20 @@ UI.Input.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap,
     ["value"],
 ]);
 
-UI.SubmitInput = class SubmitInput extends UI.Input {
+class SubmitInput extends Input {
     getInputType() {
         return "submit";
     }
-};
+}
 
-UI.SubmitInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
+SubmitInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
     ["formenctype"],
     ["formmethod"],
     ["formnovalidate"],
     ["formtarget"]
 ]);
 
-UI.TextInputInterface = function (BaseInputClass) {
+let TextInputInterface = function (BaseInputClass) {
     return class TextInput extends BaseInputClass {
         getInputType() {
             return "text";
@@ -212,10 +257,10 @@ UI.TextInputInterface = function (BaseInputClass) {
     };
 };
 
-UI.TextInput = UI.TextInputInterface(UI.Input);
-UI.FormTextInput = UI.TextInputInterface(UI.FormControl);
+let TextInput = TextInputInterface(Input);
+let FormTextInput = TextInputInterface(FormControl);
 
-UI.NumberInputInterface = function(BaseInputClass) {
+let NumberInputInterface = function(BaseInputClass) {
     let numberInput = class NumberInput extends BaseInputClass {
         getInputType() {
             return "number";
@@ -235,10 +280,10 @@ UI.NumberInputInterface = function(BaseInputClass) {
     return numberInput;
 };
 
-UI.NumberInput = UI.NumberInputInterface(UI.Input);
-UI.FormNumberInput = UI.NumberInputInterface(UI.FormControl);
+let NumberInput = NumberInputInterface(Input);
+let FormNumberInput = NumberInputInterface(FormControl);
 
-UI.EmailInputInterface = function (BaseInputClass) {
+let EmailInputInterface = function (BaseInputClass) {
     return class EmailInput extends BaseInputClass {
         getInputType() {
             return "email";
@@ -246,10 +291,10 @@ UI.EmailInputInterface = function (BaseInputClass) {
     };
 };
 
-UI.EmailInput = UI.EmailInputInterface(UI.Input);
-UI.FormEmailInput = UI.EmailInputInterface(UI.FormControl);
+let EmailInput = EmailInputInterface(Input);
+let FormEmailInput = EmailInputInterface(FormControl);
 
-UI.PasswordInputInterface = function(BaseInputClass) {
+let PasswordInputInterface = function(BaseInputClass) {
     return class PasswordInput extends BaseInputClass {
         getInputType() {
             return "password";
@@ -257,10 +302,10 @@ UI.PasswordInputInterface = function(BaseInputClass) {
     };
 };
 
-UI.PasswordInput = UI.PasswordInputInterface(UI.Input);
-UI.FormPasswordInput = UI.PasswordInputInterface(UI.FormControl);
+let PasswordInput = PasswordInputInterface(Input);
+let FormPasswordInput = PasswordInputInterface(FormControl);
 
-UI.FileInputInterface = function(BaseInputClass) {
+let FileInputInterface = function(BaseInputClass) {
     let fileInput = class FileInput extends BaseInputClass {
         getInputType() {
             return "file";
@@ -283,11 +328,11 @@ UI.FileInputInterface = function(BaseInputClass) {
     return fileInput;
 };
 
-UI.FileInput = UI.FileInputInterface(UI.Input);
-UI.FormFileInput = UI.FileInputInterface(UI.FormControl);
+let FileInput = FileInputInterface(Input);
+let FormFileInput = FileInputInterface(FormControl);
 
 
-UI.CheckboxInput = class CheckboxInput extends UI.Input {
+class CheckboxInput extends Input {
     setOptions(options) {
         options.style = options.style || {};
         options.style = Object.assign({
@@ -306,17 +351,13 @@ UI.CheckboxInput = class CheckboxInput extends UI.Input {
     setValue(newValue) {
         this.node.checked = newValue;
     }
-};
+}
 
-UI.CheckboxInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
+CheckboxInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
     ["checked", {noValue: true}]
 ]);
 
-UI.TextArea = class TextArea extends UI.Element {
-    getNodeType() {
-        return "textarea";
-    }
-
+class TextArea extends UI.Primitive("textarea") {
     applyNodeAttributes() {
         super.applyNodeAttributes();
         this.node.readOnly = this.options.readOnly || false;
@@ -350,21 +391,16 @@ UI.TextArea = class TextArea extends UI.Element {
     onKeyUp(callback) {
         this.addNodeListener("keyup", callback);
     }
-};
+}
 
-UI.InputField = class InputField extends UI.Element {
+class InputField extends UI.Element {
     render() {
     }
-};
+}
 
-UI.Slider = class Slider extends UI.Element {
-};
+class Slider extends UI.Element {}
 
-UI.Select = class Select extends UI.Element {
-    getNodeType() {
-        return "select";
-    }
-
+class Select extends UI.Primitive("select") {
     render() {
         this.givenOptions = this.options.options || [];
         let selectOptions = [];
@@ -412,4 +448,8 @@ UI.Select = class Select extends UI.Element {
             this.set(this.options.selected);
         }
     }
-};
+}
+
+export {FormStyle, Form, Input, FormControl, FormSettingsGroup, FormGroup, SubmitInput, TextInput, FormTextInput, NumberInput,
+        FormNumberInput, EmailInput, FormEmailInput, PasswordInput, FormPasswordInput, FileInput, FormFileInput, CheckboxInput, TextArea,
+        InputField, Slider, Select};

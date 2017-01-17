@@ -1,5 +1,8 @@
-// Not going to use promises until they mature
+import {fetch} from "./Fetch.es6";
+
 var Ajax = {};
+
+Ajax.fetch = fetch;
 
 Ajax.DEFAULT_OPTIONS = {
 };
@@ -13,8 +16,7 @@ Ajax.DEFAULT_POST_OPTIONS = {
 };
 
 Ajax.rawRequest = function (options) {
-    // TODO: see this through, this is the last external dependency in the library
-    return $.ajax(options);
+    return Ajax.fetch(options.url, options);
 };
 
 Ajax.request = function(options) {
