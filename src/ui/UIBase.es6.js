@@ -1,4 +1,4 @@
-import {unwrapArray} from "../base/Utils";
+import {unwrapArray, setObjectPrototype, suffixNumber} from "../base/Utils";
 import {Dispatchable} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
 
@@ -269,9 +269,7 @@ class UIElement extends BaseUIElement {
     }
 
     getOptionsAsNodeAttributes() {
-        let attr = this.options;
-        attr.__proto__ = NodeAttributes.prototype;
-        return attr;
+        return setObjectPrototype(this.options, NodeAttributes);
     }
 
     getNodeAttributes(returnCopy=true) {
@@ -311,8 +309,7 @@ class UIElement extends BaseUIElement {
     }
 
     hasClass(className) {
-        // TODO: should use NodeAttributes
-        return this.node && this.node.classList.contains(className);
+        return this.getOptionsAsNodeAttributes().hasClass(className);
     }
 
     toggleClass(className) {
@@ -462,43 +459,6 @@ class UIElement extends BaseUIElement {
         }
     }
 
-    // TODO: rethink this, should probably be in utils
-    uniqueId() {
-        if (!this.hasOwnProperty("uniqueIdStr")) {
-            // TODO: should this be global?
-            this.constructor.objectCount = (this.constructor.objectCount || 0) + 1;
-            this.uniqueIdStr = this.constructor.objectCount + "R" + Math.random().toString(36).substr(2);
-        }
-        return this.uniqueIdStr;
-    }
-
-    // TODO: this doesn't belong here
-    getOffset() {
-        let node = this.node;
-        if (!node) {
-            return {left: 0, top: 0};
-        }
-        let nodePosition = (node.style ? node.style.position : null);
-        let left = 0;
-        let top = 0;
-        while (node) {
-            let nodeStyle = node.style || {};
-            if (nodePosition === "absolute" && nodeStyle.position === "relative") {
-                return {left: left, top: top};
-            }
-            left += node.offsetLeft;
-            top += node.offsetTop;
-            node = node.offsetParent;
-        }
-        return {left: left, top: top};
-    }
-
-    getStyle(attribute) {
-        // return this.options.style[attribute];
-        // TODO: WHY THIS? remove this!!!
-        return window.getComputedStyle(this.node, null).getPropertyValue(attribute);
-    }
-
     isInDocument() {
         return document.body.contains(this.node);
     }
@@ -522,18 +482,12 @@ class UIElement extends BaseUIElement {
     }
 
     setHeight(value) {
-        if (typeof value === "number") {
-            value += "px";
-        }
-        this.setStyle("height", value);
+        this.setStyle("height", suffixNumber(value, "px"));
         this.dispatch("resize");
     };
 
     setWidth(value) {
-        if (typeof value === "number") {
-            value += "px";
-        }
-        this.setStyle("width", value);
+        this.setStyle("width", suffixNumber(value, "px"));
         this.dispatch("resize");
     }
 
@@ -610,7 +564,6 @@ UI.createElement = function (tag, options) {
     }
 
     if (typeof tag === "string") {
-        // TODO: should return UI.Primitive(tag)?
         options.nodeType = tag;
         tag = UIElement;
     }
@@ -652,5 +605,4 @@ UI.Primitive = (BaseClass, nodeType) => {
     return resultClass;
 };
 
-// TODO: code shouldn't use UIElement directly, but through UI.Element
 export {UIElement, UI};

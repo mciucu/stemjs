@@ -3,6 +3,7 @@ import {UI} from "./UIBase";
 import {Device} from "../base/Device";
 import {Draggable} from "./Draggable";
 import {Dispatchable} from "../base/Dispatcher";
+import {getOffset} from "./Utils";
 
 UI.Orientation = {
     HORIZONTAL: 1,
@@ -117,7 +118,7 @@ class SlideBar extends Draggable(UI.Element) {
     onMount() {
         this.addDragListener({
             onStart: (event) => {
-                this.setValue((Device.getEventX(event) - this.progressBar.getOffset().left) / this.options.width);
+                this.setValue((Device.getEventX(event) - getOffset(this.progressBar).left) / this.options.width);
             },
             onDrag: (deltaX, deltaY) => {
                 this.setValue(this.options.value + deltaX / this.options.width);

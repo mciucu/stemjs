@@ -88,11 +88,17 @@ export function slugify(string) {
     return string;
 }
 
+// If the first argument is a number, it's returned concatenated with the suffix, otherwise it's returned unchanged
 export function suffixNumber(value, suffix) {
     if (typeof value === "number" || value instanceof Number) {
         return value + suffix;
     }
     return value;
+}
+
+export function setObjectPrototype(obj, Class) {
+    obj.__proto__ = Class.prototype;
+    return obj;
 }
 
 export function isPlainObject(obj) {
@@ -173,4 +179,24 @@ export function getCookie(name) {
         }
     }
     return null;
+}
+
+export function uniqueId(obj) {
+    if (!uniqueId.objectWeakMap) {
+        uniqueId.objectWeakMap = new WeakMap();
+        uniqueId.constructorWeakMap = new WeakMap();
+        uniqueId.totalObjectCount = 0;
+    }
+    let objectWeakMap = uniqueId.objectWeakMap;
+    let constructorWeakMap = uniqueId.constructorWeakMap;
+    if (!objectWeakMap.has(obj)) {
+        const objConstructor = obj.constructor || obj.__proto__ || Object;
+        // Increment the object count
+        const objIndex = (constructorWeakMap.get(objConstructor) || 0) + 1;
+        constructorWeakMap.set(objConstructor, objIndex);
+
+        const objUniqueId = objIndex + "-" + (++uniqueId.totalObjectCount);
+        objectWeakMap.set(obj, objUniqueId);
+    }
+    return objectWeakMap.get(obj);
 }

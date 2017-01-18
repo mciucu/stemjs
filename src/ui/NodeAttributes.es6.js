@@ -1,3 +1,5 @@
+import {setObjectPrototype} from "../base/Utils";
+
 // TODO: this method should be made static in NodeAttributes probably
 function CreateNodeAttributesMap(oldAttributesMap, allowedAttributesArray) {
     let allowedAttributesMap = new Map(oldAttributesMap);
@@ -30,8 +32,7 @@ class ClassNameSet extends Set {
     // TODO: see if could still be made to have this as constructor
     static create(className) {
         let value = new Set(String(className || "").split(" "));
-        value.__proto__ = this.prototype;
-        return value;
+        return setObjectPrototype(value, this);
     }
 
     toString() {
@@ -119,6 +120,10 @@ class NodeAttributes {
                 node.classList.remove(cls);
             }
         }
+    }
+
+    hasClass(className) {
+        return this.getClassNameSet().has(className);
     }
 
     applyAttribute(key, node, attributesMap) {

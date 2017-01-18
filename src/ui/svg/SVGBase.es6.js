@@ -1,6 +1,6 @@
 import {UI} from "../UIBase";
 import {CreateNodeAttributesMap} from "../NodeAttributes";
-import {deepCopy} from "../../base/Utils";
+import {deepCopy, uniqueId} from "../../base/Utils";
 import {SVGNodeAttributes} from "./SVGNodeAttributes";
 
 let SVG = {};
@@ -52,7 +52,7 @@ SVG.Element = class SVGElement extends UI.Element {
     }
 
     getHashCode() {
-        return this.uniqueId();
+        return uniqueId(this);
     }
 
     //TODO(@all) : getBoundingClientRect is unreliable, reimplement it.

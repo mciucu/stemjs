@@ -1,4 +1,6 @@
-export * from "./UIBase.es6";
+export * from "./UIBase";
+
+export * from "./Utils";
 
 export * from "./StyleElement";
 
