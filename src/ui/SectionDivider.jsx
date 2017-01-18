@@ -1,5 +1,6 @@
 // This whole file needs a refactoring, it's awfully written
 import {UI} from "./UIBase";
+import {StyleInstance, StyleElement} from "./StyleElement"; // TODO: fix this Denis, be my hero!
 import {Device} from "../base/Device";
 import {StyleSet} from "./Style";
 import {styleRule} from "../decorators/Style";
@@ -301,10 +302,10 @@ class SectionDivider extends UI.Element {
     render() {
         // TODO: use a Style for the Divider bars
         return [this.dividedChildren(),
-            <UI.StyleElement>
-                <UI.StyleInstance selector=".sectionDividerHorizontal:hover" attributes={{"cursor": "row-resize"}} />
-                <UI.StyleInstance selector=".sectionDividerVertical:hover" attributes={{"cursor": "col-resize"}} />
-            </UI.StyleElement>];
+            <StyleElement>
+                <StyleInstance selector=".sectionDividerHorizontal:hover" attributes={{"cursor": "row-resize"}} />
+                <StyleInstance selector=".sectionDividerVertical:hover" attributes={{"cursor": "col-resize"}} />
+            </StyleElement>];
     }
 
     redraw() {
