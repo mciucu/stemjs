@@ -6,6 +6,7 @@ import {isPlainObject} from "./Utils";
 // May need to polyfill Headers, Request, Response, Body, URLSearchParams classes, so import them
 import "./FetchPolyfill";
 
+// Parse the headers from an xhr object, to return a native Headers object
 function getHeaders(xhr) {
     let rawHeader = xhr.getAllResponseHeaders() || "";
     let headers = new Headers();
@@ -13,13 +14,15 @@ function getHeaders(xhr) {
         let parts = line.split(":");
         let key = parts.shift().trim();
         if (key) {
-            let value = parts.join(':').trim();
+            let value = parts.join(":").trim();
             headers.append(key, value);
         }
     }
     return headers;
 }
 
+// Creates a new URLSearchParams object from a plain object
+// Fields that are arrays are spread
 function getURLSearchParams(data) {
     let urlSearchParams = new URLSearchParams();
     for (const key of Object.keys(data)) {
@@ -35,6 +38,7 @@ function getURLSearchParams(data) {
     return urlSearchParams;
 }
 
+// Appends search parameters from an object to a given URL or Request, and returns the new URL
 function composeURL(url, data) {
     if (url.url) {
         url = url.url;
@@ -86,6 +90,7 @@ class XHRPromise {
                 this.reject(new TypeError("Network error"));
             };
 
+            // TODO: need to have an options to pass setting to xhr (like timeout value)
             xhr.ontimeout = () => {
                 this.reject(new TypeError("Network timeout"));
             };
@@ -93,21 +98,20 @@ class XHRPromise {
             xhr.open(request.method, request.url, true);
 
             if (request.credentials === "include") {
-                xhr.withCredentials = true
+                xhr.withCredentials = true;
             }
 
-            xhr.responseType = "blob"
+            xhr.responseType = "blob";
 
-            // TODO: support default headers
+            // TODO: do this with default headers
             xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
-            // TODO: use a for loop
-            request.headers.forEach(function (value, name) {
+            for (const [name, value] of request.headers) {
                 xhr.setRequestHeader(name, value)
-            });
+            }
 
-            // TODO: there's no need to do this on a GET or HEAD for instance
-            request.blob().then(function (blob) {
+            // TODO: there's no need to do this on a GET or HEAD
+            request.blob().then((blob) => {
                 // TODO: save the blob here?
                 let body = (blob.size) ? blob : null;
                 xhr.send(body);
@@ -187,9 +191,18 @@ function fetch(input, init) {
     }
 
     if (isPlainObject(options.data)) {
-        // Change the URL of the request to add a query
-        let newRequestOptions = (input instanceof Request) ? input : {};
-        input = new Request(composeURL(input, options.data), newRequestOptions);
+        let method = options.method.toUpperCase();
+        if (method === "GET" || method === "HEAD") {
+            // Change the URL of the request to add a query
+            let newRequestOptions = (input instanceof Request) ? input : {};
+            input = new Request(composeURL(input, options.data), newRequestOptions);
+        } else {
+            let formData = new FormData();
+            for (const key of Object.keys(options.data)) {
+                formData.set(key, options.data[key]);
+            }
+            options.body = formData;
+        }
     } else {
         // TODO: a better compatibility with jQuery style options?
         options.body = options.body || options.data;

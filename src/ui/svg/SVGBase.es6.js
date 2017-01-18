@@ -1,6 +1,5 @@
 import {UI} from "../UIBase";
 import {CreateNodeAttributesMap} from "../NodeAttributes";
-import {Color} from "../Color";
 import {deepCopy} from "../../base/Utils";
 import {SVGNodeAttributes} from "./SVGNodeAttributes";
 

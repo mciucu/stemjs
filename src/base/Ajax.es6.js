@@ -4,15 +4,21 @@ var Ajax = {};
 
 Ajax.fetch = fetch;
 
+// TODO: should also take in the complete options
+Ajax.getDefaultHeaders = (headers) => {
+    return headers;
+};
+
 Ajax.DEFAULT_OPTIONS = {
+    credentials: "include",
 };
 
 Ajax.DEFAULT_GET_OPTIONS = {
-    type: "GET",
+    method: "GET",
 };
 
 Ajax.DEFAULT_POST_OPTIONS = {
-    type: "POST",
+    method: "POST",
 };
 
 Ajax.rawRequest = function (options) {
@@ -22,16 +28,14 @@ Ajax.rawRequest = function (options) {
 Ajax.request = function(options) {
     options = Object.assign({}, Ajax.DEFAULT_OPTIONS, options);
 
-    // TODO: Should refactor Ajax to support addition of functions from external sources, ie error handling
-    // options.success = (data) => {
-    //     if (data.error && options.onError) {
-    //         options.onError(data.error);
-    //     } else {
-    //         options.success(data);
-    //     }
-    // };
+    let headers = Ajax.getDefaultHeaders(options.headers);
+    if (headers) {
+        options.headers = headers
+    } else {
+        delete options.headers;
+    }
 
-    // TODO: see this through, this is the last external dependency in the library
+    // TODO: Should refactor Ajax to support addition of functions from external sources, ie error handling
     return Ajax.rawRequest(options);
 };
 

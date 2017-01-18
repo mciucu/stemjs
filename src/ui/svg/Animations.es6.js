@@ -1,5 +1,6 @@
 import {SVG} from "./SVGBase";
 import {Transition} from "../Transition";
+import {Color} from "../Color";
 
 SVG.AnimatedSVG = class AnimatedSVG extends SVG.SVGRoot {
     onMount() {

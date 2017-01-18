@@ -226,11 +226,7 @@ class StateButton extends Button {
 class AjaxButton extends StateButton {
     ajaxCall(data) {
         this.setState(UI.ActionStatus.RUNNING);
-        Ajax.request({
-            url: data.url,
-            type: data.type,
-            dataType: data.dataType,
-            data: data.data,
+        Ajax.request(Object.assign({}, data, {
             success: (successData) => {
                 data.success(successData);
                 if (successData.error) {
@@ -248,7 +244,7 @@ class AjaxButton extends StateButton {
                     this.setState(UI.ActionStatus.DEFAULT);
                 }, this.options.onCompete || 1000);
             }
-        });
+        }));
     }
 }
 
