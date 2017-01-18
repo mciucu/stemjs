@@ -1,4 +1,4 @@
-import * as Utils from "../base/Utils";
+import {unwrapArray, splitInChunks} from "../base/Utils";
 import {Ajax} from "../base/Ajax";
 
 function AjaxFetchMixin(BaseStoreClass) {
@@ -86,12 +86,12 @@ function AjaxFetchMixin(BaseStoreClass) {
 
             let maxChunkSize = this.options.maxFetchObjectCount || 256;
 
-            let idChunks = Utils.splitInChunks(Array.from(idFetchJobs.keys()), maxChunkSize);
-            let fetchJobsChunks = Utils.splitInChunks(Array.from(idFetchJobs.values()), maxChunkSize);
+            let idChunks = splitInChunks(Array.from(idFetchJobs.keys()), maxChunkSize);
+            let fetchJobsChunks = splitInChunks(Array.from(idFetchJobs.values()), maxChunkSize);
 
             let requests = [];
             for (let i = 0; i < idChunks.length; i += 1) {
-                requests.push(this.getFetchRequestObject(idChunks[i], Utils.unwrapArray(fetchJobsChunks[i])))
+                requests.push(this.getFetchRequestObject(idChunks[i], unwrapArray(fetchJobsChunks[i])))
             }
 
             return requests;
