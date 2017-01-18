@@ -36,4 +36,21 @@ class FACollapseIcon extends FAIcon {
     }
 }
 
-export {FAIcon, FACollapseIcon};
+class FASortIcon extends FAIcon {
+    getIcon() {
+        if (this.options.direction === UI.Direction.UP ) {
+            return "sort-asc";
+        } else if (this.options.direction === UI.Direction.DOWN){
+            return "sort-desc";
+        } else {
+            return "sort";
+        }
+    }
+
+    setDirection(direction) {
+        this.options.direction = direction;
+        this.redraw();
+    }
+}
+
+export {FAIcon, FACollapseIcon, FASortIcon};

@@ -1,4 +1,5 @@
 import {UI} from "../UIBase";
+import {Switcher} from "../Switcher";
 import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
 import {DefaultTabAreaStyle} from "./Style";
 import "../Switcher";
@@ -124,9 +125,9 @@ class TabArea extends UI.Element {
     getSwitcher(tabPanels) {
         // TODO: This should have the ex "auto-height" if not variable height children
         // className="auto-height"
-        return <UI.Switcher style={{flex: "1", overflow: "auto", }} ref="switcherArea" lazyRender={this.options.lazyRender}>
+        return <Switcher style={{flex: "1", overflow: "auto", }} ref="switcherArea" lazyRender={this.options.lazyRender}>
             {tabPanels}
-        </UI.Switcher>;
+        </Switcher>;
     }
 
     render() {

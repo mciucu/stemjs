@@ -1,3 +1,4 @@
+import {TableStyle} from "./Style";
 import {UI} from "../UIBase";
 
 // TODO: the whole table architecture probably needs a rethinking
@@ -17,7 +18,13 @@ class TableRow extends UI.Primitive("tr") {
     }
 };
 
-class Table extends UI.Element {
+class Table extends UI.Primitive("table") {
+    static styleSet = TableStyle.getInstance();
+
+    getStyleSet() {
+        return this.options.styleSet || this.constructor.styleSet;
+    }
+
     setOptions(options) {
         super.setOptions(options);
 
@@ -25,16 +32,9 @@ class Table extends UI.Element {
         this.entries = options.entries || [];
     }
 
-    getNodeAttributes() {
-        let attr = super.getNodeAttributes();
-
-        attr.addClass("ui-table table table-stripped");
-
-        return attr;
-    }
-
-    getNodeType() {
-        return "table";
+    extraNodeAttributes(attr) {
+        attr.addClass(this.getStyleSet().table);
+        attr.addClass(this.getStyleSet().tableStripped);
     }
 
     getRowClass() {
@@ -60,7 +60,7 @@ class Table extends UI.Element {
     }
 
     renderTableHead() {
-        return <tr>{this.columns.map(this.renderHeaderCell, this)}</tr>
+        return <tr>{this.columns.map(this.renderHeaderCell, this)}</tr>;
     }
 
     getEntryKey(entry, index) {
@@ -111,4 +111,5 @@ class Table extends UI.Element {
     }
 }
 
+export * from "./Style";
 export {Table, TableRow};
