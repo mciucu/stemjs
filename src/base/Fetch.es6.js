@@ -191,6 +191,10 @@ function fetch(input, init) {
     options.onSuccess = options.onSuccess || options.success;
     options.onError = options.onError || options.error;
 
+    if (typeof options.cache === "boolean") {
+        options.cache = options.cache ? "force-cache" : "reload";
+    }
+    
     if (options.type) {
         options.method = init.type.toUpperCase();
     }
