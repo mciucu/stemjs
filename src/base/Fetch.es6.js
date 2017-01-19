@@ -182,6 +182,11 @@ class XHRPromise {
 // - 1 argument: (Request)
 // - 2 arguments: (url/Request, options)
 function fetch(input, init) {
+    // In case we're being passed in jQuery-style arguments
+    if (isPlainObject(input)) {
+        return fetch(input.url, Object.assign({}, input, init));
+    }
+
     let options = Object.assign({}, init);
     options.onSuccess = options.onSuccess || options.success;
     options.onError = options.onError || options.error;
@@ -189,6 +194,8 @@ function fetch(input, init) {
     if (options.type) {
         options.method = init.type.toUpperCase();
     }
+
+    options.method = options.method || init.method || "GET";
 
     if (isPlainObject(options.data)) {
         let method = options.method.toUpperCase();
