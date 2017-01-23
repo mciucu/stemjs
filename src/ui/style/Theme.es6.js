@@ -16,24 +16,45 @@ function getInstanceForObject(obj) {
     if (!obj) {
         return null;
     }
-    let styleSheet = obj.styleSheet || obj.styleSet;
+    let styleSheet = (obj.theme && obj.theme.get(obj)) || obj.styleSheet || obj.styleSet;
     return getInstance(styleSheet);
 }
 
 // TODO: the Theme class still need considering
 class Theme extends Dispatchable {
+    constructor(name="") {
+        super();
+        this.styleSheetSymbol = Symbol("Theme" + name);
+        this.classSet = new Set();
+    }
+
     register(cls, styleSheet) {
-        // TODO: keep a set of classes in this Theme?
-        cls.styleSheet = styleSheet;
         cls.theme = this;
+        this.set(cls, styleSheet);
+    }
+
+    set(cls, styleSheet) {
+        cls[this.styleSheetSymbol] = styleSheet;
+        this.classSet.add(cls, styleSheet);
+    }
+
+    get(cls) {
+        if (!(typeof cls === "function")) {
+            cls = cls.constructor;
+        }
+        return cls[this.styleSheetSymbol];
     }
 
     static register(cls, styleSheet) {
         return this.Global.register(...arguments);
     }
+
+    static get(cls) {
+        return this.Global.get(...arguments);
+    }
 }
 
-Theme.Global = new Theme();
+Theme.Global = new Theme("Global");
 
 // We're going to add some methods to UI.Element, to be able to access their style sheets
 function styleSheetGetter() {

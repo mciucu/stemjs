@@ -1,7 +1,6 @@
 export * from "ui/UI";
 export * from "ui/Style";
 export * from "ui/StyleSheet";
-export * from "ui/style/Theme";
 export * from "ui/Transition";
 export * from "ui/Color";
 export * from "ui/GlobalStyle";

@@ -21,3 +21,5 @@ export * from "./table/SortableTable";
 export * from "./Modal";
 export * from "./DateTimePicker";
 export * from "./CodeEditor";
+
+export * from "style/Theme";
