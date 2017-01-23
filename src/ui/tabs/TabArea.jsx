@@ -1,14 +1,15 @@
 import {UI} from "../UIBase";
 import {Switcher} from "../Switcher";
 import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
+import {Theme} from "../style/Theme";
 import {DefaultTabAreaStyle} from "./Style";
 import "../Switcher";
 
 class BasicTabTitle extends UI.Primitive("a") {
     extraNodeAttributes(attr) {
-        attr.addClass(this.getStyleSet().tab);
+        attr.addClass(this.styleSheet.tab);
         if (this.options.active) {
-            attr.addClass(this.getStyleSet().activeTab);
+            attr.addClass(this.styleSheet.activeTab);
         }
     }
 
@@ -27,10 +28,6 @@ class BasicTabTitle extends UI.Primitive("a") {
                 this.setActive(false);
             });
         }
-    }
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
     }
 
     getPanel() {
@@ -74,9 +71,6 @@ class TabTitleArea extends UI.Element {
 };
 
 class TabArea extends UI.Element {
-    // TODO: should be a lazy property, must fix decorator first
-    static styleSet = DefaultTabAreaStyle.getInstance();
-
     activeTabDispatcher = new SingleActiveElementDispatcher();
 
     getDefaultOptions() {
@@ -95,14 +89,10 @@ class TabArea extends UI.Element {
         }
     }
 
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
     createTabPanel(panel) {
         let tab = <BasicTabTitle panel={panel} activeTabDispatcher={this.activeTabDispatcher}
                                  active={panel.options.active} href={panel.options.tabHref}
-                                 styleSet={this.getStyleSet()} />;
+                                 styleSet={this.getStyleSheet()} />;
 
         return [tab, panel];
     }
@@ -117,7 +107,7 @@ class TabArea extends UI.Element {
     };
 
     getTitleArea(tabTitles) {
-        return <TabTitleArea ref="titleArea" className={this.getStyleSet().nav}>
+        return <TabTitleArea ref="titleArea" className={this.styleSheet.nav}>
             {tabTitles}
         </TabTitleArea>;
     }
@@ -178,6 +168,8 @@ class TabArea extends UI.Element {
         });
     }
 };
+
+Theme.register(TabArea, DefaultTabAreaStyle);
 
 export * from "./Style";
 export {TabTitleArea, BasicTabTitle, TabArea};

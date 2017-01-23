@@ -94,66 +94,49 @@ class Label extends UI.Primitive(SimpleStyledElement, "a") {
 class Button extends UI.Primitive(SimpleStyledElement, "button") {
     extraNodeAttributes(attr) {
         attr.addClass(GlobalStyle.Button.DEFAULT);
-
-
+        
         if (this.getSize()) {
             attr.addClass(GlobalStyle.Button.Size(this.getSize()));
         }
-
-
+        
         if (this.getLevel()) {
             attr.addClass(GlobalStyle.Button.Level(this.getLevel()));
         }
-    }
-
-
-    defaultOptions() {
-        return {
-            label: ""
-        };
     }
     
     render() {
         return [this.beforeChildren(), this.getLabel(), super.render()];
     };
 
-
     getLabel() {
-        return this.options.label;
+        return (this.options.label != null) ? this.options.label : "";
     }
-
 
     setLabel(label) {
         this.updateOptions({label: label});
     }
-
 
     //TODO: this should live in a base iconable class, of which you'd only use this.beforeChildren
     getFaIcon() {
         return this.options.faIcon;
     }
 
-
     setFaIcon(value) {
         this.options.faIcon = value;
         this.redraw();
     }
 
-
     disable() {
         this.node.disabled = true;
     }
-
 
     enable() {
         this.node.disabled = false;
     }
 
-
     setEnabled(enabled) {
         this.node.disabled = !enabled;
     };
-
 
     beforeChildren() {
         if (!this.getFaIcon()) {
