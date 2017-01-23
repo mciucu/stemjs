@@ -30,7 +30,7 @@ function styleRuleWithOptions() {
 
             if (options.inherit) {
                 // Get the value we set in the prototype of the parent class
-                let parentDesc = Object.getPrototypeOf(this.__proto__)[getStyleRuleKey(key)];
+                let parentDesc = Object.getPrototypeOf(target)[getStyleRuleKey(key)];
                 let parentStyle = evaluateStyleRuleObject(this, parentDesc.objInitializer, parentDesc.value, options);
                 style = deepCopy({}, parentStyle, style);
                 return style;

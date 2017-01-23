@@ -86,10 +86,19 @@ class GenericObjectStore extends BaseStore {
     }
 
     get(id) {
-        if (!id) {
+        if (id == null) {
             return null;
         }
         return this.objects.get(parseInt(id));
+    }
+
+    getObjectIdForEvent(event) {
+        return event.objectId || event.id;
+    }
+
+    getObjectForEvent(event) {
+        let objectId = this.getObjectIdForEvent(event);
+        return this.get(objectId);
     }
 
     all(asIterable) {
@@ -105,7 +114,7 @@ class GenericObjectStore extends BaseStore {
     }
 
     applyCreateEvent(event, sendDispatch=true) {
-        let existingObject = this.get(event.objectId);
+        let existingObject = this.getObjectForEvent(event);
 
         if (existingObject) {
             let refreshEvent = Object.assign({}, event);
@@ -115,7 +124,7 @@ class GenericObjectStore extends BaseStore {
             return existingObject;
         } else {
             let newObject = this.createObject(event);
-            this.objects.set(event.objectId, newObject);
+            this.objects.set(this.getObjectIdForEvent(event), newObject);
 
             if (sendDispatch) {
                 this.dispatch("create", newObject, event);
@@ -125,7 +134,7 @@ class GenericObjectStore extends BaseStore {
     }
 
     applyUpdateOrCreateEvent(event) {
-        var obj = this.get(event.objectId);
+        var obj = this.getObjectForEvent(event);
         if (!obj) {
             obj = this.applyCreateEvent(event, false);
             this.dispatch("create", obj, event);
@@ -137,9 +146,9 @@ class GenericObjectStore extends BaseStore {
     }
 
     applyDeleteEvent(event) {
-        let objDeleted = this.objects.get(event.objectId);
+        let objDeleted = this.getObjectForEvent(event);
         if (objDeleted) {
-            this.objects.delete(event.objectId);
+            this.objects.delete(this.getObjectIdForEvent(event));
             objDeleted.dispatch("delete", event, objDeleted);
             this.dispatch("delete", objDeleted, event);
         }
@@ -161,7 +170,7 @@ class GenericObjectStore extends BaseStore {
         } else if (event.type === "updateOrCreate") {
             return this.applyUpdateOrCreateEvent(event);
         } else {
-            var obj = this.get(event.objectId);
+            var obj = this.getObjectForEvent(event);
             if (!obj) {
                 console.error("I don't have object of type ", this.objectType, " ", event.objectId);
                 return;

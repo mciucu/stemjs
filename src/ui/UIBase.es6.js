@@ -30,9 +30,8 @@ class BaseUIElement extends Dispatchable {
         }
     }
 
-    onMount() {
-        // Nothing by default
-    }
+    // Lifecycle methods, called when the element was first inserted in the DOM, and before it's removed
+    onMount() {}
 
     onUnmount() {}
 
@@ -104,6 +103,7 @@ UI.TextElement = class UITextElement extends BaseUIElement {
     }
 };
 
+// TODO: rename to Element
 class UIElement extends BaseUIElement {
     constructor(options={}) {
         super();
@@ -345,8 +345,7 @@ class UIElement extends BaseUIElement {
             }
         }
     }
-
-
+    
     refLink(name) {
         return {parent: this, name: name};
     }
@@ -523,7 +522,7 @@ class UIElement extends BaseUIElement {
     }
 }
 
-UI.createElement = function (tag, options) {
+UI.createElement = function (tag, options, ...children) {
     if (!tag) {
         console.error("Create element needs a valid object tag, did you mistype a class name?");
         return;
@@ -531,13 +530,7 @@ UI.createElement = function (tag, options) {
 
     options = options || {};
 
-    options.children = [];
-
-    for (let i = 2; i < arguments.length; i += 1) {
-        options.children.push(arguments[i]);
-    }
-
-    options.children = unwrapArray(options.children);
+    options.children = unwrapArray(children);
 
     if (options.ref) {
         if (typeof options.ref === "string") {

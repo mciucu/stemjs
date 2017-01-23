@@ -4,7 +4,17 @@
 import {isPlainObject} from "./Utils";
 
 // May need to polyfill Headers, Request, Response, Body, URLSearchParams classes, so import them
-import "./FetchPolyfill";
+import {polyfillRequest} from "../polyfill/Request";
+import {polyfillResponse} from "../polyfill/Response";
+import {polyfillHeaders} from "../polyfill/Headers";
+import {polyfillURLSearchParams} from "../polyfill/URLSearchParams";
+
+if (window) {
+    polyfillRequest(window);
+    polyfillResponse(window);
+    polyfillHeaders(window);
+    polyfillURLSearchParams(window);
+}
 
 // Parse the headers from an xhr object, to return a native Headers object
 function getHeaders(xhr) {
@@ -201,6 +211,7 @@ function fetch(input, init) {
 
     options.method = options.method || init.method || "GET";
 
+    // Support jQuery style of passing arguments in data
     if (isPlainObject(options.data)) {
         let method = options.method.toUpperCase();
         if (method === "GET" || method === "HEAD") {

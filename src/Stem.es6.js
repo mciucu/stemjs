@@ -21,4 +21,5 @@ export * from "base/Utils";
 export * from "base/Time";
 export * from "base/URLRouter";
 export * from "data-structures/Deque";
+export * from "data-structures/MultiMap";
 export * from "decorators/Decorators";

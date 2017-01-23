@@ -15,6 +15,11 @@ class StateClass extends Dispatchable {
         return this.stores.get(objectType);
     }
 
+    getStoreForEvent(event) {
+        let objectType = event.objectType || event.store;
+        return this.getStore(objectType);
+    }
+
     addStore(store) {
         let objectType = store.objectType.toLowerCase();
         if (!this.stores.has(objectType)) {
@@ -31,11 +36,7 @@ class StateClass extends Dispatchable {
             }
             return;
         }
-        if (!event.hasOwnProperty("objectType")) {
-            console.error("GlobalState: Event does not contain 'objectType' property: ", event);
-            return;
-        }
-        let store = this.getStore(event.objectType);
+        let store = this.getStoreForEvent(event);
         if (store) {
             return store.applyEvent(event);
         } else {

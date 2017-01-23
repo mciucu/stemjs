@@ -1,5 +1,8 @@
 import {UI} from "../UIBase";
 import {Table, TableRow} from "./Table";
+import {CollapsibleMixin} from "../Bootstrap3";
+import {StyleSet} from "../Style";
+import {styleRule} from "../../decorators/Style";
 
 class TableRowInCollapsibleTable extends TableRow {
     getNodeType() {
@@ -11,7 +14,41 @@ class TableRowInCollapsibleTable extends TableRow {
     }
 }
 
-class CollapsibleTableRow extends TableRow {
+class CollapsibleTableStyle extends StyleSet {
+    @styleRule
+    button = {
+        marginTop: "0",
+        marginBottom: "0",
+        fontSize: "16px",
+        color: "inherit",
+        cursor: "pointer",
+        ":hover": {
+            color: "inherit",
+        },
+        ":after": {
+            fontFamily: "'Glyphicons Halflings'",
+            content: "\"\\e114\"",
+            color: "grey",
+            float: "left",
+        }
+    };
+
+    @styleRule
+    collapsedButton = {
+        ":after": {
+            content: "\"\\e080\" !important",
+        },
+    };
+
+    @styleRule
+    heading = {
+        padding: "10px 15px",
+    };
+}
+
+let collapsibleTableStyle = new CollapsibleTableStyle();
+
+class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
     getNodeType() {
         return "tbody";
     }
@@ -23,12 +60,27 @@ class CollapsibleTableRow extends TableRow {
     }
 
     onMount() {
-        this.collapseButton.addClickListener((event) => {
-            this.collapsed = (this.collapsed != true);
-            this.collapseButton.toggleClass("collapsed");
-            // TODO (@kira): Find out how to do this properly
-            $(this.collapsible.node).collapse("toggle");
-        });
+        this.toggleButton.addClickListener(() => this.toggle());
+    }
+
+    toggle() {
+        if (!this.options.collapsed) {
+            this.collapse();
+        } else {
+            this.expand();
+        }
+    }
+
+    expand() {
+        super.expand(this.contentArea);
+        this.toggleButton.removeClass(collapsibleTableStyle.collapsedButton);
+    }
+
+    collapse() {
+        super.collapse(this.contentArea);
+        setTimeout(() => {
+            this.toggleButton.addClass(collapsibleTableStyle.collapsedButton);
+        }, this.getCollapsibleStyleSet().transitionDuration * 500);
     }
 
     // TODO: Very bad redraw practice here
@@ -37,29 +89,27 @@ class CollapsibleTableRow extends TableRow {
             return false;
         }
 
-        if (this.collapsed) {
-            this.collapseButton.addClass("collapsed");
-            this.collapsible.removeClass("in");
+        if (this.options.collapsed) {
+            this.toggleButton.addClass(collapsibleTableStyle.collapsedButton);
+            this.contentArea.addClass(this.getCollapsibleStyleSet().collapsed);
+            this.contentArea.addClass("hidden");
         } else {
-            this.collapseButton.removeClass("collapsed");
-            this.collapsible.addClass("in");
+            this.toggleButton.removeClass(collapsibleTableStyle.collapsedButton);
+            this.contentArea.removeClass(this.getCollapsibleStyleSet().collapsed);
+            this.contentArea.removeClass("hidden");
         }
         return true;
     }
 
     render() {
-        let noPaddingHiddenRowStyle = {
-            padding: 0,
-        };
-
-        let rowCells = super.render();
-
         return [
-            <tr className="panel-heading">{rowCells}</tr>,
+            <tr className={collapsibleTableStyle.heading}>{super.render()}</tr>,
             <tr>
-                <td style={noPaddingHiddenRowStyle} colspan={this.options.columns.length}>
-                    <div ref="collapsible" className="collapse">
-                        {this.renderCollapsible(this.options.entry)}
+                <td style={{overflow: "hidden", padding: "0px"}}
+                    colspan={this.options.columns.length}>
+                    <div ref="contentArea"
+                         className={`${this.getCollapsibleStyleSet().collapsed} hidden`}>
+                            {this.renderCollapsible(this.options.entry)}
                     </div>
                 </td>
             </tr>
@@ -90,21 +140,16 @@ function CollapsibleTableInterface(BaseTableClass) {
             return UI.CollapsibleTableRow;
         }
 
-        getNodeAttributes() {
-            let attr = super.getNodeAttributes();
-            attr.addClass("ui-collapsible-table");
-            return attr;
-        }
-
         setColumns(columns) {
-            let collapseColumn = {
+            let toggleColumn = {
                 value: (entry) => {
                     let rowClass = this.getRowClass(entry);
                     // TODO: Fix it lad!
                     if (rowClass === CollapsibleTableRow || rowClass.prototype instanceof CollapsibleTableRow) {
-                        return <a ref="collapseButton" className="rowCollapseButton collapsed"/>;
+                        return <a ref="toggleButton"
+                        className={`${collapsibleTableStyle.button} ${collapsibleTableStyle.collapsedButton}`}/>;
                     }
-                    return <a ref="collapseButton"/>;
+                    return <a ref="toggleButton"/>;
                 },
                 cellStyle: {
                     width: "1%",
@@ -112,7 +157,7 @@ function CollapsibleTableInterface(BaseTableClass) {
                 }
             };
 
-            super.setColumns([collapseColumn].concat(columns));
+            super.setColumns([toggleColumn].concat(columns));
         }
     };
 }
