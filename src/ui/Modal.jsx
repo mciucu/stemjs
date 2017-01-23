@@ -3,6 +3,7 @@ import {StyleSet} from "./Style";
 import {styleRule} from "../decorators/Style";
 import {UI} from "./UIBase";
 import {Panel, TemporaryMessageArea} from "./UIPrimitives";
+import {Button} from "./Bootstrap3";
 
 class FloatingWindowStyle extends StyleSet {
     @styleRule
@@ -199,7 +200,7 @@ class Modal extends UI.Element {
         if (this.options.closeButton) {
             // TODO: this should be in a method
             closeButton = <div style={{position: "absolute", right: "10px", zIndex: "10"}}>
-                <UI.Button className="close" size={UI.Size.EXTRA_LARGE}
+                <Button className="close" size={UI.Size.EXTRA_LARGE}
                            label="&times;" onClick={() => this.hide()}/>
             </div>;
         }
@@ -293,7 +294,7 @@ class ErrorModal extends Modal {
 
     getFooter() {
         return <div className={ModalStyle.footer}>
-            <UI.Button level={UI.Level.DANGER} label="Dismiss" onClick={() => this.hide()}/>
+            <Button level={UI.Level.DANGER} label="Dismiss" onClick={() => this.hide()}/>
         </div>;
     }
 }
@@ -344,13 +345,13 @@ class ActionModal extends Modal {
     }
 
     getActionButton() {
-        return <UI.Button level={this.getActionLevel()} label={this.getActionName()} onClick={() => this.action()}/>;
+        return <Button level={this.getActionLevel()} label={this.getActionName()} onClick={() => this.action()}/>;
     }
 
     getFooterContent() {
         return [
             <TemporaryMessageArea ref="messageArea"/>,
-            <UI.Button label={this.getCloseName()} onClick={() => this.hide()}/>,
+            <Button label={this.getCloseName()} onClick={() => this.hide()}/>,
             this.getActionButton(),
         ];
     }
@@ -359,7 +360,7 @@ class ActionModal extends Modal {
 }
 
 function ActionModalButton(ActionModal) {
-    return class ActionModalButton extends UI.Button {
+    return class ActionModalButton extends Button {
         getModalOptions() {
             let modalOptions = {
                 actionName: this.options.label,
