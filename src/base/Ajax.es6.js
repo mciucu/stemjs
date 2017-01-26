@@ -4,11 +4,6 @@ var Ajax = {};
 
 Ajax.fetch = fetch;
 
-// TODO: should also take in the complete options
-Ajax.getDefaultHeaders = (headers) => {
-    return headers;
-};
-
 Ajax.DEFAULT_OPTIONS = {
     credentials: "include",
 };
@@ -27,13 +22,6 @@ Ajax.rawRequest = function (options) {
 
 Ajax.request = function(options) {
     options = Object.assign({}, Ajax.DEFAULT_OPTIONS, options);
-
-    let headers = Ajax.getDefaultHeaders(options.headers);
-    if (headers) {
-        options.headers = headers
-    } else {
-        delete options.headers;
-    }
 
     // TODO: Should refactor Ajax to support addition of functions from external sources, ie error handling
     return Ajax.rawRequest(options);
