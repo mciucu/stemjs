@@ -115,10 +115,8 @@ class XHRPromise {
                 xhr.withCredentials = true;
             }
 
+            // TODO: come back to this
             xhr.responseType = "blob";
-
-            // TODO: do this with default headers
-            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
             for (const [name, value] of request.headers) {
                 xhr.setRequestHeader(name, value)
@@ -201,6 +199,8 @@ function jQueryCompatibilityPreprocessor(options) {
         options.headers.set("Content-Type", options.contentType);
     }
 
+    options.headers.set("X-Requested-With", "XMLHttpRequest");
+
     if (isPlainObject(options.data)) {
         let method = options.method.toUpperCase();
         if (method === "GET" || method === "HEAD") {
@@ -230,6 +230,7 @@ function fetch(input, init) {
 
     let options = Object.assign({}, init);
 
+    // Ensure that there's a .headers field for preprocessors
     options.headers = new Headers(options.headers || {});
 
     const preprocessors = options.preprocessors || fetch.defaultPreprocessors || [];
