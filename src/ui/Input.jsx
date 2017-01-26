@@ -171,6 +171,12 @@ class FormSettingsGroup extends UI.Element {
 }
 
 class FormGroup extends UI.Element {
+    static styleSet = FormStyle.getInstance();
+
+    getStyleSet() {
+        return this.options.styleSet || this.constructor.styleSet;
+    }
+
     setOptions(options) {
         super.setOptions(options);
         this.options.labelWidth = this.options.labelWidth || "16%";

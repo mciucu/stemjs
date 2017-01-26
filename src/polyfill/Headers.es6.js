@@ -6,7 +6,7 @@ class Headers extends MultiMap {
     static polyfill = true;
 
     constructor(obj) {
-        super(obj);
+        super();
         if (obj instanceof Headers) {
             for (let [key, value] of obj) {
                 this.append(key, value);

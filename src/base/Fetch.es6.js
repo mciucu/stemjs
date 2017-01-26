@@ -34,6 +34,10 @@ function getHeaders(xhr) {
 // Creates a new URLSearchParams object from a plain object
 // Fields that are arrays are spread
 function getURLSearchParams(data) {
+    if (!isPlainObject(data)) {
+        return data;
+    }
+
     let urlSearchParams = new URLSearchParams();
     for (const key of Object.keys(data)) {
         let value = data[key];
@@ -49,13 +53,13 @@ function getURLSearchParams(data) {
 }
 
 // Appends search parameters from an object to a given URL or Request, and returns the new URL
-function composeURL(url, data) {
+function composeURL(url, params) {
     if (url.url) {
         url = url.url;
     }
     // TODO: also extract the preexisting arguments in the url
-    if (isPlainObject(data)) {
-        url += "?" + getURLSearchParams(data);
+    if (params) {
+        url += "?" + getURLSearchParams(params);
     }
     return url;
 }
@@ -188,45 +192,19 @@ class XHRPromise {
     }
 }
 
-function jQueryStylePreprocessor(options) {
-    return options;
-}
-
-// Can either be called with
-// - 1 argument: (Request)
-// - 2 arguments: (url/Request, options)
-function fetch(input, init) {
-    // In case we're being passed in jQuery-style arguments
-    if (isPlainObject(input)) {
-        return fetch(input.url, Object.assign({}, input, init));
-    }
-
-    let options = Object.assign({}, init);
-
-    if (options.preprocessor) {
-        options = options.preprocessor(options);
-    }
-
-    options.onSuccess = options.onSuccess || options.success;
-    options.onError = options.onError || options.error;
-
-    if (typeof options.cache === "boolean") {
-        options.cache = options.cache ? "force-cache" : "reload";
-    }
-    
+function jQueryCompatibilityPreprocessor(options) {
     if (options.type) {
-        options.method = init.type.toUpperCase();
+        options.method = options.type.toUpperCase();
     }
 
-    options.method = options.method || "GET";
+    if (options.contentType) {
+        options.headers.set("Content-Type", options.contentType);
+    }
 
-    // Support jQuery style of passing arguments in data
     if (isPlainObject(options.data)) {
         let method = options.method.toUpperCase();
         if (method === "GET" || method === "HEAD") {
-            // Change the URL of the request to add a query
-            let newRequestOptions = (input instanceof Request) ? input : {};
-            input = new Request(composeURL(input, options.data), newRequestOptions);
+            options.urlParams = options.urlParams || options.data;
         } else {
             let formData = new FormData();
             for (const key of Object.keys(options.data)) {
@@ -238,10 +216,52 @@ function fetch(input, init) {
         // TODO: a better compatibility with jQuery style options?
         options.body = options.body || options.data;
     }
+    return options;
+}
+
+// Can either be called with
+// - 1 argument: (Request)
+// - 2 arguments: (url/Request, options)
+function fetch(input, init) {
+    // In case we're being passed in a single plain object (not Request), assume it has url field
+    if (isPlainObject(input)) {
+        return fetch(input.url, Object.assign({}, input, init));
+    }
+
+    let options = Object.assign({}, init);
+
+    options.headers = new Headers(options.headers || {});
+
+    const preprocessors = options.preprocessors || fetch.defaultPreprocessors || [];
+
+    for (const preprocessor of preprocessors) {
+        options = preprocessor(options) || options;
+    }
+
+    options.onSuccess = options.onSuccess || options.success;
+    options.onError = options.onError || options.error;
+
+    if (typeof options.cache === "boolean") {
+        options.cache = options.cache ? "force-cache" : "reload";
+    }
+
+    options.method = options.method || "GET";
+
+    const urlParams = options.urlParams || options.urlSearchParams;
+    if (urlParams) {
+        // Change the URL of the request to add a query
+        if (input instanceof Request) {
+            input = new Request(composeURL(input.url, urlParams), input);
+        } else {
+            input = new Request(composeURL(input, urlParams), {});
+        }
+    }
 
     return new XHRPromise(input, options);
 }
 
+fetch.defaultPreprocessors = [jQueryCompatibilityPreprocessor];
+
 fetch.polyfill = true;
 
-export {XHRPromise, fetch, getURLSearchParams};
+export {XHRPromise, fetch, getURLSearchParams, jQueryCompatibilityPreprocessor};

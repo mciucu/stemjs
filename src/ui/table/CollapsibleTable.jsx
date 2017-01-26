@@ -43,6 +43,7 @@ class CollapsibleTableStyle extends StyleSet {
     @styleRule
     heading = {
         padding: "10px 15px",
+        backgroundColor: "initial !important",
     };
 }
 

@@ -1,4 +1,4 @@
-import {fetch} from "./Fetch.es6";
+import {fetch} from "./Fetch";
 
 var Ajax = {};
 

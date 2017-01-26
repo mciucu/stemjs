@@ -67,32 +67,76 @@ class RadioButtonGroupStyle extends StyleSet {
     };
 };
 
-class ButtonStyle extends StyleSet {
-    computeButtonColorClass(colors) {
-        let darker1 = {
-            backgroundColor: colors[1],
-        };
-        let darker2 = {
-            backgroundColor: colors[2],
-        };
-        let darker3 = {
-            backgroundColor: colors[3],
-        };
-        let regular = {
-            backgroundColor: colors[0],
-            borderColor: colors[4],
-            color: colors[5],
-        };
-        return Object.assign({}, regular, {
-            ":hover": darker1,
-            ":hover:disabled": regular,
-            ":focus": darker1,
-            ":active": darker2,
-            ":hover:active": darker3,
-            ":focus:active": darker3,
-            ".active": darker3,
-        });
+function BasicLevelStyleSet(colorClassFunction) {
+    class BasicLevelStyleClass extends StyleSet {
+        @styleRule
+        PLAIN = {};
+
+        colorClassBuilder = colorClassFunction
+
+        @styleRule
+        PRIMARY = this.colorClassBuilder(buildColors(COLOR.PRIMARY));
+
+        @styleRule
+        SUCCESS = this.colorClassBuilder(buildColors(COLOR.SUCCESS));
+
+        @styleRule
+        INFO = this.colorClassBuilder(buildColors(COLOR.INFO));
+
+        @styleRule
+        WARNING = this.colorClassBuilder(buildColors(COLOR.WARNING));
+
+        @styleRule
+        DANGER = this.colorClassBuilder(buildColors(COLOR.DANGER));
+
+        @styleRule
+        GOOGLE = this.colorClassBuilder(buildColors(COLOR.GOOGLE));
+
+        @styleRule
+        FACEBOOK = this.colorClassBuilder(buildColors(COLOR.FACEBOOK));
+
+        Level(level) {
+            if (this[level]) {
+                return this[level];
+            }
+            for (let type of Object.keys(UI.Level)) {
+                if (level == UI.Level[type]) {
+                    return this[type];
+                }
+            }
+        }
+    }
+
+    return BasicLevelStyleClass;
+};
+
+let buttonColorClassBuilder = (colors) => {
+    let darker1 = {
+        backgroundColor: colors[1],
     };
+    let darker2 = {
+        backgroundColor: colors[2],
+    };
+    let darker3 = {
+        backgroundColor: colors[3],
+    };
+    let regular = {
+        backgroundColor: colors[0],
+        borderColor: colors[4],
+        color: colors[5],
+    };
+    return Object.assign({}, regular, {
+        ":hover": darker1,
+        ":hover:disabled": regular,
+        ":focus": darker1,
+        ":active": darker2,
+        ":hover:active": darker3,
+        ":focus:active": darker3,
+        ".active": darker3,
+    });
+};
+
+class ButtonStyle extends BasicLevelStyleSet(buttonColorClassBuilder) {
 
     // DEFAULT uses MEDIUM as size and PLAIN as level
     @styleRule
@@ -115,7 +159,7 @@ class ButtonStyle extends StyleSet {
         },
     }, {
         "font-size": "14px",
-    }, this.computeButtonColorClass(buildColors(COLOR.PLAIN))];
+    }, this.colorClassBuilder(buildColors(COLOR.PLAIN))];
 
     @styleRule
     EXTRA_SMALL = {
@@ -150,37 +194,79 @@ class ButtonStyle extends StyleSet {
             }
         }
     }
+}
+
+let labelColorClassBuilder = (colors) => {
+    let darker = {
+        backgroundColor: colors[1],
+        color: "white",
+        textDecoration: "none",
+    };
+    let regular = {
+        backgroundColor: colors[0],
+        borderColor: colors[4],
+        color: colors[5],
+    };
+    return Object.assign({}, regular, {
+        ":hover": darker,
+        ":hover:disabled": regular,
+        ":focus": darker,
+        ":active": darker,
+    });
+};
+
+class LabelStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
+    // DEFAULT uses MEDIUM as size and PLAIN as level
+    @styleRule
+    DEFAULT = [{
+        cursor: "hand",
+        fontWeight: "bold",
+        border: "0.1em solid transparent",
+        padding: "0.07em 0.4em",
+        borderRadius: "0.3em",
+        textAlign: "center",
+        whiteSpace: "nowrap",
+        verticalAlign: "bottom",
+        lineHeight: 4/3 + "",
+        display: "inline-block",
+        touchAction: "manipulation",
+        ":disabled": {
+            opacity: "0.7",
+            cursor: "not-allowed",
+        },
+    }, {
+        "font-size": "12px",
+    }, this.colorClassBuilder(buildColors(COLOR.PLAIN))];
 
     @styleRule
-    PLAIN = {};
+    EXTRA_SMALL = {
+        fontSize: "10px",
+        padding: "0.05em 0.2em",
+        borderWidth: "0.05em",
+    };
 
     @styleRule
-    PRIMARY = this.computeButtonColorClass(buildColors(COLOR.PRIMARY));
+    SMALL = {
+        fontSize: "10px",
+    };
 
     @styleRule
-    SUCCESS = this.computeButtonColorClass(buildColors(COLOR.SUCCESS));
+    MEDIUM = {};
 
     @styleRule
-    INFO = this.computeButtonColorClass(buildColors(COLOR.INFO));
+    LARGE = {
+        fontSize: "14px",
+    };
 
     @styleRule
-    WARNING = this.computeButtonColorClass(buildColors(COLOR.WARNING));
+    EXTRA_LARGE = {
+        fontSize: "17px",
+        padding: "0.05em 0.2em",
+    };
 
-    @styleRule
-    DANGER = this.computeButtonColorClass(buildColors(COLOR.DANGER));
-
-    @styleRule
-    GOOGLE = this.computeButtonColorClass(buildColors(COLOR.GOOGLE));
-
-    @styleRule
-    FACEBOOK = this.computeButtonColorClass(buildColors(COLOR.FACEBOOK));
-
-    Level(level) {
-        if (this[level]) {
-            return this[level];
-        }
-        for (let type of Object.keys(UI.Level)) {
-            if (level == UI.Level[type]) {
+    Size(size) {
+        for (let type of Object.keys(UI.Size)) {
+            if (size == UI.Size[type]) {
                 return this[type];
             }
         }
@@ -191,5 +277,6 @@ class ButtonStyle extends StyleSet {
 GlobalStyle.Button = ButtonStyle.getInstance();
 GlobalStyle.RadioButtonGroup = RadioButtonGroupStyle.getInstance();
 GlobalStyle.ButtonGroup = ButtonGroupStyle.getInstance();
+GlobalStyle.Label = LabelStyle.getInstance();
 
 export {GlobalStyle};

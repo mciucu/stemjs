@@ -19,23 +19,19 @@ function BootstrapMixin(BaseClass, bootstrapClassName) {
             return attr;
         }
 
-
         getLevel() {
             return this.options.level || "";
         }
-
 
         setLevel(level) {
             this.options.level = level;
             this.applyNodeAttributes();
         }
 
-
         static bootstrapClass() {
             return bootstrapClassName;
         }
     }
-
 
     return BootstrapClass;
 };
@@ -46,16 +42,13 @@ class SimpleStyledElement extends UI.Element {
         return this.options.level || (this.parent && this.parent.options && this.parent.options.level);
     }
 
-
     setLevel(level) {
         this.updateOptions({level});
     }
 
-
     getSize() {
         return this.options.size || (this.parent && this.parent.options && this.parent.options.size);
     }
-
 
     setSize(size) {
         this.updateOptions({size});
@@ -63,47 +56,8 @@ class SimpleStyledElement extends UI.Element {
 }
 
 
-class Label extends UI.Primitive(SimpleStyledElement, "a") {
-    extraNodeAttributes(attr) {
-        attr.addClass(GlobalStyle.Label.DEFAULT);
 
-
-        if (this.getSize()) {
-            attr.addClass(GlobalStyle.Label.Size(this.getSize()));
-        }
-
-
-        if (this.getLevel()) {
-            attr.addClass(GlobalStyle.Label.Level(this.getLevel()));
-        }
-    }
-
-
-    setLabel(label) {
-        this.options.label = label;
-        this.redraw();
-    }
-
-
-    render() {
-        return [this.options.label];
-    }
-}
-
-
-class Button extends UI.Primitive(SimpleStyledElement, "button") {
-    extraNodeAttributes(attr) {
-        attr.addClass(GlobalStyle.Button.DEFAULT);
-        
-        if (this.getSize()) {
-            attr.addClass(GlobalStyle.Button.Size(this.getSize()));
-        }
-        
-        if (this.getLevel()) {
-            attr.addClass(GlobalStyle.Button.Level(this.getLevel()));
-        }
-    }
-    
+class IconableInterface extends SimpleStyledElement {
     render() {
         return [this.beforeChildren(), this.getLabel(), super.render()];
     };
@@ -114,6 +68,7 @@ class Button extends UI.Primitive(SimpleStyledElement, "button") {
 
     setLabel(label) {
         this.updateOptions({label: label});
+        this.redraw();
     }
 
     //TODO: this should live in a base iconable class, of which you'd only use this.beforeChildren
@@ -125,18 +80,6 @@ class Button extends UI.Primitive(SimpleStyledElement, "button") {
         this.options.faIcon = value;
         this.redraw();
     }
-
-    disable() {
-        this.node.disabled = true;
-    }
-
-    enable() {
-        this.node.disabled = false;
-    }
-
-    setEnabled(enabled) {
-        this.node.disabled = !enabled;
-    };
 
     beforeChildren() {
         if (!this.getFaIcon()) {
@@ -151,19 +94,59 @@ class Button extends UI.Primitive(SimpleStyledElement, "button") {
             }
         }
 
-
         return <span {...iconOptions} />;
     }
 }
 
 
+class Button extends UI.Primitive(IconableInterface, "button") {
+    extraNodeAttributes(attr) {
+        attr.addClass(GlobalStyle.Button.DEFAULT);
+
+        if (this.getSize()) {
+            attr.addClass(GlobalStyle.Button.Size(this.getSize()));
+        }
+
+        if (this.getLevel()) {
+            attr.addClass(GlobalStyle.Button.Level(this.getLevel()));
+        }
+    }
+
+    disable() {
+        this.node.disabled = true;
+    }
+
+    enable() {
+        this.node.disabled = false;
+    }
+
+    setEnabled(enabled) {
+        this.node.disabled = !enabled;
+    };
+}
+
+
+class Label extends UI.Primitive(IconableInterface, "span") {
+    extraNodeAttributes(attr) {
+        attr.addClass(GlobalStyle.Label.DEFAULT);
+
+        if (this.getSize()) {
+            attr.addClass(GlobalStyle.Label.Size(this.getSize()));
+        }
+
+        if (this.getLevel()) {
+            attr.addClass(GlobalStyle.Label.Level(this.getLevel()));
+        }
+    }
+}
+
+class LinkLabel extends UI.Primitive(Label, "a") {};
+
 class StateButton extends Button {
     setOptions(options) {
         options.state = (this.options && this.options.state) || options.state || UI.ActionStatus.DEFAULT;
 
-
         super.setOptions(options);
-
 
         this.options.statusOptions = this.options.statusOptions || [];
         for (let i = 0; i < 4; i += 1) {
@@ -518,7 +501,6 @@ class ProgressBar extends BootstrapMixin(UI.Element, "progress") {
     render() {
         let valueInPercent = (this.options.value || 0) * 100;
 
-
         let barOptions = {
             className: "progress-bar",
             role: "progressbar",
@@ -532,14 +514,12 @@ class ProgressBar extends BootstrapMixin(UI.Element, "progress") {
             },
         };
 
-
         if (this.options.disableTransition) {
             Object.assign(barOptions.style, {
                 transition: "none",
                 "-webkit-transition": "none"
             });
         }
-
 
         if (this.options.level) {
             barOptions.className += " progress-bar-" + this.options.level;
@@ -553,7 +533,6 @@ class ProgressBar extends BootstrapMixin(UI.Element, "progress") {
         if (this.options.color) {
             barOptions.style.backgroundColor = this.options.color;
         }
-
 
         return <div {...barOptions}>
             <span className="progress-span">{this.options.label}</span>
@@ -571,5 +550,5 @@ class ProgressBar extends BootstrapMixin(UI.Element, "progress") {
     }
 }
 
-export {BootstrapMixin, SimpleStyledElement, Label, Button, StateButton, AjaxButton, ButtonGroup, RadioButtonGroup, BootstrapLabel,
-                  CardPanel, CollapsiblePanelStyle, CollapsiblePanel, CollapsibleMixin,  DelayedCollapsiblePanel, ProgressBar};
+export {BootstrapMixin, SimpleStyledElement, Label, LinkLabel, Button, StateButton, AjaxButton, ButtonGroup, RadioButtonGroup,
+      BootstrapLabel, CardPanel, CollapsiblePanelStyle, CollapsiblePanel, CollapsibleMixin,  DelayedCollapsiblePanel, ProgressBar};
