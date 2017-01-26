@@ -5,6 +5,7 @@ class StateClass extends Dispatchable {
         super();
         this.stores = new Map();
         // A version of applyEvent that's binded to this
+        // TODO: applyEvent should use the @bind decorator
         this.applyEventWrapper = (event) => {
             this.applyEvent(event);
         }

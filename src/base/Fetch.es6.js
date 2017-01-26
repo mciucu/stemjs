@@ -188,6 +188,10 @@ class XHRPromise {
     }
 }
 
+function jQueryStylePreprocessor(options) {
+    return options;
+}
+
 // Can either be called with
 // - 1 argument: (Request)
 // - 2 arguments: (url/Request, options)
@@ -198,6 +202,11 @@ function fetch(input, init) {
     }
 
     let options = Object.assign({}, init);
+
+    if (options.preprocessor) {
+        options = options.preprocessor(options);
+    }
+
     options.onSuccess = options.onSuccess || options.success;
     options.onError = options.onError || options.error;
 
@@ -209,7 +218,7 @@ function fetch(input, init) {
         options.method = init.type.toUpperCase();
     }
 
-    options.method = options.method || init.method || "GET";
+    options.method = options.method || "GET";
 
     // Support jQuery style of passing arguments in data
     if (isPlainObject(options.data)) {

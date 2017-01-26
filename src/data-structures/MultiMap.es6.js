@@ -5,21 +5,7 @@ class MultiMap {
     }
 
     static iterator(items) {
-        let iterator = {
-            next: () => {
-                let value = items.shift();
-                return {
-                    done: value === undefined,
-                    value: value
-                };
-            }
-        };
-        if (("Symbol" in self) && ("iterator" in Symbol)) {
-            iterator[Symbol.iterator] = () => {
-                return iterator;
-            }
-        }
-        return iterator;
+        return items[Symbol.iterator];
     }
 
     // Methods that are called before every access inside
@@ -75,6 +61,7 @@ class MultiMap {
         }
     }
 
+    // TODO: this should be a wrapper on top of this.map.entries
     entriesArray() {
         let entries = [];
         for (let [key, values] of this.map.entries()) {

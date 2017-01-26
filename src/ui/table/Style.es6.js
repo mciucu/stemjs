@@ -28,7 +28,9 @@ class TableStyle extends StyleSet {
 
     @styleRule
     tableStripped = {
-        backgroundColor: "#f9f9f9",
+        ">tbody>tr:nth-of-type(odd)": {
+            backgroundColor: "#f5f5f5",
+        }
     };
 
 }

@@ -66,6 +66,13 @@ class NodeAttributes {
     }
 
     setStyle(key, value, node) {
+        if (!(typeof key === "string" || key instanceof String)) {
+            // If the key is not a string, it should be a plain object
+            for (const styleKey of Object.keys(key)) {
+                this.setStyle(styleKey, key[styleKey], node);
+            }
+            return;
+        }
         if (value === undefined) {
             console.error("Style is being removed");
             // TODO: why return here and not remove the old value?
@@ -81,7 +88,6 @@ class NodeAttributes {
         }
     }
 
-    // TODO: should just be a regular method?
     static getClassArray(classes) {
         if (!classes) {
             return [];
@@ -172,7 +178,6 @@ class NodeAttributes {
 
             let key = attributesMap.reverseNameMap.get(attributeName);
 
-            // TODO: this is wrong since it doesn't do reverse mapping
             if (this.hasOwnProperty(key)) {
                 let value = this[key];
                 let attributeOptions = attributesMap.get(key);

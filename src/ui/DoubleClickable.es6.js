@@ -57,7 +57,6 @@ let DoubleClickable = (BaseClass) => class DoubleClickable extends BaseClass {
         let callbackWrapper = () => {
 
             let now = new Date().getTime();
-            console.log(now);
 
             if (!this.hasOwnProperty("_singleClickTime") ||
                 now - this._singleClickTime >= this.getSingleClickTimeout()) {

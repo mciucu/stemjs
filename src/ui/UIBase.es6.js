@@ -360,6 +360,7 @@ class UIElement extends BaseUIElement {
     bindToNode(node, doRedraw) {
         this.node = node;
         if (doRedraw) {
+            this.clearNode();
             this.redraw();
         }
         return this;

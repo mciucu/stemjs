@@ -1,3 +1,4 @@
+// TODO: this file should be called StoreExtenders
 import {unwrapArray, splitInChunks} from "../base/Utils";
 import {Ajax} from "../base/Ajax";
 
