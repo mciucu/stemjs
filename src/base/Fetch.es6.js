@@ -9,6 +9,7 @@ import {polyfillResponse} from "../polyfill/Response";
 import {polyfillHeaders} from "../polyfill/Headers";
 import {polyfillURLSearchParams} from "../polyfill/URLSearchParams";
 
+// TODO: should only call this in the first call to fetch, to not create unneeded dependencies?
 if (window) {
     polyfillRequest(window);
     polyfillResponse(window);
@@ -190,6 +191,7 @@ class XHRPromise {
     }
 }
 
+// TODO: this offers only partial compatibility with $.ajax
 function jQueryCompatibilityPreprocessor(options) {
     if (options.type) {
         options.method = options.type.toUpperCase();
@@ -213,7 +215,6 @@ function jQueryCompatibilityPreprocessor(options) {
             options.body = formData;
         }
     } else {
-        // TODO: a better compatibility with jQuery style options?
         options.body = options.body || options.data;
     }
     return options;
@@ -222,13 +223,13 @@ function jQueryCompatibilityPreprocessor(options) {
 // Can either be called with
 // - 1 argument: (Request)
 // - 2 arguments: (url/Request, options)
-function fetch(input, init) {
-    // In case we're being passed in a single plain object (not Request), assume it has url field
+function fetch(input, ...args) {
+    // In case we're being passed in a single plain object (not Request), assume it has a url field
     if (isPlainObject(input)) {
-        return fetch(input.url, Object.assign({}, input, init));
+        return fetch(input.url, ...arguments);
     }
 
-    let options = Object.assign({}, init);
+    let options = Object.assign({}, ...args);
 
     // Ensure that there's a .headers field for preprocessors
     options.headers = new Headers(options.headers || {});

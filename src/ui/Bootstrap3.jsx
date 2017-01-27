@@ -192,7 +192,7 @@ class StateButton extends Button {
 class AjaxButton extends StateButton {
     ajaxCall(data) {
         this.setState(UI.ActionStatus.RUNNING);
-        Ajax.request(Object.assign({}, data, {
+        Ajax.fetch(Object.assign({}, data, {
             success: (successData) => {
                 data.success(successData);
                 if (successData.error) {

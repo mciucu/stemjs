@@ -34,4 +34,12 @@ export function isDifferentDay(timeA, timeB) {
     return false;
 }
 
+export function unix(timestamp) {
+    return new Date(parseInt(timestamp * 1000));
+}
+
+export function format(date, pattern) {
+
+}
+
 export {ServerTime};

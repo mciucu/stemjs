@@ -105,7 +105,7 @@ function AjaxFetchMixin(BaseStoreClass) {
             let requests = this.getFetchRequests(fetchJobs);
 
             for (let requestObject of requests) {
-                Ajax.request(requestObject);
+                Ajax.fetch(requestObject);
             }
 
             clearTimeout(this.fetchTimeout);
