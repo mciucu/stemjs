@@ -5,12 +5,10 @@ import {Panel} from "./UIPrimitives";
 import {GlobalStyle} from "./GlobalStyle";
 import {Ajax} from "../base/Ajax";
 
-
 function BootstrapMixin(BaseClass, bootstrapClassName) {
     class BootstrapClass extends BaseClass {
         getNodeAttributes() {
             let attr = super.getNodeAttributes();
-
 
             attr.addClass(this.constructor.bootstrapClass());
             if (this.getLevel()) {
@@ -140,7 +138,20 @@ class Label extends UI.Primitive(IconableInterface, "span") {
     }
 }
 
-class LinkLabel extends UI.Primitive(Label, "a") {};
+
+class Badge extends UI.Primitive(IconableInterface, "span") {
+    extraNodeAttributes(attr) {
+        attr.addClass(GlobalStyle.Badge.DEFAULT);
+
+        if (this.getSize()) {
+            attr.addClass(GlobalStyle.Badge.Size(this.getSize()));
+        }
+
+        if (this.getLevel()) {
+            attr.addClass(GlobalStyle.Badge.Level(this.getLevel()));
+        }
+    }
+}
 
 class StateButton extends Button {
     setOptions(options) {
@@ -170,7 +181,6 @@ class StateButton extends Button {
         } else if (status === UI.ActionStatus.SUCCESS) {
         } else if (status === UI.ActionStatus.FAILED) {
         }
-
 
         this.redraw();
     }
@@ -274,44 +284,50 @@ class RadioButtonGroup extends SimpleStyledElement {
 }
 
 
-class BootstrapLabel extends BootstrapMixin(UI.Element, "label") {
-    getNodeType() {
-        return "span";
-    }
+class CardPanelStyle extends StyleSet {
+    @styleRule
+    heading = {
+        color: "#333",
+        backgroundColor: "#f5f5f5",
+        padding: "10px 15px",
+        borderBottom: "1px solid #ddd",
+    };
 
+    @styleRule
+    body = {
+        padding: "5px",
+    };
 
-    getNodeAttributes() {
-        let attr = super.getNodeAttributes();
-        if (this.options.faIcon) {
-            attr.addClass("fa fa-" + this.options.faIcon);
-        }
-        return attr;
-    }
-
-
-    setLabel(label) {
-        this.options.label = label;
-        this.redraw();
-    }
-
-
-    render() {
-        return [this.options.label];
-    }
+    @styleRule
+    panel = {
+        backgroundColor: "#ffffff",
+        border: "1px solid #ddd",
+        borderRadius: "4px",
+    };
 }
 
 
-class CardPanel extends BootstrapMixin(Panel, "panel") {
-    setOptions(options) {
-        super.setOptions(options);
-        this.options.level = this.options.level || UI.Level.DEFAULT;
+class CardPanel extends SimpleStyledElement {
+    extraNodeAttributes(attr) {
+        attr.addClass(GlobalStyle.CardPanel.DEFAULT.panel);
+        if (this.getLevel()) {
+            attr.addClass(GlobalStyle.CardPanel.Level(this.getLevel()).panel);
+        }
+        if (this.getSize()) {
+            attr.addClass(GlobalStyle.CardPanel.Size(this.getSize()).panel);
+        }
     }
 
+    getTitle() {
+        return this.options.title;
+    }
 
     render() {
+        let headingLevel = (this.getLevel() ? GlobalStyle.CardPanel.Level(this.getLevel()).heading : "");
+
         return [
-            <div className="panel-heading">{this.getTitle()}</div>,
-            <div className="panel-body" style={this.options.bodyStyle}>{this.getGivenChildren()}</div>,
+            <div className={`${GlobalStyle.CardPanel.DEFAULT.heading} ${headingLevel}`}>{this.getTitle()}</div>,
+            <div className={GlobalStyle.CardPanel.DEFAULT.body} style={this.options.bodyStyle}>{this.getGivenChildren()}</div>,
         ];
     }
 }
@@ -539,7 +555,6 @@ class ProgressBar extends BootstrapMixin(UI.Element, "progress") {
         </div>;
     }
 
-
     set(value) {
         if (value < 0)
             value = 0;
@@ -550,5 +565,5 @@ class ProgressBar extends BootstrapMixin(UI.Element, "progress") {
     }
 }
 
-export {BootstrapMixin, SimpleStyledElement, Label, LinkLabel, Button, StateButton, AjaxButton, ButtonGroup, RadioButtonGroup,
-      BootstrapLabel, CardPanel, CollapsiblePanelStyle, CollapsiblePanel, CollapsibleMixin,  DelayedCollapsiblePanel, ProgressBar};
+export {BootstrapMixin, SimpleStyledElement, Label, Button, StateButton, AjaxButton, ButtonGroup, RadioButtonGroup, Badge,
+    CardPanel, CollapsiblePanelStyle, CollapsiblePanel, CollapsibleMixin,  DelayedCollapsiblePanel, ProgressBar};

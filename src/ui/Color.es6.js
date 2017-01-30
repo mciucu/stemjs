@@ -494,9 +494,9 @@ function buildColors(color) {
     let colors = [];
     let darkenPercents;
     if (Color.isLight(color)) {
-        darkenPercents = [0, 0.05, 0.1, 0.15, 0.3, 0.8];
+        darkenPercents = [0.05, 0, 0.05, 0.1, 0.15, 0.3, 0.8];
     } else {
-        darkenPercents = [0, 0.1, 0.2, 0.23, 0.1, -1];
+        darkenPercents = [-0.3, 0, 0.1, 0.2, 0.23, 0.1, -1];
     }
     for (let i = 0; i < darkenPercents.length; i += 1) {
         colors.push(darken(color, darkenPercents[i]));

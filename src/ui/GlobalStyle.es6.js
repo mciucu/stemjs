@@ -1,6 +1,6 @@
 import {UI} from "UI";
 import {StyleSet} from "Style";
-import {styleRule} from "../decorators/Style";
+import {styleRule, styleRuleInherit} from "../decorators/Style";
 import {buildColors} from "Color";
 
 let GlobalStyle = {
@@ -8,12 +8,13 @@ let GlobalStyle = {
 
 const COLOR = {
     PLAIN: "#ffffff",
+    GRAY: "#777",
     PRIMARY: "#337ab7",
     SUCCESS: "#5cb85c",
     INFO: "#5bc0de",
     WARNING: "#f0ad4e",
     DANGER: "#d9534f",
-    GOOGLE: "#de4b39", // TODO: WTF Denis?
+    GOOGLE: "#de4b39",
     FACEBOOK: "#3b5998",
 };
 
@@ -47,7 +48,6 @@ class ButtonGroupStyle extends StyleSet {
             }
         }
     }
-
 };
 
 class RadioButtonGroupStyle extends StyleSet {
@@ -69,10 +69,13 @@ class RadioButtonGroupStyle extends StyleSet {
 
 function BasicLevelStyleSet(colorClassFunction) {
     class BasicLevelStyleClass extends StyleSet {
+        colorClassBuilder = colorClassFunction
+
         @styleRule
         PLAIN = {};
 
-        colorClassBuilder = colorClassFunction
+        @styleRule
+        GRAY = {};
 
         @styleRule
         PRIMARY = this.colorClassBuilder(buildColors(COLOR.PRIMARY));
@@ -112,18 +115,18 @@ function BasicLevelStyleSet(colorClassFunction) {
 
 let buttonColorClassBuilder = (colors) => {
     let darker1 = {
-        backgroundColor: colors[1],
-    };
-    let darker2 = {
         backgroundColor: colors[2],
     };
-    let darker3 = {
+    let darker2 = {
         backgroundColor: colors[3],
     };
+    let darker3 = {
+        backgroundColor: colors[4],
+    };
     let regular = {
-        backgroundColor: colors[0],
-        borderColor: colors[4],
-        color: colors[5],
+        backgroundColor: colors[1],
+        borderColor: colors[5],
+        color: colors[6],
     };
     return Object.assign({}, regular, {
         ":hover": darker1,
@@ -137,7 +140,6 @@ let buttonColorClassBuilder = (colors) => {
 };
 
 class ButtonStyle extends BasicLevelStyleSet(buttonColorClassBuilder) {
-
     // DEFAULT uses MEDIUM as size and PLAIN as level
     @styleRule
     DEFAULT = [{
@@ -198,14 +200,14 @@ class ButtonStyle extends BasicLevelStyleSet(buttonColorClassBuilder) {
 
 let labelColorClassBuilder = (colors) => {
     let darker = {
-        backgroundColor: colors[1],
-        color: "white",
+        backgroundColor: colors[2],
+        color: colors[6],
         textDecoration: "none",
     };
     let regular = {
-        backgroundColor: colors[0],
-        borderColor: colors[4],
-        color: colors[5],
+        backgroundColor: colors[1],
+        borderColor: colors[5],
+        color: colors[6],
     };
     return Object.assign({}, regular, {
         ":hover": darker,
@@ -219,7 +221,6 @@ class LabelStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
     // DEFAULT uses MEDIUM as size and PLAIN as level
     @styleRule
     DEFAULT = [{
-        cursor: "hand",
         fontWeight: "bold",
         border: "0.1em solid transparent",
         padding: "0.07em 0.4em",
@@ -236,7 +237,7 @@ class LabelStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
         },
     }, {
         "font-size": "12px",
-    }, this.colorClassBuilder(buildColors(COLOR.PLAIN))];
+    }, this.colorClassBuilder(buildColors(COLOR.GRAY))];
 
     @styleRule
     EXTRA_SMALL = {
@@ -273,10 +274,177 @@ class LabelStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
     }
 };
 
+let badgeColorClassBuilder = (colors) => {
+    return {
+        backgroundColor: colors[1],
+        borderColor: colors[5],
+        color: colors[6],
+    };
+};
+
+class BadgeStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
+    // DEFAULT uses MEDIUM as size and PLAIN as level
+    @styleRule
+    DEFAULT = [{
+        display: "inline-block",
+        padding: "0.25em 0.55em",
+        fontWeight: "700",
+        lineHeight: "1",
+        color: "#fff",
+        textAlign: "center",
+        whiteSpace: "nowrap",
+        verticalAlign: "middle",
+        backgroundColor: "#777",
+        borderRadius: "0.8em",
+    }, {
+        "font-size": "12px",
+    }, this.colorClassBuilder(buildColors(COLOR.GRAY))];
+
+    @styleRule
+    EXTRA_SMALL = {
+        fontSize: "10px",
+        padding: "0.1em 0.2em",
+    };
+
+    @styleRule
+    SMALL = {
+        fontSize: "10px",
+    };
+
+    @styleRule
+    MEDIUM = {};
+
+    @styleRule
+    LARGE = {
+        fontSize: "14px",
+    };
+
+    @styleRule
+    EXTRA_LARGE = {
+        fontSize: "17px",
+        padding: "0.1em 0.2em",
+    };
+
+    Size(size) {
+        for (let type of Object.keys(UI.Size)) {
+            if (size == UI.Size[type]) {
+                return this[type];
+            }
+        }
+    }
+};
+
+
+function cardPanelColorClassBuilder(color) {
+    let colors = buildColors(color);
+    class CardPanelLevelStyle extends StyleSet {
+        @styleRule
+        heading = {
+            color: colors[6],
+            backgroundColor: colors[0],
+            borderBottomColor: colors[4],
+        };
+
+        @styleRule
+        panel = {
+            borderColor: colors[4],
+        };
+    }
+
+    return CardPanelLevelStyle;
+};
+
+function cardPanelSizeClassBuilder(fontSize) {
+    let panelStyle = {};
+    if (fontSize) {
+        panelStyle.fontSize = fontSize;
+    }
+    class CardPanelSizeStyle extends StyleSet {
+        @styleRule
+        panel = panelStyle;
+    };
+
+    return CardPanelSizeStyle;
+};
+
+class CardPanelStyle {
+    defaultClassBuilder = function() {
+        class DefaultCardPanelStyle extends cardPanelColorClassBuilder(COLOR.PLAIN) {
+            @styleRuleInherit
+            heading = {
+                padding: "0.8em 1.2em",
+                borderBottomWidth: "0.08em",
+                borderBottomStyle: "solid",
+            };
+
+            @styleRule
+            body = {
+                padding: "0.35em",
+            };
+
+            @styleRuleInherit
+            panel = {
+                borderWidth: "0.08em",
+                borderRadius: "0.3em",
+                borderStyle: "solid",
+                backgroundColor: "#ffffff",
+            };
+        }
+
+        return DefaultCardPanelStyle;
+    };
+
+    DEFAULT = new (this.defaultClassBuilder())();
+
+    EXTRA_SMALL = new (cardPanelSizeClassBuilder("11px"))();
+
+    SMALL = new (cardPanelSizeClassBuilder("12px"))();
+
+    MEDIUM = new (cardPanelSizeClassBuilder)();
+
+    LARGE = new (cardPanelSizeClassBuilder("17px"))();
+
+    EXTRA_LARGE = new (cardPanelSizeClassBuilder("21px"))();
+
+    Size(size) {
+        for (let type of Object.keys(UI.Size)) {
+            if (size == UI.Size[type]) {
+                return this[type];
+            }
+        }
+    }
+
+    PRIMARY = new (cardPanelColorClassBuilder(COLOR.PRIMARY))();
+
+    SUCCESS = new (cardPanelColorClassBuilder(COLOR.SUCCESS))();
+
+    INFO = new (cardPanelColorClassBuilder(COLOR.INFO))();
+
+    WARNING = new (cardPanelColorClassBuilder(COLOR.WARNING))();
+
+    DANGER = new (cardPanelColorClassBuilder(COLOR.DANGER))();
+
+    GOOGLE = new (cardPanelColorClassBuilder(COLOR.GOOGLE))();
+
+    FACEBOOK = new (cardPanelColorClassBuilder(COLOR.FACEBOOK))();
+
+    Level(level) {
+        if (this[level]) {
+            return this[level];
+        }
+        for (let type of Object.keys(UI.Level)) {
+            if (level == UI.Level[type]) {
+                return this[type];
+            }
+        }
+    }
+}
 
 GlobalStyle.Button = ButtonStyle.getInstance();
 GlobalStyle.RadioButtonGroup = RadioButtonGroupStyle.getInstance();
 GlobalStyle.ButtonGroup = ButtonGroupStyle.getInstance();
 GlobalStyle.Label = LabelStyle.getInstance();
+GlobalStyle.Badge = BadgeStyle.getInstance();
+GlobalStyle.CardPanel = new CardPanelStyle();
 
 export {GlobalStyle};

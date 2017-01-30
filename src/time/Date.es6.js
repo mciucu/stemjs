@@ -7,6 +7,10 @@ class StemDate extends window.Date {
         return new this(unixTime * 1000);
     }
 
+    clone() {
+        return new this.constructor(this.getTime());
+    }
+
     toUnix() {
         return this.getTime() / 1000;
     }
@@ -39,6 +43,17 @@ class StemDate extends window.Date {
         }
         // The next line implicitly calls valueOf()
         return new this.constructor(+this - value);
+    }
+
+    difference(date) {
+        if (!(date instanceof Date)) {
+            throw Error("StemDate difference needs to take in a date");
+        }
+        return this.subtract(date).abs();
+    }
+
+    diff(date) {
+        return +this.difference(date);
     }
 
     // Just to keep moment compatibility, until we actually implement locales

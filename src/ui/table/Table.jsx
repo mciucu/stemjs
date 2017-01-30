@@ -34,7 +34,6 @@ class Table extends UI.Primitive("table") {
 
     extraNodeAttributes(attr) {
         attr.addClass(this.getStyleSet().table);
-        attr.addClass(this.getStyleSet().tableStripped);
     }
 
     getRowClass() {

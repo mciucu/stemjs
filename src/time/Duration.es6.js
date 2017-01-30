@@ -33,6 +33,10 @@ export class Duration {
         return this.add(-(this.constructor.toDuration(duration)));
     }
 
+    abs() {
+        return new Duration(Math.abs(+this));
+    }
+
     clone() {
         return new Duration(this);
     }
@@ -67,3 +71,16 @@ export class Duration {
         // Humanize the duration (should work with localization)
     }
 }
+
+function canonicalDuration(name) {
+    let duration = new Duration({
+        [name + "s"]: 1,
+    });
+    duration.name = name;
+    return duration;
+}
+
+Duration.SECOND = canonicalDuration("second");
+Duration.MINUTE = canonicalDuration("minute");
+Duration.HOUR   = canonicalDuration("hour");
+Duration.DAY    = canonicalDuration("day");
