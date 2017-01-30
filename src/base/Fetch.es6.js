@@ -18,7 +18,7 @@ if (window) {
 }
 
 // Parse the headers from an xhr object, to return a native Headers object
-function getHeaders(xhr) {
+function parseHeaders(xhr) {
     let rawHeader = xhr.getAllResponseHeaders() || "";
     let headers = new Headers();
     for (let line of rawHeader.split(/\r?\n/)) {
@@ -77,7 +77,7 @@ class XHRPromise {
             this.promiseReject = reject;
 
             xhr.onload = () => {
-                let headers = getHeaders(xhr);
+                let headers = parseHeaders(xhr);
                 let body = xhr.response || xhr.responseText;
                 let responseInit = {
                     status: xhr.status,
@@ -268,4 +268,4 @@ fetch.defaultPreprocessors = [jQueryCompatibilityPreprocessor];
 
 fetch.polyfill = true;
 
-export {XHRPromise, fetch, getURLSearchParams, jQueryCompatibilityPreprocessor};
+export {XHRPromise, fetch, composeURL, parseHeaders, getURLSearchParams, jQueryCompatibilityPreprocessor};
