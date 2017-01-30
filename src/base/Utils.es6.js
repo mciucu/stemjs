@@ -200,3 +200,59 @@ export function uniqueId(obj) {
     }
     return objectWeakMap.get(obj);
 }
+
+// TODO: should be done with String.padLeft
+export function padNumber(num, minLength) {
+    let strNum = String(num);
+    while (strNum.length < minLength) {
+        strNum = "0" + strNum;
+    }
+    return strNum;
+}
+
+// Returns the english ordinal suffix of a number
+export function getOrdinalSuffix(num) {
+    let suffixes = ["th", "st", "nd", "rd"];
+    let lastDigit = num % 10;
+    let isTeen = Math.floor(num / 10) % 10 === 1;
+    return (!isTeen && suffixes[lastDigit]) || suffixes[0];
+}
+
+export function suffixWithOrdinal(num) {
+    return num + getOrdinalSuffix(num);
+}
+
+export function instantiateNative(BaseClass, NewClass, ...args) {
+    let obj = new BaseClass(...args);
+    obj.__proto__ = NewClass.prototype;
+    return obj;
+}
+
+// This function can be used as a decorator in case we're extending native classes (Map/Set/Date)
+// and we want to fix the way babel breaks this scenario
+// WARNING: it destroys the code in constructor
+// If you want a custom constructor, you need to implement a static create method that generates new objects
+// Check the default constructor this code, or an example where this is done.
+export function extendsNative(targetClass) {
+    if (targetClass.toString().includes(" extends ")) {
+        // Native extended classes are cool, leave them as they are
+        return;
+    }
+    let BaseClass = targetClass.__proto__;
+    let allKeys = Object.getOwnPropertySymbols(targetClass).concat(Object.getOwnPropertyNames(targetClass));
+
+    // Fill in the default constructor
+    let newClass = targetClass.create || function create() {
+        return instantiateNative(BaseClass, newClass, ...arguments);
+        };
+    for (const key of allKeys) {
+        let property = Object.getOwnPropertyDescriptor(targetClass, key);
+        Object.defineProperty(newClass, key, property);
+    }
+    newClass.prototype = targetClass.prototype;
+    newClass.__proto__ = targetClass.__proto__;
+
+    newClass.prototype.constructor = newClass;
+
+    return newClass;
+}

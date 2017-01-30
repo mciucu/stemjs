@@ -43,3 +43,5 @@ export function format(date, pattern) {
 }
 
 export {ServerTime};
+
+export * from "../time/Date";

@@ -157,7 +157,7 @@ class XHRPromise {
         }
     }
 
-    // TODO: next 2 functions should fail if you have onSuccess/onError
+    // TODO: next 2 functions should throw an exception if you have onSuccess/onError
     then() {
         return this.getPromise().then(...arguments);
     }
@@ -183,10 +183,10 @@ class XHRPromise {
     }
 
     addXHRListener(name, callback) {
-        this.getXHR().addEventListener(name, callback);        
+        this.getXHR().addEventListener(...arguments);
     }
 
-    addProgressListener() {
+    addProgressListener(callback) {
         this.addXHRListener("progress", ...arguments);
     }
 }
@@ -249,6 +249,8 @@ function fetch(input, ...args) {
 
     options.method = options.method || "GET";
 
+    // If there are any url search parameters, update the url from the urlParams or urlSearchParams fields
+    // These fields can be plain objects (jQuery style) or can be URLSearchParams objects
     const urlParams = options.urlParams || options.urlSearchParams;
     if (urlParams) {
         // Change the URL of the request to add a query
