@@ -1,3 +1,5 @@
+import {StemDate} from "../time/Date";
+
 // TODO: need to take care of dependency on moment
 // File meant to handle server time/client time differences
 let ServerTime = {
@@ -24,14 +26,11 @@ export const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 // times should be in unix seconds
 // TODO: should be in the time file
 export function isDifferentDay(timeA, timeB) {
-    if (Math.max(timeA, timeB) - Math.min(timeA, timeB) > DAY_IN_MILLISECONDS / 1000) {
+    if (Math.abs(timeA - timeB) > DAY_IN_MILLISECONDS / 1000) {
         return true;
     }
-    // Check if different day of the week, when difference is less than a day
-    if (moment.unix(timeA).day() !== moment.unix(timeB).day()) {
-        return true;
-    }
-    return false;
+    // Check if different day of the month, when difference is less than a day
+    return (StemDate.unix(timeA).getDate() !== StemDate.unix(timeB).getDate());
 }
 
 export function unix(timestamp) {
