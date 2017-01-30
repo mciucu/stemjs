@@ -1,5 +1,6 @@
 // Very primitive version of a DateTimePicker, still work in progress, not production ready
 import {UI} from "UIBase";
+import {StemDate} from "Time";
 
 function getTwoDigitsNumber(value) {
     return value < 10 ? "0" + value : String(value);
@@ -9,7 +10,7 @@ class DateTimePicker extends UI.Element {
     getDefaultOptions() {
         return {
             format: "D/M/Y H:m",
-            defaultDate: new Date(2017, 0, 6, 16, 30)
+            defaultDate: new StemDate(2017, 0, 6, 16, 30)
         };
     }
 
@@ -87,7 +88,7 @@ class DateTimePicker extends UI.Element {
                 j += 1;
             }
         }
-        return new Date(year, month, day, hour, minute);
+        return new StemDate(year, month, day, hour, minute);
     }
 
     getDate() {
@@ -96,10 +97,6 @@ class DateTimePicker extends UI.Element {
 
     getUnixTime() {
         return this.getDate().getTime() / 1000;
-    }
-
-    getMoment() {
-        return moment(this.getDate());
     }
 
     addChangeListener(action) {

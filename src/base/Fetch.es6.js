@@ -268,4 +268,4 @@ fetch.defaultPreprocessors = [jQueryCompatibilityPreprocessor];
 
 fetch.polyfill = true;
 
-export {XHRPromise, fetch, composeURL, getURLSearchParams, jQueryCompatibilityPreprocessor};
+export {XHRPromise, fetch, getURLSearchParams, jQueryCompatibilityPreprocessor};

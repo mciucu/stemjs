@@ -1,19 +1,45 @@
-// This file is not usable yet, just a stub
+import {isPlainObject} from "../base/Utils";
 
 export class Duration {
-    constructor(miliseconds) {
-        // TODO: can take in a plain object, a value in miliseconds, or another Duration object
-        if (miliseconds instanceof Duration) {
-            miliseconds = miliseconds.miliseconds;
+    constructor(duration) {
+        if (duration instanceof window.Date) {
+            throw new Error("Can't automatically transform Date to Duration, use date.getTime() if you really want to");
         }
-        // if (isPlainObject(miliseconds)) {
-            // can have the fields "year", "months", etc...
-        // }
-        this.miliseconds = miliseconds;
+        if (duration instanceof Duration) {
+            duration = duration.miliseconds;
+        }
+        if (isPlainObject(duration)) {
+            duration = (duration.miliseconds || 0) +
+                (duration.seconds || 0) * 1000 +
+                (duration.minutes || 0) * 1000 * 60 +
+                (duration.hours   || 0) * 1000 * 60 * 60 +
+                (duration.days    || 0) * 1000 * 60 * 60 * 24;
+        }
+        this.miliseconds = duration;
+    }
+
+    static toDuration(duration) {
+        if (duration instanceof Duration) {
+            return duration;
+        }
+        return new this(duration);
+    }
+
+    add(duration) {
+        return this.constructor.toDuration(+this + this.constructor.toDuration(duration));
+    }
+
+    subtract(duration) {
+        return this.add(-(this.constructor.toDuration(duration)));
     }
 
     clone() {
         return new Duration(this);
+    }
+
+    // The primitive value
+    valueOf() {
+        return this.miliseconds;
     }
 
     toNanoseconds() {
@@ -39,8 +65,5 @@ export class Duration {
 
     toString(locale) {
         // Humanize the duration (should work with localization)
-    }
-
-    toLocalizable() {
     }
 }

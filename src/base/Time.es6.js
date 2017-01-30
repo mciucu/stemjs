@@ -44,3 +44,4 @@ export function format(date, pattern) {
 export {ServerTime};
 
 export * from "../time/Date";
+export * from "../time/Duration";

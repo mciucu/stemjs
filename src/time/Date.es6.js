@@ -1,4 +1,5 @@
 import {padNumber, suffixWithOrdinal, extendsNative} from "../base/Utils";
+import {Duration} from "./Duration";
 
 @extendsNative
 class StemDate extends window.Date {
@@ -6,8 +7,38 @@ class StemDate extends window.Date {
         return new this(unixTime * 1000);
     }
 
+    toUnix() {
+        return this.getTime() / 1000;
+    }
+
+    unix() {
+        return Math.round(this.toUnix());
+    }
+
     getWeekDay() {
         return this.getDay();
+    }
+
+    add(value) {
+        if (value instanceof window.date) {
+            throw new Error("Can't add two dates, one of them has to be a duration");
+        }
+        if (!(value instanceof Duration)) {
+            value = new Duration(value);
+        }
+        // The next line implicitly calls valueOf()
+        return new this.constructor(+this + value);
+    }
+
+    subtract(value) {
+        if (value instanceof window.Date) {
+            return new Duration(+this - value);
+        }
+        if (!(value instanceof Duration)) {
+            value = new Duration(value);
+        }
+        // The next line implicitly calls valueOf()
+        return new this.constructor(+this - value);
     }
 
     // Just to keep moment compatibility, until we actually implement locales
@@ -43,6 +74,15 @@ class StemDate extends window.Date {
         let tokens = this.constructor.splitToTokens(str);
         tokens = tokens.map(token => this.evalToken(token));
         return tokens.join("");
+    }
+
+    isValid() {
+        return (this.toString() !== "Invalid Date");
+    }
+
+    utc() {
+        // Temp hack
+        return new this.constructor(+this + this.getTimezoneOffset() * 60 * 1000);
     }
 }
 
