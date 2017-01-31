@@ -54,7 +54,6 @@ class SimpleStyledElement extends UI.Element {
 }
 
 
-
 class IconableInterface extends SimpleStyledElement {
     render() {
         return [this.beforeChildren(), this.getLabel(), super.render()];
@@ -513,18 +512,17 @@ class DelayedCollapsiblePanel extends CollapsiblePanel {
 }
 
 
-class ProgressBar extends BootstrapMixin(UI.Element, "progress") {
+class ProgressBar extends SimpleStyledElement {
+    extraNodeAttributes(attr) {
+        attr.addClass(GlobalStyle.ProgressBar.CONTAINER);
+    }
+
     render() {
         let valueInPercent = (this.options.value || 0) * 100;
 
         let barOptions = {
-            className: "progress-bar",
-            role: "progressbar",
-            "aria-valuenow": valueInPercent,
-            "aria-valuemin": 0,
-            "aria-valuemax": 100,
+            className: GlobalStyle.ProgressBar.DEFAULT,
             style: {
-                addingBottom: 5,
                 width: valueInPercent + "%",
                 height: this.options.height + "px",
             },
@@ -533,18 +531,17 @@ class ProgressBar extends BootstrapMixin(UI.Element, "progress") {
         if (this.options.disableTransition) {
             Object.assign(barOptions.style, {
                 transition: "none",
-                "-webkit-transition": "none"
             });
         }
 
         if (this.options.level) {
-            barOptions.className += " progress-bar-" + this.options.level;
+            barOptions.className += " " + GlobalStyle.ProgressBar.Level(this.getLevel());
         }
         if (this.options.striped) {
-            barOptions.className += " progress-bar-striped";
+            barOptions.className += " " + GlobalStyle.ProgressBar.STRIPED;
         }
         if (this.options.active) {
-            barOptions.className += " active";
+            barOptions.className += " " + GlobalStyle.ProgressBar.ACTIVE;
         }
         if (this.options.color) {
             barOptions.style.backgroundColor = this.options.color;
@@ -564,6 +561,7 @@ class ProgressBar extends BootstrapMixin(UI.Element, "progress") {
         this.redraw();
     }
 }
+
 
 export {BootstrapMixin, SimpleStyledElement, Label, Button, StateButton, AjaxButton, ButtonGroup, RadioButtonGroup, Badge,
     CardPanel, CollapsiblePanelStyle, CollapsiblePanel, CollapsibleMixin,  DelayedCollapsiblePanel, ProgressBar};

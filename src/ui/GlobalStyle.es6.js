@@ -160,7 +160,7 @@ class ButtonStyle extends BasicLevelStyleSet(buttonColorClassBuilder) {
             cursor: "not-allowed",
         },
     }, {
-        "font-size": "14px",
+        fontSize: "14px",
     }, this.colorClassBuilder(buildColors(COLOR.PLAIN))];
 
     @styleRule
@@ -440,11 +440,91 @@ class CardPanelStyle {
     }
 }
 
+
+let progressBarColorClassBuilder = (colors) => {
+    return {
+        backgroundColor: colors[1],
+    };
+}
+
+class ProgressBarStyle extends BasicLevelStyleSet(progressBarColorClassBuilder) {
+    @styleRule
+    CONTAINER = {
+        height: "20px",
+        marginBottom: "20px",
+        overflow: "hidden",
+        backgroundColor: "#f5f5f5",
+        borderRadius: "4px",
+        boxShadow: "inset 0 1px 2px rgba(0, 0, 0, .1)",
+    }
+    @styleRule
+    DEFAULT = [{
+        float: "left",
+        width: "0",
+        height: "100%",
+        lineHeight: "20px",
+        color: "#fff",
+        textAlign: "center",
+        backgroundColor: "#337ab7",
+        boxShadow: "inset 0 -1px 0 rgba(0, 0, 0, .15)",
+        transition: "width .6s ease",
+        fontColor: "#ffffff",
+    }, {
+        fontSize: "12px",
+    }, this.colorClassBuilder(buildColors(COLOR.PRIMARY))];
+
+    @styleRule
+    STRIPED = {
+        backgroundImage: "linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent)",
+        backgroundSize: "40px 40px",
+    };
+
+    @styleRule
+    ACTIVE = {
+        animation: "progress-bar-stripes 2s linear infinite",
+    };
+
+    @styleRule
+    EXTRA_SMALL = {
+        fontSize: "8px",
+    };
+
+    @styleRule
+    SMALL = {
+        fontSize: "10px",
+    };
+
+    @styleRule
+    MEDIUM = {};
+
+    @styleRule
+    LARGE = {
+        fontSize: "14px",
+    };
+
+    @styleRule
+    EXTRA_LARGE = {
+        fontSize: "17px",
+        padding: "0.1em 0.2em",
+    };
+
+    Size(size) {
+        for (let type of Object.keys(UI.Size)) {
+            if (size == UI.Size[type]) {
+                return this[type];
+            }
+        }
+    }
+}
+
+
+
 GlobalStyle.Button = ButtonStyle.getInstance();
 GlobalStyle.RadioButtonGroup = RadioButtonGroupStyle.getInstance();
 GlobalStyle.ButtonGroup = ButtonGroupStyle.getInstance();
 GlobalStyle.Label = LabelStyle.getInstance();
 GlobalStyle.Badge = BadgeStyle.getInstance();
 GlobalStyle.CardPanel = new CardPanelStyle();
+GlobalStyle.ProgressBar = ProgressBarStyle.getInstance();
 
 export {GlobalStyle};

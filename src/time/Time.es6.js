@@ -1,4 +1,4 @@
-import {StemDate} from "../time/Date";
+import {StemDate} from "./Date";
 
 // TODO: need to take care of dependency on moment
 // File meant to handle server time/client time differences
@@ -43,5 +43,5 @@ export function format(date, pattern) {
 
 export {ServerTime};
 
-export * from "../time/Date";
-export * from "../time/Duration";
+export * from "./Date";
+export * from "./Duration";

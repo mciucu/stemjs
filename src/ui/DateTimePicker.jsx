@@ -1,6 +1,6 @@
 // Very primitive version of a DateTimePicker, still work in progress, not production ready
-import {UI} from "UIBase";
-import {StemDate} from "Time";
+import {UI} from "./UIBase";
+import {StemDate} from "../time/Time";
 
 function getTwoDigitsNumber(value) {
     return value < 10 ? "0" + value : String(value);

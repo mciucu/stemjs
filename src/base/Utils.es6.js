@@ -256,3 +256,18 @@ export function extendsNative(targetClass) {
 
     return newClass;
 }
+
+// Helpers to wrap iterators, to wrap all values in a function or to filter them
+export function* mapIterator(iter, func) {
+    for (let value of iter) {
+        yield func(value);
+    }
+}
+
+export function* filterIterator(iter, func) {
+    for (let value of iter) {
+        if (func(value)) {
+            yield value;
+        }
+    }
+}

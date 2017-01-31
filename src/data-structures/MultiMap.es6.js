@@ -1,3 +1,5 @@
+import {mapIterator} from "../base/Utils";
+
 // A map that supports multiple values to the same key
 class MultiMap {
     constructor() {
@@ -13,6 +15,7 @@ class MultiMap {
     normalizeKey(key) {
         return key;
     }
+    
     normalizeValue(value) {
         return value;
     }
@@ -21,7 +24,7 @@ class MultiMap {
         let nKey = this.normalizeKey(key);
         let nValue = this.normalizeValue(value);
         if (this.map.has(nKey)) {
-            this.map.get(nValue).push(nValue);
+            this.map.get(nKey).push(nValue);
         } else {
             this.map.set(nKey, [nValue]);
         }
@@ -61,27 +64,20 @@ class MultiMap {
         }
     }
 
-    // TODO: this should be a wrapper on top of this.map.entries
-    entriesArray() {
-        let entries = [];
-        for (let [key, values] of this.map.entries()) {
-            for (let value of values) {
-                entries.push([key, value]);
-            }
-        }
-        return entries;
-    }
-
     keys() {
-        return this.constructor.iterator(this.entriesArray().map(entry => entry[0]));
+        return mapIterator(this.entries(), entry => entry[0]);
     }
 
     values() {
-        return this.constructor.iterator(this.entriesArray().map(entry => entry[1]));
+        return mapIterator(this.entries(), entry => entry[1]);
     }
 
-    entries() {
-        return this.constructor.iterator(this.entriesArray());
+    *entries() {
+        for (let [key, values] of this.map.entries()) {
+            for (let value of values) {
+                yield [key, value];
+            }
+        }
     }
 
     [Symbol.iterator]() {

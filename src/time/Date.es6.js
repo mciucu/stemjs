@@ -3,6 +3,14 @@ import {Duration} from "./Duration";
 
 @extendsNative
 class StemDate extends window.Date {
+    static toDate(date) {
+        if (date instanceof StemDate) {
+            return date;
+        } else {
+            return new this(date);
+        }
+    }
+
     static unix(unixTime) {
         return new this(unixTime * 1000);
     }
@@ -17,6 +25,18 @@ class StemDate extends window.Date {
 
     unix() {
         return Math.round(this.toUnix());
+    }
+
+    isBefore(date) {
+        return this.getTime() < StemDate.toDate(date).getTime();
+    }
+
+    equals(date) {
+        return this.getTime() === StemDate.toDate(date).getTime();
+    }
+
+    isAfter(date) {
+        return this.getTime() > StemDate.toDate(date).getTime();
     }
 
     getWeekDay() {

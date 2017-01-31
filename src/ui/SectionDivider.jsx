@@ -211,7 +211,7 @@ class SectionDivider extends UI.Element {
             divider.show();
         }
         divider = neighborChild = null;
-        for (let i = index * 2 + + 1; i < this.children.length; i += 1) {
+        for (let i = index * 2 + 1; i < this.children.length; i += 1) {
             if (i % 2) {
                 if (this.children[i].hasClass("hidden")) {
                     divider = this.children[i];
@@ -367,13 +367,31 @@ class SectionDivider extends UI.Element {
     render() {
         let children = [];
         this.dividers = 0;
+        let leftChildVisible = false;
         for (let child of this.options.children) {
             if (children.length > 0) {
-                children.push(<DividerBar ref={"divider" + this.dividers} orientation={this.getOrientation()}/>);
+                let hiddenClass;
+                if (leftChildVisible) {
+                    if (!child.hasClass("hidden")) {
+                        hiddenClass = "";
+                    } else {
+                        hiddenClass = "hidden";
+                    }
+                } else {
+                    if (!child.hasClass("hidden")) {
+                        leftChildVisible = true;
+                    }
+                    hiddenClass = "hidden";
+                }
+                children.push(<DividerBar className={hiddenClass} ref={"divider" + this.dividers} orientation={this.getOrientation()}/>);
                 this.dividers += 1;
             }
             children.push(child);
+            if (!child.hasClass("hidden")) {
+                leftChildVisible = true;
+            }
         }
+        console.warn(children);
         return children;
     }
 }

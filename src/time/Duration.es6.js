@@ -33,6 +33,12 @@ export class Duration {
         return this.add(-(this.constructor.toDuration(duration)));
     }
 
+    // Returns true if was defined terms of absolute primitives (anything less than a day)
+    isAbsolute() {
+        return !this.relativeDuration;
+    }
+
+    // Returns a new Duration with a positive length
     abs() {
         return new Duration(Math.abs(+this));
     }
@@ -47,12 +53,12 @@ export class Duration {
     }
 
     toNanoseconds() {
-        return this.miliseconds / 1e6;
+        return +this / 1e6;
     }
 
     // TODO: for all these units, should have a way to get the float and int value
-    toMiliseconds() {
-        return this.miliseconds;
+    toMilliseconds() {
+        return +this;
     }
 
     toSeconds() {
@@ -77,10 +83,14 @@ function canonicalDuration(name) {
         [name + "s"]: 1,
     });
     duration.name = name;
+    duration.toString = () => name;
     return duration;
 }
 
+Duration.MILLISECOND = canonicalDuration("millisecond");
 Duration.SECOND = canonicalDuration("second");
 Duration.MINUTE = canonicalDuration("minute");
 Duration.HOUR   = canonicalDuration("hour");
 Duration.DAY    = canonicalDuration("day");
+Duration.MONTH  = canonicalDuration("month");
+Duration.YEAR   = canonicalDuration("year");
