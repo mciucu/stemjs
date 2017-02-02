@@ -49,6 +49,7 @@ class CollapsibleTableStyle extends StyleSet {
 
 let collapsibleTableStyle = new CollapsibleTableStyle();
 
+// TODO: refactor this to support redraw and render override
 class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
     getNodeType() {
         return "tbody";
@@ -165,4 +166,4 @@ function CollapsibleTableInterface(BaseTableClass) {
 
 let CollapsibleTable = CollapsibleTableInterface(Table);
 
-export {CollapsibleTable, CollapsibleTableInterface, CollapsibleTableRow, TableRowInCollapsibleTable};
+export {CollapsibleTable, CollapsibleTableInterface, CollapsibleTableRow, TableRowInCollapsibleTable, collapsibleTableStyle};

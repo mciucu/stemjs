@@ -106,7 +106,8 @@ class Body {
             return Promise.resolve(new Blob([this._bodyArrayBuffer]));
         }
         if (this._bodyFormData) {
-            throw new Error("could not read FormData body as blob");
+            // I know this is technically wrong, but only we can create this scenario
+            return Promise.resolve(this._bodyFormData);
         }
         return Promise.resolve(new Blob([this._bodyText]));
     }

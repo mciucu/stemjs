@@ -125,7 +125,7 @@ class TabArea extends UI.Element {
         let tabPanels = [];
         let activeTab;
 
-        for (let panel of this.options.children) {
+        for (let panel of this.getGivenChildren()) {
             let [tabTitle, tabPanel] = this.createTabPanel(panel);
 
             if (tabTitle.options.active) {

@@ -21,7 +21,9 @@ class Request extends Body {
 
         this.method = this.constructor.normalizeMethod(options.method || input.method || "GET");
         this.url = input.url;
-        this.headers = new Headers(options.headers || input.headers || null);
+
+        let headerArgs = options.headers || input.headers || null;
+        this.headers = headerArgs ? new Headers(headerArgs) : new Headers();
         this.context = options.context || input.context || "";
         this.referrer = options.referrer || input.referrer || "about:client";
         this.referrerPolicy = options.referrerPolicy || input.referrerPolicy || "";

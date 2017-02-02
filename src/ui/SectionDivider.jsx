@@ -73,14 +73,12 @@ class DividerBar extends UI.Element {
         this.orientation = this.options.orientation || UI.Orientation.HORIZONTAL;
     }
 
-    getNodeAttributes() {
-        let attr = super.getNodeAttributes();
+    extraNodeAttributes(attr) {
         if (this.orientation === UI.Orientation.VERTICAL) {
             attr.addClass(sectionDividerStyle.verticalDivider);
         } else if (this.orientation === UI.Orientation.HORIZONTAL) {
             attr.addClass(sectionDividerStyle.horizontalDivider);
         }
-        return attr;
     }
 };
 
@@ -368,7 +366,7 @@ class SectionDivider extends UI.Element {
         let children = [];
         this.dividers = 0;
         let leftChildVisible = false;
-        for (let child of this.options.children) {
+        for (let child of this.getGivenChildren()) {
             if (children.length > 0) {
                 let hiddenClass;
                 if (leftChildVisible) {
@@ -391,7 +389,6 @@ class SectionDivider extends UI.Element {
                 leftChildVisible = true;
             }
         }
-        console.warn(children);
         return children;
     }
 }

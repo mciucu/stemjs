@@ -5,7 +5,7 @@ The architecture isn't optimized for cool one-liners, but for maintenance and fl
 This isn't really a framework in the take-over-your-codebase sense of the word, but rather a collection of libraries and design patterns that were designed to work together.
 
 Check out the docs at https://stemjs.org/docs/
-This framework is being used for about a year at csacademy.com, and it really works a lot better for use than any other solution out there.
+This framework is being used for about a year at https://csacademy.com/, and it really works a lot better for use than any other solution out there.
 
 ## Recommended parts
 There's a lot of functionality implemented in Stem. The closer to the core code you go, the better is gets and will probably be clean-up and more commented in the future.

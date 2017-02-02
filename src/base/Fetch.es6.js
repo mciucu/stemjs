@@ -71,6 +71,7 @@ class XHRPromise {
         let xhr = new XMLHttpRequest();
         this.options = options;
         this.request = request;
+        this.xhr = xhr;
 
         this.promise = new Promise((resolve, reject) => {
             this.promiseResolve = resolve;
@@ -125,14 +126,17 @@ class XHRPromise {
 
             // TODO: there's no need to do this on a GET or HEAD
             request.blob().then((blob) => {
-                // TODO: save the blob here?
-                let body = (blob.size) ? blob : null;
-                xhr.send(body);
+                // The blob can be a FormData when we're polyfilling the Request class
+                let body = ((blob instanceof FormData) || blob.size) ? blob : null;
+                this.send(body);
             });
         });
 
-        this.xhr = xhr;
         this.request = request;
+    }
+
+    send(body) {
+        this.getXHR().send(body);
     }
 
     resolve(payload) {
@@ -207,16 +211,21 @@ function jQueryCompatibilityPreprocessor(options) {
         let method = options.method.toUpperCase();
         if (method === "GET" || method === "HEAD") {
             options.urlParams = options.urlParams || options.data;
+            if (options.cache === false) {
+                options.urlParams = getURLSearchParams(options.urlParams);
+                options.urlParams.set("_", Date.now());
+            }
         } else {
             let formData = new FormData();
             for (const key of Object.keys(options.data)) {
-                formData.set(key, options.data[key]);
+                formData.append(key, options.data[key]);
             }
             options.body = formData;
         }
     } else {
         options.body = options.body || options.data;
     }
+
     return options;
 }
 
@@ -245,6 +254,7 @@ function fetch(input, ...args) {
 
     if (typeof options.cache === "boolean") {
         options.cache = options.cache ? "force-cache" : "reload";
+        // TODO: cache still isn't fully done
     }
 
     options.method = options.method || "GET";
