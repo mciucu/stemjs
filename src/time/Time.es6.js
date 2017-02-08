@@ -1,8 +1,8 @@
 import {StemDate} from "./Date";
 
-// TODO: need to take care of dependency on moment
 // File meant to handle server time/client time differences
 let ServerTime = {
+    // TODO: this should return a StemDate, change it
     now() {
         return Date.now() - this.getOffset();
     },

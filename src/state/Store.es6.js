@@ -1,10 +1,21 @@
 import {Dispatchable, CleanupJobs} from "../base/Dispatcher";
 
+// The store information is kept in a symbol, to not interfere with serialization/deserialization
+export const StoreSymbol = Symbol("Store");
+
 class StoreObject extends Dispatchable {
-    constructor(obj) {
+    constructor(obj, event, store) {
         super();
         Object.assign(this, obj);
     };
+
+    setStore(store) {
+        this[StoreSymbol] = store;
+    }
+
+    getStore() {
+        return this[StoreSymbol];
+    }
 
     // By default, applying an event just shallow copies the fields from event.data
     applyEvent(event) {
@@ -110,7 +121,9 @@ class GenericObjectStore extends BaseStore {
     }
 
     createObject(event) {
-        return new this.ObjectWrapper(event.data, event);
+        let obj = new this.ObjectWrapper(event.data, event, this);
+        obj.setStore(this);
+        return obj;
     }
 
     applyCreateEvent(event, sendDispatch=true) {

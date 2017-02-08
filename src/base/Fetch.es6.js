@@ -91,9 +91,10 @@ class XHRPromise {
                 // Response has methods to return these as promises
                 if (typeof response[options.dataType] === "function") {
                     // TODO: should whitelist dataType to json, blob
-                    response[options.dataType]().then((json) => {
-                        this.resolve(json);
+                    response[options.dataType]().then((data) => {
+                        this.resolve(data);
                     }).catch((error) => {
+                        // TODO: this also catches anything in the handler, this is not intended!!!
                         this.reject(error);
                     });
                 } else {

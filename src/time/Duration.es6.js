@@ -1,5 +1,44 @@
 import {isPlainObject} from "../base/Utils";
 
+class TimeUnit {
+    static ALL = [];
+
+    constructor(name, baseUnit, multiplier, variableMultiplier=false) {
+        this.name = name;
+        this.baseUnit = baseUnit;
+        this.multiplier = multiplier;
+        this.milliseconds = ((baseUnit && baseUnit.getMilliseconds()) || 1) * multiplier;
+        this.variableMultiplier = variableMultiplier;
+        this.variableDuration = variableMultiplier || (baseUnit && baseUnit.isVariable());
+
+        // Add to the list of all time units
+        this.constructor.ALL.push(this);
+    }
+
+    getMilliseconds() {
+        return this.milliseconds;
+    }
+
+    isVariable() {
+        return this.variableDuration;
+    }
+
+    hasVariableMultiplier() {
+        return this.variableMultiplier;
+    }
+}
+
+TimeUnit.MILLISECOND = new TimeUnit("millisecond", null, 1);
+TimeUnit.SECOND = new TimeUnit("second", TimeUnit.MILLISECOND, 1000);
+TimeUnit.MINUTE = new TimeUnit("minute", TimeUnit.SECOND, 60);
+TimeUnit.HOUR = new TimeUnit("hour", TimeUnit.MINUTE, 60);
+TimeUnit.DAY = new TimeUnit("day", TimeUnit.HOUR, 24, true);
+TimeUnit.WEEK = new TimeUnit("week", TimeUnit.DAY, 7);
+TimeUnit.MONTH =  new TimeUnit("month", TimeUnit.DAY, 30, true);
+TimeUnit.QUARTER = new TimeUnit("quarter", TimeUnit.MONTH, 3);
+TimeUnit.TRIMESTER = new TimeUnit("trimester", TimeUnit.MONTH, 4);
+TimeUnit.YEAR = new TimeUnit("year", TimeUnit.MONTH, 12);
+
 export class Duration {
     constructor(duration) {
         if (duration instanceof window.Date) {
@@ -17,6 +56,11 @@ export class Duration {
         }
         this.miliseconds = duration;
     }
+
+    // initFromPlainObject(obj) {
+    //     this.
+    //     for (const )
+    // }
 
     static toDuration(duration) {
         if (duration instanceof Duration) {

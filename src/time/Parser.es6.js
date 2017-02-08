@@ -1,4 +1,5 @@
 // This file is not usable yet, just a stub
+import {StemDate} from "./Date";
 
 let tokenMap = new Map();
 
