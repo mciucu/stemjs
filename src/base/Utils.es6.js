@@ -257,6 +257,8 @@ export function extendsNative(targetClass) {
     return newClass;
 }
 
+export const NOOP_FUNCTION = () => {};
+
 // Helpers to wrap iterators, to wrap all values in a function or to filter them
 export function* mapIterator(iter, func) {
     for (let value of iter) {

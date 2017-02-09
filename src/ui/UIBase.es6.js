@@ -1,4 +1,4 @@
-import {unwrapArray, setObjectPrototype, suffixNumber} from "../base/Utils";
+import {unwrapArray, setObjectPrototype, suffixNumber, NOOP_FUNCTION} from "../base/Utils";
 import {Dispatchable} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
 
@@ -280,9 +280,11 @@ class UIElement extends BaseUIElement {
         }
     }
 
+    extraNodeAttributes(attr) {}
+
     applyNodeAttributes() {
         let attr;
-        if (this.extraNodeAttributes) {
+        if (this.extraNodeAttributes != NOOP_FUNCTION) {
             // Create a copy of options, that is modifiable
             attr = this.getNodeAttributes(true);
             this.extraNodeAttributes(attr);
@@ -566,6 +568,9 @@ UI.createElement = function (tag, options, ...children) {
 };
 
 UIElement.domAttributesMap = NodeAttributes.defaultAttributesMap;
+
+// Explicitly know that extraNodeAttributes doesn't do anything, but have it to be callable when doing inheritance
+UIElement.prototype.extraNodeAttributes = NOOP_FUNCTION;
 
 UI.Element = UIElement;
 
