@@ -1,10 +1,17 @@
-# Stem JS [![npm package][npm-badge]][npm-url]
+# Stem JS
+[![npm package][npm-badge]][npm-url]
 [Stem](https://stemjs.org) is somewhere between a framework and a library. It offers a set of classes and functions for all the standard scenarios you can encounter in modern web app developments, with design patterns designed to work together.
 
 ## Installation
-You can either just download the source from git or from the npm repository as the `stem-core` package:
+You can either just download the source from git or from the npm repository as the `stem-core` [npm package](https://www.npmjs.com/package/stem-core):
 ```
 npm install --save-dev stem-core
+```
+
+If you want to quickly set up a new demo app, you can try to use the `create-stem-app` [npm package](https://www.npmjs.com/package/create-stem-app):
+```
+npm install -g create-stem-app
+create-stem-app your_app_name
 ```
 
 ## Using the library
