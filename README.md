@@ -1,15 +1,6 @@
 # Stem JS [![npm package][npm-badge]][npm-url]
 [Stem](https://stemjs.org) is somewhere between a framework and a library. It offers a set of classes and functions for all the standard scenarios you can encounter in modern web app developments, with design patterns designed to work together.
 
-## Why release another Javascript framework?
-The world is full by them. Most of them are mediocre though, and I wanted to show some effort into another direction.
-The architecture isn't optimized for cool one-liners, but for maintenance and flexibility, that keeps intentionally as much of the functionality in non-core code as possible.
-
-Check out the docs at https://stemjs.org/docs/
-This framework is being used for about a year at https://csacademy.com/, and it really works a lot better for use than any other solution out there.
-
-This is the initial open-sourcing effort, it'll get more cleaned-up and documented in the next few weeks/months, with some concrete examples.
-
 ## Installation
 You can either just download the source from git or from the npm repository as the `stem-core` package:
 ```
@@ -23,6 +14,15 @@ The Stem code is designed to be used as ES6 modules. The code is meant to be inc
 The source bundle is build with rollup, which you can install with:
 `npm install -g rollup`
 To call it, just run `rollup -c` in the root project folder.
+
+## Why release another Javascript framework?
+The world is full by them. Most of them are mediocre though, and I wanted to show some effort into another direction.
+The architecture isn't optimized for cool one-liners, but for maintenance and flexibility, that keeps intentionally as much of the functionality in non-core code as possible.
+
+Check out the docs at https://stemjs.org/docs/
+This framework is being used for about a year at https://csacademy.com/, and it really works a lot better for use than any other solution out there.
+
+This is the initial open-sourcing effort, it'll get more cleaned-up and documented in the next few weeks/months, with some concrete examples.
 
 ## Recommended parts
 There's a lot of functionality implemented in Stem. The closer to the core code you go, the better is gets and will probably be clean-up and more commented in the future.
