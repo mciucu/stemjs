@@ -1,4 +1,4 @@
-# Stem JS [![NPM version][npm-image]][npm-url]
+# Stem JS [![npm package][npm-badge]][npm-url]
 [Stem](https://stemjs.org) is somewhere between a framework and a library. It offers a set of classes and functions for all the standard scenarios you can encounter in modern web app developments, with design patterns designed to work together.
 
 ## Why release another Javascript framework?
@@ -25,3 +25,6 @@ To call it, just run `rollup -c` in the root project folder.
 ## License
 The license is the MIT one, except that I removed the pesky clause that forces people to include the licence if they copy/paste code.
 So, pretty much an explicit public domain.
+
+[npm-badge]: https://img.shields.io/npm/v/stem-core.svg?style=flat-square
+[npm-url]: https://www.npmjs.org/package/stem-core
