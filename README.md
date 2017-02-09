@@ -1,5 +1,4 @@
-# Stem JS
-[![npm package][npm-badge]][npm]
+# Stem JS [![NPM version][npm-image]][npm-url]
 [Stem](https://stemjs.org) is somewhere between a framework and a library. It offers a set of classes and functions for all the standard scenarios you can encounter in modern web app developments, with design patterns designed to work together.
 
 ## Why release another Javascript framework?
