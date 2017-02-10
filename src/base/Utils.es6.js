@@ -5,7 +5,12 @@ export function unwrapArray(elements) {
     }
 
     if (!Array.isArray(elements)) {
-        return [elements];
+        // In case this is an iterable, convert to array
+        if (elements[Symbol.iterator]) {
+            return unwrapArray(Array.from(elements));
+        } else {
+            return [elements];
+        }
     }
 
     // Check if the passed in array is valid, and try to return it if possible to preserve references

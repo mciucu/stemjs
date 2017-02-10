@@ -1,6 +1,6 @@
 import {Dispatchable} from "../base/Dispatcher";
 
-class StateClass extends Dispatchable {
+class State extends Dispatchable {
     constructor() {
         super();
         this.stores = new Map();
@@ -88,10 +88,12 @@ class StateClass extends Dispatchable {
     }
 }
 
-var GlobalState = new StateClass();
+let GlobalState = new State();
 
-if (window) {
-    window.GlobalState = GlobalState;
-}
+// When creating a store without an explicit state, this value should be assumes
+// Change it to null for instance of you don't want stores to be added to any state by default
+let DefaultState = GlobalState;
 
-export {StateClass, GlobalState};
+self.GlobalState = GlobalState;
+
+export {State, GlobalState, DefaultState};

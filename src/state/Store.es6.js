@@ -1,4 +1,5 @@
 import {Dispatchable, CleanupJobs} from "../base/Dispatcher";
+import {DefaultState} from "./State";
 
 // The store information is kept in a symbol, to not interfere with serialization/deserialization
 export const StoreSymbol = Symbol("Store");
@@ -75,7 +76,7 @@ class BaseStore extends Dispatchable {
         if (this.options.hasOwnProperty("state")) {
             return this.options.state;
         } else {
-            return GlobalState;
+            return DefaultState;
         }
     }
 
@@ -112,6 +113,7 @@ class GenericObjectStore extends BaseStore {
         return this.get(objectId);
     }
 
+    // TODO: should this default to iterable?
     all(asIterable) {
         let values = this.objects.values();
         if (!asIterable) {

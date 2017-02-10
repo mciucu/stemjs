@@ -1,6 +1,6 @@
 {
   "name": "stem-core",
-  "version": "0.2.48",
+  "version": "0.2.49",
   "description": "Frontend framework",
   "main": "src/Stem.es6.js",
   "scripts": {
