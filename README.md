@@ -37,8 +37,10 @@ You can check out UIBase for the basics of the UI framework. It's an OOP based a
 I also included the base state classes that we use to store instances of DB-backed objects in the browser. It's a simple alternative to Redux/Flux if you will.
 
 ## License
-The license is the MIT one, except that I removed the pesky clause that forces people to include the licence if they copy/paste code.
-So, pretty much an explicit public domain.
+The Stem code is released explicitly under public domain (AKA The Unlicence, I just like public domain more than the term "Unlicence").
+There are no ugly copyright headers you need to keep, and you can copy/paste the code without any attribution.
+It make it easier to bundle your code, so you know a minimized production js can strip all comments away.
+In case you need extra assurance, this software is also licences under Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/), you can pick your preferred licence.
 
 [npm-badge]: https://img.shields.io/npm/v/stem-core.svg?style=flat-square
 [npm-url]: https://www.npmjs.org/package/stem-core
