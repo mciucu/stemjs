@@ -1,6 +1,6 @@
 {
   "name": "stem-core",
-  "version": "0.2.51",
+  "version": "0.2.52",
   "description": "Frontend framework",
   "main": "src/Stem.es6.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "state"
   ],
   "author": "Mihai Ciucu",
-  "license": "MIT",
+  "license": "(Unlicense or Public-Domain)",
   "bugs": {
     "url": "https://github.com/mciucu/stemjs/issues"
   },
