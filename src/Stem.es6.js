@@ -19,7 +19,7 @@ export * from "base/Ajax";
 export * from "base/Plugin";
 export * from "base/Utils";
 export * from "base/URLRouter";
-export * from "base/Storage";
+export * from "base/StorageMap";
 export * from "time/Time";
 export * from "data-structures/Deque";
 export * from "data-structures/MultiMap";
