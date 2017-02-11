@@ -118,9 +118,9 @@ class XHRPromise {
             // TODO: come back to this
             xhr.responseType = "blob";
 
-            for (const [name, value] of request.headers) {
-                xhr.setRequestHeader(name, value)
-            }
+            request.headers.forEach((value, name) => {
+                xhr.setRequestHeader(name, value);
+            });
 
             // TODO: there's no need to do this on a GET or HEAD
             request.blob().then((blob) => {
@@ -275,5 +275,10 @@ function fetch(input, ...args) {
 fetch.defaultPreprocessors = [jQueryCompatibilityPreprocessor];
 
 fetch.polyfill = true;
+
+window.dbgFetch = function () {
+    debugger;
+    fetch(...arguments);
+}
 
 export {XHRPromise, fetch, composeURL, parseHeaders, getURLSearchParams, jQueryCompatibilityPreprocessor};

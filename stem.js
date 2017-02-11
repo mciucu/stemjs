@@ -209,7 +209,12 @@ function unwrapArray(elements) {
     }
 
     if (!Array.isArray(elements)) {
-        return [elements];
+        // In case this is an iterable, convert to array
+        if (elements[Symbol.iterator]) {
+            return unwrapArray(Array.from(elements));
+        } else {
+            return [elements];
+        }
     }
 
     // Check if the passed in array is valid, and try to return it if possible to preserve references
@@ -529,6 +534,8 @@ function extendsNative(targetClass) {
 
     return newClass;
 }
+
+var NOOP_FUNCTION = function NOOP_FUNCTION() {};
 
 // Helpers to wrap iterators, to wrap all values in a function or to filter them
 function mapIterator(iter, func) {
@@ -1740,10 +1747,13 @@ var UIElement = function (_BaseUIElement2) {
             }
         }
     }, {
+        key: "extraNodeAttributes",
+        value: function extraNodeAttributes(attr) {}
+    }, {
         key: "applyNodeAttributes",
         value: function applyNodeAttributes() {
             var attr = void 0;
-            if (this.extraNodeAttributes) {
+            if (this.extraNodeAttributes != NOOP_FUNCTION) {
                 // Create a copy of options, that is modifiable
                 attr = this.getNodeAttributes(true);
                 this.extraNodeAttributes(attr);
@@ -2092,6 +2102,9 @@ UI.createElement = function (tag, options) {
 };
 
 UIElement.domAttributesMap = NodeAttributes.defaultAttributesMap;
+
+// Explicitly know that extraNodeAttributes doesn't do anything, but have it to be callable when doing inheritance
+UIElement.prototype.extraNodeAttributes = NOOP_FUNCTION;
 
 UI.Element = UIElement;
 
@@ -6411,120 +6424,8 @@ var Color = function () {
             if (rgb) {
                 values = [parseInt(rgb[1]), parseInt(rgb[2]), parseInt(rgb[3]), 1];
             }
-            /*
-                    // Check for hsl (e.g. "hsl(360, 100%, 50%)"
-                    let hsl = color.match(/^hsl\s*\(\s*(\d+)\s*,\s*(\d+)\s*%\s*,\s*(\d+)\s*%\s*\)$/i);
-                    if (hsl) {
-                        values = this.constructor.hslaToRgba(...hsl.slice(1));
-                    }
-            
-                    // Check for hsla (e.g. "hsla(360, 100%, 50%, 0.5)"
-                    let hsla = color.match(/^hsla\s*\(\s*(\d+)\s*,\s*(\d+)\s*%\s*,\s*(\d+)\s*%\s*,\s*(\d+.*\d*)\s*\)$/i);
-                    if (hsla) {
-                        values = this.constructor.hslaToRgba(...hsla.slice(1));
-                    }
-            */
             return values;
         }
-        /*
-            static hsvaToRgba(h, s, v, a = 1) {
-                let r, g, b, i, f, p, q, t;
-                i = Math.floor(h * 6);
-                f = h * 6 - i;
-                p = v * (1 - s);
-                q = v * (1 - f * s);
-                t = v * (1 - (1 - f) * s);
-                switch (i % 6) {
-                    case 0: r = v, g = t, b = p; break;
-                    case 1: r = q, g = v, b = p; break;
-                    case 2: r = p, g = v, b = t; break;
-                    case 3: r = p, g = q, b = v; break;
-                    case 4: r = t, g = p, b = v; break;
-                    case 5: r = v, g = p, b = q; break;
-                }
-                return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255), a];
-            }
-        
-            static rgbaToHsva(r, g, b, a = 1) {
-                let max = Math.max(r, g, b);
-                let min = Math.min(r, g, b);
-                let diff = max - min;
-                let s = (max === 0 ? 0 : diff / max);
-                let v = max / 255;
-                let h;
-        
-                switch (max) {
-                    case min: h = 0; break;
-                    case r: h = (g - b) + diff * (g < b ? 6: 0); h /= 6 * diff; break;
-                    case g: h = (b - r) + diff * 2; h /= 6 * diff; break;
-                    case b: h = (r - g) + diff * 4; h /= 6 * diff; break;
-                }
-        
-                return [h, s, v, a];
-            }
-        
-            static hslaToRgba(h, s, l, a = 1) {
-                h /= 360; s /= 100; l /= 100;
-        
-                let r, g, b;
-        
-                if(s == 0){
-                    r = g = b = l; // achromatic
-                }else{
-                    let hueToRgb = (p, q, t) => {
-                        if(t < 0) {
-                            t += 1;
-                        } else if(t > 1) {
-                            t -= 1;
-                        }
-        
-                        if (t < 1/6) {
-                            return p + (q - p) * 6 * t;
-                        } else if (t < 1/2) {
-                            return q;
-                        } else if (t < 2/3) {
-                            return p + (q - p) * (2/3 - t) * 6;
-                        } else {
-                            return p;
-                        }
-                    };
-        
-                    let q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-                    let p = 2 * l - q;
-                    r = hueToRgb(p, q, h + 1/3);
-                    g = hueToRgb(p, q, h);
-                    b = hueToRgb(p, q, h - 1/3);
-                }
-        
-                return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255), a];
-            }
-        
-            static rgbaToHsla(r, g, b, a = 1) {
-                r /= 255, g /= 255, b /= 255;
-        
-                let max = Math.max(r, g, b);
-                let min = Math.min(r, g, b);
-                let h, s, l = (max + min) / 2;
-        
-                if (max == min) {
-                    h = s = 0; // achromatic
-                } else {
-                    let d = max - min;
-                    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-                    switch (max) {
-                        case r:
-                            h = (g - b) / d + (g < b ? 6 : 0); break;
-                        case g:
-                            h = (b - r) / d + 2; break;
-                        case b:
-                            h = (r - g) / d + 4; break;
-                    }
-                    h /= 6;
-                }
-        
-                return [h, s, l, a];
-            }
-        */
 
         // TODO: this should be implemented as a factory that generates an interpolator object, that just takes in a t
 
@@ -6549,107 +6450,6 @@ var Color = function () {
             var values = Color.parseColor(color);
             return values[0] * 0.3 + values[1] * 0.59 + values[2] * 0.11 > 188;
         }
-
-        /*
-            setRgba(value, index = -1) {
-                if (index !== -1) {
-                    let rgba = this.getRgba();
-                    rgba[index] = value;
-                    this.color = rgba;
-                } else {
-                    this.color = Color.rgbaToHsva(...value);
-                }
-            }
-        
-            getRgba() {
-                return Color.hsvaToRgba(this.color);
-            }
-        
-            addRgba(amount, index = -1) {
-                let rgba = Color.hsvaToRgba(this.color);
-                let setInRange = (rgba) => {
-                    for (let i = 0; i < 3; i += 1) {
-                        if (rgba[i] > 255) {
-                            rgba[i] = 255;
-                        } else if (rgba[i] < 0) {
-                            rgba[i] = 0;
-                        }
-                    }
-                    if (rgba[3] > 1) {
-                        rgba[3] = 1;
-                    } else if (rgba[3] < 0){
-                        rgba[3] = 0;
-                    }
-                };
-                if (index !== -1) {
-                    rgba[index] += amount;
-                } else {
-                    if (amount.length === 3) {
-                        amount.push(0);
-                    }
-                    for (let i  = 0; i < 4; i += 1) {
-                        rgba[i] += amount[i];
-                    }
-                }
-                setInRange(rgba);
-                this.setRgba(rgba);
-            }
-        
-            setHsva(value, index = -1) {
-                if (index !== -1) {
-                    this.color[index] = value;
-                } else {
-                    this.color = value;
-                }
-            }
-        
-            getHsva() {
-                return this.color;
-            }
-        
-            addHsva(amount, index = -1) {
-                let hsva = this.color;
-                let setInrange = (hsva) => {
-                    if (hsva[0] > 1) {
-                        hsva[0] -= 1;
-                    } else if (hsva[0] < 0) {
-                        hsva[0] += 1;
-                    }
-                    for (let i = 1; i < 4; i += 1) {
-                        if (hsva[i] > 1) {
-                            hsva[i] = 1;
-                        } else if (hsva[i] < 0) {
-                            hsva[i] = 0;
-                        }
-                    }
-                };
-                if (index !== -1) {
-                    hsva[index] += amount
-                }
-                if (hsva.length === 3) {
-                    hsva.push(1);
-                }
-                if (amount.length === 3) {
-                    amount.push(0);
-                }
-                hsva[0] += amount[0];
-                if (hsva[0] > 1) {
-                    hsva[0] -= 1;
-                } else if (hsva[0] < 0) {
-                    hsva[0] += 1;
-                }
-                for (let i = 1; i < 4; i += 1) {
-                    hsva[i] += amount[i];
-                    if (hsva[i] < 0) {
-                        hsva[i] = 0;
-                    } else if (hsva[i] > 1) {
-                        hsva[i] = 1;
-                    }
-                }
-                this.color = hsva;
-            }
-        */
-
     }]);
     return Color;
 }();
@@ -8467,7 +8267,8 @@ var Body = function () {
                 return Promise.resolve(new Blob([this._bodyArrayBuffer]));
             }
             if (this._bodyFormData) {
-                throw new Error("could not read FormData body as blob");
+                // I know this is technically wrong, but only we can create this scenario
+                return Promise.resolve(this._bodyFormData);
             }
             return Promise.resolve(new Blob([this._bodyText]));
         }
@@ -8601,7 +8402,9 @@ var Request$1 = (_temp = _class$3 = function (_Body) {
 
         _this.method = _this.constructor.normalizeMethod(options.method || input.method || "GET");
         _this.url = input.url;
-        _this.headers = new Headers(options.headers || input.headers || null);
+
+        var headerArgs = options.headers || input.headers || null;
+        _this.headers = headerArgs ? new Headers(headerArgs) : new Headers();
         _this.context = options.context || input.context || "";
         _this.referrer = options.referrer || input.referrer || "about:client";
         _this.referrerPolicy = options.referrerPolicy || input.referrerPolicy || "";
@@ -8837,6 +8640,7 @@ var XHRPromise = function () {
         var xhr = new XMLHttpRequest();
         this.options = options;
         this.request = request;
+        this.xhr = xhr;
 
         this.promise = new Promise(function (resolve, reject) {
             _this.promiseResolve = resolve;
@@ -8856,10 +8660,8 @@ var XHRPromise = function () {
                 // Response has methods to return these as promises
                 if (typeof response[options.dataType] === "function") {
                     // TODO: should whitelist dataType to json, blob
-                    response[options.dataType]().then(function (json) {
-                        _this.resolve(json);
-                    }).catch(function (error) {
-                        _this.reject(error);
+                    response[options.dataType]().then(function (data) {
+                        _this.resolve(data);
                     });
                 } else {
                     _this.resolve(response);
@@ -8885,47 +8687,27 @@ var XHRPromise = function () {
             // TODO: come back to this
             xhr.responseType = "blob";
 
-            var _iteratorNormalCompletion4 = true;
-            var _didIteratorError4 = false;
-            var _iteratorError4 = undefined;
+            request.headers.forEach(function (value, name) {
+                xhr.setRequestHeader(name, value);
+            });
 
-            try {
-                for (var _iterator4 = request.headers[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                    var _step4$value = slicedToArray(_step4.value, 2),
-                        name = _step4$value[0],
-                        value = _step4$value[1];
-
-                    xhr.setRequestHeader(name, value);
-                }
-
-                // TODO: there's no need to do this on a GET or HEAD
-            } catch (err) {
-                _didIteratorError4 = true;
-                _iteratorError4 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
-                        _iterator4.return();
-                    }
-                } finally {
-                    if (_didIteratorError4) {
-                        throw _iteratorError4;
-                    }
-                }
-            }
-
+            // TODO: there's no need to do this on a GET or HEAD
             request.blob().then(function (blob) {
-                // TODO: save the blob here?
-                var body = blob.size ? blob : null;
-                xhr.send(body);
+                // The blob can be a FormData when we're polyfilling the Request class
+                var body = blob instanceof FormData || blob.size ? blob : null;
+                _this.send(body);
             });
         });
 
-        this.xhr = xhr;
         this.request = request;
     }
 
     createClass(XHRPromise, [{
+        key: "send",
+        value: function send(body) {
+            this.getXHR().send(body);
+        }
+    }, {
         key: "resolve",
         value: function resolve(payload) {
             if (this.options.onSuccess) {
@@ -9024,29 +8806,33 @@ function jQueryCompatibilityPreprocessor(options) {
         var method = options.method.toUpperCase();
         if (method === "GET" || method === "HEAD") {
             options.urlParams = options.urlParams || options.data;
+            if (options.cache === false) {
+                options.urlParams = getURLSearchParams(options.urlParams);
+                options.urlParams.set("_", Date.now());
+            }
         } else {
             var formData = new FormData();
-            var _iteratorNormalCompletion5 = true;
-            var _didIteratorError5 = false;
-            var _iteratorError5 = undefined;
+            var _iteratorNormalCompletion4 = true;
+            var _didIteratorError4 = false;
+            var _iteratorError4 = undefined;
 
             try {
-                for (var _iterator5 = Object.keys(options.data)[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-                    var key = _step5.value;
+                for (var _iterator4 = Object.keys(options.data)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                    var key = _step4.value;
 
-                    formData.set(key, options.data[key]);
+                    formData.append(key, options.data[key]);
                 }
             } catch (err) {
-                _didIteratorError5 = true;
-                _iteratorError5 = err;
+                _didIteratorError4 = true;
+                _iteratorError4 = err;
             } finally {
                 try {
-                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
-                        _iterator5.return();
+                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                        _iterator4.return();
                     }
                 } finally {
-                    if (_didIteratorError5) {
-                        throw _iteratorError5;
+                    if (_didIteratorError4) {
+                        throw _iteratorError4;
                     }
                 }
             }
@@ -9056,6 +8842,7 @@ function jQueryCompatibilityPreprocessor(options) {
     } else {
         options.body = options.body || options.data;
     }
+
     return options;
 }
 
@@ -9079,27 +8866,27 @@ function fetch(input) {
 
     var preprocessors = options.preprocessors || fetch.defaultPreprocessors || [];
 
-    var _iteratorNormalCompletion6 = true;
-    var _didIteratorError6 = false;
-    var _iteratorError6 = undefined;
+    var _iteratorNormalCompletion5 = true;
+    var _didIteratorError5 = false;
+    var _iteratorError5 = undefined;
 
     try {
-        for (var _iterator6 = preprocessors[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-            var preprocessor = _step6.value;
+        for (var _iterator5 = preprocessors[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+            var preprocessor = _step5.value;
 
             options = preprocessor(options) || options;
         }
     } catch (err) {
-        _didIteratorError6 = true;
-        _iteratorError6 = err;
+        _didIteratorError5 = true;
+        _iteratorError5 = err;
     } finally {
         try {
-            if (!_iteratorNormalCompletion6 && _iterator6.return) {
-                _iterator6.return();
+            if (!_iteratorNormalCompletion5 && _iterator5.return) {
+                _iterator5.return();
             }
         } finally {
-            if (_didIteratorError6) {
-                throw _iteratorError6;
+            if (_didIteratorError5) {
+                throw _iteratorError5;
             }
         }
     }
@@ -9109,6 +8896,7 @@ function fetch(input) {
 
     if (typeof options.cache === "boolean") {
         options.cache = options.cache ? "force-cache" : "reload";
+        // TODO: cache still isn't fully done
     }
 
     options.method = options.method || "GET";
@@ -9131,6 +8919,11 @@ function fetch(input) {
 fetch.defaultPreprocessors = [jQueryCompatibilityPreprocessor];
 
 fetch.polyfill = true;
+
+window.dbgFetch = function () {
+    debugger;
+    fetch.apply(undefined, arguments);
+};
 
 var Ajax = {
     fetch: fetch,
@@ -10899,7 +10692,7 @@ var TabArea = function (_UI$Element2) {
             var _iteratorError = undefined;
 
             try {
-                for (var _iterator = this.options.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                for (var _iterator = this.getGivenChildren()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                     var panel = _step.value;
 
                     var _createTabPanel3 = this.createTabPanel(panel),
@@ -11117,15 +10910,13 @@ var DividerBar = function (_UI$Element) {
     }
 
     createClass(DividerBar, [{
-        key: "getNodeAttributes",
-        value: function getNodeAttributes() {
-            var attr = get(DividerBar.prototype.__proto__ || Object.getPrototypeOf(DividerBar.prototype), "getNodeAttributes", this).call(this);
+        key: "extraNodeAttributes",
+        value: function extraNodeAttributes(attr) {
             if (this.orientation === UI.Orientation.VERTICAL) {
                 attr.addClass(sectionDividerStyle.verticalDivider);
             } else if (this.orientation === UI.Orientation.HORIZONTAL) {
                 attr.addClass(sectionDividerStyle.horizontalDivider);
             }
-            return attr;
         }
     }]);
     return DividerBar;
@@ -11447,7 +11238,7 @@ var SectionDivider$$1 = function (_UI$Element2) {
             var _iteratorError = undefined;
 
             try {
-                for (var _iterator = this.options.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                for (var _iterator = this.getGivenChildren()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                     var child = _step.value;
 
                     if (children.length > 0) {
@@ -11487,7 +11278,6 @@ var SectionDivider$$1 = function (_UI$Element2) {
                 }
             }
 
-            console.warn(children);
             return children;
         }
     }]);
@@ -11944,6 +11734,8 @@ var CollapsibleTableStyle = (_class$11 = function (_StyleSet) {
 
 
 var collapsibleTableStyle = new CollapsibleTableStyle();
+
+// TODO: refactor this to support redraw and render override
 
 var CollapsibleTableRow = function (_CollapsibleMixin) {
     inherits(CollapsibleTableRow, _CollapsibleMixin);
@@ -12983,6 +12775,56 @@ function ActionModalButton(ActionModal) {
     }(Button);
 }
 
+var _class$14;
+var _temp$5;
+
+var TimeUnit = (_temp$5 = _class$14 = function () {
+    function TimeUnit(name, baseUnit, multiplier) {
+        var variableMultiplier = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+        classCallCheck(this, TimeUnit);
+
+        this.name = name;
+        this.baseUnit = baseUnit;
+        this.multiplier = multiplier;
+        this.milliseconds = (baseUnit && baseUnit.getMilliseconds() || 1) * multiplier;
+        this.variableMultiplier = variableMultiplier;
+        this.variableDuration = variableMultiplier || baseUnit && baseUnit.isVariable();
+
+        // Add to the list of all time units
+        this.constructor.ALL.push(this);
+    }
+
+    createClass(TimeUnit, [{
+        key: "getMilliseconds",
+        value: function getMilliseconds() {
+            return this.milliseconds;
+        }
+    }, {
+        key: "isVariable",
+        value: function isVariable() {
+            return this.variableDuration;
+        }
+    }, {
+        key: "hasVariableMultiplier",
+        value: function hasVariableMultiplier() {
+            return this.variableMultiplier;
+        }
+    }]);
+    return TimeUnit;
+}(), _class$14.ALL = [], _temp$5);
+
+
+TimeUnit.MILLISECOND = new TimeUnit("millisecond", null, 1);
+TimeUnit.SECOND = new TimeUnit("second", TimeUnit.MILLISECOND, 1000);
+TimeUnit.MINUTE = new TimeUnit("minute", TimeUnit.SECOND, 60);
+TimeUnit.HOUR = new TimeUnit("hour", TimeUnit.MINUTE, 60);
+TimeUnit.DAY = new TimeUnit("day", TimeUnit.HOUR, 24, true);
+TimeUnit.WEEK = new TimeUnit("week", TimeUnit.DAY, 7);
+TimeUnit.MONTH = new TimeUnit("month", TimeUnit.DAY, 30, true);
+TimeUnit.QUARTER = new TimeUnit("quarter", TimeUnit.MONTH, 3);
+TimeUnit.TRIMESTER = new TimeUnit("trimester", TimeUnit.MONTH, 4);
+TimeUnit.YEAR = new TimeUnit("year", TimeUnit.MONTH, 12);
+
 var Duration = function () {
     function Duration(duration) {
         classCallCheck(this, Duration);
@@ -12998,6 +12840,11 @@ var Duration = function () {
         }
         this.miliseconds = duration;
     }
+
+    // initFromPlainObject(obj) {
+    //     this.
+    //     for (const )
+    // }
 
     createClass(Duration, [{
         key: "add",
@@ -13319,9 +13166,9 @@ StemDate.tokenFormattersMap = new Map([["ISO8601", function (date) {
 
 var Date$1 = StemDate;
 
-// TODO: need to take care of dependency on moment
 // File meant to handle server time/client time differences
 var ServerTime = {
+    // TODO: this should return a StemDate, change it
     now: function now() {
         return Date.now() - this.getOffset();
     },
@@ -14446,13 +14293,13 @@ var FullScreenable = function FullScreenable(BaseClass) {
     }(BaseClass);
 };
 
-var StateClass = function (_Dispatchable) {
-    inherits(StateClass, _Dispatchable);
+var State = function (_Dispatchable) {
+    inherits(State, _Dispatchable);
 
-    function StateClass() {
-        classCallCheck(this, StateClass);
+    function State() {
+        classCallCheck(this, State);
 
-        var _this = possibleConstructorReturn(this, (StateClass.__proto__ || Object.getPrototypeOf(StateClass)).call(this));
+        var _this = possibleConstructorReturn(this, (State.__proto__ || Object.getPrototypeOf(State)).call(this));
 
         _this.stores = new Map();
         // A version of applyEvent that's binded to this
@@ -14463,7 +14310,7 @@ var StateClass = function (_Dispatchable) {
         return _this;
     }
 
-    createClass(StateClass, [{
+    createClass(State, [{
         key: "getStore",
         value: function getStore(objectType) {
             objectType = objectType.toLowerCase();
@@ -14595,19 +14442,24 @@ var StateClass = function (_Dispatchable) {
             }
         }
     }]);
-    return StateClass;
+    return State;
 }(Dispatchable);
 
-var GlobalState$1 = new StateClass();
+var GlobalState$1 = new State();
 
-if (window) {
-    window.GlobalState = GlobalState$1;
-}
+// When creating a store without an explicit state, this value should be assumes
+// Change it to null for instance of you don't want stores to be added to any state by default
+var DefaultState = GlobalState$1;
+
+self.GlobalState = GlobalState$1;
+
+// The store information is kept in a symbol, to not interfere with serialization/deserialization
+var StoreSymbol = Symbol("Store");
 
 var StoreObject = function (_Dispatchable) {
     inherits(StoreObject, _Dispatchable);
 
-    function StoreObject(obj) {
+    function StoreObject(obj, event, store) {
         classCallCheck(this, StoreObject);
 
         var _this = possibleConstructorReturn(this, (StoreObject.__proto__ || Object.getPrototypeOf(StoreObject)).call(this));
@@ -14617,10 +14469,20 @@ var StoreObject = function (_Dispatchable) {
     }
 
     createClass(StoreObject, [{
-        key: "applyEvent",
-
+        key: "setStore",
+        value: function setStore(store) {
+            this[StoreSymbol] = store;
+        }
+    }, {
+        key: "getStore",
+        value: function getStore() {
+            return this[StoreSymbol];
+        }
 
         // By default, applying an event just shallow copies the fields from event.data
+
+    }, {
+        key: "applyEvent",
         value: function applyEvent(event) {
             Object.assign(this, event.data);
         }
@@ -14722,7 +14584,7 @@ var BaseStore = function (_Dispatchable2) {
             if (this.options.hasOwnProperty("state")) {
                 return this.options.state;
             } else {
-                return GlobalState;
+                return DefaultState;
             }
         }
 
@@ -14778,6 +14640,9 @@ var GenericObjectStore = function (_BaseStore) {
             var objectId = this.getObjectIdForEvent(event);
             return this.get(objectId);
         }
+
+        // TODO: should this default to iterable?
+
     }, {
         key: "all",
         value: function all(asIterable) {
@@ -14790,7 +14655,9 @@ var GenericObjectStore = function (_BaseStore) {
     }, {
         key: "createObject",
         value: function createObject(event) {
-            return new this.ObjectWrapper(event.data, event);
+            var obj = new this.ObjectWrapper(event.data, event, this);
+            obj.setStore(this);
+            return obj;
         }
     }, {
         key: "applyCreateEvent",
@@ -17784,6 +17651,138 @@ var URLRouterClass = function (_Dispatchable) {
 
 var URLRouter = new URLRouterClass();
 
+// Class for working with the Window.localStorage and Window.sessionStorage objects
+// All keys are prefixed with our custom name, to
+
+var StorageSerializer = function (_Dispatchable) {
+    inherits(StorageSerializer, _Dispatchable);
+
+    function StorageSerializer(storage, name) {
+        classCallCheck(this, StorageSerializer);
+
+        var _this = possibleConstructorReturn(this, (StorageSerializer.__proto__ || Object.getPrototypeOf(StorageSerializer)).call(this));
+
+        _this.storage = storage;
+        _this.name = name; // TODO: default to unique id
+        _this.prefix = name + ".-";
+        return _this;
+    }
+
+    createClass(StorageSerializer, [{
+        key: "getPrefix",
+        value: function getPrefix() {
+            return this.prefix;
+        }
+    }, {
+        key: "getRawKey",
+        value: function getRawKey(key) {
+            return this.getPrefix() + key;
+        }
+
+        // Method to serialize the values
+
+    }, {
+        key: "serialize",
+        value: function serialize(value) {
+            return JSON.stringify(value);
+        }
+
+        // Method to deserialize the value (which can be null if there is no value)
+
+    }, {
+        key: "deserialize",
+        value: function deserialize(value) {
+            return JSON.parse(value);
+        }
+    }, {
+        key: "set",
+        value: function set$$1(key, value) {
+            this.storage.setItem(this.getRawKey(key), this.serialize(value));
+        }
+    }, {
+        key: "delete",
+        value: function _delete(key) {
+            this.storage.removeItem(this.getRawKey(key));
+        }
+    }, {
+        key: "getRaw",
+        value: function getRaw(key) {
+            return this.storage.getItem(this.getRawKey(key));
+        }
+    }, {
+        key: "get",
+        value: function get$$1(key, defaultValue) {
+            var value = this.getRaw(key);
+            if (value == null) {
+                return defaultValue || value;
+            }
+            return this.deserialize(value);
+        }
+    }, {
+        key: "has",
+        value: function has(key) {
+            return this.getRaw(key) != null;
+        }
+
+        // Remove all of the keys that start with out prefix
+
+    }, {
+        key: "clear",
+        value: function clear() {
+            var totalStorageKeys = this.storage.length;
+            for (var i = 0; i < totalStorageKeys; i++) {
+                var key = this.storage.key(i);
+                if (key.startsWith(this.getPrefix())) {
+                    this.storage.removeItem(key);
+                }
+            }
+        }
+
+        // Add a listener for all change event on the current store
+        // Only works if we're being backed by Window.localStorage and only received events from other tabs
+        // The event has the following fields: key, oldValue, newValue, url, storageArea
+
+    }, {
+        key: "addChangeListener",
+        value: function addChangeListener(callback) {
+            var _this2 = this;
+
+            if (this.storage !== window.localStorage) {
+                throw Error("Only localStorage has events");
+            }
+            window.addEventListener("storage", function (event) {
+                if (event.storageArea === _this2.storage) {
+                    // TODO: remove the prefix from the key
+                    callback(event);
+                }
+            });
+        }
+    }]);
+    return StorageSerializer;
+}(Dispatchable);
+
+var LocalStorageSerializer = function (_StorageSerializer) {
+    inherits(LocalStorageSerializer, _StorageSerializer);
+
+    function LocalStorageSerializer(name) {
+        classCallCheck(this, LocalStorageSerializer);
+        return possibleConstructorReturn(this, (LocalStorageSerializer.__proto__ || Object.getPrototypeOf(LocalStorageSerializer)).call(this, window.localStorage, name));
+    }
+
+    return LocalStorageSerializer;
+}(StorageSerializer);
+
+var SessionStorageSerializer = function (_StorageSerializer2) {
+    inherits(SessionStorageSerializer, _StorageSerializer2);
+
+    function SessionStorageSerializer(name) {
+        classCallCheck(this, SessionStorageSerializer);
+        return possibleConstructorReturn(this, (SessionStorageSerializer.__proto__ || Object.getPrototypeOf(SessionStorageSerializer)).call(this, window.sessionStorage, name));
+    }
+
+    return SessionStorageSerializer;
+}(StorageSerializer);
+
 var Deque = function () {
     function Deque() {
         classCallCheck(this, Deque);
@@ -18004,6 +18003,7 @@ exports.CollapsibleTable = CollapsibleTable;
 exports.CollapsibleTableInterface = CollapsibleTableInterface;
 exports.CollapsibleTableRow = CollapsibleTableRow;
 exports.TableRowInCollapsibleTable = TableRowInCollapsibleTable;
+exports.collapsibleTableStyle = collapsibleTableStyle;
 exports.SortableTable = SortableTable;
 exports.SortableTableInterface = SortableTableInterface;
 exports.FloatingWindowStyle = FloatingWindowStyle;
@@ -18041,8 +18041,10 @@ exports.FASortIcon = FASortIcon;
 exports.DoubleClickable = DoubleClickable;
 exports.Draggable = Draggable;
 exports.FullScreenable = FullScreenable;
-exports.StateClass = StateClass;
+exports.State = State;
 exports.GlobalState = GlobalState$1;
+exports.DefaultState = DefaultState;
+exports.StoreSymbol = StoreSymbol;
 exports.StoreObject = StoreObject;
 exports.BaseStore = BaseStore;
 exports.GenericObjectStore = GenericObjectStore;
@@ -18122,9 +18124,12 @@ exports.getOrdinalSuffix = getOrdinalSuffix;
 exports.suffixWithOrdinal = suffixWithOrdinal;
 exports.instantiateNative = instantiateNative;
 exports.extendsNative = extendsNative;
+exports.NOOP_FUNCTION = NOOP_FUNCTION;
 exports.mapIterator = mapIterator;
 exports.filterIterator = filterIterator;
 exports.URLRouter = URLRouter;
+exports.LocalStorageSerializer = LocalStorageSerializer;
+exports.SessionStorageSerializer = SessionStorageSerializer;
 exports.DAY_IN_MILLISECONDS = DAY_IN_MILLISECONDS;
 exports.isDifferentDay = isDifferentDay;
 exports.unix = unix;
