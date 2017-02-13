@@ -106,6 +106,14 @@ export function setObjectPrototype(obj, Class) {
     return obj;
 }
 
+export function isNumber(obj) {
+    return (typeof obj === "number") || (obj instanceof Number);
+}
+
+export function isString(obj) {
+    return (typeof obj === "string") || (obj instanceof String);
+}
+
 export function isPlainObject(obj) {
     if (!obj || typeof obj !== "object" || obj.nodeType) {
         return false;

@@ -1,8 +1,23 @@
-import {padNumber, suffixWithOrdinal, extendsNative} from "../base/Utils";
+import {padNumber, suffixWithOrdinal, extendsNative, instantiateNative, isNumber} from "../base/Utils";
 import {Duration} from "./Duration";
+
+// MAX_UNIX_TIME is either Feb 2106 in unix seconds or Feb 1970 in unix miliseconds
+// Any value less than this is interpreted as a unix time in seconds
+// If you want to go around this behavious, you can pass in a new Date(value) to your constructor
+// Of set this value to 0
+export let MAX_AUTO_UNIX_TIME = Math.pow(2, 32);
 
 @extendsNative
 class StemDate extends window.Date {
+    // Still need to do this mess because of Babel, should be removed when moving to native ES6
+    static create(value) {
+        if (arguments.length === 1 && isNumber(value) && value < MAX_AUTO_UNIX_TIME) {
+            return instantiateNative(window.Date, StemDate, value * 1000.0);
+        } else {
+            return instantiateNative(window.Date, StemDate, ...arguments);
+        }
+    }
+
     static toDate(date) {
         if (date instanceof StemDate) {
             return date;
@@ -11,6 +26,7 @@ class StemDate extends window.Date {
         }
     }
 
+    // You don't usually need to call this in most cases, constructor uses MAX_AUX_UNIX_TIME
     static unix(unixTime) {
         return new this(unixTime * 1000);
     }

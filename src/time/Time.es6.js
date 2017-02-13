@@ -23,14 +23,15 @@ let ServerTime = {
 
 export const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 
-// times should be in unix seconds
-// TODO: should be in the time file
+// TODO: should have a generic method time1.isSame("x", time);
 export function isDifferentDay(timeA, timeB) {
-    if (Math.abs(timeA - timeB) > DAY_IN_MILLISECONDS / 1000) {
+    timeA = StemDate(timeA);
+    timeB = StemDate(timeB);
+    if (+timeA - timeB > DAY_IN_MILLISECONDS) {
         return true;
     }
     // Check if different day of the month, when difference is less than a day
-    return (StemDate.unix(timeA).getDate() !== StemDate.unix(timeB).getDate());
+    return (timeA.getDate() !== timeB.getDate());
 }
 
 export function unix(timestamp) {
