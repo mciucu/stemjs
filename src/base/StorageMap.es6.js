@@ -44,10 +44,10 @@ class StorageMap extends Dispatchable {
         return this.storage.getItem(this.getRawKey(key));
     }
 
-    get(key, defaultValue) {
+    get(key, defaultValue = null) {
         const value = this.getRaw(key);
         if (value == null) {
-            return defaultValue || value;
+            return defaultValue;
         }
         return this.deserialize(value);
     }
@@ -75,6 +75,10 @@ class StorageMap extends Dispatchable {
 
     entries() {
         return this.keys().map(key => [key, this.get(key)]);
+    }
+
+    [Symbol.iterator]() {
+        return this.entries();
     }
 
     // Remove all of the keys that start with out prefix
