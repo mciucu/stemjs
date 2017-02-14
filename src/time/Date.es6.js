@@ -11,6 +11,7 @@ export let MAX_AUTO_UNIX_TIME = Math.pow(2, 32);
 class StemDate extends window.Date {
     // Still need to do this mess because of Babel, should be removed when moving to native ES6
     static create(value) {
+        // Try to do an educated guess if this date is in unix seconds or milliseconds
         if (arguments.length === 1 && isNumber(value) && value < MAX_AUTO_UNIX_TIME) {
             return instantiateNative(window.Date, StemDate, value * 1000.0);
         } else {

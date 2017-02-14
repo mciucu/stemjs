@@ -6,10 +6,6 @@ SVG.SVGRoot = class SVGRoot extends SVG.Element {
         return "svg";
     }
 
-    getSnap() {
-        return Snap(this.node);
-    }
-
     getSvg() {
         return this;
     }
@@ -63,10 +59,6 @@ SVG.Path = class SVGPath extends SVG.Element {
         return attr;
     }
 
-    createSnap() {
-        return this.getSvg().getSnap().path();
-    }
-
     getPath() {
         return this.options.d;
     }
@@ -82,6 +74,24 @@ SVG.Path = class SVGPath extends SVG.Element {
 
     getPointAtLength(len) {
         return this.node.getPointAtLength(len);
+    }
+
+    getPointAtLengthWithAngle(len) {
+        let totalLength = this.getLength();
+        let epsilon;
+        if (totalLength <= 1) {
+            epsilon = totalLength / 1000;
+        } else {
+            epsilon = Math.min(totalLength / 1000, Math.log(totalLength), 1);
+        }
+        let p1 = this.getPointAtLength(len);
+        let p2 = this.getPointAtLength(Math.min(len + epsilon, totalLength));
+        let p3 = this.getPointAtLength(Math.max(len - epsilon, 0));
+        return {
+            x: p1.x,
+            y: p1.y,
+            alpha: 180 * Math.atan2(p3.y - p2.y, p3.x - p2.x) / Math.PI
+        };
     }
 };
 

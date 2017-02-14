@@ -119,15 +119,6 @@ SVG.Element = class SVGElement extends UI.Element {
     getSvg() {
         return this.parent.getSvg();
     }
-
-    getSnap() {
-        if (!this.hasOwnProperty("_snap")) {
-            this._snap = this.createSnap();
-            this._snap.node.remove();
-            this._snap.node = this.node;
-        }
-        return this._snap;
-    }
 };
 
 SVG.Element.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
