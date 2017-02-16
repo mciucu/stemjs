@@ -41,10 +41,15 @@ class SectionDividerStyleSet extends StyleSet {
         ">*": {
             display: "inline-block",
             verticalAlign: "top",
-            paddingLeft: "9px",
+            paddingLeft: "2px",
+            paddingRight: "2px",
+            boxSizing: "border-box",
         },
         ">:first-child": {
             paddingLeft: "0",
+        },
+        ">:last-child": {
+            paddingRight: "0",
         },
         ">:nth-of-type(even)": {
             padding: "0",
@@ -55,10 +60,15 @@ class SectionDividerStyleSet extends StyleSet {
     verticalSection = {
         position: "relative",
         ">*": {
-            paddingTop: "9px",
+            paddingTop: "2px",
+            paddingBottom: "2px",
+            boxSizing: "border-box",
         },
         ">:first-child": {
             paddingTop: "0",
+        },
+        ">:last-child": {
+            paddingBottom: "0",
         },
         ">:nth-of-type(even)": {
             padding: "0",
