@@ -72,14 +72,18 @@ export function defaultComparator(a, b) {
         return -1;
     }
 
-    if (typeof a === "number" && typeof b === "number") {
+    // TODO: might want to use valueof here
+    if (isNumber(a) && isNumber(b)) {
         return a - b;
     }
 
-    if (a.toString() === b.toString()) {
+    let aStr = a.toString();
+    let bStr = b.toString();
+
+    if (aStr === bStr) {
         return 0;
     }
-    return a.toString() < b.toString() ? -1 : 1;
+    return aStr < bStr ? -1 : 1;
 }
 
 export function slugify(string) {

@@ -37,7 +37,7 @@ function BootstrapMixin(BaseClass, bootstrapClassName) {
 
 class SimpleStyledElement extends UI.Element {
     getLevel() {
-        return this.options.level || (this.parent && this.parent.options && this.parent.options.level);
+        return this.options.level || (this.parent && this.parent.getLevel && this.parent.getLevel());
     }
 
     setLevel(level) {
@@ -45,7 +45,7 @@ class SimpleStyledElement extends UI.Element {
     }
 
     getSize() {
-        return this.options.size || (this.parent && this.parent.options && this.parent.options.size);
+        return this.options.size || (this.parent && this.parent.getSize && this.parent.getSize());
     }
 
     setSize(size) {
@@ -463,6 +463,7 @@ class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
         let collapsedPanelClass = "";
         let collapsedHeadingClass = "";
         let hiddenClass = "";
+        let contentStyle = {};
 
         if (this.options.autoHeight) {
             autoHeightClass = "auto-height ";
@@ -472,6 +473,11 @@ class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
             collapsedPanelClass = this.getCollapsibleStyleSet().collapsed;
             hiddenClass = "hidden";
         }
+        if (!this.options.noPadding) {
+            contentStyle = {
+                padding: "8px 8px",
+            };
+        }
 
         return [<div className={this.getStyleSet().heading}>
                     <a ref="toggleButton"  className={`${this.getStyleSet().button} ${collapsedHeadingClass}`}
@@ -480,8 +486,8 @@ class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
                     </a>
                 </div>,
                 <div style={{overflow: "hidden"}}>
-                  <div ref="contentArea" style={{padding: "2px 10px"}}
-                       className={`${autoHeightClass} ${collapsedPanelClass} ${hiddenClass}`}>
+                  <div ref="contentArea" className={`${autoHeightClass} ${collapsedPanelClass} ${hiddenClass}`}
+                       style={contentStyle}>
                         {this.getGivenChildren()}
                     </div>
                 </div>

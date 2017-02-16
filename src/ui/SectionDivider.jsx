@@ -19,6 +19,7 @@ class SectionDividerStyleSet extends StyleSet {
         backgroundClip: "padding-box",
         borderLeft: `${this.barPadding}px solid transparent`,
         borderRight: `${this.barPadding}px solid transparent`,
+        marginLeft: `${-this.barPadding}px`,
     };
 
     @styleRule
@@ -31,6 +32,7 @@ class SectionDividerStyleSet extends StyleSet {
         backgroundClip: "padding-box",
         borderBottom: `${this.barPadding}px solid transparent`,
         borderTop: `${this.barPadding}px solid transparent`,
+        marginTop: `${-this.barPadding}px`,
     };
 
     @styleRule

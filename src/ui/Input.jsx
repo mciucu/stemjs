@@ -8,49 +8,108 @@ import {CreateNodeAttributesMap} from "./NodeAttributes";
 
 class FormStyle extends StyleSet {
     @styleRule
-    formControl = {
+    form = {
+        margin: "0 auto",
+    }
+
+    @styleRule
+    formGroup = {
+        marginBottom: "10px",
+    };
+
+    @styleRule
+    formField = {
         display: "block",
         width: "100%",
-        height: "34px",
-        padding: "6px 12px",
-        fontSize: "14px",
+        padding: "6px 0px",
         lineHeight: "1.42857143",
         color: "#555",
-        backgroundColor: "#fff",
-        border: "1px solid #ccc",
-        borderRadius: "4px",
-        boxShadow: "inset 0 1px 1px rgba(0, 0, 0, .075)",
-        transition: "border-color ease-in-out .15s, box-shadow ease-in-out .15s",
-        ":focus": {
-            borderColor: "#66afe9",
-            outline: "0",
-            boxShadow: "inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6)",
-        },
+        maxWidth: "600px",
+        margin: "0 auto",
         "[disabled]": {
-          opacity: "1",
-          cursor: "not-allowed",
+            opacity: "1",
+            cursor: "not-allowed",
         },
         "[readonly]": {
-          opacity: "1",
+            opacity: "1",
         },
     };
 
     @styleRule
-    formGroup = {
-        marginBottom: "15px",
+    sameLine = {
+        ">*:nth-child(1)": {
+            display: "inline-block",
+            textAlign: "right",
+            paddingRight: "1em",
+            width: "30%",
+            verticalAlign: "middle",
+        },
+        ">*:nth-child(2)": {
+            display: "inline-block",
+            width: "70%",
+            verticalAlign: "middle",
+        },
+    };
+
+    separatedLineInputStyle = {
+        marginRight: "0.5em",
+        width: "100%",
+        height: "2.4em",
+    };
+
+    @styleRule
+    separatedLine = {
+        padding: "6px 10px",
+        ">input": this.separatedLineInputStyle,
+        ">select": this.separatedLineInputStyle,
+        ">textarea": this.separatedLineInputStyle,
     };
 
     @styleRule
     hasError = {
         color: "#a94442",
+    };
+}
+
+class InputStyle extends StyleSet {
+    @styleRule
+    inputElement = {
+        transition: "border-color ease-in-out .15s, box-shadow ease-in-out .15s",
+        padding: "0.4em 0.54em",
+        border: "1px solid #ccc",
+        borderRadius: "4px",
+        fontSize: "90%",
+        ":focus": {
+            outline: "0",
+            borderColor: "#66afe9",
+            boxShadow: "inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6)",
+        },
+    };
+
+    @styleRule
+    checkboxInput = {
+        marginLeft: "0.2em",
+        display: "inline-block",
+        width: "initial !important",
+        marginRight:"0.5em",
+        transform: "scale(1.4)",
+    };
+
+    @styleRule
+    select = {
+        height: "2.12em",
     }
 }
 
 class Form extends UI.Primitive("form") {
-    getNodeAttributes() {
-        let attr = super.getNodeAttributes();
-        attr.addClass("form form-horizontal");
-        return attr;
+    static styleSet = FormStyle.getInstance();
+
+    getStyleSet() {
+        return this.options.styleSet || this.constructor.styleSet;
+    }
+
+    extraNodeAttributes(attr) {
+        attr.addClass(this.getStyleSet().form);
     }
 
     onMount() {
@@ -58,16 +117,26 @@ class Form extends UI.Primitive("form") {
     }
 }
 
-class Input extends UI.Primitive("input") {
-    getNodeAttributes() {
-        let attr = super.getNodeAttributes();
+class InputableElement extends UI.Element {
+    static styleSet = InputStyle.getInstance();
 
+    getStyleSet() {
+        return this.options.styleSet || this.constructor.styleSet;
+    }
+
+    extraNodeAttributes(attr) {
+        super.extraNodeAttributes(attr);
+        attr.addClass(this.getStyleSet().inputElement);
+    }
+}
+
+
+class Input extends UI.Primitive(InputableElement, "input") {
+    extraNodeAttributes(attr) {
         let type = this.getInputType();
         if (type) {
             attr.setAttribute("type", type);
         }
-
-        return attr;
     }
 
     redraw() {
@@ -98,137 +167,6 @@ class Input extends UI.Primitive("input") {
         this.addNodeListener("keyup", callback);
     }
 }
-
-class FormControl extends Input {
-    static styleSet = FormStyle.getInstance();
-
-    getNodeAttributes() {
-        let attr = super.getNodeAttributes();
-        attr.addClass(this.getStyleSet().formControl);
-        return attr;
-    }
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-}
-
-class FormSettingsGroup extends UI.Element {
-    static styleSet = FormStyle.getInstance();
-
-    setOptions(options) {
-        super.setOptions(options);
-
-        this.options.labelWidth = this.options.labelWidth || "41%";
-        this.options.contentWidth = this.options.contentWidth || "59%";
-    }
-
-    getNodeAttributes() {
-        let attr = super.getNodeAttributes();
-        attr.addClass(this.getStyleSet().FormGroup);
-        return attr;
-    }
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
-    getLabelStyle() {
-        return {
-            float: "left",
-            display: "inline-block",
-            height: "32px",
-            "line-height": "32px"
-        };
-    }
-
-    getContentStyle() {
-        return {
-            float: "left",
-            display: "inline-block",
-            "margin-top": "1px",
-            "margin-bottom": "1px",
-            "min-height": "30px"
-        };
-    }
-
-    render() {
-        let labelStyle = Object.assign(this.getLabelStyle(), {width: this.options.labelWidth});
-        labelStyle = Object.assign(labelStyle, this.options.labelStyle);
-        let contentStyle = Object.assign(this.getContentStyle(), {width: this.options.contentWidth});
-        contentStyle = Object.assign(contentStyle, this.options.contentStyle);
-        let label = this.options.label ? <div style={labelStyle}>
-                {this.options.label}
-            </div> : null;
-        let content = <div style={contentStyle}>
-                {this.options.children}
-            </div>;
-        if (this.options.contentFirst) {
-            return [content, label];
-        }
-        return [label, content];
-    }
-}
-
-class FormGroup extends UI.Element {
-    static styleSet = FormStyle.getInstance();
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
-    setOptions(options) {
-        super.setOptions(options);
-        this.options.labelWidth = this.options.labelWidth || "16%";
-        this.options.contentWidth = this.options.contentWidth || "32%";
-        this.options.errorFieldWidth = this.options.errorFieldWidth || "48%";
-    }
-
-    getNodeAttributes() {
-        let attr = super.getNodeAttributes();
-        attr.addClass("form-group");
-        return attr;
-    }
-
-    getDefaultStyle() {
-        return {
-            float: "left",
-            position: "relative",
-            "min-height": "1px",
-            "padding-right": "15px",
-            "padding-left": "15px"
-        };
-    }
-
-    render() {
-        let labelStyle = Object.assign(this.getDefaultStyle(), {width: this.options.labelWidth});
-        labelStyle = Object.assign(labelStyle, this.options.style);
-        let contentStyle = Object.assign(this.getDefaultStyle(), {width: this.options.contentWidth});
-        contentStyle = Object.assign(contentStyle, this.options.style);
-        let errorFieldStyle = Object.assign(this.getDefaultStyle(), {width: this.options.errorFieldWidth});
-        return [
-            this.options.label ? <label className="control-label" style={labelStyle}>
-                {this.options.label}
-            </label> : null,
-            <div style={contentStyle}>
-                {this.options.children}
-            </div>,
-            <span ref="errorField" style={errorFieldStyle}>
-            </span>
-        ];
-    }
-
-    setError(errorMessage) {
-        this.errorField.node.textContent = errorMessage;
-        this.addClass(this.getStyleSet().hasError);
-    }
-
-    removeError() {
-        this.errorField.node.textContent = "";
-        this.removeClass(this.getStyleSet().hasError);
-    }
-}
-
 Input.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
     ["autocomplete"],
     ["autofocus", {noValue: true}],
@@ -242,12 +180,74 @@ Input.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
     ["value"],
 ]);
 
+
+class FormGroup extends UI.Element {
+    static styleSet = FormStyle.getInstance();
+    getStyleSet() {
+        return this.options.styleSet || this.constructor.styleSet;
+    }
+
+    extraNodeAttributes(attr) {
+        attr.addClass(this.getStyleSet().formGroup);
+    }
+
+    setError(errorMessage) {
+        this.errorField.node.textContent = errorMessage;
+        this.addClass(this.getStyleSet().hasError);
+    }
+
+    removeError() {
+        this.errorField.node.textContent = "";
+        this.removeClass(this.getStyleSet().hasError);
+    }
+
+    getErrorField() {
+        return <span ref="errorField"></span>;
+    }
+
+    render() {
+        return [this.getGivenChildren(), this.getErrorField()];
+    }
+}
+
+
+class FormField extends FormGroup {
+    inline() {
+        return !(this.options.inline === false ||
+                 (this.parent && this.parent.options && this.parent.options.inline === false));
+    }
+
+    extraNodeAttributes(attr) {
+        attr.addClass(this.getStyleSet().formField);
+        if (this.inline()) {
+            attr.addClass(this.getStyleSet().sameLine);
+        } else {
+            attr.addClass(this.getStyleSet().separatedLine);
+        }
+    }
+
+    getLabel() {
+        if (this.options.label) {
+            return <label><strong>{this.options.label}</strong></label>;
+        }
+        return null;
+    }
+
+    getGivenChildren() {
+        if (this.options.contentFirst) {
+            return [super.getGivenChildren(), this.getLabel()];
+        } else {
+            return [this.getLabel(), super.getGivenChildren()];
+        }
+    }
+}
+
+
 class SubmitInput extends Input {
     getInputType() {
         return "submit";
     }
 }
-
 SubmitInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
     ["formenctype"],
     ["formmethod"],
@@ -255,95 +255,69 @@ SubmitInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesM
     ["formtarget"]
 ]);
 
-let TextInputInterface = function (BaseInputClass) {
-    return class TextInput extends BaseInputClass {
-        getInputType() {
-            return "text";
-        }
-    };
+
+class TextInput extends Input {
+    getInputType() {
+        return "text";
+    }
 };
 
-let TextInput = TextInputInterface(Input);
-let FormTextInput = TextInputInterface(FormControl);
 
-let NumberInputInterface = function(BaseInputClass) {
-    let numberInput = class NumberInput extends BaseInputClass {
-        getInputType() {
-            return "number";
-        }
+class NumberInput extends Input {
+    getInputType() {
+        return "number";
+    }
 
-        getValue() {
-            let val = super.getValue();
-            return parseInt(val) || parseFloat(val);
-        }
-    };
+    getValue() {
+        let val = super.getValue();
+        return parseInt(val) || parseFloat(val);
+    }
+};
+NumberInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
+    ["min"],
+    ["max"],
+    ["step"],
+]);
 
-    numberInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
-        ["min"],
-        ["max"],
-        ["step"],
-    ]);
-    return numberInput;
+
+class EmailInput extends Input {
+    getInputType() {
+        return "email";
+    }
 };
 
-let NumberInput = NumberInputInterface(Input);
-let FormNumberInput = NumberInputInterface(FormControl);
 
-let EmailInputInterface = function (BaseInputClass) {
-    return class EmailInput extends BaseInputClass {
-        getInputType() {
-            return "email";
-        }
-    };
+class PasswordInput extends Input {
+    getInputType() {
+        return "password";
+    }
 };
 
-let EmailInput = EmailInputInterface(Input);
-let FormEmailInput = EmailInputInterface(FormControl);
 
-let PasswordInputInterface = function(BaseInputClass) {
-    return class PasswordInput extends BaseInputClass {
-        getInputType() {
-            return "password";
-        }
-    };
+class FileInput extends Input {
+    getInputType() {
+        return "file";
+    }
+
+    getFiles() {
+        return this.node.files;
+    }
+
+    getFile() {
+        // TODO: this is valid only if multipleFiles is false
+        return this.getFiles()[0];
+    }
 };
-
-let PasswordInput = PasswordInputInterface(Input);
-let FormPasswordInput = PasswordInputInterface(FormControl);
-
-let FileInputInterface = function(BaseInputClass) {
-    let fileInput = class FileInput extends BaseInputClass {
-        getInputType() {
-            return "file";
-        }
-
-        getFiles() {
-            return this.node.files;
-        }
-
-        getFile() {
-            // TODO: this is valid only if multipleFiles is false
-            return this.getFiles()[0];
-        }
-    };
-
-    fileInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
-        ["multipleFiles", {domName: "multiple", noValue: true}],
-        ["fileTypes", {domName: "accept"}],
-    ]);
-    return fileInput;
-};
-
-let FileInput = FileInputInterface(Input);
-let FormFileInput = FileInputInterface(FormControl);
+FileInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
+    ["multipleFiles", {domName: "multiple", noValue: true}],
+    ["fileTypes", {domName: "accept"}],
+]);
 
 
 class CheckboxInput extends Input {
-    setOptions(options) {
-        options.style = options.style || {};
-        options.style = Object.assign({
-        }, options.style);
-        super.setOptions(options);
+    extraNodeAttributes(attr) {
+        super.extraNodeAttributes(attr);
+        attr.addClass(this.getStyleSet().checkboxInput);
     }
 
     getInputType() {
@@ -358,12 +332,12 @@ class CheckboxInput extends Input {
         this.node.checked = newValue;
     }
 }
-
 CheckboxInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
     ["checked", {noValue: true}]
 ]);
 
-class TextArea extends UI.Primitive("textarea") {
+
+class TextArea extends UI.Primitive(InputableElement, "textarea") {
     applyNodeAttributes() {
         super.applyNodeAttributes();
         this.node.readOnly = this.options.readOnly || false;
@@ -399,14 +373,8 @@ class TextArea extends UI.Primitive("textarea") {
     }
 }
 
-class InputField extends UI.Element {
-    render() {
-    }
-}
 
-class Slider extends UI.Element {}
-
-class Select extends UI.Primitive("select") {
+class Select extends UI.Primitive(InputableElement, "select") {
     render() {
         this.givenOptions = this.options.options || [];
         let selectOptions = [];
@@ -418,10 +386,15 @@ class Select extends UI.Primitive("select") {
             if (this.givenOptions[i] == this.options.selected) {
                 options.selected = true;
             }
-            selectOptions.push(<option {...options}>{this.givenOptions[i].toString()}</option>)
+            selectOptions.push(<option {...options}>{this.givenOptions[i].toString()}</option>);
         }
 
         return selectOptions;
+    }
+
+    extraNodeAttributes(attr) {
+        super.extraNodeAttributes(attr);
+        attr.addClass(this.getStyleSet().select);
     }
 
     get() {
@@ -456,6 +429,5 @@ class Select extends UI.Primitive("select") {
     }
 }
 
-export {FormStyle, Form, Input, FormControl, FormSettingsGroup, FormGroup, SubmitInput, TextInput, FormTextInput, NumberInput,
-        FormNumberInput, EmailInput, FormEmailInput, PasswordInput, FormPasswordInput, FileInput, FormFileInput, CheckboxInput, TextArea,
-        InputField, Slider, Select};
+export {InputStyle, Form, Input, FormGroup, FormField, SubmitInput, TextInput, NumberInput, EmailInput, PasswordInput, FileInput,
+        CheckboxInput, TextArea, Select};

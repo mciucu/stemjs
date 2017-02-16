@@ -12,6 +12,9 @@ class PriorityQueue {
         // Keep a map for each key to its index in the heap
         this.keyMap = new Map();
         this.heap = [];
+        this.cmp = options.cmp || function cmp(a, b) {
+            return +b - a;
+        };
     }
 
     set(key, priority) {
@@ -35,6 +38,20 @@ class PriorityQueue {
 
     get size() {
         return this.heap.length;
+    }
+
+    isEmpty() {
+        return this.size === 0;
+    }
+
+    entries() {
+        let values = this.heap.map(obj => obj.key);
+        values.sort(this.cmp);
+        return values;
+    }
+
+    [Symbol.iterator]() {
+        return this.entries();
     }
 }
 

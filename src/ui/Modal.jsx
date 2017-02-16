@@ -34,15 +34,9 @@ class FloatingWindow extends UI.Element {
         return this.options.styleSet || this.constructor.styleSet;
     }
 
-    setOptions(options) {
-        options = Object.assign(this.getDefaultOptions(), options);
-        super.setOptions(options);
-    }
-
-    getNodeAttributes() {
-        let attr = super.getNodeAttributes();
+    extraNodeAttributes(attr) {
+        super.extraNodeAttributes(attr);
         attr.setStyle("z-index", "2016");
-        return attr;
     }
 
     fadeOut() {
@@ -108,6 +102,14 @@ class VolatileFloatingWindow extends FloatingWindow {
         window.removeEventListener("click", this.hideListener);
     }
 
+    toggle() {
+        if (!this.isInDocument()) {
+            this.show();
+        } else {
+            this.hide();
+        }
+    }
+
     show() {
         if (!this.isInDocument()) {
             this.bindWindowListeners();
@@ -123,9 +125,14 @@ class VolatileFloatingWindow extends FloatingWindow {
     }
 
     onMount() {
-        if (!this.notVisible) {
+        if (!this.options.notVisible) {
             this.bindWindowListeners();
+        } else {
+            setTimeout(() => {
+                this.hide();
+            });
         }
+
         this.addClickListener((event) => {
             event.stopPropagation();
         });
@@ -199,9 +206,8 @@ class Modal extends UI.Element {
         let closeButton = null;
         if (this.options.closeButton) {
             // TODO: this should be in a method
-            closeButton = <div style={{position: "absolute", right: "10px", zIndex: "10"}}>
-                <Button className="close" size={UI.Size.EXTRA_LARGE}
-                           label="&times;" onClick={() => this.hide()}/>
+            closeButton = <div style={{right: "10px", zIndex: "10", position: "absolute"}}>
+                <Button className="close" size={UI.Size.EXTRA_LARGE} style={{border: "none"}} label="&times;" onClick={() => this.hide()}/>
             </div>;
         }
 

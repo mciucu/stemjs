@@ -1,18 +1,34 @@
-import {isPlainObject} from "../base/Utils";
+import {isPlainObject, isNumber} from "../base/Utils";
 
-class TimeUnit {
+export class TimeUnit {
+    static CANONICAL = {};
     static ALL = [];
+    static FIXED_DURATION = [];
+    static VARIABLE_DURATION = [];
 
-    constructor(name, baseUnit, multiplier, variableMultiplier=false) {
+    constructor(name, baseUnit, multiplier, variableMultiplier = false) {
         this.name = name;
+        this.pluralName = name + "s";
         this.baseUnit = baseUnit;
         this.multiplier = multiplier;
         this.milliseconds = ((baseUnit && baseUnit.getMilliseconds()) || 1) * multiplier;
         this.variableMultiplier = variableMultiplier;
         this.variableDuration = variableMultiplier || (baseUnit && baseUnit.isVariable());
+    }
 
-        // Add to the list of all time units
-        this.constructor.ALL.push(this);
+    static toTimeUnit(timeUnit) {
+        if (timeUnit instanceof TimeUnit) {
+            return timeUnit;
+        }
+        return this.CANONICAL[timeUnit];
+    }
+
+    getName() {
+        return this.name;
+    }
+
+    getPluralName() {
+        return this.pluralName;
     }
 
     getMilliseconds() {
@@ -37,30 +53,49 @@ TimeUnit.WEEK = new TimeUnit("week", TimeUnit.DAY, 7);
 TimeUnit.MONTH =  new TimeUnit("month", TimeUnit.DAY, 30, true);
 TimeUnit.QUARTER = new TimeUnit("quarter", TimeUnit.MONTH, 3);
 TimeUnit.TRIMESTER = new TimeUnit("trimester", TimeUnit.MONTH, 4);
+TimeUnit.SEMESTER = new TimeUnit("semester", TimeUnit.MONTH, 6);
 TimeUnit.YEAR = new TimeUnit("year", TimeUnit.MONTH, 12);
 
+TimeUnit.DAY.dateMethodSuffix = "Date";
+TimeUnit.MONTH.dateMethodSuffix = "Month";
+TimeUnit.YEAR.dateMethodSuffix = "FullYear";
+
 export class Duration {
+    static TIME_UNITS = {};
+
     constructor(duration) {
         if (duration instanceof window.Date) {
             throw new Error("Can't automatically transform Date to Duration, use date.getTime() if you really want to");
         }
+        if (isNumber(duration)) {
+            this.milliseconds = duration;
+            return;
+        }
         if (duration instanceof Duration) {
-            duration = duration.miliseconds;
+            Object.assign(this, duration);
+            return;
         }
         if (isPlainObject(duration)) {
-            duration = (duration.miliseconds || 0) +
-                (duration.seconds || 0) * 1000 +
-                (duration.minutes || 0) * 1000 * 60 +
-                (duration.hours   || 0) * 1000 * 60 * 60 +
-                (duration.days    || 0) * 1000 * 60 * 60 * 24;
+            for (const key of Object.keys(duration)) {
+                let timeUnit = this.constructor.TIME_UNITS[key];
+                if (!timeUnit) {
+                    throw Error("Unknown time unit:", key);
+                }
+                // TODO: throw an error if can't parse these values
+                if (timeUnit.isVariable()) {
+                    this[key] = parseInt(duration[key]);
+                    this.relativeDuration = true;
+                } else {
+                    this.milliseconds += parseFloat(duration[key]) * timeUnit.milliseconds;
+                }
+            }
+            return;
         }
-        this.miliseconds = duration;
+        if (arguments.length > 0) {
+            throw Error("Invalid Duration arguments: ", ...arguments);
+        }
+        this.milliseconds = 0;
     }
-
-    // initFromPlainObject(obj) {
-    //     this.
-    //     for (const )
-    // }
 
     static toDuration(duration) {
         if (duration instanceof Duration) {
@@ -69,17 +104,47 @@ export class Duration {
         return new this(duration);
     }
 
+    increment(duration) {
+        duration = this.constructor.toDuration(duration);
+        for (const key in duration) {
+            if (!(key in TimeUnit.CANONICAL)) {
+                continue;
+            }
+            if (this.hasOwnProperty(key)) {
+                this[key] += duration[key];
+            } else {
+                this[key] = duration[key];
+            }
+        }
+        return this;
+    }
+
     add(duration) {
-        return this.constructor.toDuration(+this + this.constructor.toDuration(duration));
+        return this.clone().increm(duration);
     }
 
     subtract(duration) {
-        return this.add(-(this.constructor.toDuration(duration)));
+        duration = this.constructor.toDuration(duration).negate();
+        return this.add(duration);
     }
 
     // Returns true if was defined terms of absolute primitives (anything less than a day)
     isAbsolute() {
-        return !this.relativeDuration;
+        return !this.isVariable();
+    }
+
+    isVariable() {
+        return this.relativeDuration;
+    }
+
+    negate() {
+        let duration = new Duration(this);
+        for (const key in duration) {
+            if (key in TimeUnit.CANONICAL) {
+                duration[key] = -duration[key];
+            }
+        }
+        return duration;
     }
 
     // Returns a new Duration with a positive length
@@ -93,7 +158,10 @@ export class Duration {
 
     // The primitive value
     valueOf() {
-        return this.miliseconds;
+        if (!this.isAbsolute()) {
+            console.warn("Current time is not absolute, conversion to milliseconds is invalid");
+        }
+        return this.milliseconds;
     }
 
     toNanoseconds() {
@@ -106,15 +174,15 @@ export class Duration {
     }
 
     toSeconds() {
-        return this.miliseconds / 1000;
+        return +this / 1000;
     }
 
     toMinutes() {
-        return this.miliseconds / (1000 * 60);
+        return +this / (1000 * 60);
     }
 
     toHours() {
-        return this.miliseconds / (1000 * 60 * 60);
+        return +this / (1000 * 60 * 60);
     }
 
     toString(locale) {
@@ -122,19 +190,35 @@ export class Duration {
     }
 }
 
-function canonicalDuration(name) {
-    let duration = new Duration({
-        [name + "s"]: 1,
+export function addCanonicalTimeUnit(key, timeUnit) {
+    TimeUnit.ALL.push(timeUnit);
+    if (timeUnit.isVariable()) {
+        TimeUnit.VARIABLE_DURATION.push(timeUnit);
+    } else {
+        TimeUnit.FIXED_DURATION.push(timeUnit);
+    }
+
+    TimeUnit.CANONICAL[timeUnit.name] = timeUnit;
+    if (timeUnit.pluralName) {
+        TimeUnit.CANONICAL[timeUnit.pluralName] = timeUnit;
+    }
+
+    const timeUnitsName = timeUnit.pluralName;
+
+    Duration.TIME_UNITS[timeUnitsName] = timeUnit;
+
+    Duration[key] = new Duration({
+        [timeUnitsName]: 1,
     });
-    duration.name = name;
-    duration.toString = () => name;
-    return duration;
 }
 
-Duration.MILLISECOND = canonicalDuration("millisecond");
-Duration.SECOND = canonicalDuration("second");
-Duration.MINUTE = canonicalDuration("minute");
-Duration.HOUR   = canonicalDuration("hour");
-Duration.DAY    = canonicalDuration("day");
-Duration.MONTH  = canonicalDuration("month");
-Duration.YEAR   = canonicalDuration("year");
+export function addCanonicalTimeUnits() {
+    for (const key in TimeUnit) {
+        const timeUnit = TimeUnit[key];
+        if (timeUnit instanceof TimeUnit) {
+            addCanonicalTimeUnit(key, timeUnit);
+        }
+    }
+}
+
+addCanonicalTimeUnits();

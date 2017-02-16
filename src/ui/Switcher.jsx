@@ -119,6 +119,10 @@ class Switcher extends UI.Element {
             this.node.removeChild(this.node.firstChild);
         }
 
+        if (element == null) {
+            return;
+        }
+
         this.updateChild(element);
 
         this.node.appendChild(element.node);
@@ -135,7 +139,9 @@ class Switcher extends UI.Element {
             this.activeChild.dispatch("hide");
         }
         this.updateActiveChild(element);
-        this.activeChild.dispatch("show");
+        if (this.activeChild) {
+            this.activeChild.dispatch("show");
+        }
     }
 
     hasChild(element) {

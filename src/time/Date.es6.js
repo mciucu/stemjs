@@ -1,7 +1,7 @@
 import {padNumber, suffixWithOrdinal, extendsNative, instantiateNative, isNumber} from "../base/Utils";
-import {Duration} from "./Duration";
+import {TimeUnit, Duration} from "./Duration";
 
-// MAX_UNIX_TIME is either Feb 2106 in unix seconds or Feb 1970 in unix miliseconds
+// MAX_UNIX_TIME is either Feb 2106 in unix seconds or Feb 1970 in unix milliseconds
 // Any value less than this is interpreted as a unix time in seconds
 // If you want to go around this behavious, you can pass in a new Date(value) to your constructor
 // Of set this value to 0
@@ -24,6 +24,14 @@ class StemDate extends window.Date {
             return date;
         } else {
             return new this(date);
+        }
+    }
+
+    static toDuration(duration) {
+        if (duration instanceof window.Date) {
+            return new Duration(duration.getMilliseconds());
+        } else {
+            return Duration.toDuration(duration);
         }
     }
 
@@ -60,30 +68,56 @@ class StemDate extends window.Date {
         return this.getDay();
     }
 
-    add(value) {
-        if (value instanceof window.date) {
-            throw new Error("Can't add two dates, one of them has to be a duration");
+    addUnit(timeUnit, count = 1) {
+        count = parseInt(count);
+        timeUnit = TimeUnit.toTimeUnit(timeUnit);
+        if (!timeUnit.isVariable()) {
+            this.setMilliseconds(this.getMilliseconds() + timeUnit.getMilliseconds());
+            return this;
         }
-        if (!(value instanceof Duration)) {
-            value = new Duration(value);
+        while (!timeUnit.dateMethodSuffix) {
+            count *= timeUnit.multiplier;
+            timeUnit = timeUnit.baseUnit;
         }
-        // The next line implicitly calls valueOf()
-        return new this.constructor(+this + value);
+        const dateMethodSuffix = timeUnit.dateMethodSuffix;
+        const currentValue = this["get" + dateMethodSuffix]();
+        this["set" + dateMethodSuffix](currentValue + count);
+        return this;
     }
 
-    subtract(value) {
-        if (value instanceof window.Date) {
-            return new Duration(+this - value);
+    roundUp(timeUnit) {
+        timeUnit = TimeUnit.toTimeUnit(timeUnit);
+        throw Error("Not implemented");
+    }
+
+    rountDown(timeUnit) {
+        timeUnit = TimeUnit.toTimeUnit(timeUnit);
+        throw Error("Not implemented");
+    }
+
+    add(duration) {
+        duration = Duration.toDuration(duration);
+        if (duration.isAbsolute()) {
+            this.setMilliseconds(this.getMilliseconds() + duration.toMilliseconds());
+            return this;
         }
-        if (!(value instanceof Duration)) {
-            value = new Duration(value);
+        for (const key in duration) {
+            const timeUnit = Duration.TIME_UNITS[key];
+            if (timeUnit) {
+                this.addUnit(timeUnit, duration[key]);
+            }
         }
-        // The next line implicitly calls valueOf()
-        return new this.constructor(+this - value);
+        return this;
+    }
+
+    subtract(duration) {
+        // We can also subtract a date
+        duration = this.constructor.toDuration(duration).negate();
+        return this.add(duration);
     }
 
     difference(date) {
-        if (!(date instanceof Date)) {
+        if (!(date instanceof window.Date)) {
             throw Error("StemDate difference needs to take in a date");
         }
         return this.subtract(date).abs();
@@ -94,7 +128,7 @@ class StemDate extends window.Date {
     }
 
     // Just to keep moment compatibility, until we actually implement locales
-    locale() {
+    locale(loc) {
         return this;
     }
 

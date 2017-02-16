@@ -16,14 +16,12 @@ class DateTimePicker extends UI.Element {
 
     render() {
         return [
-            <div className="form-group">
-                <div className="input-group date" ref="picker">
-                    <UI.FormTextInput ref="textArea" placeholder={this.options.format}
-                                      value={this.getStringFromDate(this.options.format, this.options.defaultDate)}/>
-                    <span className="input-group-addon">
-                        <span className="glyphicon glyphicon-calendar"/>
-                    </span>
-                </div>
+            <div className="input-group date" ref="picker">
+                <UI.TextInput ref="textArea" placeholder={this.options.format}
+                                  value={this.getStringFromDate(this.options.format, this.options.defaultDate)}/>
+                <span className="input-group-addon">
+                    <span className="glyphicon glyphicon-calendar"/>
+                </span>
             </div>
         ];
     }
