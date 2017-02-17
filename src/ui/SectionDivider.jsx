@@ -371,7 +371,6 @@ class SectionDivider extends UI.Element {
             this["divider" + i].addNodeListener("mousedown", mousedownFunc);
         }
         setTimeout(() => this.recalculateDimensions());
-        window.addEventListener("resize", () => this.recalculateDimensions());
     }
 
     render() {

@@ -71,12 +71,11 @@ class Dispatcher {
     };
 }
 
+export const DispatchersSymbol = Symbol("Dispatchers");
+
 class Dispatchable {
     get dispatchers() {
-        if (!this.hasOwnProperty("_dispatchers")) {
-            this._dispatchers = new Map();
-        }
-        return this._dispatchers;
+        return this[DispatchersSymbol] || (this[DispatchersSymbol] = new Map());
     }
 
     getDispatcher(name) {
