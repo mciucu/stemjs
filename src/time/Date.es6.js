@@ -102,7 +102,7 @@ class StemDate extends window.Date {
             return this;
         }
         for (const key in duration) {
-            const timeUnit = Duration.TIME_UNITS[key];
+            const timeUnit = TimeUnit.CANONICAL[key];
             if (timeUnit) {
                 this.addUnit(timeUnit, duration[key]);
             }

@@ -61,8 +61,6 @@ TimeUnit.MONTH.dateMethodSuffix = "Month";
 TimeUnit.YEAR.dateMethodSuffix = "FullYear";
 
 export class Duration {
-    static TIME_UNITS = {};
-
     constructor(duration) {
         if (duration instanceof window.Date) {
             throw new Error("Can't automatically transform Date to Duration, use date.getTime() if you really want to");
@@ -77,7 +75,7 @@ export class Duration {
         }
         if (isPlainObject(duration)) {
             for (const key of Object.keys(duration)) {
-                let timeUnit = this.constructor.TIME_UNITS[key];
+                let timeUnit = TimeUnit.CANONICAL[key];
                 if (!timeUnit) {
                     throw Error("Unknown time unit:", key);
                 }
@@ -205,8 +203,7 @@ export function addCanonicalTimeUnit(key, timeUnit) {
 
     const timeUnitsName = timeUnit.pluralName;
 
-    Duration.TIME_UNITS[timeUnitsName] = timeUnit;
-
+    // TODO: not sure about this anymore
     Duration[key] = new Duration({
         [timeUnitsName]: 1,
     });
