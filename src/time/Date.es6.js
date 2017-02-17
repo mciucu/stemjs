@@ -72,7 +72,7 @@ class StemDate extends window.Date {
         count = parseInt(count);
         timeUnit = TimeUnit.toTimeUnit(timeUnit);
         if (!timeUnit.isVariable()) {
-            this.setMilliseconds(this.getMilliseconds() + timeUnit.getMilliseconds());
+            this.setMilliseconds(this.getMilliseconds() + timeUnit.getMilliseconds() * count);
             return this;
         }
         while (!timeUnit.dateMethodSuffix) {

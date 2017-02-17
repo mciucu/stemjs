@@ -56,6 +56,7 @@ TimeUnit.TRIMESTER = new TimeUnit("trimester", TimeUnit.MONTH, 4);
 TimeUnit.SEMESTER = new TimeUnit("semester", TimeUnit.MONTH, 6);
 TimeUnit.YEAR = new TimeUnit("year", TimeUnit.MONTH, 12);
 
+TimeUnit.MILLISECOND.dateMethodSuffix = "Milliseconds";
 TimeUnit.DAY.dateMethodSuffix = "Date";
 TimeUnit.MONTH.dateMethodSuffix = "Month";
 TimeUnit.YEAR.dateMethodSuffix = "FullYear";

@@ -196,7 +196,7 @@ class Modal extends UI.Element {
     render() {
         return [
             <Panel ref="modalContainer" className={`hidden ${this.getStyleSet().container}`}>
-                <Panel ref="behindPanel" className={`${this.getStyleSet().hiddenAnimated} ${this.getStyleSet().background}`}/>
+                <Panel ref="behindPanel" className={`${this.getStyleSet().hiddenAnimated} ${this.getStyleSet().background}`} onClick={() => this.hide()}/>
                 {this.getModalWindow()}
             </Panel>
         ];
@@ -252,6 +252,7 @@ class Modal extends UI.Element {
                 this.modalContainer.addClass("hidden");
             }, this.modalWindow.options.transitionTime);
         }, this.modalWindow.options.transitionTime);
+        document.body.classList.remove("unscrollable");
     }
 
     show() {
@@ -267,13 +268,7 @@ class Modal extends UI.Element {
                 this.modalWindow.fadeIn();
             }, this.modalWindow.options.transitionTime);
         }, 0);
-    }
-
-    onMount() {
-        super.onMount();
-        this.behindPanel.addClickListener(() => {
-            this.hide();
-        });
+        document.body.classList.add("unscrollable");
     }
 }
 
