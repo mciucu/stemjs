@@ -74,6 +74,7 @@ export class Duration {
             return;
         }
         if (isPlainObject(duration)) {
+            this.milliseconds = 0;
             for (const key of Object.keys(duration)) {
                 let timeUnit = TimeUnit.CANONICAL[key];
                 if (!timeUnit) {

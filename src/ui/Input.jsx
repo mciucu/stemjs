@@ -19,8 +19,10 @@ class FormStyle extends StyleSet {
 
     @styleRule
     formField = {
+        ">label": {
+            width: "100%",
+        },
         display: "block",
-        width: "100%",
         padding: "6px 0px",
         lineHeight: "1.42857143",
         color: "#555",
@@ -37,14 +39,14 @@ class FormStyle extends StyleSet {
 
     @styleRule
     sameLine = {
-        ">*:nth-child(1)": {
+        ">label>*:nth-child(1)": {
             display: "inline-block",
             textAlign: "right",
             paddingRight: "1em",
             width: "30%",
             verticalAlign: "middle",
         },
-        ">*:nth-child(2)": {
+        ">label>*:nth-child(2)": {
             display: "inline-block",
             width: "70%",
             verticalAlign: "middle",
@@ -228,16 +230,16 @@ class FormField extends FormGroup {
 
     getLabel() {
         if (this.options.label) {
-            return <label><strong>{this.options.label}</strong></label>;
+            return <strong>{this.options.label}</strong>;
         }
         return null;
     }
 
     getGivenChildren() {
         if (this.options.contentFirst) {
-            return [super.getGivenChildren(), this.getLabel()];
+            return [<label>{[super.getGivenChildren(),this.getLabel()]}</label>];
         } else {
-            return [this.getLabel(), super.getGivenChildren()];
+            return [<label>{[this.getLabel(),super.getGivenChildren()]}</label>];
         }
     }
 }
