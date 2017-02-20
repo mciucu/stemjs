@@ -7,15 +7,17 @@ import {TimeUnit, Duration} from "./Duration";
 // Of set this value to 0
 export let MAX_AUTO_UNIX_TIME = Math.pow(2, 32);
 
+const BaseDate = self.Date;
+
 @extendsNative
-class StemDate extends window.Date {
+class StemDate extends BaseDate {
     // Still need to do this mess because of Babel, should be removed when moving to native ES6
     static create(value) {
         // Try to do an educated guess if this date is in unix seconds or milliseconds
         if (arguments.length === 1 && isNumber(value) && value < MAX_AUTO_UNIX_TIME) {
-            return instantiateNative(window.Date, StemDate, value * 1000.0);
+            return instantiateNative(BaseDate, StemDate, value * 1000.0);
         } else {
-            return instantiateNative(window.Date, StemDate, ...arguments);
+            return instantiateNative(BaseDate, StemDate, ...arguments);
         }
     }
 
@@ -27,17 +29,26 @@ class StemDate extends window.Date {
         }
     }
 
-    static toDuration(duration) {
-        if (duration instanceof window.Date) {
-            return new Duration(duration.getMilliseconds());
-        } else {
-            return Duration.toDuration(duration);
-        }
+    toDate() {
+        return this;
+    }
+
+    static fromUnixMilliseconds(unixMilliseconds) {
+        return this.create(new BaseDate(unixMilliseconds));
+    }
+
+    static fromUnixSeconds(unixSecons) {
+        return this.fromUnixMilliseconds(unixSecons * 1000);
     }
 
     // You don't usually need to call this in most cases, constructor uses MAX_AUX_UNIX_TIME
     static unix(unixTime) {
-        return new this(unixTime * 1000);
+        return this.fromUnixSeconds(unixTime);
+    }
+
+    set(date) {
+        date = this.constructor.toDate(date);
+        this.setTime(date.setTime());
     }
 
     clone() {
@@ -49,7 +60,7 @@ class StemDate extends window.Date {
     }
 
     unix() {
-        return Math.round(this.toUnix());
+        return Math.floor(this.toUnix());
     }
 
     isBefore(date) {
@@ -60,8 +71,39 @@ class StemDate extends window.Date {
         return this.getTime() === StemDate.toDate(date).getTime();
     }
 
+    get(timeUnit) {
+        timeUnit = TimeUnit.toTimeUnit(timeUnit);
+        return timeUnit.getDateValue(this);
+    }
+
+    isSame(date, timeUnit) {
+        if (!timeUnit) {
+            return this.equals(date);
+        }
+
+        timeUnit = TimeUnit.toTimeUnit(timeUnit);
+        date = this.constructor.toDate(date);
+        let diff = this.diff(date);
+        if (timeUnit.isAbsolute() && diff > +timeUnit) {
+            return false;
+        }
+        return this.get(timeUnit) == date.get(timeUnit);
+    }
+
     isAfter(date) {
         return this.getTime() > StemDate.toDate(date).getTime();
+    }
+
+    isSameOrBefore(date) {
+        return this.isBefore(date) || this.equals(date);
+    }
+
+    isSameOrAfter(date) {
+        return this.isAfter(date) || this.equals(date);
+    }
+
+    isBetween(a, b) {
+        return this.isSameOrAfter(a) && this.isSameOrBefore(b);
     }
 
     getWeekDay() {
@@ -69,36 +111,101 @@ class StemDate extends window.Date {
     }
 
     addUnit(timeUnit, count = 1) {
-        count = parseInt(count);
         timeUnit = TimeUnit.toTimeUnit(timeUnit);
+        count = parseInt(count);
+
         if (!timeUnit.isVariable()) {
-            this.setMilliseconds(this.getMilliseconds() + timeUnit.getMilliseconds() * count);
+            this.setTime(this.getTime() + timeUnit.getMilliseconds() * count);
             return this;
         }
+
         while (!timeUnit.dateMethodSuffix) {
             count *= timeUnit.multiplier;
             timeUnit = timeUnit.baseUnit;
         }
+
         const dateMethodSuffix = timeUnit.dateMethodSuffix;
         const currentValue = this["get" + dateMethodSuffix]();
         this["set" + dateMethodSuffix](currentValue + count);
+
+        return this;
+    }
+
+    static min() {
+        // TODO: simplify and remove code duplication
+        let result = this.constructor.toDate(arguments[0]);
+        for (let index = 1; index < arguments.length; index++) {
+            let candidate = this.constructor.toDate(arguments[index]);
+            if (candidate.isBefore(result)) {
+                result = candidate;
+            }
+        }
+        return result;
+    }
+
+    static max() {
+        let result = this.constructor.toDate(arguments[0]);
+        for (let index = 1; index < arguments.length; index++) {
+            let candidate = this.constructor.toDate(arguments[index]);
+            if (candidate.isAfter(result)) {
+                result = candidate;
+            }
+        }
+        return result;
+    }
+
+    // Assign the given date if current value if greater than it
+    capUp(date) {
+        date = this.constructor.toDate(date);
+        if (this.isAfter(date)) {
+            this.set(date);
+        }
+    }
+
+    // Assign the given date if current value if less than it
+    capDown(date) {
+        date = this.constructor.toDate(date);
+        if (this.isBefore(date)) {
+            this.set(date);
+        }
+    }
+
+    roundDown(timeUnit) {
+        timeUnit = TimeUnit.toTimeUnit(timeUnit);
+        // TODO: this is wrong for semester, etc, should be different then
+        while (timeUnit = timeUnit.baseUnit) {
+            this["set" + timeUnit.dateMethodSuffix](0);
+        }
         return this;
     }
 
     roundUp(timeUnit) {
-        timeUnit = TimeUnit.toTimeUnit(timeUnit);
-        throw Error("Not implemented");
+        const roundDown = this.clone().roundDown(timeUnit);
+        if (this.equals(roundDown)) {
+            this.set(roundDown);
+            return this;
+        }
+        this.addUnit(timeUnit);
+        return this.roundDown(timeUnit);
     }
 
-    rountDown(timeUnit) {
-        timeUnit = TimeUnit.toTimeUnit(timeUnit);
-        throw Error("Not implemented");
+
+    round(timeUnit) {
+        let roundUp = this.clone().roundUp(timeUnit);
+        let roundDown = this.clone().roundDown(timeUnit);
+        // At a tie, preffer to round up, that's where time's going
+        if (this.diff(roundUp) <= this.diff(roundDown)) {
+            this.setTime(roundUp.getTime());
+        } else {
+            this.setTime(roundDown.getTime());
+        }
+        return this;
     }
 
     add(duration) {
         duration = Duration.toDuration(duration);
         if (duration.isAbsolute()) {
-            this.setMilliseconds(this.getMilliseconds() + duration.toMilliseconds());
+            this.setTime(this.getTime() + duration.toMilliseconds());
             return this;
         }
         for (const key in duration) {
@@ -111,20 +218,17 @@ class StemDate extends window.Date {
     }
 
     subtract(duration) {
-        // We can also subtract a date
-        duration = this.constructor.toDuration(duration).negate();
+        duration = Duration.toDuration(duration).negate();
         return this.add(duration);
     }
 
-    difference(date) {
-        if (!(date instanceof window.Date)) {
-            throw Error("StemDate difference needs to take in a date");
-        }
-        return this.subtract(date).abs();
+    diffDuration(date) {
+        return new Duration(this.diff(date));
     }
 
     diff(date) {
-        return +this.difference(date);
+        date = this.constructor.toDate(date);
+        return Math.abs(+this - date);
     }
 
     // Just to keep moment compatibility, until we actually implement locales
@@ -133,6 +237,7 @@ class StemDate extends window.Date {
     }
 
     static splitToTokens(str) {
+        // TODO: Support [ and ]
         let tokens = [];
         let lastIsLetter = null;
         for (let i = 0; i < str.length; i++) {
@@ -168,7 +273,17 @@ class StemDate extends window.Date {
 
     utc() {
         // Temp hack
-        return new this.constructor(+this + this.getTimezoneOffset() * 60 * 1000);
+        return this.constructor.fromUnixMilliseconds(+this + this.getTimezoneOffset() * 60 * 1000);
+    }
+
+    isLeapYear() {
+        let year = this.getFullYear();
+        return (year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0));
+    }
+
+    daysInMonth() {
+        let lastDayInMonth = new BaseDate(this.getFullYear(), this.getMonth() + 1, 0);
+        return lastDayInMonth.getDate();
     }
 }
 
@@ -178,15 +293,41 @@ const longWeekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "F
 const shortMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const longMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
+class DateLocale {
+    constructor(obj={}) {
+        Object.assign(this, obj);
+        this.formats = this.formats || {};
+    }
+
+    getFormat(longDate) {
+        return this.formats[longDate];
+    }
+
+    setFormat(pattern, func) {
+        this.formats[pattern] = func;
+    }
+
+    format(date, pattern) {
+        return date.format(pattern);
+    }
+
+    getRelativeTime() {
+        throw Error("Not implemented");
+    }
+}
+
 StemDate.tokenFormattersMap = new Map([
-    ["ISO8601", date => date.toString()], // TODO: implement ISO format
+    ["ISO8601", date => date.toISOString()],
+
     ["Y", date => date.getFullYear()],
     ["YY", date => padNumber(date.getFullYear() % 100, 2)],
     ["YYYY", date => date.getFullYear()],
+
     ["M", date => (date.getMonth() + 1)],
     ["MM", date => padNumber(date.getMonth() + 1, 2)],
     ["MMM", date => shortMonths[date.getMonth()]],
     ["MMMM", date => longMonths[date.getMonth()]],
+
     ["D", date => date.getDate()],
     ["Do", date => suffixWithOrdinal(date.getDate())],
     ["DD", date => padNumber(date.getDate(), 2)],
@@ -196,14 +337,22 @@ StemDate.tokenFormattersMap = new Map([
     ["dd", date => miniWeekDays[date.getWeekDay()]],
     ["ddd", date => shortWeekDays[date.getWeekDay()]],
     ["dddd", date => longWeekdays[date.getWeekDay()]],
+
     ["H", date => date.getHours()],
     ["HH", date => padNumber(date.getHours(), 2)],
     ["h", date => date.getHours() % 12],
     ["hh", date => padNumber(date.getHours() % 12, 2)],
+
     ["m", date => date.getMinutes()],
     ["mm", date => padNumber(date.getMinutes(), 2)],
+
     ["s", date => date.getSeconds()],
     ["ss", date => padNumber(date.getSeconds(), 2)],
+
+    ["S", date => Math.floor(date.getMilliseconds() / 100)],
+    ["SS", date => padNumber(Math.floor(date.getMilliseconds() / 10), 2)],
+    ["SSS", date => padNumber(date.getMilliseconds(), 3)],
+    ["ms", date => padNumber(date.getMilliseconds(), 3)],
 
     ["LL", date => date.format("MMMM Do, YYYY")],
 ]);

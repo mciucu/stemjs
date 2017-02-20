@@ -159,3 +159,5 @@ function css(style) {
 }
 
 export {css, StyleSet, ExclusiveClassSet, styleMap, wrapCSS, hover, focus, active};
+
+export * from "../decorators/Style";

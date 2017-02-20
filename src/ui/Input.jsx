@@ -10,7 +10,7 @@ class FormStyle extends StyleSet {
     @styleRule
     form = {
         margin: "0 auto",
-    }
+    };
 
     @styleRule
     formGroup = {

@@ -1,14 +1,10 @@
 import {StemDate} from "./Date";
+import {TimeUnit} from "./Duration"
 
 // File meant to handle server time/client time differences
 let ServerTime = {
-    // TODO: this should return a StemDate, change it
     now() {
-        return Date.now() - this.getOffset();
-    },
-
-    unixNow() {
-        return this.now() / 1000.0;
+        return StemDate().subtract(this.getOffset());
     },
 
     getOffset() {
@@ -21,6 +17,7 @@ let ServerTime = {
     }
 };
 
+// TODO: should use +TimeUnit.DAY
 export const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 
 // TODO: should have a generic method time1.isSame("x", time);
@@ -32,14 +29,6 @@ export function isDifferentDay(timeA, timeB) {
     }
     // Check if different day of the month, when difference is less than a day
     return (timeA.getDate() !== timeB.getDate());
-}
-
-export function unix(timestamp) {
-    return new Date(parseInt(timestamp * 1000));
-}
-
-export function format(date, pattern) {
-
 }
 
 export {ServerTime};

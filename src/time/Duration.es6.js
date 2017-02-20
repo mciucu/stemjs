@@ -23,6 +23,13 @@ export class TimeUnit {
         return this.CANONICAL[timeUnit];
     }
 
+    valueOf() {
+        if (this.isVariable()) {
+            throw Error("Can't get a value of a variable time unit");
+        }
+        return this.milliseconds;
+    }
+
     getName() {
         return this.name;
     }
@@ -42,6 +49,12 @@ export class TimeUnit {
     hasVariableMultiplier() {
         return this.variableMultiplier;
     }
+
+    getDateValue(date) {
+    }
+
+    setDateValue(date, value) {
+    }
 }
 
 TimeUnit.MILLISECOND = new TimeUnit("millisecond", null, 1);
@@ -56,14 +69,13 @@ TimeUnit.TRIMESTER = new TimeUnit("trimester", TimeUnit.MONTH, 4);
 TimeUnit.SEMESTER = new TimeUnit("semester", TimeUnit.MONTH, 6);
 TimeUnit.YEAR = new TimeUnit("year", TimeUnit.MONTH, 12);
 
-TimeUnit.MILLISECOND.dateMethodSuffix = "Milliseconds";
 TimeUnit.DAY.dateMethodSuffix = "Date";
 TimeUnit.MONTH.dateMethodSuffix = "Month";
 TimeUnit.YEAR.dateMethodSuffix = "FullYear";
 
 export class Duration {
     constructor(duration) {
-        if (duration instanceof window.Date) {
+        if (duration instanceof self.Date) {
             throw new Error("Can't automatically transform Date to Duration, use date.getTime() if you really want to");
         }
         if (isNumber(duration)) {
@@ -170,19 +182,51 @@ export class Duration {
 
     // TODO: for all these units, should have a way to get the float and int value
     toMilliseconds() {
-        return +this;
+        return Math.floor(+this);
+    }
+
+    getMilliseconds() {
+        return this.toMilliseconds() % 1000;
     }
 
     toSeconds() {
-        return +this / 1000;
+        return Math.floor(+this / 1000);
+    }
+
+    getSeconds() {
+        return this.toSeconds() % 60;
     }
 
     toMinutes() {
-        return +this / (1000 * 60);
+        return Math.floor(+this / (1000 * 60));
+    }
+
+    getMinutes() {
+        return this.toMinutes() % 60;
     }
 
     toHours() {
-        return +this / (1000 * 60 * 60);
+        return Math.floor(+this / (1000 * 60 * 60));
+    }
+
+    getHours() {
+        return this.toHours() % 24;
+    }
+
+    toDays() {
+        return Math.floor(+this / (1000 * 60 * 60 * 24));
+    }
+
+    toMonths() {
+        return Math.floor(+this / (1000 * 60 * 60 * 24 * 30));
+    }
+
+    toYears() {
+        return Math.floor(+this / (1000 * 60 * 60 * 24 * 365));
+    }
+
+    format(pattern) {
+        // TODO: The same as for Date for hours, min, sec, etc
     }
 
     toString(locale) {

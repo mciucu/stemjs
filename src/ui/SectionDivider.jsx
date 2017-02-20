@@ -1,5 +1,5 @@
 // This whole file needs a refactoring, it's awfully written
-import {UI, getComputedStyle} from "./UI";
+import {UI} from "./UI";
 import {StyleInstance, StyleElement} from "./StyleElement"; // TODO: fix this Denis, be my hero!
 import {Device} from "../base/Device";
 import {StyleSet} from "./Style";
