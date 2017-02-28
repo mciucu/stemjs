@@ -1,9 +1,9 @@
 import {padNumber, suffixWithOrdinal, extendsNative, instantiateNative, isNumber} from "../base/Utils";
 import {TimeUnit, Duration} from "./Duration";
 
-// MAX_UNIX_TIME is either Feb 2106 in unix seconds or Feb 1970 in unix milliseconds
+// MAX_UNIX_TIME is either ~Feb 2106 in unix seconds or ~Feb 1970 in unix milliseconds
 // Any value less than this is interpreted as a unix time in seconds
-// If you want to go around this behavious, you can pass in a new Date(value) to your constructor
+// If you want to go around this behavious, you can use the static method .fromUnixMilliseconds()
 // Of set this value to 0
 export let MAX_AUTO_UNIX_TIME = Math.pow(2, 32);
 
@@ -237,18 +237,39 @@ class StemDate extends BaseDate {
     }
 
     static splitToTokens(str) {
-        // TODO: Support [ and ]
+        // TODO: "[HH]HH" will be split to ["HH", "HH"], so the escape does not solve the problem
         let tokens = [];
         let lastIsLetter = null;
+        let escapeByCurlyBracket = false;
+        let escapeBySquareBracket = false;
         for (let i = 0; i < str.length; i++) {
             let charCode = str.charCodeAt(i);
-            let isLetter = (65 <= charCode && charCode <= 90) || (97 <= charCode && charCode <= 122);
-            if (isLetter === lastIsLetter) {
+            if (charCode === 125 && escapeByCurlyBracket) { // '}' ending the escape
+                escapeByCurlyBracket = false;
+                lastIsLetter = null;
+            } else if (charCode === 93 && escapeBySquareBracket) { // ']' ending the escape
+                escapeBySquareBracket = false;
+                lastIsLetter = null;
+            } else if (escapeByCurlyBracket || escapeBySquareBracket) { // The character is escaped no matter what it is
                 tokens[tokens.length - 1] += str[i];
+            } else if (charCode === 123) { // '{' starts a new escape
+                escapeByCurlyBracket = true;
+                tokens.push("");
+            } else if (charCode === 91) { // '[' starts a new escape
+                escapeBySquareBracket = true;
+                tokens.push("");
             } else {
-                tokens.push(str[i]);
+                let isLetter = (65 <= charCode && charCode <= 90) || (97 <= charCode && charCode <= 122);
+                if (isLetter === lastIsLetter) {
+                    tokens[tokens.length - 1] += str[i];
+                } else {
+                    tokens.push(str[i]);
+                }
+                lastIsLetter = isLetter;
             }
-            lastIsLetter = isLetter;
+        }
+        if (escapeByCurlyBracket || escapeBySquareBracket) {
+            console.warn("Unfinished escaped sequence!");
         }
         return tokens;
     }
@@ -261,7 +282,7 @@ class StemDate extends BaseDate {
         return func(this);
     }
 
-    format(str="ISO8601") {
+    format(str="ISO") {
         let tokens = this.constructor.splitToTokens(str);
         tokens = tokens.map(token => this.evalToken(token));
         return tokens.join("");
@@ -282,10 +303,15 @@ class StemDate extends BaseDate {
     }
 
     daysInMonth() {
+        // The 0th day of the next months is actually the last day in the current month
         let lastDayInMonth = new BaseDate(this.getFullYear(), this.getMonth() + 1, 0);
         return lastDayInMonth.getDate();
     }
 }
+
+Duration.prototype.format = function (pattern) {
+    return StemDate.fromUnixMilliseconds(this.toMilliseconds()).utc().format(pattern);
+};
 
 const miniWeekDays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const shortWeekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -317,7 +343,7 @@ class DateLocale {
 }
 
 StemDate.tokenFormattersMap = new Map([
-    ["ISO8601", date => date.toISOString()],
+    ["ISO", date => date.toISOString()],
 
     ["Y", date => date.getFullYear()],
     ["YY", date => padNumber(date.getFullYear() % 100, 2)],

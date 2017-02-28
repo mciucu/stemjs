@@ -116,7 +116,7 @@ class Dispatchable {
 
     cleanup() {
         this.runCleanupJobs();
-        delete this._dispatchers;
+        delete this[DispatchersSymbol];
     }
 
     // These function don't really belong here, but they don't really hurt here and I don't want a long proto chain

@@ -33,7 +33,7 @@ class ButtonGroupStyle extends StyleSet {
     @styleRule
     VERTICAL = {
         ">*": {
-            "margin-bottom": "5px",
+            "margin-top": "5px",
             "display": "block",
         },
         ">:first-child": {
@@ -48,7 +48,7 @@ class ButtonGroupStyle extends StyleSet {
             }
         }
     }
-};
+}
 
 class RadioButtonGroupStyle extends StyleSet {
     @styleRule
@@ -65,7 +65,7 @@ class RadioButtonGroupStyle extends StyleSet {
             borderBottomLeftRadius: "0.3em",
         }
     };
-};
+}
 
 function BasicLevelStyleSet(colorClassFunction) {
     class BasicLevelStyleClass extends StyleSet {
@@ -272,7 +272,7 @@ class LabelStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
             }
         }
     }
-};
+}
 
 let badgeColorClassBuilder = (colors) => {
     return {
@@ -332,7 +332,7 @@ class BadgeStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
             }
         }
     }
-};
+}
 
 
 function cardPanelColorClassBuilder(color) {
@@ -517,6 +517,75 @@ class ProgressBarStyle extends BasicLevelStyleSet(progressBarColorClassBuilder) 
     }
 }
 
+class FlexContainerStyle extends StyleSet {
+    @styleRule
+    HORIZONTAL = {
+        display: "flex",
+        ">*": {
+            marginLeft: "20px",
+            flex: "1",
+        },
+        ">:first-child": {
+            marginLeft: "0px",
+        },
+    };
+
+    @styleRule
+    VERTICAL = {
+        display: "flex",
+        flexDirection: "column",
+        ">*": {
+            marginTop: "20px",
+            flex: "1",
+        },
+        ">:first-child": {
+            marginTop: "0px",
+        }
+    };
+
+    Orientation(orientation) {
+        for (let type of Object.keys(UI.Orientation)) {
+            if (orientation == UI.Orientation[type]) {
+                return this[type];
+            }
+        }
+    }
+}
+
+class ContainerStyle extends StyleSet {
+    @styleRule
+    EXTRA_SMALL = {
+        margin: "0% 15%",
+    };
+
+    @styleRule
+    SMALL = {
+        margin: "0% 10%",
+    };
+
+    @styleRule
+    MEDIUM = {
+        margin: "0% 6%",
+    };
+
+    @styleRule
+    LARGE = {
+        margin: "0% 3%",
+    };
+
+    @styleRule
+    EXTRA_LARGE = {
+        margin: "0% 1%",
+    };
+
+    Size(size) {
+        for (let type of Object.keys(UI.Size)) {
+            if (size == UI.Size[type]) {
+                return this[type];
+            }
+        }
+    }
+}
 
 
 GlobalStyle.Button = ButtonStyle.getInstance();
@@ -526,5 +595,7 @@ GlobalStyle.Label = LabelStyle.getInstance();
 GlobalStyle.Badge = BadgeStyle.getInstance();
 GlobalStyle.CardPanel = new CardPanelStyle();
 GlobalStyle.ProgressBar = ProgressBarStyle.getInstance();
+GlobalStyle.FlexContainer = FlexContainerStyle.getInstance();
+GlobalStyle.Container = ContainerStyle.getInstance();
 
 export {GlobalStyle};

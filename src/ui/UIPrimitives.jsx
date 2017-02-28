@@ -60,40 +60,28 @@ class Panel extends UI.Element {
 }
 
 class SlideBar extends Draggable(UI.Element) {
-    constructor(options) {
-        super(options);
+    extraNodeAttributes(attr) {
+        attr.setStyle("display", "inline-block");
+        attr.setStyle("position", "relative");
+        attr.setStyle("cursor", "pointer");
     }
 
-    getNodeAttributes() {
-        let attributes = super.getNodeAttributes();
-        attributes.setStyle("display", "inline-block");
-        attributes.setStyle("position", "relative");
-        attributes.setStyle("cursor", "pointer");
-        return attributes;
-    }
-
-    getSliderLeft() {
-        return this.options.value * this.options.width - (this.options.barWidth / 2);
+    getSliderValue() {
+        return this.options.value * this.options.size - (this.options.barSize / 2);
     }
 
     render() {
         return [
             <UI.ProgressBar ref="progressBar" active="true" value={this.options.value} disableTransition={true}
-                            style={{
-                                height: "5px",
-                                width: this.options.width + "px",
+                            orientation={this.getOrientation()}
+                            style={Object.assign({
                                 position: "relative",
-                                top: "15px",
-                            }}
+                            }, this.getProgressBarStyle())}
             />,
-            <div ref="slider" style={{
-                                width: this.options.barWidth + "px",
-                                height: "20px",
-                                "background-color": "black",
+            <div ref="slider" style={Object.assign({
+                                backgroundColor: "black",
                                 position: "absolute",
-                                left: this.getSliderLeft() + "px",
-                                top: "7.5px"
-                            }}>
+                            }, this.getSliderStyle())}>
             </div>
         ];
     }
@@ -104,11 +92,9 @@ class SlideBar extends Draggable(UI.Element) {
 
         this.options.value = value;
         this.progressBar.set(this.options.value);
-        this.slider.setStyle("left", this.getSliderLeft() + "px");
+        this.slider.setStyle(this.getOrientationAttribute(), this.getSliderValue() + "px");
 
-        if (this.onSetValue) {
-            this.onSetValue(this.options.value);
-        }
+        this.dispatch("change", this.options.value);
     }
 
     getValue() {
@@ -116,16 +102,96 @@ class SlideBar extends Draggable(UI.Element) {
     }
 
     onMount() {
-        this.addDragListener({
+        this.addDragListener(this.getDragConfig());
+    }
+}
+
+class HorizontalSlideBar extends SlideBar {
+    setOptions(options) {
+        options.size = options.size || options.width || 100;
+        options.barSize = options.barSize || options.barWidth || 5;
+        super.setOptions(options);
+    }
+
+    getProgressBarStyle() {
+        return {
+            height: "5px",
+            width: this.options.size + "px",
+            top: "15px",
+        };
+    }
+
+    getSliderStyle() {
+        return {
+            width: this.options.barSize + "px",
+            height: "20px",
+            left: this.getSliderValue() + "px",
+            top: "7.5px"
+        };
+    }
+
+    getOrientationAttribute() {
+        return "left";
+    }
+
+    getOrientation() {
+        return UI.Orientation.HORIZONTAL;
+    }
+
+    getDragConfig() {
+        return {
             onStart: (event) => {
-                this.setValue((Device.getEventX(event) - getOffset(this.progressBar).left) / this.options.width);
+                this.setValue((Device.getEventX(event) - getOffset(this.progressBar)[this.getOrientationAttribute()]) / this.options.size);
             },
             onDrag: (deltaX, deltaY) => {
-                this.setValue(this.options.value + deltaX / this.options.width);
+                this.setValue(this.options.value + deltaX / this.options.size);
             },
-        });
+        };
     }
-};
+}
+class VerticalSlideBar extends SlideBar {
+    setOptions(options) {
+        options.size = options.size || options.height || 100;
+        options.barSize = options.barSize || options.barHeight || 5;
+        super.setOptions(options);
+    }
+
+    getProgressBarStyle() {
+        return {
+            height: this.options.size + "px",
+            width: "5px",
+            left: "15px",
+        };
+    }
+
+    getSliderStyle() {
+        return {
+            height: this.options.barSize + "px",
+            width: "20px",
+            top: this.getSliderValue() + "px",
+            left: "7.5px"
+        };
+    }
+
+    getOrientationAttribute() {
+        return "top";
+    }
+
+    getOrientation() {
+        return UI.Orientation.VERTICAL;
+    }
+
+    getDragConfig() {
+        return {
+            onStart: (event) => {
+                this.setValue((Device.getEventY(event) - getOffset(this.progressBar)[this.getOrientationAttribute()]) / this.options.size);
+            },
+            onDrag: (deltaX, deltaY) => {
+                this.setValue(this.options.value + deltaY / this.options.size);
+            },
+        };
+    }
+}
 
 class Link extends UI.Primitive("a") {
     extraNodeAttributes(attr) {
@@ -451,4 +517,4 @@ export function ConstructorInitMixin(BaseClass) {
 };
 
 
-export {Link, Panel, Image, RawHTML, TimePassedSpan, TemporaryMessageArea, SlideBar, ScrollableMixin, InfiniteScrollable};
+export {Link, Panel, Image, RawHTML, TimePassedSpan, TemporaryMessageArea, SlideBar, VerticalSlideBar, HorizontalSlideBar, ScrollableMixin, InfiniteScrollable};

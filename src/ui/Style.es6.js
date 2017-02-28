@@ -1,6 +1,6 @@
 // This file will probably be deprecated in time by StyleSheet, but the API will be backwards compatible, so use it
 import {UI} from "./UIBase";
-import {StyleElement, DynamicStyleElement} from "./StyleElement";
+import {StyleElement, KeyframeElement, DynamicStyleElement} from "./StyleElement";
 import {Dispatchable} from "../base/Dispatcher";
 
 // Class meant to group multiple classes inside a single <style> element, for convenience
@@ -67,9 +67,16 @@ class StyleSet extends Dispatchable {
         return element;
     }
 
-    keyframe(styles) {
+    keyframes(keyframes) {
         this.ensureFirstUpdate();
-        throw Error("Not implemented yet!");
+        // This is not really necessarily as I don't believe it will ever be used
+        if (arguments.length > 1) {
+            keyframes = Object.assign({}, ...arguments);
+        }
+        let element = new KeyframeElement({keyframe: keyframes});
+        this.elements.add(element);
+        this.styleElement.appendChild(element);
+        return element;
     }
 
     addBeforeUpdateListener(callback) {
@@ -159,5 +166,6 @@ function css(style) {
 }
 
 export {css, StyleSet, ExclusiveClassSet, styleMap, wrapCSS, hover, focus, active};
+
 
 export * from "../decorators/Style";

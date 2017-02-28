@@ -31,9 +31,9 @@ class StyleInstance extends UI.TextElement {
             }
             // TODO: if key starts with vendor-, replace it with the browser specific one (and the plain one)
             // TODO: on some attributes, do we want to automatically add a px suffix?
-            str += dashCase(key) + ":" + value + ";"
+            str += dashCase(key) + ":" + value + ";";
         }
-        return str + "}"
+        return str + "}";
     }
 
     copyState(element) {
@@ -96,7 +96,7 @@ class DynamicStyleElement extends StyleElement {
                 // Check that this actually is a valid subselector
                 let firstChar = String(key).charAt(0);
                 if (!ALLOWED_SELECTOR_STARTS.has(firstChar)) {
-                    // TODO: Log here?
+                    console.error("First character of your selector is invalid.");
                     continue;
                 }
                 // TODO: maybe optimize for waste here?
@@ -129,4 +129,47 @@ class DynamicStyleElement extends StyleElement {
     }
 }
 
-export {StyleInstance, StyleElement, DynamicStyleElement}
+class KeyframeElement extends StyleElement {
+    toString() {
+        return this.getKeyframeName();
+    }
+
+    getKeyframeName() {
+        if (this.keyframeName) {
+            return this.keyframeName;
+        }
+        this.constructor.instanceCounter = (this.constructor.instanceCounter || 0) + 1;
+        this.keyframeName = "keyframes-" + this.constructor.instanceCounter;
+        return this.keyframeName;
+    }
+
+    getValue(style) {
+        let str = "{";
+        for (let key in style) {
+            let value = style[key];
+            if (typeof value === "function") {
+                value = value();
+            }
+            if (value == null) {
+                continue;
+            }
+            str += dashCase(key) + ":" + value + ";";
+        }
+        return str + "}";
+    }
+
+    getKeyframeInstance(keyframe) {
+        let result = "{";
+        for (let key in keyframe) {
+            let value = keyframe[key];
+            result += key + " " + this.getValue(value);
+        }
+        return result + "}";
+    }
+
+    render() {
+        return "@keyframes " + this.getKeyframeName() + this.getKeyframeInstance(this.options.keyframe || {});
+    }
+}
+
+export {StyleInstance, StyleElement, KeyframeElement, DynamicStyleElement}

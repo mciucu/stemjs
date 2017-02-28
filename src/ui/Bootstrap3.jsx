@@ -87,7 +87,7 @@ class IconableInterface extends SimpleStyledElement {
         };
         if (this.getLabel()) {
             iconOptions.style = {
-                paddingRight: "5px",
+                marginRight: "5px",
             }
         }
 
@@ -110,14 +110,17 @@ class Button extends UI.Primitive(IconableInterface, "button") {
     }
 
     disable() {
+        this.options.disabled = true;
         this.node.disabled = true;
     }
 
     enable() {
+        this.options.disabled = false;
         this.node.disabled = false;
     }
 
     setEnabled(enabled) {
+        this.options.disabled = !enabled;
         this.node.disabled = !enabled;
     };
 }
@@ -525,13 +528,25 @@ class ProgressBar extends SimpleStyledElement {
 
     render() {
         let valueInPercent = (this.options.value || 0) * 100;
-
-        let barOptions = {
-            className: GlobalStyle.ProgressBar.DEFAULT,
-            style: {
+        let orientation = UI.Orientation.HORIZONTAL;
+        if (this.options.hasOwnProperty("orientation")) {
+            orientation = this.options.orientation;
+        }
+        let barStyle;
+        if (orientation === UI.Orientation.HORIZONTAL) {
+            barStyle = {
                 width: valueInPercent + "%",
                 height: this.options.height + "px",
-            },
+            };
+        } else {
+            barStyle = {
+                height: valueInPercent + "%",
+                width: "5px",
+            }
+        }
+        let barOptions = {
+            className: GlobalStyle.ProgressBar.DEFAULT,
+            style: barStyle,
         };
 
         if (this.options.disableTransition) {

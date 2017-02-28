@@ -301,6 +301,12 @@ class ErrorModal extends Modal {
 }
 
 class ActionModal extends Modal {
+    getDefaultOptions() {
+        return {
+            closeButton: false
+        };
+    }
+
     getActionName() {
         return this.options.actionName;
     }
@@ -352,8 +358,10 @@ class ActionModal extends Modal {
     getFooterContent() {
         return [
             <TemporaryMessageArea ref="messageArea"/>,
-            <Button label={this.getCloseName()} onClick={() => this.hide()}/>,
-            this.getActionButton(),
+            <UI.ButtonGroup>
+                <Button label={this.getCloseName()} onClick={() => this.hide()}/>
+                  {this.getActionButton()}
+            </UI.ButtonGroup>
         ];
     }
 

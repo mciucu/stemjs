@@ -17,9 +17,17 @@ function getStyleRuleKey(key) {
     return "__style__" + key;
 }
 
+function getKeyframesRuleKey(key) {
+    return "__keyframes__" + key;
+}
+
 // TODO: this function can be made a lot more generic, to wrap plain object initializer with inheritance support
 function styleRuleWithOptions() {
     let options = Object.assign({}, ...arguments); //Simpler notation?
+    // TODO: Remove this if you don't think it's appropiate, I thought a warning would do no harm
+    if (!options.targetMethodName) {
+        console.error("WARNING: targetMethodName not specified in the options (default is \"css\")");
+    }
     let targetMethodName = options.targetMethodName || "css";
 
     function styleRuleDecorator(target, key, descriptor) {
@@ -40,7 +48,7 @@ function styleRuleWithOptions() {
         };
 
         // Change the prototype of this object to be able to access the old descriptor/value
-        target[getStyleRuleKey(key)] = Object.assign({}, descriptor);
+        target[options.getKey(key)] = Object.assign({}, descriptor);
 
         descriptor.initializer = function () {
             let style = descriptor.objInitializer.call(this);
@@ -55,7 +63,31 @@ function styleRuleWithOptions() {
     return styleRuleDecorator;
 }
 
-let styleRule = styleRuleWithOptions();
-let styleRuleInherit = styleRuleWithOptions({inherit: true});
+// TODO: Second argument is mostly useless (implied from targetMethodName)
+let styleRule = styleRuleWithOptions({
+    targetMethodName: "css",
+    getKey: getStyleRuleKey,
+    inherit: false,
+});
 
-export {styleRule, styleRuleInherit, styleRuleWithOptions}
+let styleRuleInherit = styleRuleWithOptions({
+    targetMethodName: "css",
+    getKey: getStyleRuleKey,
+    inherit: true,
+});
+
+let keyframesRule = styleRuleWithOptions({
+    targetMethodName: "keyframes",
+    getKey: getKeyframesRuleKey,
+    inherit: false,
+});
+
+// TODO: This is currently not working (I think)
+let keyframesRuleInherit = styleRuleWithOptions({
+    targetMethodName: "keyframes",
+    getKey: getKeyframesRuleKey,
+    inherit: true,
+});
+
+export {styleRule, styleRuleInherit, keyframesRule, keyframesRuleInherit, styleRuleWithOptions}
+

@@ -14,6 +14,7 @@ export * from "./Switcher";
 export * from "tabs/TabArea";
 export * from "./SectionDivider";
 export * from "./Accordion";
+export * from "./Carousel";
 
 export * from "./table/Table";
 export * from "./table/CollapsibleTable";

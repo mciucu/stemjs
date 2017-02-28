@@ -216,7 +216,15 @@ function jQueryCompatibilityPreprocessor(options) {
         } else {
             let formData = new FormData();
             for (const key of Object.keys(options.data)) {
-                formData.append(key, options.data[key]);
+                const value = options.data[key];
+                if (Array.isArray(value)) {
+                    for (const arrayValue of value) {
+                        formData.append(key + "[]", arrayValue);
+                    }
+                } else {
+                    formData.append(key, value);
+                }
+
             }
             options.body = formData;
         }

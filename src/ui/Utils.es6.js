@@ -29,3 +29,9 @@ export function getComputedStyle(node, attribute) {
     let computedStyle = window.getComputedStyle(node, null);
     return (attribute) ? computedStyle.getPropertyValue(attribute) : computedStyle;
 }
+
+export function changeParent(element, newParent) {
+    const currentParent = element.parent;
+    currentParent.eraseChild(element, false);
+    newParent.appendChild(element);
+}

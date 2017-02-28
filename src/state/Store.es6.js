@@ -37,13 +37,8 @@ class StoreObject extends Dispatchable {
     // Returns an object that implements the Cleanup interface.
     addEventListener(eventType, callback) {
         if (Array.isArray(eventType)) {
-            // return new CleanupJobs(eventType.map(x => this.addEventListener(x, callback)));
-
-            let cleanupJobs = new CleanupJobs();
-            for (let type of eventType) {
-                cleanupJobs.add(this.addEventListener(type, callback));
-            }
-            return cleanupJobs;
+            const handlers = eventType.map(e => this.addEventListener(e, callback));
+            return new CleanupJobs(handlers);
         }
         // Ensure the private event dispatcher exists
         if (!this._eventDispatcher) {

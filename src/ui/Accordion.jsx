@@ -1,4 +1,3 @@
-// This whole file needs a refactoring, it's awfully written
 import {UI, getComputedStyle} from "./UI";
 import {StyleInstance, StyleElement} from "./StyleElement";
 import {Device} from "../base/Device";

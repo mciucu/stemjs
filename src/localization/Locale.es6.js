@@ -26,10 +26,15 @@ class Locale extends Dispatchable {
     }
 
     getTimeFormatter() {
+        return null;
     }
 
     getNumberFormatter() {
+        return null;
+    }
 
+    getPhoneNumberFormatter() {
+        return null;
     }
 }
 

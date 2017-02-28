@@ -373,9 +373,13 @@ class UIElement extends BaseUIElement {
             parent = new UI.Element().bindToNode(parent);
         }
         this.parent = parent;
-        if (!this.node) {
-            this.createNode();
+        if (this.node) {
+            parent.insertChildNodeBefore(this, nextSiblingNode);
+            this.dispatch("changeParent", this.parent);
+            return;
         }
+
+        this.createNode();
         this.redraw();
 
         parent.insertChildNodeBefore(this, nextSiblingNode);
@@ -404,12 +408,14 @@ class UIElement extends BaseUIElement {
 
         this.options.children.splice(position, 0, child);
 
-        child.mount(this, position + 1 < this.options.children.length ? this.children[position + 1].node : null);
+        const nextChildNode = position + 1 < this.options.children.length ? this.children[position + 1].node : null;
+
+        child.mount(this, nextChildNode);
 
         return child;
     }
 
-    eraseChild(child, destroy=true) {
+    eraseChild(child, destroy = true) {
         let index = this.options.children.indexOf(child);
 
         if (index < 0) {

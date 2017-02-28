@@ -6,14 +6,14 @@ export class TimeUnit {
     static FIXED_DURATION = [];
     static VARIABLE_DURATION = [];
 
-    constructor(name, baseUnit, multiplier, variableMultiplier = false) {
+    constructor(name, baseUnit, multiplier, options = {}) {
         this.name = name;
         this.pluralName = name + "s";
         this.baseUnit = baseUnit;
         this.multiplier = multiplier;
         this.milliseconds = ((baseUnit && baseUnit.getMilliseconds()) || 1) * multiplier;
-        this.variableMultiplier = variableMultiplier;
-        this.variableDuration = variableMultiplier || (baseUnit && baseUnit.isVariable());
+        this.variableMultiplier = options.variableMultiplier || false;
+        this.variableDuration = this.variableMultiplier || (baseUnit && baseUnit.isVariable());
     }
 
     static toTimeUnit(timeUnit) {
@@ -24,9 +24,6 @@ export class TimeUnit {
     }
 
     valueOf() {
-        if (this.isVariable()) {
-            throw Error("Can't get a value of a variable time unit");
-        }
         return this.milliseconds;
     }
 
@@ -51,6 +48,7 @@ export class TimeUnit {
     }
 
     getDateValue(date) {
+
     }
 
     setDateValue(date, value) {
@@ -61,13 +59,13 @@ TimeUnit.MILLISECOND = new TimeUnit("millisecond", null, 1);
 TimeUnit.SECOND = new TimeUnit("second", TimeUnit.MILLISECOND, 1000);
 TimeUnit.MINUTE = new TimeUnit("minute", TimeUnit.SECOND, 60);
 TimeUnit.HOUR = new TimeUnit("hour", TimeUnit.MINUTE, 60);
-TimeUnit.DAY = new TimeUnit("day", TimeUnit.HOUR, 24, true);
+TimeUnit.DAY = new TimeUnit("day", TimeUnit.HOUR, 24, {variableMultiplier: true});
 TimeUnit.WEEK = new TimeUnit("week", TimeUnit.DAY, 7);
-TimeUnit.MONTH =  new TimeUnit("month", TimeUnit.DAY, 30, true);
+TimeUnit.MONTH =  new TimeUnit("month", TimeUnit.DAY, 30, {variableMultiplier: true});
 TimeUnit.QUARTER = new TimeUnit("quarter", TimeUnit.MONTH, 3);
 TimeUnit.TRIMESTER = new TimeUnit("trimester", TimeUnit.MONTH, 4);
 TimeUnit.SEMESTER = new TimeUnit("semester", TimeUnit.MONTH, 6);
-TimeUnit.YEAR = new TimeUnit("year", TimeUnit.MONTH, 12);
+TimeUnit.YEAR = new TimeUnit("year", TimeUnit.DAY, 365, {variableMultiplier: true});
 
 TimeUnit.DAY.dateMethodSuffix = "Date";
 TimeUnit.MONTH.dateMethodSuffix = "Month";
@@ -170,14 +168,11 @@ export class Duration {
 
     // The primitive value
     valueOf() {
-        if (!this.isAbsolute()) {
-            console.warn("Current time is not absolute, conversion to milliseconds is invalid");
-        }
         return this.milliseconds;
     }
 
     toNanoseconds() {
-        return +this / 1e6;
+        return Math.floor(+this * 1e6);
     }
 
     // TODO: for all these units, should have a way to get the float and int value
@@ -223,10 +218,6 @@ export class Duration {
 
     toYears() {
         return Math.floor(+this / (1000 * 60 * 60 * 24 * 365));
-    }
-
-    format(pattern) {
-        // TODO: The same as for Date for hours, min, sec, etc
     }
 
     toString(locale) {

@@ -62,9 +62,13 @@ class FormStyle extends StyleSet {
     @styleRule
     separatedLine = {
         padding: "6px 10px",
-        ">input": this.separatedLineInputStyle,
-        ">select": this.separatedLineInputStyle,
-        ">textarea": this.separatedLineInputStyle,
+        ">label>input": this.separatedLineInputStyle,
+        ">label>select": this.separatedLineInputStyle,
+        ">label>textarea": this.separatedLineInputStyle,
+        ">label>input[type='checkbox']": {
+            marginLeft: "10px",
+            verticalAlign: "middle",
+        }
     };
 
     @styleRule
