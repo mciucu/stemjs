@@ -1,5 +1,4 @@
 import {UI, getComputedStyle} from "./UI";
-import {StyleInstance, StyleElement} from "./StyleElement";
 import {Device} from "../base/Device";
 import {StyleSet} from "./Style";
 import {styleRule} from "../decorators/Style";
