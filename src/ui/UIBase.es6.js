@@ -302,6 +302,10 @@ class UIElement extends BaseUIElement {
         this.getOptionsAsNodeAttributes().setStyle(key, value, this.node);
     }
 
+    removeStyle(key) {
+        this.getOptionsAsNodeAttributes().removeStyle(key, this.node);
+    }
+
     addClass(className) {
         this.getOptionsAsNodeAttributes().addClass(className, this.node);
     }

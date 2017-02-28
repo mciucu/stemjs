@@ -74,8 +74,7 @@ class NodeAttributes {
             return;
         }
         if (value === undefined) {
-            console.error("Style is being removed");
-            // TODO: why return here and not remove the old value?
+            this.removeStyle(key, node);
             return;
         }
         this.style = this.style || {};
@@ -85,6 +84,15 @@ class NodeAttributes {
         }
         if (node && node.style[key] !== value) {
             node.style[key] = value;
+        }
+    }
+
+    removeStyle(key, node) {
+        if (this.style) {
+            delete this.style[key];
+        }
+        if (node && node.style[key]) {
+            delete node.style[key];
         }
     }
 
