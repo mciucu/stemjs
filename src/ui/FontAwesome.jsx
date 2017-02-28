@@ -34,6 +34,10 @@ class FACollapseIcon extends FAIcon {
         this.options.collapsed = collapsed;
         this.redraw();
     }
+
+    toggleCollapsed() {
+        this.setCollapsed(!this.options.collapsed);
+    }
 }
 
 class FASortIcon extends FAIcon {

@@ -1,11 +1,13 @@
 import {UI, getComputedStyle} from "./UI";
+import {StyleInstance, StyleElement} from "./StyleElement";
 import {Device} from "../base/Device";
 import {StyleSet} from "./Style";
 import {styleRule} from "../decorators/Style";
+import {FACollapseIcon} from "../ui/FontAwesome";
 
 class AccordionStyleSet extends StyleSet {
     mainColor = "black";
-    hoverColor = "#333";
+    hoverColor = "#555";
 
     @styleRule
     accordion = {
@@ -19,7 +21,6 @@ class AccordionStyleSet extends StyleSet {
             overflow: "auto",
         },
         ">:nth-of-type(odd)": {
-            backgroundColor: this.mainColor,
             color: "white",
             fontSize: "130%",
             padding: "2px 10px",
@@ -50,6 +51,15 @@ class AccordionStyleSet extends StyleSet {
         cursor: "grabbing",
         cursor: "-moz-grabbing",
         cursor: "-webkit-grabbing",
+    };
+
+    @styleRule
+    collapseIcon = {
+        width: "0.7em",
+        fontSize: "120% !important",
+        fontWeight: "900 !important",
+        textAlign: "center",
+        marginRight: "0.2em",
     };
 }
 
@@ -91,9 +101,14 @@ class AccordionDivider extends UI.Element {
         window.addEventListener("mouseup", dragMouseupFunction);
     }
 
+    render() {
+        return [<FACollapseIcon ref="collapseIcon" collapsed={false} className={this.getStyleSet().collapseIcon}/>, this.options.children];
+    }
+
     onMount() {
         this.addNodeListener("touchstart", (event) => this.dividerMousedownFunction(event));
         this.addNodeListener("mousedown", (event) => this.dividerMousedownFunction(event));
+        this.addListener("togglePanel", () => {this.collapseIcon.toggleCollapsed();});
     }
 }
 
@@ -183,6 +198,7 @@ class Accordion extends UI.Element {
 
         let mouseUpListener = this.addListener("dividerMouseup", () => {
             if (!dragTriggered) {
+                dividerEvent.divider.dispatch("togglePanel");
                 this.toggleChild(this.panels[index]);
             }
             mouseMoveListener.remove();
