@@ -233,7 +233,7 @@ class Accordion extends UI.Element {
         return panelHeights;
     }
 
-    setFlexes(panelHeights) {
+    setChildrenHeights(panelHeights) {
         for (let i = 0; i < this.panels.length; i += 1) {
             this.panels[i].setStyle("flex", panelHeights[i]);
         }
