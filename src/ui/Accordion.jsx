@@ -105,6 +105,10 @@ class AccordionDivider extends UI.Element {
         return [<FACollapseIcon ref="collapseIcon" collapsed={false} className={this.getStyleSet().collapseIcon}/>, this.options.children];
     }
 
+    setCollapsed(value) {
+        this.collapseIcon.setCollapsed(value);
+    }
+
     onMount() {
         this.addNodeListener("touchstart", (event) => this.dividerMousedownFunction(event));
         this.addNodeListener("mousedown", (event) => this.dividerMousedownFunction(event));
@@ -203,6 +207,7 @@ class Accordion extends UI.Element {
             }
             mouseMoveListener.remove();
             mouseUpListener.remove();
+            this.dispatch("childrenStatusChange");
         });
     }
 
@@ -225,17 +230,27 @@ class Accordion extends UI.Element {
         }
     }
 
-    getChildrenHeights() {
-        let panelHeights = [];
+    getChildrenStatus() {
+        let childrenStatus = [];
         for (let panel of this.panels) {
-            panelHeights.push(getComputedStyle(panel.node, "flex"));
+            childrenStatus.push({
+                flex: getComputedStyle(panel.node, "flex"),
+                collapsed: panel.hasClass("hidden")
+            });
         }
-        return panelHeights;
+        return childrenStatus;
     }
 
-    setChildrenHeights(panelHeights) {
-        for (let i = 0; i < this.panels.length; i += 1) {
-            this.panels[i].setStyle("flex", panelHeights[i]);
+    setChildrenStatus(childrenStatus) {
+        for (let i = 0; i < childrenStatus.length; i += 1) {
+            this.panels[i].setStyle("flex", childrenStatus[i].flex);
+            let collapsed = childrenStatus[i].collapsed;
+            if (collapsed) {
+                this.panels[i].addClass("hidden");
+            } else {
+                this.panels[i].removeClass("hidden");
+            }
+            this.dividers[i].setCollapsed(collapsed);
         }
     }
 
