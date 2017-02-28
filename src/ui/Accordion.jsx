@@ -225,6 +225,20 @@ class Accordion extends UI.Element {
         }
     }
 
+    getChildrenHeights() {
+        let panelHeights = [];
+        for (let panel of this.panels) {
+            panelHeights.push(getComputedStyle(panel.node, "flex"));
+        }
+        return panelHeights;
+    }
+
+    setFlexes(panelHeights) {
+        for (let i = 0; i < this.panels.length; i += 1) {
+            this.panels[i].setStyle("flex", panelHeights[i]);
+        }
+    }
+
     onMount() {
         this.addListener("dividerMousedown", (dividerEvent) => this.dividerMousedownFunction(dividerEvent));
     }
