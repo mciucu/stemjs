@@ -110,8 +110,9 @@ class AccordionDivider extends UI.Element {
     }
 
     onMount() {
-        this.addNodeListener("touchstart", (event) => this.dividerMousedownFunction(event));
-        this.addNodeListener("mousedown", (event) => this.dividerMousedownFunction(event));
+        // TODO: fix this hack when Device.isTouchDevice works
+        this.addNodeListener("touchstart", (event) => {this.touchDeviceTriggered = true; this.dividerMousedownFunction(event);});
+        this.addNodeListener("mousedown", (event) => {if (!this.touchDeviceTriggered) {this.dividerMousedownFunction(event);}});
         this.addListener("togglePanel", () => {this.collapseIcon.toggleCollapsed();});
     }
 }
