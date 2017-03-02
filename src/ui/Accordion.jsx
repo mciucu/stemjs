@@ -198,6 +198,8 @@ class Accordion extends UI.Element {
                 previousPanel.setStyle("flex", previousSize + delta);
 
                 previousEvent = event;
+
+                this.dispatch("dragging");
             }
         });
 
