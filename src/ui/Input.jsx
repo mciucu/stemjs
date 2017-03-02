@@ -98,7 +98,6 @@ class InputStyle extends StyleSet {
         display: "inline-block",
         width: "initial !important",
         marginRight:"0.5em",
-        transform: "scale(1.4)",
     };
 
     @styleRule
