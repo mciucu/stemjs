@@ -22,8 +22,10 @@ class AccordionStyleSet extends StyleSet {
         },
         ">:nth-of-type(odd)": {
             color: "white",
-            fontSize: "130%",
-            padding: "2px 10px",
+            fontSize: "1em",
+            textTransform: "uppercase",
+            fontFamily: "lato, open sans",
+            padding: "8px 8px",
             ":hover": {
                 backgroundColor: this.hoverColor,
             }
