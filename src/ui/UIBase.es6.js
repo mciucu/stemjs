@@ -172,7 +172,7 @@ class UIElement extends BaseUIElement {
     cleanup() {
         this.runCleanupJobs();
         for (let child of this.children) {
-            child.cleanup();
+            child.destroyNode();
         }
         this.clearNode();
         super.cleanup();
