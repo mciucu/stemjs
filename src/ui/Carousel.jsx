@@ -31,7 +31,6 @@ class CarouselStyleSet extends StyleSet {
     navigator = {
         width: "100%",
         height: this.navigatorHeight,
-        borderBottom: "1px solid #fff",
         display: "flex",
     };
 
