@@ -87,16 +87,16 @@ class AccordionDivider extends UI.Element {
             this.parent.dispatch("dividerMousemove", event);
         };
 
-        window.addEventListener("touchmove", dragMousemoveFunction);
-        window.addEventListener("mousemove", dragMousemoveFunction);
+        this.parent.addNodeListener("touchmove", dragMousemoveFunction);
+        this.parent.addNodeListener("mousemove", dragMousemoveFunction);
 
         let dragMouseupFunction = (event) => {
             this.parent.dispatch("dividerMouseup", event);
             this.removeClass(this.getStyleSet().grabbing);
             document.body.classList.remove(this.getStyleSet().noTextSelection);
-            window.removeEventListener("touchmove", dragMousemoveFunction);
+            this.parent.removeNodeListener("touchmove", dragMousemoveFunction);
             window.removeEventListener("touchend", dragMouseupFunction);
-            window.removeEventListener("mousemove", dragMousemoveFunction);
+            this.parent.removeNodeListener("mousemove", dragMousemoveFunction);
             window.removeEventListener("mouseup", dragMouseupFunction);
         };
         window.addEventListener("touchend", dragMouseupFunction);

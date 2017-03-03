@@ -107,7 +107,7 @@ class Carousel extends UI.Element {
             }
         }
 
-        return [<CarouselNavigator className={this.options.children.length > 1 ? "" : "hidden"}/>,
+        return [<CarouselNavigator className={this.options.children.length > 1 ? "" : "hidden"} styleSet={this.options.navigatorStyleSet}/>,
             <div className={this.getStyleSet().container}>
                 <div ref="pusher" className={{marginLeft: `${-this.activeIndex * 100}%`}}/>
                 {this.options.children}

@@ -503,11 +503,11 @@ class UIElement extends BaseUIElement {
         this.dispatch("resize");
     }
 
-    addNodeListener(name, callback) {
-        this.node.addEventListener(name, callback);
+    addNodeListener(name, callback, ...args) {
+        this.node.addEventListener(name, callback, ...args);
         return {
             remove() {
-                this.removeNodeListener(name, callback);
+                this.removeNodeListener(name, callback, ...args);
             }
         }
     }
