@@ -109,7 +109,7 @@ class Carousel extends UI.Element {
 
         return [<CarouselNavigator className={this.options.children.length > 1 ? "" : "hidden"}/>,
             <div className={this.getStyleSet().container}>
-                <div ref="pusher" className={{marginLeft: `${-this.activeIndex * 100}%`}}/>
+                <div ref="pusher" style={{marginLeft: `${-this.activeIndex * 100}%`}}/>
                 {this.options.children}
             </div>];
     }
