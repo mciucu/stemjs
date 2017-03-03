@@ -379,7 +379,7 @@ class CardPanelStyle {
 
             @styleRule
             body = {
-                padding: "0.35em",
+                // padding: "0.35em",
             };
 
             @styleRuleInherit
