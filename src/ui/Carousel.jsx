@@ -5,6 +5,8 @@ import {FAIcon} from "../ui/FontAwesome";
 
 class CarouselStyleSet extends StyleSet {
     navigatorHeight = "35px";
+    hoverColor = "#364251";
+    transitionTime = "0.3";
 
     @styleRule
     carousel = {
@@ -23,7 +25,7 @@ class CarouselStyleSet extends StyleSet {
         },
         ">:first-child": {
             width: "0",
-            transition: "margin-left ease 0.7s",
+            transition: `margin-left ease ${this.transitionTime}s`,
         }
     };
 
@@ -38,13 +40,13 @@ class CarouselStyleSet extends StyleSet {
     navigatorIcon = {
         color: "#fff",
         fontSize: "180% !important",
-        display: "inline-block",
         textAlign: "center",
         cursor: "pointer",
         flex: "1",
         fontWeight: "900 !important",
+        lineHeight: this.navigatorHeight + " !important",
         ":hover": {
-            backgroundColor: "#555",
+            backgroundColor: this.hoverColor,
         },
     };
 }
@@ -61,8 +63,10 @@ class CarouselNavigator extends UI.Element {
     }
 
     render() {
-        return [<FAIcon icon="angle-left" className={this.getStyleSet().navigatorIcon} onClick={() => {this.parent.dispatch("previousPage");}} />,
-                <FAIcon icon="angle-right" className={this.getStyleSet().navigatorIcon} onClick={() => {this.parent.dispatch("nextPage");}} />];
+        return [
+            <FAIcon icon="angle-left" className={this.getStyleSet().navigatorIcon} onClick={() => {this.parent.dispatch("previousPage");}} />,
+            <FAIcon icon="angle-right" className={this.getStyleSet().navigatorIcon} onClick={() => {this.parent.dispatch("nextPage");}} />,
+        ];
     }
 }
 

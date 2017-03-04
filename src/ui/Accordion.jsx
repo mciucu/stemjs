@@ -21,7 +21,7 @@ class AccordionStyleSet extends StyleSet {
             overflow: "auto",
         },
         ">:nth-of-type(odd)": {
-            color: "white",
+            color: "#eee",
             fontSize: "1em",
             textTransform: "uppercase",
             fontFamily: "lato, open sans",
