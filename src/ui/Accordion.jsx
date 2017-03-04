@@ -7,7 +7,7 @@ import {FACollapseIcon} from "../ui/FontAwesome";
 
 class AccordionStyleSet extends StyleSet {
     mainColor = "black";
-    hoverColor = "#555";
+    hoverColor = "#364251";
 
     @styleRule
     accordion = {
