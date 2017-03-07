@@ -262,13 +262,6 @@ class ViewportMeta extends UI.Primitive("meta") {
         attr.setAttribute("content", this.getContent());
     }
 
-    redraw() {
-        super.redraw();
-        let print = () => console.log("W", window.innerHeight, window.innerWidth, window.devicePixelRatio);
-        print();
-        setTimeout(print, 0);
-    }
-
     maybeUpdate() {
         const desiredScale = this.getDesiredScale();
         if (desiredScale != this.options.scale) {
