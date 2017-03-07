@@ -246,6 +246,17 @@ class Accordion extends UI.Element {
         return childrenStatus;
     }
 
+    getDefaultChildrenStatus() {
+        let childrenStatus = [];
+        for (let panel of this.panels) {
+            childrenStatus.push({
+                flex: 1,
+                collapsed: false
+            })
+        }
+        return childrenStatus;
+    }
+
     setChildrenStatus(childrenStatus) {
         for (let i = 0; i < childrenStatus.length; i += 1) {
             this.panels[i].setStyle("flex", childrenStatus[i].flex);
