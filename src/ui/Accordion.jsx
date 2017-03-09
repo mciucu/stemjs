@@ -1,5 +1,4 @@
 import {UI, getComputedStyle} from "./UI";
-import {StyleInstance, StyleElement} from "./StyleElement";
 import {Device} from "../base/Device";
 import {StyleSet} from "./Style";
 import {styleRule} from "../decorators/Style";
@@ -24,7 +23,6 @@ class AccordionStyleSet extends StyleSet {
             color: "#eee",
             fontSize: "1em",
             textTransform: "uppercase",
-            fontFamily: "lato, open sans",
             padding: "8px 8px",
             ":hover": {
                 backgroundColor: this.hoverColor,
