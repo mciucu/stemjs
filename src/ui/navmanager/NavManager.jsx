@@ -379,13 +379,13 @@ class SocialNavbarItems extends NavElementSection {
 
 
 class NavManager extends UI.Primitive("nav") {
-    constructor() {
+    constructor(persistentLeftSidePanel=true, persistentRightSidePanel=true) {
         super();
 
         let icon = [<UI.SVG.CSAIconSVG size={25} style={{
         }}/>, "Home"];
 
-        this.leftSidePanel = <SidePanel anchor={UI.Direction.LEFT} name="left">
+        this.leftSidePanel = <SidePanel anchor={UI.Direction.LEFT} name="left" persistent={persistentLeftSidePanel}>
             <BasicOrientedElement orientation={UI.Orientation.VERTICAL} ref={this.refLink("navigationPanel")}>
                     {this.getLeftSidePanelFixedChildren()}
             </BasicOrientedElement>
@@ -396,7 +396,7 @@ class NavManager extends UI.Primitive("nav") {
             </UI.Carousel>
         </SidePanel>;
 
-        this.rightSidePanel = <SidePanel anchor={UI.Direction.RIGHT} name="right">
+        this.rightSidePanel = <SidePanel anchor={UI.Direction.RIGHT} name="right" persistent={persistentRightSidePanel}>
             {this.getRightSidePanelChildren()}
         </SidePanel>;
 
