@@ -1,3 +1,7 @@
+export * from "ui/navmanager/NavManager";
+export * from "ui/navmanager/NavIcons";
+export * from "ui/navmanager/NavSwipeDetection";
+export * from "ui/navmanager/NavStyle";
 export * from "ui/UI";
 export * from "ui/Style";
 export * from "ui/StyleSheet";
@@ -12,7 +16,7 @@ export * from "state/State";
 export * from "state/Store";
 export * from "state/StoreMixins";
 export * from "markup/MarkupParser";
-export * from "markup/MarkupRenderer"
+export * from "markup/MarkupRenderer";
 export * from "./math";
 export * from "base/Dispatcher";
 export * from "base/Ajax";
