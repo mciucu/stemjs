@@ -38,7 +38,9 @@ class SectionDividerStyleSet extends StyleSet {
     @styleRule
     horizontalSection = {
         position: "relative",
+        whiteSpace: "nowrap",
         ">*": {
+            whiteSpace: "initial",
             display: "inline-block",
             verticalAlign: "top",
             paddingLeft: "2px",
