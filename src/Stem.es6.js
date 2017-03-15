@@ -20,6 +20,7 @@ export * from "markup/MarkupRenderer";
 export * from "./math";
 export * from "base/Dispatcher";
 export * from "base/Ajax";
+export * from "base/FileSaver";
 export * from "base/Plugin";
 export * from "base/Utils";
 export * from "base/URLRouter";
