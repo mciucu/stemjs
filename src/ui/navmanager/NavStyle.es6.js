@@ -45,14 +45,14 @@ class NavbarStyle extends StyleSet {
             fontSize: "100%",
             float: "left",
             ":hover": {
-                backgroundColor: "#323539",
+                backgroundColor: CSAStyle.color.HOVER_BLUE,
             },
         }
     ];
 
     @styleRule
     navCollapseElement = {
-        backgroundColor: "#1c1f24",
+        backgroundColor: CSAStyle.color.BLACK,
         marginLeft: "-" + padding,
         textAlign: "initial",
         minWidth: "100%",
@@ -63,7 +63,7 @@ class NavbarStyle extends StyleSet {
         height: sidebarHeight,
         lineHeight: sidebarHeight,
         ":hover": {
-            backgroundColor: "#323539",
+            backgroundColor: CSAStyle.color.HOVER_BLUE,
         },
     };
 
@@ -78,7 +78,7 @@ class NavbarStyle extends StyleSet {
         padding: "0 10px",
         fontFamily: this.fontFamily,
         ":hover": {
-            backgroundColor: "#323539",
+            backgroundColor: CSAStyle.color.HOVER_BLUE,
         },
     };
 
