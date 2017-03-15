@@ -1,5 +1,5 @@
 export * from "ui/navmanager/NavManager";
-export * from "ui/navmanager/NavIcons";
+export * from "ui/navmanager/NavIcon";
 export * from "ui/navmanager/NavSwipeDetection";
 export * from "ui/navmanager/NavStyle";
 export * from "ui/UI";

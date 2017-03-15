@@ -1,6 +1,6 @@
-import {Device} from "Device";
-import {Dispatcher} from "Dispatcher";
-import {StemDate} from "Time";
+import {Device} from "../../base/Device";
+import {Dispatcher} from "../../base/Dispatcher";
+import {StemDate} from "../../time/Time";
 
 let maxDistanceFromSide = 25; // Pixels
 let minSwipeDistance = 60;    // Pixels

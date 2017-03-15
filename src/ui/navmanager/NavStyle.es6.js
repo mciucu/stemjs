@@ -1,6 +1,4 @@
-import {StyleSet} from "Style";
-import {styleRule, keyframesRule} from "decorators/Style";
-import {CSAStyle} from "CSAStyle";
+import {StyleSet, styleRule, keyframesRule} from "../Style";
 
 let padding = "10px";
 let navbarHeight = "50px";
@@ -11,6 +9,17 @@ let sidebarHideWidth = "335px"; // boxShadowWidth + sidebarWidth
 let sidebarTransition = ".3s";
 let boxShadowWidth = "5px";
 let boxShadowColor = "#353535";
+
+const colors = {
+    // BLUE: "#20232d",
+    BLUE: "#202e3e",
+    HOVER_BLUE: "#364251",
+    // BLACK: "#181a22",
+    BLACK: "#1c2937",
+    // HOVER_BLACK: "#323539",
+    HOVER_BLACK: "#364251",
+    WHITE: "#eee",
+};
 
 class NavbarStyle extends StyleSet {
     fontFamily = "lato, open sans";
@@ -45,14 +54,14 @@ class NavbarStyle extends StyleSet {
             fontSize: "100%",
             float: "left",
             ":hover": {
-                backgroundColor: CSAStyle.color.HOVER_BLUE,
+                backgroundColor: colors.HOVER_BLUE,
             },
         }
     ];
 
     @styleRule
     navCollapseElement = {
-        backgroundColor: CSAStyle.color.BLACK,
+        backgroundColor: colors.BLACK,
         marginLeft: "-" + padding,
         textAlign: "initial",
         minWidth: "100%",
@@ -63,7 +72,7 @@ class NavbarStyle extends StyleSet {
         height: sidebarHeight,
         lineHeight: sidebarHeight,
         ":hover": {
-            backgroundColor: CSAStyle.color.HOVER_BLUE,
+            backgroundColor: colors.HOVER_BLUE,
         },
     };
 
@@ -78,7 +87,7 @@ class NavbarStyle extends StyleSet {
         padding: "0 10px",
         fontFamily: this.fontFamily,
         ":hover": {
-            backgroundColor: CSAStyle.color.HOVER_BLUE,
+            backgroundColor: colors.HOVER_BLUE,
         },
     };
 
@@ -100,7 +109,7 @@ class NavbarStyle extends StyleSet {
         listStyleType: "none",
         minHeight: sidebarHeight,
         color: "#eee",
-        backgroundColor: CSAStyle.color.BLUE,
+        backgroundColor: colors.BLUE,
         overflow: "hidden",
         position: "relative",
         fontFamily: this.fontFamily,
@@ -118,14 +127,14 @@ class NavbarStyle extends StyleSet {
         lineHeight: sidebarHeight,
         fontFamily: this.fontFamily,
         ":hover": {
-            backgroundColor: CSAStyle.color.HOVER_BLUE,
+            backgroundColor: colors.HOVER_BLUE,
         },
     };
 
     @styleRule
     navElementVerticalHover = {
         ":hover": {
-            backgroundColor: CSAStyle.color.HOVER_BLUE,
+            backgroundColor: colors.HOVER_BLUE,
         },
     };
 
@@ -145,7 +154,7 @@ class NavbarStyle extends StyleSet {
         listStyleType: "none",
         fontFamily: this.fontFamily,
         ":hover": {
-            backgroundColor: CSAStyle.color.HOVER_BLUE,
+            backgroundColor: colors.HOVER_BLUE,
             color: "#eee",
             textDecoration: "none",
         },
@@ -210,7 +219,7 @@ class NavbarStyle extends StyleSet {
         top: "0",
         bottom: "0",
         height: "100%",
-        backgroundColor: CSAStyle.color.BLUE,
+        backgroundColor: colors.BLUE,
         overflow: "hidden",
         overflowY: "scroll",
         width: sidebarWidthLeft,
@@ -229,7 +238,7 @@ class NavbarStyle extends StyleSet {
     rightSidePanel = {
         top: "0",
         bottom: "0",
-        backgroundColor: CSAStyle.color.BLUE,
+        backgroundColor: colors.BLUE,
         height: "100%",
         overflow: "hidden",
         width: sidebarWidth,
@@ -244,7 +253,7 @@ class NavbarStyle extends StyleSet {
         height: navbarHeight,
         lineHeight: navbarHeight,
         width: "100%",
-        backgroundColor: CSAStyle.color.BLACK,
+        backgroundColor: colors.BLACK,
         boxShadow: "0px 0px 10px #000",
         color: "#f2f2f2",
         zIndex: "9999",
@@ -267,7 +276,7 @@ class NavbarStyle extends StyleSet {
     @styleRule
     hrStyle = {
         margin: "10px 5%",
-        borderTop: "2px solid " + CSAStyle.color.HOVER_BLUE,
+        borderTop: "2px solid " + colors.HOVER_BLUE,
     };
 }
 

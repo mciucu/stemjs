@@ -1,6 +1,6 @@
-import {UI, changeParent} from "UI";
-import {SessionStorageMap} from "StorageMap";
-import {FAIcon, FACollapseIcon} from "ui/FontAwesome";
+import {UI, changeParent} from "../UI";
+import {SessionStorageMap} from "../../base/StorageMap";
+import {FAIcon, FACollapseIcon} from "../FontAwesome";
 import {NavbarStyle, NavEffectsStyle} from "NavStyle";
 
 let navStyle = NavbarStyle.getInstance();
