@@ -1014,7 +1014,6 @@ var SingleActiveElementDispatcher = function (_Dispatcher) {
     return SingleActiveElementDispatcher;
 }(Dispatcher);
 
-// TODO: this method should be made static in NodeAttributes probably
 function CreateNodeAttributesMap(oldAttributesMap, allowedAttributesArray) {
     var allowedAttributesMap = new Map(oldAttributesMap);
 
@@ -2224,8 +2223,6 @@ function changeParent(element, newParent) {
 }
 
 // TODO: not sure is this needs to actually be *.jsx
-// TODO: should this be actually better done throught the dynamic CSS API, without doing through the DOM?
-
 var StyleInstance = function (_UI$TextElement) {
     inherits(StyleInstance, _UI$TextElement);
 
@@ -3918,11 +3915,6 @@ var keyframesRuleInherit = styleRuleWithOptions({
 });
 
 // This file will probably be deprecated in time by StyleSheet, but the API will be backwards compatible, so use it
-// Class meant to group multiple classes inside a single <style> element, for convenience
-// TODO: should probably be implemented with document.styleSheet
-// TODO: pattern should be more robust, to be able to only update classes
-// TODO: should probably be renamed to StyleSheet?
-
 var StyleSet = function (_Dispatchable) {
     inherits(StyleSet, _Dispatchable);
 
@@ -4228,9 +4220,6 @@ function _applyDecoratedDescriptor$1(target, property, decorators, descriptor, c
     return desc;
 }
 
-// TODO: this file was started with a lot of old patterns, that need to be updated
-// TODO: remove everything from UI namespace, export instead
-// TODO: need a major clean-up
 var FormStyle = (_class = function (_StyleSet) {
     inherits(FormStyle, _StyleSet);
 
@@ -4883,10 +4872,6 @@ var Select = function (_UI$Primitive4) {
     return Select;
 }(UI.Primitive(InputableElement, "select"));
 
-// Setting these attributes as styles in mozilla has no effect.
-// To maintain compatibility between moz and webkit, whenever
-// one of these attributes is set as a style, it is also set as a
-// node attribute.
 var MozStyleElements = new Set(["width", "height", "rx", "ry", "cx", "cy", "x", "y"]);
 
 var SVGNodeAttributes = function (_NodeAttributes) {
@@ -8163,8 +8148,6 @@ GlobalStyle.ProgressBar = ProgressBarStyle.getInstance();
 GlobalStyle.FlexContainer = FlexContainerStyle.getInstance();
 GlobalStyle.Container = ContainerStyle.getInstance();
 
-// A map that supports multiple values to the same key
-
 var MultiMap = function () {
     function MultiMap() {
         classCallCheck(this, MultiMap);
@@ -8414,8 +8397,6 @@ var MultiMap = function () {
 var _class$4;
 var _temp$1;
 
-// This class currently mirrors the functionality of Headers on Chrome at the time of implementation
-// TODO: It is specified that the function get() should return the result of getAll() and getAll() deprecated
 var Headers$1 = (_temp$1 = _class$4 = function (_MultiMap) {
     inherits(Headers, _MultiMap);
 
@@ -8982,8 +8963,6 @@ function polyfillResponse(global) {
 // Tries to be a more flexible implementation of fetch()
 // Still work in progress
 
-// May need to polyfill Headers, Request, Response, Body, URLSearchParams classes, so import them
-// TODO: should only call this in the first call to fetch, to not create unneeded dependencies?
 if (window) {
     polyfillRequest(window);
     polyfillResponse(window);
@@ -10355,7 +10334,6 @@ var ProgressBar = function (_SimpleStyledElement5) {
     return ProgressBar;
 }(SimpleStyledElement);
 
-// This is the object that will be used to translate text
 var translationMap = null;
 
 // Keep a set of all UI Element that need to be updated when the language changes
@@ -10833,6 +10811,8 @@ Object.defineProperty(UI.Element.prototype, "styleSheet", {
         throw Error("Don't change the styleSheet of a UI Element, change this attribute in this.options");
     }
 });
+
+// TODO: create a getter, .styleSheet??
 
 var _class$7;
 var _descriptor$3;
@@ -11345,7 +11325,6 @@ function _applyDecoratedDescriptor$5(target, property, decorators, descriptor, c
     return desc;
 }
 
-// This whole file needs a refactoring, it's awfully written
 var SectionDividerStyleSet = (_class$8 = function (_StyleSet) {
     inherits(SectionDividerStyleSet, _StyleSet);
 
@@ -12856,8 +12835,6 @@ var SortableTableStyle = (_class3$6 = function (_TableStyle) {
 var _class$11;
 var _temp$4;
 
-// TODO: the whole table architecture probably needs a rethinking
-
 var TableRow = function (_UI$Primitive) {
     inherits(TableRow, _UI$Primitive);
 
@@ -13551,7 +13528,6 @@ function _applyDecoratedDescriptor$10(target, property, decorators, descriptor, 
     return desc;
 }
 
-// TODO: need to redo with a StyleSheet
 var FloatingWindowStyle = (_class$14 = function (_StyleSet) {
     inherits(FloatingWindowStyle, _StyleSet);
 
@@ -14461,10 +14437,6 @@ addCanonicalTimeUnits();
 
 var _class$15;
 
-// MAX_UNIX_TIME is either ~Feb 2106 in unix seconds or ~Feb 1970 in unix milliseconds
-// Any value less than this is interpreted as a unix time in seconds
-// If you want to go around this behavious, you can use the static method .fromUnixMilliseconds()
-// Of set this value to 0
 var MAX_AUTO_UNIX_TIME = Math.pow(2, 32);
 
 var BaseDate = self.Date;
@@ -14943,7 +14915,6 @@ StemDate.tokenFormattersMap = new Map([["ISO", function (date) {
 
 var Date$1 = StemDate;
 
-// File meant to handle server time/client time differences
 var ServerTime = {
     now: function now() {
         return StemDate().subtract(this.getOffset());
@@ -15588,10 +15559,6 @@ var StaticCodeHighlighter = function (_CodeEditor) {
 var _class$17;
 var _temp$6;
 
-// Class for working with the Window.localStorage and Window.sessionStorage objects
-// All keys are prefixed with our custom name, so we don't have to worry about polluting the global storage namespace
-// Keys must be strings, and values are modified by the serialize/deserialize methods,
-// which by default involve JSON conversion
 var StorageMap = (_temp$6 = _class$17 = function (_Dispatchable) {
     inherits(StorageMap, _Dispatchable);
 
@@ -15946,7 +15913,18 @@ var NavbarStyle = (_class$18 = function (_StyleSet) {
             display: "none",
             opacity: "0",
             fontFamily: _this.fontFamily
-        }, _initDefineProp$11(_this, "navElementSectionHorizontal", _descriptor11, _this), _initDefineProp$11(_this, "navElementSectionVertical", _descriptor12, _this), _initDefineProp$11(_this, "sidePanelGroup", _descriptor13$1, _this), _initDefineProp$11(_this, "leftSidePanel", _descriptor14$1, _this), _initDefineProp$11(_this, "rightSidePanel", _descriptor15$1, _this), _initDefineProp$11(_this, "navManager", _descriptor16$1, _this), _this.hideNavElement = {
+        }, _initDefineProp$11(_this, "navElementSectionHorizontal", _descriptor11, _this), _initDefineProp$11(_this, "navElementSectionVertical", _descriptor12, _this), _initDefineProp$11(_this, "sidePanelGroup", _descriptor13$1, _this), _this.sidePanel = {
+            top: "0",
+            bottom: "0",
+            height: "100%",
+            backgroundColor: colors.BLUE,
+            overflow: "hidden",
+            position: "fixed",
+            zIndex: "3000",
+            boxShadow: "0px 0px 10px " + boxShadowColor,
+            fontFamily: _this.fontFamily,
+            width: sidebarWidth
+        }, _initDefineProp$11(_this, "leftSidePanel", _descriptor14$1, _this), _initDefineProp$11(_this, "rightSidePanel", _descriptor15$1, _this), _initDefineProp$11(_this, "navManager", _descriptor16$1, _this), _this.hideNavElement = {
             display: "none",
             opacity: "0"
         }, _this.showNavElement = {
@@ -15977,7 +15955,6 @@ var NavbarStyle = (_class$18 = function (_StyleSet) {
             minWidth: "100%",
             paddingRight: "20px",
             fontFamily: this.fontFamily,
-            // lineHeight: "20px",
             maxHeight: sidebarHeight,
             height: sidebarHeight,
             lineHeight: sidebarHeight,
@@ -15991,8 +15968,6 @@ var NavbarStyle = (_class$18 = function (_StyleSet) {
     initializer: function initializer() {
         return {
             height: navbarHeight,
-            // minHeight: navbarHeight,
-            // textAlign: "center",
             color: "#eee",
             listStyleType: "none",
             cursor: "pointer",
@@ -16065,8 +16040,6 @@ var NavbarStyle = (_class$18 = function (_StyleSet) {
     initializer: function initializer() {
         return {
             width: "100%",
-            // height: sidebarHeight,
-            // lineHeight: sidebarHeight,
             fontFamily: this.fontFamily
         };
     }
@@ -16135,38 +16108,20 @@ var NavbarStyle = (_class$18 = function (_StyleSet) {
 }), _descriptor14$1 = _applyDecoratedDescriptor$11(_class$18.prototype, "leftSidePanel", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
-        var _ref2;
-
-        return _ref2 = {
-            top: "0",
-            bottom: "0",
-            height: "100%",
-            backgroundColor: colors.BLUE,
-            overflow: "hidden",
+        return [this.sidePanel, {
             overflowY: "scroll",
             width: sidebarWidthLeft,
-            position: "fixed",
-            zIndex: "3000",
-            "-ms-overflow-style": "none"
-        }, defineProperty(_ref2, "overflow", "-moz-scrollbars-none"), defineProperty(_ref2, "::-webkit-scrollbar", {
-            display: "none"
-        }), defineProperty(_ref2, "boxShadow", "0px 0px 10px " + boxShadowColor), defineProperty(_ref2, "fontFamily", this.fontFamily), _ref2;
+            "-ms-overflow-style": "none",
+            overflow: "-moz-scrollbars-none",
+            "::-webkit-scrollbar": {
+                display: "none"
+            }
+        }];
     }
 }), _descriptor15$1 = _applyDecoratedDescriptor$11(_class$18.prototype, "rightSidePanel", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
-        return {
-            top: "0",
-            bottom: "0",
-            backgroundColor: colors.BLUE,
-            height: "100%",
-            overflow: "hidden",
-            width: sidebarWidth,
-            position: "fixed",
-            zIndex: "3000",
-            boxShadow: "0px 0px 10px " + boxShadowColor,
-            fontFamily: this.fontFamily
-        };
+        return this.sidePanel;
     }
 }), _descriptor16$1 = _applyDecoratedDescriptor$11(_class$18.prototype, "navManager", [styleRule], {
     enumerable: true,
@@ -16196,7 +16151,7 @@ var NavEffectsStyle = (_class3$8 = function (_StyleSet2) {
     inherits(NavEffectsStyle, _StyleSet2);
 
     function NavEffectsStyle() {
-        var _ref3;
+        var _ref2;
 
         var _temp2, _this2, _ret2;
 
@@ -16206,46 +16161,41 @@ var NavEffectsStyle = (_class3$8 = function (_StyleSet2) {
             args[_key2] = arguments[_key2];
         }
 
-        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref3 = NavEffectsStyle.__proto__ || Object.getPrototypeOf(NavEffectsStyle)).call.apply(_ref3, [this].concat(args))), _this2), _initDefineProp$11(_this2, "navVerticalLeftHide", _descriptor18$1, _this2), _initDefineProp$11(_this2, "navVerticalRightHide", _descriptor19$1, _this2), _initDefineProp$11(_this2, "navVerticalLeftShow", _descriptor20$1, _this2), _initDefineProp$11(_this2, "navVerticalRightShow", _descriptor21$1, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
+        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = NavEffectsStyle.__proto__ || Object.getPrototypeOf(NavEffectsStyle)).call.apply(_ref2, [this].concat(args))), _this2), _this2.baseEffect = {
+            display: "block",
+            transition: sidebarTransition
+        }, _initDefineProp$11(_this2, "navVerticalLeftHide", _descriptor18$1, _this2), _initDefineProp$11(_this2, "navVerticalRightHide", _descriptor19$1, _this2), _initDefineProp$11(_this2, "navVerticalLeftShow", _descriptor20$1, _this2), _initDefineProp$11(_this2, "navVerticalRightShow", _descriptor21$1, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
     }
 
     return NavEffectsStyle;
 }(StyleSet), (_descriptor18$1 = _applyDecoratedDescriptor$11(_class3$8.prototype, "navVerticalLeftHide", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
-        return {
+        return [this.baseEffect, {
             marginLeft: "-" + sidebarHideWidth,
-            transition: sidebarTransition,
-            display: "block",
             overflow: "hidden"
-        };
+        }];
     }
 }), _descriptor19$1 = _applyDecoratedDescriptor$11(_class3$8.prototype, "navVerticalRightHide", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
-        return {
+        return [this.baseEffect, {
             marginRight: "-" + sidebarHideWidth,
-            transition: sidebarTransition,
-            display: "block",
             overflow: "hidden"
-        };
+        }];
     }
 }), _descriptor20$1 = _applyDecoratedDescriptor$11(_class3$8.prototype, "navVerticalLeftShow", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
-        return {
-            marginLeft: "0",
-            transition: sidebarTransition,
-            display: "block"
-        };
+        return [this.baseEffect, {
+            marginLeft: "0"
+        }];
     }
 }), _descriptor21$1 = _applyDecoratedDescriptor$11(_class3$8.prototype, "navVerticalRightShow", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
-            marginRight: "0",
-            transition: sidebarTransition,
-            display: "block"
+            marginRight: "0"
         };
     }
 })), _class3$8);
@@ -18024,7 +17974,6 @@ var DefaultState = GlobalState$1;
 
 self.GlobalState = GlobalState$1;
 
-// The store information is kept in a symbol, to not interfere with serialization/deserialization
 var StoreSymbol = Symbol("Store");
 
 var StoreObject = function (_Dispatchable) {
@@ -20819,8 +20768,6 @@ function TestStringStream() {
     console.log("Finished running all tests. Failed: ", numFailed);
 }
 
-// Class that for every markup tag returns the UI class to instantiate for that element
-
 var MarkupClassMap = function () {
     function MarkupClassMap(fallback) {
         classCallCheck(this, MarkupClassMap);
@@ -21229,8 +21176,6 @@ var Pluginable = function Pluginable(BaseClass) {
         return Pluginable;
     }(BaseClass);
 };
-
-// TODO: might need a redesign, to handle full urls
 
 var URLRouterClass = function (_Dispatchable) {
     inherits(URLRouterClass, _Dispatchable);

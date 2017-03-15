@@ -29,3 +29,4 @@ export * from "time/Time";
 export * from "data-structures/Deque";
 export * from "data-structures/MultiMap";
 export * from "decorators/Decorators";
+export * from "ui/NodeAttributes";

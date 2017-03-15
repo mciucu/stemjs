@@ -5,12 +5,8 @@ import {styleRule} from "../decorators/Style";
 import {FACollapseIcon} from "../ui/FontAwesome";
 
 class AccordionStyleSet extends StyleSet {
-    mainColor = "black";
-    hoverColor = "#364251";
-
     @styleRule
     accordion = {
-        backgroundColor: this.mainColor,
         display: "flex",
         flexDirection: "column",
         ">:nth-of-type(even)": {
@@ -20,13 +16,9 @@ class AccordionStyleSet extends StyleSet {
             overflow: "auto",
         },
         ">:nth-of-type(odd)": {
-            color: "#eee",
             fontSize: "1em",
             textTransform: "uppercase",
             padding: "8px 8px",
-            ":hover": {
-                backgroundColor: this.hoverColor,
-            }
         }
     };
 

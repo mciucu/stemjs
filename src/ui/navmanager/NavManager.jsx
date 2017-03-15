@@ -85,7 +85,7 @@ class NavElement extends UI.Primitive(BasicOrientedElement, "li") {
             if (this.getOrientation() === UI.Orientation.VERTICAL) {
                 // is in the sidebar
                 result = [
-                    <BasicOrientedElement style={{marginLeft: "-15px",}} className={navStyle.navElementVerticalHover}>
+                    <BasicOrientedElement style={{marginLeft: "-15px",}}>
                         <FACollapseIcon ref="collapseIcon" collapsed={!this.isToggled} className={navStyle.navElementVerticalArrow} />
                         {this.options.value}
                     </BasicOrientedElement>
