@@ -33,7 +33,13 @@ class StorageMap extends Dispatchable {
     }
 
     set(key, value) {
-        this.storage.setItem(this.getRawKey(key), this.serialize(value));
+        try {
+            this.storage.setItem(this.getRawKey(key), this.serialize(value));
+        }
+        catch(e) {
+            return false;
+        }
+        return true;
     }
 
     delete(key) {
