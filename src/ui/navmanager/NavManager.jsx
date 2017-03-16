@@ -322,6 +322,12 @@ class SidePanel extends UI.Element {
             {this.getGivenChildren()}
         </SidePanelGroup>;
     }
+
+    onMount() {
+        this.addClickListener((event) => {
+            event.stopPropagation();
+        });
+    }
 }
 
 
@@ -642,6 +648,9 @@ class NavManager extends UI.Primitive("nav") {
         setTimeout(() => this.checkForWrap());
         window.addEventListener("resize", () => this.checkForWrap());
         this.addListener("maybeWrap", () => this.checkForWrap());
+        this.addClickListener((event) => {
+            event.stopPropagation();
+        });
     }
 }
 
