@@ -1,35 +1,41 @@
 import {StyleSet, styleRule, keyframesRule} from "../Style";
 
-let padding = "10px";
-let navbarHeight = "50px";
-let sidebarHeight = "30px";
-let sidebarWidthLeft = "250px";
-let sidebarWidth = "330px";
-let sidebarHideWidth = "335px"; // boxShadowWidth + sidebarWidth
-let sidebarTransition = ".3s";
-let boxShadowWidth = "5px";
 
-const navbarColors = {
-    boxShadow: "#353535",
-    sidepanelBackground: "#202e3e",
-    sidepanelHover: "#364251",
-    navbarBackground: "#1c2937",
-    navbarHover: "#323e4b",
-    hover: "rgba(255, 255, 255, 0.1)",
-    font: "#eee",
-};
+class NavStyle extends StyleSet {
+    // Custom variables
+    colors = {
+        boxShadow: "#353535",
+        sidepanelBackground: "#202e3e",
+        sidepanelHover: "#364251",
+        navbarBackground: "#1c2937",
+        navbarHover: "#323e4b",
+        hr: "#364251",
+        text: "#eee",
+    };
 
-class NavbarStyle extends StyleSet {
+    dimensions = {
+        collapseArrowWidth: "20px",
+        navbarHeight: "50px",
+        sidepanelElementHeight: "30px",
+        sidepanelWidthLeft: "250px",
+        sidepanelWidth: "330px",
+        sidepanelHideWidth: "335px",
+        sidepanelTransitionDuration: ".3s",
+        boxShadowWidth: "5px",
+    }
+
+
+    // Icons
     icon = {
-        color: navbarColors.font,
-        lineHeight: navbarHeight,
-        height: navbarHeight,
-        width: "50px",
+        color: () => this.colors.text,
+        lineHeight: () => this.dimensions.navbarHeight,
+        height: () => this.dimensions.navbarHeight,
+        width: () => this.dimensions.navbarHeight,
         display: "inline-block",
         cursor: "pointer",
         textAlign: "center",
         ":hover": {
-            backgroundColor: navbarColors.navbarHover,
+            backgroundColor: () => this.colors.navbarHover,
         }
     };
 
@@ -43,11 +49,6 @@ class NavbarStyle extends StyleSet {
         float: "right",
     });
 
-    envelope = Object.assign({}, this.icon, {
-        fontSize: "100%",
-        float: "right",
-    });
-
     @styleRule
     wrappedIcon = [
         this.icon, {
@@ -56,150 +57,104 @@ class NavbarStyle extends StyleSet {
         }
     ];
 
-    @styleRule
-    navCollapseElement = {
-        color: navbarColors.font,
-        marginLeft: "-" + padding,
-        textAlign: "initial",
-        minWidth: "100%",
-        paddingRight: "20px",
-        maxHeight: sidebarHeight,
-        height: sidebarHeight,
-        lineHeight: sidebarHeight,
-    };
 
+    // Nav manager elements
     @styleRule
-    navElementHorizontal = {
-        color: navbarColors.font,
-        backgroundColor: navbarColors.navbarBackground,
-        height: navbarHeight,
+    navLinkElement = {
+        display: "block",
+        color: this.colors.text,
+        textDecoration: "none",
         listStyleType: "none",
-        cursor: "pointer",
-        padding: "0 10px",
         ":hover": {
-            backgroundColor: navbarColors.sidepanelHover,
+            backgroundColor: this.colors.sidePanelHover,
+            color: this.colors.text,
+            textDecoration: "none",
+        },
+        ":focus": {
+            color: this.colors.text,
+            textDecoration: "none",
+        },
+        ":active": {
+            color: this.colors.text,
+            textDecoration: "none",
+        },
+        ":visited": {
+            color: this.colors.text,
+            textDecoration: "none",
         },
     };
 
+
+    // Navbar
     @styleRule
-    navElementVerticalArrow = {
-        width: "20px",
-        textAlign: "center",
+    navManager = {
+        height: this.dimensions.navbarHeight,
+        lineHeight: this.dimensions.navbarHeight,
+        width: "100%",
+        backgroundColor: this.colors.navbarBackground,
+        boxShadow: "0px 0px 10px #000",
+        zIndex: "9999",
+        position: "fixed",
+    };
+
+
+    // Navbar elements
+    @styleRule
+    navElementHorizontal = {
+        color: this.colors.text,
+        backgroundColor: this.colors.navbarBackground,
+        height: this.dimensions.navbarHeight,
+        listStyleType: "none",
+        cursor: "pointer",
+        ">:nth-child(2)": {
+            position: "absolute",
+        }
     };
 
     @styleRule
     navElementHorizontalArrow = {
-        paddingLeft: "5px",
-    };
-
-    @styleRule
-    navElementVertical = {
-        color: navbarColors.font,
-        cursor: "pointer",
-        listStyleType: "none",
-        minHeight: sidebarHeight,
-        overflow: "hidden",
-        position: "relative",
-        ">*": {
-            paddingLeft: "20px",
-        },
-    };
-
-    @styleRule
-    navElementValueVertical = {
-        color: navbarColors.font,
-        zIndex: "1",
-        position: "relative",
-        width: "100%",
-        height: sidebarHeight,
-        lineHeight: sidebarHeight,
-        ":hover": {
-            backgroundColor: navbarColors.sidepanelHover,
-        },
+        paddingLeft: ".1em",
+        verticalAlign: "middle",
     };
 
     @styleRule
     navElementValueHorizontal = {
+        padding: "0 0.7em",
+        color: this.colors.text,
         width: "100%",
-    };
-
-    @styleRule
-    navLinkElement = {
-        display: "block",
-        color: navbarColors.font,
-        textDecoration: "none",
-        listStyleType: "none",
         ":hover": {
-            backgroundColor: navbarColors.sidePanelHover,
-            color: navbarColors.font,
-            textDecoration: "none",
+            backgroundColor: this.colors.navbarHover,
         },
-        ":focus": {
-            color: navbarColors.font,
-            textDecoration: "none",
-        },
-        ":active": {
-            color: navbarColors.font,
-            textDecoration: "none",
-        },
-        ":visited": {
-            color: navbarColors.font,
-            textDecoration: "none",
-        },
-    };
-
-    navElementSubElementsHorizontal = {
-        position: "absolute",
-        paddingRight: padding,
-    };
-
-    navElementSubElementsVertical = {
-        transitionDuration: ".2s",
-        transitionProperty: "opacity",
     };
 
     @styleRule
-    navElementSectionHorizontal = {
+    navSectionHorizontal = {
         display: "inline-block",
         paddingLeft: "0",
-        height: navbarHeight,
+        height: this.dimensions.navbarHeight,
         marginBottom: "0",
     };
 
-    @styleRule
-    navElementSectionVertical = {
-        paddingLeft: "0",
-        marginBottom: "0",
-        width: "100%",
-    };
 
-    @styleRule
-    sidePanelGroup = {
-        paddingTop: navbarHeight,
-        height: "inherit",
-        width: sidebarWidth,
-        position: "absolute",
-        zIndex: "3",
-        transition: ".2s",
-    };
-
+    // Sidepanel
     sidePanel = {
         top: "0",
         bottom: "0",
         height: "100%",
-        backgroundColor: navbarColors.sidepanelBackground,
+        backgroundColor: () => this.colors.sidepanelBackground,
         overflow: "hidden",
         position: "fixed",
         zIndex: "3000",
-        boxShadow: "0px 0px 10px " + navbarColors.boxShadow,
-        width: sidebarWidth,
+        boxShadow: () => "0px 0px 10px " + this.colors.boxShadow,
+        width: () => this.dimensions.sidepanelWidth,
+        transitionDuration: () => this.dimensions.sidepanelTransitionDuration,
     };
 
     @styleRule
     leftSidePanel = [
         this.sidePanel, {
             overflowY: "scroll",
-            width: sidebarWidthLeft,
+            width: this.dimensions.sidepanelWidthLeft,
             "-ms-overflow-style": "none",
             overflow: "-moz-scrollbars-none",
             "::-webkit-scrollbar": {
@@ -211,71 +166,85 @@ class NavbarStyle extends StyleSet {
     @styleRule
     rightSidePanel = this.sidePanel;
 
+
+    // Sidepanel elements
     @styleRule
-    navManager = {
-        height: navbarHeight,
-        lineHeight: navbarHeight,
+    navElementVertical = {
+        color: this.colors.text,
+        cursor: "pointer",
+        listStyleType: "none",
+        minHeight: this.dimensions.sidepanelElementHeight,
+        overflow: "hidden",
+        position: "relative",
+        ">*": {
+            paddingLeft: this.dimensions.collapseArrowWidth,
+        },
+    };
+
+    @styleRule
+    navElementVerticalArrow = {
+        width: this.dimensions.collapseArrowWidth,
+        textAlign: "center",
+    };
+
+    @styleRule
+    navElementValueVertical = {
+        color: this.colors.text,
+        zIndex: "1",
+        position: "relative",
         width: "100%",
-        backgroundColor: navbarColors.navbarBackground,
-        boxShadow: "0px 0px 10px #000",
-        zIndex: "9999",
-        position: "fixed",
+        height: this.dimensions.sidepanelElementHeight,
+        lineHeight: this.dimensions.sidepanelElementHeight,
+        ":hover": {
+            backgroundColor: this.colors.sidepanelHover,
+        },
     };
 
-    hideNavElement = {
-        display: "none",
-        opacity: "0",
+    @styleRule
+    navSectionVertical = {
+        paddingLeft: "0",
+        marginBottom: "0",
+        width: "100%",
     };
 
-    showNavElement = {
-        display: "block",
-        opacity: "1",
+    @styleRule
+    navCollapseElement = {
+        color: this.colors.text,
+        textAlign: "initial",
+        maxHeight: this.dimensions.sidepanelElementHeight,
+        height: this.dimensions.sidepanelElementHeight,
+        lineHeight: this.dimensions.sidepanelElementHeight,
+    };
+
+    @styleRule
+    sidePanelGroup = {
+        paddingTop: this.dimensions.navbarHeight,
+        height: "inherit",
+        width: this.dimensions.sidepanelWidth,
+        position: "absolute",
+        zIndex: "3",
     };
 
     @styleRule
     hrStyle = {
         margin: "10px 5%",
-        borderTop: "2px solid " + navbarColors.sidepanelHover,
+        borderTop: () => "2px solid " + this.colors.hr,
+    };
+
+
+    // Sidepanel transitions
+    @styleRule
+    navVerticalLeftHide = {
+        marginLeft: "-" + this.dimensions.sidepanelHideWidth,
+        overflow: "hidden",
+    };
+
+    @styleRule
+    navVerticalRightHide = {
+        marginRight: "-" + this.dimensions.sidepanelHideWidth,
+        overflow: "hidden",
     };
 }
 
 
-class NavEffectsStyle extends StyleSet {
-    baseEffect = {
-        display: "block",
-        transition: sidebarTransition,
-    };
-
-    @styleRule
-    navVerticalLeftHide = [
-        this.baseEffect, {
-            marginLeft: "-" + sidebarHideWidth,
-            overflow: "hidden",
-        }
-    ];
-
-    @styleRule
-    navVerticalRightHide = [
-        this.baseEffect, {
-            marginRight: "-" + sidebarHideWidth,
-            overflow: "hidden",
-        }
-    ];
-
-    @styleRule
-    navVerticalLeftShow = [
-        this.baseEffect, {
-            marginLeft: "0",
-        }
-    ];
-
-    @styleRule
-    navVerticalRightShow = [
-        this.baseEffect, {
-            marginRight: "0",
-        }
-    ];
-}
-
-
-export {NavbarStyle, NavEffectsStyle, navbarColors};
+export {NavStyle};

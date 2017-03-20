@@ -2,6 +2,7 @@ export * from "ui/navmanager/NavManager";
 export * from "ui/navmanager/NavIcon";
 export * from "ui/navmanager/NavSwipeDetection";
 export * from "ui/navmanager/NavStyle";
+export * from "ui/navmanager/NavElement";
 export * from "ui/UI";
 export * from "ui/Style";
 export * from "ui/StyleSheet";

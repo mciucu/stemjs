@@ -6,13 +6,12 @@ class FAIcon extends UI.Primitive("i") {
         return this.options.icon;
     }
 
-    getNodeAttributes() {
-        let attr = super.getNodeAttributes();
-
+    extraNodeAttributes(attr) {
         attr.addClass("fa");
         attr.addClass("fa-" + this.getIcon());
-
-        return attr;
+        if (this.options.size) {
+            attr.addClass("fa-" + this.options.size);
+        }
     }
 
     setIcon(icon) {

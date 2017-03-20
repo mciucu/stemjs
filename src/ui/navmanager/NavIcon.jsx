@@ -1,12 +1,11 @@
-import {NavElement} from "NavManager";
-import {NavbarStyle} from "NavStyle";
-
-let navStyle = NavbarStyle.getInstance();
+import {UI} from "UI";
+import {NavElement} from "NavElement";
+import {FAIcon} from "../FontAwesome";
 
 class NavIcon extends NavElement {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
-        attr.setStyle(navStyle.icon);
+        attr.setStyle(this.getStyleSet().icon);
     }
 
     getValue() {
@@ -16,6 +15,14 @@ class NavIcon extends NavElement {
         ];
     }
 
+    getContent() {
+        return null;
+    }
+
+    getIcon() {
+        return null;
+    }
+
     onMount() {
         this.addClickListener((event) => {
             event.stopPropagation();
@@ -23,4 +30,39 @@ class NavIcon extends NavElement {
     }
 }
 
-export {NavIcon};
+
+class LeftSideIcon extends NavIcon {
+    extraNodeAttributes(attr) {
+        super.extraNodeAttributes(attr);
+        attr.setStyle({
+            float: "left",
+        });
+    }
+
+    getIcon() {
+        return <FAIcon icon="bars" size={UI.Size.LARGE}/>;
+    }
+}
+
+
+class RightSideIcon extends NavIcon {
+    extraNodeAttributes(attr) {
+        super.extraNodeAttributes(attr);
+        attr.setStyle({
+            float: "right",
+        });
+    }
+
+    getIcon() {
+        return <FAIcon icon="ellipsis-v" size={UI.Size.LARGE}/>;
+    }
+}
+
+
+class WrappedIcon extends NavIcon {
+    getIcon() {
+        return <FAIcon icon="ellipsis-h" size={UI.Size.LARGE}/>;
+    }
+}
+
+export {NavIcon, LeftSideIcon, RightSideIcon, WrappedIcon};

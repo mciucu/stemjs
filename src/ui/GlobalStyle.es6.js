@@ -457,6 +457,7 @@ class ProgressBarStyle extends BasicLevelStyleSet(progressBarColorClassBuilder) 
         borderRadius: "4px",
         boxShadow: "inset 0 1px 2px rgba(0, 0, 0, .1)",
     }
+
     @styleRule
     DEFAULT = [{
         float: "left",

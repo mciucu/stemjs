@@ -4,7 +4,7 @@ import {StyleSet} from "./Style";
 import {styleRule} from "../decorators/Style";
 import {FACollapseIcon} from "../ui/FontAwesome";
 
-class AccordionStyleSet extends StyleSet {
+class AccordionStyle extends StyleSet {
     @styleRule
     accordion = {
         display: "flex",
@@ -57,7 +57,7 @@ class AccordionStyleSet extends StyleSet {
 
 
 class AccordionDivider extends UI.Element {
-    static styleSet = AccordionStyleSet.getInstance();
+    static styleSet = AccordionStyle.getInstance();
 
     getStyleSet() {
         return this.options.styleSet || this.constructor.styleSet;
@@ -111,7 +111,7 @@ class AccordionDivider extends UI.Element {
 
 
 class Accordion extends UI.Element {
-    static styleSet = AccordionStyleSet.getInstance();
+    static styleSet = AccordionStyle.getInstance();
 
     getStyleSet() {
         return this.options.styleSet || this.constructor.styleSet;
@@ -265,4 +265,4 @@ class Accordion extends UI.Element {
     }
 }
 
-export {Accordion}
+export {Accordion, AccordionStyle};

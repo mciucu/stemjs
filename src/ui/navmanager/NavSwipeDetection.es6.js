@@ -38,14 +38,14 @@ function touchEventHandler(ignoreCondition, successCondition, onSuccess, xType="
 
 function initializeSwipeRight(navManager, maxDistance=maxDistanceFromSide, minDistance=minSwipeDistance, minSpeed=minSwipeSpeed) {
     document.addEventListener("touchstart", touchEventHandler(
-        (touchX) => (navManager.getLeftSidePanel().visible ||
+        (touchX) => (navManager.leftSidePanel.visible ||
                         window.pageXOffset !== 0 ||
                             touchX > maxDistance),
         (touchX, startX, duration) => (touchX - startX >= minDistance && (touchX - startX) / duration >= minSpeed),
         () => navManager.toggleLeftSidePanel()
     ));
-    navManager.getLeftSidePanel().addNodeListener("touchstart", touchEventHandler(
-        () => (!navManager.getLeftSidePanel().visible),
+    navManager.leftSidePanel.addNodeListener("touchstart", touchEventHandler(
+        () => (!navManager.leftSidePanel.visible),
         (touchX, startX) => (startX - touchX >= minDistance && (startX - touchX) >= minSpeed),
         () => navManager.toggleLeftSidePanel()
     ));
@@ -53,12 +53,12 @@ function initializeSwipeRight(navManager, maxDistance=maxDistanceFromSide, minDi
 
 function initializeSwipeLeft(navManager, maxDistance=maxDistanceFromSide, minDistance=minSwipeDistance, minSpeed=minSwipeSpeed) {
     document.addEventListener("touchstart", touchEventHandler(
-        (touchX) => (navManager.getRightSidePanel().visible || window.innerWidth - touchX > maxDistance),
+        (touchX) => (navManager.rightSidePanel.visible || window.innerWidth - touchX > maxDistance),
         (touchX, startX, duration) => (startX - touchX >= minDistance && (startX - touchX) / duration >= minSpeed),
         () => navManager.toggleRightSidePanel()
     ));
-    navManager.getRightSidePanel().addNodeListener("touchstart", touchEventHandler(
-        () => (!navManager.getRightSidePanel().visible),
+    navManager.rightSidePanel.addNodeListener("touchstart", touchEventHandler(
+        () => (!navManager.rightSidePanel.visible),
         (touchX, startX, duration) => (touchX - startX >= minDistance && (touchX - startX) / duration >= minSpeed),
         () => navManager.toggleRightSidePanel()
     ));
@@ -68,10 +68,10 @@ function initializeSwipeEvents(navManager, maxDistanceFromSide=maxDistanceFromSi
     if (!Device.isTouchDevice()) {
         return;
     }
-    if (navManager.hasLeftSidePanel()) {
+    if (navManager.leftSidePanel) {
         initializeSwipeRight(navManager, maxDistanceFromSide, minDistance, minSpeed);
     }
-    if (navManager.hasRightSidePanel()) {
+    if (navManager.rightSidePanel) {
         initializeSwipeLeft(navManager, maxDistanceFromSide, minDistance, minSpeed);
     }
 }

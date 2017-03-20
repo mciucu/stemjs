@@ -3,10 +3,11 @@ import {StyleSet} from "./Style";
 import {styleRule} from "../decorators/Style";
 import {FAIcon} from "../ui/FontAwesome";
 
-class CarouselStyleSet extends StyleSet {
+class CarouselStyle extends StyleSet {
     navigatorHeight = "35px";
     hoverColor = "#364251";
     transitionTime = "0.3";
+    textColor = "inherit";
 
     @styleRule
     carousel = {
@@ -38,7 +39,7 @@ class CarouselStyleSet extends StyleSet {
 
     @styleRule
     navigatorIcon = {
-        color: "#fff",
+        color: this.textColor,
         fontSize: "180% !important",
         textAlign: "center",
         cursor: "pointer",
@@ -52,10 +53,8 @@ class CarouselStyleSet extends StyleSet {
 }
 
 class CarouselNavigator extends UI.Element {
-    static styleSet = CarouselStyleSet.getInstance();
-
     getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
+        return this.options.styleSet || this.parent.getStyleSet();
     }
 
     extraNodeAttributes(attr) {
@@ -72,7 +71,7 @@ class CarouselNavigator extends UI.Element {
 
 
 class Carousel extends UI.Element {
-    static styleSet = CarouselStyleSet.getInstance();
+    static styleSet = CarouselStyle.getInstance();
 
     getStyleSet() {
         return this.options.styleSet || this.constructor.styleSet;
@@ -110,7 +109,7 @@ class Carousel extends UI.Element {
             }
         }
 
-        return [<CarouselNavigator className={this.options.children.length > 1 ? "" : "hidden"} styleSet={this.options.navigatorStyleSet}/>,
+        return [<CarouselNavigator className={this.options.children.length > 1 ? "" : "hidden"} styleSet={this.getStyleSet()}/>,
             <div className={this.getStyleSet().container}>
                 <div ref="pusher" style={{marginLeft: `${-this.activeIndex * 100}%`}}/>
                 {this.options.children}
@@ -140,4 +139,4 @@ class Carousel extends UI.Element {
     }
 }
 
-export {Carousel};
+export {Carousel, CarouselStyle};
