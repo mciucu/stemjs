@@ -22,7 +22,8 @@ class NavStyle extends StyleSet {
         sidepanelHideWidth: "335px",
         sidepanelTransitionDuration: ".3s",
         boxShadowWidth: "5px",
-    }
+        backgroundTransitionDuration: ".2s",
+    };
 
 
     // Icons
@@ -59,6 +60,10 @@ class NavStyle extends StyleSet {
 
 
     // Nav manager elements
+    navElement = {
+        transition: `background-color ${this.dimensions.backgroundTransitionDuration}`,
+    }
+
     @styleRule
     navLinkElement = {
         display: "block",
@@ -118,14 +123,16 @@ class NavStyle extends StyleSet {
     };
 
     @styleRule
-    navElementValueHorizontal = {
-        padding: "0 0.7em",
-        color: this.colors.text,
-        width: "100%",
-        ":hover": {
-            backgroundColor: this.colors.navbarHover,
-        },
-    };
+    navElementValueHorizontal = [
+        this.navElement, {
+            padding: "0 0.7em",
+            color: this.colors.text,
+            width: "100%",
+            ":hover": {
+                backgroundColor: this.colors.navbarHover,
+            },
+        }
+    ];
 
     @styleRule
     navSectionHorizontal = {
@@ -188,17 +195,19 @@ class NavStyle extends StyleSet {
     };
 
     @styleRule
-    navElementValueVertical = {
-        color: this.colors.text,
-        zIndex: "1",
-        position: "relative",
-        width: "100%",
-        height: this.dimensions.sidepanelElementHeight,
-        lineHeight: this.dimensions.sidepanelElementHeight,
-        ":hover": {
-            backgroundColor: this.colors.sidepanelHover,
-        },
-    };
+    navElementValueVertical = [
+        this.navElement, {
+            color: this.colors.text,
+            zIndex: "1",
+            position: "relative",
+            width: "100%",
+            height: this.dimensions.sidepanelElementHeight,
+            lineHeight: this.dimensions.sidepanelElementHeight,
+            ":hover": {
+                backgroundColor: this.colors.sidepanelHover,
+            },
+        }
+    ];
 
     @styleRule
     navSectionVertical = {

@@ -8,6 +8,7 @@ class CarouselStyle extends StyleSet {
     hoverColor = "#364251";
     transitionTime = "0.3";
     textColor = "inherit";
+    navigatorTransitionTime = "0s";
 
     @styleRule
     carousel = {
@@ -46,6 +47,7 @@ class CarouselStyle extends StyleSet {
         flex: "1",
         fontWeight: "900 !important",
         lineHeight: this.navigatorHeight + " !important",
+        transition: `background-color ${this.navigatorTransitionTime}`,
         ":hover": {
             backgroundColor: this.hoverColor,
         },

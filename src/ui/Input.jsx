@@ -118,9 +118,11 @@ class Form extends UI.Primitive("form") {
     }
 
     onMount() {
-        // Insert here code to not refresh page
+        // Form elements by default refresh the page when a button inside them is clicked.
+        this.addNodeListener("submit", (event) => event.preventDefault());
     }
 }
+
 
 class InputableElement extends UI.Element {
     static styleSet = InputStyle.getInstance();

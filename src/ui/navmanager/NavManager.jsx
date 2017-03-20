@@ -114,6 +114,7 @@ class SidePanel extends UI.Element {
 class NavCarouselStyle extends CarouselStyle {
     hoverColor = NavStyle.getInstance().colors.sidepanelHover;
     textColor = NavStyle.getInstance().colors.text;
+    navigatorTransitionTime = NavStyle.getInstance().dimensions.backgroundTransitionDuration;
 }
 
 
