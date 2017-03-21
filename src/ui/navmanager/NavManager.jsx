@@ -317,7 +317,7 @@ class NavManager extends UI.Primitive("nav") {
     }
 
     toggleRightSidePanel() {
-        this.toggleSidePanel(this.rightSidePanel, "toggleRightSide");
+        this.toggleSidePanel(this.rightSidePanel, "toggledRightSide");
     }
 
     render() {
