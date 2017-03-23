@@ -96,36 +96,6 @@ class IconableInterface extends SimpleStyledElement {
 }
 
 
-class Button extends UI.Primitive(IconableInterface, "button") {
-    extraNodeAttributes(attr) {
-        attr.addClass(GlobalStyle.Button.DEFAULT);
-
-        if (this.getSize()) {
-            attr.addClass(GlobalStyle.Button.Size(this.getSize()));
-        }
-
-        if (this.getLevel()) {
-            attr.addClass(GlobalStyle.Button.Level(this.getLevel()));
-        }
-    }
-
-    disable() {
-        this.options.disabled = true;
-        this.node.disabled = true;
-    }
-
-    enable() {
-        this.options.disabled = false;
-        this.node.disabled = false;
-    }
-
-    setEnabled(enabled) {
-        this.options.disabled = !enabled;
-        this.node.disabled = !enabled;
-    };
-}
-
-
 class Label extends UI.Primitive(IconableInterface, "span") {
     extraNodeAttributes(attr) {
         attr.addClass(GlobalStyle.Label.DEFAULT);
@@ -152,136 +122,6 @@ class Badge extends UI.Primitive(IconableInterface, "span") {
         if (this.getLevel()) {
             attr.addClass(GlobalStyle.Badge.Level(this.getLevel()));
         }
-    }
-}
-
-class StateButton extends Button {
-    setOptions(options) {
-        options.state = (this.options && this.options.state) || options.state || UI.ActionStatus.DEFAULT;
-
-        super.setOptions(options);
-
-        this.options.statusOptions = this.options.statusOptions || [];
-        for (let i = 0; i < 4; i += 1) {
-            if (typeof this.options.statusOptions[i] === "string") {
-                let statusLabel = this.options.statusOptions[i];
-                this.options.statusOptions[i] = {
-                    label: statusLabel,
-                    faIcon: ""
-                }
-            }
-        }
-    }
-
-
-    setState(status) {
-        this.options.state = status;
-        if (status === UI.ActionStatus.DEFAULT) {
-            this.enable();
-        } else if (status === UI.ActionStatus.RUNNING) {
-            this.disable();
-        } else if (status === UI.ActionStatus.SUCCESS) {
-        } else if (status === UI.ActionStatus.FAILED) {
-        }
-
-        this.redraw();
-    }
-
-
-    render() {
-        let stateOptions = this.options.statusOptions[this.options.state - 1];
-
-
-        this.options.label = stateOptions.label;
-        this.options.faIcon = stateOptions.faIcon;
-
-
-        return super.render();
-    }
-}
-
-
-class AjaxButton extends StateButton {
-    ajaxCall(data) {
-        this.setState(UI.ActionStatus.RUNNING);
-        Ajax.fetch(Object.assign({}, data, {
-            success: (successData) => {
-                data.success(successData);
-                if (successData.error) {
-                    this.setState(UI.ActionStatus.FAILED);
-                } else {
-                    this.setState(UI.ActionStatus.SUCCESS);
-                }
-            },
-            error: (xhr, errmsg, err) => {
-                data.error(xhr, errmsg, err);
-                this.setState(UI.ActionStatus.FAILED);
-            },
-            complete: () => {
-                setTimeout(() => {
-                    this.setState(UI.ActionStatus.DEFAULT);
-                }, this.options.onCompete || 1000);
-            }
-        }));
-    }
-}
-
-
-class ButtonGroup extends SimpleStyledElement {
-    getDefaultOptions() {
-        return {
-            orientation: UI.Orientation.HORIZONTAL,
-        };
-    }
-
-    extraNodeAttributes(attr) {
-        attr.addClass(GlobalStyle.ButtonGroup.Orientation(this.options.orientation));
-    }
-}
-
-
-class RadioButtonGroup extends SimpleStyledElement {
-    setOptions(options) {
-        super.setOptions(options);
-        this.index = this.options.index || 0;
-    }
-
-    extraNodeAttributes(attr) {
-        attr.addClass(GlobalStyle.RadioButtonGroup.DEFAULT);
-    }
-
-    render() {
-        this.buttons = [];
-        for (let i = 0; i < this.options.givenOptions.length; i += 1) {
-            this.buttons.push(
-                <Button key={i} onClick={() => {this.setIndex(i);}} size={this.getSize()}
-                  label={this.options.givenOptions[i].toString()} level={this.getLevel()}
-                  className={this.index === i ? "active" : ""}/>);
-        }
-        return this.buttons;
-    }
-
-
-    getIndex() {
-        return this.index;
-    }
-
-
-    getValue() {
-        return this.options.givenOptions[this.index];
-    }
-
-
-    setIndex(index) {
-        this.dispatch("setIndex", {
-            index: index,
-            oldIndex: this.index,
-            value: this.options.givenOptions[index],
-            oldValue: this.options.givenOptions[this.index]
-        });
-        this.buttons[this.index].removeClass("active");
-        this.index = index;
-        this.buttons[this.index].addClass("active");
     }
 }
 
@@ -584,5 +424,4 @@ class ProgressBar extends SimpleStyledElement {
 }
 
 
-export {BootstrapMixin, SimpleStyledElement, Label, Button, StateButton, AjaxButton, ButtonGroup, RadioButtonGroup, Badge,
-    CardPanel, CollapsiblePanelStyle, CollapsiblePanel, CollapsibleMixin,  DelayedCollapsiblePanel, ProgressBar};
+export {BootstrapMixin, SimpleStyledElement, IconableInterface, Label, Badge,  CardPanel, CollapsiblePanelStyle, CollapsiblePanel, CollapsibleMixin,  DelayedCollapsiblePanel, ProgressBar};

@@ -1,5 +1,6 @@
-import {UI, TextInput, VolatileFloatingWindow, getOffset, Button, VerticalSlideBar} from "./UI";
+import {UI, TextInput, VolatileFloatingWindow, getOffset, VerticalSlideBar} from "./UI";
 import {StemDate, DAY_IN_MILLISECONDS} from "../time/Time";
+// import {Button} from "./button/Button";
 
 class DatePickerTable extends UI.Element {
 

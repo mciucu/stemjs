@@ -12,6 +12,8 @@ export * from "./Bootstrap3";
 export * from "./Translation";
 export * from "./Switcher";
 export * from "tabs/TabArea";
+export * from "button/Button";
+export * from "button/ButtonGroup";
 export * from "./SectionDivider";
 export * from "./Accordion";
 export * from "./Carousel";

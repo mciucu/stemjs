@@ -3,7 +3,8 @@ import {StyleSet} from "./Style";
 import {styleRule} from "../decorators/Style";
 import {UI} from "./UIBase";
 import {Panel, TemporaryMessageArea} from "./UIPrimitives";
-import {Button} from "./Bootstrap3";
+import {Button} from "./button/Button";
+import {ButtonGroup} from "./button/ButtonGroup";
 
 class FloatingWindowStyle extends StyleSet {
     @styleRule
@@ -358,10 +359,10 @@ class ActionModal extends Modal {
     getFooterContent() {
         return [
             <TemporaryMessageArea ref="messageArea"/>,
-            <UI.ButtonGroup>
+            <ButtonGroup>
                 <Button label={this.getCloseName()} onClick={() => this.hide()}/>
                   {this.getActionButton()}
-            </UI.ButtonGroup>
+            </ButtonGroup>
         ];
     }
 
