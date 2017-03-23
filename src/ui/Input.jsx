@@ -62,6 +62,9 @@ class FormStyle extends StyleSet {
     @styleRule
     separatedLine = {
         padding: "6px 10px",
+        ">label>*:nth-child(1)": {
+            verticalAlign: "sub",
+        },
         ">label>input": this.separatedLineInputStyle,
         ">label>select": this.separatedLineInputStyle,
         ">label>textarea": this.separatedLineInputStyle,
