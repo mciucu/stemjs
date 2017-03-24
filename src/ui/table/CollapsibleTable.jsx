@@ -1,6 +1,6 @@
 import {UI} from "../UIBase";
 import {Table, TableRow} from "./Table";
-import {CollapsibleMixin} from "../Bootstrap3";
+import {CollapsibleMixin} from "../collapsible/CollapsibleMixin";
 import {StyleSet} from "../Style";
 import {styleRule} from "../../decorators/Style";
 

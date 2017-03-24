@@ -5906,7 +5906,7 @@ var NodeAttributes = function () {
 NodeAttributes.defaultAttributesMap = CreateNodeAttributesMap([["id"], ["action"], ["colspan"], ["default"], ["disabled", { noValue: true }], ["fixed"], ["forAttr", { domName: "for" }], // TODO: have a consistent nomenclature for there!
 ["hidden"], ["href"], ["rel"], ["minHeight"], ["minWidth"], ["role"], ["target"], ["HTMLtitle", { domName: "title" }], ["type"], ["placeholder"], ["src"], ["height"], ["width"]]);
 
-var UI = {
+var UI$1 = {
     renderingStack: [] };
 
 var BaseUIElement = function (_Dispatchable) {
@@ -5964,7 +5964,7 @@ var BaseUIElement = function (_Dispatchable) {
     return BaseUIElement;
 }(Dispatchable);
 
-UI.TextElement = function (_BaseUIElement) {
+UI$1.TextElement = function (_BaseUIElement) {
     inherits(UITextElement, _BaseUIElement);
 
     function UITextElement() {
@@ -6190,9 +6190,9 @@ var UIElement = function (_BaseUIElement2) {
                 return false;
             }
 
-            UI.renderingStack.push(this);
+            UI$1.renderingStack.push(this);
             var newChildren = unwrapArray(this.render());
-            UI.renderingStack.pop();
+            UI$1.renderingStack.pop();
 
             if (newChildren === this.children) {
                 for (var i = 0; i < newChildren.length; i += 1) {
@@ -6213,7 +6213,7 @@ var UIElement = function (_BaseUIElement2) {
 
                 // Not a UIElement, to be converted to a TextElement
                 if (!newChild.getNodeType) {
-                    newChild = newChildren[_i] = new UI.TextElement(newChild);
+                    newChild = newChildren[_i] = new UI$1.TextElement(newChild);
                 }
 
                 var newChildKey = newChild.options && newChild.options.key || "autokey" + _i;
@@ -6340,7 +6340,7 @@ var UIElement = function (_BaseUIElement2) {
                     // by a previous call to this function or manually by the user
                     if (typeof _this4[addListenerMethodName] === "function" && !_this4.hasOwnProperty(handlerMethodName)) {
                         _this4[handlerMethodName] = function (event) {
-                            UI.event = event;
+                            UI$1.event = event;
                             if (_this4.options[key]) {
                                 // TODO: arguments should be (event, this)!
                                 _this4.options[key](_this4, event);
@@ -6384,7 +6384,7 @@ var UIElement = function (_BaseUIElement2) {
         key: "mount",
         value: function mount(parent, nextSiblingNode) {
             if (!parent.node) {
-                parent = new UI.Element().bindToNode(parent);
+                parent = new UI$1.Element().bindToNode(parent);
             }
             this.parent = parent;
             if (this.node) {
@@ -6597,7 +6597,7 @@ var UIElement = function (_BaseUIElement2) {
     return UIElement;
 }(BaseUIElement);
 
-UI.createElement = function (tag, options) {
+UI$1.createElement = function (tag, options) {
     if (!tag) {
         console.error("Create element needs a valid object tag, did you mistype a class name?");
         return;
@@ -6613,9 +6613,9 @@ UI.createElement = function (tag, options) {
 
     if (options.ref) {
         if (typeof options.ref === "string") {
-            if (UI.renderingStack.length > 0) {
+            if (UI$1.renderingStack.length > 0) {
                 options.ref = {
-                    parent: UI.renderingStack[UI.renderingStack.length - 1],
+                    parent: UI$1.renderingStack[UI$1.renderingStack.length - 1],
                     name: options.ref
                 };
             } else {
@@ -6647,19 +6647,19 @@ UIElement.domAttributesMap = NodeAttributes.defaultAttributesMap;
 // Explicitly know that extraNodeAttributes doesn't do anything, but have it to be callable when doing inheritance
 UIElement.prototype.extraNodeAttributes = NOOP_FUNCTION;
 
-UI.Element = UIElement;
+UI$1.Element = UIElement;
 
-UI.str = function (value) {
-    return new UI.TextElement(value);
+UI$1.str = function (value) {
+    return new UI$1.TextElement(value);
 };
 
 // Keep a map for every base class, and for each base class keep a map for each nodeType, to cache classes
 var primitiveMap = new WeakMap();
 
-UI.Primitive = function (BaseClass, nodeType) {
+UI$1.Primitive = function (BaseClass, nodeType) {
     if (!nodeType) {
         nodeType = BaseClass;
-        BaseClass = UI.Element;
+        BaseClass = UI$1.Element;
     }
     var baseClassPrimitiveMap = primitiveMap.get(BaseClass);
     if (!baseClassPrimitiveMap) {
@@ -6691,7 +6691,7 @@ UI.Primitive = function (BaseClass, nodeType) {
 };
 
 function getOffset(node) {
-    if (node instanceof UI.Element) {
+    if (node instanceof UI$1.Element) {
         node = node.node;
     }
     if (!node) {
@@ -6713,7 +6713,7 @@ function getOffset(node) {
 }
 
 function getComputedStyle(node, attribute) {
-    if (node instanceof UI.Element) {
+    if (node instanceof UI$1.Element) {
         node = node.node;
     }
     var computedStyle = window.getComputedStyle(node, null);
@@ -6812,7 +6812,7 @@ var StyleInstance = function (_UI$TextElement) {
         }
     }]);
     return StyleInstance;
-}(UI.TextElement);
+}(UI$1.TextElement);
 
 var StyleElement = function (_UI$Primitive) {
     inherits(StyleElement, _UI$Primitive);
@@ -6834,7 +6834,7 @@ var StyleElement = function (_UI$Primitive) {
         }
     }]);
     return StyleElement;
-}(UI.Primitive("style"));
+}(UI$1.Primitive("style"));
 
 var ALLOWED_SELECTOR_STARTS = new Set([":", ">", " ", "+", "~", "[", "."]);
 
@@ -7309,12 +7309,12 @@ var Draggable = function Draggable(BaseClass) {
 };
 
 // TODO: this file existed to hold generic classes in a period of fast prototyping, has a lot of old code
-UI.Orientation = {
+UI$1.Orientation = {
     HORIZONTAL: 1,
     VERTICAL: 2
 };
 
-UI.Direction = {
+UI$1.Direction = {
     UP: "up",
     LEFT: "left",
     DOWN: "down",
@@ -7322,7 +7322,7 @@ UI.Direction = {
 };
 
 // TODO: move to Bootstrap file
-UI.Level = {
+UI$1.Level = {
     NONE: null,
     DEFAULT: "default",
     INFO: "info",
@@ -7333,7 +7333,7 @@ UI.Level = {
     ERROR: "danger"
 };
 
-UI.Size = {
+UI$1.Size = {
     NONE: null,
     EXTRA_SMALL: "xs",
     SMALL: "sm",
@@ -7343,13 +7343,13 @@ UI.Size = {
 };
 
 // TODO: why is this here?
-UI.VoteStatus = {
+UI$1.VoteStatus = {
     NONE: null,
     LIKE: 1,
     DISLIKE: -1
 };
 
-UI.ActionStatus = {
+UI$1.ActionStatus = {
     DEFAULT: 1,
     RUNNING: 2,
     SUCCESS: 3,
@@ -7373,7 +7373,7 @@ var Panel = function (_UI$Element) {
         }
     }]);
     return Panel;
-}(UI.Element);
+}(UI$1.Element);
 
 var SlideBar = function (_Draggable) {
     inherits(SlideBar, _Draggable);
@@ -7398,12 +7398,12 @@ var SlideBar = function (_Draggable) {
     }, {
         key: "render",
         value: function render() {
-            return [UI.createElement(UI.ProgressBar, { ref: "progressBar", active: "true", value: this.options.value, disableTransition: true,
+            return [UI$1.createElement(UI$1.ProgressBar, { ref: "progressBar", active: "true", value: this.options.value, disableTransition: true,
                 orientation: this.getOrientation(),
                 style: Object.assign({
                     position: "relative"
                 }, this.getProgressBarStyle())
-            }), UI.createElement("div", { ref: "slider", style: Object.assign({
+            }), UI$1.createElement("div", { ref: "slider", style: Object.assign({
                     backgroundColor: "black",
                     position: "absolute"
                 }, this.getSliderStyle()) })];
@@ -7432,7 +7432,7 @@ var SlideBar = function (_Draggable) {
         }
     }]);
     return SlideBar;
-}(Draggable(UI.Element));
+}(Draggable(UI$1.Element));
 
 var HorizontalSlideBar = function (_SlideBar) {
     inherits(HorizontalSlideBar, _SlideBar);
@@ -7476,7 +7476,7 @@ var HorizontalSlideBar = function (_SlideBar) {
     }, {
         key: "getOrientation",
         value: function getOrientation() {
-            return UI.Orientation.HORIZONTAL;
+            return UI$1.Orientation.HORIZONTAL;
         }
     }, {
         key: "getDragConfig",
@@ -7538,7 +7538,7 @@ var VerticalSlideBar = function (_SlideBar2) {
     }, {
         key: "getOrientation",
         value: function getOrientation() {
-            return UI.Orientation.VERTICAL;
+            return UI$1.Orientation.VERTICAL;
         }
     }, {
         key: "getDragConfig",
@@ -7596,7 +7596,7 @@ var Link = function (_UI$Primitive) {
         }
     }]);
     return Link;
-}(UI.Primitive("a"));
+}(UI$1.Primitive("a"));
 
 var Image = function (_UI$Primitive2) {
     inherits(Image, _UI$Primitive2);
@@ -7607,7 +7607,7 @@ var Image = function (_UI$Primitive2) {
     }
 
     return Image;
-}(UI.Primitive("img"));
+}(UI$1.Primitive("img"));
 
 // Beware coder: If you ever use this class, you should have a well documented reason
 
@@ -7634,7 +7634,7 @@ var RawHTML = function (_UI$Element2) {
         }
     }]);
     return RawHTML;
-}(UI.Element);
+}(UI$1.Element);
 
 var ViewportMeta = function (_UI$Primitive3) {
     inherits(ViewportMeta, _UI$Primitive3);
@@ -7693,7 +7693,7 @@ var ViewportMeta = function (_UI$Primitive3) {
         }
     }]);
     return ViewportMeta;
-}(UI.Primitive("meta"));
+}(UI$1.Primitive("meta"));
 
 var TemporaryMessageArea = function (_UI$Primitive4) {
     inherits(TemporaryMessageArea, _UI$Primitive4);
@@ -7713,7 +7713,7 @@ var TemporaryMessageArea = function (_UI$Primitive4) {
     }, {
         key: "render",
         value: function render() {
-            return [UI.createElement(UI.TextElement, { ref: "textElement", value: this.options.value || "" })];
+            return [UI$1.createElement(UI$1.TextElement, { ref: "textElement", value: this.options.value || "" })];
         }
     }, {
         key: "getNodeAttributes",
@@ -7763,7 +7763,7 @@ var TemporaryMessageArea = function (_UI$Primitive4) {
         }
     }]);
     return TemporaryMessageArea;
-}(UI.Primitive("span"));
+}(UI$1.Primitive("span"));
 
 // Just putting in a lot of methods, to try to think of an interface
 
@@ -7897,7 +7897,7 @@ var ScrollableMixin = function (_UI$Element3) {
         }
     }]);
     return ScrollableMixin;
-}(UI.Element);
+}(UI$1.Element);
 
 
 
@@ -8067,7 +8067,7 @@ var TimePassedSpan = function (_UI$Primitive5) {
         }
     }]);
     return TimePassedSpan;
-}(UI.Primitive("span"));
+}(UI$1.Primitive("span"));
 
 
 
@@ -8690,7 +8690,7 @@ var Form = (_temp3 = _class5 = function (_UI$Primitive) {
         }
     }]);
     return Form;
-}(UI.Primitive("form")), _class5.styleSet = FormStyle.getInstance(), _temp3);
+}(UI$1.Primitive("form")), _class5.styleSet = FormStyle.getInstance(), _temp3);
 var InputableElement = (_temp4 = _class6 = function (_UI$Element) {
     inherits(InputableElement, _UI$Element);
 
@@ -8712,7 +8712,7 @@ var InputableElement = (_temp4 = _class6 = function (_UI$Element) {
         }
     }]);
     return InputableElement;
-}(UI.Element), _class6.styleSet = InputStyle.getInstance(), _temp4);
+}(UI$1.Element), _class6.styleSet = InputStyle.getInstance(), _temp4);
 
 var Input = function (_UI$Primitive2) {
     inherits(Input, _UI$Primitive2);
@@ -8766,9 +8766,9 @@ var Input = function (_UI$Primitive2) {
         }
     }]);
     return Input;
-}(UI.Primitive(InputableElement, "input"));
+}(UI$1.Primitive(InputableElement, "input"));
 
-Input.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [["autocomplete"], ["autofocus", { noValue: true }], ["formaction"], ["maxLength", { domName: "maxlength" }], ["minLength", { domName: "minlength" }], ["name"], ["placeholder"], ["readonly"], ["required"], ["value"]]);
+Input.domAttributesMap = CreateNodeAttributesMap(UI$1.Element.domAttributesMap, [["autocomplete"], ["autofocus", { noValue: true }], ["formaction"], ["maxLength", { domName: "maxlength" }], ["minLength", { domName: "minlength" }], ["name"], ["placeholder"], ["readonly"], ["required"], ["value"]]);
 
 var FormGroup = (_temp5 = _class7 = function (_UI$Element2) {
     inherits(FormGroup, _UI$Element2);
@@ -8803,7 +8803,7 @@ var FormGroup = (_temp5 = _class7 = function (_UI$Element2) {
     }, {
         key: "getErrorField",
         value: function getErrorField() {
-            return UI.createElement("span", { ref: "errorField" });
+            return UI$1.createElement("span", { ref: "errorField" });
         }
     }, {
         key: "render",
@@ -8812,7 +8812,7 @@ var FormGroup = (_temp5 = _class7 = function (_UI$Element2) {
         }
     }]);
     return FormGroup;
-}(UI.Element), _class7.styleSet = FormStyle.getInstance(), _temp5);
+}(UI$1.Element), _class7.styleSet = FormStyle.getInstance(), _temp5);
 
 var FormField = function (_FormGroup) {
     inherits(FormField, _FormGroup);
@@ -8841,7 +8841,7 @@ var FormField = function (_FormGroup) {
         key: "getLabel",
         value: function getLabel() {
             if (this.options.label) {
-                return UI.createElement(
+                return UI$1.createElement(
                     "strong",
                     null,
                     this.options.label
@@ -8853,13 +8853,13 @@ var FormField = function (_FormGroup) {
         key: "getGivenChildren",
         value: function getGivenChildren() {
             if (this.options.contentFirst) {
-                return [UI.createElement(
+                return [UI$1.createElement(
                     "label",
                     null,
                     [get(FormField.prototype.__proto__ || Object.getPrototypeOf(FormField.prototype), "getGivenChildren", this).call(this), this.getLabel()]
                 )];
             } else {
-                return [UI.createElement(
+                return [UI$1.createElement(
                     "label",
                     null,
                     [this.getLabel(), get(FormField.prototype.__proto__ || Object.getPrototypeOf(FormField.prototype), "getGivenChildren", this).call(this)]
@@ -8887,7 +8887,7 @@ var SubmitInput = function (_Input) {
     return SubmitInput;
 }(Input);
 
-SubmitInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [["formenctype"], ["formmethod"], ["formnovalidate"], ["formtarget"]]);
+SubmitInput.domAttributesMap = CreateNodeAttributesMap(UI$1.Element.domAttributesMap, [["formenctype"], ["formmethod"], ["formnovalidate"], ["formtarget"]]);
 
 var TextInput = function (_Input2) {
     inherits(TextInput, _Input2);
@@ -8932,7 +8932,7 @@ var NumberInput = function (_Input3) {
 }(Input);
 
 
-NumberInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [["min"], ["max"], ["step"]]);
+NumberInput.domAttributesMap = CreateNodeAttributesMap(UI$1.Element.domAttributesMap, [["min"], ["max"], ["step"]]);
 
 var EmailInput = function (_Input4) {
     inherits(EmailInput, _Input4);
@@ -9001,7 +9001,7 @@ var FileInput = function (_Input6) {
 }(Input);
 
 
-FileInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [["multipleFiles", { domName: "multiple", noValue: true }], ["fileTypes", { domName: "accept" }]]);
+FileInput.domAttributesMap = CreateNodeAttributesMap(UI$1.Element.domAttributesMap, [["multipleFiles", { domName: "multiple", noValue: true }], ["fileTypes", { domName: "accept" }]]);
 
 var CheckboxInput = function (_Input7) {
     inherits(CheckboxInput, _Input7);
@@ -9036,7 +9036,7 @@ var CheckboxInput = function (_Input7) {
     return CheckboxInput;
 }(Input);
 
-CheckboxInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [["checked", { noValue: true }]]);
+CheckboxInput.domAttributesMap = CreateNodeAttributesMap(UI$1.Element.domAttributesMap, [["checked", { noValue: true }]]);
 
 var TextArea = function (_UI$Primitive3) {
     inherits(TextArea, _UI$Primitive3);
@@ -9089,7 +9089,7 @@ var TextArea = function (_UI$Primitive3) {
         }
     }]);
     return TextArea;
-}(UI.Primitive(InputableElement, "textarea"));
+}(UI$1.Primitive(InputableElement, "textarea"));
 
 var Select = function (_UI$Primitive4) {
     inherits(Select, _UI$Primitive4);
@@ -9112,7 +9112,7 @@ var Select = function (_UI$Primitive4) {
                 if (this.givenOptions[i] == this.options.selected) {
                     options.selected = true;
                 }
-                selectOptions.push(UI.createElement(
+                selectOptions.push(UI$1.createElement(
                     "option",
                     options,
                     this.givenOptions[i].toString()
@@ -9165,7 +9165,7 @@ var Select = function (_UI$Primitive4) {
         }
     }]);
     return Select;
-}(UI.Primitive(InputableElement, "select"));
+}(UI$1.Primitive(InputableElement, "select"));
 
 // Setting these attributes as styles in mozilla has no effect.
 // To maintain compatibility between moz and webkit, whenever
@@ -9385,9 +9385,9 @@ SVG.Element = function (_UI$Element) {
         }
     }]);
     return SVGElement;
-}(UI.Element);
+}(UI$1.Element);
 
-SVG.Element.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [["fill"], ["height"], ["opacity"], ["stroke"], ["strokeWidth", { domName: "stroke-width" }], ["clipPath", { domName: "clip-path" }], ["transform"], ["width"], ["cx"], ["cy"], ["rx"], ["ry"], ["x"], ["y"], ["x1"], ["y1"], ["x2"], ["y2"], ["offset"], ["stopColor", { domName: "stop-color" }], ["strokeDasharray", { domName: "stroke-dasharray" }], ["strokeLinecap", { domName: "stroke-linecap" }]]);
+SVG.Element.domAttributesMap = CreateNodeAttributesMap(UI$1.Element.domAttributesMap, [["fill"], ["height"], ["opacity"], ["stroke"], ["strokeWidth", { domName: "stroke-width" }], ["clipPath", { domName: "clip-path" }], ["transform"], ["width"], ["cx"], ["cy"], ["rx"], ["ry"], ["x"], ["y"], ["x1"], ["y1"], ["x2"], ["y2"], ["offset"], ["stopColor", { domName: "stop-color" }], ["strokeDasharray", { domName: "stroke-dasharray" }], ["strokeLinecap", { domName: "stroke-linecap" }]]);
 
 SVG.Text = function (_SVG$Element) {
     inherits(SVGText, _SVG$Element);
@@ -9429,7 +9429,7 @@ SVG.Text = function (_SVG$Element) {
     }, {
         key: "render",
         value: function render() {
-            return [UI.createElement(UI.TextElement, { ref: "textElement", value: this.options.text + "" })];
+            return [UI$1.createElement(UI$1.TextElement, { ref: "textElement", value: this.options.text + "" })];
         }
     }, {
         key: "getX",
@@ -10978,11 +10978,11 @@ SVG.Text.prototype.changeFillTransition = function (color, duration) {
     });
 };
 
-var _class$7;
-var _descriptor$2;
-var _descriptor2$2;
-var _class3$2;
-var _descriptor3$2;
+var _class$6;
+var _descriptor$1;
+var _descriptor2$1;
+var _class3$1;
+var _descriptor3$1;
 var _class7$1;
 var _descriptor13;
 var _descriptor14;
@@ -11024,7 +11024,7 @@ var _descriptor50;
 var _descriptor51;
 var _descriptor52;
 
-function _initDefineProp$3(target, property, descriptor, context) {
+function _initDefineProp$2(target, property, descriptor, context) {
     if (!descriptor) return;
     Object.defineProperty(target, property, {
         enumerable: descriptor.enumerable,
@@ -11034,7 +11034,7 @@ function _initDefineProp$3(target, property, descriptor, context) {
     });
 }
 
-function _applyDecoratedDescriptor$3(target, property, decorators, descriptor, context) {
+function _applyDecoratedDescriptor$2(target, property, decorators, descriptor, context) {
     var desc = {};
     Object['ke' + 'ys'](descriptor).forEach(function (key) {
         desc[key] = descriptor[key];
@@ -11077,7 +11077,7 @@ var COLOR = {
     FACEBOOK: "#3b5998"
 };
 
-var ButtonGroupStyle = (_class$7 = function (_StyleSet) {
+var ButtonGroupStyle = (_class$6 = function (_StyleSet) {
     inherits(ButtonGroupStyle, _StyleSet);
 
     function ButtonGroupStyle() {
@@ -11091,7 +11091,7 @@ var ButtonGroupStyle = (_class$7 = function (_StyleSet) {
             args[_key] = arguments[_key];
         }
 
-        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = ButtonGroupStyle.__proto__ || Object.getPrototypeOf(ButtonGroupStyle)).call.apply(_ref, [this].concat(args))), _this), _initDefineProp$3(_this, "HORIZONTAL", _descriptor$2, _this), _initDefineProp$3(_this, "VERTICAL", _descriptor2$2, _this), _temp), possibleConstructorReturn(_this, _ret);
+        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = ButtonGroupStyle.__proto__ || Object.getPrototypeOf(ButtonGroupStyle)).call.apply(_ref, [this].concat(args))), _this), _initDefineProp$2(_this, "HORIZONTAL", _descriptor$1, _this), _initDefineProp$2(_this, "VERTICAL", _descriptor2$1, _this), _temp), possibleConstructorReturn(_this, _ret);
     }
 
     createClass(ButtonGroupStyle, [{
@@ -11102,10 +11102,10 @@ var ButtonGroupStyle = (_class$7 = function (_StyleSet) {
             var _iteratorError = undefined;
 
             try {
-                for (var _iterator = Object.keys(UI.Orientation)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                for (var _iterator = Object.keys(UI$1.Orientation)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                     var type = _step.value;
 
-                    if (orientation == UI.Orientation[type]) {
+                    if (orientation == UI$1.Orientation[type]) {
                         return this[type];
                     }
                 }
@@ -11126,7 +11126,7 @@ var ButtonGroupStyle = (_class$7 = function (_StyleSet) {
         }
     }]);
     return ButtonGroupStyle;
-}(StyleSet), (_descriptor$2 = _applyDecoratedDescriptor$3(_class$7.prototype, "HORIZONTAL", [styleRule], {
+}(StyleSet), (_descriptor$1 = _applyDecoratedDescriptor$2(_class$6.prototype, "HORIZONTAL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11139,7 +11139,7 @@ var ButtonGroupStyle = (_class$7 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor2$2 = _applyDecoratedDescriptor$3(_class$7.prototype, "VERTICAL", [styleRule], {
+}), _descriptor2$1 = _applyDecoratedDescriptor$2(_class$6.prototype, "VERTICAL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11152,8 +11152,8 @@ var ButtonGroupStyle = (_class$7 = function (_StyleSet) {
             }
         };
     }
-})), _class$7);
-var RadioButtonGroupStyle = (_class3$2 = function (_StyleSet2) {
+})), _class$6);
+var RadioButtonGroupStyle = (_class3$1 = function (_StyleSet2) {
     inherits(RadioButtonGroupStyle, _StyleSet2);
 
     function RadioButtonGroupStyle() {
@@ -11167,11 +11167,11 @@ var RadioButtonGroupStyle = (_class3$2 = function (_StyleSet2) {
             args[_key2] = arguments[_key2];
         }
 
-        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = RadioButtonGroupStyle.__proto__ || Object.getPrototypeOf(RadioButtonGroupStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$3(_this2, "DEFAULT", _descriptor3$2, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
+        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = RadioButtonGroupStyle.__proto__ || Object.getPrototypeOf(RadioButtonGroupStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$2(_this2, "DEFAULT", _descriptor3$1, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
     }
 
     return RadioButtonGroupStyle;
-}(StyleSet), (_descriptor3$2 = _applyDecoratedDescriptor$3(_class3$2.prototype, "DEFAULT", [styleRule], {
+}(StyleSet), (_descriptor3$1 = _applyDecoratedDescriptor$2(_class3$1.prototype, "DEFAULT", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11188,7 +11188,7 @@ var RadioButtonGroupStyle = (_class3$2 = function (_StyleSet2) {
             }
         };
     }
-})), _class3$2);
+})), _class3$1);
 
 
 function BasicLevelStyleSet(colorClassFunction) {
@@ -11208,7 +11208,7 @@ function BasicLevelStyleSet(colorClassFunction) {
                 args[_key3] = arguments[_key3];
             }
 
-            return _ret3 = (_temp3 = (_this3 = possibleConstructorReturn(this, (_ref3 = BasicLevelStyleClass.__proto__ || Object.getPrototypeOf(BasicLevelStyleClass)).call.apply(_ref3, [this].concat(args))), _this3), _this3.colorClassBuilder = colorClassFunction, _initDefineProp$3(_this3, "PLAIN", _descriptor4, _this3), _initDefineProp$3(_this3, "GRAY", _descriptor5, _this3), _initDefineProp$3(_this3, "PRIMARY", _descriptor6, _this3), _initDefineProp$3(_this3, "SUCCESS", _descriptor7, _this3), _initDefineProp$3(_this3, "INFO", _descriptor8, _this3), _initDefineProp$3(_this3, "WARNING", _descriptor9, _this3), _initDefineProp$3(_this3, "DANGER", _descriptor10, _this3), _initDefineProp$3(_this3, "GOOGLE", _descriptor11, _this3), _initDefineProp$3(_this3, "FACEBOOK", _descriptor12, _this3), _temp3), possibleConstructorReturn(_this3, _ret3);
+            return _ret3 = (_temp3 = (_this3 = possibleConstructorReturn(this, (_ref3 = BasicLevelStyleClass.__proto__ || Object.getPrototypeOf(BasicLevelStyleClass)).call.apply(_ref3, [this].concat(args))), _this3), _this3.colorClassBuilder = colorClassFunction, _initDefineProp$2(_this3, "PLAIN", _descriptor4, _this3), _initDefineProp$2(_this3, "GRAY", _descriptor5, _this3), _initDefineProp$2(_this3, "PRIMARY", _descriptor6, _this3), _initDefineProp$2(_this3, "SUCCESS", _descriptor7, _this3), _initDefineProp$2(_this3, "INFO", _descriptor8, _this3), _initDefineProp$2(_this3, "WARNING", _descriptor9, _this3), _initDefineProp$2(_this3, "DANGER", _descriptor10, _this3), _initDefineProp$2(_this3, "GOOGLE", _descriptor11, _this3), _initDefineProp$2(_this3, "FACEBOOK", _descriptor12, _this3), _temp3), possibleConstructorReturn(_this3, _ret3);
         }
 
         createClass(BasicLevelStyleClass, [{
@@ -11222,10 +11222,10 @@ function BasicLevelStyleSet(colorClassFunction) {
                 var _iteratorError2 = undefined;
 
                 try {
-                    for (var _iterator2 = Object.keys(UI.Level)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    for (var _iterator2 = Object.keys(UI$1.Level)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
                         var type = _step2.value;
 
-                        if (level == UI.Level[type]) {
+                        if (level == UI$1.Level[type]) {
                             return this[type];
                         }
                     }
@@ -11246,47 +11246,47 @@ function BasicLevelStyleSet(colorClassFunction) {
             }
         }]);
         return BasicLevelStyleClass;
-    }(StyleSet), (_descriptor4 = _applyDecoratedDescriptor$3(_class5.prototype, "PLAIN", [styleRule], {
+    }(StyleSet), (_descriptor4 = _applyDecoratedDescriptor$2(_class5.prototype, "PLAIN", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return {};
         }
-    }), _descriptor5 = _applyDecoratedDescriptor$3(_class5.prototype, "GRAY", [styleRule], {
+    }), _descriptor5 = _applyDecoratedDescriptor$2(_class5.prototype, "GRAY", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return {};
         }
-    }), _descriptor6 = _applyDecoratedDescriptor$3(_class5.prototype, "PRIMARY", [styleRule], {
+    }), _descriptor6 = _applyDecoratedDescriptor$2(_class5.prototype, "PRIMARY", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return this.colorClassBuilder(buildColors(COLOR.PRIMARY));
         }
-    }), _descriptor7 = _applyDecoratedDescriptor$3(_class5.prototype, "SUCCESS", [styleRule], {
+    }), _descriptor7 = _applyDecoratedDescriptor$2(_class5.prototype, "SUCCESS", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return this.colorClassBuilder(buildColors(COLOR.SUCCESS));
         }
-    }), _descriptor8 = _applyDecoratedDescriptor$3(_class5.prototype, "INFO", [styleRule], {
+    }), _descriptor8 = _applyDecoratedDescriptor$2(_class5.prototype, "INFO", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return this.colorClassBuilder(buildColors(COLOR.INFO));
         }
-    }), _descriptor9 = _applyDecoratedDescriptor$3(_class5.prototype, "WARNING", [styleRule], {
+    }), _descriptor9 = _applyDecoratedDescriptor$2(_class5.prototype, "WARNING", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return this.colorClassBuilder(buildColors(COLOR.WARNING));
         }
-    }), _descriptor10 = _applyDecoratedDescriptor$3(_class5.prototype, "DANGER", [styleRule], {
+    }), _descriptor10 = _applyDecoratedDescriptor$2(_class5.prototype, "DANGER", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return this.colorClassBuilder(buildColors(COLOR.DANGER));
         }
-    }), _descriptor11 = _applyDecoratedDescriptor$3(_class5.prototype, "GOOGLE", [styleRule], {
+    }), _descriptor11 = _applyDecoratedDescriptor$2(_class5.prototype, "GOOGLE", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return this.colorClassBuilder(buildColors(COLOR.GOOGLE));
         }
-    }), _descriptor12 = _applyDecoratedDescriptor$3(_class5.prototype, "FACEBOOK", [styleRule], {
+    }), _descriptor12 = _applyDecoratedDescriptor$2(_class5.prototype, "FACEBOOK", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return this.colorClassBuilder(buildColors(COLOR.FACEBOOK));
@@ -11337,7 +11337,7 @@ var ButtonStyle = (_class7$1 = function (_BasicLevelStyleSet) {
             args[_key4] = arguments[_key4];
         }
 
-        return _ret4 = (_temp4 = (_this4 = possibleConstructorReturn(this, (_ref4 = ButtonStyle.__proto__ || Object.getPrototypeOf(ButtonStyle)).call.apply(_ref4, [this].concat(args))), _this4), _initDefineProp$3(_this4, "DEFAULT", _descriptor13, _this4), _initDefineProp$3(_this4, "EXTRA_SMALL", _descriptor14, _this4), _initDefineProp$3(_this4, "SMALL", _descriptor15, _this4), _initDefineProp$3(_this4, "MEDIUM", _descriptor16, _this4), _initDefineProp$3(_this4, "LARGE", _descriptor17, _this4), _initDefineProp$3(_this4, "EXTRA_LARGE", _descriptor18, _this4), _temp4), possibleConstructorReturn(_this4, _ret4);
+        return _ret4 = (_temp4 = (_this4 = possibleConstructorReturn(this, (_ref4 = ButtonStyle.__proto__ || Object.getPrototypeOf(ButtonStyle)).call.apply(_ref4, [this].concat(args))), _this4), _initDefineProp$2(_this4, "DEFAULT", _descriptor13, _this4), _initDefineProp$2(_this4, "EXTRA_SMALL", _descriptor14, _this4), _initDefineProp$2(_this4, "SMALL", _descriptor15, _this4), _initDefineProp$2(_this4, "MEDIUM", _descriptor16, _this4), _initDefineProp$2(_this4, "LARGE", _descriptor17, _this4), _initDefineProp$2(_this4, "EXTRA_LARGE", _descriptor18, _this4), _temp4), possibleConstructorReturn(_this4, _ret4);
     }
 
     createClass(ButtonStyle, [{
@@ -11348,10 +11348,10 @@ var ButtonStyle = (_class7$1 = function (_BasicLevelStyleSet) {
             var _iteratorError3 = undefined;
 
             try {
-                for (var _iterator3 = Object.keys(UI.Size)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                for (var _iterator3 = Object.keys(UI$1.Size)[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
                     var type = _step3.value;
 
-                    if (size == UI.Size[type]) {
+                    if (size == UI$1.Size[type]) {
                         return this[type];
                     }
                 }
@@ -11372,7 +11372,7 @@ var ButtonStyle = (_class7$1 = function (_BasicLevelStyleSet) {
         }
     }]);
     return ButtonStyle;
-}(BasicLevelStyleSet(buttonColorClassBuilder)), (_descriptor13 = _applyDecoratedDescriptor$3(_class7$1.prototype, "DEFAULT", [styleRule], {
+}(BasicLevelStyleSet(buttonColorClassBuilder)), (_descriptor13 = _applyDecoratedDescriptor$2(_class7$1.prototype, "DEFAULT", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return [{
@@ -11396,7 +11396,7 @@ var ButtonStyle = (_class7$1 = function (_BasicLevelStyleSet) {
             fontSize: "14px"
         }, this.colorClassBuilder(buildColors(COLOR.PLAIN))];
     }
-}), _descriptor14 = _applyDecoratedDescriptor$3(_class7$1.prototype, "EXTRA_SMALL", [styleRule], {
+}), _descriptor14 = _applyDecoratedDescriptor$2(_class7$1.prototype, "EXTRA_SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11405,26 +11405,26 @@ var ButtonStyle = (_class7$1 = function (_BasicLevelStyleSet) {
             borderWidth: "0.05em"
         };
     }
-}), _descriptor15 = _applyDecoratedDescriptor$3(_class7$1.prototype, "SMALL", [styleRule], {
+}), _descriptor15 = _applyDecoratedDescriptor$2(_class7$1.prototype, "SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "12px"
         };
     }
-}), _descriptor16 = _applyDecoratedDescriptor$3(_class7$1.prototype, "MEDIUM", [styleRule], {
+}), _descriptor16 = _applyDecoratedDescriptor$2(_class7$1.prototype, "MEDIUM", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {};
     }
-}), _descriptor17 = _applyDecoratedDescriptor$3(_class7$1.prototype, "LARGE", [styleRule], {
+}), _descriptor17 = _applyDecoratedDescriptor$2(_class7$1.prototype, "LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "17px"
         };
     }
-}), _descriptor18 = _applyDecoratedDescriptor$3(_class7$1.prototype, "EXTRA_LARGE", [styleRule], {
+}), _descriptor18 = _applyDecoratedDescriptor$2(_class7$1.prototype, "EXTRA_LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11468,7 +11468,7 @@ var LabelStyle = (_class9 = function (_BasicLevelStyleSet2) {
             args[_key5] = arguments[_key5];
         }
 
-        return _ret5 = (_temp5 = (_this5 = possibleConstructorReturn(this, (_ref5 = LabelStyle.__proto__ || Object.getPrototypeOf(LabelStyle)).call.apply(_ref5, [this].concat(args))), _this5), _initDefineProp$3(_this5, "DEFAULT", _descriptor19, _this5), _initDefineProp$3(_this5, "EXTRA_SMALL", _descriptor20, _this5), _initDefineProp$3(_this5, "SMALL", _descriptor21, _this5), _initDefineProp$3(_this5, "MEDIUM", _descriptor22, _this5), _initDefineProp$3(_this5, "LARGE", _descriptor23, _this5), _initDefineProp$3(_this5, "EXTRA_LARGE", _descriptor24, _this5), _temp5), possibleConstructorReturn(_this5, _ret5);
+        return _ret5 = (_temp5 = (_this5 = possibleConstructorReturn(this, (_ref5 = LabelStyle.__proto__ || Object.getPrototypeOf(LabelStyle)).call.apply(_ref5, [this].concat(args))), _this5), _initDefineProp$2(_this5, "DEFAULT", _descriptor19, _this5), _initDefineProp$2(_this5, "EXTRA_SMALL", _descriptor20, _this5), _initDefineProp$2(_this5, "SMALL", _descriptor21, _this5), _initDefineProp$2(_this5, "MEDIUM", _descriptor22, _this5), _initDefineProp$2(_this5, "LARGE", _descriptor23, _this5), _initDefineProp$2(_this5, "EXTRA_LARGE", _descriptor24, _this5), _temp5), possibleConstructorReturn(_this5, _ret5);
     }
 
     createClass(LabelStyle, [{
@@ -11479,10 +11479,10 @@ var LabelStyle = (_class9 = function (_BasicLevelStyleSet2) {
             var _iteratorError4 = undefined;
 
             try {
-                for (var _iterator4 = Object.keys(UI.Size)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                for (var _iterator4 = Object.keys(UI$1.Size)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
                     var type = _step4.value;
 
-                    if (size == UI.Size[type]) {
+                    if (size == UI$1.Size[type]) {
                         return this[type];
                     }
                 }
@@ -11503,7 +11503,7 @@ var LabelStyle = (_class9 = function (_BasicLevelStyleSet2) {
         }
     }]);
     return LabelStyle;
-}(BasicLevelStyleSet(labelColorClassBuilder)), (_descriptor19 = _applyDecoratedDescriptor$3(_class9.prototype, "DEFAULT", [styleRule], {
+}(BasicLevelStyleSet(labelColorClassBuilder)), (_descriptor19 = _applyDecoratedDescriptor$2(_class9.prototype, "DEFAULT", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return [{
@@ -11525,7 +11525,7 @@ var LabelStyle = (_class9 = function (_BasicLevelStyleSet2) {
             "font-size": "12px"
         }, this.colorClassBuilder(buildColors(COLOR.GRAY))];
     }
-}), _descriptor20 = _applyDecoratedDescriptor$3(_class9.prototype, "EXTRA_SMALL", [styleRule], {
+}), _descriptor20 = _applyDecoratedDescriptor$2(_class9.prototype, "EXTRA_SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11534,26 +11534,26 @@ var LabelStyle = (_class9 = function (_BasicLevelStyleSet2) {
             borderWidth: "0.05em"
         };
     }
-}), _descriptor21 = _applyDecoratedDescriptor$3(_class9.prototype, "SMALL", [styleRule], {
+}), _descriptor21 = _applyDecoratedDescriptor$2(_class9.prototype, "SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "10px"
         };
     }
-}), _descriptor22 = _applyDecoratedDescriptor$3(_class9.prototype, "MEDIUM", [styleRule], {
+}), _descriptor22 = _applyDecoratedDescriptor$2(_class9.prototype, "MEDIUM", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {};
     }
-}), _descriptor23 = _applyDecoratedDescriptor$3(_class9.prototype, "LARGE", [styleRule], {
+}), _descriptor23 = _applyDecoratedDescriptor$2(_class9.prototype, "LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "14px"
         };
     }
-}), _descriptor24 = _applyDecoratedDescriptor$3(_class9.prototype, "EXTRA_LARGE", [styleRule], {
+}), _descriptor24 = _applyDecoratedDescriptor$2(_class9.prototype, "EXTRA_LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11578,7 +11578,7 @@ var BadgeStyle = (_class11 = function (_BasicLevelStyleSet3) {
             args[_key6] = arguments[_key6];
         }
 
-        return _ret6 = (_temp6 = (_this6 = possibleConstructorReturn(this, (_ref6 = BadgeStyle.__proto__ || Object.getPrototypeOf(BadgeStyle)).call.apply(_ref6, [this].concat(args))), _this6), _initDefineProp$3(_this6, "DEFAULT", _descriptor25, _this6), _initDefineProp$3(_this6, "EXTRA_SMALL", _descriptor26, _this6), _initDefineProp$3(_this6, "SMALL", _descriptor27, _this6), _initDefineProp$3(_this6, "MEDIUM", _descriptor28, _this6), _initDefineProp$3(_this6, "LARGE", _descriptor29, _this6), _initDefineProp$3(_this6, "EXTRA_LARGE", _descriptor30, _this6), _temp6), possibleConstructorReturn(_this6, _ret6);
+        return _ret6 = (_temp6 = (_this6 = possibleConstructorReturn(this, (_ref6 = BadgeStyle.__proto__ || Object.getPrototypeOf(BadgeStyle)).call.apply(_ref6, [this].concat(args))), _this6), _initDefineProp$2(_this6, "DEFAULT", _descriptor25, _this6), _initDefineProp$2(_this6, "EXTRA_SMALL", _descriptor26, _this6), _initDefineProp$2(_this6, "SMALL", _descriptor27, _this6), _initDefineProp$2(_this6, "MEDIUM", _descriptor28, _this6), _initDefineProp$2(_this6, "LARGE", _descriptor29, _this6), _initDefineProp$2(_this6, "EXTRA_LARGE", _descriptor30, _this6), _temp6), possibleConstructorReturn(_this6, _ret6);
     }
 
     createClass(BadgeStyle, [{
@@ -11589,10 +11589,10 @@ var BadgeStyle = (_class11 = function (_BasicLevelStyleSet3) {
             var _iteratorError5 = undefined;
 
             try {
-                for (var _iterator5 = Object.keys(UI.Size)[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+                for (var _iterator5 = Object.keys(UI$1.Size)[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
                     var type = _step5.value;
 
-                    if (size == UI.Size[type]) {
+                    if (size == UI$1.Size[type]) {
                         return this[type];
                     }
                 }
@@ -11613,7 +11613,7 @@ var BadgeStyle = (_class11 = function (_BasicLevelStyleSet3) {
         }
     }]);
     return BadgeStyle;
-}(BasicLevelStyleSet(labelColorClassBuilder)), (_descriptor25 = _applyDecoratedDescriptor$3(_class11.prototype, "DEFAULT", [styleRule], {
+}(BasicLevelStyleSet(labelColorClassBuilder)), (_descriptor25 = _applyDecoratedDescriptor$2(_class11.prototype, "DEFAULT", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return [{
@@ -11631,7 +11631,7 @@ var BadgeStyle = (_class11 = function (_BasicLevelStyleSet3) {
             "font-size": "12px"
         }, this.colorClassBuilder(buildColors(COLOR.GRAY))];
     }
-}), _descriptor26 = _applyDecoratedDescriptor$3(_class11.prototype, "EXTRA_SMALL", [styleRule], {
+}), _descriptor26 = _applyDecoratedDescriptor$2(_class11.prototype, "EXTRA_SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11639,26 +11639,26 @@ var BadgeStyle = (_class11 = function (_BasicLevelStyleSet3) {
             padding: "0.1em 0.2em"
         };
     }
-}), _descriptor27 = _applyDecoratedDescriptor$3(_class11.prototype, "SMALL", [styleRule], {
+}), _descriptor27 = _applyDecoratedDescriptor$2(_class11.prototype, "SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "10px"
         };
     }
-}), _descriptor28 = _applyDecoratedDescriptor$3(_class11.prototype, "MEDIUM", [styleRule], {
+}), _descriptor28 = _applyDecoratedDescriptor$2(_class11.prototype, "MEDIUM", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {};
     }
-}), _descriptor29 = _applyDecoratedDescriptor$3(_class11.prototype, "LARGE", [styleRule], {
+}), _descriptor29 = _applyDecoratedDescriptor$2(_class11.prototype, "LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "14px"
         };
     }
-}), _descriptor30 = _applyDecoratedDescriptor$3(_class11.prototype, "EXTRA_LARGE", [styleRule], {
+}), _descriptor30 = _applyDecoratedDescriptor$2(_class11.prototype, "EXTRA_LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11687,11 +11687,11 @@ function cardPanelColorClassBuilder(color) {
                 args[_key7] = arguments[_key7];
             }
 
-            return _ret7 = (_temp7 = (_this7 = possibleConstructorReturn(this, (_ref7 = CardPanelLevelStyle.__proto__ || Object.getPrototypeOf(CardPanelLevelStyle)).call.apply(_ref7, [this].concat(args))), _this7), _initDefineProp$3(_this7, "heading", _descriptor31, _this7), _initDefineProp$3(_this7, "panel", _descriptor32, _this7), _temp7), possibleConstructorReturn(_this7, _ret7);
+            return _ret7 = (_temp7 = (_this7 = possibleConstructorReturn(this, (_ref7 = CardPanelLevelStyle.__proto__ || Object.getPrototypeOf(CardPanelLevelStyle)).call.apply(_ref7, [this].concat(args))), _this7), _initDefineProp$2(_this7, "heading", _descriptor31, _this7), _initDefineProp$2(_this7, "panel", _descriptor32, _this7), _temp7), possibleConstructorReturn(_this7, _ret7);
         }
 
         return CardPanelLevelStyle;
-    }(StyleSet), (_descriptor31 = _applyDecoratedDescriptor$3(_class13.prototype, "heading", [styleRule], {
+    }(StyleSet), (_descriptor31 = _applyDecoratedDescriptor$2(_class13.prototype, "heading", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return {
@@ -11700,7 +11700,7 @@ function cardPanelColorClassBuilder(color) {
                 borderBottomColor: colors[4]
             };
         }
-    }), _descriptor32 = _applyDecoratedDescriptor$3(_class13.prototype, "panel", [styleRule], {
+    }), _descriptor32 = _applyDecoratedDescriptor$2(_class13.prototype, "panel", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return {
@@ -11734,11 +11734,11 @@ function cardPanelSizeClassBuilder(fontSize) {
                 args[_key8] = arguments[_key8];
             }
 
-            return _ret8 = (_temp8 = (_this8 = possibleConstructorReturn(this, (_ref8 = CardPanelSizeStyle.__proto__ || Object.getPrototypeOf(CardPanelSizeStyle)).call.apply(_ref8, [this].concat(args))), _this8), _initDefineProp$3(_this8, "panel", _descriptor33, _this8), _temp8), possibleConstructorReturn(_this8, _ret8);
+            return _ret8 = (_temp8 = (_this8 = possibleConstructorReturn(this, (_ref8 = CardPanelSizeStyle.__proto__ || Object.getPrototypeOf(CardPanelSizeStyle)).call.apply(_ref8, [this].concat(args))), _this8), _initDefineProp$2(_this8, "panel", _descriptor33, _this8), _temp8), possibleConstructorReturn(_this8, _ret8);
         }
 
         return CardPanelSizeStyle;
-    }(StyleSet), (_descriptor33 = _applyDecoratedDescriptor$3(_class15.prototype, "panel", [styleRule], {
+    }(StyleSet), (_descriptor33 = _applyDecoratedDescriptor$2(_class15.prototype, "panel", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return panelStyle;
@@ -11749,7 +11749,7 @@ function cardPanelSizeClassBuilder(fontSize) {
     return CardPanelSizeStyle;
 }
 
-var CardPanelStyle$1 = function () {
+var CardPanelStyle = function () {
     function CardPanelStyle() {
         classCallCheck(this, CardPanelStyle);
 
@@ -11770,11 +11770,11 @@ var CardPanelStyle$1 = function () {
                         args[_key9] = arguments[_key9];
                     }
 
-                    return _ret9 = (_temp9 = (_this9 = possibleConstructorReturn(this, (_ref9 = DefaultCardPanelStyle.__proto__ || Object.getPrototypeOf(DefaultCardPanelStyle)).call.apply(_ref9, [this].concat(args))), _this9), _initDefineProp$3(_this9, "heading", _descriptor34, _this9), _initDefineProp$3(_this9, "body", _descriptor35, _this9), _initDefineProp$3(_this9, "panel", _descriptor36, _this9), _temp9), possibleConstructorReturn(_this9, _ret9);
+                    return _ret9 = (_temp9 = (_this9 = possibleConstructorReturn(this, (_ref9 = DefaultCardPanelStyle.__proto__ || Object.getPrototypeOf(DefaultCardPanelStyle)).call.apply(_ref9, [this].concat(args))), _this9), _initDefineProp$2(_this9, "heading", _descriptor34, _this9), _initDefineProp$2(_this9, "body", _descriptor35, _this9), _initDefineProp$2(_this9, "panel", _descriptor36, _this9), _temp9), possibleConstructorReturn(_this9, _ret9);
                 }
 
                 return DefaultCardPanelStyle;
-            }(cardPanelColorClassBuilder(COLOR.PLAIN)), (_descriptor34 = _applyDecoratedDescriptor$3(_class18.prototype, "heading", [styleRuleInherit], {
+            }(cardPanelColorClassBuilder(COLOR.PLAIN)), (_descriptor34 = _applyDecoratedDescriptor$2(_class18.prototype, "heading", [styleRuleInherit], {
                 enumerable: true,
                 initializer: function initializer() {
                     return {
@@ -11783,14 +11783,14 @@ var CardPanelStyle$1 = function () {
                         borderBottomStyle: "solid"
                     };
                 }
-            }), _descriptor35 = _applyDecoratedDescriptor$3(_class18.prototype, "body", [styleRule], {
+            }), _descriptor35 = _applyDecoratedDescriptor$2(_class18.prototype, "body", [styleRule], {
                 enumerable: true,
                 initializer: function initializer() {
                     return {
                         // padding: "0.35em",
                     };
                 }
-            }), _descriptor36 = _applyDecoratedDescriptor$3(_class18.prototype, "panel", [styleRuleInherit], {
+            }), _descriptor36 = _applyDecoratedDescriptor$2(_class18.prototype, "panel", [styleRuleInherit], {
                 enumerable: true,
                 initializer: function initializer() {
                     return {
@@ -11829,10 +11829,10 @@ var CardPanelStyle$1 = function () {
             var _iteratorError6 = undefined;
 
             try {
-                for (var _iterator6 = Object.keys(UI.Size)[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+                for (var _iterator6 = Object.keys(UI$1.Size)[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
                     var type = _step6.value;
 
-                    if (size == UI.Size[type]) {
+                    if (size == UI$1.Size[type]) {
                         return this[type];
                     }
                 }
@@ -11862,10 +11862,10 @@ var CardPanelStyle$1 = function () {
             var _iteratorError7 = undefined;
 
             try {
-                for (var _iterator7 = Object.keys(UI.Level)[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
+                for (var _iterator7 = Object.keys(UI$1.Level)[Symbol.iterator](), _step7; !(_iteratorNormalCompletion7 = (_step7 = _iterator7.next()).done); _iteratorNormalCompletion7 = true) {
                     var type = _step7.value;
 
-                    if (level == UI.Level[type]) {
+                    if (level == UI$1.Level[type]) {
                         return this[type];
                     }
                 }
@@ -11908,7 +11908,7 @@ var ProgressBarStyle = (_class20 = function (_BasicLevelStyleSet4) {
             args[_key10] = arguments[_key10];
         }
 
-        return _ret10 = (_temp10 = (_this10 = possibleConstructorReturn(this, (_ref10 = ProgressBarStyle.__proto__ || Object.getPrototypeOf(ProgressBarStyle)).call.apply(_ref10, [this].concat(args))), _this10), _initDefineProp$3(_this10, "CONTAINER", _descriptor37, _this10), _initDefineProp$3(_this10, "DEFAULT", _descriptor38, _this10), _initDefineProp$3(_this10, "STRIPED", _descriptor39, _this10), _initDefineProp$3(_this10, "ACTIVE", _descriptor40, _this10), _initDefineProp$3(_this10, "EXTRA_SMALL", _descriptor41, _this10), _initDefineProp$3(_this10, "SMALL", _descriptor42, _this10), _initDefineProp$3(_this10, "MEDIUM", _descriptor43, _this10), _initDefineProp$3(_this10, "LARGE", _descriptor44, _this10), _initDefineProp$3(_this10, "EXTRA_LARGE", _descriptor45, _this10), _temp10), possibleConstructorReturn(_this10, _ret10);
+        return _ret10 = (_temp10 = (_this10 = possibleConstructorReturn(this, (_ref10 = ProgressBarStyle.__proto__ || Object.getPrototypeOf(ProgressBarStyle)).call.apply(_ref10, [this].concat(args))), _this10), _initDefineProp$2(_this10, "CONTAINER", _descriptor37, _this10), _initDefineProp$2(_this10, "DEFAULT", _descriptor38, _this10), _initDefineProp$2(_this10, "STRIPED", _descriptor39, _this10), _initDefineProp$2(_this10, "ACTIVE", _descriptor40, _this10), _initDefineProp$2(_this10, "EXTRA_SMALL", _descriptor41, _this10), _initDefineProp$2(_this10, "SMALL", _descriptor42, _this10), _initDefineProp$2(_this10, "MEDIUM", _descriptor43, _this10), _initDefineProp$2(_this10, "LARGE", _descriptor44, _this10), _initDefineProp$2(_this10, "EXTRA_LARGE", _descriptor45, _this10), _temp10), possibleConstructorReturn(_this10, _ret10);
     }
 
     createClass(ProgressBarStyle, [{
@@ -11919,10 +11919,10 @@ var ProgressBarStyle = (_class20 = function (_BasicLevelStyleSet4) {
             var _iteratorError8 = undefined;
 
             try {
-                for (var _iterator8 = Object.keys(UI.Size)[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
+                for (var _iterator8 = Object.keys(UI$1.Size)[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
                     var type = _step8.value;
 
-                    if (size == UI.Size[type]) {
+                    if (size == UI$1.Size[type]) {
                         return this[type];
                     }
                 }
@@ -11943,7 +11943,7 @@ var ProgressBarStyle = (_class20 = function (_BasicLevelStyleSet4) {
         }
     }]);
     return ProgressBarStyle;
-}(BasicLevelStyleSet(progressBarColorClassBuilder)), (_descriptor37 = _applyDecoratedDescriptor$3(_class20.prototype, "CONTAINER", [styleRule], {
+}(BasicLevelStyleSet(progressBarColorClassBuilder)), (_descriptor37 = _applyDecoratedDescriptor$2(_class20.prototype, "CONTAINER", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11955,7 +11955,7 @@ var ProgressBarStyle = (_class20 = function (_BasicLevelStyleSet4) {
             boxShadow: "inset 0 1px 2px rgba(0, 0, 0, .1)"
         };
     }
-}), _descriptor38 = _applyDecoratedDescriptor$3(_class20.prototype, "DEFAULT", [styleRule], {
+}), _descriptor38 = _applyDecoratedDescriptor$2(_class20.prototype, "DEFAULT", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return [{
@@ -11973,7 +11973,7 @@ var ProgressBarStyle = (_class20 = function (_BasicLevelStyleSet4) {
             fontSize: "12px"
         }, this.colorClassBuilder(buildColors(COLOR.PRIMARY))];
     }
-}), _descriptor39 = _applyDecoratedDescriptor$3(_class20.prototype, "STRIPED", [styleRule], {
+}), _descriptor39 = _applyDecoratedDescriptor$2(_class20.prototype, "STRIPED", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11981,40 +11981,40 @@ var ProgressBarStyle = (_class20 = function (_BasicLevelStyleSet4) {
             backgroundSize: "40px 40px"
         };
     }
-}), _descriptor40 = _applyDecoratedDescriptor$3(_class20.prototype, "ACTIVE", [styleRule], {
+}), _descriptor40 = _applyDecoratedDescriptor$2(_class20.prototype, "ACTIVE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             animation: "progress-bar-stripes 2s linear infinite"
         };
     }
-}), _descriptor41 = _applyDecoratedDescriptor$3(_class20.prototype, "EXTRA_SMALL", [styleRule], {
+}), _descriptor41 = _applyDecoratedDescriptor$2(_class20.prototype, "EXTRA_SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "8px"
         };
     }
-}), _descriptor42 = _applyDecoratedDescriptor$3(_class20.prototype, "SMALL", [styleRule], {
+}), _descriptor42 = _applyDecoratedDescriptor$2(_class20.prototype, "SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "10px"
         };
     }
-}), _descriptor43 = _applyDecoratedDescriptor$3(_class20.prototype, "MEDIUM", [styleRule], {
+}), _descriptor43 = _applyDecoratedDescriptor$2(_class20.prototype, "MEDIUM", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {};
     }
-}), _descriptor44 = _applyDecoratedDescriptor$3(_class20.prototype, "LARGE", [styleRule], {
+}), _descriptor44 = _applyDecoratedDescriptor$2(_class20.prototype, "LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "14px"
         };
     }
-}), _descriptor45 = _applyDecoratedDescriptor$3(_class20.prototype, "EXTRA_LARGE", [styleRule], {
+}), _descriptor45 = _applyDecoratedDescriptor$2(_class20.prototype, "EXTRA_LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -12037,7 +12037,7 @@ var FlexContainerStyle = (_class22 = function (_StyleSet6) {
             args[_key11] = arguments[_key11];
         }
 
-        return _ret11 = (_temp11 = (_this11 = possibleConstructorReturn(this, (_ref11 = FlexContainerStyle.__proto__ || Object.getPrototypeOf(FlexContainerStyle)).call.apply(_ref11, [this].concat(args))), _this11), _initDefineProp$3(_this11, "HORIZONTAL", _descriptor46, _this11), _initDefineProp$3(_this11, "VERTICAL", _descriptor47, _this11), _temp11), possibleConstructorReturn(_this11, _ret11);
+        return _ret11 = (_temp11 = (_this11 = possibleConstructorReturn(this, (_ref11 = FlexContainerStyle.__proto__ || Object.getPrototypeOf(FlexContainerStyle)).call.apply(_ref11, [this].concat(args))), _this11), _initDefineProp$2(_this11, "HORIZONTAL", _descriptor46, _this11), _initDefineProp$2(_this11, "VERTICAL", _descriptor47, _this11), _temp11), possibleConstructorReturn(_this11, _ret11);
     }
 
     createClass(FlexContainerStyle, [{
@@ -12048,10 +12048,10 @@ var FlexContainerStyle = (_class22 = function (_StyleSet6) {
             var _iteratorError9 = undefined;
 
             try {
-                for (var _iterator9 = Object.keys(UI.Orientation)[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
+                for (var _iterator9 = Object.keys(UI$1.Orientation)[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
                     var type = _step9.value;
 
-                    if (orientation == UI.Orientation[type]) {
+                    if (orientation == UI$1.Orientation[type]) {
                         return this[type];
                     }
                 }
@@ -12072,7 +12072,7 @@ var FlexContainerStyle = (_class22 = function (_StyleSet6) {
         }
     }]);
     return FlexContainerStyle;
-}(StyleSet), (_descriptor46 = _applyDecoratedDescriptor$3(_class22.prototype, "HORIZONTAL", [styleRule], {
+}(StyleSet), (_descriptor46 = _applyDecoratedDescriptor$2(_class22.prototype, "HORIZONTAL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -12086,7 +12086,7 @@ var FlexContainerStyle = (_class22 = function (_StyleSet6) {
             }
         };
     }
-}), _descriptor47 = _applyDecoratedDescriptor$3(_class22.prototype, "VERTICAL", [styleRule], {
+}), _descriptor47 = _applyDecoratedDescriptor$2(_class22.prototype, "VERTICAL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -12116,7 +12116,7 @@ var ContainerStyle = (_class24 = function (_StyleSet7) {
             args[_key12] = arguments[_key12];
         }
 
-        return _ret12 = (_temp12 = (_this12 = possibleConstructorReturn(this, (_ref12 = ContainerStyle.__proto__ || Object.getPrototypeOf(ContainerStyle)).call.apply(_ref12, [this].concat(args))), _this12), _initDefineProp$3(_this12, "EXTRA_SMALL", _descriptor48, _this12), _initDefineProp$3(_this12, "SMALL", _descriptor49, _this12), _initDefineProp$3(_this12, "MEDIUM", _descriptor50, _this12), _initDefineProp$3(_this12, "LARGE", _descriptor51, _this12), _initDefineProp$3(_this12, "EXTRA_LARGE", _descriptor52, _this12), _temp12), possibleConstructorReturn(_this12, _ret12);
+        return _ret12 = (_temp12 = (_this12 = possibleConstructorReturn(this, (_ref12 = ContainerStyle.__proto__ || Object.getPrototypeOf(ContainerStyle)).call.apply(_ref12, [this].concat(args))), _this12), _initDefineProp$2(_this12, "EXTRA_SMALL", _descriptor48, _this12), _initDefineProp$2(_this12, "SMALL", _descriptor49, _this12), _initDefineProp$2(_this12, "MEDIUM", _descriptor50, _this12), _initDefineProp$2(_this12, "LARGE", _descriptor51, _this12), _initDefineProp$2(_this12, "EXTRA_LARGE", _descriptor52, _this12), _temp12), possibleConstructorReturn(_this12, _ret12);
     }
 
     createClass(ContainerStyle, [{
@@ -12127,10 +12127,10 @@ var ContainerStyle = (_class24 = function (_StyleSet7) {
             var _iteratorError10 = undefined;
 
             try {
-                for (var _iterator10 = Object.keys(UI.Size)[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
+                for (var _iterator10 = Object.keys(UI$1.Size)[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
                     var type = _step10.value;
 
-                    if (size == UI.Size[type]) {
+                    if (size == UI$1.Size[type]) {
                         return this[type];
                     }
                 }
@@ -12151,35 +12151,35 @@ var ContainerStyle = (_class24 = function (_StyleSet7) {
         }
     }]);
     return ContainerStyle;
-}(StyleSet), (_descriptor48 = _applyDecoratedDescriptor$3(_class24.prototype, "EXTRA_SMALL", [styleRule], {
+}(StyleSet), (_descriptor48 = _applyDecoratedDescriptor$2(_class24.prototype, "EXTRA_SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             margin: "0% 15%"
         };
     }
-}), _descriptor49 = _applyDecoratedDescriptor$3(_class24.prototype, "SMALL", [styleRule], {
+}), _descriptor49 = _applyDecoratedDescriptor$2(_class24.prototype, "SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             margin: "0% 10%"
         };
     }
-}), _descriptor50 = _applyDecoratedDescriptor$3(_class24.prototype, "MEDIUM", [styleRule], {
+}), _descriptor50 = _applyDecoratedDescriptor$2(_class24.prototype, "MEDIUM", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             margin: "0% 6%"
         };
     }
-}), _descriptor51 = _applyDecoratedDescriptor$3(_class24.prototype, "LARGE", [styleRule], {
+}), _descriptor51 = _applyDecoratedDescriptor$2(_class24.prototype, "LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             margin: "0% 3%"
         };
     }
-}), _descriptor52 = _applyDecoratedDescriptor$3(_class24.prototype, "EXTRA_LARGE", [styleRule], {
+}), _descriptor52 = _applyDecoratedDescriptor$2(_class24.prototype, "EXTRA_LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -12194,63 +12194,10 @@ GlobalStyle.RadioButtonGroup = RadioButtonGroupStyle.getInstance();
 GlobalStyle.ButtonGroup = ButtonGroupStyle.getInstance();
 GlobalStyle.Label = LabelStyle.getInstance();
 GlobalStyle.Badge = BadgeStyle.getInstance();
-GlobalStyle.CardPanel = new CardPanelStyle$1();
+GlobalStyle.CardPanel = new CardPanelStyle();
 GlobalStyle.ProgressBar = ProgressBarStyle.getInstance();
 GlobalStyle.FlexContainer = FlexContainerStyle.getInstance();
 GlobalStyle.Container = ContainerStyle.getInstance();
-
-var _class$6;
-var _descriptor$1;
-var _descriptor2$1;
-var _descriptor3$1;
-var _class3$1;
-var _descriptor4$1;
-var _descriptor5$1;
-var _class5$1;
-var _descriptor6$1;
-var _descriptor7$1;
-var _descriptor8$1;
-var _class8;
-var _temp4$1;
-
-function _initDefineProp$2(target, property, descriptor, context) {
-    if (!descriptor) return;
-    Object.defineProperty(target, property, {
-        enumerable: descriptor.enumerable,
-        configurable: descriptor.configurable,
-        writable: descriptor.writable,
-        value: descriptor.initializer ? descriptor.initializer.call(context) : void 0
-    });
-}
-
-function _applyDecoratedDescriptor$2(target, property, decorators, descriptor, context) {
-    var desc = {};
-    Object['ke' + 'ys'](descriptor).forEach(function (key) {
-        desc[key] = descriptor[key];
-    });
-    desc.enumerable = !!desc.enumerable;
-    desc.configurable = !!desc.configurable;
-
-    if ('value' in desc || desc.initializer) {
-        desc.writable = true;
-    }
-
-    desc = decorators.slice().reverse().reduce(function (desc, decorator) {
-        return decorator(target, property, desc) || desc;
-    }, desc);
-
-    if (context && desc.initializer !== void 0) {
-        desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
-        desc.initializer = undefined;
-    }
-
-    if (desc.initializer === void 0) {
-        Object['define' + 'Property'](target, property, desc);
-        desc = null;
-    }
-
-    return desc;
-}
 
 function BootstrapMixin(BaseClass, bootstrapClassName) {
     var BootstrapClass = function (_BaseClass) {
@@ -12325,7 +12272,7 @@ var SimpleStyledElement = function (_UI$Element) {
         }
     }]);
     return SimpleStyledElement;
-}(UI.Element);
+}(UI$1.Element);
 
 var IconableInterface = function (_SimpleStyledElement) {
     inherits(IconableInterface, _SimpleStyledElement);
@@ -12380,7 +12327,7 @@ var IconableInterface = function (_SimpleStyledElement) {
                 };
             }
 
-            return UI.createElement("span", iconOptions);
+            return UI$1.createElement("span", iconOptions);
         }
     }]);
     return IconableInterface;
@@ -12409,7 +12356,7 @@ var Label = function (_UI$Primitive) {
         }
     }]);
     return Label;
-}(UI.Primitive(IconableInterface, "span"));
+}(UI$1.Primitive(IconableInterface, "span"));
 
 var Badge = function (_UI$Primitive2) {
     inherits(Badge, _UI$Primitive2);
@@ -12434,378 +12381,10 @@ var Badge = function (_UI$Primitive2) {
         }
     }]);
     return Badge;
-}(UI.Primitive(IconableInterface, "span"));
+}(UI$1.Primitive(IconableInterface, "span"));
 
-var CardPanelStyle = (_class$6 = function (_StyleSet) {
-    inherits(CardPanelStyle, _StyleSet);
-
-    function CardPanelStyle() {
-        var _ref;
-
-        var _temp, _this6, _ret;
-
-        classCallCheck(this, CardPanelStyle);
-
-        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-            args[_key] = arguments[_key];
-        }
-
-        return _ret = (_temp = (_this6 = possibleConstructorReturn(this, (_ref = CardPanelStyle.__proto__ || Object.getPrototypeOf(CardPanelStyle)).call.apply(_ref, [this].concat(args))), _this6), _initDefineProp$2(_this6, "heading", _descriptor$1, _this6), _initDefineProp$2(_this6, "body", _descriptor2$1, _this6), _initDefineProp$2(_this6, "panel", _descriptor3$1, _this6), _temp), possibleConstructorReturn(_this6, _ret);
-    }
-
-    return CardPanelStyle;
-}(StyleSet), (_descriptor$1 = _applyDecoratedDescriptor$2(_class$6.prototype, "heading", [styleRule], {
-    enumerable: true,
-    initializer: function initializer() {
-        return {
-            color: "#333",
-            backgroundColor: "#f5f5f5",
-            padding: "10px 15px",
-            borderBottom: "1px solid #ddd"
-        };
-    }
-}), _descriptor2$1 = _applyDecoratedDescriptor$2(_class$6.prototype, "body", [styleRule], {
-    enumerable: true,
-    initializer: function initializer() {
-        return {
-            padding: "5px"
-        };
-    }
-}), _descriptor3$1 = _applyDecoratedDescriptor$2(_class$6.prototype, "panel", [styleRule], {
-    enumerable: true,
-    initializer: function initializer() {
-        return {
-            backgroundColor: "#ffffff",
-            border: "1px solid #ddd",
-            borderRadius: "4px"
-        };
-    }
-})), _class$6);
-
-var CardPanel = function (_SimpleStyledElement2) {
-    inherits(CardPanel, _SimpleStyledElement2);
-
-    function CardPanel() {
-        classCallCheck(this, CardPanel);
-        return possibleConstructorReturn(this, (CardPanel.__proto__ || Object.getPrototypeOf(CardPanel)).apply(this, arguments));
-    }
-
-    createClass(CardPanel, [{
-        key: "extraNodeAttributes",
-        value: function extraNodeAttributes(attr) {
-            attr.addClass(GlobalStyle.CardPanel.DEFAULT.panel);
-            if (this.getLevel()) {
-                attr.addClass(GlobalStyle.CardPanel.Level(this.getLevel()).panel);
-            }
-            if (this.getSize()) {
-                attr.addClass(GlobalStyle.CardPanel.Size(this.getSize()).panel);
-            }
-        }
-    }, {
-        key: "getTitle",
-        value: function getTitle() {
-            return this.options.title;
-        }
-    }, {
-        key: "render",
-        value: function render() {
-            var headingLevel = this.getLevel() ? GlobalStyle.CardPanel.Level(this.getLevel()).heading : "";
-
-            return [UI.createElement(
-                "div",
-                { className: GlobalStyle.CardPanel.DEFAULT.heading + " " + headingLevel },
-                this.getTitle()
-            ), UI.createElement(
-                "div",
-                { className: GlobalStyle.CardPanel.DEFAULT.body, style: this.options.bodyStyle },
-                this.getGivenChildren()
-            )];
-        }
-    }]);
-    return CardPanel;
-}(SimpleStyledElement);
-
-var CollapsibleStyle = (_class3$1 = function (_StyleSet2) {
-    inherits(CollapsibleStyle, _StyleSet2);
-
-    function CollapsibleStyle() {
-        classCallCheck(this, CollapsibleStyle);
-
-        var _this8 = possibleConstructorReturn(this, (CollapsibleStyle.__proto__ || Object.getPrototypeOf(CollapsibleStyle)).call(this));
-
-        _initDefineProp$2(_this8, "collapsing", _descriptor4$1, _this8);
-
-        _initDefineProp$2(_this8, "collapsed", _descriptor5$1, _this8);
-
-        _this8.transitionDuration = 0.4;
-        return _this8;
-    }
-
-    return CollapsibleStyle;
-}(StyleSet), (_descriptor4$1 = _applyDecoratedDescriptor$2(_class3$1.prototype, "collapsing", [styleRule], {
-    enumerable: true,
-    initializer: function initializer() {
-        return {
-            marginTop: "0",
-            transitionTimingFunction: "ease",
-            transitionDuration: this.transitionDuration + "s",
-            transitionProperty: "margin-top",
-            transitionDelay: "-0.15s"
-        };
-    }
-}), _descriptor5$1 = _applyDecoratedDescriptor$2(_class3$1.prototype, "collapsed", [styleRule], {
-    enumerable: true,
-    initializer: function initializer() {
-        return {
-            marginTop: "-100% !important",
-            transitionDelay: "0s !important"
-        };
-    }
-})), _class3$1);
-var CollapsiblePanelStyle = (_class5$1 = function (_StyleSet3) {
-    inherits(CollapsiblePanelStyle, _StyleSet3);
-
-    function CollapsiblePanelStyle() {
-        var _ref2;
-
-        var _temp2, _this9, _ret2;
-
-        classCallCheck(this, CollapsiblePanelStyle);
-
-        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-            args[_key2] = arguments[_key2];
-        }
-
-        return _ret2 = (_temp2 = (_this9 = possibleConstructorReturn(this, (_ref2 = CollapsiblePanelStyle.__proto__ || Object.getPrototypeOf(CollapsiblePanelStyle)).call.apply(_ref2, [this].concat(args))), _this9), _initDefineProp$2(_this9, "heading", _descriptor6$1, _this9), _initDefineProp$2(_this9, "button", _descriptor7$1, _this9), _initDefineProp$2(_this9, "collapsedButton", _descriptor8$1, _this9), _temp2), possibleConstructorReturn(_this9, _ret2);
-    }
-
-    return CollapsiblePanelStyle;
-}(StyleSet), (_descriptor6$1 = _applyDecoratedDescriptor$2(_class5$1.prototype, "heading", [styleRule], {
-    enumerable: true,
-    initializer: function initializer() {
-        return {
-            padding: "10px 15px",
-            borderBottom: "1px solid transparent",
-            borderTopLeftRadius: "3px",
-            borderTopRightRadius: "3px",
-            backgroundColor: "#f5f5f5"
-        };
-    }
-}), _descriptor7$1 = _applyDecoratedDescriptor$2(_class5$1.prototype, "button", [styleRule], {
-    enumerable: true,
-    initializer: function initializer() {
-        return {
-            marginTop: "0",
-            marginBottom: "0",
-            fontSize: "16px",
-            color: "inherit",
-            cursor: "pointer",
-            ":hover": {
-                color: "inherit"
-            },
-            ":before": {
-                fontFamily: "'Glyphicons Halflings'",
-                content: "\"\\e114\"",
-                color: "grey",
-                float: "left"
-            }
-        };
-    }
-}), _descriptor8$1 = _applyDecoratedDescriptor$2(_class5$1.prototype, "collapsedButton", [styleRule], {
-    enumerable: true,
-    initializer: function initializer() {
-        return {
-            ":before": {
-                content: "\"\\e080\" !important"
-            }
-        };
-    }
-})), _class5$1);
-
-
-function CollapsibleMixin(BaseClass) {
-    var _class7, _temp3;
-
-    var CollapsibleClass = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : CollapsibleStyle;
-    var CollapsibleElement = (_temp3 = _class7 = function (_BaseClass2) {
-        inherits(CollapsibleElement, _BaseClass2);
-
-        function CollapsibleElement() {
-            classCallCheck(this, CollapsibleElement);
-            return possibleConstructorReturn(this, (CollapsibleElement.__proto__ || Object.getPrototypeOf(CollapsibleElement)).apply(this, arguments));
-        }
-
-        createClass(CollapsibleElement, [{
-            key: "getDefaultOptions",
-            value: function getDefaultOptions() {
-                return {
-                    collapsed: true
-                };
-            }
-        }, {
-            key: "getCollapsibleStyleSet",
-            value: function getCollapsibleStyleSet() {
-                return this.options.collapsibleStyleSet || this.constructor.collapsibleStyleSet;
-            }
-        }, {
-            key: "expand",
-            value: function expand(panel) {
-                this.options.collapsed = false;
-                var collapsibleStyle = this.getCollapsibleStyleSet();
-                panel.addClass(collapsibleStyle.collapsing);
-                panel.removeClass("hidden");
-                setTimeout(function () {
-                    panel.removeClass(collapsibleStyle.collapsed);
-                });
-            }
-        }, {
-            key: "collapse",
-            value: function collapse(panel) {
-                var _this11 = this;
-
-                this.options.collapsed = true;
-                var collapsibleStyle = this.getCollapsibleStyleSet();
-                panel.addClass(collapsibleStyle.collapsing);
-                panel.addClass(collapsibleStyle.collapsed);
-                var transitionEndFunction = function transitionEndFunction() {
-                    if (_this11.options.collapsed) {
-                        panel.addClass("hidden");
-                    }
-                };
-                panel.addNodeListener("transitionend", transitionEndFunction);
-            }
-        }]);
-        return CollapsibleElement;
-    }(BaseClass), _class7.collapsibleStyleSet = new CollapsibleStyle(), _temp3);
-
-
-    return CollapsibleElement;
-}
-
-var CollapsiblePanel = (_temp4$1 = _class8 = function (_CollapsibleMixin) {
-    inherits(CollapsiblePanel, _CollapsibleMixin);
-
-    function CollapsiblePanel() {
-        classCallCheck(this, CollapsiblePanel);
-        return possibleConstructorReturn(this, (CollapsiblePanel.__proto__ || Object.getPrototypeOf(CollapsiblePanel)).apply(this, arguments));
-    }
-
-    createClass(CollapsiblePanel, [{
-        key: "getStyleSet",
-        value: function getStyleSet() {
-            return this.options.styleSet || this.constructor.styleSet;
-        }
-    }, {
-        key: "toggle",
-        value: function toggle() {
-            if (this.options.collapsed) {
-                this.expand();
-            } else {
-                this.collapse();
-            }
-        }
-    }, {
-        key: "expand",
-        value: function expand() {
-            get(CollapsiblePanel.prototype.__proto__ || Object.getPrototypeOf(CollapsiblePanel.prototype), "expand", this).call(this, this.contentArea);
-            this.toggleButton.removeClass(this.getStyleSet().collapsedButton);
-        }
-    }, {
-        key: "collapse",
-        value: function collapse() {
-            var _this13 = this;
-
-            get(CollapsiblePanel.prototype.__proto__ || Object.getPrototypeOf(CollapsiblePanel.prototype), "collapse", this).call(this, this.contentArea);
-            setTimeout(function () {
-                _this13.toggleButton.addClass(_this13.getStyleSet().collapsedButton);
-            }, this.getCollapsibleStyleSet().transitionDuration * 700);
-        }
-    }, {
-        key: "render",
-        value: function render() {
-            var _this14 = this;
-
-            var autoHeightClass = "";
-            var collapsedPanelClass = "";
-            var collapsedHeadingClass = "";
-            var hiddenClass = "";
-            var contentStyle = {};
-
-            if (this.options.autoHeight) {
-                autoHeightClass = "auto-height ";
-            }
-            if (this.options.collapsed) {
-                collapsedHeadingClass = this.getStyleSet().collapsedButton;
-                collapsedPanelClass = this.getCollapsibleStyleSet().collapsed;
-                hiddenClass = "hidden";
-            }
-            if (!this.options.noPadding) {
-                contentStyle = {
-                    padding: "8px 8px"
-                };
-            }
-
-            return [UI.createElement(
-                "div",
-                { className: this.getStyleSet().heading },
-                UI.createElement(
-                    "a",
-                    { ref: "toggleButton", className: this.getStyleSet().button + " " + collapsedHeadingClass,
-                        onClick: function onClick() {
-                            return _this14.toggle();
-                        } },
-                    this.getTitle()
-                )
-            ), UI.createElement(
-                "div",
-                { style: { overflow: "hidden" } },
-                UI.createElement(
-                    "div",
-                    { ref: "contentArea", className: autoHeightClass + " " + collapsedPanelClass + " " + hiddenClass,
-                        style: contentStyle },
-                    this.getGivenChildren()
-                )
-            )];
-        }
-    }]);
-    return CollapsiblePanel;
-}(CollapsibleMixin(CardPanel)), _class8.styleSet = new CollapsiblePanelStyle(), _temp4$1);
-
-var DelayedCollapsiblePanel = function (_CollapsiblePanel) {
-    inherits(DelayedCollapsiblePanel, _CollapsiblePanel);
-
-    function DelayedCollapsiblePanel() {
-        classCallCheck(this, DelayedCollapsiblePanel);
-        return possibleConstructorReturn(this, (DelayedCollapsiblePanel.__proto__ || Object.getPrototypeOf(DelayedCollapsiblePanel)).apply(this, arguments));
-    }
-
-    createClass(DelayedCollapsiblePanel, [{
-        key: "toggle",
-        value: function toggle() {
-            if (!this._haveExpanded) {
-                this._haveExpanded = true;
-                UI.renderingStack.push(this);
-                this.contentArea.options.children = this.getGivenChildren();
-                UI.renderingStack.pop();
-                this.contentArea.redraw();
-                this.delayedMount();
-            }
-            get(DelayedCollapsiblePanel.prototype.__proto__ || Object.getPrototypeOf(DelayedCollapsiblePanel.prototype), "toggle", this).call(this);
-        }
-    }, {
-        key: "getGivenChildren",
-        value: function getGivenChildren() {
-            if (!this._haveExpanded) {
-                return [];
-            }
-            return this.getDelayedChildren();
-        }
-    }]);
-    return DelayedCollapsiblePanel;
-}(CollapsiblePanel);
-
-var ProgressBar = function (_SimpleStyledElement3) {
-    inherits(ProgressBar, _SimpleStyledElement3);
+var ProgressBar = function (_SimpleStyledElement2) {
+    inherits(ProgressBar, _SimpleStyledElement2);
 
     function ProgressBar() {
         classCallCheck(this, ProgressBar);
@@ -12821,12 +12400,12 @@ var ProgressBar = function (_SimpleStyledElement3) {
         key: "render",
         value: function render() {
             var valueInPercent = (this.options.value || 0) * 100;
-            var orientation = UI.Orientation.HORIZONTAL;
+            var orientation = UI$1.Orientation.HORIZONTAL;
             if (this.options.hasOwnProperty("orientation")) {
                 orientation = this.options.orientation;
             }
             var barStyle = void 0;
-            if (orientation === UI.Orientation.HORIZONTAL) {
+            if (orientation === UI$1.Orientation.HORIZONTAL) {
                 barStyle = {
                     width: valueInPercent + "%",
                     height: this.options.height + "px"
@@ -12861,10 +12440,10 @@ var ProgressBar = function (_SimpleStyledElement3) {
                 barOptions.style.backgroundColor = this.options.color;
             }
 
-            return UI.createElement(
+            return UI$1.createElement(
                 "div",
                 barOptions,
-                UI.createElement(
+                UI$1.createElement(
                     "span",
                     { className: "progress-span" },
                     this.options.label
@@ -12888,9 +12467,9 @@ var translationMap = null;
 // Keep a set of all UI Element that need to be updated when the language changes
 // Can't use a weak set here unfortunately because we need iteration
 // That's why we must make sure to remove all nodes from the set when destroying them
-UI.TranslationElements = new Set();
+UI$1.TranslationElements = new Set();
 
-UI.TranslationTextElement = function (_UI$TextElement) {
+UI$1.TranslationTextElement = function (_UI$TextElement) {
     inherits(TranslationTextElement, _UI$TextElement);
 
     function TranslationTextElement(value) {
@@ -12963,21 +12542,21 @@ UI.TranslationTextElement = function (_UI$TextElement) {
     }, {
         key: "onMount",
         value: function onMount() {
-            UI.TranslationElements.add(this);
+            UI$1.TranslationElements.add(this);
         }
     }, {
         key: "onUnmount",
         value: function onUnmount() {
-            UI.TranslationElements.delete(this);
+            UI$1.TranslationElements.delete(this);
         }
     }]);
     return TranslationTextElement;
-}(UI.TextElement);
+}(UI$1.TextElement);
 
 // This method is a shorthand notation to create a new translatable text element
 // TODO: should also support being used as a string template
-UI.T = function (str) {
-    return new UI.TranslationTextElement(str);
+UI$1.T = function (str) {
+    return new UI$1.TranslationTextElement(str);
 };
 
 // TODO @mciucu this should be wrapped in a way that previous requests that arrive later don't get processed
@@ -12994,7 +12573,7 @@ function setTranslationMap(_translationMap) {
     var _iteratorError = undefined;
 
     try {
-        for (var _iterator = UI.TranslationElements.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        for (var _iterator = UI$1.TranslationElements.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
             var textElement = _step.value;
 
             textElement.redraw();
@@ -13118,9 +12697,9 @@ var Switcher = function (_UI$Element) {
             this.applyRef();
 
             // This render may be required to update this.options.children
-            UI.renderingStack.push(this);
+            UI$1.renderingStack.push(this);
             this.render();
-            UI.renderingStack.pop();
+            UI$1.renderingStack.pop();
 
             if (this.options.children.length == 0) {
                 return;
@@ -13264,7 +12843,7 @@ var Switcher = function (_UI$Element) {
         }
     }]);
     return Switcher;
-}(UI.Element);
+}(UI$1.Element);
 
 function getInstance(styleSheet) {
     if (typeof styleSheet === "function") {
@@ -13351,30 +12930,30 @@ function styleSheetGetter() {
 }
 
 // TODO: should fixate on a single nomenclature, just use StyleSheet everywhere
-UI.Element.prototype.getStyleSheet = UI.Element.prototype.getStyleSet = styleSheetGetter;
+UI$1.Element.prototype.getStyleSheet = UI$1.Element.prototype.getStyleSet = styleSheetGetter;
 
 // TODO: not sure if I like the getter pattern
-Object.defineProperty(UI.Element.prototype, "styleSheet", {
+Object.defineProperty(UI$1.Element.prototype, "styleSheet", {
     get: styleSheetGetter,
     set: function set$$1(value) {
         throw Error("Don't change the styleSheet of a UI Element, change this attribute in this.options");
     }
 });
 
-var _class$8;
-var _descriptor$3;
-var _descriptor2$3;
-var _descriptor3$3;
-var _class3$3;
-var _descriptor4$2;
-var _descriptor5$2;
-var _descriptor6$2;
-var _class5$2;
-var _descriptor7$2;
-var _descriptor8$2;
+var _class$7;
+var _descriptor$2;
+var _descriptor2$2;
+var _descriptor3$2;
+var _class3$2;
+var _descriptor4$1;
+var _descriptor5$1;
+var _descriptor6$1;
+var _class5$1;
+var _descriptor7$1;
+var _descriptor8$1;
 var _descriptor9$1;
 
-function _initDefineProp$4(target, property, descriptor, context) {
+function _initDefineProp$3(target, property, descriptor, context) {
     if (!descriptor) return;
     Object.defineProperty(target, property, {
         enumerable: descriptor.enumerable,
@@ -13384,7 +12963,7 @@ function _initDefineProp$4(target, property, descriptor, context) {
     });
 }
 
-function _applyDecoratedDescriptor$4(target, property, decorators, descriptor, context) {
+function _applyDecoratedDescriptor$3(target, property, decorators, descriptor, context) {
     var desc = {};
     Object['ke' + 'ys'](descriptor).forEach(function (key) {
         desc[key] = descriptor[key];
@@ -13413,7 +12992,7 @@ function _applyDecoratedDescriptor$4(target, property, decorators, descriptor, c
     return desc;
 }
 
-var BaseTabAreaStyle = (_class$8 = function (_StyleSet) {
+var BaseTabAreaStyle = (_class$7 = function (_StyleSet) {
     inherits(BaseTabAreaStyle, _StyleSet);
 
     function BaseTabAreaStyle() {
@@ -13427,11 +13006,11 @@ var BaseTabAreaStyle = (_class$8 = function (_StyleSet) {
             args[_key] = arguments[_key];
         }
 
-        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = BaseTabAreaStyle.__proto__ || Object.getPrototypeOf(BaseTabAreaStyle)).call.apply(_ref, [this].concat(args))), _this), _initDefineProp$4(_this, "tab", _descriptor$3, _this), _initDefineProp$4(_this, "activeTab", _descriptor2$3, _this), _initDefineProp$4(_this, "nav", _descriptor3$3, _this), _temp), possibleConstructorReturn(_this, _ret);
+        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = BaseTabAreaStyle.__proto__ || Object.getPrototypeOf(BaseTabAreaStyle)).call.apply(_ref, [this].concat(args))), _this), _initDefineProp$3(_this, "tab", _descriptor$2, _this), _initDefineProp$3(_this, "activeTab", _descriptor2$2, _this), _initDefineProp$3(_this, "nav", _descriptor3$2, _this), _temp), possibleConstructorReturn(_this, _ret);
     }
 
     return BaseTabAreaStyle;
-}(StyleSet), (_descriptor$3 = _applyDecoratedDescriptor$4(_class$8.prototype, "tab", [styleRule], {
+}(StyleSet), (_descriptor$2 = _applyDecoratedDescriptor$3(_class$7.prototype, "tab", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13440,20 +13019,20 @@ var BaseTabAreaStyle = (_class$8 = function (_StyleSet) {
             position: "relative"
         };
     }
-}), _descriptor2$3 = _applyDecoratedDescriptor$4(_class$8.prototype, "activeTab", [styleRule], {
+}), _descriptor2$2 = _applyDecoratedDescriptor$3(_class$7.prototype, "activeTab", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {};
     }
-}), _descriptor3$3 = _applyDecoratedDescriptor$4(_class$8.prototype, "nav", [styleRule], {
+}), _descriptor3$2 = _applyDecoratedDescriptor$3(_class$7.prototype, "nav", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             listStyle: "none"
         };
     }
-})), _class$8);
-var DefaultTabAreaStyle = (_class3$3 = function (_BaseTabAreaStyle) {
+})), _class$7);
+var DefaultTabAreaStyle = (_class3$2 = function (_BaseTabAreaStyle) {
     inherits(DefaultTabAreaStyle, _BaseTabAreaStyle);
 
     function DefaultTabAreaStyle() {
@@ -13467,11 +13046,11 @@ var DefaultTabAreaStyle = (_class3$3 = function (_BaseTabAreaStyle) {
             args[_key2] = arguments[_key2];
         }
 
-        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = DefaultTabAreaStyle.__proto__ || Object.getPrototypeOf(DefaultTabAreaStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$4(_this2, "tab", _descriptor4$2, _this2), _initDefineProp$4(_this2, "activeTab", _descriptor5$2, _this2), _initDefineProp$4(_this2, "nav", _descriptor6$2, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
+        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = DefaultTabAreaStyle.__proto__ || Object.getPrototypeOf(DefaultTabAreaStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$3(_this2, "tab", _descriptor4$1, _this2), _initDefineProp$3(_this2, "activeTab", _descriptor5$1, _this2), _initDefineProp$3(_this2, "nav", _descriptor6$1, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
     }
 
     return DefaultTabAreaStyle;
-}(BaseTabAreaStyle), (_descriptor4$2 = _applyDecoratedDescriptor$4(_class3$3.prototype, "tab", [styleRuleInherit], {
+}(BaseTabAreaStyle), (_descriptor4$1 = _applyDecoratedDescriptor$3(_class3$2.prototype, "tab", [styleRuleInherit], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13493,7 +13072,7 @@ var DefaultTabAreaStyle = (_class3$3 = function (_BaseTabAreaStyle) {
             }
         };
     }
-}), _descriptor5$2 = _applyDecoratedDescriptor$4(_class3$3.prototype, "activeTab", [styleRuleInherit], {
+}), _descriptor5$1 = _applyDecoratedDescriptor$3(_class3$2.prototype, "activeTab", [styleRuleInherit], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13504,7 +13083,7 @@ var DefaultTabAreaStyle = (_class3$3 = function (_BaseTabAreaStyle) {
             borderBottomColor: "transparent !important"
         };
     }
-}), _descriptor6$2 = _applyDecoratedDescriptor$4(_class3$3.prototype, "nav", [styleRuleInherit], {
+}), _descriptor6$1 = _applyDecoratedDescriptor$3(_class3$2.prototype, "nav", [styleRuleInherit], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13513,8 +13092,8 @@ var DefaultTabAreaStyle = (_class3$3 = function (_BaseTabAreaStyle) {
             marginBottom: "0"
         };
     }
-})), _class3$3);
-var MinimalistTabAreaStyle = (_class5$2 = function (_BaseTabAreaStyle2) {
+})), _class3$2);
+var MinimalistTabAreaStyle = (_class5$1 = function (_BaseTabAreaStyle2) {
     inherits(MinimalistTabAreaStyle, _BaseTabAreaStyle2);
 
     function MinimalistTabAreaStyle() {
@@ -13528,11 +13107,11 @@ var MinimalistTabAreaStyle = (_class5$2 = function (_BaseTabAreaStyle2) {
             args[_key3] = arguments[_key3];
         }
 
-        return _ret3 = (_temp3 = (_this3 = possibleConstructorReturn(this, (_ref3 = MinimalistTabAreaStyle.__proto__ || Object.getPrototypeOf(MinimalistTabAreaStyle)).call.apply(_ref3, [this].concat(args))), _this3), _initDefineProp$4(_this3, "tab", _descriptor7$2, _this3), _initDefineProp$4(_this3, "activeTab", _descriptor8$2, _this3), _initDefineProp$4(_this3, "nav", _descriptor9$1, _this3), _temp3), possibleConstructorReturn(_this3, _ret3);
+        return _ret3 = (_temp3 = (_this3 = possibleConstructorReturn(this, (_ref3 = MinimalistTabAreaStyle.__proto__ || Object.getPrototypeOf(MinimalistTabAreaStyle)).call.apply(_ref3, [this].concat(args))), _this3), _initDefineProp$3(_this3, "tab", _descriptor7$1, _this3), _initDefineProp$3(_this3, "activeTab", _descriptor8$1, _this3), _initDefineProp$3(_this3, "nav", _descriptor9$1, _this3), _temp3), possibleConstructorReturn(_this3, _ret3);
     }
 
     return MinimalistTabAreaStyle;
-}(BaseTabAreaStyle), (_descriptor7$2 = _applyDecoratedDescriptor$4(_class5$2.prototype, "tab", [styleRuleInherit], {
+}(BaseTabAreaStyle), (_descriptor7$1 = _applyDecoratedDescriptor$3(_class5$1.prototype, "tab", [styleRuleInherit], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13550,7 +13129,7 @@ var MinimalistTabAreaStyle = (_class5$2 = function (_BaseTabAreaStyle2) {
             }
         };
     }
-}), _descriptor8$2 = _applyDecoratedDescriptor$4(_class5$2.prototype, "activeTab", [styleRuleInherit], {
+}), _descriptor8$1 = _applyDecoratedDescriptor$3(_class5$1.prototype, "activeTab", [styleRuleInherit], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13560,7 +13139,7 @@ var MinimalistTabAreaStyle = (_class5$2 = function (_BaseTabAreaStyle2) {
             borderBottom: "2px solid rgba(51,122,183,1) !important"
         };
     }
-}), _descriptor9$1 = _applyDecoratedDescriptor$4(_class5$2.prototype, "nav", [styleRuleInherit], {
+}), _descriptor9$1 = _applyDecoratedDescriptor$3(_class5$1.prototype, "nav", [styleRuleInherit], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13568,7 +13147,7 @@ var MinimalistTabAreaStyle = (_class5$2 = function (_BaseTabAreaStyle2) {
             borderBottom: "1px solid #aaa"
         };
     }
-})), _class5$2);
+})), _class5$1);
 
 var BasicTabTitle = function (_UI$Primitive) {
     inherits(BasicTabTitle, _UI$Primitive);
@@ -13650,7 +13229,7 @@ var BasicTabTitle = function (_UI$Primitive) {
         }
     }]);
     return BasicTabTitle;
-}(UI.Primitive("a"));
+}(UI$1.Primitive("a"));
 
 
 
@@ -13663,7 +13242,7 @@ var TabTitleArea = function (_UI$Element) {
     }
 
     return TabTitleArea;
-}(UI.Element);
+}(UI$1.Element);
 
 
 
@@ -13704,7 +13283,7 @@ var TabArea = function (_UI$Element2) {
     }, {
         key: "createTabPanel",
         value: function createTabPanel(panel) {
-            var tab = UI.createElement(BasicTabTitle, { panel: panel, activeTabDispatcher: this.activeTabDispatcher,
+            var tab = UI$1.createElement(BasicTabTitle, { panel: panel, activeTabDispatcher: this.activeTabDispatcher,
                 active: panel.options.active, href: panel.options.tabHref,
                 styleSet: this.getStyleSheet() });
 
@@ -13726,7 +13305,7 @@ var TabArea = function (_UI$Element2) {
     }, {
         key: "getTitleArea",
         value: function getTitleArea(tabTitles) {
-            return UI.createElement(
+            return UI$1.createElement(
                 TabTitleArea,
                 { ref: "titleArea", className: this.styleSheet.nav },
                 tabTitles
@@ -13737,7 +13316,7 @@ var TabArea = function (_UI$Element2) {
         value: function getSwitcher(tabPanels) {
             // TODO: This should have the ex "auto-height" if not variable height children
             // className="auto-height"
-            return UI.createElement(
+            return UI$1.createElement(
                 Switcher,
                 { style: { flex: "1", overflow: "auto" }, ref: "switcherArea", lazyRender: this.options.lazyRender },
                 tabPanels
@@ -13821,7 +13400,7 @@ var TabArea = function (_UI$Element2) {
         }
     }]);
     return TabArea;
-}(UI.Element);
+}(UI$1.Element);
 
 
 
@@ -13868,7 +13447,7 @@ var Button = function (_UI$Primitive) {
         }
     }]);
     return Button;
-}(UI.Primitive(IconableInterface, "button"));
+}(UI$1.Primitive(IconableInterface, "button"));
 
 var StateButton = function (_Button) {
     inherits(StateButton, _Button);
@@ -13881,7 +13460,7 @@ var StateButton = function (_Button) {
     createClass(StateButton, [{
         key: "setOptions",
         value: function setOptions(options) {
-            options.state = this.options && this.options.state || options.state || UI.ActionStatus.DEFAULT;
+            options.state = this.options && this.options.state || options.state || UI$1.ActionStatus.DEFAULT;
 
             get(StateButton.prototype.__proto__ || Object.getPrototypeOf(StateButton.prototype), "setOptions", this).call(this, options);
 
@@ -13900,11 +13479,11 @@ var StateButton = function (_Button) {
         key: "setState",
         value: function setState(status) {
             this.options.state = status;
-            if (status === UI.ActionStatus.DEFAULT) {
+            if (status === UI$1.ActionStatus.DEFAULT) {
                 this.enable();
-            } else if (status === UI.ActionStatus.RUNNING) {
+            } else if (status === UI$1.ActionStatus.RUNNING) {
                 this.disable();
-            } else if (status === UI.ActionStatus.SUCCESS) {} else if (status === UI.ActionStatus.FAILED) {}
+            } else if (status === UI$1.ActionStatus.SUCCESS) {} else if (status === UI$1.ActionStatus.FAILED) {}
 
             this.redraw();
         }
@@ -13935,23 +13514,23 @@ var AjaxButton = function (_StateButton) {
         value: function ajaxCall(data) {
             var _this4 = this;
 
-            this.setState(UI.ActionStatus.RUNNING);
+            this.setState(UI$1.ActionStatus.RUNNING);
             Ajax.fetch(Object.assign({}, data, {
                 success: function success(successData) {
                     data.success(successData);
                     if (successData.error) {
-                        _this4.setState(UI.ActionStatus.FAILED);
+                        _this4.setState(UI$1.ActionStatus.FAILED);
                     } else {
-                        _this4.setState(UI.ActionStatus.SUCCESS);
+                        _this4.setState(UI$1.ActionStatus.SUCCESS);
                     }
                 },
                 error: function error(xhr, errmsg, err) {
                     data.error(xhr, errmsg, err);
-                    _this4.setState(UI.ActionStatus.FAILED);
+                    _this4.setState(UI$1.ActionStatus.FAILED);
                 },
                 complete: function complete() {
                     setTimeout(function () {
-                        _this4.setState(UI.ActionStatus.DEFAULT);
+                        _this4.setState(UI$1.ActionStatus.DEFAULT);
                     }, _this4.options.onCompete || 1000);
                 }
             }));
@@ -13972,7 +13551,7 @@ var ButtonGroup = function (_SimpleStyledElement) {
         key: "getDefaultOptions",
         value: function getDefaultOptions() {
             return {
-                orientation: UI.Orientation.HORIZONTAL
+                orientation: UI$1.Orientation.HORIZONTAL
             };
         }
     }, {
@@ -14011,7 +13590,7 @@ var RadioButtonGroup = function (_SimpleStyledElement2) {
             this.buttons = [];
 
             var _loop = function _loop(i) {
-                _this3.buttons.push(UI.createElement(Button, { key: i, onClick: function onClick() {
+                _this3.buttons.push(UI$1.createElement(Button, { key: i, onClick: function onClick() {
                         _this3.setIndex(i);
                     }, size: _this3.getSize(),
                     label: _this3.options.givenOptions[i].toString(), level: _this3.getLevel(),
@@ -14050,7 +13629,379 @@ var RadioButtonGroup = function (_SimpleStyledElement2) {
     return RadioButtonGroup;
 }(SimpleStyledElement);
 
+var CardPanel = function (_SimpleStyledElement) {
+    inherits(CardPanel, _SimpleStyledElement);
+
+    function CardPanel() {
+        classCallCheck(this, CardPanel);
+        return possibleConstructorReturn(this, (CardPanel.__proto__ || Object.getPrototypeOf(CardPanel)).apply(this, arguments));
+    }
+
+    createClass(CardPanel, [{
+        key: "extraNodeAttributes",
+        value: function extraNodeAttributes(attr) {
+            attr.addClass(GlobalStyle.CardPanel.DEFAULT.panel);
+            if (this.getLevel()) {
+                attr.addClass(GlobalStyle.CardPanel.Level(this.getLevel()).panel);
+            }
+            if (this.getSize()) {
+                attr.addClass(GlobalStyle.CardPanel.Size(this.getSize()).panel);
+            }
+        }
+    }, {
+        key: "getTitle",
+        value: function getTitle() {
+            return this.options.title;
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            var headingLevel = this.getLevel() ? GlobalStyle.CardPanel.Level(this.getLevel()).heading : "";
+
+            return [UI.createElement(
+                "div",
+                { className: GlobalStyle.CardPanel.DEFAULT.heading + " " + headingLevel },
+                this.getTitle()
+            ), UI.createElement(
+                "div",
+                { className: GlobalStyle.CardPanel.DEFAULT.body, style: this.options.bodyStyle },
+                this.getGivenChildren()
+            )];
+        }
+    }]);
+    return CardPanel;
+}(SimpleStyledElement);
+
 var _class$9;
+var _descriptor$3;
+var _descriptor2$3;
+var _class3$3;
+var _descriptor3$3;
+var _descriptor4$2;
+var _descriptor5$2;
+
+function _initDefineProp$4(target, property, descriptor, context) {
+    if (!descriptor) return;
+    Object.defineProperty(target, property, {
+        enumerable: descriptor.enumerable,
+        configurable: descriptor.configurable,
+        writable: descriptor.writable,
+        value: descriptor.initializer ? descriptor.initializer.call(context) : void 0
+    });
+}
+
+function _applyDecoratedDescriptor$4(target, property, decorators, descriptor, context) {
+    var desc = {};
+    Object['ke' + 'ys'](descriptor).forEach(function (key) {
+        desc[key] = descriptor[key];
+    });
+    desc.enumerable = !!desc.enumerable;
+    desc.configurable = !!desc.configurable;
+
+    if ('value' in desc || desc.initializer) {
+        desc.writable = true;
+    }
+
+    desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+        return decorator(target, property, desc) || desc;
+    }, desc);
+
+    if (context && desc.initializer !== void 0) {
+        desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+        desc.initializer = undefined;
+    }
+
+    if (desc.initializer === void 0) {
+        Object['define' + 'Property'](target, property, desc);
+        desc = null;
+    }
+
+    return desc;
+}
+
+var CollapsibleStyle = (_class$9 = function (_StyleSet) {
+    inherits(CollapsibleStyle, _StyleSet);
+
+    function CollapsibleStyle() {
+        var _ref;
+
+        var _temp, _this, _ret;
+
+        classCallCheck(this, CollapsibleStyle);
+
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
+
+        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = CollapsibleStyle.__proto__ || Object.getPrototypeOf(CollapsibleStyle)).call.apply(_ref, [this].concat(args))), _this), _this.transitionDuration = 0.4, _initDefineProp$4(_this, "collapsing", _descriptor$3, _this), _initDefineProp$4(_this, "collapsed", _descriptor2$3, _this), _temp), possibleConstructorReturn(_this, _ret);
+    }
+
+    return CollapsibleStyle;
+}(StyleSet), (_descriptor$3 = _applyDecoratedDescriptor$4(_class$9.prototype, "collapsing", [styleRule], {
+    enumerable: true,
+    initializer: function initializer() {
+        return {
+            marginTop: "0",
+            transitionTimingFunction: "ease",
+            transitionDuration: this.transitionDuration + "s",
+            transitionProperty: "margin-top",
+            transitionDelay: "-0.15s"
+        };
+    }
+}), _descriptor2$3 = _applyDecoratedDescriptor$4(_class$9.prototype, "collapsed", [styleRule], {
+    enumerable: true,
+    initializer: function initializer() {
+        return {
+            marginTop: "-100% !important",
+            transitionDelay: "0s !important"
+        };
+    }
+})), _class$9);
+var CollapsiblePanelStyle = (_class3$3 = function (_StyleSet2) {
+    inherits(CollapsiblePanelStyle, _StyleSet2);
+
+    function CollapsiblePanelStyle() {
+        var _ref2;
+
+        var _temp2, _this2, _ret2;
+
+        classCallCheck(this, CollapsiblePanelStyle);
+
+        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+            args[_key2] = arguments[_key2];
+        }
+
+        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = CollapsiblePanelStyle.__proto__ || Object.getPrototypeOf(CollapsiblePanelStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$4(_this2, "heading", _descriptor3$3, _this2), _initDefineProp$4(_this2, "button", _descriptor4$2, _this2), _initDefineProp$4(_this2, "collapsedButton", _descriptor5$2, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
+    }
+
+    return CollapsiblePanelStyle;
+}(StyleSet), (_descriptor3$3 = _applyDecoratedDescriptor$4(_class3$3.prototype, "heading", [styleRule], {
+    enumerable: true,
+    initializer: function initializer() {
+        return {
+            padding: "10px 15px",
+            borderBottom: "1px solid transparent",
+            borderTopLeftRadius: "3px",
+            borderTopRightRadius: "3px",
+            backgroundColor: "#f5f5f5"
+        };
+    }
+}), _descriptor4$2 = _applyDecoratedDescriptor$4(_class3$3.prototype, "button", [styleRule], {
+    enumerable: true,
+    initializer: function initializer() {
+        return {
+            marginTop: "0",
+            marginBottom: "0",
+            fontSize: "16px",
+            color: "inherit",
+            cursor: "pointer",
+            ":hover": {
+                color: "inherit"
+            },
+            ":before": {
+                fontFamily: "'Glyphicons Halflings'",
+                content: "\"\\e114\"",
+                color: "grey",
+                float: "left"
+            }
+        };
+    }
+}), _descriptor5$2 = _applyDecoratedDescriptor$4(_class3$3.prototype, "collapsedButton", [styleRule], {
+    enumerable: true,
+    initializer: function initializer() {
+        return {
+            ":before": {
+                content: "\"\\e080\" !important"
+            }
+        };
+    }
+})), _class3$3);
+
+function CollapsibleMixin(BaseClass) {
+    var _class, _temp;
+
+    var CollapsibleClass = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : CollapsibleStyle;
+    var CollapsibleElement = (_temp = _class = function (_BaseClass) {
+        inherits(CollapsibleElement, _BaseClass);
+
+        function CollapsibleElement() {
+            classCallCheck(this, CollapsibleElement);
+            return possibleConstructorReturn(this, (CollapsibleElement.__proto__ || Object.getPrototypeOf(CollapsibleElement)).apply(this, arguments));
+        }
+
+        createClass(CollapsibleElement, [{
+            key: "getDefaultOptions",
+            value: function getDefaultOptions() {
+                return {
+                    collapsed: true
+                };
+            }
+        }, {
+            key: "getCollapsibleStyleSet",
+            value: function getCollapsibleStyleSet() {
+                return this.options.collapsibleStyleSet || this.constructor.collapsibleStyleSet;
+            }
+        }, {
+            key: "expand",
+            value: function expand(panel) {
+                this.options.collapsed = false;
+                var collapsibleStyle = this.getCollapsibleStyleSet();
+                panel.addClass(collapsibleStyle.collapsing);
+                panel.removeClass("hidden");
+                setTimeout(function () {
+                    panel.removeClass(collapsibleStyle.collapsed);
+                });
+            }
+        }, {
+            key: "collapse",
+            value: function collapse(panel) {
+                var _this2 = this;
+
+                this.options.collapsed = true;
+                var collapsibleStyle = this.getCollapsibleStyleSet();
+                panel.addClass(collapsibleStyle.collapsing);
+                panel.addClass(collapsibleStyle.collapsed);
+                var transitionEndFunction = function transitionEndFunction() {
+                    if (_this2.options.collapsed) {
+                        panel.addClass("hidden");
+                    }
+                };
+                panel.addNodeListener("transitionend", transitionEndFunction);
+            }
+        }]);
+        return CollapsibleElement;
+    }(BaseClass), _class.collapsibleStyleSet = new CollapsibleClass(), _temp);
+
+
+    return CollapsibleElement;
+}
+
+var _class$8;
+var _temp$5;
+
+var CollapsiblePanel = (_temp$5 = _class$8 = function (_CollapsibleMixin) {
+    inherits(CollapsiblePanel, _CollapsibleMixin);
+
+    function CollapsiblePanel() {
+        classCallCheck(this, CollapsiblePanel);
+        return possibleConstructorReturn(this, (CollapsiblePanel.__proto__ || Object.getPrototypeOf(CollapsiblePanel)).apply(this, arguments));
+    }
+
+    createClass(CollapsiblePanel, [{
+        key: "getStyleSet",
+        value: function getStyleSet() {
+            return this.options.styleSet || this.constructor.styleSet;
+        }
+    }, {
+        key: "toggle",
+        value: function toggle() {
+            if (this.options.collapsed) {
+                this.expand();
+            } else {
+                this.collapse();
+            }
+        }
+    }, {
+        key: "expand",
+        value: function expand() {
+            get(CollapsiblePanel.prototype.__proto__ || Object.getPrototypeOf(CollapsiblePanel.prototype), "expand", this).call(this, this.contentArea);
+            this.toggleButton.removeClass(this.getStyleSet().collapsedButton);
+        }
+    }, {
+        key: "collapse",
+        value: function collapse() {
+            var _this2 = this;
+
+            get(CollapsiblePanel.prototype.__proto__ || Object.getPrototypeOf(CollapsiblePanel.prototype), "collapse", this).call(this, this.contentArea);
+            setTimeout(function () {
+                _this2.toggleButton.addClass(_this2.getStyleSet().collapsedButton);
+            }, this.getCollapsibleStyleSet().transitionDuration * 700);
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            var _this3 = this;
+
+            var autoHeightClass = "";
+            var collapsedPanelClass = "";
+            var collapsedHeadingClass = "";
+            var hiddenClass = "";
+            var contentStyle = {};
+
+            if (this.options.autoHeight) {
+                autoHeightClass = "auto-height ";
+            }
+            if (this.options.collapsed) {
+                collapsedHeadingClass = this.getStyleSet().collapsedButton;
+                collapsedPanelClass = this.getCollapsibleStyleSet().collapsed;
+                hiddenClass = "hidden";
+            }
+            if (!this.options.noPadding) {
+                contentStyle = {
+                    padding: "8px 8px"
+                };
+            }
+
+            return [UI$1.createElement(
+                "div",
+                { className: this.getStyleSet().heading },
+                UI$1.createElement(
+                    "a",
+                    { ref: "toggleButton", className: this.getStyleSet().button + " " + collapsedHeadingClass,
+                        onClick: function onClick() {
+                            return _this3.toggle();
+                        } },
+                    this.getTitle()
+                )
+            ), UI$1.createElement(
+                "div",
+                { style: { overflow: "hidden" } },
+                UI$1.createElement(
+                    "div",
+                    { ref: "contentArea", className: autoHeightClass + " " + collapsedPanelClass + " " + hiddenClass,
+                        style: contentStyle },
+                    this.getGivenChildren()
+                )
+            )];
+        }
+    }]);
+    return CollapsiblePanel;
+}(CollapsibleMixin(CardPanel)), _class$8.styleSet = new CollapsiblePanelStyle(), _temp$5);
+
+var DelayedCollapsiblePanel = function (_CollapsiblePanel) {
+    inherits(DelayedCollapsiblePanel, _CollapsiblePanel);
+
+    function DelayedCollapsiblePanel() {
+        classCallCheck(this, DelayedCollapsiblePanel);
+        return possibleConstructorReturn(this, (DelayedCollapsiblePanel.__proto__ || Object.getPrototypeOf(DelayedCollapsiblePanel)).apply(this, arguments));
+    }
+
+    createClass(DelayedCollapsiblePanel, [{
+        key: "toggle",
+        value: function toggle() {
+            if (!this._haveExpanded) {
+                this._haveExpanded = true;
+                UI$1.renderingStack.push(this);
+                this.contentArea.options.children = this.getGivenChildren();
+                UI$1.renderingStack.pop();
+                this.contentArea.redraw();
+                this.delayedMount();
+            }
+            get(DelayedCollapsiblePanel.prototype.__proto__ || Object.getPrototypeOf(DelayedCollapsiblePanel.prototype), "toggle", this).call(this);
+        }
+    }, {
+        key: "getGivenChildren",
+        value: function getGivenChildren() {
+            if (!this._haveExpanded) {
+                return [];
+            }
+            return this.getDelayedChildren();
+        }
+    }]);
+    return DelayedCollapsiblePanel;
+}(CollapsiblePanel);
+
+var _class$10;
 var _descriptor$4;
 var _descriptor2$4;
 var _descriptor3$4;
@@ -14096,7 +14047,7 @@ function _applyDecoratedDescriptor$5(target, property, decorators, descriptor, c
 }
 
 // This whole file needs a refactoring, it's awfully written
-var SectionDividerStyleSet = (_class$9 = function (_StyleSet) {
+var SectionDividerStyleSet = (_class$10 = function (_StyleSet) {
     inherits(SectionDividerStyleSet, _StyleSet);
 
     function SectionDividerStyleSet() {
@@ -14114,7 +14065,7 @@ var SectionDividerStyleSet = (_class$9 = function (_StyleSet) {
     }
 
     return SectionDividerStyleSet;
-}(StyleSet), (_descriptor$4 = _applyDecoratedDescriptor$5(_class$9.prototype, "horizontalDivider", [styleRule], {
+}(StyleSet), (_descriptor$4 = _applyDecoratedDescriptor$5(_class$10.prototype, "horizontalDivider", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14129,7 +14080,7 @@ var SectionDividerStyleSet = (_class$9 = function (_StyleSet) {
             marginLeft: -this.barPadding + "px"
         };
     }
-}), _descriptor2$4 = _applyDecoratedDescriptor$5(_class$9.prototype, "verticalDivider", [styleRule], {
+}), _descriptor2$4 = _applyDecoratedDescriptor$5(_class$10.prototype, "verticalDivider", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14144,7 +14095,7 @@ var SectionDividerStyleSet = (_class$9 = function (_StyleSet) {
             marginTop: -this.barPadding + "px"
         };
     }
-}), _descriptor3$4 = _applyDecoratedDescriptor$5(_class$9.prototype, "horizontalSection", [styleRule], {
+}), _descriptor3$4 = _applyDecoratedDescriptor$5(_class$10.prototype, "horizontalSection", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14169,7 +14120,7 @@ var SectionDividerStyleSet = (_class$9 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor4$3 = _applyDecoratedDescriptor$5(_class$9.prototype, "verticalSection", [styleRule], {
+}), _descriptor4$3 = _applyDecoratedDescriptor$5(_class$10.prototype, "verticalSection", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14190,7 +14141,7 @@ var SectionDividerStyleSet = (_class$9 = function (_StyleSet) {
             }
         };
     }
-})), _class$9);
+})), _class$10);
 
 
 var sectionDividerStyle = new SectionDividerStyleSet();
@@ -14205,22 +14156,22 @@ var DividerBar = function (_UI$Element) {
 
         var _this2 = possibleConstructorReturn(this, (DividerBar.__proto__ || Object.getPrototypeOf(DividerBar)).call(this, options));
 
-        _this2.orientation = _this2.options.orientation || UI.Orientation.HORIZONTAL;
+        _this2.orientation = _this2.options.orientation || UI$1.Orientation.HORIZONTAL;
         return _this2;
     }
 
     createClass(DividerBar, [{
         key: "extraNodeAttributes",
         value: function extraNodeAttributes(attr) {
-            if (this.orientation === UI.Orientation.VERTICAL) {
+            if (this.orientation === UI$1.Orientation.VERTICAL) {
                 attr.addClass(sectionDividerStyle.verticalDivider);
-            } else if (this.orientation === UI.Orientation.HORIZONTAL) {
+            } else if (this.orientation === UI$1.Orientation.HORIZONTAL) {
                 attr.addClass(sectionDividerStyle.horizontalDivider);
             }
         }
     }]);
     return DividerBar;
-}(UI.Element);
+}(UI$1.Element);
 
 
 
@@ -14245,7 +14196,7 @@ var SectionDivider$$1 = function (_UI$Element2) {
     createClass(SectionDivider$$1, [{
         key: "extraNodeAttributes",
         value: function extraNodeAttributes(attr) {
-            if (this.getOrientation() === UI.Orientation.VERTICAL) {
+            if (this.getOrientation() === UI$1.Orientation.VERTICAL) {
                 attr.addClass(sectionDividerStyle.verticalSection);
             } else {
                 attr.addClass(sectionDividerStyle.horizontalSection);
@@ -14254,12 +14205,12 @@ var SectionDivider$$1 = function (_UI$Element2) {
     }, {
         key: "getOrientation",
         value: function getOrientation() {
-            return this.options.orientation || UI.Orientation.VERTICAL;
+            return this.options.orientation || UI$1.Orientation.VERTICAL;
         }
     }, {
         key: "getDimension",
         value: function getDimension(element) {
-            if (this.getOrientation() === UI.Orientation.HORIZONTAL) {
+            if (this.getOrientation() === UI$1.Orientation.HORIZONTAL) {
                 return element.getWidth();
             } else {
                 return element.getHeight();
@@ -14268,7 +14219,7 @@ var SectionDivider$$1 = function (_UI$Element2) {
     }, {
         key: "setDimension",
         value: function setDimension(element, size) {
-            if (this.getOrientation() === UI.Orientation.HORIZONTAL) {
+            if (this.getOrientation() === UI$1.Orientation.HORIZONTAL) {
                 element.setWidth(size);
             } else {
                 element.setHeight(size);
@@ -14277,9 +14228,9 @@ var SectionDivider$$1 = function (_UI$Element2) {
     }, {
         key: "getMinDimension",
         value: function getMinDimension(element) {
-            if (this.getOrientation() === UI.Orientation.HORIZONTAL && element.options.hasOwnProperty("minWidth")) {
+            if (this.getOrientation() === UI$1.Orientation.HORIZONTAL && element.options.hasOwnProperty("minWidth")) {
                 return element.options.minWidth;
-            } else if (this.getOrientation() === UI.Orientation.VERTICAL && element.options.hasOwnProperty("minHeight")) {
+            } else if (this.getOrientation() === UI$1.Orientation.VERTICAL && element.options.hasOwnProperty("minHeight")) {
                 return element.options.minHeight;
             } else {
                 return 100 / this.children.length / 4;
@@ -14471,9 +14422,9 @@ var SectionDivider$$1 = function (_UI$Element2) {
                     var updateDimension = function updateDimension(event) {
                         var delta = void 0;
 
-                        if (_this4.getOrientation() === UI.Orientation.HORIZONTAL) {
+                        if (_this4.getOrientation() === UI$1.Orientation.HORIZONTAL) {
                             delta = Device.getEventX(event) - currentX;
-                        } else if (_this4.getOrientation() === UI.Orientation.VERTICAL) {
+                        } else if (_this4.getOrientation() === UI$1.Orientation.VERTICAL) {
                             delta = Device.getEventY(event) - currentY;
                         }
 
@@ -14552,7 +14503,7 @@ var SectionDivider$$1 = function (_UI$Element2) {
                             }
                             hiddenClass = "hidden";
                         }
-                        children.push(UI.createElement(DividerBar, { className: hiddenClass, ref: "divider" + this.dividers, orientation: this.getOrientation() }));
+                        children.push(UI$1.createElement(DividerBar, { className: hiddenClass, ref: "divider" + this.dividers, orientation: this.getOrientation() }));
                         this.dividers += 1;
                     }
                     children.push(child);
@@ -14579,7 +14530,7 @@ var SectionDivider$$1 = function (_UI$Element2) {
         }
     }]);
     return SectionDivider$$1;
-}(UI.Element);
+}(UI$1.Element);
 
 // Contains classes to abstract some generic Font Awesome usecases.
 var FAIcon = function (_UI$Primitive) {
@@ -14612,7 +14563,7 @@ var FAIcon = function (_UI$Primitive) {
         }
     }]);
     return FAIcon;
-}(UI.Primitive("i"));
+}(UI$1.Primitive("i"));
 
 var FACollapseIcon = function (_FAIcon) {
     inherits(FACollapseIcon, _FAIcon);
@@ -14657,9 +14608,9 @@ var FASortIcon = function (_FAIcon2) {
     createClass(FASortIcon, [{
         key: "getIcon",
         value: function getIcon() {
-            if (this.options.direction === UI.Direction.UP) {
+            if (this.options.direction === UI$1.Direction.UP) {
                 return "sort-asc";
-            } else if (this.options.direction === UI.Direction.DOWN) {
+            } else if (this.options.direction === UI$1.Direction.DOWN) {
                 return "sort-desc";
             } else {
                 return "sort";
@@ -14675,7 +14626,7 @@ var FASortIcon = function (_FAIcon2) {
     return FASortIcon;
 }(FAIcon);
 
-var _class$10;
+var _class$11;
 var _descriptor$5;
 var _descriptor2$5;
 var _descriptor3$5;
@@ -14725,7 +14676,7 @@ function _applyDecoratedDescriptor$6(target, property, decorators, descriptor, c
     return desc;
 }
 
-var AccordionStyle$$1 = (_class$10 = function (_StyleSet) {
+var AccordionStyle$$1 = (_class$11 = function (_StyleSet) {
     inherits(AccordionStyle$$1, _StyleSet);
 
     function AccordionStyle$$1() {
@@ -14743,7 +14694,7 @@ var AccordionStyle$$1 = (_class$10 = function (_StyleSet) {
     }
 
     return AccordionStyle$$1;
-}(StyleSet), (_descriptor$5 = _applyDecoratedDescriptor$6(_class$10.prototype, "accordion", [styleRule], {
+}(StyleSet), (_descriptor$5 = _applyDecoratedDescriptor$6(_class$11.prototype, "accordion", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14762,7 +14713,7 @@ var AccordionStyle$$1 = (_class$10 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor2$5 = _applyDecoratedDescriptor$6(_class$10.prototype, "noTextSelection", [styleRule], {
+}), _descriptor2$5 = _applyDecoratedDescriptor$6(_class$11.prototype, "noTextSelection", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14773,7 +14724,7 @@ var AccordionStyle$$1 = (_class$10 = function (_StyleSet) {
             userSelect: "none"
         };
     }
-}), _descriptor3$5 = _applyDecoratedDescriptor$6(_class$10.prototype, "grab", [styleRule], {
+}), _descriptor3$5 = _applyDecoratedDescriptor$6(_class$11.prototype, "grab", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         var _ref2;
@@ -14782,7 +14733,7 @@ var AccordionStyle$$1 = (_class$10 = function (_StyleSet) {
             cursor: "grab"
         }, defineProperty(_ref2, "cursor", "-moz-grab"), defineProperty(_ref2, "cursor", "-webkit-grab"), _ref2;
     }
-}), _descriptor4$4 = _applyDecoratedDescriptor$6(_class$10.prototype, "grabbing", [styleRule], {
+}), _descriptor4$4 = _applyDecoratedDescriptor$6(_class$11.prototype, "grabbing", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         var _ref3;
@@ -14791,7 +14742,7 @@ var AccordionStyle$$1 = (_class$10 = function (_StyleSet) {
             cursor: "grabbing"
         }, defineProperty(_ref3, "cursor", "-moz-grabbing"), defineProperty(_ref3, "cursor", "-webkit-grabbing"), _ref3;
     }
-}), _descriptor5$3 = _applyDecoratedDescriptor$6(_class$10.prototype, "collapseIcon", [styleRule], {
+}), _descriptor5$3 = _applyDecoratedDescriptor$6(_class$11.prototype, "collapseIcon", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14802,7 +14753,7 @@ var AccordionStyle$$1 = (_class$10 = function (_StyleSet) {
             marginRight: "0.2em"
         };
     }
-})), _class$10);
+})), _class$11);
 var AccordionDivider = (_temp2 = _class3$4 = function (_UI$Element) {
     inherits(AccordionDivider, _UI$Element);
 
@@ -14853,7 +14804,7 @@ var AccordionDivider = (_temp2 = _class3$4 = function (_UI$Element) {
     }, {
         key: "render",
         value: function render() {
-            return [UI.createElement(FACollapseIcon, { ref: "collapseIcon", collapsed: false, className: this.getStyleSet().collapseIcon }), this.options.children];
+            return [UI$1.createElement(FACollapseIcon, { ref: "collapseIcon", collapsed: false, className: this.getStyleSet().collapseIcon }), this.options.children];
         }
     }, {
         key: "setCollapsed",
@@ -14880,7 +14831,7 @@ var AccordionDivider = (_temp2 = _class3$4 = function (_UI$Element) {
         }
     }]);
     return AccordionDivider;
-}(UI.Element), _class3$4.styleSet = AccordionStyle$$1.getInstance(), _temp2);
+}(UI$1.Element), _class3$4.styleSet = AccordionStyle$$1.getInstance(), _temp2);
 var Accordion$$1 = (_temp3$1 = _class4 = function (_UI$Element2) {
     inherits(Accordion$$1, _UI$Element2);
 
@@ -14914,7 +14865,7 @@ var Accordion$$1 = (_temp3$1 = _class4 = function (_UI$Element2) {
                     var child = _step.value;
 
                     var title = child.getTitle ? child.getTitle() : child.options.title ? child.options.title : "";
-                    var divider = UI.createElement(
+                    var divider = UI$1.createElement(
                         AccordionDivider,
                         null,
                         title
@@ -15217,9 +15168,9 @@ var Accordion$$1 = (_temp3$1 = _class4 = function (_UI$Element2) {
         }
     }]);
     return Accordion$$1;
-}(UI.Element), _class4.styleSet = AccordionStyle$$1.getInstance(), _temp3$1);
+}(UI$1.Element), _class4.styleSet = AccordionStyle$$1.getInstance(), _temp3$1);
 
-var _class$11;
+var _class$12;
 var _descriptor$6;
 var _descriptor2$6;
 var _descriptor3$6;
@@ -15266,7 +15217,7 @@ function _applyDecoratedDescriptor$7(target, property, decorators, descriptor, c
     return desc;
 }
 
-var CarouselStyle$$1 = (_class$11 = function (_StyleSet) {
+var CarouselStyle$$1 = (_class$12 = function (_StyleSet) {
     inherits(CarouselStyle$$1, _StyleSet);
 
     function CarouselStyle$$1() {
@@ -15284,14 +15235,14 @@ var CarouselStyle$$1 = (_class$11 = function (_StyleSet) {
     }
 
     return CarouselStyle$$1;
-}(StyleSet), (_descriptor$6 = _applyDecoratedDescriptor$7(_class$11.prototype, "carousel", [styleRule], {
+}(StyleSet), (_descriptor$6 = _applyDecoratedDescriptor$7(_class$12.prototype, "carousel", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             overflow: "hidden"
         };
     }
-}), _descriptor2$6 = _applyDecoratedDescriptor$7(_class$11.prototype, "container", [styleRule], {
+}), _descriptor2$6 = _applyDecoratedDescriptor$7(_class$12.prototype, "container", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -15309,7 +15260,7 @@ var CarouselStyle$$1 = (_class$11 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor3$6 = _applyDecoratedDescriptor$7(_class$11.prototype, "navigator", [styleRule], {
+}), _descriptor3$6 = _applyDecoratedDescriptor$7(_class$12.prototype, "navigator", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -15318,7 +15269,7 @@ var CarouselStyle$$1 = (_class$11 = function (_StyleSet) {
             display: "flex"
         };
     }
-}), _descriptor4$5 = _applyDecoratedDescriptor$7(_class$11.prototype, "navigatorIcon", [styleRule], {
+}), _descriptor4$5 = _applyDecoratedDescriptor$7(_class$12.prototype, "navigatorIcon", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -15335,7 +15286,7 @@ var CarouselStyle$$1 = (_class$11 = function (_StyleSet) {
             }
         };
     }
-})), _class$11);
+})), _class$12);
 
 var CarouselNavigator = function (_UI$Element) {
     inherits(CarouselNavigator, _UI$Element);
@@ -15360,15 +15311,15 @@ var CarouselNavigator = function (_UI$Element) {
         value: function render() {
             var _this3 = this;
 
-            return [UI.createElement(FAIcon, { icon: "angle-left", className: this.getStyleSet().navigatorIcon, onClick: function onClick() {
+            return [UI$1.createElement(FAIcon, { icon: "angle-left", className: this.getStyleSet().navigatorIcon, onClick: function onClick() {
                     _this3.parent.dispatch("previousPage");
-                } }), UI.createElement(FAIcon, { icon: "angle-right", className: this.getStyleSet().navigatorIcon, onClick: function onClick() {
+                } }), UI$1.createElement(FAIcon, { icon: "angle-right", className: this.getStyleSet().navigatorIcon, onClick: function onClick() {
                     _this3.parent.dispatch("nextPage");
                 } })];
         }
     }]);
     return CarouselNavigator;
-}(UI.Element);
+}(UI$1.Element);
 
 var Carousel$$1 = (_temp2$1 = _class3$5 = function (_UI$Element2) {
     inherits(Carousel$$1, _UI$Element2);
@@ -15420,10 +15371,10 @@ var Carousel$$1 = (_temp2$1 = _class3$5 = function (_UI$Element2) {
                 }
             }
 
-            return [UI.createElement(CarouselNavigator, { className: this.options.children.length > 1 ? "" : "hidden", styleSet: this.getStyleSet() }), UI.createElement(
+            return [UI$1.createElement(CarouselNavigator, { className: this.options.children.length > 1 ? "" : "hidden", styleSet: this.getStyleSet() }), UI$1.createElement(
                 "div",
                 { className: this.getStyleSet().container },
-                UI.createElement("div", { ref: "pusher", style: { marginLeft: -this.activeIndex * 100 + "%" } }),
+                UI$1.createElement("div", { ref: "pusher", style: { marginLeft: -this.activeIndex * 100 + "%" } }),
                 this.options.children
             )];
         }
@@ -15458,13 +15409,13 @@ var Carousel$$1 = (_temp2$1 = _class3$5 = function (_UI$Element2) {
     }, {
         key: "getOrientation",
         value: function getOrientation() {
-            return this.options.orientation || UI.Orientation.VERTICAL;
+            return this.options.orientation || UI$1.Orientation.VERTICAL;
         }
     }]);
     return Carousel$$1;
-}(UI.Element), _class3$5.styleSet = CarouselStyle$$1.getInstance(), _temp2$1);
+}(UI$1.Element), _class3$5.styleSet = CarouselStyle$$1.getInstance(), _temp2$1);
 
-var _class$13;
+var _class$14;
 var _descriptor$7;
 var _descriptor2$7;
 var _class3$6;
@@ -15510,7 +15461,7 @@ function _applyDecoratedDescriptor$8(target, property, decorators, descriptor, c
     return desc;
 }
 
-var TableStyle = (_class$13 = function (_StyleSet) {
+var TableStyle = (_class$14 = function (_StyleSet) {
     inherits(TableStyle, _StyleSet);
 
     function TableStyle() {
@@ -15536,7 +15487,7 @@ var TableStyle = (_class$13 = function (_StyleSet) {
     }
 
     return TableStyle;
-}(StyleSet), (_descriptor$7 = _applyDecoratedDescriptor$8(_class$13.prototype, "table", [styleRule], {
+}(StyleSet), (_descriptor$7 = _applyDecoratedDescriptor$8(_class$14.prototype, "table", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -15550,7 +15501,7 @@ var TableStyle = (_class$13 = function (_StyleSet) {
             ">*>thead>*>*": this.theadCellStyle
         };
     }
-}), _descriptor2$7 = _applyDecoratedDescriptor$8(_class$13.prototype, "tableStripped", [styleRule], {
+}), _descriptor2$7 = _applyDecoratedDescriptor$8(_class$14.prototype, "tableStripped", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -15559,7 +15510,7 @@ var TableStyle = (_class$13 = function (_StyleSet) {
             }
         };
     }
-})), _class$13);
+})), _class$14);
 var SortableTableStyle = (_class3$6 = function (_TableStyle) {
     inherits(SortableTableStyle, _TableStyle);
 
@@ -15598,8 +15549,8 @@ var SortableTableStyle = (_class3$6 = function (_TableStyle) {
     }
 })), _class3$6);
 
-var _class$12;
-var _temp$5;
+var _class$13;
+var _temp$6;
 
 // TODO: the whole table architecture probably needs a rethinking
 
@@ -15646,7 +15597,7 @@ var TableRow = function (_UI$Primitive) {
     }, {
         key: "renderEntryCell",
         value: function renderEntryCell(column) {
-            return UI.createElement(
+            return UI$1.createElement(
                 "td",
                 { style: column.cellStyle, key: column.id },
                 column.value(this.options.entry, this.options.index)
@@ -15654,11 +15605,11 @@ var TableRow = function (_UI$Primitive) {
         }
     }]);
     return TableRow;
-}(UI.Primitive("tr"));
+}(UI$1.Primitive("tr"));
 
 
 
-var Table = (_temp$5 = _class$12 = function (_UI$Primitive2) {
+var Table = (_temp$6 = _class$13 = function (_UI$Primitive2) {
     inherits(Table, _UI$Primitive2);
 
     function Table() {
@@ -15700,11 +15651,11 @@ var Table = (_temp$5 = _class$12 = function (_UI$Primitive2) {
     }, {
         key: "render",
         value: function render() {
-            return [UI.createElement(
+            return [UI$1.createElement(
                 "thead",
                 null,
                 this.renderTableHead()
-            ), UI.createElement(
+            ), UI$1.createElement(
                 "tbody",
                 null,
                 this.renderTableBody()
@@ -15713,7 +15664,7 @@ var Table = (_temp$5 = _class$12 = function (_UI$Primitive2) {
     }, {
         key: "renderTableHead",
         value: function renderTableHead() {
-            return UI.createElement(
+            return UI$1.createElement(
                 "tr",
                 null,
                 this.columns.map(this.renderHeaderCell, this)
@@ -15733,7 +15684,7 @@ var Table = (_temp$5 = _class$12 = function (_UI$Primitive2) {
             for (var i = 0; i < entries.length; i += 1) {
                 var entry = entries[i];
                 var RowClass = this.getRowClass(entry);
-                this.rows.push(UI.createElement(RowClass, _extends({ key: this.getEntryKey(entry, i), index: i }, this.getRowOptions(entry), { parent: this })));
+                this.rows.push(UI$1.createElement(RowClass, _extends({ key: this.getEntryKey(entry, i), index: i }, this.getRowOptions(entry), { parent: this })));
             }
             return this.rows;
         }
@@ -15743,7 +15694,7 @@ var Table = (_temp$5 = _class$12 = function (_UI$Primitive2) {
     }, {
         key: "renderHeaderCell",
         value: function renderHeaderCell(column) {
-            return UI.createElement(
+            return UI$1.createElement(
                 "th",
                 { style: column.headerStyle, ref: "columnHeader" + column.id },
                 this.renderColumnHeader(column)
@@ -15783,9 +15734,9 @@ var Table = (_temp$5 = _class$12 = function (_UI$Primitive2) {
         }
     }]);
     return Table;
-}(UI.Primitive("table")), _class$12.styleSet = TableStyle.getInstance(), _temp$5);
+}(UI$1.Primitive("table")), _class$13.styleSet = TableStyle.getInstance(), _temp$6);
 
-var _class$14;
+var _class$15;
 var _descriptor$8;
 var _descriptor2$8;
 var _descriptor3$8;
@@ -15845,7 +15796,7 @@ var TableRowInCollapsibleTable = function (_TableRow) {
     }, {
         key: "render",
         value: function render() {
-            return UI.createElement(
+            return UI$1.createElement(
                 "tr",
                 null,
                 get(TableRowInCollapsibleTable.prototype.__proto__ || Object.getPrototypeOf(TableRowInCollapsibleTable.prototype), "render", this).call(this)
@@ -15855,7 +15806,7 @@ var TableRowInCollapsibleTable = function (_TableRow) {
     return TableRowInCollapsibleTable;
 }(TableRow);
 
-var CollapsibleTableStyle = (_class$14 = function (_StyleSet) {
+var CollapsibleTableStyle = (_class$15 = function (_StyleSet) {
     inherits(CollapsibleTableStyle, _StyleSet);
 
     function CollapsibleTableStyle() {
@@ -15873,7 +15824,7 @@ var CollapsibleTableStyle = (_class$14 = function (_StyleSet) {
     }
 
     return CollapsibleTableStyle;
-}(StyleSet), (_descriptor$8 = _applyDecoratedDescriptor$9(_class$14.prototype, "button", [styleRule], {
+}(StyleSet), (_descriptor$8 = _applyDecoratedDescriptor$9(_class$15.prototype, "button", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -15893,7 +15844,7 @@ var CollapsibleTableStyle = (_class$14 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor2$8 = _applyDecoratedDescriptor$9(_class$14.prototype, "collapsedButton", [styleRule], {
+}), _descriptor2$8 = _applyDecoratedDescriptor$9(_class$15.prototype, "collapsedButton", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -15902,7 +15853,7 @@ var CollapsibleTableStyle = (_class$14 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor3$8 = _applyDecoratedDescriptor$9(_class$14.prototype, "heading", [styleRule], {
+}), _descriptor3$8 = _applyDecoratedDescriptor$9(_class$15.prototype, "heading", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -15910,7 +15861,7 @@ var CollapsibleTableStyle = (_class$14 = function (_StyleSet) {
             backgroundColor: "initial !important"
         };
     }
-})), _class$14);
+})), _class$15);
 
 
 var collapsibleTableStyle = new CollapsibleTableStyle();
@@ -15995,18 +15946,18 @@ var CollapsibleTableRow = function (_CollapsibleMixin) {
     }, {
         key: "render",
         value: function render() {
-            return [UI.createElement(
+            return [UI$1.createElement(
                 "tr",
                 { className: collapsibleTableStyle.heading },
                 get(CollapsibleTableRow.prototype.__proto__ || Object.getPrototypeOf(CollapsibleTableRow.prototype), "render", this).call(this)
-            ), UI.createElement(
+            ), UI$1.createElement(
                 "tr",
                 null,
-                UI.createElement(
+                UI$1.createElement(
                     "td",
                     { style: { overflow: "hidden", padding: "0px" },
                         colspan: this.options.columns.length },
-                    UI.createElement(
+                    UI$1.createElement(
                         "div",
                         { ref: "contentArea",
                             className: this.getCollapsibleStyleSet().collapsed + " hidden" },
@@ -16040,7 +15991,7 @@ function CollapsibleTableInterface(BaseTableClass) {
         }, {
             key: "render",
             value: function render() {
-                return [UI.createElement(
+                return [UI$1.createElement(
                     "thead",
                     null,
                     this.renderTableHead()
@@ -16049,7 +16000,7 @@ function CollapsibleTableInterface(BaseTableClass) {
         }, {
             key: "getRowClass",
             value: function getRowClass() {
-                return UI.CollapsibleTableRow;
+                return UI$1.CollapsibleTableRow;
             }
         }, {
             key: "setColumns",
@@ -16061,10 +16012,10 @@ function CollapsibleTableInterface(BaseTableClass) {
                         var rowClass = _this7.getRowClass(entry);
                         // TODO: Fix it lad!
                         if (rowClass === CollapsibleTableRow || rowClass.prototype instanceof CollapsibleTableRow) {
-                            return UI.createElement("a", { ref: "toggleButton",
+                            return UI$1.createElement("a", { ref: "toggleButton",
                                 className: collapsibleTableStyle.button + " " + collapsibleTableStyle.collapsedButton });
                         }
-                        return UI.createElement("a", { ref: "toggleButton" });
+                        return UI$1.createElement("a", { ref: "toggleButton" });
                     },
                     cellStyle: {
                         width: "1%",
@@ -16149,16 +16100,16 @@ function SortableTableInterface(BaseTableClass) {
         }, {
             key: "renderColumnHeader",
             value: function renderColumnHeader(column) {
-                var sortIcon = UI.createElement(SortIconClass, { className: this.getStyleSet().sortIcon });
+                var sortIcon = UI$1.createElement(SortIconClass, { className: this.getStyleSet().sortIcon });
                 if (this.sortBy === column) {
                     if (this.sortDescending) {
-                        sortIcon = UI.createElement(SortIconClass, { className: this.getStyleSet().sortIcon, direction: UI.Direction.DOWN });
+                        sortIcon = UI$1.createElement(SortIconClass, { className: this.getStyleSet().sortIcon, direction: UI$1.Direction.DOWN });
                     } else {
-                        sortIcon = UI.createElement(SortIconClass, { className: this.getStyleSet().sortIcon, direction: UI.Direction.UP });
+                        sortIcon = UI$1.createElement(SortIconClass, { className: this.getStyleSet().sortIcon, direction: UI$1.Direction.UP });
                     }
                 }
 
-                return UI.createElement(
+                return UI$1.createElement(
                     "div",
                     { style: { position: "relative" } },
                     get(SortableTable.prototype.__proto__ || Object.getPrototypeOf(SortableTable.prototype), "renderColumnHeader", this).call(this, column),
@@ -16243,7 +16194,7 @@ function SortableTableInterface(BaseTableClass) {
 
 var SortableTable = SortableTableInterface(Table);
 
-var _class$15;
+var _class$16;
 var _descriptor$9;
 var _descriptor2$9;
 var _class3$7;
@@ -16252,10 +16203,10 @@ var _class4$1;
 var _descriptor3$9;
 var _descriptor4$7;
 var _descriptor5$4;
-var _descriptor6$3;
-var _descriptor7$3;
+var _descriptor6$2;
+var _descriptor7$2;
 var _class6$1;
-var _temp4$2;
+var _temp4$1;
 
 function _initDefineProp$10(target, property, descriptor, context) {
     if (!descriptor) return;
@@ -16297,7 +16248,7 @@ function _applyDecoratedDescriptor$10(target, property, decorators, descriptor, 
 }
 
 // TODO: need to redo with a StyleSheet
-var FloatingWindowStyle = (_class$15 = function (_StyleSet) {
+var FloatingWindowStyle = (_class$16 = function (_StyleSet) {
     inherits(FloatingWindowStyle, _StyleSet);
 
     function FloatingWindowStyle() {
@@ -16315,7 +16266,7 @@ var FloatingWindowStyle = (_class$15 = function (_StyleSet) {
     }
 
     return FloatingWindowStyle;
-}(StyleSet), (_descriptor$9 = _applyDecoratedDescriptor$10(_class$15.prototype, "hiddenAnimated", [styleRule], {
+}(StyleSet), (_descriptor$9 = _applyDecoratedDescriptor$10(_class$16.prototype, "hiddenAnimated", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -16324,7 +16275,7 @@ var FloatingWindowStyle = (_class$15 = function (_StyleSet) {
             transition: "opacity 0.1s linear"
         };
     }
-}), _descriptor2$9 = _applyDecoratedDescriptor$10(_class$15.prototype, "visibleAnimated", [styleRule], {
+}), _descriptor2$9 = _applyDecoratedDescriptor$10(_class$16.prototype, "visibleAnimated", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -16333,7 +16284,7 @@ var FloatingWindowStyle = (_class$15 = function (_StyleSet) {
             transition: "opacity 0.1s linear"
         };
     }
-})), _class$15);
+})), _class$16);
 var FloatingWindow = (_temp2$2 = _class3$7 = function (_UI$Element) {
     inherits(FloatingWindow, _UI$Element);
 
@@ -16424,7 +16375,7 @@ var FloatingWindow = (_temp2$2 = _class3$7 = function (_UI$Element) {
         }
     }]);
     return FloatingWindow;
-}(UI.Element), _class3$7.styleSet = FloatingWindowStyle.getInstance(), _temp2$2);
+}(UI$1.Element), _class3$7.styleSet = FloatingWindowStyle.getInstance(), _temp2$2);
 
 var VolatileFloatingWindow = function (_FloatingWindow) {
     inherits(VolatileFloatingWindow, _FloatingWindow);
@@ -16509,7 +16460,7 @@ var ModalStyle = (_class4$1 = function (_FloatingWindowStyle) {
             args[_key2] = arguments[_key2];
         }
 
-        return _ret2 = (_temp3 = (_this8 = possibleConstructorReturn(this, (_ref2 = ModalStyle.__proto__ || Object.getPrototypeOf(ModalStyle)).call.apply(_ref2, [this].concat(args))), _this8), _initDefineProp$10(_this8, "container", _descriptor3$9, _this8), _initDefineProp$10(_this8, "background", _descriptor4$7, _this8), _initDefineProp$10(_this8, "header", _descriptor5$4, _this8), _initDefineProp$10(_this8, "body", _descriptor6$3, _this8), _initDefineProp$10(_this8, "footer", _descriptor7$3, _this8), _temp3), possibleConstructorReturn(_this8, _ret2);
+        return _ret2 = (_temp3 = (_this8 = possibleConstructorReturn(this, (_ref2 = ModalStyle.__proto__ || Object.getPrototypeOf(ModalStyle)).call.apply(_ref2, [this].concat(args))), _this8), _initDefineProp$10(_this8, "container", _descriptor3$9, _this8), _initDefineProp$10(_this8, "background", _descriptor4$7, _this8), _initDefineProp$10(_this8, "header", _descriptor5$4, _this8), _initDefineProp$10(_this8, "body", _descriptor6$2, _this8), _initDefineProp$10(_this8, "footer", _descriptor7$2, _this8), _temp3), possibleConstructorReturn(_this8, _ret2);
     }
 
     return ModalStyle;
@@ -16545,7 +16496,7 @@ var ModalStyle = (_class4$1 = function (_FloatingWindowStyle) {
             borderBottom: "1px solid #e5e5e5"
         };
     }
-}), _descriptor6$3 = _applyDecoratedDescriptor$10(_class4$1.prototype, "body", [styleRule], {
+}), _descriptor6$2 = _applyDecoratedDescriptor$10(_class4$1.prototype, "body", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -16553,7 +16504,7 @@ var ModalStyle = (_class4$1 = function (_FloatingWindowStyle) {
             padding: "15px"
         };
     }
-}), _descriptor7$3 = _applyDecoratedDescriptor$10(_class4$1.prototype, "footer", [styleRule], {
+}), _descriptor7$2 = _applyDecoratedDescriptor$10(_class4$1.prototype, "footer", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -16563,7 +16514,7 @@ var ModalStyle = (_class4$1 = function (_FloatingWindowStyle) {
         };
     }
 })), _class4$1);
-var Modal = (_temp4$2 = _class6$1 = function (_UI$Element2) {
+var Modal = (_temp4$1 = _class6$1 = function (_UI$Element2) {
     inherits(Modal, _UI$Element2);
 
     function Modal() {
@@ -16588,10 +16539,10 @@ var Modal = (_temp4$2 = _class6$1 = function (_UI$Element2) {
         value: function render() {
             var _this10 = this;
 
-            return [UI.createElement(
+            return [UI$1.createElement(
                 Panel,
                 { ref: "modalContainer", className: "hidden " + this.getStyleSet().container },
-                UI.createElement(Panel, { ref: "behindPanel", className: this.getStyleSet().hiddenAnimated + " " + this.getStyleSet().background, onClick: function onClick() {
+                UI$1.createElement(Panel, { ref: "behindPanel", className: this.getStyleSet().hiddenAnimated + " " + this.getStyleSet().background, onClick: function onClick() {
                         return _this10.hide();
                     } }),
                 this.getModalWindow()
@@ -16605,20 +16556,20 @@ var Modal = (_temp4$2 = _class6$1 = function (_UI$Element2) {
             var closeButton = null;
             if (this.options.closeButton) {
                 // TODO: this should be in a method
-                closeButton = UI.createElement(
+                closeButton = UI$1.createElement(
                     "div",
                     { style: { right: "10px", zIndex: "10", position: "absolute" } },
-                    UI.createElement(Button, { className: "close", size: UI.Size.EXTRA_LARGE, style: { border: "none" }, label: "\xD7", onClick: function onClick() {
+                    UI$1.createElement(Button, { className: "close", size: UI$1.Size.EXTRA_LARGE, style: { border: "none" }, label: "\xD7", onClick: function onClick() {
                             return _this11.hide();
                         } })
                 );
             }
 
-            return UI.createElement(
+            return UI$1.createElement(
                 FloatingWindow,
                 { ref: "modalWindow", style: this.getModalWindowStyle() },
                 closeButton,
-                UI.createElement(
+                UI$1.createElement(
                     "div",
                     { style: { margin: "0px", height: "100%", width: "100%" } },
                     this.getGivenChildren()
@@ -16686,7 +16637,7 @@ var Modal = (_temp4$2 = _class6$1 = function (_UI$Element2) {
         }
     }]);
     return Modal;
-}(UI.Element), _class6$1.styleSet = new ModalStyle(), _temp4$2);
+}(UI$1.Element), _class6$1.styleSet = new ModalStyle(), _temp4$1);
 
 var ErrorModal = function (_Modal) {
     inherits(ErrorModal, _Modal);
@@ -16704,10 +16655,10 @@ var ErrorModal = function (_Modal) {
     }, {
         key: "getHeader",
         value: function getHeader() {
-            return [UI.createElement(
+            return [UI$1.createElement(
                 "div",
                 { className: ModalStyle.header },
-                UI.createElement(
+                UI$1.createElement(
                     "h4",
                     null,
                     "An Error occurred"
@@ -16717,7 +16668,7 @@ var ErrorModal = function (_Modal) {
     }, {
         key: "getBody",
         value: function getBody() {
-            return UI.createElement(
+            return UI$1.createElement(
                 "div",
                 { className: ModalStyle.body },
                 this.options.error.message || this.options.error
@@ -16728,10 +16679,10 @@ var ErrorModal = function (_Modal) {
         value: function getFooter() {
             var _this15 = this;
 
-            return UI.createElement(
+            return UI$1.createElement(
                 "div",
                 { className: ModalStyle.footer },
-                UI.createElement(Button, { level: UI.Level.DANGER, label: "Dismiss", onClick: function onClick() {
+                UI$1.createElement(Button, { level: UI$1.Level.DANGER, label: "Dismiss", onClick: function onClick() {
                         return _this15.hide();
                     } })
             );
@@ -16763,7 +16714,7 @@ var ActionModal = function (_Modal2) {
     }, {
         key: "getActionLevel",
         value: function getActionLevel() {
-            return this.options.level || UI.Level.DEFAULT;
+            return this.options.level || UI$1.Level.DEFAULT;
         }
     }, {
         key: "getCloseName",
@@ -16778,10 +16729,10 @@ var ActionModal = function (_Modal2) {
     }, {
         key: "getHeader",
         value: function getHeader() {
-            return [UI.createElement(
+            return [UI$1.createElement(
                 "div",
                 { className: this.getStyleSet().header },
-                UI.createElement(
+                UI$1.createElement(
                     "h4",
                     null,
                     this.getTitle()
@@ -16797,7 +16748,7 @@ var ActionModal = function (_Modal2) {
         key: "getBody",
         value: function getBody() {
             var content = this.getBodyContent();
-            return content ? UI.createElement(
+            return content ? UI$1.createElement(
                 "div",
                 { className: this.getStyleSet().body },
                 content
@@ -16810,7 +16761,7 @@ var ActionModal = function (_Modal2) {
         key: "getFooter",
         value: function getFooter() {
             var content = this.getFooterContent();
-            return content ? UI.createElement(
+            return content ? UI$1.createElement(
                 "div",
                 { className: this.getStyleSet().footer },
                 content
@@ -16821,7 +16772,7 @@ var ActionModal = function (_Modal2) {
         value: function getActionButton() {
             var _this17 = this;
 
-            return UI.createElement(Button, { level: this.getActionLevel(), label: this.getActionName(), onClick: function onClick() {
+            return UI$1.createElement(Button, { level: this.getActionLevel(), label: this.getActionName(), onClick: function onClick() {
                     return _this17.action();
                 } });
         }
@@ -16830,10 +16781,10 @@ var ActionModal = function (_Modal2) {
         value: function getFooterContent() {
             var _this18 = this;
 
-            return [UI.createElement(TemporaryMessageArea, { ref: "messageArea" }), UI.createElement(
+            return [UI$1.createElement(TemporaryMessageArea, { ref: "messageArea" }), UI$1.createElement(
                 ButtonGroup,
                 null,
-                UI.createElement(Button, { label: this.getCloseName(), onClick: function onClick() {
+                UI$1.createElement(Button, { label: this.getCloseName(), onClick: function onClick() {
                         return _this18.hide();
                     } }),
                 this.getActionButton()
@@ -16871,7 +16822,7 @@ function ActionModalButton(ActionModal) {
             value: function onMount() {
                 var _this20 = this;
 
-                this.modal = UI.createElement(ActionModal, this.getModalOptions());
+                this.modal = UI$1.createElement(ActionModal, this.getModalOptions());
                 this.addClickListener(function () {
                     return _this20.modal.show();
                 });
@@ -16881,10 +16832,10 @@ function ActionModalButton(ActionModal) {
     }(Button);
 }
 
-var _class$17;
-var _temp$6;
+var _class$18;
+var _temp$7;
 
-var TimeUnit = (_temp$6 = _class$17 = function () {
+var TimeUnit = (_temp$7 = _class$18 = function () {
     function TimeUnit(name, baseUnit, multiplier) {
         var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
         classCallCheck(this, TimeUnit);
@@ -16944,7 +16895,7 @@ var TimeUnit = (_temp$6 = _class$17 = function () {
         }
     }]);
     return TimeUnit;
-}(), _class$17.CANONICAL = {}, _class$17.ALL = [], _class$17.FIXED_DURATION = [], _class$17.VARIABLE_DURATION = [], _temp$6);
+}(), _class$18.CANONICAL = {}, _class$18.ALL = [], _class$18.FIXED_DURATION = [], _class$18.VARIABLE_DURATION = [], _temp$7);
 
 TimeUnit.MILLISECOND = new TimeUnit("millisecond", null, 1);
 TimeUnit.SECOND = new TimeUnit("second", TimeUnit.MILLISECOND, 1000);
@@ -17204,7 +17155,7 @@ function addCanonicalTimeUnits() {
 
 addCanonicalTimeUnits();
 
-var _class$16;
+var _class$17;
 
 // MAX_UNIX_TIME is either ~Feb 2106 in unix seconds or ~Feb 1970 in unix milliseconds
 // Any value less than this is interpreted as a unix time in seconds
@@ -17214,7 +17165,7 @@ var MAX_AUTO_UNIX_TIME = Math.pow(2, 32);
 
 var BaseDate = self.Date;
 
-var StemDate = extendsNative(_class$16 = function (_BaseDate) {
+var StemDate = extendsNative(_class$17 = function (_BaseDate) {
     inherits(StemDate, _BaseDate);
 
     function StemDate() {
@@ -17581,7 +17532,7 @@ var StemDate = extendsNative(_class$16 = function (_BaseDate) {
         }
     }]);
     return StemDate;
-}(BaseDate)) || _class$16;
+}(BaseDate)) || _class$17;
 
 Duration.prototype.format = function (pattern) {
     return StemDate.fromUnixMilliseconds(this.toMilliseconds()).utc().format(pattern);
@@ -17732,7 +17683,7 @@ var DatePickerTable = function (_UI$Element) {
     }
 
     return DatePickerTable;
-}(UI.Element);
+}(UI$1.Element);
 
 var TimePickerWidget = function (_UI$Element2) {
     inherits(TimePickerWidget, _UI$Element2);
@@ -17756,30 +17707,30 @@ var TimePickerWidget = function (_UI$Element2) {
                 fontWeight: "bold",
                 padding: "0 5px"
             };
-            return [UI.createElement(
+            return [UI$1.createElement(
                 "div",
                 { style: { width: "130px", display: "flex" } },
-                UI.createElement("div", { style: textSpanStyle, ref: "hours" }),
-                UI.createElement(
+                UI$1.createElement("div", { style: textSpanStyle, ref: "hours" }),
+                UI$1.createElement(
                     "div",
                     { style: textSpanStyle },
                     ":"
                 ),
-                UI.createElement("div", { style: textSpanStyle, ref: "minutes" }),
-                UI.createElement(
+                UI$1.createElement("div", { style: textSpanStyle, ref: "minutes" }),
+                UI$1.createElement(
                     "div",
                     { style: textSpanStyle },
                     ":"
                 ),
-                UI.createElement("div", { style: textSpanStyle, ref: "seconds" })
-            ), UI.createElement(
+                UI$1.createElement("div", { style: textSpanStyle, ref: "seconds" })
+            ), UI$1.createElement(
                 "div",
                 { style: { width: "130px", display: "flex" } },
-                UI.createElement(VerticalSlideBar, { value: hours / 23, ref: "hourSlider", height: 200, barHeight: 5, style: { flex: 1 } }),
-                UI.createElement("div", { style: { flex: 1 } }),
-                UI.createElement(VerticalSlideBar, { value: minutes / 59, ref: "minuteSlider", height: 200, barHeight: 5, style: { flex: 1 } }),
-                UI.createElement("div", { style: { flex: 1 } }),
-                UI.createElement(VerticalSlideBar, { value: seconds / 59, ref: "secondSlider", height: 200, barHeight: 5, style: { flex: 1, marginRight: "5px" } })
+                UI$1.createElement(VerticalSlideBar, { value: hours / 23, ref: "hourSlider", height: 200, barHeight: 5, style: { flex: 1 } }),
+                UI$1.createElement("div", { style: { flex: 1 } }),
+                UI$1.createElement(VerticalSlideBar, { value: minutes / 59, ref: "minuteSlider", height: 200, barHeight: 5, style: { flex: 1 } }),
+                UI$1.createElement("div", { style: { flex: 1 } }),
+                UI$1.createElement(VerticalSlideBar, { value: seconds / 59, ref: "secondSlider", height: 200, barHeight: 5, style: { flex: 1, marginRight: "5px" } })
             )];
         }
     }, {
@@ -17804,7 +17755,7 @@ var TimePickerWidget = function (_UI$Element2) {
         }
     }]);
     return TimePickerWidget;
-}(UI.Element);
+}(UI$1.Element);
 
 var DateTimeWindow = function (_VolatileFloatingWind) {
     inherits(DateTimeWindow, _VolatileFloatingWind);
@@ -17834,7 +17785,7 @@ var DateTimeWindow = function (_VolatileFloatingWind) {
     }, {
         key: "render",
         value: function render() {
-            return [UI.createElement(DatePickerTable, { ref: "datePicker", date: this.date }), UI.createElement(TimePickerWidget, { ref: "timePicker", time: this.time })];
+            return [UI$1.createElement(DatePickerTable, { ref: "datePicker", date: this.date }), UI$1.createElement(TimePickerWidget, { ref: "timePicker", time: this.time })];
         }
     }, {
         key: "computeInitial",
@@ -17980,7 +17931,7 @@ var DateTimePicker$$1 = function (_UI$Element3) {
     }, {
         key: "render",
         value: function render() {
-            return [UI.createElement(TextInput, { ref: "textInput", placeholder: this.options.format, value: this.options.dateString || "" })];
+            return [UI$1.createElement(TextInput, { ref: "textInput", placeholder: this.options.format, value: this.options.dateString || "" })];
         }
 
         // onMount() {
@@ -18005,7 +17956,7 @@ var DateTimePicker$$1 = function (_UI$Element3) {
 
     }]);
     return DateTimePicker$$1;
-}(UI.Element);
+}(UI$1.Element);
 
 // Wrapper over the ace code editor, needs ace to be globally loaded
 // TODO: should be renamed to AceCodeEditor?
@@ -18308,7 +18259,7 @@ var CodeEditor = function (_UI$Element) {
         }
     }]);
     return CodeEditor;
-}(UI.Element);
+}(UI$1.Element);
 
 var StaticCodeHighlighter = function (_CodeEditor) {
     inherits(StaticCodeHighlighter, _CodeEditor);
@@ -18482,13 +18433,13 @@ var MarkupRenderer = function (_Panel) {
         value: function convertToUI(value) {
             var _this2 = this;
 
-            if (value instanceof UI.TextElement || value instanceof UI.Element) {
+            if (value instanceof UI$1.TextElement || value instanceof UI$1.Element) {
                 // TODO: investigate this!
                 return value;
             }
 
             if (typeof value === "string") {
-                return new UI.TextElement(value);
+                return new UI$1.TextElement(value);
             }
             if (Array.isArray(value)) {
                 return value.map(function (x) {
@@ -18503,7 +18454,7 @@ var MarkupRenderer = function (_Panel) {
 
             // TODO: maybe just copy to another object, not delete?
             //delete value.tag;
-            return UI.createElement.apply(UI, [classObject, value].concat(toConsumableArray(value.children || [])));
+            return UI$1.createElement.apply(UI$1, [classObject, value].concat(toConsumableArray(value.children || [])));
         }
     }, {
         key: "render",
@@ -20092,11 +20043,11 @@ var BasicOrientedElement = function (_UI$Element) {
             if (this.parent && typeof this.parent.getOrientation === "function") {
                 return this.parent.getOrientation();
             }
-            return UI.Orientation.HORIZONTAL;
+            return UI$1.Orientation.HORIZONTAL;
         }
     }]);
     return BasicOrientedElement;
-}(UI.Element);
+}(UI$1.Element);
 
 // NavElements should know if they are in vertical or horizontal mode, so they can behave differently
 
@@ -20116,7 +20067,7 @@ var NavElement = function (_UI$Primitive) {
     createClass(NavElement, [{
         key: "extraNodeAttributes",
         value: function extraNodeAttributes(attr) {
-            if (this.getOrientation() === UI.Orientation.HORIZONTAL) {
+            if (this.getOrientation() === UI$1.Orientation.HORIZONTAL) {
                 // it is in the navbar
                 attr.addClass(this.getStyleSet().navElementHorizontal);
 
@@ -20134,9 +20085,9 @@ var NavElement = function (_UI$Primitive) {
     }, {
         key: "getSelf",
         value: function getSelf() {
-            var style = this.getOrientation() === UI.Orientation.HORIZONTAL ? this.getStyleSet().navElementValueHorizontal : this.getStyleSet().navElementValueVertical;
+            var style = this.getOrientation() === UI$1.Orientation.HORIZONTAL ? this.getStyleSet().navElementValueHorizontal : this.getStyleSet().navElementValueVertical;
 
-            return UI.createElement(
+            return UI$1.createElement(
                 BasicOrientedElement,
                 { className: style },
                 this.getValue()
@@ -20151,7 +20102,7 @@ var NavElement = function (_UI$Primitive) {
                 if (!this.isToggled) {
                     subElementsClass = "hidden";
                 }
-                return UI.createElement(
+                return UI$1.createElement(
                     BasicOrientedElement,
                     { ref: "contentArea", className: subElementsClass },
                     childrenToRender
@@ -20164,17 +20115,17 @@ var NavElement = function (_UI$Primitive) {
         value: function getValue() {
             var result = void 0;
             if (this.getGivenChildren().length) {
-                if (this.getOrientation() === UI.Orientation.VERTICAL) {
+                if (this.getOrientation() === UI$1.Orientation.VERTICAL) {
                     // is in the sidebar
-                    result = [UI.createElement(
+                    result = [UI$1.createElement(
                         BasicOrientedElement,
                         { style: { marginLeft: "-20px" } },
-                        UI.createElement(FACollapseIcon, { ref: "collapseIcon", collapsed: !this.isToggled, className: this.getStyleSet().navElementVerticalArrow }),
+                        UI$1.createElement(FACollapseIcon, { ref: "collapseIcon", collapsed: !this.isToggled, className: this.getStyleSet().navElementVerticalArrow }),
                         this.options.value
                     )];
-                } else if (this.getOrientation() === UI.Orientation.HORIZONTAL) {
+                } else if (this.getOrientation() === UI$1.Orientation.HORIZONTAL) {
                     // is in the navbar
-                    result = [this.options.value, UI.createElement(FACollapseIcon, { collapsed: false, className: this.getStyleSet().navElementHorizontalArrow })];
+                    result = [this.options.value, UI$1.createElement(FACollapseIcon, { collapsed: false, className: this.getStyleSet().navElementHorizontalArrow })];
                 }
             } else {
                 result = this.options.value;
@@ -20257,17 +20208,17 @@ var NavElement = function (_UI$Primitive) {
             var _this3 = this;
 
             this.addNodeListener("mouseenter", function () {
-                if (_this3.getOrientation() === UI.Orientation.HORIZONTAL && _this3.getGivenChildren().length) {
+                if (_this3.getOrientation() === UI$1.Orientation.HORIZONTAL && _this3.getGivenChildren().length) {
                     _this3.showChildren();
                 }
             });
             this.addNodeListener("mouseleave", function () {
-                if (_this3.getOrientation() === UI.Orientation.HORIZONTAL && _this3.getGivenChildren().length) {
+                if (_this3.getOrientation() === UI$1.Orientation.HORIZONTAL && _this3.getGivenChildren().length) {
                     _this3.hideChildren();
                 }
             });
             this.addClickListener(function (event) {
-                if (_this3.getOrientation() === UI.Orientation.VERTICAL) {
+                if (_this3.getOrientation() === UI$1.Orientation.VERTICAL) {
                     event.stopPropagation();
                     _this3.toggleChildren();
                 }
@@ -20275,7 +20226,7 @@ var NavElement = function (_UI$Primitive) {
         }
     }]);
     return NavElement;
-}(UI.Primitive(BasicOrientedElement, "li"));
+}(UI$1.Primitive(BasicOrientedElement, "li"));
 
 var NavLinkElement = function (_UI$Primitive2) {
     inherits(NavLinkElement, _UI$Primitive2);
@@ -20298,7 +20249,7 @@ var NavLinkElement = function (_UI$Primitive2) {
         }
     }]);
     return NavLinkElement;
-}(UI.Primitive(NavElement, "a"));
+}(UI$1.Primitive(NavElement, "a"));
 
 var NavSection = function (_UI$Primitive3) {
     inherits(NavSection, _UI$Primitive3);
@@ -20316,7 +20267,7 @@ var NavSection = function (_UI$Primitive3) {
     }, {
         key: "extraNodeAttributes",
         value: function extraNodeAttributes(attr) {
-            if (this.getOrientation() === UI.Orientation.HORIZONTAL) {
+            if (this.getOrientation() === UI$1.Orientation.HORIZONTAL) {
                 // it is in the navbar
                 attr.addClass(this.getStyleSet().navSectionHorizontal);
                 // this is functionality, I really want this to be isolated from the actual design
@@ -20330,7 +20281,7 @@ var NavSection = function (_UI$Primitive3) {
     }, {
         key: "getAnchor",
         value: function getAnchor() {
-            return this.options.anchor || UI.Direction.LEFT;
+            return this.options.anchor || UI$1.Direction.LEFT;
         }
     }, {
         key: "getOrientation",
@@ -20339,7 +20290,7 @@ var NavSection = function (_UI$Primitive3) {
         }
     }]);
     return NavSection;
-}(UI.Primitive("ul"));
+}(UI$1.Primitive("ul"));
 
 var NavAnchoredNotifications = function (_NavSection) {
     inherits(NavAnchoredNotifications, _NavSection);
@@ -20373,7 +20324,7 @@ var NavAnchoredNotifications = function (_NavSection) {
     }, {
         key: "render",
         value: function render() {
-            return [this.options.children, UI.createElement(UI.Switcher, { ref: "switcher", style: this.getSwitcherStyle(), className: "hidden" })];
+            return [this.options.children, UI$1.createElement(UI$1.Switcher, { ref: "switcher", style: this.getSwitcherStyle(), className: "hidden" })];
         }
     }, {
         key: "show",
@@ -20474,7 +20425,7 @@ var LeftSideIcon = function (_NavIcon) {
     }, {
         key: "getIcon",
         value: function getIcon() {
-            return UI.createElement(FAIcon, { icon: "bars", size: UI.Size.LARGE });
+            return UI$1.createElement(FAIcon, { icon: "bars", size: UI$1.Size.LARGE });
         }
     }]);
     return LeftSideIcon;
@@ -20499,7 +20450,7 @@ var RightSideIcon = function (_NavIcon2) {
     }, {
         key: "getIcon",
         value: function getIcon() {
-            return UI.createElement(FAIcon, { icon: "ellipsis-v", size: UI.Size.LARGE });
+            return UI$1.createElement(FAIcon, { icon: "ellipsis-v", size: UI$1.Size.LARGE });
         }
     }]);
     return RightSideIcon;
@@ -20516,21 +20467,21 @@ var WrappedIcon = function (_NavIcon3) {
     createClass(WrappedIcon, [{
         key: "getIcon",
         value: function getIcon() {
-            return UI.createElement(FAIcon, { icon: "ellipsis-h", size: UI.Size.LARGE });
+            return UI$1.createElement(FAIcon, { icon: "ellipsis-h", size: UI$1.Size.LARGE });
         }
     }]);
     return WrappedIcon;
 }(NavIcon);
 
-var _class$19;
+var _class$20;
 var _descriptor$10;
 var _descriptor2$10;
 var _descriptor3$10;
 var _descriptor4$8;
 var _descriptor5$5;
-var _descriptor6$4;
-var _descriptor7$4;
-var _descriptor8$3;
+var _descriptor6$3;
+var _descriptor7$3;
+var _descriptor8$2;
 var _descriptor9$2;
 var _descriptor10;
 var _descriptor11;
@@ -20581,7 +20532,7 @@ function _applyDecoratedDescriptor$11(target, property, decorators, descriptor, 
     return desc;
 }
 
-var NavStyle = (_class$19 = function (_StyleSet) {
+var NavStyle = (_class$20 = function (_StyleSet) {
     inherits(NavStyle, _StyleSet);
 
     function NavStyle() {
@@ -20642,7 +20593,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             float: "right"
         }), _initDefineProp$11(_this, "wrappedIcon", _descriptor$10, _this), _this.navElement = {
             transition: "background-color " + _this.dimensions.backgroundTransitionDuration
-        }, _initDefineProp$11(_this, "navLinkElement", _descriptor2$10, _this), _initDefineProp$11(_this, "navManager", _descriptor3$10, _this), _initDefineProp$11(_this, "navElementHorizontal", _descriptor4$8, _this), _initDefineProp$11(_this, "navElementHorizontalArrow", _descriptor5$5, _this), _initDefineProp$11(_this, "navElementValueHorizontal", _descriptor6$4, _this), _initDefineProp$11(_this, "navSectionHorizontal", _descriptor7$4, _this), _this.sidePanel = {
+        }, _initDefineProp$11(_this, "navLinkElement", _descriptor2$10, _this), _initDefineProp$11(_this, "navManager", _descriptor3$10, _this), _initDefineProp$11(_this, "navElementHorizontal", _descriptor4$8, _this), _initDefineProp$11(_this, "navElementHorizontalArrow", _descriptor5$5, _this), _initDefineProp$11(_this, "navElementValueHorizontal", _descriptor6$3, _this), _initDefineProp$11(_this, "navSectionHorizontal", _descriptor7$3, _this), _this.sidePanel = {
             top: "0",
             bottom: "0",
             height: "100%",
@@ -20661,7 +20612,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             transitionDuration: function transitionDuration() {
                 return _this.dimensions.sidepanelTransitionDuration;
             }
-        }, _initDefineProp$11(_this, "leftSidePanel", _descriptor8$3, _this), _initDefineProp$11(_this, "rightSidePanel", _descriptor9$2, _this), _initDefineProp$11(_this, "navElementVertical", _descriptor10, _this), _initDefineProp$11(_this, "navElementVerticalArrow", _descriptor11, _this), _initDefineProp$11(_this, "navElementValueVertical", _descriptor12, _this), _initDefineProp$11(_this, "navSectionVertical", _descriptor13$1, _this), _initDefineProp$11(_this, "navCollapseElement", _descriptor14$1, _this), _initDefineProp$11(_this, "sidePanelGroup", _descriptor15$1, _this), _initDefineProp$11(_this, "hrStyle", _descriptor16$1, _this), _initDefineProp$11(_this, "navVerticalLeftHide", _descriptor17$1, _this), _initDefineProp$11(_this, "navVerticalRightHide", _descriptor18$1, _this), _temp), possibleConstructorReturn(_this, _ret);
+        }, _initDefineProp$11(_this, "leftSidePanel", _descriptor8$2, _this), _initDefineProp$11(_this, "rightSidePanel", _descriptor9$2, _this), _initDefineProp$11(_this, "navElementVertical", _descriptor10, _this), _initDefineProp$11(_this, "navElementVerticalArrow", _descriptor11, _this), _initDefineProp$11(_this, "navElementValueVertical", _descriptor12, _this), _initDefineProp$11(_this, "navSectionVertical", _descriptor13$1, _this), _initDefineProp$11(_this, "navCollapseElement", _descriptor14$1, _this), _initDefineProp$11(_this, "sidePanelGroup", _descriptor15$1, _this), _initDefineProp$11(_this, "hrStyle", _descriptor16$1, _this), _initDefineProp$11(_this, "navVerticalLeftHide", _descriptor17$1, _this), _initDefineProp$11(_this, "navVerticalRightHide", _descriptor18$1, _this), _temp), possibleConstructorReturn(_this, _ret);
     }
     // Custom variables
 
@@ -20688,7 +20639,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
 
 
     return NavStyle;
-}(StyleSet), (_descriptor$10 = _applyDecoratedDescriptor$11(_class$19.prototype, "wrappedIcon", [styleRule], {
+}(StyleSet), (_descriptor$10 = _applyDecoratedDescriptor$11(_class$20.prototype, "wrappedIcon", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return [this.icon, {
@@ -20696,7 +20647,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             float: "left"
         }];
     }
-}), _descriptor2$10 = _applyDecoratedDescriptor$11(_class$19.prototype, "navLinkElement", [styleRule], {
+}), _descriptor2$10 = _applyDecoratedDescriptor$11(_class$20.prototype, "navLinkElement", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20723,7 +20674,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor3$10 = _applyDecoratedDescriptor$11(_class$19.prototype, "navManager", [styleRule], {
+}), _descriptor3$10 = _applyDecoratedDescriptor$11(_class$20.prototype, "navManager", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20736,7 +20687,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             position: "fixed"
         };
     }
-}), _descriptor4$8 = _applyDecoratedDescriptor$11(_class$19.prototype, "navElementHorizontal", [styleRule], {
+}), _descriptor4$8 = _applyDecoratedDescriptor$11(_class$20.prototype, "navElementHorizontal", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20750,7 +20701,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor5$5 = _applyDecoratedDescriptor$11(_class$19.prototype, "navElementHorizontalArrow", [styleRule], {
+}), _descriptor5$5 = _applyDecoratedDescriptor$11(_class$20.prototype, "navElementHorizontalArrow", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20758,7 +20709,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             verticalAlign: "middle"
         };
     }
-}), _descriptor6$4 = _applyDecoratedDescriptor$11(_class$19.prototype, "navElementValueHorizontal", [styleRule], {
+}), _descriptor6$3 = _applyDecoratedDescriptor$11(_class$20.prototype, "navElementValueHorizontal", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return [this.navElement, {
@@ -20770,7 +20721,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             }
         }];
     }
-}), _descriptor7$4 = _applyDecoratedDescriptor$11(_class$19.prototype, "navSectionHorizontal", [styleRule], {
+}), _descriptor7$3 = _applyDecoratedDescriptor$11(_class$20.prototype, "navSectionHorizontal", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20780,7 +20731,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             marginBottom: "0"
         };
     }
-}), _descriptor8$3 = _applyDecoratedDescriptor$11(_class$19.prototype, "leftSidePanel", [styleRule], {
+}), _descriptor8$2 = _applyDecoratedDescriptor$11(_class$20.prototype, "leftSidePanel", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return [this.sidePanel, {
@@ -20793,12 +20744,12 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             }
         }];
     }
-}), _descriptor9$2 = _applyDecoratedDescriptor$11(_class$19.prototype, "rightSidePanel", [styleRule], {
+}), _descriptor9$2 = _applyDecoratedDescriptor$11(_class$20.prototype, "rightSidePanel", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return this.sidePanel;
     }
-}), _descriptor10 = _applyDecoratedDescriptor$11(_class$19.prototype, "navElementVertical", [styleRule], {
+}), _descriptor10 = _applyDecoratedDescriptor$11(_class$20.prototype, "navElementVertical", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20813,7 +20764,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor11 = _applyDecoratedDescriptor$11(_class$19.prototype, "navElementVerticalArrow", [styleRule], {
+}), _descriptor11 = _applyDecoratedDescriptor$11(_class$20.prototype, "navElementVerticalArrow", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20821,7 +20772,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             textAlign: "center"
         };
     }
-}), _descriptor12 = _applyDecoratedDescriptor$11(_class$19.prototype, "navElementValueVertical", [styleRule], {
+}), _descriptor12 = _applyDecoratedDescriptor$11(_class$20.prototype, "navElementValueVertical", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return [this.navElement, {
@@ -20836,7 +20787,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             }
         }];
     }
-}), _descriptor13$1 = _applyDecoratedDescriptor$11(_class$19.prototype, "navSectionVertical", [styleRule], {
+}), _descriptor13$1 = _applyDecoratedDescriptor$11(_class$20.prototype, "navSectionVertical", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20845,7 +20796,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             width: "100%"
         };
     }
-}), _descriptor14$1 = _applyDecoratedDescriptor$11(_class$19.prototype, "navCollapseElement", [styleRule], {
+}), _descriptor14$1 = _applyDecoratedDescriptor$11(_class$20.prototype, "navCollapseElement", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20856,7 +20807,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             lineHeight: this.dimensions.sidepanelElementHeight
         };
     }
-}), _descriptor15$1 = _applyDecoratedDescriptor$11(_class$19.prototype, "sidePanelGroup", [styleRule], {
+}), _descriptor15$1 = _applyDecoratedDescriptor$11(_class$20.prototype, "sidePanelGroup", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20867,7 +20818,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             zIndex: "3"
         };
     }
-}), _descriptor16$1 = _applyDecoratedDescriptor$11(_class$19.prototype, "hrStyle", [styleRule], {
+}), _descriptor16$1 = _applyDecoratedDescriptor$11(_class$20.prototype, "hrStyle", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         var _this2 = this;
@@ -20879,7 +20830,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor17$1 = _applyDecoratedDescriptor$11(_class$19.prototype, "navVerticalLeftHide", [styleRule], {
+}), _descriptor17$1 = _applyDecoratedDescriptor$11(_class$20.prototype, "navVerticalLeftHide", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20887,7 +20838,7 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             overflow: "hidden"
         };
     }
-}), _descriptor18$1 = _applyDecoratedDescriptor$11(_class$19.prototype, "navVerticalRightHide", [styleRule], {
+}), _descriptor18$1 = _applyDecoratedDescriptor$11(_class$20.prototype, "navVerticalRightHide", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20895,10 +20846,10 @@ var NavStyle = (_class$19 = function (_StyleSet) {
             overflow: "hidden"
         };
     }
-})), _class$19);
+})), _class$20);
 
-var _class$18;
-var _temp$7;
+var _class$19;
+var _temp$8;
 var _class3$8;
 var _temp3$2;
 
@@ -20919,7 +20870,7 @@ var SidePanelGroup = function (_UI$Element) {
         key: "extraNodeAttributes",
         value: function extraNodeAttributes(attr) {
             attr.addClass(this.getStyleSet().sidePanelGroup);
-            if (this.options.anchor === UI.Direction.RIGHT) {
+            if (this.options.anchor === UI$1.Direction.RIGHT) {
                 attr.setStyle("right", 0);
             } else {
                 attr.setStyle("width", "250px");
@@ -20928,13 +20879,13 @@ var SidePanelGroup = function (_UI$Element) {
     }, {
         key: "getOrientation",
         value: function getOrientation() {
-            return UI.Orientation.VERTICAL;
+            return UI$1.Orientation.VERTICAL;
         }
     }]);
     return SidePanelGroup;
-}(UI.Element);
+}(UI$1.Element);
 
-var SidePanel = (_temp$7 = _class$18 = function (_UI$Element2) {
+var SidePanel = (_temp$8 = _class$19 = function (_UI$Element2) {
     inherits(SidePanel, _UI$Element2);
     createClass(SidePanel, [{
         key: "getStyleSet",
@@ -20968,7 +20919,7 @@ var SidePanel = (_temp$7 = _class$18 = function (_UI$Element2) {
     createClass(SidePanel, [{
         key: "extraNodeAttributes",
         value: function extraNodeAttributes(attr) {
-            if (this.options.anchor === UI.Direction.RIGHT) {
+            if (this.options.anchor === UI$1.Direction.RIGHT) {
                 attr.addClass(this.getStyleSet().rightSidePanel);
                 attr.setStyle("right", "0");
             } else {
@@ -20986,7 +20937,7 @@ var SidePanel = (_temp$7 = _class$18 = function (_UI$Element2) {
     }, {
         key: "show",
         value: function show() {
-            if (this.options.anchor === UI.Direction.RIGHT) {
+            if (this.options.anchor === UI$1.Direction.RIGHT) {
                 this.removeClass(this.getStyleSet().navVerticalRightHide);
             } else {
                 this.removeClass(this.getStyleSet().navVerticalLeftHide);
@@ -20997,7 +20948,7 @@ var SidePanel = (_temp$7 = _class$18 = function (_UI$Element2) {
     }, {
         key: "hide",
         value: function hide() {
-            if (this.options.anchor === UI.Direction.RIGHT) {
+            if (this.options.anchor === UI$1.Direction.RIGHT) {
                 this.addClass(this.getStyleSet().navVerticalRightHide);
             } else {
                 this.addClass(this.getStyleSet().navVerticalLeftHide);
@@ -21017,7 +20968,7 @@ var SidePanel = (_temp$7 = _class$18 = function (_UI$Element2) {
     }, {
         key: "render",
         value: function render() {
-            return UI.createElement(
+            return UI$1.createElement(
                 SidePanelGroup,
                 { ref: "this.wrappedPanel", anchor: this.options.anchor },
                 this.getGivenChildren()
@@ -21032,7 +20983,7 @@ var SidePanel = (_temp$7 = _class$18 = function (_UI$Element2) {
         }
     }]);
     return SidePanel;
-}(UI.Element), _class$18.styleSet = NavStyle.getInstance(), _temp$7);
+}(UI$1.Element), _class$19.styleSet = NavStyle.getInstance(), _temp$8);
 
 var NavCarouselStyle = function (_CarouselStyle) {
     inherits(NavCarouselStyle, _CarouselStyle);
@@ -21081,30 +21032,30 @@ var NavManager = (_temp3$2 = _class3$8 = function (_UI$Primitive) {
 
         var _this4 = possibleConstructorReturn(this, (NavManager.__proto__ || Object.getPrototypeOf(NavManager)).call(this, options));
 
-        _this4.leftSidePanel = UI.createElement(
+        _this4.leftSidePanel = UI$1.createElement(
             SidePanel,
-            { anchor: UI.Direction.LEFT, name: "left", persistent: _this4.options.persistentLeftSidePanel,
+            { anchor: UI$1.Direction.LEFT, name: "left", persistent: _this4.options.persistentLeftSidePanel,
                 styleSet: _this4.getStyleSet() },
-            UI.createElement(
+            UI$1.createElement(
                 BasicOrientedElement,
-                { orientation: UI.Orientation.VERTICAL, ref: _this4.refLink("navigationPanel") },
+                { orientation: UI$1.Orientation.VERTICAL, ref: _this4.refLink("navigationPanel") },
                 _this4.getLeftSidePanelFixedChildren()
             ),
-            UI.createElement(
+            UI$1.createElement(
                 Carousel$$1,
                 { ref: _this4.refLink("carousel"), styleSet: _this4.getCarouselStyleSet() },
-                UI.createElement(
+                UI$1.createElement(
                     BasicOrientedElement,
-                    { orientation: UI.Orientation.VERTICAL, ref: _this4.refLink("navigationPanel"),
+                    { orientation: UI$1.Orientation.VERTICAL, ref: _this4.refLink("navigationPanel"),
                         styleSet: _this4.getStyleSet() },
                     _this4.getLeftSidePanelChildren()
                 )
             )
         );
 
-        _this4.rightSidePanel = UI.createElement(
+        _this4.rightSidePanel = UI$1.createElement(
             SidePanel,
-            { anchor: UI.Direction.RIGHT, name: "right", persistent: _this4.options.persistentRightSidePanel,
+            { anchor: UI$1.Direction.RIGHT, name: "right", persistent: _this4.options.persistentRightSidePanel,
                 styleSet: _this4.getStyleSet() },
             _this4.getRightSidePanelChildren()
         );
@@ -21144,7 +21095,7 @@ var NavManager = (_temp3$2 = _class3$8 = function (_UI$Primitive) {
     }, {
         key: "getOrientation",
         value: function getOrientation() {
-            return UI.Orientation.HORIZONTAL;
+            return UI$1.Orientation.HORIZONTAL;
         }
     }, {
         key: "leftSideIconAction",
@@ -21175,7 +21126,7 @@ var NavManager = (_temp3$2 = _class3$8 = function (_UI$Primitive) {
             }
 
             if (!this.leftPanelToggler) {
-                this.leftPanelToggler = UI.createElement(LeftSideIcon, { onClick: function onClick() {
+                this.leftPanelToggler = UI$1.createElement(LeftSideIcon, { onClick: function onClick() {
                         return _this5.leftSideIconAction();
                     } });
             }
@@ -21195,7 +21146,7 @@ var NavManager = (_temp3$2 = _class3$8 = function (_UI$Primitive) {
                 return null;
             }
             if (!this.rightPanelToggler) {
-                this.rightPanelToggler = UI.createElement(RightSideIcon, { onClick: function onClick() {
+                this.rightPanelToggler = UI$1.createElement(RightSideIcon, { onClick: function onClick() {
                         return _this6.rightSideIconAction();
                     } });
             }
@@ -21256,7 +21207,7 @@ var NavManager = (_temp3$2 = _class3$8 = function (_UI$Primitive) {
             var _this7 = this;
 
             if (!this.wrappedToggler) {
-                this.wrappedToggler = UI.createElement(WrappedIcon, { onClick: function onClick() {
+                this.wrappedToggler = UI$1.createElement(WrappedIcon, { onClick: function onClick() {
                         return _this7.wrappedIconAction();
                     },
                     className: this.wrapped ? "" : "hidden" });
@@ -21277,9 +21228,9 @@ var NavManager = (_temp3$2 = _class3$8 = function (_UI$Primitive) {
         key: "getLeftConditionedWrapper",
         value: function getLeftConditionedWrapper() {
             if (!this.leftConditionedWrapper) {
-                this.leftConditionedWrapper = UI.createElement(
+                this.leftConditionedWrapper = UI$1.createElement(
                     NavSection,
-                    { anchor: UI.Direction.LEFT },
+                    { anchor: UI$1.Direction.LEFT },
                     this.getLeftConditioned()
                 );
             }
@@ -21289,9 +21240,9 @@ var NavManager = (_temp3$2 = _class3$8 = function (_UI$Primitive) {
         key: "getRightConditionedWrapper",
         value: function getRightConditionedWrapper() {
             if (!this.rightConditionedWrapper) {
-                this.rightConditionedWrapper = UI.createElement(
+                this.rightConditionedWrapper = UI$1.createElement(
                     NavSection,
-                    { anchor: UI.Direction.RIGHT },
+                    { anchor: UI$1.Direction.RIGHT },
                     this.getRightConditioned()
                 );
             }
@@ -21301,7 +21252,7 @@ var NavManager = (_temp3$2 = _class3$8 = function (_UI$Primitive) {
         key: "getLeftConditioned",
         value: function getLeftConditioned() {
             if (!this.leftConditioned) {
-                this.leftConditioned = UI.createElement(
+                this.leftConditioned = UI$1.createElement(
                     NavSection,
                     null,
                     this.getLeftConditionedChildren()
@@ -21313,7 +21264,7 @@ var NavManager = (_temp3$2 = _class3$8 = function (_UI$Primitive) {
         key: "getRightConditioned",
         value: function getRightConditioned() {
             if (!this.rightConditioned) {
-                this.rightConditioned = UI.createElement(
+                this.rightConditioned = UI$1.createElement(
                     NavSection,
                     null,
                     this.getRightConditionedChildren()
@@ -21386,7 +21337,7 @@ var NavManager = (_temp3$2 = _class3$8 = function (_UI$Primitive) {
                 }
                 if (window.innerWidth < this.unwrappedTotalWidth && !this.wrapped) {
                     this.wrapped = true;
-                    this.wrappedPanel = UI.createElement(BasicOrientedElement, { orientation: UI.Orientation.VERTICAL, styleSet: this.getStyleSet() });
+                    this.wrappedPanel = UI$1.createElement(BasicOrientedElement, { orientation: UI$1.Orientation.VERTICAL, styleSet: this.getStyleSet() });
                     this.carousel.appendChild(this.wrappedPanel);
 
                     this.getWrappedIcon().setStyle("width", "calc(100% - " + this.getFixedWidth() + "px)");
@@ -21428,7 +21379,7 @@ var NavManager = (_temp3$2 = _class3$8 = function (_UI$Primitive) {
         }
     }]);
     return NavManager;
-}(UI.Primitive("nav")), _class3$8.styleSet = NavStyle.getInstance(), _class3$8.carouselStyleSet = NavCarouselStyle.getInstance(), _temp3$2);
+}(UI$1.Primitive("nav")), _class3$8.styleSet = NavStyle.getInstance(), _class3$8.carouselStyleSet = NavCarouselStyle.getInstance(), _temp3$2);
 
 
 var initializeNavbar = function initializeNavbar() {
@@ -21672,7 +21623,7 @@ exports.Transition = Transition;
 exports.Modifier = Modifier$1;
 exports.TransitionList = TransitionList;
 exports.UIElement = UIElement;
-exports.UI = UI;
+exports.UI = UI$1;
 exports.getOffset = getOffset;
 exports.getComputedStyle = getComputedStyle;
 exports.changeParent = changeParent;
@@ -21714,11 +21665,6 @@ exports.SimpleStyledElement = SimpleStyledElement;
 exports.IconableInterface = IconableInterface;
 exports.Label = Label;
 exports.Badge = Badge;
-exports.CardPanel = CardPanel;
-exports.CollapsiblePanelStyle = CollapsiblePanelStyle;
-exports.CollapsiblePanel = CollapsiblePanel;
-exports.CollapsibleMixin = CollapsibleMixin;
-exports.DelayedCollapsiblePanel = DelayedCollapsiblePanel;
 exports.ProgressBar = ProgressBar;
 exports.setLanguageStore = setLanguageStore;
 exports.setTranslationMap = setTranslationMap;
@@ -21735,6 +21681,9 @@ exports.StateButton = StateButton;
 exports.AjaxButton = AjaxButton;
 exports.ButtonGroup = ButtonGroup;
 exports.RadioButtonGroup = RadioButtonGroup;
+exports.CardPanel = CardPanel;
+exports.CollapsiblePanel = CollapsiblePanel;
+exports.DelayedCollapsiblePanel = DelayedCollapsiblePanel;
 exports.SectionDivider = SectionDivider$$1;
 exports.Accordion = Accordion$$1;
 exports.AccordionStyle = AccordionStyle$$1;
