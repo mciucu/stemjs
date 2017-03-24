@@ -1,3 +1,4 @@
+import {UI} from "./UIBase";
 import {SimpleStyledElement} from "./Bootstrap3";
 import {GlobalStyle} from "./GlobalStyle";
 

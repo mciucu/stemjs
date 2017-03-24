@@ -16,6 +16,8 @@ export * from "button/Button";
 export * from "button/ButtonGroup";
 export * from "./CardPanel";
 export * from "collapsible/CollapsiblePanel";
+export * from "modal/FloatingWindow";
+export * from "modal/Modal";
 
 export * from "./SectionDivider";
 export * from "./Accordion";
@@ -25,7 +27,6 @@ export * from "./table/Table";
 export * from "./table/CollapsibleTable";
 export * from "./table/SortableTable";
 
-export * from "./Modal";
 export * from "./DateTimePicker";
 export * from "./CodeEditor";
 

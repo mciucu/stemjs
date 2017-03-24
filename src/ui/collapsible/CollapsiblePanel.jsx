@@ -89,5 +89,4 @@ class DelayedCollapsiblePanel extends CollapsiblePanel {
     }
 }
 
-
 export {CollapsiblePanel, DelayedCollapsiblePanel};

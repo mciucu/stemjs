@@ -1,185 +1,9 @@
-// TODO: need to redo with a StyleSheet
-import {StyleSet} from "./Style";
-import {styleRule} from "../decorators/Style";
-import {UI} from "./UIBase";
-import {Panel, TemporaryMessageArea} from "./UIPrimitives";
-import {Button} from "./button/Button";
-import {ButtonGroup} from "./button/ButtonGroup";
-
-class FloatingWindowStyle extends StyleSet {
-    @styleRule
-    hiddenAnimated = {
-        visibility: "hidden",
-        opacity: "0",
-        transition: "opacity 0.1s linear",
-    };
-
-    @styleRule
-    visibleAnimated = {
-        visibility: "visible",
-        opacity: "1",
-        transition: "opacity 0.1s linear",
-    };
-}
-
-class FloatingWindow extends UI.Element {
-    static styleSet = FloatingWindowStyle.getInstance();
-
-    getDefaultOptions() {
-        return {
-            transitionTime: 0
-        };
-    }
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
-    extraNodeAttributes(attr) {
-        super.extraNodeAttributes(attr);
-        attr.setStyle("z-index", "2016");
-    }
-
-    fadeOut() {
-        this.removeClass(this.getStyleSet().visibleAnimated);
-        this.addClass(this.getStyleSet().hiddenAnimated);
-    }
-
-    fadeIn() {
-        this.removeClass(this.getStyleSet().hiddenAnimated);
-        this.addClass(this.getStyleSet().visibleAnimated);
-    }
-
-    show() {
-        // TODO: refactor this to use this.parent and UI.Element appendChild
-        if (!this.isInDocument()) {
-            this.parentNode.appendChild(this.node);
-            this.redraw();
-            setTimeout(() => {
-                this.fadeIn();
-            }, 0);
-        }
-    }
-
-    setParentNode(parentNode) {
-        this.options.parentNode = parentNode;
-    }
-
-    get parentNode() {
-        if (!this.options.parentNode) {
-            if (this.parent) {
-                if (this.parent instanceof HTMLElement) {
-                    this.options.parentNode = this.parent;
-                } else {
-                    this.options.parentNode = this.parent.node;
-                }
-            } else {
-                this.options.parentNode = document.body;
-            }
-        }
-        return this.options.parentNode;
-    }
-
-    hide() {
-        // TODO: refactor this to use this.parent and UI.Element removeChild
-        if (this.isInDocument()) {
-            this.fadeOut();
-            setTimeout(() => {
-                if (this.isInDocument()) {
-                    this.parentNode.removeChild(this.node);
-                }
-            }, this.options.transitionTime);
-        }
-    }
-}
-
-class VolatileFloatingWindow extends FloatingWindow {
-    bindWindowListeners() {
-        this.hideListener = this.hideListener || (() => {this.hide();});
-        window.addEventListener("click", this.hideListener);
-    }
-
-    unbindWindowListeners() {
-        window.removeEventListener("click", this.hideListener);
-    }
-
-    toggle() {
-        if (!this.isInDocument()) {
-            this.show();
-        } else {
-            this.hide();
-        }
-    }
-
-    show() {
-        if (!this.isInDocument()) {
-            this.bindWindowListeners();
-            super.show();
-        }
-    }
-
-    hide() {
-        if (this.isInDocument()) {
-            this.unbindWindowListeners();
-            super.hide();
-        }
-    }
-
-    onMount() {
-        if (!this.options.notVisible) {
-            this.bindWindowListeners();
-        } else {
-            setTimeout(() => {
-                this.hide();
-            });
-        }
-
-        this.addClickListener((event) => {
-            event.stopPropagation();
-        });
-    }
-}
-
-class ModalStyle extends FloatingWindowStyle {
-    @styleRule
-    container = {
-        position: "fixed",
-        top: "0px",
-        left: "0px",
-        right: "0px",
-        bottom: "0px",
-        width: "100%",
-        height: "100%",
-        zIndex: "9999",
-    };
-
-    @styleRule
-    background = {
-        position: "fixed",
-        width: "100%",
-        height: "100%",
-        background: "rgba(0,0,0,0.5)",
-    };
-
-    @styleRule
-    header = {
-        padding: "15px",
-        borderBottom: "1px solid #e5e5e5",
-    };
-
-    @styleRule
-    body = {
-        position: "relative",
-        padding: "15px",
-    };
-
-    @styleRule
-    footer = {
-        padding: "15px",
-        textAlign: "right",
-        borderTop: "1px solid #e5e5e5",
-    };
-}
+import {ButtonGroup} from "../button/ButtonGroup";
+import {Button} from "../button/Button";
+import {FloatingWindow} from "./FloatingWindow";
+import {ModalStyle} from "./Style";
+import {Panel, TemporaryMessageArea} from "../UIPrimitives";
+import {UI} from "../UIBase";
 
 class Modal extends UI.Element {
     static styleSet = new ModalStyle();
@@ -273,6 +97,7 @@ class Modal extends UI.Element {
     }
 }
 
+
 class ErrorModal extends Modal {
     getGivenChildren() {
         return [
@@ -300,6 +125,7 @@ class ErrorModal extends Modal {
         </div>;
     }
 }
+
 
 class ActionModal extends Modal {
     getDefaultOptions() {
@@ -369,6 +195,7 @@ class ActionModal extends Modal {
     action() {}
 }
 
+
 function ActionModalButton(ActionModal) {
     return class ActionModalButton extends Button {
         getModalOptions() {
@@ -388,4 +215,4 @@ function ActionModalButton(ActionModal) {
     };
 }
 
-export {FloatingWindowStyle, FloatingWindow, VolatileFloatingWindow, ModalStyle, Modal, ErrorModal, ActionModal, ActionModalButton};
+export {Modal, ErrorModal, ActionModal, ActionModalButton};

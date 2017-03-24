@@ -20,7 +20,7 @@ class NavStyle extends StyleSet {
         sidepanelWidthLeft: "250px",
         sidepanelWidth: "330px",
         sidepanelHideWidth: "335px",
-        sidepanelTransitionDuration: ".3s",
+        sidepanelTransitionDuration: ".15s",
         boxShadowWidth: "5px",
         backgroundTransitionDuration: ".2s",
     };
