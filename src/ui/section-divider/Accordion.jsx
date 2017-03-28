@@ -1,96 +1,30 @@
-import {UI, getComputedStyle} from "./UI";
-import {Device} from "../base/Device";
-import {StyleSet} from "./Style";
-import {styleRule} from "../decorators/Style";
-import {FACollapseIcon} from "../ui/FontAwesome";
+import {UI} from "../UIBase";
+import {getComputedStyle} from "../Utils";
+import {Device} from "../../base/Device";
+import {AccordionStyle} from "./Style";
+import {FACollapseIcon} from "../../ui/FontAwesome";
+import {Divider} from "./Divider";
 
-class AccordionStyle extends StyleSet {
-    @styleRule
-    accordion = {
-        display: "flex",
-        flexDirection: "column",
-        ">:nth-of-type(even)": {
-            flexGrow: "1",
-            flexShrink: "1",
-            flexBasis: "auto",
-            overflow: "auto",
-        },
-        ">:nth-of-type(odd)": {
-            fontSize: "1em",
-            textTransform: "uppercase",
-            padding: "8px 8px",
-        }
-    };
-
-    @styleRule
-    noTextSelection = {
-        "-webkit-user-select": "none",
-        "-moz-user-select": "none",
-        "-ms-user-select": "none",
-        "-o-user-select": "none",
-        userSelect: "none",
-    };
-
-    @styleRule
-    grab = {
-        cursor: "grab",
-        cursor: "-moz-grab",
-        cursor: "-webkit-grab",
-    };
-
-    @styleRule
-    grabbing = {
-        cursor: "grabbing",
-        cursor: "-moz-grabbing",
-        cursor: "-webkit-grabbing",
-    };
-
-    @styleRule
-    collapseIcon = {
-        width: "0.7em",
-        fontSize: "120% !important",
-        fontWeight: "900 !important",
-        textAlign: "center",
-        marginRight: "0.2em",
-    };
-}
-
-
-class AccordionDivider extends UI.Element {
+class AccordionDivider extends Divider {
     static styleSet = AccordionStyle.getInstance();
 
     getStyleSet() {
         return this.options.styleSet || this.constructor.styleSet;
     }
 
-    extraNodeAttributes(attr) {
-        attr.addClass(this.getStyleSet().grab);
+    dragMousedown(event) {
+        document.body.classList.add(this.getStyleSet().noTextSelection);
+        this.addClass(this.getStyleSet().grabbing);
     }
 
-    dividerMousedownFunction(event) {
-        this.parent.dispatch("dividerMousedown", {divider: this, domEvent: event});
-        this.addClass(this.getStyleSet().grabbing);
-        document.body.classList.add(this.getStyleSet().noTextSelection);
+    dragMouseup(event) {
+        document.body.classList.remove(this.getStyleSet().noTextSelection);
+        this.removeClass(this.getStyleSet().grabbing);
+    }
 
-        let dragMousemoveFunction = (event) => {
-            event.preventDefault(); // for touch devices
-            this.parent.dispatch("dividerMousemove", event);
-        };
-
-        this.parent.addNodeListener("touchmove", dragMousemoveFunction);
-        this.parent.addNodeListener("mousemove", dragMousemoveFunction);
-
-        let dragMouseupFunction = (event) => {
-            this.parent.dispatch("dividerMouseup", event);
-            this.removeClass(this.getStyleSet().grabbing);
-            document.body.classList.remove(this.getStyleSet().noTextSelection);
-            this.parent.removeNodeListener("touchmove", dragMousemoveFunction);
-            window.removeEventListener("touchend", dragMouseupFunction);
-            this.parent.removeNodeListener("mousemove", dragMousemoveFunction);
-            window.removeEventListener("mouseup", dragMouseupFunction);
-        };
-        window.addEventListener("touchend", dragMouseupFunction);
-        window.addEventListener("mouseup", dragMouseupFunction);
+    extraNodeAttributes(attr) {
+        super.extraNodeAttributes(attr);
+        attr.addClass(this.getStyleSet().grab);
     }
 
     render() {
@@ -102,9 +36,7 @@ class AccordionDivider extends UI.Element {
     }
 
     onMount() {
-        // TODO: fix this hack when Device.isTouchDevice works
-        this.addNodeListener("touchstart", (event) => {this.touchDeviceTriggered = true; this.dividerMousedownFunction(event);});
-        this.addNodeListener("mousedown", (event) => {if (!this.touchDeviceTriggered) {this.dividerMousedownFunction(event);}});
+        super.onMount();
         this.addListener("togglePanel", () => {this.collapseIcon.toggleCollapsed();});
     }
 }
@@ -265,4 +197,4 @@ class Accordion extends UI.Element {
     }
 }
 
-export {Accordion, AccordionStyle};
+export {Accordion};
