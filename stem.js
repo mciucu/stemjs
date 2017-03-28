@@ -20821,7 +20821,7 @@ var NavStyle = (_class$26 = function (_StyleSet) {
             textDecoration: "none",
             listStyleType: "none",
             ":hover": {
-                backgroundColor: this.colors.sidePanelHover,
+                backgroundColor: this.colors.sidepanelHover,
                 color: this.colors.text,
                 textDecoration: "none"
             },
@@ -21202,11 +21202,6 @@ var NavManager = (_temp3 = _class3$7 = function (_UI$Primitive) {
             { anchor: UI.Direction.LEFT, name: "left", persistent: _this4.options.persistentLeftSidePanel,
                 styleSet: _this4.getStyleSet() },
             UI.createElement(
-                BasicOrientedElement,
-                { orientation: UI.Orientation.VERTICAL, ref: _this4.refLink("navigationPanel") },
-                _this4.getLeftSidePanelFixedChildren()
-            ),
-            UI.createElement(
                 Carousel$$1,
                 { ref: _this4.refLink("carousel"), styleSet: _this4.getCarouselStyleSet() },
                 UI.createElement(
@@ -21228,11 +21223,6 @@ var NavManager = (_temp3 = _class3$7 = function (_UI$Primitive) {
     }
 
     createClass(NavManager, [{
-        key: "getLeftSidePanelFixedChildren",
-        value: function getLeftSidePanelFixedChildren() {
-            return [];
-        }
-    }, {
         key: "getLeftSidePanelChildren",
         value: function getLeftSidePanelChildren() {
             return [];

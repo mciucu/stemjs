@@ -143,9 +143,6 @@ class NavManager extends UI.Primitive("nav") {
 
         this.leftSidePanel = <SidePanel anchor={UI.Direction.LEFT} name="left" persistent={this.options.persistentLeftSidePanel}
                                         styleSet={this.getStyleSet()}>
-            <BasicOrientedElement orientation={UI.Orientation.VERTICAL} ref={this.refLink("navigationPanel")}>
-                {this.getLeftSidePanelFixedChildren()}
-            </BasicOrientedElement>
             <Carousel ref={this.refLink("carousel")} styleSet={this.getCarouselStyleSet()}>
                 <BasicOrientedElement orientation={UI.Orientation.VERTICAL} ref={this.refLink("navigationPanel")}
                                       styleSet={this.getStyleSet()}>
@@ -158,10 +155,6 @@ class NavManager extends UI.Primitive("nav") {
                                          styleSet={this.getStyleSet()}>
             {this.getRightSidePanelChildren()}
         </SidePanel>;
-    }
-
-    getLeftSidePanelFixedChildren() {
-        return [];
     }
 
     getLeftSidePanelChildren() {

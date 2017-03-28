@@ -62,7 +62,7 @@ class NavStyle extends StyleSet {
     // Nav manager elements
     navElement = {
         transition: `background-color ${this.dimensions.backgroundTransitionDuration}`,
-    }
+    };
 
     @styleRule
     navLinkElement = {
@@ -71,7 +71,7 @@ class NavStyle extends StyleSet {
         textDecoration: "none",
         listStyleType: "none",
         ":hover": {
-            backgroundColor: this.colors.sidePanelHover,
+            backgroundColor: this.colors.sidepanelHover,
             color: this.colors.text,
             textDecoration: "none",
         },
