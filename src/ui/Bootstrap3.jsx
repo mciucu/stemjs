@@ -5,36 +5,6 @@ import {Panel} from "./UIPrimitives";
 import {GlobalStyle} from "./GlobalStyle";
 import {Ajax} from "../base/Ajax";
 
-function BootstrapMixin(BaseClass, bootstrapClassName) {
-    class BootstrapClass extends BaseClass {
-        getNodeAttributes() {
-            let attr = super.getNodeAttributes();
-
-            attr.addClass(this.constructor.bootstrapClass());
-            if (this.getLevel()) {
-                attr.addClass(this.constructor.bootstrapClass() + "-" + this.getLevel());
-            }
-            return attr;
-        }
-
-        getLevel() {
-            return this.options.level || "";
-        }
-
-        setLevel(level) {
-            this.options.level = level;
-            this.applyNodeAttributes();
-        }
-
-        static bootstrapClass() {
-            return bootstrapClassName;
-        }
-    }
-
-    return BootstrapClass;
-};
-
-
 class SimpleStyledElement extends UI.Element {
     getLevel() {
         return this.options.level || (this.parent && this.parent.getLevel && this.parent.getLevel());
@@ -188,4 +158,4 @@ class ProgressBar extends SimpleStyledElement {
 }
 
 
-export {BootstrapMixin, SimpleStyledElement, IconableInterface, Label, Badge, ProgressBar};
+export {SimpleStyledElement, IconableInterface, Label, Badge, ProgressBar};

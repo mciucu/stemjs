@@ -8449,23 +8449,10 @@ function css(style) {
     return styleWrapper;
 }
 
-var _class$5;
+var _class$6;
 var _descriptor;
 var _descriptor2;
 var _descriptor3;
-var _descriptor4;
-var _descriptor5;
-var _descriptor6;
-var _class3;
-var _descriptor7;
-var _descriptor8;
-var _descriptor9;
-var _class5;
-var _temp3;
-var _class6;
-var _temp4;
-var _class7;
-var _temp5;
 
 function _initDefineProp$1(target, property, descriptor, context) {
     if (!descriptor) return;
@@ -8506,129 +8493,25 @@ function _applyDecoratedDescriptor$1(target, property, decorators, descriptor, c
     return desc;
 }
 
-// TODO: this file was started with a lot of old patterns, that need to be updated
-// TODO: remove everything from UI namespace, export instead
-// TODO: need a major clean-up
-var FormStyle = (_class$5 = function (_StyleSet) {
-    inherits(FormStyle, _StyleSet);
+var InputStyle = (_class$6 = function (_StyleSet) {
+    inherits(InputStyle, _StyleSet);
 
-    function FormStyle() {
+    function InputStyle() {
         var _ref;
 
         var _temp, _this, _ret;
 
-        classCallCheck(this, FormStyle);
+        classCallCheck(this, InputStyle);
 
         for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
             args[_key] = arguments[_key];
         }
 
-        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = FormStyle.__proto__ || Object.getPrototypeOf(FormStyle)).call.apply(_ref, [this].concat(args))), _this), _initDefineProp$1(_this, "form", _descriptor, _this), _initDefineProp$1(_this, "formGroup", _descriptor2, _this), _initDefineProp$1(_this, "formField", _descriptor3, _this), _initDefineProp$1(_this, "sameLine", _descriptor4, _this), _this.separatedLineInputStyle = {
-            marginRight: "0.5em",
-            width: "100%",
-            height: "2.4em"
-        }, _initDefineProp$1(_this, "separatedLine", _descriptor5, _this), _initDefineProp$1(_this, "hasError", _descriptor6, _this), _temp), possibleConstructorReturn(_this, _ret);
-    }
-
-    return FormStyle;
-}(StyleSet), (_descriptor = _applyDecoratedDescriptor$1(_class$5.prototype, "form", [styleRule], {
-    enumerable: true,
-    initializer: function initializer() {
-        return {
-            margin: "0 auto"
-        };
-    }
-}), _descriptor2 = _applyDecoratedDescriptor$1(_class$5.prototype, "formGroup", [styleRule], {
-    enumerable: true,
-    initializer: function initializer() {
-        return {
-            marginBottom: "10px"
-        };
-    }
-}), _descriptor3 = _applyDecoratedDescriptor$1(_class$5.prototype, "formField", [styleRule], {
-    enumerable: true,
-    initializer: function initializer() {
-        return {
-            ">label": {
-                width: "100%"
-            },
-            display: "block",
-            padding: "6px 0px",
-            lineHeight: "1.42857143",
-            color: "#555",
-            maxWidth: "600px",
-            margin: "0 auto",
-            "[disabled]": {
-                opacity: "1",
-                cursor: "not-allowed"
-            },
-            "[readonly]": {
-                opacity: "1"
-            }
-        };
-    }
-}), _descriptor4 = _applyDecoratedDescriptor$1(_class$5.prototype, "sameLine", [styleRule], {
-    enumerable: true,
-    initializer: function initializer() {
-        return {
-            ">label>*:nth-child(1)": {
-                display: "inline-block",
-                textAlign: "right",
-                paddingRight: "1em",
-                width: "30%",
-                verticalAlign: "middle"
-            },
-            ">label>*:nth-child(2)": {
-                display: "inline-block",
-                width: "70%",
-                verticalAlign: "middle"
-            }
-        };
-    }
-}), _descriptor5 = _applyDecoratedDescriptor$1(_class$5.prototype, "separatedLine", [styleRule], {
-    enumerable: true,
-    initializer: function initializer() {
-        return {
-            padding: "6px 10px",
-            ">label>*:nth-child(1)": {
-                verticalAlign: "sub"
-            },
-            ">label>input": this.separatedLineInputStyle,
-            ">label>select": this.separatedLineInputStyle,
-            ">label>textarea": this.separatedLineInputStyle,
-            ">label>input[type='checkbox']": {
-                marginLeft: "10px",
-                verticalAlign: "middle"
-            }
-        };
-    }
-}), _descriptor6 = _applyDecoratedDescriptor$1(_class$5.prototype, "hasError", [styleRule], {
-    enumerable: true,
-    initializer: function initializer() {
-        return {
-            color: "#a94442"
-        };
-    }
-})), _class$5);
-var InputStyle = (_class3 = function (_StyleSet2) {
-    inherits(InputStyle, _StyleSet2);
-
-    function InputStyle() {
-        var _ref2;
-
-        var _temp2, _this2, _ret2;
-
-        classCallCheck(this, InputStyle);
-
-        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-            args[_key2] = arguments[_key2];
-        }
-
-        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = InputStyle.__proto__ || Object.getPrototypeOf(InputStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$1(_this2, "inputElement", _descriptor7, _this2), _initDefineProp$1(_this2, "checkboxInput", _descriptor8, _this2), _initDefineProp$1(_this2, "select", _descriptor9, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
+        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = InputStyle.__proto__ || Object.getPrototypeOf(InputStyle)).call.apply(_ref, [this].concat(args))), _this), _initDefineProp$1(_this, "inputElement", _descriptor, _this), _initDefineProp$1(_this, "checkboxInput", _descriptor2, _this), _initDefineProp$1(_this, "select", _descriptor3, _this), _temp), possibleConstructorReturn(_this, _ret);
     }
 
     return InputStyle;
-}(StyleSet), (_descriptor7 = _applyDecoratedDescriptor$1(_class3.prototype, "inputElement", [styleRule], {
+}(StyleSet), (_descriptor = _applyDecoratedDescriptor$1(_class$6.prototype, "inputElement", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -8644,7 +8527,7 @@ var InputStyle = (_class3 = function (_StyleSet2) {
             }
         };
     }
-}), _descriptor8 = _applyDecoratedDescriptor$1(_class3.prototype, "checkboxInput", [styleRule], {
+}), _descriptor2 = _applyDecoratedDescriptor$1(_class$6.prototype, "checkboxInput", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -8654,44 +8537,19 @@ var InputStyle = (_class3 = function (_StyleSet2) {
             marginRight: "0.5em"
         };
     }
-}), _descriptor9 = _applyDecoratedDescriptor$1(_class3.prototype, "select", [styleRule], {
+}), _descriptor3 = _applyDecoratedDescriptor$1(_class$6.prototype, "select", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             height: "2.12em"
         };
     }
-})), _class3);
-var Form = (_temp3 = _class5 = function (_UI$Primitive) {
-    inherits(Form, _UI$Primitive);
+})), _class$6);
 
-    function Form() {
-        classCallCheck(this, Form);
-        return possibleConstructorReturn(this, (Form.__proto__ || Object.getPrototypeOf(Form)).apply(this, arguments));
-    }
+var _class$5;
+var _temp$5;
 
-    createClass(Form, [{
-        key: "getStyleSet",
-        value: function getStyleSet() {
-            return this.options.styleSet || this.constructor.styleSet;
-        }
-    }, {
-        key: "extraNodeAttributes",
-        value: function extraNodeAttributes(attr) {
-            attr.addClass(this.getStyleSet().form);
-        }
-    }, {
-        key: "onMount",
-        value: function onMount() {
-            // Form elements by default refresh the page when a button inside them is clicked.
-            this.addNodeListener("submit", function (event) {
-                return event.preventDefault();
-            });
-        }
-    }]);
-    return Form;
-}(UI.Primitive("form")), _class5.styleSet = FormStyle.getInstance(), _temp3);
-var InputableElement = (_temp4 = _class6 = function (_UI$Element) {
+var InputableElement = (_temp$5 = _class$5 = function (_UI$Element) {
     inherits(InputableElement, _UI$Element);
 
     function InputableElement() {
@@ -8712,10 +8570,10 @@ var InputableElement = (_temp4 = _class6 = function (_UI$Element) {
         }
     }]);
     return InputableElement;
-}(UI.Element), _class6.styleSet = InputStyle.getInstance(), _temp4);
+}(UI.Element), _class$5.styleSet = InputStyle.getInstance(), _temp$5);
 
-var Input = function (_UI$Primitive2) {
-    inherits(Input, _UI$Primitive2);
+var Input = function (_UI$Primitive) {
+    inherits(Input, _UI$Primitive);
 
     function Input() {
         classCallCheck(this, Input);
@@ -8769,106 +8627,6 @@ var Input = function (_UI$Primitive2) {
 }(UI.Primitive(InputableElement, "input"));
 
 Input.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [["autocomplete"], ["autofocus", { noValue: true }], ["formaction"], ["maxLength", { domName: "maxlength" }], ["minLength", { domName: "minlength" }], ["name"], ["placeholder"], ["readonly"], ["required"], ["value"]]);
-
-var FormGroup = (_temp5 = _class7 = function (_UI$Element2) {
-    inherits(FormGroup, _UI$Element2);
-
-    function FormGroup() {
-        classCallCheck(this, FormGroup);
-        return possibleConstructorReturn(this, (FormGroup.__proto__ || Object.getPrototypeOf(FormGroup)).apply(this, arguments));
-    }
-
-    createClass(FormGroup, [{
-        key: "getStyleSet",
-        value: function getStyleSet() {
-            return this.options.styleSet || this.constructor.styleSet;
-        }
-    }, {
-        key: "extraNodeAttributes",
-        value: function extraNodeAttributes(attr) {
-            attr.addClass(this.getStyleSet().formGroup);
-        }
-    }, {
-        key: "setError",
-        value: function setError(errorMessage) {
-            this.errorField.node.textContent = errorMessage;
-            this.addClass(this.getStyleSet().hasError);
-        }
-    }, {
-        key: "removeError",
-        value: function removeError() {
-            this.errorField.node.textContent = "";
-            this.removeClass(this.getStyleSet().hasError);
-        }
-    }, {
-        key: "getErrorField",
-        value: function getErrorField() {
-            return UI.createElement("span", { ref: "errorField" });
-        }
-    }, {
-        key: "render",
-        value: function render() {
-            return [this.getGivenChildren(), this.getErrorField()];
-        }
-    }]);
-    return FormGroup;
-}(UI.Element), _class7.styleSet = FormStyle.getInstance(), _temp5);
-
-var FormField = function (_FormGroup) {
-    inherits(FormField, _FormGroup);
-
-    function FormField() {
-        classCallCheck(this, FormField);
-        return possibleConstructorReturn(this, (FormField.__proto__ || Object.getPrototypeOf(FormField)).apply(this, arguments));
-    }
-
-    createClass(FormField, [{
-        key: "inline",
-        value: function inline() {
-            return !(this.options.inline === false || this.parent && this.parent.options && this.parent.options.inline === false);
-        }
-    }, {
-        key: "extraNodeAttributes",
-        value: function extraNodeAttributes(attr) {
-            attr.addClass(this.getStyleSet().formField);
-            if (this.inline()) {
-                attr.addClass(this.getStyleSet().sameLine);
-            } else {
-                attr.addClass(this.getStyleSet().separatedLine);
-            }
-        }
-    }, {
-        key: "getLabel",
-        value: function getLabel() {
-            if (this.options.label) {
-                return UI.createElement(
-                    "strong",
-                    null,
-                    this.options.label
-                );
-            }
-            return null;
-        }
-    }, {
-        key: "getGivenChildren",
-        value: function getGivenChildren() {
-            if (this.options.contentFirst) {
-                return [UI.createElement(
-                    "label",
-                    null,
-                    [get(FormField.prototype.__proto__ || Object.getPrototypeOf(FormField.prototype), "getGivenChildren", this).call(this), this.getLabel()]
-                )];
-            } else {
-                return [UI.createElement(
-                    "label",
-                    null,
-                    [this.getLabel(), get(FormField.prototype.__proto__ || Object.getPrototypeOf(FormField.prototype), "getGivenChildren", this).call(this)]
-                )];
-            }
-        }
-    }]);
-    return FormField;
-}(FormGroup);
 
 var SubmitInput = function (_Input) {
     inherits(SubmitInput, _Input);
@@ -9038,8 +8796,8 @@ var CheckboxInput = function (_Input7) {
 
 CheckboxInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [["checked", { noValue: true }]]);
 
-var TextArea = function (_UI$Primitive3) {
-    inherits(TextArea, _UI$Primitive3);
+var TextArea = function (_UI$Primitive2) {
+    inherits(TextArea, _UI$Primitive2);
 
     function TextArea() {
         classCallCheck(this, TextArea);
@@ -9091,8 +8849,8 @@ var TextArea = function (_UI$Primitive3) {
     return TextArea;
 }(UI.Primitive(InputableElement, "textarea"));
 
-var Select = function (_UI$Primitive4) {
-    inherits(Select, _UI$Primitive4);
+var Select = function (_UI$Primitive3) {
+    inherits(Select, _UI$Primitive3);
 
     function Select() {
         classCallCheck(this, Select);
@@ -9166,6 +8924,289 @@ var Select = function (_UI$Primitive4) {
     }]);
     return Select;
 }(UI.Primitive(InputableElement, "select"));
+
+var _class$8;
+var _descriptor$1;
+var _descriptor2$1;
+var _descriptor3$1;
+var _descriptor4;
+var _descriptor5;
+var _descriptor6;
+
+function _initDefineProp$2(target, property, descriptor, context) {
+    if (!descriptor) return;
+    Object.defineProperty(target, property, {
+        enumerable: descriptor.enumerable,
+        configurable: descriptor.configurable,
+        writable: descriptor.writable,
+        value: descriptor.initializer ? descriptor.initializer.call(context) : void 0
+    });
+}
+
+function _applyDecoratedDescriptor$2(target, property, decorators, descriptor, context) {
+    var desc = {};
+    Object['ke' + 'ys'](descriptor).forEach(function (key) {
+        desc[key] = descriptor[key];
+    });
+    desc.enumerable = !!desc.enumerable;
+    desc.configurable = !!desc.configurable;
+
+    if ('value' in desc || desc.initializer) {
+        desc.writable = true;
+    }
+
+    desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+        return decorator(target, property, desc) || desc;
+    }, desc);
+
+    if (context && desc.initializer !== void 0) {
+        desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+        desc.initializer = undefined;
+    }
+
+    if (desc.initializer === void 0) {
+        Object['define' + 'Property'](target, property, desc);
+        desc = null;
+    }
+
+    return desc;
+}
+
+var FormStyle = (_class$8 = function (_StyleSet) {
+    inherits(FormStyle, _StyleSet);
+
+    function FormStyle() {
+        var _ref;
+
+        var _temp, _this, _ret;
+
+        classCallCheck(this, FormStyle);
+
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
+
+        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = FormStyle.__proto__ || Object.getPrototypeOf(FormStyle)).call.apply(_ref, [this].concat(args))), _this), _initDefineProp$2(_this, "form", _descriptor$1, _this), _initDefineProp$2(_this, "formGroup", _descriptor2$1, _this), _initDefineProp$2(_this, "formField", _descriptor3$1, _this), _initDefineProp$2(_this, "sameLine", _descriptor4, _this), _this.separatedLineInputStyle = {
+            marginRight: "0.5em",
+            width: "100%",
+            height: "2.4em"
+        }, _initDefineProp$2(_this, "separatedLine", _descriptor5, _this), _initDefineProp$2(_this, "hasError", _descriptor6, _this), _temp), possibleConstructorReturn(_this, _ret);
+    }
+
+    return FormStyle;
+}(StyleSet), (_descriptor$1 = _applyDecoratedDescriptor$2(_class$8.prototype, "form", [styleRule], {
+    enumerable: true,
+    initializer: function initializer() {
+        return {
+            margin: "0 auto"
+        };
+    }
+}), _descriptor2$1 = _applyDecoratedDescriptor$2(_class$8.prototype, "formGroup", [styleRule], {
+    enumerable: true,
+    initializer: function initializer() {
+        return {
+            marginBottom: "10px"
+        };
+    }
+}), _descriptor3$1 = _applyDecoratedDescriptor$2(_class$8.prototype, "formField", [styleRule], {
+    enumerable: true,
+    initializer: function initializer() {
+        return {
+            ">label": {
+                width: "100%"
+            },
+            display: "block",
+            padding: "6px 0px",
+            lineHeight: "1.42857143",
+            color: "#555",
+            maxWidth: "600px",
+            margin: "0 auto",
+            "[disabled]": {
+                opacity: "1",
+                cursor: "not-allowed"
+            },
+            "[readonly]": {
+                opacity: "1"
+            }
+        };
+    }
+}), _descriptor4 = _applyDecoratedDescriptor$2(_class$8.prototype, "sameLine", [styleRule], {
+    enumerable: true,
+    initializer: function initializer() {
+        return {
+            ">label>*:nth-child(1)": {
+                display: "inline-block",
+                textAlign: "right",
+                paddingRight: "1em",
+                width: "30%",
+                verticalAlign: "middle"
+            },
+            ">label>*:nth-child(2)": {
+                display: "inline-block",
+                width: "70%",
+                verticalAlign: "middle"
+            }
+        };
+    }
+}), _descriptor5 = _applyDecoratedDescriptor$2(_class$8.prototype, "separatedLine", [styleRule], {
+    enumerable: true,
+    initializer: function initializer() {
+        return {
+            padding: "6px 10px",
+            ">label>*:nth-child(1)": {
+                verticalAlign: "sub"
+            },
+            ">label>input": this.separatedLineInputStyle,
+            ">label>select": this.separatedLineInputStyle,
+            ">label>textarea": this.separatedLineInputStyle,
+            ">label>input[type='checkbox']": {
+                marginLeft: "10px",
+                verticalAlign: "middle"
+            }
+        };
+    }
+}), _descriptor6 = _applyDecoratedDescriptor$2(_class$8.prototype, "hasError", [styleRule], {
+    enumerable: true,
+    initializer: function initializer() {
+        return {
+            color: "#a94442"
+        };
+    }
+})), _class$8);
+
+var _class$7;
+var _temp$6;
+var _class2;
+var _temp2;
+
+var Form = (_temp$6 = _class$7 = function (_UI$Primitive) {
+    inherits(Form, _UI$Primitive);
+
+    function Form() {
+        classCallCheck(this, Form);
+        return possibleConstructorReturn(this, (Form.__proto__ || Object.getPrototypeOf(Form)).apply(this, arguments));
+    }
+
+    createClass(Form, [{
+        key: "getStyleSet",
+        value: function getStyleSet() {
+            return this.options.styleSet || this.constructor.styleSet;
+        }
+    }, {
+        key: "extraNodeAttributes",
+        value: function extraNodeAttributes(attr) {
+            attr.addClass(this.getStyleSet().form);
+        }
+    }, {
+        key: "onMount",
+        value: function onMount() {
+            // Form elements by default refresh the page when a button inside them is clicked, so we prevent that.
+            this.addNodeListener("submit", function (event) {
+                return event.preventDefault();
+            });
+        }
+    }]);
+    return Form;
+}(UI.Primitive("form")), _class$7.styleSet = FormStyle.getInstance(), _temp$6);
+var FormGroup = (_temp2 = _class2 = function (_UI$Element) {
+    inherits(FormGroup, _UI$Element);
+
+    function FormGroup() {
+        classCallCheck(this, FormGroup);
+        return possibleConstructorReturn(this, (FormGroup.__proto__ || Object.getPrototypeOf(FormGroup)).apply(this, arguments));
+    }
+
+    createClass(FormGroup, [{
+        key: "getStyleSet",
+        value: function getStyleSet() {
+            return this.options.styleSet || this.constructor.styleSet;
+        }
+    }, {
+        key: "extraNodeAttributes",
+        value: function extraNodeAttributes(attr) {
+            attr.addClass(this.getStyleSet().formGroup);
+        }
+    }, {
+        key: "setError",
+        value: function setError(errorMessage) {
+            this.errorField.node.textContent = errorMessage;
+            this.addClass(this.getStyleSet().hasError);
+        }
+    }, {
+        key: "removeError",
+        value: function removeError() {
+            this.errorField.node.textContent = "";
+            this.removeClass(this.getStyleSet().hasError);
+        }
+    }, {
+        key: "getErrorField",
+        value: function getErrorField() {
+            return UI.createElement("span", { ref: "errorField" });
+        }
+    }, {
+        key: "render",
+        value: function render() {
+            return [this.getGivenChildren(), this.getErrorField()];
+        }
+    }]);
+    return FormGroup;
+}(UI.Element), _class2.styleSet = FormStyle.getInstance(), _temp2);
+
+var FormField = function (_FormGroup) {
+    inherits(FormField, _FormGroup);
+
+    function FormField() {
+        classCallCheck(this, FormField);
+        return possibleConstructorReturn(this, (FormField.__proto__ || Object.getPrototypeOf(FormField)).apply(this, arguments));
+    }
+
+    createClass(FormField, [{
+        key: "inline",
+        value: function inline() {
+            return !(this.options.inline === false || this.parent && this.parent.options && this.parent.options.inline === false);
+        }
+    }, {
+        key: "extraNodeAttributes",
+        value: function extraNodeAttributes(attr) {
+            attr.addClass(this.getStyleSet().formField);
+            if (this.inline()) {
+                attr.addClass(this.getStyleSet().sameLine);
+            } else {
+                attr.addClass(this.getStyleSet().separatedLine);
+            }
+        }
+    }, {
+        key: "getLabel",
+        value: function getLabel() {
+            if (this.options.label) {
+                return UI.createElement(
+                    "strong",
+                    null,
+                    this.options.label
+                );
+            }
+            return null;
+        }
+    }, {
+        key: "getGivenChildren",
+        value: function getGivenChildren() {
+            if (this.options.contentFirst) {
+                return [UI.createElement(
+                    "label",
+                    null,
+                    [get(FormField.prototype.__proto__ || Object.getPrototypeOf(FormField.prototype), "getGivenChildren", this).call(this), this.getLabel()]
+                )];
+            } else {
+                return [UI.createElement(
+                    "label",
+                    null,
+                    [this.getLabel(), get(FormField.prototype.__proto__ || Object.getPrototypeOf(FormField.prototype), "getGivenChildren", this).call(this)]
+                )];
+            }
+        }
+    }]);
+    return FormField;
+}(FormGroup);
 
 // Setting these attributes as styles in mozilla has no effect.
 // To maintain compatibility between moz and webkit, whenever
@@ -10978,12 +11019,12 @@ SVG.Text.prototype.changeFillTransition = function (color, duration) {
     });
 };
 
-var _class$6;
-var _descriptor$1;
-var _descriptor2$1;
-var _class3$1;
-var _descriptor3$1;
-var _class7$1;
+var _class$9;
+var _descriptor$2;
+var _descriptor2$2;
+var _class3;
+var _descriptor3$2;
+var _class7;
 var _descriptor13;
 var _descriptor14;
 var _descriptor15;
@@ -11024,7 +11065,7 @@ var _descriptor50;
 var _descriptor51;
 var _descriptor52;
 
-function _initDefineProp$2(target, property, descriptor, context) {
+function _initDefineProp$3(target, property, descriptor, context) {
     if (!descriptor) return;
     Object.defineProperty(target, property, {
         enumerable: descriptor.enumerable,
@@ -11034,7 +11075,7 @@ function _initDefineProp$2(target, property, descriptor, context) {
     });
 }
 
-function _applyDecoratedDescriptor$2(target, property, decorators, descriptor, context) {
+function _applyDecoratedDescriptor$3(target, property, decorators, descriptor, context) {
     var desc = {};
     Object['ke' + 'ys'](descriptor).forEach(function (key) {
         desc[key] = descriptor[key];
@@ -11077,7 +11118,7 @@ var COLOR = {
     FACEBOOK: "#3b5998"
 };
 
-var ButtonGroupStyle = (_class$6 = function (_StyleSet) {
+var ButtonGroupStyle = (_class$9 = function (_StyleSet) {
     inherits(ButtonGroupStyle, _StyleSet);
 
     function ButtonGroupStyle() {
@@ -11091,7 +11132,7 @@ var ButtonGroupStyle = (_class$6 = function (_StyleSet) {
             args[_key] = arguments[_key];
         }
 
-        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = ButtonGroupStyle.__proto__ || Object.getPrototypeOf(ButtonGroupStyle)).call.apply(_ref, [this].concat(args))), _this), _initDefineProp$2(_this, "HORIZONTAL", _descriptor$1, _this), _initDefineProp$2(_this, "VERTICAL", _descriptor2$1, _this), _temp), possibleConstructorReturn(_this, _ret);
+        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = ButtonGroupStyle.__proto__ || Object.getPrototypeOf(ButtonGroupStyle)).call.apply(_ref, [this].concat(args))), _this), _initDefineProp$3(_this, "HORIZONTAL", _descriptor$2, _this), _initDefineProp$3(_this, "VERTICAL", _descriptor2$2, _this), _temp), possibleConstructorReturn(_this, _ret);
     }
 
     createClass(ButtonGroupStyle, [{
@@ -11126,7 +11167,7 @@ var ButtonGroupStyle = (_class$6 = function (_StyleSet) {
         }
     }]);
     return ButtonGroupStyle;
-}(StyleSet), (_descriptor$1 = _applyDecoratedDescriptor$2(_class$6.prototype, "HORIZONTAL", [styleRule], {
+}(StyleSet), (_descriptor$2 = _applyDecoratedDescriptor$3(_class$9.prototype, "HORIZONTAL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11139,7 +11180,7 @@ var ButtonGroupStyle = (_class$6 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor2$1 = _applyDecoratedDescriptor$2(_class$6.prototype, "VERTICAL", [styleRule], {
+}), _descriptor2$2 = _applyDecoratedDescriptor$3(_class$9.prototype, "VERTICAL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11152,8 +11193,8 @@ var ButtonGroupStyle = (_class$6 = function (_StyleSet) {
             }
         };
     }
-})), _class$6);
-var RadioButtonGroupStyle = (_class3$1 = function (_StyleSet2) {
+})), _class$9);
+var RadioButtonGroupStyle = (_class3 = function (_StyleSet2) {
     inherits(RadioButtonGroupStyle, _StyleSet2);
 
     function RadioButtonGroupStyle() {
@@ -11167,11 +11208,11 @@ var RadioButtonGroupStyle = (_class3$1 = function (_StyleSet2) {
             args[_key2] = arguments[_key2];
         }
 
-        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = RadioButtonGroupStyle.__proto__ || Object.getPrototypeOf(RadioButtonGroupStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$2(_this2, "DEFAULT", _descriptor3$1, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
+        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = RadioButtonGroupStyle.__proto__ || Object.getPrototypeOf(RadioButtonGroupStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$3(_this2, "DEFAULT", _descriptor3$2, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
     }
 
     return RadioButtonGroupStyle;
-}(StyleSet), (_descriptor3$1 = _applyDecoratedDescriptor$2(_class3$1.prototype, "DEFAULT", [styleRule], {
+}(StyleSet), (_descriptor3$2 = _applyDecoratedDescriptor$3(_class3.prototype, "DEFAULT", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11188,7 +11229,7 @@ var RadioButtonGroupStyle = (_class3$1 = function (_StyleSet2) {
             }
         };
     }
-})), _class3$1);
+})), _class3);
 
 
 function BasicLevelStyleSet(colorClassFunction) {
@@ -11208,7 +11249,7 @@ function BasicLevelStyleSet(colorClassFunction) {
                 args[_key3] = arguments[_key3];
             }
 
-            return _ret3 = (_temp3 = (_this3 = possibleConstructorReturn(this, (_ref3 = BasicLevelStyleClass.__proto__ || Object.getPrototypeOf(BasicLevelStyleClass)).call.apply(_ref3, [this].concat(args))), _this3), _this3.colorClassBuilder = colorClassFunction, _initDefineProp$2(_this3, "PLAIN", _descriptor4, _this3), _initDefineProp$2(_this3, "GRAY", _descriptor5, _this3), _initDefineProp$2(_this3, "PRIMARY", _descriptor6, _this3), _initDefineProp$2(_this3, "SUCCESS", _descriptor7, _this3), _initDefineProp$2(_this3, "INFO", _descriptor8, _this3), _initDefineProp$2(_this3, "WARNING", _descriptor9, _this3), _initDefineProp$2(_this3, "DANGER", _descriptor10, _this3), _initDefineProp$2(_this3, "GOOGLE", _descriptor11, _this3), _initDefineProp$2(_this3, "FACEBOOK", _descriptor12, _this3), _temp3), possibleConstructorReturn(_this3, _ret3);
+            return _ret3 = (_temp3 = (_this3 = possibleConstructorReturn(this, (_ref3 = BasicLevelStyleClass.__proto__ || Object.getPrototypeOf(BasicLevelStyleClass)).call.apply(_ref3, [this].concat(args))), _this3), _this3.colorClassBuilder = colorClassFunction, _initDefineProp$3(_this3, "PLAIN", _descriptor4, _this3), _initDefineProp$3(_this3, "GRAY", _descriptor5, _this3), _initDefineProp$3(_this3, "PRIMARY", _descriptor6, _this3), _initDefineProp$3(_this3, "SUCCESS", _descriptor7, _this3), _initDefineProp$3(_this3, "INFO", _descriptor8, _this3), _initDefineProp$3(_this3, "WARNING", _descriptor9, _this3), _initDefineProp$3(_this3, "DANGER", _descriptor10, _this3), _initDefineProp$3(_this3, "GOOGLE", _descriptor11, _this3), _initDefineProp$3(_this3, "FACEBOOK", _descriptor12, _this3), _temp3), possibleConstructorReturn(_this3, _ret3);
         }
 
         createClass(BasicLevelStyleClass, [{
@@ -11246,47 +11287,47 @@ function BasicLevelStyleSet(colorClassFunction) {
             }
         }]);
         return BasicLevelStyleClass;
-    }(StyleSet), (_descriptor4 = _applyDecoratedDescriptor$2(_class5.prototype, "PLAIN", [styleRule], {
+    }(StyleSet), (_descriptor4 = _applyDecoratedDescriptor$3(_class5.prototype, "PLAIN", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return {};
         }
-    }), _descriptor5 = _applyDecoratedDescriptor$2(_class5.prototype, "GRAY", [styleRule], {
+    }), _descriptor5 = _applyDecoratedDescriptor$3(_class5.prototype, "GRAY", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return {};
         }
-    }), _descriptor6 = _applyDecoratedDescriptor$2(_class5.prototype, "PRIMARY", [styleRule], {
+    }), _descriptor6 = _applyDecoratedDescriptor$3(_class5.prototype, "PRIMARY", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return this.colorClassBuilder(buildColors(COLOR.PRIMARY));
         }
-    }), _descriptor7 = _applyDecoratedDescriptor$2(_class5.prototype, "SUCCESS", [styleRule], {
+    }), _descriptor7 = _applyDecoratedDescriptor$3(_class5.prototype, "SUCCESS", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return this.colorClassBuilder(buildColors(COLOR.SUCCESS));
         }
-    }), _descriptor8 = _applyDecoratedDescriptor$2(_class5.prototype, "INFO", [styleRule], {
+    }), _descriptor8 = _applyDecoratedDescriptor$3(_class5.prototype, "INFO", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return this.colorClassBuilder(buildColors(COLOR.INFO));
         }
-    }), _descriptor9 = _applyDecoratedDescriptor$2(_class5.prototype, "WARNING", [styleRule], {
+    }), _descriptor9 = _applyDecoratedDescriptor$3(_class5.prototype, "WARNING", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return this.colorClassBuilder(buildColors(COLOR.WARNING));
         }
-    }), _descriptor10 = _applyDecoratedDescriptor$2(_class5.prototype, "DANGER", [styleRule], {
+    }), _descriptor10 = _applyDecoratedDescriptor$3(_class5.prototype, "DANGER", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return this.colorClassBuilder(buildColors(COLOR.DANGER));
         }
-    }), _descriptor11 = _applyDecoratedDescriptor$2(_class5.prototype, "GOOGLE", [styleRule], {
+    }), _descriptor11 = _applyDecoratedDescriptor$3(_class5.prototype, "GOOGLE", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return this.colorClassBuilder(buildColors(COLOR.GOOGLE));
         }
-    }), _descriptor12 = _applyDecoratedDescriptor$2(_class5.prototype, "FACEBOOK", [styleRule], {
+    }), _descriptor12 = _applyDecoratedDescriptor$3(_class5.prototype, "FACEBOOK", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return this.colorClassBuilder(buildColors(COLOR.FACEBOOK));
@@ -11323,7 +11364,7 @@ var buttonColorClassBuilder = function buttonColorClassBuilder(colors) {
     });
 };
 
-var ButtonStyle = (_class7$1 = function (_BasicLevelStyleSet) {
+var ButtonStyle = (_class7 = function (_BasicLevelStyleSet) {
     inherits(ButtonStyle, _BasicLevelStyleSet);
 
     function ButtonStyle() {
@@ -11337,7 +11378,7 @@ var ButtonStyle = (_class7$1 = function (_BasicLevelStyleSet) {
             args[_key4] = arguments[_key4];
         }
 
-        return _ret4 = (_temp4 = (_this4 = possibleConstructorReturn(this, (_ref4 = ButtonStyle.__proto__ || Object.getPrototypeOf(ButtonStyle)).call.apply(_ref4, [this].concat(args))), _this4), _initDefineProp$2(_this4, "DEFAULT", _descriptor13, _this4), _initDefineProp$2(_this4, "EXTRA_SMALL", _descriptor14, _this4), _initDefineProp$2(_this4, "SMALL", _descriptor15, _this4), _initDefineProp$2(_this4, "MEDIUM", _descriptor16, _this4), _initDefineProp$2(_this4, "LARGE", _descriptor17, _this4), _initDefineProp$2(_this4, "EXTRA_LARGE", _descriptor18, _this4), _temp4), possibleConstructorReturn(_this4, _ret4);
+        return _ret4 = (_temp4 = (_this4 = possibleConstructorReturn(this, (_ref4 = ButtonStyle.__proto__ || Object.getPrototypeOf(ButtonStyle)).call.apply(_ref4, [this].concat(args))), _this4), _initDefineProp$3(_this4, "DEFAULT", _descriptor13, _this4), _initDefineProp$3(_this4, "EXTRA_SMALL", _descriptor14, _this4), _initDefineProp$3(_this4, "SMALL", _descriptor15, _this4), _initDefineProp$3(_this4, "MEDIUM", _descriptor16, _this4), _initDefineProp$3(_this4, "LARGE", _descriptor17, _this4), _initDefineProp$3(_this4, "EXTRA_LARGE", _descriptor18, _this4), _temp4), possibleConstructorReturn(_this4, _ret4);
     }
 
     createClass(ButtonStyle, [{
@@ -11372,7 +11413,7 @@ var ButtonStyle = (_class7$1 = function (_BasicLevelStyleSet) {
         }
     }]);
     return ButtonStyle;
-}(BasicLevelStyleSet(buttonColorClassBuilder)), (_descriptor13 = _applyDecoratedDescriptor$2(_class7$1.prototype, "DEFAULT", [styleRule], {
+}(BasicLevelStyleSet(buttonColorClassBuilder)), (_descriptor13 = _applyDecoratedDescriptor$3(_class7.prototype, "DEFAULT", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return [{
@@ -11396,7 +11437,7 @@ var ButtonStyle = (_class7$1 = function (_BasicLevelStyleSet) {
             fontSize: "14px"
         }, this.colorClassBuilder(buildColors(COLOR.PLAIN))];
     }
-}), _descriptor14 = _applyDecoratedDescriptor$2(_class7$1.prototype, "EXTRA_SMALL", [styleRule], {
+}), _descriptor14 = _applyDecoratedDescriptor$3(_class7.prototype, "EXTRA_SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11405,26 +11446,26 @@ var ButtonStyle = (_class7$1 = function (_BasicLevelStyleSet) {
             borderWidth: "0.05em"
         };
     }
-}), _descriptor15 = _applyDecoratedDescriptor$2(_class7$1.prototype, "SMALL", [styleRule], {
+}), _descriptor15 = _applyDecoratedDescriptor$3(_class7.prototype, "SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "12px"
         };
     }
-}), _descriptor16 = _applyDecoratedDescriptor$2(_class7$1.prototype, "MEDIUM", [styleRule], {
+}), _descriptor16 = _applyDecoratedDescriptor$3(_class7.prototype, "MEDIUM", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {};
     }
-}), _descriptor17 = _applyDecoratedDescriptor$2(_class7$1.prototype, "LARGE", [styleRule], {
+}), _descriptor17 = _applyDecoratedDescriptor$3(_class7.prototype, "LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "17px"
         };
     }
-}), _descriptor18 = _applyDecoratedDescriptor$2(_class7$1.prototype, "EXTRA_LARGE", [styleRule], {
+}), _descriptor18 = _applyDecoratedDescriptor$3(_class7.prototype, "EXTRA_LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11432,7 +11473,7 @@ var ButtonStyle = (_class7$1 = function (_BasicLevelStyleSet) {
             padding: "0.2em 0.4em"
         };
     }
-})), _class7$1);
+})), _class7);
 
 
 var labelColorClassBuilder = function labelColorClassBuilder(colors) {
@@ -11468,7 +11509,7 @@ var LabelStyle = (_class9 = function (_BasicLevelStyleSet2) {
             args[_key5] = arguments[_key5];
         }
 
-        return _ret5 = (_temp5 = (_this5 = possibleConstructorReturn(this, (_ref5 = LabelStyle.__proto__ || Object.getPrototypeOf(LabelStyle)).call.apply(_ref5, [this].concat(args))), _this5), _initDefineProp$2(_this5, "DEFAULT", _descriptor19, _this5), _initDefineProp$2(_this5, "EXTRA_SMALL", _descriptor20, _this5), _initDefineProp$2(_this5, "SMALL", _descriptor21, _this5), _initDefineProp$2(_this5, "MEDIUM", _descriptor22, _this5), _initDefineProp$2(_this5, "LARGE", _descriptor23, _this5), _initDefineProp$2(_this5, "EXTRA_LARGE", _descriptor24, _this5), _temp5), possibleConstructorReturn(_this5, _ret5);
+        return _ret5 = (_temp5 = (_this5 = possibleConstructorReturn(this, (_ref5 = LabelStyle.__proto__ || Object.getPrototypeOf(LabelStyle)).call.apply(_ref5, [this].concat(args))), _this5), _initDefineProp$3(_this5, "DEFAULT", _descriptor19, _this5), _initDefineProp$3(_this5, "EXTRA_SMALL", _descriptor20, _this5), _initDefineProp$3(_this5, "SMALL", _descriptor21, _this5), _initDefineProp$3(_this5, "MEDIUM", _descriptor22, _this5), _initDefineProp$3(_this5, "LARGE", _descriptor23, _this5), _initDefineProp$3(_this5, "EXTRA_LARGE", _descriptor24, _this5), _temp5), possibleConstructorReturn(_this5, _ret5);
     }
 
     createClass(LabelStyle, [{
@@ -11503,7 +11544,7 @@ var LabelStyle = (_class9 = function (_BasicLevelStyleSet2) {
         }
     }]);
     return LabelStyle;
-}(BasicLevelStyleSet(labelColorClassBuilder)), (_descriptor19 = _applyDecoratedDescriptor$2(_class9.prototype, "DEFAULT", [styleRule], {
+}(BasicLevelStyleSet(labelColorClassBuilder)), (_descriptor19 = _applyDecoratedDescriptor$3(_class9.prototype, "DEFAULT", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return [{
@@ -11525,7 +11566,7 @@ var LabelStyle = (_class9 = function (_BasicLevelStyleSet2) {
             "font-size": "12px"
         }, this.colorClassBuilder(buildColors(COLOR.GRAY))];
     }
-}), _descriptor20 = _applyDecoratedDescriptor$2(_class9.prototype, "EXTRA_SMALL", [styleRule], {
+}), _descriptor20 = _applyDecoratedDescriptor$3(_class9.prototype, "EXTRA_SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11534,26 +11575,26 @@ var LabelStyle = (_class9 = function (_BasicLevelStyleSet2) {
             borderWidth: "0.05em"
         };
     }
-}), _descriptor21 = _applyDecoratedDescriptor$2(_class9.prototype, "SMALL", [styleRule], {
+}), _descriptor21 = _applyDecoratedDescriptor$3(_class9.prototype, "SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "10px"
         };
     }
-}), _descriptor22 = _applyDecoratedDescriptor$2(_class9.prototype, "MEDIUM", [styleRule], {
+}), _descriptor22 = _applyDecoratedDescriptor$3(_class9.prototype, "MEDIUM", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {};
     }
-}), _descriptor23 = _applyDecoratedDescriptor$2(_class9.prototype, "LARGE", [styleRule], {
+}), _descriptor23 = _applyDecoratedDescriptor$3(_class9.prototype, "LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "14px"
         };
     }
-}), _descriptor24 = _applyDecoratedDescriptor$2(_class9.prototype, "EXTRA_LARGE", [styleRule], {
+}), _descriptor24 = _applyDecoratedDescriptor$3(_class9.prototype, "EXTRA_LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11578,7 +11619,7 @@ var BadgeStyle = (_class11 = function (_BasicLevelStyleSet3) {
             args[_key6] = arguments[_key6];
         }
 
-        return _ret6 = (_temp6 = (_this6 = possibleConstructorReturn(this, (_ref6 = BadgeStyle.__proto__ || Object.getPrototypeOf(BadgeStyle)).call.apply(_ref6, [this].concat(args))), _this6), _initDefineProp$2(_this6, "DEFAULT", _descriptor25, _this6), _initDefineProp$2(_this6, "EXTRA_SMALL", _descriptor26, _this6), _initDefineProp$2(_this6, "SMALL", _descriptor27, _this6), _initDefineProp$2(_this6, "MEDIUM", _descriptor28, _this6), _initDefineProp$2(_this6, "LARGE", _descriptor29, _this6), _initDefineProp$2(_this6, "EXTRA_LARGE", _descriptor30, _this6), _temp6), possibleConstructorReturn(_this6, _ret6);
+        return _ret6 = (_temp6 = (_this6 = possibleConstructorReturn(this, (_ref6 = BadgeStyle.__proto__ || Object.getPrototypeOf(BadgeStyle)).call.apply(_ref6, [this].concat(args))), _this6), _initDefineProp$3(_this6, "DEFAULT", _descriptor25, _this6), _initDefineProp$3(_this6, "EXTRA_SMALL", _descriptor26, _this6), _initDefineProp$3(_this6, "SMALL", _descriptor27, _this6), _initDefineProp$3(_this6, "MEDIUM", _descriptor28, _this6), _initDefineProp$3(_this6, "LARGE", _descriptor29, _this6), _initDefineProp$3(_this6, "EXTRA_LARGE", _descriptor30, _this6), _temp6), possibleConstructorReturn(_this6, _ret6);
     }
 
     createClass(BadgeStyle, [{
@@ -11613,7 +11654,7 @@ var BadgeStyle = (_class11 = function (_BasicLevelStyleSet3) {
         }
     }]);
     return BadgeStyle;
-}(BasicLevelStyleSet(labelColorClassBuilder)), (_descriptor25 = _applyDecoratedDescriptor$2(_class11.prototype, "DEFAULT", [styleRule], {
+}(BasicLevelStyleSet(labelColorClassBuilder)), (_descriptor25 = _applyDecoratedDescriptor$3(_class11.prototype, "DEFAULT", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return [{
@@ -11631,7 +11672,7 @@ var BadgeStyle = (_class11 = function (_BasicLevelStyleSet3) {
             "font-size": "12px"
         }, this.colorClassBuilder(buildColors(COLOR.GRAY))];
     }
-}), _descriptor26 = _applyDecoratedDescriptor$2(_class11.prototype, "EXTRA_SMALL", [styleRule], {
+}), _descriptor26 = _applyDecoratedDescriptor$3(_class11.prototype, "EXTRA_SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11639,26 +11680,26 @@ var BadgeStyle = (_class11 = function (_BasicLevelStyleSet3) {
             padding: "0.1em 0.2em"
         };
     }
-}), _descriptor27 = _applyDecoratedDescriptor$2(_class11.prototype, "SMALL", [styleRule], {
+}), _descriptor27 = _applyDecoratedDescriptor$3(_class11.prototype, "SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "10px"
         };
     }
-}), _descriptor28 = _applyDecoratedDescriptor$2(_class11.prototype, "MEDIUM", [styleRule], {
+}), _descriptor28 = _applyDecoratedDescriptor$3(_class11.prototype, "MEDIUM", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {};
     }
-}), _descriptor29 = _applyDecoratedDescriptor$2(_class11.prototype, "LARGE", [styleRule], {
+}), _descriptor29 = _applyDecoratedDescriptor$3(_class11.prototype, "LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "14px"
         };
     }
-}), _descriptor30 = _applyDecoratedDescriptor$2(_class11.prototype, "EXTRA_LARGE", [styleRule], {
+}), _descriptor30 = _applyDecoratedDescriptor$3(_class11.prototype, "EXTRA_LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11687,11 +11728,11 @@ function cardPanelColorClassBuilder(color) {
                 args[_key7] = arguments[_key7];
             }
 
-            return _ret7 = (_temp7 = (_this7 = possibleConstructorReturn(this, (_ref7 = CardPanelLevelStyle.__proto__ || Object.getPrototypeOf(CardPanelLevelStyle)).call.apply(_ref7, [this].concat(args))), _this7), _initDefineProp$2(_this7, "heading", _descriptor31, _this7), _initDefineProp$2(_this7, "panel", _descriptor32, _this7), _temp7), possibleConstructorReturn(_this7, _ret7);
+            return _ret7 = (_temp7 = (_this7 = possibleConstructorReturn(this, (_ref7 = CardPanelLevelStyle.__proto__ || Object.getPrototypeOf(CardPanelLevelStyle)).call.apply(_ref7, [this].concat(args))), _this7), _initDefineProp$3(_this7, "heading", _descriptor31, _this7), _initDefineProp$3(_this7, "panel", _descriptor32, _this7), _temp7), possibleConstructorReturn(_this7, _ret7);
         }
 
         return CardPanelLevelStyle;
-    }(StyleSet), (_descriptor31 = _applyDecoratedDescriptor$2(_class13.prototype, "heading", [styleRule], {
+    }(StyleSet), (_descriptor31 = _applyDecoratedDescriptor$3(_class13.prototype, "heading", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return {
@@ -11700,7 +11741,7 @@ function cardPanelColorClassBuilder(color) {
                 borderBottomColor: colors[4]
             };
         }
-    }), _descriptor32 = _applyDecoratedDescriptor$2(_class13.prototype, "panel", [styleRule], {
+    }), _descriptor32 = _applyDecoratedDescriptor$3(_class13.prototype, "panel", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return {
@@ -11734,11 +11775,11 @@ function cardPanelSizeClassBuilder(fontSize) {
                 args[_key8] = arguments[_key8];
             }
 
-            return _ret8 = (_temp8 = (_this8 = possibleConstructorReturn(this, (_ref8 = CardPanelSizeStyle.__proto__ || Object.getPrototypeOf(CardPanelSizeStyle)).call.apply(_ref8, [this].concat(args))), _this8), _initDefineProp$2(_this8, "panel", _descriptor33, _this8), _temp8), possibleConstructorReturn(_this8, _ret8);
+            return _ret8 = (_temp8 = (_this8 = possibleConstructorReturn(this, (_ref8 = CardPanelSizeStyle.__proto__ || Object.getPrototypeOf(CardPanelSizeStyle)).call.apply(_ref8, [this].concat(args))), _this8), _initDefineProp$3(_this8, "panel", _descriptor33, _this8), _temp8), possibleConstructorReturn(_this8, _ret8);
         }
 
         return CardPanelSizeStyle;
-    }(StyleSet), (_descriptor33 = _applyDecoratedDescriptor$2(_class15.prototype, "panel", [styleRule], {
+    }(StyleSet), (_descriptor33 = _applyDecoratedDescriptor$3(_class15.prototype, "panel", [styleRule], {
         enumerable: true,
         initializer: function initializer() {
             return panelStyle;
@@ -11770,11 +11811,11 @@ var CardPanelStyle = function () {
                         args[_key9] = arguments[_key9];
                     }
 
-                    return _ret9 = (_temp9 = (_this9 = possibleConstructorReturn(this, (_ref9 = DefaultCardPanelStyle.__proto__ || Object.getPrototypeOf(DefaultCardPanelStyle)).call.apply(_ref9, [this].concat(args))), _this9), _initDefineProp$2(_this9, "heading", _descriptor34, _this9), _initDefineProp$2(_this9, "body", _descriptor35, _this9), _initDefineProp$2(_this9, "panel", _descriptor36, _this9), _temp9), possibleConstructorReturn(_this9, _ret9);
+                    return _ret9 = (_temp9 = (_this9 = possibleConstructorReturn(this, (_ref9 = DefaultCardPanelStyle.__proto__ || Object.getPrototypeOf(DefaultCardPanelStyle)).call.apply(_ref9, [this].concat(args))), _this9), _initDefineProp$3(_this9, "heading", _descriptor34, _this9), _initDefineProp$3(_this9, "body", _descriptor35, _this9), _initDefineProp$3(_this9, "panel", _descriptor36, _this9), _temp9), possibleConstructorReturn(_this9, _ret9);
                 }
 
                 return DefaultCardPanelStyle;
-            }(cardPanelColorClassBuilder(COLOR.PLAIN)), (_descriptor34 = _applyDecoratedDescriptor$2(_class18.prototype, "heading", [styleRuleInherit], {
+            }(cardPanelColorClassBuilder(COLOR.PLAIN)), (_descriptor34 = _applyDecoratedDescriptor$3(_class18.prototype, "heading", [styleRuleInherit], {
                 enumerable: true,
                 initializer: function initializer() {
                     return {
@@ -11783,14 +11824,14 @@ var CardPanelStyle = function () {
                         borderBottomStyle: "solid"
                     };
                 }
-            }), _descriptor35 = _applyDecoratedDescriptor$2(_class18.prototype, "body", [styleRule], {
+            }), _descriptor35 = _applyDecoratedDescriptor$3(_class18.prototype, "body", [styleRule], {
                 enumerable: true,
                 initializer: function initializer() {
                     return {
                         // padding: "0.35em",
                     };
                 }
-            }), _descriptor36 = _applyDecoratedDescriptor$2(_class18.prototype, "panel", [styleRuleInherit], {
+            }), _descriptor36 = _applyDecoratedDescriptor$3(_class18.prototype, "panel", [styleRuleInherit], {
                 enumerable: true,
                 initializer: function initializer() {
                     return {
@@ -11908,7 +11949,7 @@ var ProgressBarStyle = (_class20 = function (_BasicLevelStyleSet4) {
             args[_key10] = arguments[_key10];
         }
 
-        return _ret10 = (_temp10 = (_this10 = possibleConstructorReturn(this, (_ref10 = ProgressBarStyle.__proto__ || Object.getPrototypeOf(ProgressBarStyle)).call.apply(_ref10, [this].concat(args))), _this10), _initDefineProp$2(_this10, "CONTAINER", _descriptor37, _this10), _initDefineProp$2(_this10, "DEFAULT", _descriptor38, _this10), _initDefineProp$2(_this10, "STRIPED", _descriptor39, _this10), _initDefineProp$2(_this10, "ACTIVE", _descriptor40, _this10), _initDefineProp$2(_this10, "EXTRA_SMALL", _descriptor41, _this10), _initDefineProp$2(_this10, "SMALL", _descriptor42, _this10), _initDefineProp$2(_this10, "MEDIUM", _descriptor43, _this10), _initDefineProp$2(_this10, "LARGE", _descriptor44, _this10), _initDefineProp$2(_this10, "EXTRA_LARGE", _descriptor45, _this10), _temp10), possibleConstructorReturn(_this10, _ret10);
+        return _ret10 = (_temp10 = (_this10 = possibleConstructorReturn(this, (_ref10 = ProgressBarStyle.__proto__ || Object.getPrototypeOf(ProgressBarStyle)).call.apply(_ref10, [this].concat(args))), _this10), _initDefineProp$3(_this10, "CONTAINER", _descriptor37, _this10), _initDefineProp$3(_this10, "DEFAULT", _descriptor38, _this10), _initDefineProp$3(_this10, "STRIPED", _descriptor39, _this10), _initDefineProp$3(_this10, "ACTIVE", _descriptor40, _this10), _initDefineProp$3(_this10, "EXTRA_SMALL", _descriptor41, _this10), _initDefineProp$3(_this10, "SMALL", _descriptor42, _this10), _initDefineProp$3(_this10, "MEDIUM", _descriptor43, _this10), _initDefineProp$3(_this10, "LARGE", _descriptor44, _this10), _initDefineProp$3(_this10, "EXTRA_LARGE", _descriptor45, _this10), _temp10), possibleConstructorReturn(_this10, _ret10);
     }
 
     createClass(ProgressBarStyle, [{
@@ -11943,7 +11984,7 @@ var ProgressBarStyle = (_class20 = function (_BasicLevelStyleSet4) {
         }
     }]);
     return ProgressBarStyle;
-}(BasicLevelStyleSet(progressBarColorClassBuilder)), (_descriptor37 = _applyDecoratedDescriptor$2(_class20.prototype, "CONTAINER", [styleRule], {
+}(BasicLevelStyleSet(progressBarColorClassBuilder)), (_descriptor37 = _applyDecoratedDescriptor$3(_class20.prototype, "CONTAINER", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11955,7 +11996,7 @@ var ProgressBarStyle = (_class20 = function (_BasicLevelStyleSet4) {
             boxShadow: "inset 0 1px 2px rgba(0, 0, 0, .1)"
         };
     }
-}), _descriptor38 = _applyDecoratedDescriptor$2(_class20.prototype, "DEFAULT", [styleRule], {
+}), _descriptor38 = _applyDecoratedDescriptor$3(_class20.prototype, "DEFAULT", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return [{
@@ -11973,7 +12014,7 @@ var ProgressBarStyle = (_class20 = function (_BasicLevelStyleSet4) {
             fontSize: "12px"
         }, this.colorClassBuilder(buildColors(COLOR.PRIMARY))];
     }
-}), _descriptor39 = _applyDecoratedDescriptor$2(_class20.prototype, "STRIPED", [styleRule], {
+}), _descriptor39 = _applyDecoratedDescriptor$3(_class20.prototype, "STRIPED", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -11981,40 +12022,40 @@ var ProgressBarStyle = (_class20 = function (_BasicLevelStyleSet4) {
             backgroundSize: "40px 40px"
         };
     }
-}), _descriptor40 = _applyDecoratedDescriptor$2(_class20.prototype, "ACTIVE", [styleRule], {
+}), _descriptor40 = _applyDecoratedDescriptor$3(_class20.prototype, "ACTIVE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             animation: "progress-bar-stripes 2s linear infinite"
         };
     }
-}), _descriptor41 = _applyDecoratedDescriptor$2(_class20.prototype, "EXTRA_SMALL", [styleRule], {
+}), _descriptor41 = _applyDecoratedDescriptor$3(_class20.prototype, "EXTRA_SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "8px"
         };
     }
-}), _descriptor42 = _applyDecoratedDescriptor$2(_class20.prototype, "SMALL", [styleRule], {
+}), _descriptor42 = _applyDecoratedDescriptor$3(_class20.prototype, "SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "10px"
         };
     }
-}), _descriptor43 = _applyDecoratedDescriptor$2(_class20.prototype, "MEDIUM", [styleRule], {
+}), _descriptor43 = _applyDecoratedDescriptor$3(_class20.prototype, "MEDIUM", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {};
     }
-}), _descriptor44 = _applyDecoratedDescriptor$2(_class20.prototype, "LARGE", [styleRule], {
+}), _descriptor44 = _applyDecoratedDescriptor$3(_class20.prototype, "LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             fontSize: "14px"
         };
     }
-}), _descriptor45 = _applyDecoratedDescriptor$2(_class20.prototype, "EXTRA_LARGE", [styleRule], {
+}), _descriptor45 = _applyDecoratedDescriptor$3(_class20.prototype, "EXTRA_LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -12037,7 +12078,7 @@ var FlexContainerStyle = (_class22 = function (_StyleSet6) {
             args[_key11] = arguments[_key11];
         }
 
-        return _ret11 = (_temp11 = (_this11 = possibleConstructorReturn(this, (_ref11 = FlexContainerStyle.__proto__ || Object.getPrototypeOf(FlexContainerStyle)).call.apply(_ref11, [this].concat(args))), _this11), _initDefineProp$2(_this11, "HORIZONTAL", _descriptor46, _this11), _initDefineProp$2(_this11, "VERTICAL", _descriptor47, _this11), _temp11), possibleConstructorReturn(_this11, _ret11);
+        return _ret11 = (_temp11 = (_this11 = possibleConstructorReturn(this, (_ref11 = FlexContainerStyle.__proto__ || Object.getPrototypeOf(FlexContainerStyle)).call.apply(_ref11, [this].concat(args))), _this11), _initDefineProp$3(_this11, "HORIZONTAL", _descriptor46, _this11), _initDefineProp$3(_this11, "VERTICAL", _descriptor47, _this11), _temp11), possibleConstructorReturn(_this11, _ret11);
     }
 
     createClass(FlexContainerStyle, [{
@@ -12072,7 +12113,7 @@ var FlexContainerStyle = (_class22 = function (_StyleSet6) {
         }
     }]);
     return FlexContainerStyle;
-}(StyleSet), (_descriptor46 = _applyDecoratedDescriptor$2(_class22.prototype, "HORIZONTAL", [styleRule], {
+}(StyleSet), (_descriptor46 = _applyDecoratedDescriptor$3(_class22.prototype, "HORIZONTAL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -12086,7 +12127,7 @@ var FlexContainerStyle = (_class22 = function (_StyleSet6) {
             }
         };
     }
-}), _descriptor47 = _applyDecoratedDescriptor$2(_class22.prototype, "VERTICAL", [styleRule], {
+}), _descriptor47 = _applyDecoratedDescriptor$3(_class22.prototype, "VERTICAL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -12116,7 +12157,7 @@ var ContainerStyle = (_class24 = function (_StyleSet7) {
             args[_key12] = arguments[_key12];
         }
 
-        return _ret12 = (_temp12 = (_this12 = possibleConstructorReturn(this, (_ref12 = ContainerStyle.__proto__ || Object.getPrototypeOf(ContainerStyle)).call.apply(_ref12, [this].concat(args))), _this12), _initDefineProp$2(_this12, "EXTRA_SMALL", _descriptor48, _this12), _initDefineProp$2(_this12, "SMALL", _descriptor49, _this12), _initDefineProp$2(_this12, "MEDIUM", _descriptor50, _this12), _initDefineProp$2(_this12, "LARGE", _descriptor51, _this12), _initDefineProp$2(_this12, "EXTRA_LARGE", _descriptor52, _this12), _temp12), possibleConstructorReturn(_this12, _ret12);
+        return _ret12 = (_temp12 = (_this12 = possibleConstructorReturn(this, (_ref12 = ContainerStyle.__proto__ || Object.getPrototypeOf(ContainerStyle)).call.apply(_ref12, [this].concat(args))), _this12), _initDefineProp$3(_this12, "EXTRA_SMALL", _descriptor48, _this12), _initDefineProp$3(_this12, "SMALL", _descriptor49, _this12), _initDefineProp$3(_this12, "MEDIUM", _descriptor50, _this12), _initDefineProp$3(_this12, "LARGE", _descriptor51, _this12), _initDefineProp$3(_this12, "EXTRA_LARGE", _descriptor52, _this12), _temp12), possibleConstructorReturn(_this12, _ret12);
     }
 
     createClass(ContainerStyle, [{
@@ -12151,35 +12192,35 @@ var ContainerStyle = (_class24 = function (_StyleSet7) {
         }
     }]);
     return ContainerStyle;
-}(StyleSet), (_descriptor48 = _applyDecoratedDescriptor$2(_class24.prototype, "EXTRA_SMALL", [styleRule], {
+}(StyleSet), (_descriptor48 = _applyDecoratedDescriptor$3(_class24.prototype, "EXTRA_SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             margin: "0% 15%"
         };
     }
-}), _descriptor49 = _applyDecoratedDescriptor$2(_class24.prototype, "SMALL", [styleRule], {
+}), _descriptor49 = _applyDecoratedDescriptor$3(_class24.prototype, "SMALL", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             margin: "0% 10%"
         };
     }
-}), _descriptor50 = _applyDecoratedDescriptor$2(_class24.prototype, "MEDIUM", [styleRule], {
+}), _descriptor50 = _applyDecoratedDescriptor$3(_class24.prototype, "MEDIUM", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             margin: "0% 6%"
         };
     }
-}), _descriptor51 = _applyDecoratedDescriptor$2(_class24.prototype, "LARGE", [styleRule], {
+}), _descriptor51 = _applyDecoratedDescriptor$3(_class24.prototype, "LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             margin: "0% 3%"
         };
     }
-}), _descriptor52 = _applyDecoratedDescriptor$2(_class24.prototype, "EXTRA_LARGE", [styleRule], {
+}), _descriptor52 = _applyDecoratedDescriptor$3(_class24.prototype, "EXTRA_LARGE", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -12198,49 +12239,6 @@ GlobalStyle.CardPanel = new CardPanelStyle();
 GlobalStyle.ProgressBar = ProgressBarStyle.getInstance();
 GlobalStyle.FlexContainer = FlexContainerStyle.getInstance();
 GlobalStyle.Container = ContainerStyle.getInstance();
-
-function BootstrapMixin(BaseClass, bootstrapClassName) {
-    var BootstrapClass = function (_BaseClass) {
-        inherits(BootstrapClass, _BaseClass);
-
-        function BootstrapClass() {
-            classCallCheck(this, BootstrapClass);
-            return possibleConstructorReturn(this, (BootstrapClass.__proto__ || Object.getPrototypeOf(BootstrapClass)).apply(this, arguments));
-        }
-
-        createClass(BootstrapClass, [{
-            key: "getNodeAttributes",
-            value: function getNodeAttributes() {
-                var attr = get(BootstrapClass.prototype.__proto__ || Object.getPrototypeOf(BootstrapClass.prototype), "getNodeAttributes", this).call(this);
-
-                attr.addClass(this.constructor.bootstrapClass());
-                if (this.getLevel()) {
-                    attr.addClass(this.constructor.bootstrapClass() + "-" + this.getLevel());
-                }
-                return attr;
-            }
-        }, {
-            key: "getLevel",
-            value: function getLevel() {
-                return this.options.level || "";
-            }
-        }, {
-            key: "setLevel",
-            value: function setLevel(level) {
-                this.options.level = level;
-                this.applyNodeAttributes();
-            }
-        }], [{
-            key: "bootstrapClass",
-            value: function bootstrapClass() {
-                return bootstrapClassName;
-            }
-        }]);
-        return BootstrapClass;
-    }(BaseClass);
-
-    return BootstrapClass;
-}
 
 var SimpleStyledElement = function (_UI$Element) {
     inherits(SimpleStyledElement, _UI$Element);
@@ -12940,20 +12938,20 @@ Object.defineProperty(UI.Element.prototype, "styleSheet", {
     }
 });
 
-var _class$7;
-var _descriptor$2;
-var _descriptor2$2;
-var _descriptor3$2;
-var _class3$2;
+var _class$10;
+var _descriptor$3;
+var _descriptor2$3;
+var _descriptor3$3;
+var _class3$1;
 var _descriptor4$1;
 var _descriptor5$1;
 var _descriptor6$1;
-var _class5$1;
-var _descriptor7$1;
-var _descriptor8$1;
-var _descriptor9$1;
+var _class5;
+var _descriptor7;
+var _descriptor8;
+var _descriptor9;
 
-function _initDefineProp$3(target, property, descriptor, context) {
+function _initDefineProp$4(target, property, descriptor, context) {
     if (!descriptor) return;
     Object.defineProperty(target, property, {
         enumerable: descriptor.enumerable,
@@ -12963,7 +12961,7 @@ function _initDefineProp$3(target, property, descriptor, context) {
     });
 }
 
-function _applyDecoratedDescriptor$3(target, property, decorators, descriptor, context) {
+function _applyDecoratedDescriptor$4(target, property, decorators, descriptor, context) {
     var desc = {};
     Object['ke' + 'ys'](descriptor).forEach(function (key) {
         desc[key] = descriptor[key];
@@ -12992,7 +12990,7 @@ function _applyDecoratedDescriptor$3(target, property, decorators, descriptor, c
     return desc;
 }
 
-var BaseTabAreaStyle = (_class$7 = function (_StyleSet) {
+var BaseTabAreaStyle = (_class$10 = function (_StyleSet) {
     inherits(BaseTabAreaStyle, _StyleSet);
 
     function BaseTabAreaStyle() {
@@ -13006,11 +13004,11 @@ var BaseTabAreaStyle = (_class$7 = function (_StyleSet) {
             args[_key] = arguments[_key];
         }
 
-        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = BaseTabAreaStyle.__proto__ || Object.getPrototypeOf(BaseTabAreaStyle)).call.apply(_ref, [this].concat(args))), _this), _initDefineProp$3(_this, "tab", _descriptor$2, _this), _initDefineProp$3(_this, "activeTab", _descriptor2$2, _this), _initDefineProp$3(_this, "nav", _descriptor3$2, _this), _temp), possibleConstructorReturn(_this, _ret);
+        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = BaseTabAreaStyle.__proto__ || Object.getPrototypeOf(BaseTabAreaStyle)).call.apply(_ref, [this].concat(args))), _this), _initDefineProp$4(_this, "tab", _descriptor$3, _this), _initDefineProp$4(_this, "activeTab", _descriptor2$3, _this), _initDefineProp$4(_this, "nav", _descriptor3$3, _this), _temp), possibleConstructorReturn(_this, _ret);
     }
 
     return BaseTabAreaStyle;
-}(StyleSet), (_descriptor$2 = _applyDecoratedDescriptor$3(_class$7.prototype, "tab", [styleRule], {
+}(StyleSet), (_descriptor$3 = _applyDecoratedDescriptor$4(_class$10.prototype, "tab", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13019,20 +13017,20 @@ var BaseTabAreaStyle = (_class$7 = function (_StyleSet) {
             position: "relative"
         };
     }
-}), _descriptor2$2 = _applyDecoratedDescriptor$3(_class$7.prototype, "activeTab", [styleRule], {
+}), _descriptor2$3 = _applyDecoratedDescriptor$4(_class$10.prototype, "activeTab", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {};
     }
-}), _descriptor3$2 = _applyDecoratedDescriptor$3(_class$7.prototype, "nav", [styleRule], {
+}), _descriptor3$3 = _applyDecoratedDescriptor$4(_class$10.prototype, "nav", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             listStyle: "none"
         };
     }
-})), _class$7);
-var DefaultTabAreaStyle = (_class3$2 = function (_BaseTabAreaStyle) {
+})), _class$10);
+var DefaultTabAreaStyle = (_class3$1 = function (_BaseTabAreaStyle) {
     inherits(DefaultTabAreaStyle, _BaseTabAreaStyle);
 
     function DefaultTabAreaStyle() {
@@ -13046,11 +13044,11 @@ var DefaultTabAreaStyle = (_class3$2 = function (_BaseTabAreaStyle) {
             args[_key2] = arguments[_key2];
         }
 
-        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = DefaultTabAreaStyle.__proto__ || Object.getPrototypeOf(DefaultTabAreaStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$3(_this2, "tab", _descriptor4$1, _this2), _initDefineProp$3(_this2, "activeTab", _descriptor5$1, _this2), _initDefineProp$3(_this2, "nav", _descriptor6$1, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
+        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = DefaultTabAreaStyle.__proto__ || Object.getPrototypeOf(DefaultTabAreaStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$4(_this2, "tab", _descriptor4$1, _this2), _initDefineProp$4(_this2, "activeTab", _descriptor5$1, _this2), _initDefineProp$4(_this2, "nav", _descriptor6$1, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
     }
 
     return DefaultTabAreaStyle;
-}(BaseTabAreaStyle), (_descriptor4$1 = _applyDecoratedDescriptor$3(_class3$2.prototype, "tab", [styleRuleInherit], {
+}(BaseTabAreaStyle), (_descriptor4$1 = _applyDecoratedDescriptor$4(_class3$1.prototype, "tab", [styleRuleInherit], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13072,7 +13070,7 @@ var DefaultTabAreaStyle = (_class3$2 = function (_BaseTabAreaStyle) {
             }
         };
     }
-}), _descriptor5$1 = _applyDecoratedDescriptor$3(_class3$2.prototype, "activeTab", [styleRuleInherit], {
+}), _descriptor5$1 = _applyDecoratedDescriptor$4(_class3$1.prototype, "activeTab", [styleRuleInherit], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13083,7 +13081,7 @@ var DefaultTabAreaStyle = (_class3$2 = function (_BaseTabAreaStyle) {
             borderBottomColor: "transparent !important"
         };
     }
-}), _descriptor6$1 = _applyDecoratedDescriptor$3(_class3$2.prototype, "nav", [styleRuleInherit], {
+}), _descriptor6$1 = _applyDecoratedDescriptor$4(_class3$1.prototype, "nav", [styleRuleInherit], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13092,8 +13090,8 @@ var DefaultTabAreaStyle = (_class3$2 = function (_BaseTabAreaStyle) {
             marginBottom: "0"
         };
     }
-})), _class3$2);
-var MinimalistTabAreaStyle = (_class5$1 = function (_BaseTabAreaStyle2) {
+})), _class3$1);
+var MinimalistTabAreaStyle = (_class5 = function (_BaseTabAreaStyle2) {
     inherits(MinimalistTabAreaStyle, _BaseTabAreaStyle2);
 
     function MinimalistTabAreaStyle() {
@@ -13107,11 +13105,11 @@ var MinimalistTabAreaStyle = (_class5$1 = function (_BaseTabAreaStyle2) {
             args[_key3] = arguments[_key3];
         }
 
-        return _ret3 = (_temp3 = (_this3 = possibleConstructorReturn(this, (_ref3 = MinimalistTabAreaStyle.__proto__ || Object.getPrototypeOf(MinimalistTabAreaStyle)).call.apply(_ref3, [this].concat(args))), _this3), _initDefineProp$3(_this3, "tab", _descriptor7$1, _this3), _initDefineProp$3(_this3, "activeTab", _descriptor8$1, _this3), _initDefineProp$3(_this3, "nav", _descriptor9$1, _this3), _temp3), possibleConstructorReturn(_this3, _ret3);
+        return _ret3 = (_temp3 = (_this3 = possibleConstructorReturn(this, (_ref3 = MinimalistTabAreaStyle.__proto__ || Object.getPrototypeOf(MinimalistTabAreaStyle)).call.apply(_ref3, [this].concat(args))), _this3), _initDefineProp$4(_this3, "tab", _descriptor7, _this3), _initDefineProp$4(_this3, "activeTab", _descriptor8, _this3), _initDefineProp$4(_this3, "nav", _descriptor9, _this3), _temp3), possibleConstructorReturn(_this3, _ret3);
     }
 
     return MinimalistTabAreaStyle;
-}(BaseTabAreaStyle), (_descriptor7$1 = _applyDecoratedDescriptor$3(_class5$1.prototype, "tab", [styleRuleInherit], {
+}(BaseTabAreaStyle), (_descriptor7 = _applyDecoratedDescriptor$4(_class5.prototype, "tab", [styleRuleInherit], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13129,7 +13127,7 @@ var MinimalistTabAreaStyle = (_class5$1 = function (_BaseTabAreaStyle2) {
             }
         };
     }
-}), _descriptor8$1 = _applyDecoratedDescriptor$3(_class5$1.prototype, "activeTab", [styleRuleInherit], {
+}), _descriptor8 = _applyDecoratedDescriptor$4(_class5.prototype, "activeTab", [styleRuleInherit], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13139,7 +13137,7 @@ var MinimalistTabAreaStyle = (_class5$1 = function (_BaseTabAreaStyle2) {
             borderBottom: "2px solid rgba(51,122,183,1) !important"
         };
     }
-}), _descriptor9$1 = _applyDecoratedDescriptor$3(_class5$1.prototype, "nav", [styleRuleInherit], {
+}), _descriptor9 = _applyDecoratedDescriptor$4(_class5.prototype, "nav", [styleRuleInherit], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13147,7 +13145,7 @@ var MinimalistTabAreaStyle = (_class5$1 = function (_BaseTabAreaStyle2) {
             borderBottom: "1px solid #aaa"
         };
     }
-})), _class5$1);
+})), _class5);
 
 var BasicTabTitle = function (_UI$Primitive) {
     inherits(BasicTabTitle, _UI$Primitive);
@@ -13672,15 +13670,15 @@ var CardPanel = function (_SimpleStyledElement) {
     return CardPanel;
 }(SimpleStyledElement);
 
-var _class$9;
-var _descriptor$3;
-var _descriptor2$3;
-var _class3$3;
-var _descriptor3$3;
+var _class$12;
+var _descriptor$4;
+var _descriptor2$4;
+var _class3$2;
+var _descriptor3$4;
 var _descriptor4$2;
 var _descriptor5$2;
 
-function _initDefineProp$4(target, property, descriptor, context) {
+function _initDefineProp$5(target, property, descriptor, context) {
     if (!descriptor) return;
     Object.defineProperty(target, property, {
         enumerable: descriptor.enumerable,
@@ -13690,7 +13688,7 @@ function _initDefineProp$4(target, property, descriptor, context) {
     });
 }
 
-function _applyDecoratedDescriptor$4(target, property, decorators, descriptor, context) {
+function _applyDecoratedDescriptor$5(target, property, decorators, descriptor, context) {
     var desc = {};
     Object['ke' + 'ys'](descriptor).forEach(function (key) {
         desc[key] = descriptor[key];
@@ -13719,7 +13717,7 @@ function _applyDecoratedDescriptor$4(target, property, decorators, descriptor, c
     return desc;
 }
 
-var CollapsibleStyle = (_class$9 = function (_StyleSet) {
+var CollapsibleStyle = (_class$12 = function (_StyleSet) {
     inherits(CollapsibleStyle, _StyleSet);
 
     function CollapsibleStyle() {
@@ -13733,11 +13731,11 @@ var CollapsibleStyle = (_class$9 = function (_StyleSet) {
             args[_key] = arguments[_key];
         }
 
-        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = CollapsibleStyle.__proto__ || Object.getPrototypeOf(CollapsibleStyle)).call.apply(_ref, [this].concat(args))), _this), _this.transitionDuration = 0.4, _initDefineProp$4(_this, "collapsing", _descriptor$3, _this), _initDefineProp$4(_this, "collapsed", _descriptor2$3, _this), _temp), possibleConstructorReturn(_this, _ret);
+        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = CollapsibleStyle.__proto__ || Object.getPrototypeOf(CollapsibleStyle)).call.apply(_ref, [this].concat(args))), _this), _this.transitionDuration = 0.4, _initDefineProp$5(_this, "collapsing", _descriptor$4, _this), _initDefineProp$5(_this, "collapsed", _descriptor2$4, _this), _temp), possibleConstructorReturn(_this, _ret);
     }
 
     return CollapsibleStyle;
-}(StyleSet), (_descriptor$3 = _applyDecoratedDescriptor$4(_class$9.prototype, "collapsing", [styleRule], {
+}(StyleSet), (_descriptor$4 = _applyDecoratedDescriptor$5(_class$12.prototype, "collapsing", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13748,7 +13746,7 @@ var CollapsibleStyle = (_class$9 = function (_StyleSet) {
             transitionDelay: "-0.15s"
         };
     }
-}), _descriptor2$3 = _applyDecoratedDescriptor$4(_class$9.prototype, "collapsed", [styleRule], {
+}), _descriptor2$4 = _applyDecoratedDescriptor$5(_class$12.prototype, "collapsed", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13756,8 +13754,8 @@ var CollapsibleStyle = (_class$9 = function (_StyleSet) {
             transitionDelay: "0s !important"
         };
     }
-})), _class$9);
-var CollapsiblePanelStyle = (_class3$3 = function (_StyleSet2) {
+})), _class$12);
+var CollapsiblePanelStyle = (_class3$2 = function (_StyleSet2) {
     inherits(CollapsiblePanelStyle, _StyleSet2);
 
     function CollapsiblePanelStyle() {
@@ -13771,11 +13769,11 @@ var CollapsiblePanelStyle = (_class3$3 = function (_StyleSet2) {
             args[_key2] = arguments[_key2];
         }
 
-        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = CollapsiblePanelStyle.__proto__ || Object.getPrototypeOf(CollapsiblePanelStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$4(_this2, "heading", _descriptor3$3, _this2), _initDefineProp$4(_this2, "button", _descriptor4$2, _this2), _initDefineProp$4(_this2, "collapsedButton", _descriptor5$2, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
+        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = CollapsiblePanelStyle.__proto__ || Object.getPrototypeOf(CollapsiblePanelStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$5(_this2, "heading", _descriptor3$4, _this2), _initDefineProp$5(_this2, "button", _descriptor4$2, _this2), _initDefineProp$5(_this2, "collapsedButton", _descriptor5$2, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
     }
 
     return CollapsiblePanelStyle;
-}(StyleSet), (_descriptor3$3 = _applyDecoratedDescriptor$4(_class3$3.prototype, "heading", [styleRule], {
+}(StyleSet), (_descriptor3$4 = _applyDecoratedDescriptor$5(_class3$2.prototype, "heading", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13786,7 +13784,7 @@ var CollapsiblePanelStyle = (_class3$3 = function (_StyleSet2) {
             backgroundColor: "#f5f5f5"
         };
     }
-}), _descriptor4$2 = _applyDecoratedDescriptor$4(_class3$3.prototype, "button", [styleRule], {
+}), _descriptor4$2 = _applyDecoratedDescriptor$5(_class3$2.prototype, "button", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13806,7 +13804,7 @@ var CollapsiblePanelStyle = (_class3$3 = function (_StyleSet2) {
             }
         };
     }
-}), _descriptor5$2 = _applyDecoratedDescriptor$4(_class3$3.prototype, "collapsedButton", [styleRule], {
+}), _descriptor5$2 = _applyDecoratedDescriptor$5(_class3$2.prototype, "collapsedButton", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -13815,7 +13813,7 @@ var CollapsiblePanelStyle = (_class3$3 = function (_StyleSet2) {
             }
         };
     }
-})), _class3$3);
+})), _class3$2);
 
 function CollapsibleMixin(BaseClass) {
     var _class, _temp;
@@ -13876,10 +13874,10 @@ function CollapsibleMixin(BaseClass) {
     return CollapsibleElement;
 }
 
-var _class$8;
-var _temp$5;
+var _class$11;
+var _temp$7;
 
-var CollapsiblePanel = (_temp$5 = _class$8 = function (_CollapsibleMixin) {
+var CollapsiblePanel = (_temp$7 = _class$11 = function (_CollapsibleMixin) {
     inherits(CollapsiblePanel, _CollapsibleMixin);
 
     function CollapsiblePanel() {
@@ -13966,7 +13964,7 @@ var CollapsiblePanel = (_temp$5 = _class$8 = function (_CollapsibleMixin) {
         }
     }]);
     return CollapsiblePanel;
-}(CollapsibleMixin(CardPanel)), _class$8.styleSet = new CollapsiblePanelStyle(), _temp$5);
+}(CollapsibleMixin(CardPanel)), _class$11.styleSet = new CollapsiblePanelStyle(), _temp$7);
 
 var DelayedCollapsiblePanel = function (_CollapsiblePanel) {
     inherits(DelayedCollapsiblePanel, _CollapsiblePanel);
@@ -14001,17 +13999,17 @@ var DelayedCollapsiblePanel = function (_CollapsiblePanel) {
     return DelayedCollapsiblePanel;
 }(CollapsiblePanel);
 
-var _class$11;
-var _descriptor$4;
-var _descriptor2$4;
-var _class3$4;
-var _descriptor3$4;
+var _class$14;
+var _descriptor$5;
+var _descriptor2$5;
+var _class3$3;
+var _descriptor3$5;
 var _descriptor4$3;
 var _descriptor5$3;
 var _descriptor6$2;
-var _descriptor7$2;
+var _descriptor7$1;
 
-function _initDefineProp$5(target, property, descriptor, context) {
+function _initDefineProp$6(target, property, descriptor, context) {
     if (!descriptor) return;
     Object.defineProperty(target, property, {
         enumerable: descriptor.enumerable,
@@ -14021,7 +14019,7 @@ function _initDefineProp$5(target, property, descriptor, context) {
     });
 }
 
-function _applyDecoratedDescriptor$5(target, property, decorators, descriptor, context) {
+function _applyDecoratedDescriptor$6(target, property, decorators, descriptor, context) {
     var desc = {};
     Object['ke' + 'ys'](descriptor).forEach(function (key) {
         desc[key] = descriptor[key];
@@ -14050,7 +14048,7 @@ function _applyDecoratedDescriptor$5(target, property, decorators, descriptor, c
     return desc;
 }
 
-var FloatingWindowStyle = (_class$11 = function (_StyleSet) {
+var FloatingWindowStyle = (_class$14 = function (_StyleSet) {
     inherits(FloatingWindowStyle, _StyleSet);
 
     function FloatingWindowStyle() {
@@ -14064,11 +14062,11 @@ var FloatingWindowStyle = (_class$11 = function (_StyleSet) {
             args[_key] = arguments[_key];
         }
 
-        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = FloatingWindowStyle.__proto__ || Object.getPrototypeOf(FloatingWindowStyle)).call.apply(_ref, [this].concat(args))), _this), _initDefineProp$5(_this, "hiddenAnimated", _descriptor$4, _this), _initDefineProp$5(_this, "visibleAnimated", _descriptor2$4, _this), _temp), possibleConstructorReturn(_this, _ret);
+        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = FloatingWindowStyle.__proto__ || Object.getPrototypeOf(FloatingWindowStyle)).call.apply(_ref, [this].concat(args))), _this), _initDefineProp$6(_this, "hiddenAnimated", _descriptor$5, _this), _initDefineProp$6(_this, "visibleAnimated", _descriptor2$5, _this), _temp), possibleConstructorReturn(_this, _ret);
     }
 
     return FloatingWindowStyle;
-}(StyleSet), (_descriptor$4 = _applyDecoratedDescriptor$5(_class$11.prototype, "hiddenAnimated", [styleRule], {
+}(StyleSet), (_descriptor$5 = _applyDecoratedDescriptor$6(_class$14.prototype, "hiddenAnimated", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14077,7 +14075,7 @@ var FloatingWindowStyle = (_class$11 = function (_StyleSet) {
             transition: "opacity 0.1s linear"
         };
     }
-}), _descriptor2$4 = _applyDecoratedDescriptor$5(_class$11.prototype, "visibleAnimated", [styleRule], {
+}), _descriptor2$5 = _applyDecoratedDescriptor$6(_class$14.prototype, "visibleAnimated", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14086,8 +14084,8 @@ var FloatingWindowStyle = (_class$11 = function (_StyleSet) {
             transition: "opacity 0.1s linear"
         };
     }
-})), _class$11);
-var ModalStyle = (_class3$4 = function (_FloatingWindowStyle) {
+})), _class$14);
+var ModalStyle = (_class3$3 = function (_FloatingWindowStyle) {
     inherits(ModalStyle, _FloatingWindowStyle);
 
     function ModalStyle() {
@@ -14101,11 +14099,11 @@ var ModalStyle = (_class3$4 = function (_FloatingWindowStyle) {
             args[_key2] = arguments[_key2];
         }
 
-        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = ModalStyle.__proto__ || Object.getPrototypeOf(ModalStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$5(_this2, "container", _descriptor3$4, _this2), _initDefineProp$5(_this2, "background", _descriptor4$3, _this2), _initDefineProp$5(_this2, "header", _descriptor5$3, _this2), _initDefineProp$5(_this2, "body", _descriptor6$2, _this2), _initDefineProp$5(_this2, "footer", _descriptor7$2, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
+        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = ModalStyle.__proto__ || Object.getPrototypeOf(ModalStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$6(_this2, "container", _descriptor3$5, _this2), _initDefineProp$6(_this2, "background", _descriptor4$3, _this2), _initDefineProp$6(_this2, "header", _descriptor5$3, _this2), _initDefineProp$6(_this2, "body", _descriptor6$2, _this2), _initDefineProp$6(_this2, "footer", _descriptor7$1, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
     }
 
     return ModalStyle;
-}(FloatingWindowStyle), (_descriptor3$4 = _applyDecoratedDescriptor$5(_class3$4.prototype, "container", [styleRule], {
+}(FloatingWindowStyle), (_descriptor3$5 = _applyDecoratedDescriptor$6(_class3$3.prototype, "container", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14119,7 +14117,7 @@ var ModalStyle = (_class3$4 = function (_FloatingWindowStyle) {
             zIndex: "9999"
         };
     }
-}), _descriptor4$3 = _applyDecoratedDescriptor$5(_class3$4.prototype, "background", [styleRule], {
+}), _descriptor4$3 = _applyDecoratedDescriptor$6(_class3$3.prototype, "background", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14129,7 +14127,7 @@ var ModalStyle = (_class3$4 = function (_FloatingWindowStyle) {
             background: "rgba(0,0,0,0.5)"
         };
     }
-}), _descriptor5$3 = _applyDecoratedDescriptor$5(_class3$4.prototype, "header", [styleRule], {
+}), _descriptor5$3 = _applyDecoratedDescriptor$6(_class3$3.prototype, "header", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14137,7 +14135,7 @@ var ModalStyle = (_class3$4 = function (_FloatingWindowStyle) {
             borderBottom: "1px solid #e5e5e5"
         };
     }
-}), _descriptor6$2 = _applyDecoratedDescriptor$5(_class3$4.prototype, "body", [styleRule], {
+}), _descriptor6$2 = _applyDecoratedDescriptor$6(_class3$3.prototype, "body", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14145,7 +14143,7 @@ var ModalStyle = (_class3$4 = function (_FloatingWindowStyle) {
             padding: "15px"
         };
     }
-}), _descriptor7$2 = _applyDecoratedDescriptor$5(_class3$4.prototype, "footer", [styleRule], {
+}), _descriptor7$1 = _applyDecoratedDescriptor$6(_class3$3.prototype, "footer", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14154,12 +14152,12 @@ var ModalStyle = (_class3$4 = function (_FloatingWindowStyle) {
             borderTop: "1px solid #e5e5e5"
         };
     }
-})), _class3$4);
+})), _class3$3);
 
-var _class$10;
-var _temp$6;
+var _class$13;
+var _temp$8;
 
-var FloatingWindow = (_temp$6 = _class$10 = function (_UI$Element) {
+var FloatingWindow = (_temp$8 = _class$13 = function (_UI$Element) {
     inherits(FloatingWindow, _UI$Element);
 
     function FloatingWindow() {
@@ -14249,7 +14247,7 @@ var FloatingWindow = (_temp$6 = _class$10 = function (_UI$Element) {
         }
     }]);
     return FloatingWindow;
-}(UI.Element), _class$10.styleSet = FloatingWindowStyle.getInstance(), _temp$6);
+}(UI.Element), _class$13.styleSet = FloatingWindowStyle.getInstance(), _temp$8);
 
 var VolatileFloatingWindow = function (_FloatingWindow) {
     inherits(VolatileFloatingWindow, _FloatingWindow);
@@ -14320,10 +14318,10 @@ var VolatileFloatingWindow = function (_FloatingWindow) {
     return VolatileFloatingWindow;
 }(FloatingWindow);
 
-var _class$12;
-var _temp$7;
+var _class$15;
+var _temp$9;
 
-var Modal = (_temp$7 = _class$12 = function (_UI$Element) {
+var Modal = (_temp$9 = _class$15 = function (_UI$Element) {
     inherits(Modal, _UI$Element);
 
     function Modal() {
@@ -14446,7 +14444,7 @@ var Modal = (_temp$7 = _class$12 = function (_UI$Element) {
         }
     }]);
     return Modal;
-}(UI.Element), _class$12.styleSet = new ModalStyle(), _temp$7);
+}(UI.Element), _class$15.styleSet = new ModalStyle(), _temp$9);
 
 var ErrorModal = function (_Modal) {
     inherits(ErrorModal, _Modal);
@@ -14706,20 +14704,20 @@ var Divider = function (_UI$Element) {
     return Divider;
 }(UI.Element);
 
-var _class$14;
-var _descriptor$5;
-var _class3$5;
-var _descriptor2$5;
-var _descriptor3$5;
+var _class$17;
+var _descriptor$6;
+var _class3$4;
+var _descriptor2$6;
+var _descriptor3$6;
 var _descriptor4$4;
 var _descriptor5$4;
-var _class5$2;
+var _class5$1;
 var _descriptor6$3;
-var _descriptor7$3;
-var _descriptor8$2;
-var _descriptor9$2;
+var _descriptor7$2;
+var _descriptor8$1;
+var _descriptor9$1;
 
-function _initDefineProp$6(target, property, descriptor, context) {
+function _initDefineProp$7(target, property, descriptor, context) {
     if (!descriptor) return;
     Object.defineProperty(target, property, {
         enumerable: descriptor.enumerable,
@@ -14729,7 +14727,7 @@ function _initDefineProp$6(target, property, descriptor, context) {
     });
 }
 
-function _applyDecoratedDescriptor$6(target, property, decorators, descriptor, context) {
+function _applyDecoratedDescriptor$7(target, property, decorators, descriptor, context) {
     var desc = {};
     Object['ke' + 'ys'](descriptor).forEach(function (key) {
         desc[key] = descriptor[key];
@@ -14758,7 +14756,7 @@ function _applyDecoratedDescriptor$6(target, property, decorators, descriptor, c
     return desc;
 }
 
-var DividerStyle = (_class$14 = function (_StyleSet) {
+var DividerStyle = (_class$17 = function (_StyleSet) {
     inherits(DividerStyle, _StyleSet);
 
     function DividerStyle() {
@@ -14772,11 +14770,11 @@ var DividerStyle = (_class$14 = function (_StyleSet) {
             args[_key] = arguments[_key];
         }
 
-        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = DividerStyle.__proto__ || Object.getPrototypeOf(DividerStyle)).call.apply(_ref, [this].concat(args))), _this), _initDefineProp$6(_this, "noTextSelection", _descriptor$5, _this), _temp), possibleConstructorReturn(_this, _ret);
+        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = DividerStyle.__proto__ || Object.getPrototypeOf(DividerStyle)).call.apply(_ref, [this].concat(args))), _this), _initDefineProp$7(_this, "noTextSelection", _descriptor$6, _this), _temp), possibleConstructorReturn(_this, _ret);
     }
 
     return DividerStyle;
-}(StyleSet), (_descriptor$5 = _applyDecoratedDescriptor$6(_class$14.prototype, "noTextSelection", [styleRule], {
+}(StyleSet), (_descriptor$6 = _applyDecoratedDescriptor$7(_class$17.prototype, "noTextSelection", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14787,8 +14785,8 @@ var DividerStyle = (_class$14 = function (_StyleSet) {
             userSelect: "none"
         };
     }
-})), _class$14);
-var AccordionStyle = (_class3$5 = function (_DividerStyle) {
+})), _class$17);
+var AccordionStyle = (_class3$4 = function (_DividerStyle) {
     inherits(AccordionStyle, _DividerStyle);
 
     function AccordionStyle() {
@@ -14802,11 +14800,11 @@ var AccordionStyle = (_class3$5 = function (_DividerStyle) {
             args[_key2] = arguments[_key2];
         }
 
-        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = AccordionStyle.__proto__ || Object.getPrototypeOf(AccordionStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$6(_this2, "accordion", _descriptor2$5, _this2), _initDefineProp$6(_this2, "grab", _descriptor3$5, _this2), _initDefineProp$6(_this2, "grabbing", _descriptor4$4, _this2), _initDefineProp$6(_this2, "collapseIcon", _descriptor5$4, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
+        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = AccordionStyle.__proto__ || Object.getPrototypeOf(AccordionStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$7(_this2, "accordion", _descriptor2$6, _this2), _initDefineProp$7(_this2, "grab", _descriptor3$6, _this2), _initDefineProp$7(_this2, "grabbing", _descriptor4$4, _this2), _initDefineProp$7(_this2, "collapseIcon", _descriptor5$4, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
     }
 
     return AccordionStyle;
-}(DividerStyle), (_descriptor2$5 = _applyDecoratedDescriptor$6(_class3$5.prototype, "accordion", [styleRule], {
+}(DividerStyle), (_descriptor2$6 = _applyDecoratedDescriptor$7(_class3$4.prototype, "accordion", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14825,7 +14823,7 @@ var AccordionStyle = (_class3$5 = function (_DividerStyle) {
             }
         };
     }
-}), _descriptor3$5 = _applyDecoratedDescriptor$6(_class3$5.prototype, "grab", [styleRule], {
+}), _descriptor3$6 = _applyDecoratedDescriptor$7(_class3$4.prototype, "grab", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         var _ref3;
@@ -14834,7 +14832,7 @@ var AccordionStyle = (_class3$5 = function (_DividerStyle) {
             cursor: "grab"
         }, defineProperty(_ref3, "cursor", "-moz-grab"), defineProperty(_ref3, "cursor", "-webkit-grab"), _ref3;
     }
-}), _descriptor4$4 = _applyDecoratedDescriptor$6(_class3$5.prototype, "grabbing", [styleRule], {
+}), _descriptor4$4 = _applyDecoratedDescriptor$7(_class3$4.prototype, "grabbing", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         var _ref4;
@@ -14843,7 +14841,7 @@ var AccordionStyle = (_class3$5 = function (_DividerStyle) {
             cursor: "grabbing"
         }, defineProperty(_ref4, "cursor", "-moz-grabbing"), defineProperty(_ref4, "cursor", "-webkit-grabbing"), _ref4;
     }
-}), _descriptor5$4 = _applyDecoratedDescriptor$6(_class3$5.prototype, "collapseIcon", [styleRule], {
+}), _descriptor5$4 = _applyDecoratedDescriptor$7(_class3$4.prototype, "collapseIcon", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14854,8 +14852,8 @@ var AccordionStyle = (_class3$5 = function (_DividerStyle) {
             marginRight: "0.2em"
         };
     }
-})), _class3$5);
-var SectionDividerStyle = (_class5$2 = function (_DividerStyle2) {
+})), _class3$4);
+var SectionDividerStyle = (_class5$1 = function (_DividerStyle2) {
     inherits(SectionDividerStyle, _DividerStyle2);
 
     function SectionDividerStyle() {
@@ -14869,11 +14867,11 @@ var SectionDividerStyle = (_class5$2 = function (_DividerStyle2) {
             args[_key3] = arguments[_key3];
         }
 
-        return _ret3 = (_temp3 = (_this3 = possibleConstructorReturn(this, (_ref5 = SectionDividerStyle.__proto__ || Object.getPrototypeOf(SectionDividerStyle)).call.apply(_ref5, [this].concat(args))), _this3), _this3.barThickness = 2, _this3.barPadding = 3, _initDefineProp$6(_this3, "horizontalDivider", _descriptor6$3, _this3), _initDefineProp$6(_this3, "verticalDivider", _descriptor7$3, _this3), _initDefineProp$6(_this3, "horizontalSection", _descriptor8$2, _this3), _initDefineProp$6(_this3, "verticalSection", _descriptor9$2, _this3), _temp3), possibleConstructorReturn(_this3, _ret3);
+        return _ret3 = (_temp3 = (_this3 = possibleConstructorReturn(this, (_ref5 = SectionDividerStyle.__proto__ || Object.getPrototypeOf(SectionDividerStyle)).call.apply(_ref5, [this].concat(args))), _this3), _this3.barThickness = 2, _this3.barPadding = 3, _initDefineProp$7(_this3, "horizontalDivider", _descriptor6$3, _this3), _initDefineProp$7(_this3, "verticalDivider", _descriptor7$2, _this3), _initDefineProp$7(_this3, "horizontalSection", _descriptor8$1, _this3), _initDefineProp$7(_this3, "verticalSection", _descriptor9$1, _this3), _temp3), possibleConstructorReturn(_this3, _ret3);
     }
 
     return SectionDividerStyle;
-}(DividerStyle), (_descriptor6$3 = _applyDecoratedDescriptor$6(_class5$2.prototype, "horizontalDivider", [styleRule], {
+}(DividerStyle), (_descriptor6$3 = _applyDecoratedDescriptor$7(_class5$1.prototype, "horizontalDivider", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14888,7 +14886,7 @@ var SectionDividerStyle = (_class5$2 = function (_DividerStyle2) {
             marginLeft: -this.barPadding + "px"
         };
     }
-}), _descriptor7$3 = _applyDecoratedDescriptor$6(_class5$2.prototype, "verticalDivider", [styleRule], {
+}), _descriptor7$2 = _applyDecoratedDescriptor$7(_class5$1.prototype, "verticalDivider", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14903,7 +14901,7 @@ var SectionDividerStyle = (_class5$2 = function (_DividerStyle2) {
             marginTop: -this.barPadding + "px"
         };
     }
-}), _descriptor8$2 = _applyDecoratedDescriptor$6(_class5$2.prototype, "horizontalSection", [styleRule], {
+}), _descriptor8$1 = _applyDecoratedDescriptor$7(_class5$1.prototype, "horizontalSection", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14928,7 +14926,7 @@ var SectionDividerStyle = (_class5$2 = function (_DividerStyle2) {
             }
         };
     }
-}), _descriptor9$2 = _applyDecoratedDescriptor$6(_class5$2.prototype, "verticalSection", [styleRule], {
+}), _descriptor9$1 = _applyDecoratedDescriptor$7(_class5$1.prototype, "verticalSection", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -14949,16 +14947,16 @@ var SectionDividerStyle = (_class5$2 = function (_DividerStyle2) {
             }
         };
     }
-})), _class5$2);
+})), _class5$1);
 
-var _class$13;
-var _temp$8;
-var _class2;
-var _temp2;
+var _class$16;
+var _temp$10;
+var _class2$1;
+var _temp2$1;
 
 // TODO: Too much "hidden"
 // options.orientation is the orientation of the divided elements
-var DividerBar = (_temp$8 = _class$13 = function (_Divider) {
+var DividerBar = (_temp$10 = _class$16 = function (_Divider) {
     inherits(DividerBar, _Divider);
 
     function DividerBar() {
@@ -15000,7 +14998,7 @@ var DividerBar = (_temp$8 = _class$13 = function (_Divider) {
         }
     }]);
     return DividerBar;
-}(Divider), _class$13.styleSet = SectionDividerStyle.getInstance(), _temp$8);
+}(Divider), _class$16.styleSet = SectionDividerStyle.getInstance(), _temp$10);
 
 
 /* SectionDivider class should take in:
@@ -15008,7 +15006,7 @@ var DividerBar = (_temp$8 = _class$13 = function (_Divider) {
     - All the children it's dividing
     - An option on how to redivide the sizes of the children
  */
-var SectionDivider = (_temp2 = _class2 = function (_UI$Element) {
+var SectionDivider = (_temp2$1 = _class2$1 = function (_UI$Element) {
     inherits(SectionDivider, _UI$Element);
     createClass(SectionDivider, [{
         key: "getStyleSet",
@@ -15482,7 +15480,7 @@ var SectionDivider = (_temp2 = _class2 = function (_UI$Element) {
         }
     }]);
     return SectionDivider;
-}(UI.Element), _class2.styleSet = SectionDividerStyle.getInstance(), _temp2);
+}(UI.Element), _class2$1.styleSet = SectionDividerStyle.getInstance(), _temp2$1);
 
 // Contains classes to abstract some generic Font Awesome usecases.
 var FAIcon = function (_UI$Primitive) {
@@ -15578,12 +15576,12 @@ var FASortIcon = function (_FAIcon2) {
     return FASortIcon;
 }(FAIcon);
 
-var _class$15;
-var _temp$9;
-var _class2$1;
-var _temp2$1;
+var _class$18;
+var _temp$11;
+var _class2$2;
+var _temp2$2;
 
-var AccordionDivider = (_temp$9 = _class$15 = function (_Divider) {
+var AccordionDivider = (_temp$11 = _class$18 = function (_Divider) {
     inherits(AccordionDivider, _Divider);
 
     function AccordionDivider() {
@@ -15636,8 +15634,8 @@ var AccordionDivider = (_temp$9 = _class$15 = function (_Divider) {
         }
     }]);
     return AccordionDivider;
-}(Divider), _class$15.styleSet = AccordionStyle.getInstance(), _temp$9);
-var Accordion = (_temp2$1 = _class2$1 = function (_UI$Element) {
+}(Divider), _class$18.styleSet = AccordionStyle.getInstance(), _temp$11);
+var Accordion = (_temp2$2 = _class2$2 = function (_UI$Element) {
     inherits(Accordion, _UI$Element);
 
     function Accordion() {
@@ -15973,17 +15971,17 @@ var Accordion = (_temp2$1 = _class2$1 = function (_UI$Element) {
         }
     }]);
     return Accordion;
-}(UI.Element), _class2$1.styleSet = AccordionStyle.getInstance(), _temp2$1);
+}(UI.Element), _class2$2.styleSet = AccordionStyle.getInstance(), _temp2$2);
 
-var _class$16;
-var _descriptor$6;
-var _descriptor2$6;
-var _descriptor3$6;
+var _class$19;
+var _descriptor$7;
+var _descriptor2$7;
+var _descriptor3$7;
 var _descriptor4$5;
-var _class3$6;
-var _temp2$2;
+var _class3$5;
+var _temp2$3;
 
-function _initDefineProp$7(target, property, descriptor, context) {
+function _initDefineProp$8(target, property, descriptor, context) {
     if (!descriptor) return;
     Object.defineProperty(target, property, {
         enumerable: descriptor.enumerable,
@@ -15993,7 +15991,7 @@ function _initDefineProp$7(target, property, descriptor, context) {
     });
 }
 
-function _applyDecoratedDescriptor$7(target, property, decorators, descriptor, context) {
+function _applyDecoratedDescriptor$8(target, property, decorators, descriptor, context) {
     var desc = {};
     Object['ke' + 'ys'](descriptor).forEach(function (key) {
         desc[key] = descriptor[key];
@@ -16022,7 +16020,7 @@ function _applyDecoratedDescriptor$7(target, property, decorators, descriptor, c
     return desc;
 }
 
-var CarouselStyle$$1 = (_class$16 = function (_StyleSet) {
+var CarouselStyle$$1 = (_class$19 = function (_StyleSet) {
     inherits(CarouselStyle$$1, _StyleSet);
 
     function CarouselStyle$$1() {
@@ -16036,18 +16034,18 @@ var CarouselStyle$$1 = (_class$16 = function (_StyleSet) {
             args[_key] = arguments[_key];
         }
 
-        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = CarouselStyle$$1.__proto__ || Object.getPrototypeOf(CarouselStyle$$1)).call.apply(_ref, [this].concat(args))), _this), _this.navigatorHeight = "35px", _this.hoverColor = "#364251", _this.transitionTime = "0.3", _this.textColor = "inherit", _this.navigatorTransitionTime = "0s", _initDefineProp$7(_this, "carousel", _descriptor$6, _this), _initDefineProp$7(_this, "container", _descriptor2$6, _this), _initDefineProp$7(_this, "navigator", _descriptor3$6, _this), _initDefineProp$7(_this, "navigatorIcon", _descriptor4$5, _this), _temp), possibleConstructorReturn(_this, _ret);
+        return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = CarouselStyle$$1.__proto__ || Object.getPrototypeOf(CarouselStyle$$1)).call.apply(_ref, [this].concat(args))), _this), _this.navigatorHeight = "35px", _this.hoverColor = "#364251", _this.transitionTime = "0.3", _this.textColor = "inherit", _this.navigatorTransitionTime = "0s", _initDefineProp$8(_this, "carousel", _descriptor$7, _this), _initDefineProp$8(_this, "container", _descriptor2$7, _this), _initDefineProp$8(_this, "navigator", _descriptor3$7, _this), _initDefineProp$8(_this, "navigatorIcon", _descriptor4$5, _this), _temp), possibleConstructorReturn(_this, _ret);
     }
 
     return CarouselStyle$$1;
-}(StyleSet), (_descriptor$6 = _applyDecoratedDescriptor$7(_class$16.prototype, "carousel", [styleRule], {
+}(StyleSet), (_descriptor$7 = _applyDecoratedDescriptor$8(_class$19.prototype, "carousel", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
             overflow: "hidden"
         };
     }
-}), _descriptor2$6 = _applyDecoratedDescriptor$7(_class$16.prototype, "container", [styleRule], {
+}), _descriptor2$7 = _applyDecoratedDescriptor$8(_class$19.prototype, "container", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -16065,7 +16063,7 @@ var CarouselStyle$$1 = (_class$16 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor3$6 = _applyDecoratedDescriptor$7(_class$16.prototype, "navigator", [styleRule], {
+}), _descriptor3$7 = _applyDecoratedDescriptor$8(_class$19.prototype, "navigator", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -16074,7 +16072,7 @@ var CarouselStyle$$1 = (_class$16 = function (_StyleSet) {
             display: "flex"
         };
     }
-}), _descriptor4$5 = _applyDecoratedDescriptor$7(_class$16.prototype, "navigatorIcon", [styleRule], {
+}), _descriptor4$5 = _applyDecoratedDescriptor$8(_class$19.prototype, "navigatorIcon", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -16091,7 +16089,7 @@ var CarouselStyle$$1 = (_class$16 = function (_StyleSet) {
             }
         };
     }
-})), _class$16);
+})), _class$19);
 
 var CarouselNavigator = function (_UI$Element) {
     inherits(CarouselNavigator, _UI$Element);
@@ -16126,7 +16124,7 @@ var CarouselNavigator = function (_UI$Element) {
     return CarouselNavigator;
 }(UI.Element);
 
-var Carousel$$1 = (_temp2$2 = _class3$6 = function (_UI$Element2) {
+var Carousel$$1 = (_temp2$3 = _class3$5 = function (_UI$Element2) {
     inherits(Carousel$$1, _UI$Element2);
 
     function Carousel$$1() {
@@ -16218,16 +16216,16 @@ var Carousel$$1 = (_temp2$2 = _class3$6 = function (_UI$Element2) {
         }
     }]);
     return Carousel$$1;
-}(UI.Element), _class3$6.styleSet = CarouselStyle$$1.getInstance(), _temp2$2);
+}(UI.Element), _class3$5.styleSet = CarouselStyle$$1.getInstance(), _temp2$3);
 
-var _class$18;
-var _descriptor$7;
-var _descriptor2$7;
-var _class3$7;
-var _descriptor3$7;
+var _class$21;
+var _descriptor$8;
+var _descriptor2$8;
+var _class3$6;
+var _descriptor3$8;
 var _descriptor4$6;
 
-function _initDefineProp$8(target, property, descriptor, context) {
+function _initDefineProp$9(target, property, descriptor, context) {
     if (!descriptor) return;
     Object.defineProperty(target, property, {
         enumerable: descriptor.enumerable,
@@ -16237,7 +16235,7 @@ function _initDefineProp$8(target, property, descriptor, context) {
     });
 }
 
-function _applyDecoratedDescriptor$8(target, property, decorators, descriptor, context) {
+function _applyDecoratedDescriptor$9(target, property, decorators, descriptor, context) {
     var desc = {};
     Object['ke' + 'ys'](descriptor).forEach(function (key) {
         desc[key] = descriptor[key];
@@ -16266,7 +16264,7 @@ function _applyDecoratedDescriptor$8(target, property, decorators, descriptor, c
     return desc;
 }
 
-var TableStyle = (_class$18 = function (_StyleSet) {
+var TableStyle = (_class$21 = function (_StyleSet) {
     inherits(TableStyle, _StyleSet);
 
     function TableStyle() {
@@ -16288,11 +16286,11 @@ var TableStyle = (_class$18 = function (_StyleSet) {
         }, _this.theadCellStyle = {
             borderBottom: "2px solid #ddd",
             borderTop: "0"
-        }, _initDefineProp$8(_this, "table", _descriptor$7, _this), _initDefineProp$8(_this, "tableStripped", _descriptor2$7, _this), _temp), possibleConstructorReturn(_this, _ret);
+        }, _initDefineProp$9(_this, "table", _descriptor$8, _this), _initDefineProp$9(_this, "tableStripped", _descriptor2$8, _this), _temp), possibleConstructorReturn(_this, _ret);
     }
 
     return TableStyle;
-}(StyleSet), (_descriptor$7 = _applyDecoratedDescriptor$8(_class$18.prototype, "table", [styleRule], {
+}(StyleSet), (_descriptor$8 = _applyDecoratedDescriptor$9(_class$21.prototype, "table", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -16306,7 +16304,7 @@ var TableStyle = (_class$18 = function (_StyleSet) {
             ">*>thead>*>*": this.theadCellStyle
         };
     }
-}), _descriptor2$7 = _applyDecoratedDescriptor$8(_class$18.prototype, "tableStripped", [styleRule], {
+}), _descriptor2$8 = _applyDecoratedDescriptor$9(_class$21.prototype, "tableStripped", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -16315,8 +16313,8 @@ var TableStyle = (_class$18 = function (_StyleSet) {
             }
         };
     }
-})), _class$18);
-var SortableTableStyle = (_class3$7 = function (_TableStyle) {
+})), _class$21);
+var SortableTableStyle = (_class3$6 = function (_TableStyle) {
     inherits(SortableTableStyle, _TableStyle);
 
     function SortableTableStyle() {
@@ -16330,11 +16328,11 @@ var SortableTableStyle = (_class3$7 = function (_TableStyle) {
             args[_key2] = arguments[_key2];
         }
 
-        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = SortableTableStyle.__proto__ || Object.getPrototypeOf(SortableTableStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$8(_this2, "sortIcon", _descriptor3$7, _this2), _initDefineProp$8(_this2, "table", _descriptor4$6, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
+        return _ret2 = (_temp2 = (_this2 = possibleConstructorReturn(this, (_ref2 = SortableTableStyle.__proto__ || Object.getPrototypeOf(SortableTableStyle)).call.apply(_ref2, [this].concat(args))), _this2), _initDefineProp$9(_this2, "sortIcon", _descriptor3$8, _this2), _initDefineProp$9(_this2, "table", _descriptor4$6, _this2), _temp2), possibleConstructorReturn(_this2, _ret2);
     }
 
     return SortableTableStyle;
-}(TableStyle), (_descriptor3$7 = _applyDecoratedDescriptor$8(_class3$7.prototype, "sortIcon", [styleRule], {
+}(TableStyle), (_descriptor3$8 = _applyDecoratedDescriptor$9(_class3$6.prototype, "sortIcon", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -16345,17 +16343,17 @@ var SortableTableStyle = (_class3$7 = function (_TableStyle) {
             float: "right"
         };
     }
-}), _descriptor4$6 = _applyDecoratedDescriptor$8(_class3$7.prototype, "table", [styleRuleInherit], {
+}), _descriptor4$6 = _applyDecoratedDescriptor$9(_class3$6.prototype, "table", [styleRuleInherit], {
     enumerable: true,
     initializer: function initializer() {
         return defineProperty({}, " th:hover ." + this.sortIcon, {
             visibility: "inherit"
         });
     }
-})), _class3$7);
+})), _class3$6);
 
-var _class$17;
-var _temp$10;
+var _class$20;
+var _temp$12;
 
 // TODO: the whole table architecture probably needs a rethinking
 
@@ -16414,7 +16412,7 @@ var TableRow = function (_UI$Primitive) {
 
 
 
-var Table = (_temp$10 = _class$17 = function (_UI$Primitive2) {
+var Table = (_temp$12 = _class$20 = function (_UI$Primitive2) {
     inherits(Table, _UI$Primitive2);
 
     function Table() {
@@ -16539,14 +16537,14 @@ var Table = (_temp$10 = _class$17 = function (_UI$Primitive2) {
         }
     }]);
     return Table;
-}(UI.Primitive("table")), _class$17.styleSet = TableStyle.getInstance(), _temp$10);
+}(UI.Primitive("table")), _class$20.styleSet = TableStyle.getInstance(), _temp$12);
 
-var _class$19;
-var _descriptor$8;
-var _descriptor2$8;
-var _descriptor3$8;
+var _class$22;
+var _descriptor$9;
+var _descriptor2$9;
+var _descriptor3$9;
 
-function _initDefineProp$9(target, property, descriptor, context) {
+function _initDefineProp$10(target, property, descriptor, context) {
     if (!descriptor) return;
     Object.defineProperty(target, property, {
         enumerable: descriptor.enumerable,
@@ -16556,7 +16554,7 @@ function _initDefineProp$9(target, property, descriptor, context) {
     });
 }
 
-function _applyDecoratedDescriptor$9(target, property, decorators, descriptor, context) {
+function _applyDecoratedDescriptor$10(target, property, decorators, descriptor, context) {
     var desc = {};
     Object['ke' + 'ys'](descriptor).forEach(function (key) {
         desc[key] = descriptor[key];
@@ -16611,7 +16609,7 @@ var TableRowInCollapsibleTable = function (_TableRow) {
     return TableRowInCollapsibleTable;
 }(TableRow);
 
-var CollapsibleTableStyle = (_class$19 = function (_StyleSet) {
+var CollapsibleTableStyle = (_class$22 = function (_StyleSet) {
     inherits(CollapsibleTableStyle, _StyleSet);
 
     function CollapsibleTableStyle() {
@@ -16625,11 +16623,11 @@ var CollapsibleTableStyle = (_class$19 = function (_StyleSet) {
             args[_key] = arguments[_key];
         }
 
-        return _ret = (_temp = (_this2 = possibleConstructorReturn(this, (_ref = CollapsibleTableStyle.__proto__ || Object.getPrototypeOf(CollapsibleTableStyle)).call.apply(_ref, [this].concat(args))), _this2), _initDefineProp$9(_this2, "button", _descriptor$8, _this2), _initDefineProp$9(_this2, "collapsedButton", _descriptor2$8, _this2), _initDefineProp$9(_this2, "heading", _descriptor3$8, _this2), _temp), possibleConstructorReturn(_this2, _ret);
+        return _ret = (_temp = (_this2 = possibleConstructorReturn(this, (_ref = CollapsibleTableStyle.__proto__ || Object.getPrototypeOf(CollapsibleTableStyle)).call.apply(_ref, [this].concat(args))), _this2), _initDefineProp$10(_this2, "button", _descriptor$9, _this2), _initDefineProp$10(_this2, "collapsedButton", _descriptor2$9, _this2), _initDefineProp$10(_this2, "heading", _descriptor3$9, _this2), _temp), possibleConstructorReturn(_this2, _ret);
     }
 
     return CollapsibleTableStyle;
-}(StyleSet), (_descriptor$8 = _applyDecoratedDescriptor$9(_class$19.prototype, "button", [styleRule], {
+}(StyleSet), (_descriptor$9 = _applyDecoratedDescriptor$10(_class$22.prototype, "button", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -16649,7 +16647,7 @@ var CollapsibleTableStyle = (_class$19 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor2$8 = _applyDecoratedDescriptor$9(_class$19.prototype, "collapsedButton", [styleRule], {
+}), _descriptor2$9 = _applyDecoratedDescriptor$10(_class$22.prototype, "collapsedButton", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -16658,7 +16656,7 @@ var CollapsibleTableStyle = (_class$19 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor3$8 = _applyDecoratedDescriptor$9(_class$19.prototype, "heading", [styleRule], {
+}), _descriptor3$9 = _applyDecoratedDescriptor$10(_class$22.prototype, "heading", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -16666,7 +16664,7 @@ var CollapsibleTableStyle = (_class$19 = function (_StyleSet) {
             backgroundColor: "initial !important"
         };
     }
-})), _class$19);
+})), _class$22);
 
 
 var collapsibleTableStyle = new CollapsibleTableStyle();
@@ -16999,10 +16997,10 @@ function SortableTableInterface(BaseTableClass) {
 
 var SortableTable = SortableTableInterface(Table);
 
-var _class$21;
-var _temp$11;
+var _class$24;
+var _temp$13;
 
-var TimeUnit = (_temp$11 = _class$21 = function () {
+var TimeUnit = (_temp$13 = _class$24 = function () {
     function TimeUnit(name, baseUnit, multiplier) {
         var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
         classCallCheck(this, TimeUnit);
@@ -17062,7 +17060,7 @@ var TimeUnit = (_temp$11 = _class$21 = function () {
         }
     }]);
     return TimeUnit;
-}(), _class$21.CANONICAL = {}, _class$21.ALL = [], _class$21.FIXED_DURATION = [], _class$21.VARIABLE_DURATION = [], _temp$11);
+}(), _class$24.CANONICAL = {}, _class$24.ALL = [], _class$24.FIXED_DURATION = [], _class$24.VARIABLE_DURATION = [], _temp$13);
 
 TimeUnit.MILLISECOND = new TimeUnit("millisecond", null, 1);
 TimeUnit.SECOND = new TimeUnit("second", TimeUnit.MILLISECOND, 1000);
@@ -17322,7 +17320,7 @@ function addCanonicalTimeUnits() {
 
 addCanonicalTimeUnits();
 
-var _class$20;
+var _class$23;
 
 // MAX_UNIX_TIME is either ~Feb 2106 in unix seconds or ~Feb 1970 in unix milliseconds
 // Any value less than this is interpreted as a unix time in seconds
@@ -17332,7 +17330,7 @@ var MAX_AUTO_UNIX_TIME = Math.pow(2, 32);
 
 var BaseDate = self.Date;
 
-var StemDate = extendsNative(_class$20 = function (_BaseDate) {
+var StemDate = extendsNative(_class$23 = function (_BaseDate) {
     inherits(StemDate, _BaseDate);
 
     function StemDate() {
@@ -17699,7 +17697,7 @@ var StemDate = extendsNative(_class$20 = function (_BaseDate) {
         }
     }]);
     return StemDate;
-}(BaseDate)) || _class$20;
+}(BaseDate)) || _class$23;
 
 Duration.prototype.format = function (pattern) {
     return StemDate.fromUnixMilliseconds(this.toMilliseconds()).utc().format(pattern);
@@ -20640,16 +20638,16 @@ var WrappedIcon = function (_NavIcon3) {
     return WrappedIcon;
 }(NavIcon);
 
-var _class$23;
-var _descriptor$9;
-var _descriptor2$9;
-var _descriptor3$9;
+var _class$26;
+var _descriptor$10;
+var _descriptor2$10;
+var _descriptor3$10;
 var _descriptor4$7;
 var _descriptor5$5;
 var _descriptor6$4;
-var _descriptor7$4;
-var _descriptor8$3;
-var _descriptor9$3;
+var _descriptor7$3;
+var _descriptor8$2;
+var _descriptor9$2;
 var _descriptor10;
 var _descriptor11;
 var _descriptor12;
@@ -20660,7 +20658,7 @@ var _descriptor16$1;
 var _descriptor17$1;
 var _descriptor18$1;
 
-function _initDefineProp$10(target, property, descriptor, context) {
+function _initDefineProp$11(target, property, descriptor, context) {
     if (!descriptor) return;
     Object.defineProperty(target, property, {
         enumerable: descriptor.enumerable,
@@ -20670,7 +20668,7 @@ function _initDefineProp$10(target, property, descriptor, context) {
     });
 }
 
-function _applyDecoratedDescriptor$10(target, property, decorators, descriptor, context) {
+function _applyDecoratedDescriptor$11(target, property, decorators, descriptor, context) {
     var desc = {};
     Object['ke' + 'ys'](descriptor).forEach(function (key) {
         desc[key] = descriptor[key];
@@ -20699,7 +20697,7 @@ function _applyDecoratedDescriptor$10(target, property, decorators, descriptor, 
     return desc;
 }
 
-var NavStyle = (_class$23 = function (_StyleSet) {
+var NavStyle = (_class$26 = function (_StyleSet) {
     inherits(NavStyle, _StyleSet);
 
     function NavStyle() {
@@ -20758,9 +20756,9 @@ var NavStyle = (_class$23 = function (_StyleSet) {
         }), _this.rightSideIcon = Object.assign({}, _this.icon, {
             fontSize: "120%",
             float: "right"
-        }), _initDefineProp$10(_this, "wrappedIcon", _descriptor$9, _this), _this.navElement = {
+        }), _initDefineProp$11(_this, "wrappedIcon", _descriptor$10, _this), _this.navElement = {
             transition: "background-color " + _this.dimensions.backgroundTransitionDuration
-        }, _initDefineProp$10(_this, "navLinkElement", _descriptor2$9, _this), _initDefineProp$10(_this, "navManager", _descriptor3$9, _this), _initDefineProp$10(_this, "navElementHorizontal", _descriptor4$7, _this), _initDefineProp$10(_this, "navElementHorizontalArrow", _descriptor5$5, _this), _initDefineProp$10(_this, "navElementValueHorizontal", _descriptor6$4, _this), _initDefineProp$10(_this, "navSectionHorizontal", _descriptor7$4, _this), _this.sidePanel = {
+        }, _initDefineProp$11(_this, "navLinkElement", _descriptor2$10, _this), _initDefineProp$11(_this, "navManager", _descriptor3$10, _this), _initDefineProp$11(_this, "navElementHorizontal", _descriptor4$7, _this), _initDefineProp$11(_this, "navElementHorizontalArrow", _descriptor5$5, _this), _initDefineProp$11(_this, "navElementValueHorizontal", _descriptor6$4, _this), _initDefineProp$11(_this, "navSectionHorizontal", _descriptor7$3, _this), _this.sidePanel = {
             top: "0",
             bottom: "0",
             height: "100%",
@@ -20779,7 +20777,7 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             transitionDuration: function transitionDuration() {
                 return _this.dimensions.sidepanelTransitionDuration;
             }
-        }, _initDefineProp$10(_this, "leftSidePanel", _descriptor8$3, _this), _initDefineProp$10(_this, "rightSidePanel", _descriptor9$3, _this), _initDefineProp$10(_this, "navElementVertical", _descriptor10, _this), _initDefineProp$10(_this, "navElementVerticalArrow", _descriptor11, _this), _initDefineProp$10(_this, "navElementValueVertical", _descriptor12, _this), _initDefineProp$10(_this, "navSectionVertical", _descriptor13$1, _this), _initDefineProp$10(_this, "navCollapseElement", _descriptor14$1, _this), _initDefineProp$10(_this, "sidePanelGroup", _descriptor15$1, _this), _initDefineProp$10(_this, "hrStyle", _descriptor16$1, _this), _initDefineProp$10(_this, "navVerticalLeftHide", _descriptor17$1, _this), _initDefineProp$10(_this, "navVerticalRightHide", _descriptor18$1, _this), _temp), possibleConstructorReturn(_this, _ret);
+        }, _initDefineProp$11(_this, "leftSidePanel", _descriptor8$2, _this), _initDefineProp$11(_this, "rightSidePanel", _descriptor9$2, _this), _initDefineProp$11(_this, "navElementVertical", _descriptor10, _this), _initDefineProp$11(_this, "navElementVerticalArrow", _descriptor11, _this), _initDefineProp$11(_this, "navElementValueVertical", _descriptor12, _this), _initDefineProp$11(_this, "navSectionVertical", _descriptor13$1, _this), _initDefineProp$11(_this, "navCollapseElement", _descriptor14$1, _this), _initDefineProp$11(_this, "sidePanelGroup", _descriptor15$1, _this), _initDefineProp$11(_this, "hrStyle", _descriptor16$1, _this), _initDefineProp$11(_this, "navVerticalLeftHide", _descriptor17$1, _this), _initDefineProp$11(_this, "navVerticalRightHide", _descriptor18$1, _this), _temp), possibleConstructorReturn(_this, _ret);
     }
     // Custom variables
 
@@ -20806,7 +20804,7 @@ var NavStyle = (_class$23 = function (_StyleSet) {
 
 
     return NavStyle;
-}(StyleSet), (_descriptor$9 = _applyDecoratedDescriptor$10(_class$23.prototype, "wrappedIcon", [styleRule], {
+}(StyleSet), (_descriptor$10 = _applyDecoratedDescriptor$11(_class$26.prototype, "wrappedIcon", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return [this.icon, {
@@ -20814,7 +20812,7 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             float: "left"
         }];
     }
-}), _descriptor2$9 = _applyDecoratedDescriptor$10(_class$23.prototype, "navLinkElement", [styleRule], {
+}), _descriptor2$10 = _applyDecoratedDescriptor$11(_class$26.prototype, "navLinkElement", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20841,7 +20839,7 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor3$9 = _applyDecoratedDescriptor$10(_class$23.prototype, "navManager", [styleRule], {
+}), _descriptor3$10 = _applyDecoratedDescriptor$11(_class$26.prototype, "navManager", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20854,7 +20852,7 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             position: "fixed"
         };
     }
-}), _descriptor4$7 = _applyDecoratedDescriptor$10(_class$23.prototype, "navElementHorizontal", [styleRule], {
+}), _descriptor4$7 = _applyDecoratedDescriptor$11(_class$26.prototype, "navElementHorizontal", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20868,7 +20866,7 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor5$5 = _applyDecoratedDescriptor$10(_class$23.prototype, "navElementHorizontalArrow", [styleRule], {
+}), _descriptor5$5 = _applyDecoratedDescriptor$11(_class$26.prototype, "navElementHorizontalArrow", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20876,7 +20874,7 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             verticalAlign: "middle"
         };
     }
-}), _descriptor6$4 = _applyDecoratedDescriptor$10(_class$23.prototype, "navElementValueHorizontal", [styleRule], {
+}), _descriptor6$4 = _applyDecoratedDescriptor$11(_class$26.prototype, "navElementValueHorizontal", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return [this.navElement, {
@@ -20888,7 +20886,7 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             }
         }];
     }
-}), _descriptor7$4 = _applyDecoratedDescriptor$10(_class$23.prototype, "navSectionHorizontal", [styleRule], {
+}), _descriptor7$3 = _applyDecoratedDescriptor$11(_class$26.prototype, "navSectionHorizontal", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20898,7 +20896,7 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             marginBottom: "0"
         };
     }
-}), _descriptor8$3 = _applyDecoratedDescriptor$10(_class$23.prototype, "leftSidePanel", [styleRule], {
+}), _descriptor8$2 = _applyDecoratedDescriptor$11(_class$26.prototype, "leftSidePanel", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return [this.sidePanel, {
@@ -20911,12 +20909,12 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             }
         }];
     }
-}), _descriptor9$3 = _applyDecoratedDescriptor$10(_class$23.prototype, "rightSidePanel", [styleRule], {
+}), _descriptor9$2 = _applyDecoratedDescriptor$11(_class$26.prototype, "rightSidePanel", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return this.sidePanel;
     }
-}), _descriptor10 = _applyDecoratedDescriptor$10(_class$23.prototype, "navElementVertical", [styleRule], {
+}), _descriptor10 = _applyDecoratedDescriptor$11(_class$26.prototype, "navElementVertical", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20931,7 +20929,7 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor11 = _applyDecoratedDescriptor$10(_class$23.prototype, "navElementVerticalArrow", [styleRule], {
+}), _descriptor11 = _applyDecoratedDescriptor$11(_class$26.prototype, "navElementVerticalArrow", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20939,7 +20937,7 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             textAlign: "center"
         };
     }
-}), _descriptor12 = _applyDecoratedDescriptor$10(_class$23.prototype, "navElementValueVertical", [styleRule], {
+}), _descriptor12 = _applyDecoratedDescriptor$11(_class$26.prototype, "navElementValueVertical", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return [this.navElement, {
@@ -20954,7 +20952,7 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             }
         }];
     }
-}), _descriptor13$1 = _applyDecoratedDescriptor$10(_class$23.prototype, "navSectionVertical", [styleRule], {
+}), _descriptor13$1 = _applyDecoratedDescriptor$11(_class$26.prototype, "navSectionVertical", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20963,7 +20961,7 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             width: "100%"
         };
     }
-}), _descriptor14$1 = _applyDecoratedDescriptor$10(_class$23.prototype, "navCollapseElement", [styleRule], {
+}), _descriptor14$1 = _applyDecoratedDescriptor$11(_class$26.prototype, "navCollapseElement", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20974,7 +20972,7 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             lineHeight: this.dimensions.sidepanelElementHeight
         };
     }
-}), _descriptor15$1 = _applyDecoratedDescriptor$10(_class$23.prototype, "sidePanelGroup", [styleRule], {
+}), _descriptor15$1 = _applyDecoratedDescriptor$11(_class$26.prototype, "sidePanelGroup", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -20985,7 +20983,7 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             zIndex: "3"
         };
     }
-}), _descriptor16$1 = _applyDecoratedDescriptor$10(_class$23.prototype, "hrStyle", [styleRule], {
+}), _descriptor16$1 = _applyDecoratedDescriptor$11(_class$26.prototype, "hrStyle", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         var _this2 = this;
@@ -20997,7 +20995,7 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             }
         };
     }
-}), _descriptor17$1 = _applyDecoratedDescriptor$10(_class$23.prototype, "navVerticalLeftHide", [styleRule], {
+}), _descriptor17$1 = _applyDecoratedDescriptor$11(_class$26.prototype, "navVerticalLeftHide", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -21005,7 +21003,7 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             overflow: "hidden"
         };
     }
-}), _descriptor18$1 = _applyDecoratedDescriptor$10(_class$23.prototype, "navVerticalRightHide", [styleRule], {
+}), _descriptor18$1 = _applyDecoratedDescriptor$11(_class$26.prototype, "navVerticalRightHide", [styleRule], {
     enumerable: true,
     initializer: function initializer() {
         return {
@@ -21013,12 +21011,12 @@ var NavStyle = (_class$23 = function (_StyleSet) {
             overflow: "hidden"
         };
     }
-})), _class$23);
+})), _class$26);
 
-var _class$22;
-var _temp$12;
-var _class3$8;
-var _temp3$1;
+var _class$25;
+var _temp$14;
+var _class3$7;
+var _temp3;
 
 var SidePanelGroup = function (_UI$Element) {
     inherits(SidePanelGroup, _UI$Element);
@@ -21052,7 +21050,7 @@ var SidePanelGroup = function (_UI$Element) {
     return SidePanelGroup;
 }(UI.Element);
 
-var SidePanel = (_temp$12 = _class$22 = function (_UI$Element2) {
+var SidePanel = (_temp$14 = _class$25 = function (_UI$Element2) {
     inherits(SidePanel, _UI$Element2);
     createClass(SidePanel, [{
         key: "getStyleSet",
@@ -21150,7 +21148,7 @@ var SidePanel = (_temp$12 = _class$22 = function (_UI$Element2) {
         }
     }]);
     return SidePanel;
-}(UI.Element), _class$22.styleSet = NavStyle.getInstance(), _temp$12);
+}(UI.Element), _class$25.styleSet = NavStyle.getInstance(), _temp$14);
 
 var NavCarouselStyle = function (_CarouselStyle) {
     inherits(NavCarouselStyle, _CarouselStyle);
@@ -21172,7 +21170,7 @@ var NavCarouselStyle = function (_CarouselStyle) {
     return NavCarouselStyle;
 }(CarouselStyle$$1);
 
-var NavManager = (_temp3$1 = _class3$8 = function (_UI$Primitive) {
+var NavManager = (_temp3 = _class3$7 = function (_UI$Primitive) {
     inherits(NavManager, _UI$Primitive);
     createClass(NavManager, [{
         key: "getStyleSet",
@@ -21546,7 +21544,7 @@ var NavManager = (_temp3$1 = _class3$8 = function (_UI$Primitive) {
         }
     }]);
     return NavManager;
-}(UI.Primitive("nav")), _class3$8.styleSet = NavStyle.getInstance(), _class3$8.carouselStyleSet = NavCarouselStyle.getInstance(), _temp3$1);
+}(UI.Primitive("nav")), _class3$7.styleSet = NavStyle.getInstance(), _class3$7.carouselStyleSet = NavCarouselStyle.getInstance(), _temp3);
 
 
 var initializeNavbar = function initializeNavbar() {
@@ -21812,10 +21810,7 @@ exports.ScrollableMixin = ScrollableMixin;
 exports.InfiniteScrollable = InfiniteScrollable;
 exports.ViewportMeta = ViewportMeta;
 exports.InputStyle = InputStyle;
-exports.Form = Form;
 exports.Input = Input;
-exports.FormGroup = FormGroup;
-exports.FormField = FormField;
 exports.SubmitInput = SubmitInput;
 exports.TextInput = TextInput;
 exports.NumberInput = NumberInput;
@@ -21825,9 +21820,11 @@ exports.FileInput = FileInput;
 exports.CheckboxInput = CheckboxInput;
 exports.TextArea = TextArea;
 exports.Select = Select;
+exports.Form = Form;
+exports.FormGroup = FormGroup;
+exports.FormField = FormField;
 exports.SVG = SVG;
 exports.SVGNodeAttributes = SVGNodeAttributes;
-exports.BootstrapMixin = BootstrapMixin;
 exports.SimpleStyledElement = SimpleStyledElement;
 exports.IconableInterface = IconableInterface;
 exports.Label = Label;

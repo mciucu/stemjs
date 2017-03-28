@@ -5,7 +5,8 @@ export * from "./Utils";
 export * from "./StyleElement";
 
 export * from "./UIPrimitives";
-export * from "./Input";
+export * from "./input/Input";
+export * from "./form/Form";
 export * from "./SVG";
 export * from "./Bootstrap3";
 
