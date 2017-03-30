@@ -143,7 +143,7 @@ class ProgressBar extends SimpleStyledElement {
         }
 
         return <div {...barOptions}>
-            <span className="progress-span">{this.options.label}</span>
+            <span>{this.options.label}</span>
         </div>;
     }
 
