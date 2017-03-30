@@ -36,6 +36,9 @@ function styleRuleWithOptions() {
         descriptor.objInitializer = function () {
             let style = evaluateStyleRuleObject(this, initializer, value, options);
 
+            // TODO: a bit of a hack, clean this up
+            style["prefferedClassName"] = key;
+
             if (options.inherit) {
                 // Get the value we set in the prototype of the parent class
                 let parentDesc = Object.getPrototypeOf(target)[getStyleRuleKey(key)];

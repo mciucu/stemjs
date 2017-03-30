@@ -1,4 +1,4 @@
-// Wrapper over the ace code editor, needs ace to be globally loaded
+// Wrapper over the Ace code editor, needs ace to be loaded
 // TODO: should be renamed to AceCodeEditor?
 import {UI} from "./UIBase";
 

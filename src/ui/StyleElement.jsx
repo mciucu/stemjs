@@ -70,13 +70,18 @@ class DynamicStyleElement extends StyleElement {
         return this.getClassName();
     }
 
+    // Overwrite valueOf, so when using the + operator should seamlessly concatenate to create a valid className
+    valueOf() {
+        return " " + this.getClassName();
+    }
+
     // TODO: use a cached decorator here
     getClassName() {
         if (this.className) {
             return this.className;
         }
         this.constructor.instanceCounter = (this.constructor.instanceCounter || 0) + 1;
-        this.className = "autocls-" + this.constructor.instanceCounter;
+        this.className = (this.options.name ||  "autocls") + "-" + this.constructor.instanceCounter;
         return this.className;
     }
 
@@ -86,6 +91,9 @@ class DynamicStyleElement extends StyleElement {
         let ownStyle = {}, haveOwnStyle = false;
         for (let key in style) {
             let value = style[key];
+            if (value == null) {
+                continue;
+            }
             let isProperValue = (typeof value === "string" || value instanceof String
                               || typeof value === "number" || value instanceof Number
                               || typeof value === "function");
@@ -139,7 +147,7 @@ class KeyframeElement extends StyleElement {
             return this.keyframeName;
         }
         this.constructor.instanceCounter = (this.constructor.instanceCounter || 0) + 1;
-        this.keyframeName = "keyframes-" + this.constructor.instanceCounter;
+        this.keyframeName = (this.options.name || "autokeyframe") + "-" + this.constructor.instanceCounter;
         return this.keyframeName;
     }
 

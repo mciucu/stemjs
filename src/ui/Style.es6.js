@@ -58,7 +58,16 @@ class StyleSet extends Dispatchable {
         if (arguments.length > 1) {
             style = Object.assign({}, ...arguments);
         }
-        let element = new DynamicStyleElement({style: style});
+        let elementOptions = {style: style};
+
+        // Get the preffered name, maybe cleanup later
+        const nameKey = "prefferedClassName";
+        if (style[nameKey]) {
+            elementOptions.name = style[nameKey];
+            delete style[nameKey];
+        }
+
+        let element = new DynamicStyleElement(elementOptions);
         this.elements.add(element);
         let styleInstances = element.render();
         for (let styleInstance of styleInstances) {
