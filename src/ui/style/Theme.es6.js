@@ -76,6 +76,4 @@ Object.defineProperty(UI.Element.prototype, "styleSheet", {
     }
 });
 
-// TODO: create a getter, .styleSheet??
-
 export {Theme};
