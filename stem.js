@@ -12443,7 +12443,7 @@ var ProgressBar = function (_SimpleStyledElement2) {
                 barOptions,
                 UI.createElement(
                     "span",
-                    { className: "progress-span" },
+                    null,
                     this.options.label
                 )
             );
@@ -20881,6 +20881,7 @@ var NavStyle = (_class$26 = function (_StyleSet) {
             padding: "0 0.7em",
             color: this.colors.text,
             width: "100%",
+            height: "100%",
             ":hover": {
                 backgroundColor: this.colors.navbarHover
             }

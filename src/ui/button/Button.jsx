@@ -3,7 +3,6 @@ import {GlobalStyle} from "../GlobalStyle";
 import {IconableInterface} from "../Bootstrap3";
 import {UI} from "../UIBase";
 
-
 class Button extends UI.Primitive(IconableInterface, "button") {
     extraNodeAttributes(attr) {
         attr.addClass(GlobalStyle.Button.DEFAULT);

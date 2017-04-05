@@ -26,17 +26,24 @@ class CollapsibleTableStyle extends StyleSet {
             color: "inherit",
         },
         ":after": {
-            fontFamily: "'Glyphicons Halflings'",
-            content: "\"\\e114\"",
+            fontFamily: "'FontAwesome'",
+            content: "\"\\f107\"",
             color: "grey",
             float: "left",
+            fontWeight: "bold",
+            width: "0.7em",
+            fontSize: "130%",
+            verticalAlign: "top",
+            height: "0.7em",
+            marginTop: "-0.2em",
+            textAlign: "center",
         }
     };
 
     @styleRule
     collapsedButton = {
         ":after": {
-            content: "\"\\e080\" !important",
+            content: "\"\\f105\" !important",
         },
     };
 

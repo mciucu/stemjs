@@ -80,13 +80,9 @@ class TabArea extends UI.Element {
     }
 
     extraNodeAttributes(attr) {
-        // TODO: these shoudl not be in here!
+        // TODO: these should not be in here!
         attr.setStyle("display", "flex");
         attr.setStyle("flex-direction", "column");
-        // attr.setStyle("display", "none");
-        if (!this.options.variableHeightPanels) {
-            // attr.addClass("auto-height-parent");
-        }
     }
 
     createTabPanel(panel) {
@@ -113,8 +109,6 @@ class TabArea extends UI.Element {
     }
 
     getSwitcher(tabPanels) {
-        // TODO: This should have the ex "auto-height" if not variable height children
-        // className="auto-height"
         return <Switcher style={{flex: "1", overflow: "auto", }} ref="switcherArea" lazyRender={this.options.lazyRender}>
             {tabPanels}
         </Switcher>;

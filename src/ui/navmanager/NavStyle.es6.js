@@ -108,7 +108,6 @@ class NavStyle extends StyleSet {
     navElementHorizontal = {
         color: this.colors.text,
         backgroundColor: this.colors.navbarBackground,
-        height: this.dimensions.navbarHeight,
         listStyleType: "none",
         cursor: "pointer",
         ">:nth-child(2)": {
@@ -128,6 +127,7 @@ class NavStyle extends StyleSet {
             padding: "0 0.7em",
             color: this.colors.text,
             width: "100%",
+            height: "100%",
             ":hover": {
                 backgroundColor: this.colors.navbarHover,
             },
@@ -220,8 +220,6 @@ class NavStyle extends StyleSet {
     navCollapseElement = {
         color: this.colors.text,
         textAlign: "initial",
-        maxHeight: this.dimensions.sidepanelElementHeight,
-        height: this.dimensions.sidepanelElementHeight,
         lineHeight: this.dimensions.sidepanelElementHeight,
     };
 

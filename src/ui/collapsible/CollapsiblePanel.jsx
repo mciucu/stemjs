@@ -31,15 +31,11 @@ class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
     }
 
     render() {
-        let autoHeightClass = "";
         let collapsedPanelClass = "";
         let collapsedHeadingClass = "";
         let hiddenClass = "";
         let contentStyle = {};
 
-        if (this.options.autoHeight) {
-            autoHeightClass = "auto-height ";
-        }
         if (this.options.collapsed) {
             collapsedHeadingClass = this.getStyleSet().collapsedButton;
             collapsedPanelClass = this.getCollapsibleStyleSet().collapsed;
@@ -58,7 +54,7 @@ class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
                     </a>
                 </div>,
                 <div style={{overflow: "hidden"}}>
-                  <div ref="contentArea" className={`${autoHeightClass} ${collapsedPanelClass} ${hiddenClass}`}
+                  <div ref="contentArea" className={`${collapsedPanelClass} ${hiddenClass}`}
                        style={contentStyle}>
                         {this.getGivenChildren()}
                     </div>
