@@ -98,35 +98,6 @@ class Modal extends UI.Element {
 }
 
 
-class ErrorModal extends Modal {
-    getGivenChildren() {
-        return [
-            this.getHeader(),
-            this.getBody(),
-            this.getFooter()
-        ];
-    }
-
-    getHeader() {
-        return [
-            <div className={ModalStyle.header}>
-                <h4>An Error occurred</h4>
-            </div>
-        ];
-    }
-
-    getBody() {
-        return <div className={ModalStyle.body}>{this.options.error.message || this.options.error}</div>;
-    }
-
-    getFooter() {
-        return <div className={ModalStyle.footer}>
-            <Button level={UI.Level.DANGER} label="Dismiss" onClick={() => this.hide()}/>
-        </div>;
-    }
-}
-
-
 class ActionModal extends Modal {
     getDefaultOptions() {
         return {
@@ -148,18 +119,14 @@ class ActionModal extends Modal {
 
     getGivenChildren() {
         return [
-            this.getHeader(),
-            this.getBody(),
-            this.getFooter()
+            <div className={this.getStyleSet().header}>{this.getHeader()}</div>,
+            (this.getBody() ? <div className={this.getStyleSet().body}>{this.getBody()}</div> : null),
+            (this.getFooter() ? <div className={this.getStyleSet().footer}>{this.getFooter()}</div> : null)
         ];
     }
 
     getHeader() {
-        return [
-            <div className={this.getStyleSet().header}>
-                <h4 >{this.getTitle()}</h4>
-            </div>
-        ];
+        return <h4>{this.getTitle()}</h4>;
     }
 
     getTitle() {
@@ -167,22 +134,14 @@ class ActionModal extends Modal {
     }
 
     getBody() {
-        let content = this.getBodyContent();
-        return content ? <div className={this.getStyleSet().body}>{content}</div> : null;
-    }
-
-    getBodyContent() {}
-
-    getFooter() {
-        let content = this.getFooterContent();
-        return content ? <div className={this.getStyleSet().footer}>{content}</div> : null;
+        return null;
     }
 
     getActionButton() {
         return <Button level={this.getActionLevel()} label={this.getActionName()} onClick={() => this.action()}/>;
     }
 
-    getFooterContent() {
+    getFooter() {
         return [
             <TemporaryMessageArea ref="messageArea"/>,
             <ButtonGroup>
@@ -213,6 +172,21 @@ function ActionModalButton(ActionModal) {
             this.addClickListener(() => this.modal.show());
         }
     };
+}
+
+
+class ErrorModal extends ActionModal {
+    getTitle() {
+        return "An Error occurred";
+    }
+
+    getBody() {
+        return this.options.error.message || this.options.error;
+    }
+
+    getFooter() {
+        return <Button level={UI.Level.DANGER} label="Dismiss" onClick={() => this.hide()}/>;
+    }
 }
 
 export {Modal, ErrorModal, ActionModal, ActionModalButton};

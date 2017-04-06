@@ -41,6 +41,16 @@ const FULL_SCREEN_CHANGE_EVENTS = [
 // TODO: this should not be directly in UI namespace
 let FullScreenable = function (BaseClass) {
     return class FullScreenable extends BaseClass {
+        extraNodeAttributes(attr) {
+            super.extraNodeAttributes(attr);
+            attr.setStyle({
+                backgroundColor: "#FFFFFF",
+                width: "100%",
+                padding: "10px",
+                height: "100%",
+            });
+        }
+
         enterFullScreen() {
             this.attachEnterFullscreenHandler();
             if (!callFirstMethodAvailable(this.node, ENTER_FULL_SCREEN_METHODS)) {
