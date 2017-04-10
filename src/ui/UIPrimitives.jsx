@@ -27,6 +27,7 @@ UI.Level = {
     WARNING: "warning",
     DANGER: "danger",
     ERROR: "danger",
+    DARK: "dark",
 };
 
 UI.Size = {

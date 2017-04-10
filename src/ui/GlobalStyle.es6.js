@@ -16,6 +16,7 @@ const COLOR = {
     DANGER: "#d9534f",
     GOOGLE: "#de4b39",
     FACEBOOK: "#3b5998",
+    DARK: "#202e3e",
 };
 
 class ButtonGroupStyle extends StyleSet {
@@ -69,7 +70,7 @@ class RadioButtonGroupStyle extends StyleSet {
 
 function BasicLevelStyleSet(colorClassFunction) {
     class BasicLevelStyleClass extends StyleSet {
-        colorClassBuilder = colorClassFunction
+        colorClassBuilder = colorClassFunction;
 
         @styleRule
         PLAIN = {};
@@ -97,6 +98,9 @@ function BasicLevelStyleSet(colorClassFunction) {
 
         @styleRule
         FACEBOOK = this.colorClassBuilder(buildColors(COLOR.FACEBOOK));
+
+        @styleRule
+        DARK = this.colorClassBuilder(buildColors(COLOR.DARK, false));
 
         Level(level) {
             if (this[level]) {

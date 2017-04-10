@@ -278,10 +278,12 @@ function darken(color, amount) {
     }
 };
 
-function buildColors(color) {
+function buildColors(color, dark=true) {
     let colors = [];
     let darkenPercents;
-    if (Color.isLight(color)) {
+    if (!dark) {
+        darkenPercents = [0.1, 0, -0.2, -0.3, -0.35, -0.2, -1];
+    } else if (Color.isLight(color)) {
         darkenPercents = [0.05, 0, 0.05, 0.1, 0.15, 0.3, 0.8];
     } else {
         darkenPercents = [-0.3, 0, 0.1, 0.2, 0.23, 0.1, -1];
