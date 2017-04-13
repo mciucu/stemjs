@@ -77,7 +77,11 @@ UI.TextElement = class UITextElement extends BaseUIElement {
     }
 
     createNode() {
-        return this.node = document.createTextNode(this.getValue());
+        this.node = document.createTextNode(this.getValue());
+        if (document.STEM_DEBUG) {
+            this.node.stemElement = this;
+        }
+        return this.node;
     }
 
     setValue(value) {
@@ -165,7 +169,11 @@ class UIElement extends BaseUIElement {
     };
 
     createNode() {
-        return this.node = document.createElement(this.getNodeType());
+        this.node = document.createElement(this.getNodeType());
+        if (document.STEM_DEBUG) {
+            this.node.stemElement = this;
+        }
+        return this.node;
     }
 
     // Abstract, gets called when removing DOM node associated with the
@@ -351,7 +359,7 @@ class UIElement extends BaseUIElement {
             }
         }
     }
-    
+
     refLink(name) {
         return {parent: this, name: name};
     }
