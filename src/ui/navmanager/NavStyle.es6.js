@@ -127,7 +127,6 @@ class NavStyle extends StyleSet {
             padding: "0 0.7em",
             color: this.colors.text,
             width: "100%",
-            height: this.dimensions.navbarHeight,
             ":hover": {
                 backgroundColor: this.colors.navbarHover,
             },
