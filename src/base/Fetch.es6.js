@@ -65,6 +65,14 @@ function composeURL(url, params) {
     return url;
 }
 
+export function toFormData(data) {
+    let formData = new FormData();
+    for (const key of Object.keys(data)) {
+        formData.append(key, data[key]);
+    }
+    return formData;
+}
+
 class XHRPromise {
     constructor(request, options = {}) {
         request = new Request(request, options);
@@ -119,15 +127,22 @@ class XHRPromise {
             xhr.responseType = "blob";
 
             request.headers.forEach((value, name) => {
+                if (options.body instanceof FormData && name.toLowerCase() === "content-type") {
+                    return;
+                }
                 xhr.setRequestHeader(name, value);
             });
 
-            // TODO: there's no need to do this on a GET or HEAD
-            request.blob().then((blob) => {
-                // The blob can be a FormData when we're polyfilling the Request class
-                let body = ((blob instanceof FormData) || blob.size) ? blob : null;
-                this.send(body);
-            });
+            // TODO: there's no need to send anything on a GET or HEAD
+            if (options.body instanceof FormData) {
+                this.send(options.body);
+            } else {
+                request.blob().then((blob) => {
+                    // The blob can be a FormData when we're polyfilling the Request class
+                    let body = ((blob instanceof FormData) || blob.size) ? blob : null;
+                    this.send(body);
+                });
+            }
         });
 
         this.request = request;
@@ -283,10 +298,5 @@ function fetch(input, ...args) {
 fetch.defaultPreprocessors = [jQueryCompatibilityPreprocessor];
 
 fetch.polyfill = true;
-
-window.dbgFetch = function () {
-    debugger;
-    fetch(...arguments);
-}
 
 export {XHRPromise, fetch, composeURL, parseHeaders, getURLSearchParams, jQueryCompatibilityPreprocessor};

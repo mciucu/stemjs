@@ -130,7 +130,16 @@ class FileInput extends Input {
         // TODO: this is valid only if multipleFiles is false
         return this.getFiles()[0];
     }
+
+    getAsFormData() {
+        let formData = new FormData();
+        for (let file of this.getFiles()) {
+            formData.append(file.name, file);
+        }
+        return formData;
+    }
 };
+
 FileInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
     ["multipleFiles", {domName: "multiple", noValue: true}],
     ["fileTypes", {domName: "accept"}],
