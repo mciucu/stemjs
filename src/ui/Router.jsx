@@ -1,6 +1,6 @@
-import {UI, Switcher} from "UI";
-import {Dispatcher, Dispatchable} from "Dispatcher";
-import {unwrapArray} from "Utils";
+import {UI, Switcher} from "./UI";
+import {Dispatcher, Dispatchable} from "../base/Dispatcher";
+import {unwrapArray} from "../base/Utils";
 
 class Router extends Switcher {
     static parseURL() {
@@ -24,9 +24,9 @@ class Router extends Switcher {
             return;
         }
         if (replaceHistory) {
-            history.replaceState({}, "CS Academy", url);
+            history.replaceState({}, this.pageTitle, url);
         } else {
-            history.pushState({}, "CS Academy", url);
+            history.pushState({}, this.pageTitle, url);
         }
     }
 
@@ -107,7 +107,7 @@ class Router extends Switcher {
     onMount() {
         this.updateURL();
         Dispatcher.Global.addListener("changeURL", (href, event) => {
-            history.pushState({}, "CS Academy", href);
+            history.pushState({}, Router.pageTitle, href);
             if (event) {
                 event.preventDefault();
             }
@@ -118,6 +118,7 @@ class Router extends Switcher {
         });
     }
 }
+Router.pageTitle = "Example";
 
 class Subrouter extends Dispatchable {
     constructor(parentRouter, prefix, initialState=[]) {
