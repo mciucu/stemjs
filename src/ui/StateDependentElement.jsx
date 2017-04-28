@@ -1,8 +1,7 @@
-import {UI} from "UI";
-import {DelayedElement} from "DelayedElement";
-import {Ajax} from "Ajax";
-import {GlobalState} from "State";
-import {StemDate} from "Time";
+import {UI} from "./UI";
+import {DelayedElement} from "./DelayedElement";
+import {Ajax} from "base/Ajax";
+import {GlobalState} from "state/State";
 
 function StateDependentElement(BaseClass) {
     return class StateDependentElementClass extends DelayedElement(BaseClass) {
@@ -20,16 +19,10 @@ function StateDependentElement(BaseClass) {
         }
 
         beforeRedrawNotLoaded() {
-            let startTime = StemDate.now();
             Ajax.getJSON(this.getAjaxUrl(), {}).then(
                 (data) => {
                     this.importState(data);
-                    let durationLeft = 500 - (StemDate.now() - startTime);
-                    if (durationLeft > 0) {
-                        setTimeout(() => {this.setLoaded();}, durationLeft);
-                    } else {
-                        this.setLoaded();
-                    }
+                    this.setLoaded();
                 },
                 (error) => {
                     console.error(error);
