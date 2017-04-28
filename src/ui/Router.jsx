@@ -19,7 +19,9 @@ class Router extends Switcher {
     }
 
     static changeURL(urlParts, replaceHistory=false) {
-        let url = "/" + unwrapArray(urlParts).join("/") + "/";
+        urlParts = unwrapArray(urlParts).filter(urlPart => !!urlPart);
+        let url = "/" + urlParts.join("/") + "/";
+
         if (url === location.pathname) {
             return;
         }
