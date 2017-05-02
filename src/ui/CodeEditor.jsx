@@ -8,6 +8,7 @@ class CodeEditor extends UI.Element {
             aceMode: "text",
             readOnly: false,
             aceTheme: "dawn",
+            aceKeyboardHandler: "ace",
             fontSize: 14,
             tabSize: 4,
             showLineNumber: true,
@@ -35,6 +36,7 @@ class CodeEditor extends UI.Element {
         //set the language mode
         this.ace.getSession().setMode("ace/mode/" + this.options.aceMode);
 
+        this.setAceKeyboardHandler(this.options.aceKeyboardHandler);
         this.setAceTheme(this.options.aceTheme);
         this.setAceFontSize(this.options.fontSize);
         this.setAceTabSize(this.options.tabSize);
@@ -120,7 +122,7 @@ class CodeEditor extends UI.Element {
         this.addListener("change", () => {
             this.ace.resize();
         });
-    };
+    }
 
     setValue(sourceCode, fakeUserChange) {
         // We need to wrap the ace call in these flags so any event listeners can know if this change
@@ -128,11 +130,11 @@ class CodeEditor extends UI.Element {
         this.apiChange = !fakeUserChange;
         this.ace.setValue(sourceCode, -1);
         this.apiChange = false;
-    };
+    }
 
     getValue() {
         return this.ace.getValue();
-    };
+    }
 
     getAce() {
         return this.ace;
@@ -148,65 +150,77 @@ class CodeEditor extends UI.Element {
             aceMode = aceMode.aceMode;
         }
         this.ace.getSession().setMode("ace/mode/" + aceMode);
-    };
+    }
+
+    getAceKeyboardHandler() {
+        return this.ace.$keybindingId;
+    }
+
+    setAceKeyboardHandler(keyboardHandler) {
+        if (keyboardHandler.hasOwnProperty("aceName")) {
+            keyboardHandler = keyboardHandler.aceName;
+        }
+        this.ace.setKeyboardHandler("ace/keyboard/" + keyboardHandler);
+    }
+
     getAceMode() {
         return this.ace.getSession().getMode();
-    };
+    }
 
     setAceTheme(theme) {
         if (theme.hasOwnProperty("aceName")) {
             theme = theme.aceName;
         }
         this.ace.setTheme("ace/theme/" + theme);
-    };
+    }
 
     getAceTheme() {
         return this.ace.getTheme();
-    };
+    }
 
     setAceFontSize(fontSize) {
         this.ace.setOptions({
             fontSize: fontSize + "px"
         });
-    };
+    }
 
     getAceFontSize() {
         return this.ace.getFontSize();
-    };
+    }
 
     setAceTabSize(tabSize) {
         this.ace.setOptions({
             tabSize: tabSize
         });
-    };
+    }
 
     getAceTabSize() {
         return this.ace.getOption("tabSize");
-    };
+    }
 
     setAceLineNumberVisible(value) {
         this.ace.renderer.setShowGutter(value);
-    };
+    }
 
     getAceLineNumberVisible() {
         return this.ace.renderer.getShowGutter();
-    };
+    }
 
     setAcePrintMarginVisible(value) {
         this.ace.setShowPrintMargin(value);
-    };
+    }
 
     getAcePrintMarginVisible() {
         return this.ace.getShowPrintMargin();
-    };
+    }
 
     setAcePrintMarginSize(printMarginSize) {
         this.ace.setPrintMarginColumn(printMarginSize);
-    };
+    }
 
     getAcePrintMarginSize() {
         return this.ace.getPrintMarginColumn();
-    };
+    }
 
     setBasicAutocompletion(value) {
         this.ace.setOptions({
@@ -229,7 +243,7 @@ class CodeEditor extends UI.Element {
     // Inserts the text at the current cursor position
     insert(text) {
         this.ace.insert(text);
-    };
+    }
 
     // Appends the text at the end of the document
     append(text) {
@@ -253,7 +267,7 @@ class CodeEditor extends UI.Element {
             // TODO: for some reason the scroll bar height is not being updated, this needs to be fixed
             this.ace.scrollToLine(this.ace.getSession().getLength() - 1, true, true, function () {});
         }
-    };
+    }
 }
 
 class StaticCodeHighlighter extends CodeEditor {
