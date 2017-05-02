@@ -4,6 +4,7 @@ import {FloatingWindow} from "./FloatingWindow";
 import {ModalStyle} from "./Style";
 import {Panel, TemporaryMessageArea} from "../UIPrimitives";
 import {UI} from "../UIBase";
+import {Dispatcher} from "../../base/Dispatcher";
 
 class Modal extends UI.Element {
     static styleSet = new ModalStyle();
@@ -76,6 +77,10 @@ class Modal extends UI.Element {
             setTimeout(() => {
                 this.modalContainer.addClass("hidden");
             }, this.modalWindow.options.transitionTime);
+
+            this.closeListenerHandler.remove();
+            delete this.closeListenerHandler;
+
         }, this.modalWindow.options.transitionTime);
         document.body.classList.remove("unscrollable");
     }
@@ -93,6 +98,9 @@ class Modal extends UI.Element {
                 this.modalWindow.fadeIn();
             }, this.modalWindow.options.transitionTime);
         }, 0);
+        this.closeListenerHandler = this.attachListener(Dispatcher.Global, "closeAllModals", () => {
+            this.hide();
+        });
         document.body.classList.add("unscrollable");
     }
 }
