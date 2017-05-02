@@ -2,6 +2,24 @@ import {UI, Switcher} from "./UI";
 import {Dispatcher, Dispatchable} from "../base/Dispatcher";
 import {unwrapArray} from "../base/Utils";
 
+function attachSubrouterEvents(subrouter) {
+    let handleChangeUrl = () => {
+        let currentUrl = Router.parseURL();
+        if (currentUrl.length >= subrouter.getPrefix().length) {
+            let currentPrefix = currentUrl.slice(0, subrouter.getPrefix().length);
+            if (currentPrefix.join("/") === subrouter.getPrefix().join("/")) {
+                subrouter.getParentRouter().setActiveSubrouter(subrouter);
+                subrouter.setState(currentUrl.slice(currentPrefix.length), true);
+            } else if (subrouter.getParentRouter().getActiveSubrouter() === subrouter) {
+                subrouter.getParentRouter().resetActiveSubrouter();
+            }
+        }
+    };
+
+    Dispatcher.Global.addListener("changeURL", handleChangeUrl);
+    Router.Global.addListener("change", handleChangeUrl);
+}
+
 class Router extends Switcher {
     static parseURL() {
         let path = location.pathname;
@@ -73,6 +91,8 @@ class Router extends Switcher {
         if (autoActive) {
             this.setActiveSubrouter(subrouter);
         }
+
+        attachSubrouterEvents(subrouter);
     }
 
     getActiveSubrouter() {
@@ -155,6 +175,8 @@ class Subrouter extends Dispatchable {
         if (autoActive) {
             this.setActiveSubrouter(subrouter);
         }
+
+        attachSubrouterEvents(subrouter);
     }
 
     getActiveSubrouter() {
