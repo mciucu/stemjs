@@ -21,7 +21,12 @@ SVG.Element = class SVGElement extends UI.Element {
     setOptions(options) {
         if (typeof this.getDefaultOptions === "function") {
             let defaultOptions = this.getDefaultOptions();
+            // TODO: consider this deep copy, seems really shady!
+            const goodRef = options.ref;
             options = deepCopy({}, defaultOptions, options);
+            if (goodRef) {
+                options.ref = goodRef;
+            }
         }
         super.setOptions(options);
     }
