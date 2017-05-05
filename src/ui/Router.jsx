@@ -38,7 +38,12 @@ class Router extends Switcher {
 
     static changeURL(urlParts, replaceHistory=false) {
         urlParts = unwrapArray(urlParts).filter(urlPart => !!urlPart);
-        let url = "/" + urlParts.join("/") + "/";
+        let url;
+        if (urlParts.length) {
+            url = "/" + urlParts.join("/") + "/";
+        } else {
+            url = "/";
+        }
 
         if (url === location.pathname) {
             return;
@@ -228,11 +233,20 @@ class Subrouter extends Dispatchable {
     }
 
     openInNewTab(state) {
-        let fullUrl = [...this.getPrefix(), ...state];
-        if (this.getActiveSubrouter()) {
-            fullUrl = [...fullUrl, this.getActiveSubrouter().getFullState()];
+        if (!(state instanceof Array)) {
+            state = [state];
         }
-        window.open("/" + fullUrl.join("/") + "/", "_blank");
+        let urlParts = [...this.getPrefix(), ...state];
+        if (this.getActiveSubrouter()) {
+            urlParts = [...urlParts, this.getActiveSubrouter().getFullState()];
+        }
+        let url;
+        if (urlParts.length) {
+            url = "/" + urlParts.join("/") + "/";
+        } else {
+            url = "/";
+        }
+        window.open(url, "_blank");
     }
 
     addChangeListener(callback) {
