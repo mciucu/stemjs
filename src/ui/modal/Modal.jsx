@@ -39,9 +39,7 @@ class Modal extends UI.Element {
 
         return <FloatingWindow ref="modalWindow" style={this.getModalWindowStyle()}>
             {closeButton}
-            <div style={{margin: "0px", height: "100%", width: "100%"}}>
-                {this.getGivenChildren()}
-            </div>
+            {this.getGivenChildren()}
         </FloatingWindow>;
     }
 
