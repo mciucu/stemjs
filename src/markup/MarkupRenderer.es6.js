@@ -99,6 +99,10 @@ class MarkupRenderer extends Panel {
         return this.classMap.getClass(className);
     }
 
+    getValue() {
+        return this.options.value;
+    }
+
     convertToUI(value) {
         if (value instanceof UI.TextElement || value instanceof UI.Element) {
             // TODO: investigate this!
@@ -123,7 +127,7 @@ class MarkupRenderer extends Panel {
     }
 
     render() {
-        return this.convertToUI(this.options.value);
+        return this.convertToUI(this.getValue());
     }
 }
 
