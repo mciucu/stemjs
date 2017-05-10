@@ -236,6 +236,7 @@ class NavAnchoredNotifications extends NavSection {
             height: "300px",
             width: "400px",
             boxShadow: "0px 0px 10px #666",
+            zIndex: "-1",
         };
     }
 
