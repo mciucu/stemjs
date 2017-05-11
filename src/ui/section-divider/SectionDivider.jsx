@@ -289,7 +289,9 @@ class SectionDivider extends UI.Element {
 
     onMount() {
         this.addListener("dividerMousedown", (dividerEvent) => this.dividerMouseDownFunction(dividerEvent));
-        this.recalculateDimensions();
+        setTimeout(() => {
+            this.recalculateDimensions();
+        });
     }
 
     render() {
