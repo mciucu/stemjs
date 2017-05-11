@@ -34,9 +34,7 @@ class NavIcon extends NavElement {
 class LeftSideIcon extends NavIcon {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
-        attr.setStyle({
-            float: "left",
-        });
+        attr.setStyle(this.getStyleSet().sideIcon);
     }
 
     getIcon() {
@@ -48,9 +46,7 @@ class LeftSideIcon extends NavIcon {
 class RightSideIcon extends NavIcon {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
-        attr.setStyle({
-            float: "right",
-        });
+        attr.setStyle(this.getStyleSet().sideIcon);
     }
 
     getIcon() {
@@ -60,6 +56,11 @@ class RightSideIcon extends NavIcon {
 
 
 class WrappedIcon extends NavIcon {
+    extraNodeAttributes(attr) {
+        super.extraNodeAttributes(attr);
+        attr.setStyle(this.getStyleSet().wrappedIcon);
+    }
+
     getIcon() {
         return <FAIcon icon="ellipsis-h" size={UI.Size.LARGE}/>;
     }

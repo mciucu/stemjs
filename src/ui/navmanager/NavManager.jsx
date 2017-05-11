@@ -319,9 +319,11 @@ class NavManager extends UI.Primitive("nav") {
             this.getLeftFixed(),
             this.getLeftConditionedWrapper(),
             this.getWrappedIcon(),
-            this.getRightSideIcon(),
+            <NavSection style={{marginLeft: "auto"}}>
+              {this.getRightConditionedWrapper()}
+            </NavSection>,
             this.getRightFixed(),
-            this.getRightConditionedWrapper(),
+            this.getRightSideIcon(),
         ];
     }
 
@@ -331,6 +333,28 @@ class NavManager extends UI.Primitive("nav") {
     }
 
     checkForWrap() {
+        const wrapNavElements = () => {
+            this.wrapped = true;
+            this.wrappedPanel = <BasicOrientedElement orientation={UI.Orientation.VERTICAL} styleSet={this.getStyleSet()}/>;
+            this.carousel.appendChild(this.wrappedPanel);
+
+            changeParent(this.getRightConditioned(), this.wrappedPanel);
+            changeParent(this.getLeftConditioned(), this.wrappedPanel);
+            this.getRightConditioned().redraw();
+            this.getLeftConditioned().redraw();
+            this.getWrappedIcon().removeClass("hidden");
+        };
+
+        const unwrapNavElements = () => {
+            this.wrapped = false;
+            this.getWrappedIcon().addClass("hidden");
+            changeParent(this.getLeftConditioned(), this.getLeftConditionedWrapper());
+            changeParent(this.getRightConditioned(), this.getRightConditionedWrapper());
+            this.carousel.eraseChild(this.wrappedPanel);
+            this.getLeftConditioned().redraw();
+            this.getRightConditioned().redraw();
+        };
+
         if (this.getLeftConditioned().children.length || this.getRightConditioned().children.length) {
             if (!this.wrapped) {
                 this.unwrappedTotalWidth = 10;
@@ -339,27 +363,14 @@ class NavManager extends UI.Primitive("nav") {
                 }
             }
             if (window.innerWidth < this.unwrappedTotalWidth && !this.wrapped) {
-                this.wrapped = true;
-                this.wrappedPanel = <BasicOrientedElement orientation={UI.Orientation.VERTICAL} styleSet={this.getStyleSet()}/>;
-                this.carousel.appendChild(this.wrappedPanel);
-
-                this.getWrappedIcon().setStyle("width", "calc(100% - " + this.getFixedWidth() + "px)");
-                changeParent(this.getRightConditioned(), this.wrappedPanel);
-                changeParent(this.getLeftConditioned(), this.wrappedPanel);
-                this.getRightConditioned().redraw();
-                this.getLeftConditioned().redraw();
-                this.getWrappedIcon().removeClass("hidden");
+                wrapNavElements();
                 this.dispatch("wrapped", true);
             } else if (window.innerWidth >= this.unwrappedTotalWidth && this.wrapped) {
-                this.wrapped = false;
-                this.getWrappedIcon().addClass("hidden");
-                changeParent(this.getLeftConditioned(), this.getLeftConditionedWrapper());
-                changeParent(this.getRightConditioned(), this.getRightConditionedWrapper());
-                this.carousel.eraseChild(this.wrappedPanel);
-                this.getLeftConditioned().redraw();
-                this.getRightConditioned().redraw();
+                unwrapNavElements();
                 this.dispatch("wrapped", false);
             }
+        } else if (this.wrapped) {
+            unwrapNavElements();
         }
     }
 

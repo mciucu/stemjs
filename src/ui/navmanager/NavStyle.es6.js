@@ -40,23 +40,14 @@ class NavStyle extends StyleSet {
         }
     };
 
-    leftSideIcon = Object.assign({}, this.icon, {
+    sideIcon = Object.assign({}, this.icon, {
         fontSize: "120%",
-        float: "left",
     });
 
-    rightSideIcon = Object.assign({}, this.icon, {
-        fontSize: "120%",
-        float: "right",
+    wrappedIcon = Object.assign({}, this.icon, {
+        fontSize: "100%",
+        flex: "1",
     });
-
-    @styleRule
-    wrappedIcon = [
-        this.icon, {
-            fontSize: "100%",
-            float: "left",
-        }
-    ];
 
 
     // Nav manager elements
@@ -93,6 +84,7 @@ class NavStyle extends StyleSet {
     // Navbar
     @styleRule
     navManager = {
+        display: "flex",
         height: this.dimensions.navbarHeight,
         lineHeight: this.dimensions.navbarHeight,
         width: "100%",
