@@ -11,7 +11,8 @@ class Modal extends UI.Element {
 
     getDefaultOptions() {
         return {
-            closeButton: true
+            closeButton: true,
+            destroyOnHide: true,
         };
     }
 
@@ -74,6 +75,9 @@ class Modal extends UI.Element {
 
             setTimeout(() => {
                 this.modalContainer.addClass("hidden");
+                if (this.options.destroyOnHide) {
+                    this.destroyNode();
+                }
             }, this.modalWindow.options.transitionTime);
 
             this.closeListenerHandler.remove();

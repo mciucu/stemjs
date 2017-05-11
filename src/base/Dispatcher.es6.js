@@ -5,6 +5,10 @@ class DispatcherHandle {
     }
 
     remove() {
+        if (!this.dispatcher) {
+            console.warn("Removing a dispatcher twice");
+            return;
+        }
         this.dispatcher.removeListener(this.callback);
         this.dispatcher = undefined;
         this.callback = undefined;
