@@ -5,6 +5,7 @@ class Switcher extends UI.Element {
     constructor(options) {
         super(options);
         this.childMap = new WeakMap();
+        this.numRedraws = 0;
     }
 
     copyState(element) {
@@ -42,6 +43,8 @@ class Switcher extends UI.Element {
     }
 
     redraw() {
+        this.numRedraws += 1;
+
         //basic things for our current node
         this.applyNodeAttributes();
         this.applyRef();
@@ -70,21 +73,21 @@ class Switcher extends UI.Element {
     getChildProperties(child) {
         if (!this.childMap.has(child)) {
             this.childMap.set(child, {
-                isUpToDate: false,
-                isMounted: !!child.node
+                isMounted: !!child.node,
+                redrawIndex: -1,
             });
         }
         return this.childMap.get(child);
     }
 
     updateChild(child) {
-        if (!this.getChildProperties(child).isUpToDate) {
+        if (this.getChildProperties(child).redrawIndex < this.numRedraws) {
             if (!child.node) {
                 child.mount(this);
             } else {
                 child.redraw();
             }
-            this.getChildProperties(child).isUpToDate = true;
+            this.getChildProperties(child).redrawIndex = this.numRedraws;
         }
     }
 
@@ -106,7 +109,7 @@ class Switcher extends UI.Element {
     insertChildNodeBefore(child, nextSibling) {
         let childProperties = this.getChildProperties(child);
         childProperties.isMounted = true;
-        childProperties.isUpToDate = true;
+        childProperties.redrawIndex = this.numRedraws;
     }
 
     updateActiveChild(element) {
