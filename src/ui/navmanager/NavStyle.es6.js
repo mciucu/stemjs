@@ -1,4 +1,4 @@
-import {StyleSet, styleRule, keyframesRule} from "../Style";
+import {StyleSet, styleRule} from "../Style";
 
 
 class NavStyle extends StyleSet {
