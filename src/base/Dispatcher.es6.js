@@ -138,6 +138,14 @@ class Dispatchable {
             this._cleanupJobs.cleanup();
         }
     }
+
+    detachListener(dispatcherHandle) {
+        if (this._cleanupJobs) {
+            this._cleanupJobs.remove(dispatcherHandle);
+        } else {
+            dispatcherHandle.remove();
+        }
+    }
 }
 
 // Creates a method that calls the method methodName on obj, and adds the result as a cleanup task
@@ -193,8 +201,16 @@ class CleanupJobs {
         this.jobs = [];
     }
 
-    remove() {
-        this.cleanup();
+    remove(job) {
+        if (job) {
+            const index = this.jobs.indexOf(job);
+            if (index >= 0) {
+                this.jobs.splice(index, 1);
+            }
+            job.remove();
+        } else {
+            this.cleanup();
+        }
     }
 }
 

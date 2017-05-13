@@ -80,9 +80,7 @@ class Modal extends UI.Element {
                 }
             }, this.modalWindow.options.transitionTime);
 
-            this.closeListenerHandler.remove();
-            delete this.closeListenerHandler;
-
+            this.detachListener(this.closeListenerHandler);
         }, this.modalWindow.options.transitionTime);
         document.body.classList.remove("unscrollable");
     }
@@ -104,6 +102,11 @@ class Modal extends UI.Element {
             this.hide();
         });
         document.body.classList.add("unscrollable");
+    }
+
+    static show(options={}) {
+        let modal = new this(options);
+        modal.show();
     }
 }
 
