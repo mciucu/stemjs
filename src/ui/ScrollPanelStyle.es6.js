@@ -4,20 +4,14 @@ class ScrollPanelStyle extends StyleSet {
     @styleRule
     panel = {
         height: "600px",
-        width: "800px",
+        width: "100%",
         overflow: "auto",
+        position: "absolute",
     };
 
     @styleRule
     unloaded = {
         width: "100%",
-    };
-
-    @styleRule
-    mock = {
-        border: "1px solid black",
-        width: "100%",
-        display: "block",
     };
 }
 
