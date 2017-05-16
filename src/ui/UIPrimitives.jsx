@@ -196,12 +196,13 @@ class VerticalSlideBar extends SlideBar {
 
 class Link extends UI.Primitive("a") {
     extraNodeAttributes(attr) {
+        // TODO: do we want this as a default?
         attr.setStyle("cursor", "pointer");
     }
 
     getDefaultOptions() {
         return {
-            newTab: true,
+            newTab: true, //TODO: make this false
         }
     }
 
