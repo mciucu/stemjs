@@ -216,7 +216,10 @@ class Link extends UI.Primitive("a") {
     }
 
     render() {
-        return [this.options.value];
+        if (this.options.value) {
+            return [this.options.value];
+        }
+        return super.render();
     }
 }
 
