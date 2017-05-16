@@ -24,6 +24,7 @@ export * from "section-divider/SectionDivider";
 export * from "section-divider/Accordion";
 export * from "section-divider/Style";
 export * from "./Carousel";
+export * from "./ScrollPanel";
 
 export * from "./table/Table";
 export * from "./table/CollapsibleTable";
