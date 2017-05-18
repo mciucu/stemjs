@@ -40,7 +40,7 @@ class FormGroup extends UI.Element {
     }
 
     getErrorField() {
-        return <span ref="errorField"></span>;
+        return <span ref="errorField" style={{float: "right"}}></span>;
     }
 
     render() {
