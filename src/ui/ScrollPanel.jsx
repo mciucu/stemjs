@@ -3,26 +3,31 @@ import {ScrollPanelStyle} from "./ScrollPanelStyle";
 import {UserHandle} from "UserHandle";
 
 function ScrollPanelInterface(TableClass) {
-    class ScrollPanel extends TableClass {
+    class ScrollPanel extends UI.Primitive(TableClass, "div") {
         static scrollPanelStyleSet = ScrollPanelStyle.getInstance();
-
         extraNodeAttributes(attr) {
             super.extraNodeAttributes(attr);
             attr.setStyle({
                 position: "relative",
+                paddingTop: "60px",
+                height: "600px",
+                width: "100%",
             });
         }
 
         render() {
             return [
-                <thead ref="head">
-                    {this.renderTableHead()}
-                </thead>,
-                <tbody ref="scrollablePanel" className={this.constructor.scrollPanelStyleSet.panel}>
-                    <tr ref="before" className={this.constructor.scrollPanelStyleSet.unloaded}/>
+                <div ref="scrollablePanel" style={{overflow: "auto", height: "100%", width: "100%"}}>
+                <tr ref="fakePanel" className={this.constructor.scrollPanelStyleSet.unloaded} style={{height: "1000px"}}/>
+                <table ref="table" className={this.getStyleSet().table} style={{top: "0px", position: "absolute", zIndex: "-1"}}>
+                    <thead ref="head">
+                        {this.renderTableHead()}
+                    </thead>
+                    <tbody ref="tbody">
                         {this.renderTableBody()}
-                    <tr ref="after" className={this.constructor.scrollPanelStyleSet.unloaded}/>
-                </tbody>
+                    </tbody>
+                </table>
+                </div>
             ];
         }
 
@@ -47,28 +52,45 @@ function ScrollPanelInterface(TableClass) {
         }
 
         setScroll() {
-            debugger;
-                    const scrollRatio = this.scrollablePanel.node.scrollTop / this.scrollablePanel.node.scrollHeight;
-                    this.lowIndex = parseInt(scrollRatio * this.getEntries().length - 2);
-                    if (this.lowIndex < 0) {
-                        this.lowIndex = 0;
-                    }
-                    this.highIndex = this.lowIndex + parseInt(this.scrollablePanel.getHeight() / this.rowHeight) + 2;
-                    this.redraw();
-                    this.before.setHeight(this.lowIndex * this.rowHeight);
-                    this.after.setHeight((this.getEntries().length - this.highIndex) * this.rowHeight);
-                }
+            let rowHeight;
+            const scrollRatio = this.scrollablePanel.node.scrollTop / this.scrollablePanel.node.scrollHeight;
+            if (this.tbody.children.length) {
+                rowHeight = this.tbody.children[0].getHeight();
+            } else {
+                rowHeight = this.head.getHeight();
+            }
+            this.fakePanel.setHeight(rowHeight * this.getEntries().length + "px");
+            this.lowIndex = parseInt(scrollRatio * this.getEntries().length);
+            this.highIndex = this.lowIndex + parseInt((this.getHeight() - this.head.getHeight()) / rowHeight);
+            this.tbody.options.children = this.renderTableBody();
+            this.tbody.redraw();
+        }
 
-                onMount() {
-                    super.onMount();
+        onMount() {
+            super.onMount();
+            setTimeout(() => {
+                debugger;
+                this.setScroll();
+                this.scrollablePanel.addNodeListener("scroll", () => {
+                    this.setScroll();
+                });
+                this.table.addClickListener((event) => {
+                    event.stopPropagation();
+                });
+                this.scrollablePanel.addNodeListener("mousedown", (event) => {
+                    this.table.setStyle("zIndex", 0);
+                });
+                this.table.addNodeListener("mouseup", (event) => {
+                    const mouseDownEvent = document.createEvent ("MouseEvents");
+                    mouseDownEvent.initEvent ("click", true, false);
+                    console.warn(document.elementFromPoint(parseFloat(event.pageX), parseFloat(event.pageY)));
+                    document.elementFromPoint(parseFloat(event.pageX), parseFloat(event.pageY)).dispatchEvent(mouseDownEvent);
                     setTimeout(() => {
-                        this.rowHeight = this.head.getHeight();
-                        this.setScroll();
-                    });
-                    this.scrollablePanel.addNodeListener("scroll", () => {
-                        this.setScroll();
-                    });
-                }
+                        this.table.setStyle("zIndex", -1);
+                    }, 100);
+                });
+            })
+        }
     }
     return ScrollPanel;
 }
