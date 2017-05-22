@@ -3,15 +3,15 @@ import {StyleSet, styleRule} from "./Style";
 class ScrollPanelStyle extends StyleSet {
     @styleRule
     panel = {
-        height: "600px",
+        height: "100%",
         width: "100%",
-        overflow: "auto",
-        position: "absolute",
+        position: "relative",
     };
 
     @styleRule
     unloaded = {
         width: "100%",
+        height: "2000px",
     };
 }
 

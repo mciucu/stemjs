@@ -7,18 +7,13 @@ function ScrollPanelInterface(TableClass) {
         static scrollPanelStyleSet = ScrollPanelStyle.getInstance();
         extraNodeAttributes(attr) {
             super.extraNodeAttributes(attr);
-            attr.setStyle({
-                position: "relative",
-                paddingTop: "60px",
-                height: "600px",
-                width: "100%",
-            });
+            attr.addClass(this.constructor.scrollPanelStyleSet.panel);
         }
 
         render() {
             return [
                 <div ref="scrollablePanel" style={{overflow: "auto", height: "100%", width: "100%"}}>
-                <tr ref="fakePanel" className={this.constructor.scrollPanelStyleSet.unloaded} style={{height: "1000px"}}/>
+                <tr ref="fakePanel" className={this.constructor.scrollPanelStyleSet.unloaded}/>
                 <table ref="table" className={this.getStyleSet().table} style={{top: "0px", position: "absolute", zIndex: "-1"}}>
                     <thead ref="head">
                         {this.renderTableHead()}
@@ -34,21 +29,22 @@ function ScrollPanelInterface(TableClass) {
         renderTableBody() {
             this.rows = [];
 
-            let entries = this.getMyEntries();
+            const entries = this.getEntriesRange(this.lowIndex, this.highIndex);
             for (let i = 0; i < entries.length; i += 1) {
-                                    let entry = entries[i];
-                                    let RowClass = this.getRowClass(entry);
-                                    this.rows.push(<RowClass key={this.getEntryKey(entry, i)} index={i} {...this.getRowOptions(entry)} parent={this}/>);
+                const entry = entries[i];
+                const RowClass = this.getRowClass(entry);
+                this.rows.push(<RowClass key={this.getEntryKey(entry, i)} index={i}
+                {...this.getRowOptions(entry)} parent={this}/>);
             }
             return this.rows;
         }
 
-        getMyEntries() {
-            if (!this.highIndex) {
-                return [];
-            } else {
-                return this.getEntries().slice(this.lowIndex, this.highIndex);
-            }
+        getEntriesRange(low, high) {
+            return this.getEntries().slice(low, high);
+        }
+
+        getEntriesCount() {
+            return this.getEntries().length;
         }
 
         setScroll() {
@@ -59,8 +55,9 @@ function ScrollPanelInterface(TableClass) {
             } else {
                 rowHeight = this.head.getHeight();
             }
-            this.fakePanel.setHeight(rowHeight * this.getEntries().length + "px");
-            this.lowIndex = parseInt(scrollRatio * this.getEntries().length);
+            this.setStyle("paddingTop", this.head.getHeight() + "px");
+            this.fakePanel.setHeight(rowHeight * this.getEntriesCount() + "px");
+            this.lowIndex = parseInt(scrollRatio * this.getEntriesCount());
             this.highIndex = this.lowIndex + parseInt((this.getHeight() - this.head.getHeight()) / rowHeight);
             this.tbody.options.children = this.renderTableBody();
             this.tbody.redraw();
@@ -68,27 +65,34 @@ function ScrollPanelInterface(TableClass) {
 
         onMount() {
             super.onMount();
-            setTimeout(() => {
-                debugger;
-                this.setScroll();
-                this.scrollablePanel.addNodeListener("scroll", () => {
+
+            this.addListener("entriesChange", (event) => {
+                if (!(event.leftIndex >= this.highIndex || event.rightIndex < this.lowIndex)) {
                     this.setScroll();
-                });
-                this.table.addClickListener((event) => {
-                    event.stopPropagation();
-                });
-                this.scrollablePanel.addNodeListener("mousedown", (event) => {
-                    this.table.setStyle("zIndex", 0);
-                });
-                this.table.addNodeListener("mouseup", (event) => {
-                    const mouseDownEvent = document.createEvent ("MouseEvents");
-                    mouseDownEvent.initEvent ("click", true, false);
-                    console.warn(document.elementFromPoint(parseFloat(event.pageX), parseFloat(event.pageY)));
-                    document.elementFromPoint(parseFloat(event.pageX), parseFloat(event.pageY)).dispatchEvent(mouseDownEvent);
-                    setTimeout(() => {
-                        this.table.setStyle("zIndex", -1);
-                    }, 100);
-                });
+                }
+            })
+
+            this.scrollablePanel.addNodeListener("scroll", () => {
+                this.setScroll();
+            });
+            this.table.addClickListener((event) => {
+                event.stopPropagation();
+            });
+            this.scrollablePanel.addNodeListener("mousedown", (event) => {
+                this.table.setStyle("zIndex", 0);
+            });
+            this.table.addNodeListener("mouseup", (event) => {
+                const mouseDownEvent = document.createEvent ("MouseEvents");
+                mouseDownEvent.initEvent ("click", true, false);
+                const domElement = document.elementFromPoint(parseFloat(event.pageX), parseFloat(event.pageY));
+                setTimeout(() => {
+                    this.table.setStyle("zIndex", -1);
+                    domElement.dispatchEvent(mouseDownEvent);
+                }, 100);
+            });
+
+            setTimeout(() => {
+                this.setScroll();
             })
         }
     }
