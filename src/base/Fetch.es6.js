@@ -158,8 +158,8 @@ class XHRPromise {
         } else {
             this.promiseResolve(...arguments);
         }
-        if (this.options.complete) {
-            this.options.complete();
+        if (this.options.onComplete) {
+            this.options.onComplete();
         }
     }
 
@@ -169,8 +169,8 @@ class XHRPromise {
         } else {
             this.promiseReject(...arguments);
         }
-        if (this.options.complete) {
-            this.options.complete();
+        if (this.options.onComplete) {
+            this.options.onComplete();
         }
     }
 
@@ -272,6 +272,7 @@ function fetch(input, ...args) {
 
     options.onSuccess = options.onSuccess || options.success;
     options.onError = options.onError || options.error;
+    options.onComplete = options.onComplete || options.complete;
 
     if (typeof options.cache === "boolean") {
         options.cache = options.cache ? "force-cache" : "reload";
