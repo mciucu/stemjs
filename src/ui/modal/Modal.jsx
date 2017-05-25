@@ -13,6 +13,7 @@ class Modal extends UI.Element {
         return {
             closeButton: true,
             destroyOnHide: true,
+            visible: false,
         };
     }
 
@@ -21,9 +22,10 @@ class Modal extends UI.Element {
     }
 
     render() {
+        const style = this.getStyleSet();
         return [
-            <Panel ref="modalContainer" className={`hidden ${this.getStyleSet().container}`}>
-                <Panel ref="behindPanel" className={`${this.getStyleSet().hiddenAnimated} ${this.getStyleSet().background}`} onClick={() => this.hide()}/>
+            <Panel ref="modalContainer" className={(this.options.visible ? "" : "hidden") + style.container}>
+                <Panel ref="behindPanel" className={style.hiddenAnimated + style.background} onClick={() => this.hide()}/>
                 {this.getModalWindow()}
             </Panel>
         ];
@@ -67,6 +69,7 @@ class Modal extends UI.Element {
     }
 
     hide() {
+        this.options.visible = false;
         this.modalWindow.fadeOut();
 
         setTimeout(() => {
@@ -86,6 +89,7 @@ class Modal extends UI.Element {
     }
 
     show() {
+        this.options.visible = true;
         if (!this.node) {
             this.mount(document.body);
         }

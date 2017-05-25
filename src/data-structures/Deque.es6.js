@@ -116,6 +116,15 @@ class Deque {
     toString() {
         return this.toArray().toString();
     }
+
+    entries() {
+        // TODO: implement with yield?
+        return this.toArray()[Symbol.iterator];
+    }
+
+    [Symbol.iterator]() {
+        return this.entries();
+    }
 }
 
 // Also support the standard javascript method names
