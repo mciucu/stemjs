@@ -102,7 +102,7 @@ class Deque {
     }
 
     get length() {
-        return this._values.length;
+        return this._length;
     }
 
     set length(value) {
