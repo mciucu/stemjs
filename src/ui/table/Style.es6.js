@@ -48,9 +48,12 @@ class SortableTableStyle extends TableStyle {
 
     @styleRuleInherit
     table = {
-        [" th:hover ." + this.sortIcon]: {
+        [" th:hover ." + this.sortIcon.getClassName()]: {
             visibility: "inherit",
         },
+        " th:hover": {
+            cursor: "pointer",
+        }
     };
 }
 

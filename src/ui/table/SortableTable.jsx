@@ -12,6 +12,11 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
             return this.options.styleSet || this.constructor.styleSet;
         }
 
+        extraNodeAttributes(attr) {
+            super.extraNodeAttributes(attr);
+            attr.addClass(this.getStyleSet().table);
+        }
+
         setOptions(options) {
             super.setOptions(options);
 
@@ -35,9 +40,9 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
             let sortIcon = <SortIconClass className={this.getStyleSet().sortIcon}/>;
             if (this.sortBy === column) {
                 if (this.sortDescending) {
-                    sortIcon = <SortIconClass className={this.getStyleSet().sortIcon} direction={UI.Direction.DOWN}/>;
+                    sortIcon = <SortIconClass className={this.getStyleSet().sortIcon} style={{visibility: "inherit"}} direction={UI.Direction.DOWN}/>;
                 } else {
-                    sortIcon = <SortIconClass className={this.getStyleSet().sortIcon} direction={UI.Direction.UP}/>;
+                    sortIcon = <SortIconClass className={this.getStyleSet().sortIcon} style={{visibility: "inherit"}} direction={UI.Direction.UP}/>;
                 }
             }
 
@@ -53,7 +58,7 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
 
             this.sortBy = column;
 
-            // this.redraw();
+            this.redraw();
         }
 
         sortEntries(entries) {

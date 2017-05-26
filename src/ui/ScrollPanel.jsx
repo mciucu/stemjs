@@ -26,6 +26,16 @@ function ScrollPanelInterface(TableClass) {
             ];
         }
 
+        redraw() {
+            if (!this.redrawDone) {
+                this.redrawDone = true;
+                super.redraw();
+            } else {
+                this.head.redraw();
+                this.setScroll();
+            }
+        }
+
         renderTableBody() {
             this.rows = [];
 
