@@ -13,7 +13,7 @@ function ScrollPanelInterface(TableClass) {
         render() {
             return [
                 <div ref="scrollablePanel" style={{overflow: "auto", height: "100%", width: "100%"}}>
-                <tr ref="fakePanel" className={this.constructor.scrollPanelStyleSet.unloaded}/>
+                <div ref="fakePanel" className={this.constructor.scrollPanelStyleSet.unloaded}/>
                 <table ref="table" className={this.getStyleSet().table} style={{top: "0px", position: "absolute", zIndex: "-1"}}>
                     <thead ref="head">
                         {this.renderTableHead()}
@@ -48,6 +48,7 @@ function ScrollPanelInterface(TableClass) {
         }
 
         setScroll() {
+            this.table.setStyle("zIndex", 1);
             let rowHeight;
             const scrollRatio = this.scrollablePanel.node.scrollTop / this.scrollablePanel.node.scrollHeight;
             if (this.tbody.children.length) {
@@ -61,6 +62,8 @@ function ScrollPanelInterface(TableClass) {
             this.highIndex = this.lowIndex + parseInt((this.getHeight() - this.head.getHeight()) / rowHeight);
             this.tbody.options.children = this.renderTableBody();
             this.tbody.redraw();
+            this.table.setWidth(this.fakePanel.getWidth() + "px");
+            this.table.setStyle("zIndex", -1);
         }
 
         onMount() {
@@ -70,6 +73,10 @@ function ScrollPanelInterface(TableClass) {
                 if (!(event.leftIndex >= this.highIndex || event.rightIndex < this.lowIndex)) {
                     this.setScroll();
                 }
+            });
+
+            this.addListener("reorder", () => {
+                this.setScroll();
             })
 
             this.scrollablePanel.addNodeListener("scroll", () => {
@@ -78,7 +85,7 @@ function ScrollPanelInterface(TableClass) {
             this.table.addClickListener((event) => {
                 event.stopPropagation();
             });
-            this.scrollablePanel.addNodeListener("mousedown", (event) => {
+            this.addNodeListener("mousedown", (event) => {
                 this.table.setStyle("zIndex", 0);
             });
             this.table.addNodeListener("mouseup", (event) => {
@@ -93,7 +100,7 @@ function ScrollPanelInterface(TableClass) {
 
             setTimeout(() => {
                 this.setScroll();
-            })
+            });
         }
     }
     return ScrollPanel;

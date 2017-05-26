@@ -26,6 +26,7 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
             for (let column of this.columns) {
                 this["columnHeader" + column.id].addClickListener(() => {
                     this.sortByColumn(column);
+                    this.dispatch("reorder");
                 });
             }
         }
@@ -52,7 +53,7 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
 
             this.sortBy = column;
 
-            this.redraw();
+            // this.redraw();
         }
 
         sortEntries(entries) {
