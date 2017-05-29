@@ -29,6 +29,10 @@ class StemDate extends BaseDate {
         }
     }
 
+    static now() {
+        return new this(BaseDate.now());
+    }
+
     toDate() {
         return this;
     }
