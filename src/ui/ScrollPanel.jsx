@@ -1,4 +1,4 @@
-import {UI, UIElement} from "./UI";
+import {UI, UIElement, NumberInput} from "./UI";
 import {ScrollPanelStyle} from "./ScrollPanelStyle";
 import {UserHandle} from "UserHandle";
 
@@ -104,18 +104,28 @@ function ScrollTableInterface (TableClass) {
 
         render() {
             return [
-                <div ref="scrollablePanel" style={{overflow: "auto", height: "100%", width: "100%"}}>
-                <div ref="fakePanel" className={this.constructor.scrollPanelStyleSet.unloaded}/>
-                <table ref="container" className={this.getStyleSet().table} style={{top: "0px", position: "absolute", zIndex: "-1"}}>
-                    <thead ref="containerHead">
-                        {this.renderContainerHead()}
-                    </thead>
-                    <tbody ref="containerBody">
-                        {this.renderContainerBody()}
-                    </tbody>
-                </table>
-                </div>
+                <div ref="tableContainer" style={{flex: "1", height: "100%", width: "100%", position: "relative"}}>
+                    <div ref="scrollablePanel" style={{overflow: "auto", height: "100%", width: "100%"}}>
+                        <div ref="fakePanel" className={this.constructor.scrollPanelStyleSet.unloaded}/>
+                        <table ref="container" className={this.getStyleSet().table} style={{top: "0px", position: "absolute", zIndex: "-1"}}>
+                            <thead ref="containerHead">
+                                {this.renderContainerHead()}
+                            </thead>
+                            <tbody ref="containerBody">
+                                {this.renderContainerBody()}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>,
+                <div ref="tableFooter">
+                    {this.getFooterText()}
+                </div>,
+                <NumberInput ref="goToInput" />
             ];
+        }
+        
+        getFooterText() {
+            return `Showing ${this.lowIndex + 1}-${this.highIndex} of ${this.getEntriesCount()}. Go to `;
         }
 
         redraw() {
@@ -136,7 +146,6 @@ function ScrollTableInterface (TableClass) {
             this.rows = [];
 
             const entries = this.getEntriesRange(this.lowIndex, this.highIndex);
-            console.warn(entries.length);
 
             for (let i = 0; i < entries.length; i += 1) {
                 const entry = entries[i];
@@ -148,7 +157,6 @@ function ScrollTableInterface (TableClass) {
         }
 
         getEntriesRange(low, high) {
-            console.warn(low, high);
             return this.getEntries().slice(low, high);
         }
 
@@ -169,10 +177,12 @@ function ScrollTableInterface (TableClass) {
             } else {
                 rowHeight = this.containerHead.getHeight();
             }
-            this.setStyle("paddingTop", this.containerHead.getHeight() + "px");
+            this.tableContainer.setStyle("paddingTop", this.containerHead.getHeight() + "px");
             this.fakePanel.setHeight(rowHeight * this.getEntriesCount() + "px");
-            this.lowIndex = parseInt(scrollRatio * this.getEntriesCount());
-            this.highIndex = this.lowIndex + parseInt((this.getHeight() - this.containerHead.getHeight()) / rowHeight);
+            this.lowIndex = parseInt(scrollRatio * (this.getEntriesCount() + 0.5));
+            this.highIndex = this.lowIndex + parseInt((this.tableContainer.getHeight() - this.containerHead.getHeight()) / rowHeight);
+            this.tableFooter.options.children = this.getFooterText();
+            this.tableFooter.redraw();
             this.containerBody.options.children = this.renderContainerBody();
             this.containerBody.redraw();
             this.container.setWidth(this.fakePanel.getWidth() + "px");
@@ -210,6 +220,14 @@ function ScrollTableInterface (TableClass) {
                     this.container.setStyle("zIndex", -1);
                     domElement.dispatchEvent(mouseDownEvent);
                 }, 100);
+            });
+            this.goToInput.addNodeListener("keyup", (event) => {
+                if (event.code === "Enter") {
+                    const place = parseInt(this.goToInput.getValue());
+                    const lowIndex = parseInt(place - (this.highIndex - this.lowIndex) / 2);
+                    const scrollRatio = lowIndex / (this.getEntriesCount() + 0.5);
+                    this.scrollablePanel.node.scrollTop = scrollRatio * this.scrollablePanel.node.scrollHeight;
+                }
             });
 
             setTimeout(() => {

@@ -5,7 +5,8 @@ class ScrollPanelStyle extends StyleSet {
     panel = {
         height: "100%",
         width: "100%",
-        position: "relative",
+        display: "flex",
+        flexDirection: "column",
     };
 
     @styleRule
