@@ -7,7 +7,6 @@ class TableStyle extends StyleSet {
         lineHeight: "1.42857143",
         verticalAlign: "top",
         borderTop: "1px solid #ddd",
-        height: "52px",
     };
 
     theadCellStyle = {
