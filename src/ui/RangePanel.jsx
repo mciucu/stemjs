@@ -7,6 +7,9 @@ function RangePanelInterface(PanelClass) {
     return RangePanel;
 }
 
+
+// A wrapper for tables which optimizes rendering when many entries / updates are involved. It currently has hardcoded
+// row height for functionality reasons.
 function RangeTableInterface(TableClass) {
     class RangeTable extends UI.Primitive(TableClass, "div") {
         static rangePanelStyleSet = RangePanelStyle.getInstance();
@@ -26,8 +29,8 @@ function RangeTableInterface(TableClass) {
                 this.redrawDone = true;
                 super.redraw();
             } else {
-                this.containerHead.redraw();
-                this.setScroll(true);
+                this.container.redraw();
+                this.setScroll();
             }
         }
 
@@ -61,6 +64,7 @@ function RangeTableInterface(TableClass) {
         }
 
         renderContainerBody() {
+            // TODO: this method should not be here, and tables should have a method "getEntriesToRender" which will be overwritten in this class.
             this.rows = [];
 
             const entries = this.getEntriesRange(this.lowIndex, this.highIndex);
@@ -87,42 +91,44 @@ function RangeTableInterface(TableClass) {
         }
 
         jumpToIndex(index) {
+            // Set the scroll so that the requested position is in the center.
             const lowIndex = parseInt(index - (this.highIndex - this.lowIndex) / 2);
             const scrollRatio = lowIndex / (this.getEntriesCount() + 0.5);
             this.scrollablePanel.node.scrollTop = scrollRatio * this.scrollablePanel.node.scrollHeight;
         }
 
-        setScroll(haveToResize = false) {
-            if (this.inSetScroll) {
-                return;
-            }
-            this.inSetScroll = true;
-            //this.container.setStyle("zIndex", 1);
+        setScroll() {
+            // This is the main logic for rendering the right entries. Right now, it best works with a fixed row height,
+            // for other cases no good results are guaranteed. For now, that row height is hardcoded in the class'
+            // styleset.
+
             let rowHeight;
-            const scrollRatio = this.scrollablePanel.node.scrollTop / this.scrollablePanel.node.scrollHeight;
             if (this.containerBody.children.length) {
                 rowHeight = this.containerBody.children[0].getHeight();
             } else {
                 rowHeight = this.containerHead.getHeight();
             }
-            if (haveToResize) {
-                this.scrollablePanel.setHeight(null);
-            }
+            const scrollRatio = this.scrollablePanel.node.scrollTop / this.scrollablePanel.node.scrollHeight;
+            // This padding top makes the scrollbar appear only on the tbody side
             this.tableContainer.setStyle("paddingTop", this.containerHead.getHeight() + "px");
+            // Computing of entries range is made using the physicall scroll on the fake panel.
             this.lowIndex = parseInt(scrollRatio * (this.getEntriesCount() + 0.5));
-            this.highIndex = this.lowIndex + parseInt(this.scrollablePanel.getHeight() / rowHeight);
+            this.highIndex = this.lowIndex + parseInt((this.tableContainer.getHeight() - this.containerHead.getHeight()) / rowHeight);
             this.fakePanel.setHeight(rowHeight * this.getEntriesCount() + "px");
-            if (!haveToResize) {
-                this.scrollablePanel.setHeight(rowHeight * (this.highIndex - this.lowIndex) + "px");
-            }
+            // The scrollable panel must have the exact height of the tbody so that there is consistency between entries
+            // rendering and scroll position.
+            this.scrollablePanel.setHeight(rowHeight * (this.highIndex - this.lowIndex) + "px");
+            // Update the entries and the footer info.
             this.tableFooterText.setChildren(this.getFooterContent());
             this.containerBody.setChildren(this.renderContainerBody());
+            // This is for setting the scrollbar outside of the table area, otherwise the scrollbar wouldn't be clickable
+            // because of the logic in "addCompatibilityListeners".
             this.container.setWidth(this.fakePanel.getWidth() + "px");
-            //this.container.setStyle("zIndex", -1);
-            this.inSetScroll = false;
         }
 
         addCompatibilityListeners() {
+            // The physical table has z-index -1 so it does not respond to mouse events, as it is "behind" fake panel.
+            // The following listeners repair that.
             this.container.addClickListener((event) => {
                 event.stopPropagation();
             });
@@ -139,6 +145,7 @@ function RangeTableInterface(TableClass) {
                 }, 100);
             });
 
+            // Adding listeners that force resizing
             this.addListener("setActive", () => {
                 this.setScroll(true);
             });
@@ -151,6 +158,7 @@ function RangeTableInterface(TableClass) {
         }
 
         addTableAPIListeners() {
+            // This event isn't used anywhere but this is how range updates should be made.
             this.addListener("entriesChange", (event) => {
                 if (!(event.leftIndex >= this.highIndex || event.rightIndex < this.lowIndex)) {
                     this.setScroll();

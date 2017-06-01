@@ -33,6 +33,7 @@ class RangePanelStyle extends StyleSet {
     @styleRule
     footer = {
         fontWeight: "bold",
+        textAlign: "center",
     };
 
     @styleRule
