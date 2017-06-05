@@ -3,7 +3,8 @@ import {RangePanelStyle} from "./RangePanelStyle";
 import {UserHandle} from "UserHandle";
 
 function RangePanelInterface(PanelClass) {
-    class RangePanel extends PanelClass {}
+    class RangePanel extends PanelClass {
+    }
     return RangePanel;
 }
 
@@ -16,11 +17,11 @@ function RangeTableInterface(TableClass) {
 
         constructor(options) {
             super(options);
-            this.lowIndex = 0; this.highIndex = 0;
+            this.lowIndex = 0;
+            this.highIndex = 0;
         }
 
         extraNodeAttributes(attr) {
-            super.extraNodeAttributes(attr);
             attr.addClass(this.constructor.rangePanelStyleSet.default);
         }
 
@@ -42,20 +43,20 @@ function RangeTableInterface(TableClass) {
                         <div ref="fakePanel" className={rangePanelStyleSet.fakePanel}/>
                         <table ref="container" className={`${this.getStyleSet().table} ${rangePanelStyleSet.table}`}>
                             <thead ref="containerHead">
-                                {this.renderContainerHead()}
+                            {this.renderContainerHead()}
                             </thead>
                             <tbody ref="containerBody">
-                                {this.renderContainerBody()}
+                            {this.renderContainerBody()}
                             </tbody>
                         </table>
                     </div>
                 </div>,
-                <div className={rangePanelStyleSet.footer}>
+                <div ref="footer" className={rangePanelStyleSet.footer}>
                     <span ref="tableFooterText">
                         {this.getFooterContent()}
                     </span>
-                    <NumberInput ref="jumpToInput" />
-                </div>,
+                    <NumberInput ref="jumpToInput"/>
+                </div>
             ];
         }
 
@@ -73,7 +74,7 @@ function RangeTableInterface(TableClass) {
                 const entry = entries[i];
                 const RowClass = this.getRowClass(entry);
                 this.rows.push(<RowClass key={this.getEntryKey(entry, i)} index={i}
-                {...this.getRowOptions(entry)} parent={this}/>);
+                                         {...this.getRowOptions(entry)} parent={this}/>);
             }
             return this.rows;
         }
@@ -92,7 +93,7 @@ function RangeTableInterface(TableClass) {
 
         jumpToIndex(index) {
             // Set the scroll so that the requested position is in the center.
-            const lowIndex = parseInt(index - (this.highIndex - this.lowIndex) / 2);
+            const lowIndex = parseInt(index - (this.highIndex - this.lowIndex) / 2 + 1);
             const scrollRatio = lowIndex / (this.getEntriesCount() + 0.5);
             this.scrollablePanel.node.scrollTop = scrollRatio * this.scrollablePanel.node.scrollHeight;
         }
@@ -113,7 +114,8 @@ function RangeTableInterface(TableClass) {
             this.tableContainer.setStyle("paddingTop", this.containerHead.getHeight() + "px");
             // Computing of entries range is made using the physicall scroll on the fake panel.
             this.lowIndex = parseInt(scrollRatio * (this.getEntriesCount() + 0.5));
-            this.highIndex = this.lowIndex + parseInt((this.tableContainer.getHeight() - this.containerHead.getHeight()) / rowHeight);
+            this.highIndex = this.lowIndex + parseInt((this.tableContainer.getHeight() - this.containerHead.getHeight()
+                    - this.footer.getHeight()) / rowHeight);
             this.fakePanel.setHeight(rowHeight * this.getEntriesCount() + "px");
             // The scrollable panel must have the exact height of the tbody so that there is consistency between entries
             // rendering and scroll position.
@@ -136,8 +138,8 @@ function RangeTableInterface(TableClass) {
                 this.container.setStyle("zIndex", 0);
             });
             this.container.addNodeListener("mouseup", (event) => {
-                const mouseDownEvent = document.createEvent ("MouseEvents");
-                mouseDownEvent.initEvent ("click", true, false);
+                const mouseDownEvent = document.createEvent("MouseEvents");
+                mouseDownEvent.initEvent("click", true, false);
                 const domElement = document.elementFromPoint(parseFloat(event.pageX), parseFloat(event.pageY));
                 setTimeout(() => {
                     this.container.setStyle("zIndex", -1);

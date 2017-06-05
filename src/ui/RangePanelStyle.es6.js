@@ -7,6 +7,7 @@ class RangePanelStyle extends StyleSet {
         width: "100%",
         display: "flex",
         flexDirection: "column",
+        position: "relative",
     };
 
     @styleRule
@@ -34,10 +35,14 @@ class RangePanelStyle extends StyleSet {
     footer = {
         fontWeight: "bold",
         textAlign: "center",
+        position: "absolute",
+        bottom: "0px",
+        width: "100%",
     };
 
     @styleRule
     table = {
+        marginBottom: "0px",
         top: "0px",
         position: "absolute",
         zIndex: "-1",
