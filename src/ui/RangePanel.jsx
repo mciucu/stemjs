@@ -1,4 +1,4 @@
-import {UI, UIElement, NumberInput} from "./UI";
+import {UI, UIElement, NumberInput, Button} from "./UI";
 import {RangePanelStyle} from "./RangePanelStyle";
 import {UserHandle} from "UserHandle";
 
@@ -56,6 +56,7 @@ function RangeTableInterface(TableClass) {
                         {this.getFooterContent()}
                     </span>
                     <NumberInput ref="jumpToInput"/>
+                    <Button ref="jumpToButton" size={UI.Size.SMALL} className={rangePanelStyleSet.jumpToButton}>Go</Button>
                 </div>
             ];
         }
@@ -103,6 +104,8 @@ function RangeTableInterface(TableClass) {
             // for other cases no good results are guaranteed. For now, that row height is hardcoded in the class'
             // styleset.
 
+            // Ugly hack for chrome stabilization.
+            this.container.setStyle("zIndex", 0);
             let rowHeight;
             if (this.containerBody.children.length) {
                 rowHeight = this.containerBody.children[0].getHeight();
@@ -126,6 +129,7 @@ function RangeTableInterface(TableClass) {
             // This is for setting the scrollbar outside of the table area, otherwise the scrollbar wouldn't be clickable
             // because of the logic in "addCompatibilityListeners".
             this.container.setWidth(this.fakePanel.getWidth() + "px");
+            this.container.setStyle("zIndex", -1);
         }
 
         addCompatibilityListeners() {
@@ -169,6 +173,10 @@ function RangeTableInterface(TableClass) {
             this.addListener("reorder", () => {
                 this.setScroll();
             });
+            this.addListener("showCurrentUser", () => {
+                const index = this.getEntries().map(entry => entry.userId).indexOf(USER.id) + 1;
+                this.jumpToIndex(index);
+            })
         }
 
         addSelfListeners() {
@@ -179,6 +187,9 @@ function RangeTableInterface(TableClass) {
                 if (event.code === "Enter") {
                     this.jumpToIndex(parseInt(this.jumpToInput.getValue()));
                 }
+            });
+            this.jumpToButton.addClickListener(() => {
+                this.jumpToIndex(parseInt(this.jumpToInput.getValue()));
             });
         }
 

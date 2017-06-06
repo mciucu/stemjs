@@ -41,6 +41,13 @@ class RangePanelStyle extends StyleSet {
     };
 
     @styleRule
+    jumpToButton = {
+        marginLeft: "5px",
+        padding: "2.3px 10px",
+        verticalAlign: "bottom",
+    };
+
+    @styleRule
     table = {
         marginBottom: "0px",
         top: "0px",
