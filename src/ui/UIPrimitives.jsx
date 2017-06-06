@@ -61,6 +61,12 @@ class Panel extends UI.Element {
 }
 
 class SlideBar extends Draggable(UI.Element) {
+    getDefaultOptions() {
+        return Object.assign({}, super.getDefaultOptions(), {
+            value: 0,
+        });
+    }
+
     extraNodeAttributes(attr) {
         attr.setStyle("display", "inline-block");
         attr.setStyle("position", "relative");

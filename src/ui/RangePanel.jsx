@@ -149,13 +149,13 @@ function RangeTableInterface(TableClass) {
 
             // Adding listeners that force resizing
             this.addListener("setActive", () => {
-                this.setScroll(true);
+                this.setScroll();
             });
             this.addListener("resize", () => {
-                this.setScroll(true);
+                this.setScroll();
             });
             window.addEventListener("resize", () => {
-                this.setScroll(true);
+                this.setScroll();
             });
         }
 
@@ -192,7 +192,7 @@ function RangeTableInterface(TableClass) {
             this.addSelfListeners();
 
             setTimeout(() => {
-                this.setScroll(true);
+                this.setScroll();
             });
         }
     }
