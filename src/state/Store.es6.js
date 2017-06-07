@@ -100,7 +100,7 @@ class GenericObjectStore extends BaseStore {
     }
 
     getObjectIdForEvent(event) {
-        return event.objectId || event.id;
+        return event.objectId || event.data.id;
     }
 
     getObjectForEvent(event) {
