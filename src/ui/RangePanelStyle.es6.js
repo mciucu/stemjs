@@ -28,7 +28,6 @@ class RangePanelStyle extends StyleSet {
     @styleRule
     fakePanel = {
         width: "100%",
-        height: "2000px",
     };
 
     @styleRule

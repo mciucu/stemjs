@@ -48,7 +48,8 @@ class EntriesManager extends Dispatchable {
     }
 
     filterEntries(entries) {
-        return this.getFilter() ? entries.filter(this.getFilter()) : entries;
+        const filter = this.getFilter();
+        return filter ? entries.filter(filter) : entries;
     }
 
     getComparator() {
@@ -94,21 +95,17 @@ function RangeTableInterface(TableClass) {
             attr.addClass(this.constructor.rangePanelStyleSet.default);
         }
 
-        // redraw() {
-        //     if (!document.body.contains(this.node)) {
-        //         super.redraw();
-        //     } else {
-        //         this.container.redraw();
-        //         this.setScroll();
-        //     }
-        // }
-
         render() {
             const rangePanelStyleSet = this.constructor.rangePanelStyleSet;
+            let fakePanelHeight = 0;
+            if (this.rowHeight) {
+                fakePanelHeight = (this.rowHeight * this.getEntriesManager().getEntriesCount() + 1) + "px";
+            }
+            debugger;
             return [
                 <div ref="tableContainer" className={rangePanelStyleSet.tableContainer}>
                     <div ref="scrollablePanel" className={rangePanelStyleSet.scrollablePanel}>
-                        <div ref="fakePanel" className={rangePanelStyleSet.fakePanel}/>
+                        <div ref="fakePanel" className={rangePanelStyleSet.fakePanel} style={{height: fakePanelHeight}}/>
                         <table ref="container" className={`${this.getStyleSet().table} ${rangePanelStyleSet.table}`}>
                             <thead ref="containerHead">
                             {this.renderContainerHead()}
@@ -123,7 +120,7 @@ function RangeTableInterface(TableClass) {
                     <span ref="tableFooterText">
                         {this.getFooterContent()}
                     </span>
-                    <NumberInput ref="jumpToInput"/>
+                    <NumberInput ref="jumpToInput" placeholder="enter position..." style={{textAlign: "center",}}/>
                     <Button ref="jumpToButton" size={UI.Size.SMALL} className={rangePanelStyleSet.jumpToButton}>Go</Button>
                 </div>
             ];
@@ -149,6 +146,9 @@ function RangeTableInterface(TableClass) {
         }
 
         getFooterContent() {
+            if (this.lowIndex + 1 > this.highIndex) {
+                return `No results. Jump to `;
+            }
             return `Showing ${this.lowIndex + 1} - ${this.highIndex} of ${this.getEntriesManager().getEntriesCount()}. Jump to `;
         }
 
@@ -170,11 +170,13 @@ function RangeTableInterface(TableClass) {
             this.inSetScroll = true;
             // Ugly hack for chrome stabilization.
             this.container.setStyle("zIndex", 0);
-            let rowHeight;
-            if (this.containerBody.children.length) {
-                rowHeight = this.containerBody.children[0].getHeight();
-            } else {
-                rowHeight = this.containerHead.getHeight();
+            let rowHeight = this.rowHeight;
+            if (!rowHeight) {
+                if (this.containerBody.children.length) {
+                    rowHeight = this.rowHeight = this.containerBody.children[0].getHeight();
+                } else {
+                    rowHeight = this.containerHead.getHeight();
+                }
             }
             const entriesCount = this.getEntriesManager().getEntriesCount();
             const scrollRatio = this.scrollablePanel.node.scrollTop / this.scrollablePanel.node.scrollHeight;
@@ -182,6 +184,9 @@ function RangeTableInterface(TableClass) {
             this.tableContainer.setStyle("paddingTop", this.containerHead.getHeight() + "px");
             // Computing of entries range is made using the physical scroll on the fake panel.
             this.lowIndex = parseInt(scrollRatio * (entriesCount + 0.5));
+            if (isNaN(this.lowIndex)) {
+                this.lowIndex = 0;
+            }
             this.highIndex = Math.min(this.lowIndex + parseInt((this.tableContainer.getHeight() - this.containerHead.getHeight()
                     - this.footer.getHeight()) / rowHeight), entriesCount);
             this.fakePanel.setHeight(rowHeight * entriesCount + "px");
