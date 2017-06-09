@@ -61,12 +61,12 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
             this.redraw();
         }
 
-        sortEntries(entries) {
+        getComparator() {
             if (!this.sortBy && this.columnSortingOrder.length === 0) {
-                return entries;
+                return null;
             }
 
-            let colCmp = (a, b, col) => {
+            const colCmp = (a, b, col) => {
                 if (!col) return 0;
 
                 let keyA = col.rawValue ? col.rawValue(a) : col.value(a);
@@ -74,9 +74,7 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
                 return col.cmp(keyA, keyB);
             };
 
-            let sortedEntries = entries.slice();
-
-            sortedEntries.sort((a, b) => {
+            return (a, b) => {
                 let cmpRes;
 
                 if (this.sortBy) {
@@ -97,7 +95,16 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
                     }
                 }
                 return 0;
-            });
+            }
+        }
+
+        sortEntries(entries) {
+            let sortedEntries = entries.slice();
+
+            if (this.getComparator()) {
+                sortedEntries.sort(this.getComparator());
+            }
+
             return sortedEntries;
         }
 

@@ -1,11 +1,73 @@
 import {UI, UIElement, NumberInput, Button} from "./UI";
 import {RangePanelStyle} from "./RangePanelStyle";
-import {UserHandle} from "UserHandle";
+import {Dispatchable} from "../base/Dispatcher";
 
 function RangePanelInterface(PanelClass) {
     class RangePanel extends PanelClass {
     }
     return RangePanel;
+}
+
+
+class EntriesManager extends Dispatchable {
+    constructor(entries, options={}) {
+        super();
+        this.rawEntries = entries;
+        this.options = options;
+        this.cacheEntries();
+    }
+
+    getRawEntries() {
+        return this.rawEntries;
+    }
+
+    cacheEntries() {
+        this.cachedEntries = this.sortEntries(this.filterEntries(this.getRawEntries()));
+        this.dispatch("update");
+    }
+
+    getEntries() {
+        return this.cachedEntries;
+    }
+
+    getEntriesCount() {
+        return this.cachedEntries.length;
+    }
+
+    getEntriesRange(low, high) {
+        return this.cachedEntries.slice(low, high);
+    }
+
+    updateEntries(entries) {
+        this.rawEntries = entries;
+        this.cacheEntries();
+    }
+
+    sortEntries(entries) {
+        return this.getComparator() ? entries.sort(this.getComparator()) : entries;
+    }
+
+    filterEntries(entries) {
+        return this.getFilter() ? entries.filter(this.getFilter()) : entries;
+    }
+
+    getComparator() {
+        return this.options.comparator;
+    }
+
+    setComparator(comparator) {
+        this.options.comparator = comparator;
+        this.cacheEntries();
+    }
+
+    getFilter() {
+        return this.options.filter;
+    }
+
+    setFilter(filter) {
+        this.options.filter = filter;
+        this.cacheEntries();
+    }
 }
 
 
@@ -21,19 +83,25 @@ function RangeTableInterface(TableClass) {
             this.highIndex = 0;
         }
 
+        getEntriesManager() {
+            if (!this.entriesManager) {
+                this.entriesManager = new EntriesManager(super.getEntries());
+            }
+            return this.entriesManager;
+        }
+
         extraNodeAttributes(attr) {
             attr.addClass(this.constructor.rangePanelStyleSet.default);
         }
 
-        redraw() {
-            if (!this.redrawDone) {
-                this.redrawDone = true;
-                super.redraw();
-            } else {
-                this.container.redraw();
-                this.setScroll();
-            }
-        }
+        // redraw() {
+        //     if (!document.body.contains(this.node)) {
+        //         super.redraw();
+        //     } else {
+        //         this.container.redraw();
+        //         this.setScroll();
+        //     }
+        // }
 
         render() {
             const rangePanelStyleSet = this.constructor.rangePanelStyleSet;
@@ -69,33 +137,25 @@ function RangeTableInterface(TableClass) {
             // TODO: this method should not be here, and tables should have a method "getEntriesToRender" which will be overwritten in this class.
             this.rows = [];
 
-            const entries = this.getEntriesRange(this.lowIndex, this.highIndex);
+            const entries = this.getEntriesManager().getEntriesRange(this.lowIndex, this.highIndex);
 
             for (let i = 0; i < entries.length; i += 1) {
                 const entry = entries[i];
                 const RowClass = this.getRowClass(entry);
-                this.rows.push(<RowClass key={this.getEntryKey(entry, i)} index={i}
+                this.rows.push(<RowClass key={this.getEntryKey(entry, i + this.lowIndex)} index={i + this.lowIndex}
                                          {...this.getRowOptions(entry)} parent={this}/>);
             }
             return this.rows;
         }
 
         getFooterContent() {
-            return `Showing ${this.lowIndex + 1}-   ${this.highIndex} of ${this.getEntriesCount()}. Jump to `;
-        }
-
-        getEntriesRange(low, high) {
-            return this.getEntries().slice(low, high);
-        }
-
-        getEntriesCount() {
-            return this.getEntries().length;
+            return `Showing ${this.lowIndex + 1} - ${this.highIndex} of ${this.getEntriesManager().getEntriesCount()}. Jump to `;
         }
 
         jumpToIndex(index) {
             // Set the scroll so that the requested position is in the center.
             const lowIndex = parseInt(index - (this.highIndex - this.lowIndex) / 2 + 1);
-            const scrollRatio = lowIndex / (this.getEntriesCount() + 0.5);
+            const scrollRatio = lowIndex / (this.getEntriesManager().getEntriesCount() + 0.5);
             this.scrollablePanel.node.scrollTop = scrollRatio * this.scrollablePanel.node.scrollHeight;
         }
 
@@ -104,6 +164,10 @@ function RangeTableInterface(TableClass) {
             // for other cases no good results are guaranteed. For now, that row height is hardcoded in the class'
             // styleset.
 
+            if (this.inSetScroll) {
+                return;
+            }
+            this.inSetScroll = true;
             // Ugly hack for chrome stabilization.
             this.container.setStyle("zIndex", 0);
             let rowHeight;
@@ -112,14 +176,15 @@ function RangeTableInterface(TableClass) {
             } else {
                 rowHeight = this.containerHead.getHeight();
             }
+            const entriesCount = this.getEntriesManager().getEntriesCount();
             const scrollRatio = this.scrollablePanel.node.scrollTop / this.scrollablePanel.node.scrollHeight;
             // This padding top makes the scrollbar appear only on the tbody side
             this.tableContainer.setStyle("paddingTop", this.containerHead.getHeight() + "px");
-            // Computing of entries range is made using the physicall scroll on the fake panel.
-            this.lowIndex = parseInt(scrollRatio * (this.getEntriesCount() + 0.5));
-            this.highIndex = this.lowIndex + parseInt((this.tableContainer.getHeight() - this.containerHead.getHeight()
-                    - this.footer.getHeight()) / rowHeight);
-            this.fakePanel.setHeight(rowHeight * this.getEntriesCount() + "px");
+            // Computing of entries range is made using the physical scroll on the fake panel.
+            this.lowIndex = parseInt(scrollRatio * (entriesCount + 0.5));
+            this.highIndex = Math.min(this.lowIndex + parseInt((this.tableContainer.getHeight() - this.containerHead.getHeight()
+                    - this.footer.getHeight()) / rowHeight), entriesCount);
+            this.fakePanel.setHeight(rowHeight * entriesCount + "px");
             // The scrollable panel must have the exact height of the tbody so that there is consistency between entries
             // rendering and scroll position.
             this.scrollablePanel.setHeight(rowHeight * (this.highIndex - this.lowIndex) + "px");
@@ -130,6 +195,7 @@ function RangeTableInterface(TableClass) {
             // because of the logic in "addCompatibilityListeners".
             this.container.setWidth(this.fakePanel.getWidth() + "px");
             this.container.setStyle("zIndex", -1);
+            this.inSetScroll = false;
         }
 
         addCompatibilityListeners() {
@@ -170,13 +236,13 @@ function RangeTableInterface(TableClass) {
                     this.setScroll();
                 }
             });
-            this.addListener("reorder", () => {
+            this.addListener("showCurrentUser", () => {
+                const index = this.getEntriesManager().getEntries().map(entry => entry.userId).indexOf(USER.id) + 1;
+                this.jumpToIndex(index);
+            });
+            this.getEntriesManager().addListener("update", () => {
                 this.setScroll();
             });
-            this.addListener("showCurrentUser", () => {
-                const index = this.getEntries().map(entry => entry.userId).indexOf(USER.id) + 1;
-                this.jumpToIndex(index);
-            })
         }
 
         addSelfListeners() {
@@ -210,4 +276,4 @@ function RangeTableInterface(TableClass) {
     return RangeTable;
 }
 
-export {RangePanelInterface, RangeTableInterface};
+export {RangePanelInterface, RangeTableInterface, EntriesManager};
