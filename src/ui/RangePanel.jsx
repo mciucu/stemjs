@@ -84,6 +84,10 @@ function RangeTableInterface(TableClass) {
             this.highIndex = 0;
         }
 
+        getRowHeight() {
+            return this.options.rowHeight || this.constructor.rangePanelStyleSet.rowHeight;
+        }
+
         getEntriesManager() {
             if (!this.entriesManager) {
                 this.entriesManager = new EntriesManager(super.getEntries());
@@ -97,13 +101,9 @@ function RangeTableInterface(TableClass) {
 
         render() {
             const rangePanelStyleSet = this.constructor.rangePanelStyleSet;
-            let fakePanelHeight = 0;
-            if (this.rowHeight) {
-                fakePanelHeight = (this.rowHeight * this.getEntriesManager().getEntriesCount() + 1) + "px";
-            }
-            debugger;
+            const fakePanelHeight = (this.getRowHeight() * this.getEntriesManager().getEntriesCount() + 1) + "px";
             return [
-                <div ref="tableContainer" className={rangePanelStyleSet.tableContainer}>
+                <div ref="tableContainer" className={rangePanelStyleSet.tableContainer} style={{paddingTop: this.headHeight + "px"}}>
                     <div ref="scrollablePanel" className={rangePanelStyleSet.scrollablePanel}>
                         <div ref="fakePanel" className={rangePanelStyleSet.fakePanel} style={{height: fakePanelHeight}}/>
                         <table ref="container" className={`${this.getStyleSet().table} ${rangePanelStyleSet.table}`}>
@@ -124,6 +124,16 @@ function RangeTableInterface(TableClass) {
                     <Button ref="jumpToButton" size={UI.Size.SMALL} className={rangePanelStyleSet.jumpToButton}>Go</Button>
                 </div>
             ];
+        }
+
+        applyScrollState() {
+            this.scrollablePanel.node.scrollTop = this.scrollState;
+        }
+
+        saveScrollState() {
+            if (this.scrollablePanel && this.scrollablePanel.node) {
+                this.scrollState = this.scrollablePanel.node.scrollTop;
+            }
         }
 
         renderContainerHead() {
@@ -167,17 +177,14 @@ function RangeTableInterface(TableClass) {
             if (this.inSetScroll) {
                 return;
             }
+            if (!document.body.contains(this.node)) {
+                this.tableFooterText.setChildren(this.getFooterContent());
+                this.containerBody.setChildren(this.renderContainerBody());
+                return;
+            }
             this.inSetScroll = true;
             // Ugly hack for chrome stabilization.
             this.container.setStyle("zIndex", 0);
-            let rowHeight = this.rowHeight;
-            if (!rowHeight) {
-                if (this.containerBody.children.length) {
-                    rowHeight = this.rowHeight = this.containerBody.children[0].getHeight();
-                } else {
-                    rowHeight = this.containerHead.getHeight();
-                }
-            }
             const entriesCount = this.getEntriesManager().getEntriesCount();
             const scrollRatio = this.scrollablePanel.node.scrollTop / this.scrollablePanel.node.scrollHeight;
             // This padding top makes the scrollbar appear only on the tbody side
@@ -188,11 +195,11 @@ function RangeTableInterface(TableClass) {
                 this.lowIndex = 0;
             }
             this.highIndex = Math.min(this.lowIndex + parseInt((this.tableContainer.getHeight() - this.containerHead.getHeight()
-                    - this.footer.getHeight()) / rowHeight), entriesCount);
-            this.fakePanel.setHeight(rowHeight * entriesCount + "px");
+                    - this.footer.getHeight()) / this.getRowHeight()), entriesCount);
+            this.fakePanel.setHeight(this.getRowHeight() * entriesCount + "px");
             // The scrollable panel must have the exact height of the tbody so that there is consistency between entries
             // rendering and scroll position.
-            this.scrollablePanel.setHeight(rowHeight * (this.highIndex - this.lowIndex) + "px");
+            this.scrollablePanel.setHeight(this.getRowHeight() * (this.highIndex - this.lowIndex) + "px");
             // Update the entries and the footer info.
             this.tableFooterText.setChildren(this.getFooterContent());
             this.containerBody.setChildren(this.renderContainerBody());
@@ -245,7 +252,7 @@ function RangeTableInterface(TableClass) {
                 const index = this.getEntriesManager().getEntries().map(entry => entry.userId).indexOf(USER.id) + 1;
                 this.jumpToIndex(index);
             });
-            this.getEntriesManager().addListener("update", () => {
+            this.attachListener(this.getEntriesManager(), "update", () => {
                 this.setScroll();
             });
         }

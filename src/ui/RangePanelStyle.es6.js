@@ -1,6 +1,8 @@
 import {StyleSet, styleRule} from "./Style";
 
 class RangePanelStyle extends StyleSet {
+    rowHeight = 52;
+
     @styleRule
     default = {
         height: "100%",
@@ -21,7 +23,7 @@ class RangePanelStyle extends StyleSet {
     @styleRule
     scrollablePanel = {
         overflow: "auto",
-        height: "100%",
+        height: "calc(100% - 30px)",
         width: "100%",
     };
 
@@ -48,12 +50,13 @@ class RangePanelStyle extends StyleSet {
 
     @styleRule
     table = {
+        width: "calc(100% - 15px)",
         marginBottom: "0px",
         top: "0px",
         position: "absolute",
         zIndex: "-1",
         ">tbody>tr>td": {
-            height: "52px !important",
+            height: `${this.rowHeight}px !important`,
             whiteSpace: "nowrap !important",
         }
     };
