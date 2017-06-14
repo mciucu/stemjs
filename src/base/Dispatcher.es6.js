@@ -25,16 +25,23 @@ class Dispatcher {
         this.listeners = [];
     }
 
+    callbackExists(callback) {
+        for (let i = 0; i < this.listeners.length; i += 1) {
+            if (this.listeners[i] === callback) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     addListener(callback) {
         if (!(typeof callback === "function")) {
             console.error("The listener needs to be a function: ", callback);
             return;
         }
-        for (let i = 0; i < this.listeners.length; i += 1) {
-            if (this.listeners[i] === callback) {
-                console.error("Can't re-register for the same callback: ", this, " ", callback);
-                return;
-            }
+        if (this.callbackExists(callback)) {
+            console.error("Can't re-register for the same callback: ", this, " ", callback);
+            return;
         }
 
         this.listeners.push(callback);
