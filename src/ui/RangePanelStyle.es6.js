@@ -10,6 +10,7 @@ class RangePanelStyle extends StyleSet {
         display: "flex",
         flexDirection: "column",
         position: "relative",
+        overflow: "auto",
     };
 
     @styleRule
@@ -39,6 +40,7 @@ class RangePanelStyle extends StyleSet {
         position: "absolute",
         bottom: "0px",
         width: "100%",
+        whiteSpace: "nowrap",
     };
 
     @styleRule
@@ -54,7 +56,7 @@ class RangePanelStyle extends StyleSet {
         marginBottom: "0px",
         top: "0px",
         position: "absolute",
-        zIndex: "-1",
+        pointerEvents: "none",
         ">tbody>tr>td": {
             height: `${this.rowHeight}px !important`,
             whiteSpace: "nowrap !important",

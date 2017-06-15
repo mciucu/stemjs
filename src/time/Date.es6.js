@@ -311,6 +311,24 @@ class StemDate extends BaseDate {
         let lastDayInMonth = new BaseDate(this.getFullYear(), this.getMonth() + 1, 0);
         return lastDayInMonth.getDate();
     }
+
+    getDaysCountPerMonth(index) {
+        const months = [31, 28 + this.isLeapYear(), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        return months[index];
+    }
+
+    getDayInYear() {
+        const month = this.getMonth();
+        let totalDays = 0;
+        for (let i = 0; i < month; i += 1) {
+            totalDays += this.getDaysCountPerMonth(i);
+        }
+        return totalDays + this.getDate() - 1;
+    }
+
+    getWeekInYear() {
+        return (this.getDayInYear() - this.getWeekDay()) / 7;
+    }
 }
 
 Duration.prototype.format = function (pattern) {

@@ -16,17 +16,17 @@ function CollapsibleMixin(BaseClass, CollapsibleClass = CollapsibleStyle) {
 
         expand(panel) {
             this.options.collapsed = false;
-            let collapsibleStyle = this.getCollapsibleStyleSet();
+            const collapsibleStyle = this.getCollapsibleStyleSet();
             panel.addClass(collapsibleStyle.collapsing);
             panel.removeClass("hidden");
             setTimeout(() => {
                 panel.removeClass(collapsibleStyle.collapsed);
-            });
+            }, 100);
         }
 
         collapse(panel) {
             this.options.collapsed = true;
-            let collapsibleStyle = this.getCollapsibleStyleSet();
+            const collapsibleStyle = this.getCollapsibleStyleSet();
             panel.addClass(collapsibleStyle.collapsing);
             panel.addClass(collapsibleStyle.collapsed);
             let transitionEndFunction = () => {

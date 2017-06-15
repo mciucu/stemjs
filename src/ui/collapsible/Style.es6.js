@@ -50,7 +50,6 @@ class CollapsiblePanelStyle extends StyleSet {
             fontSize: "130%",
             verticalAlign: "top",
             height: "0.7em",
-            marginTop: "-0.2em",
             textAlign: "center",
         }
     };

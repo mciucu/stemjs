@@ -102,8 +102,9 @@ function RangeTableInterface(TableClass) {
         render() {
             const rangePanelStyleSet = this.constructor.rangePanelStyleSet;
             const fakePanelHeight = (this.getRowHeight() * this.getEntriesManager().getEntriesCount() + 1) + "px";
+            const headHeight = this.containerHead ? this.containerHead.getHeight() : 0;
             return [
-                <div ref="tableContainer" className={rangePanelStyleSet.tableContainer} style={{paddingTop: this.headHeight + "px"}}>
+                <div ref="tableContainer" className={rangePanelStyleSet.tableContainer} style={{paddingTop: headHeight + "px"}}>
                     <div ref="scrollablePanel" className={rangePanelStyleSet.scrollablePanel}>
                         <div ref="fakePanel" className={rangePanelStyleSet.fakePanel} style={{height: fakePanelHeight}}/>
                         <table ref="container" className={`${this.getStyleSet().table} ${rangePanelStyleSet.table}`}>
@@ -120,7 +121,7 @@ function RangeTableInterface(TableClass) {
                     <span ref="tableFooterText">
                         {this.getFooterContent()}
                     </span>
-                    <NumberInput ref="jumpToInput" placeholder="enter position..." style={{textAlign: "center",}}/>
+                    <NumberInput ref="jumpToInput" placeholder="jump to..." style={{textAlign: "center",}}/>
                     <Button ref="jumpToButton" size={UI.Size.SMALL} className={rangePanelStyleSet.jumpToButton}>Go</Button>
                 </div>
             ];
@@ -159,7 +160,7 @@ function RangeTableInterface(TableClass) {
             if (this.lowIndex + 1 > this.highIndex) {
                 return `No results. Jump to `;
             }
-            return `Showing ${this.lowIndex + 1} - ${this.highIndex} of ${this.getEntriesManager().getEntriesCount()}. Jump to `;
+            return `${this.lowIndex + 1} ➞ ${this.highIndex} of ${this.getEntriesManager().getEntriesCount()}. `;
         }
 
         jumpToIndex(index) {
@@ -184,7 +185,7 @@ function RangeTableInterface(TableClass) {
             }
             this.inSetScroll = true;
             // Ugly hack for chrome stabilization.
-            this.container.setStyle("zIndex", 0);
+            // this.container.setStyle("pointerEvents", "all");
             const entriesCount = this.getEntriesManager().getEntriesCount();
             const scrollRatio = this.scrollablePanel.node.scrollTop / this.scrollablePanel.node.scrollHeight;
             // This padding top makes the scrollbar appear only on the tbody side
@@ -206,25 +207,22 @@ function RangeTableInterface(TableClass) {
             // This is for setting the scrollbar outside of the table area, otherwise the scrollbar wouldn't be clickable
             // because of the logic in "addCompatibilityListeners".
             this.container.setWidth(this.fakePanel.getWidth() + "px");
-            this.container.setStyle("zIndex", -1);
+            // this.container.setStyle("pointerEvents", "none");
             this.inSetScroll = false;
         }
 
         addCompatibilityListeners() {
             // The physical table has z-index -1 so it does not respond to mouse events, as it is "behind" fake panel.
             // The following listeners repair that.
-            this.container.addClickListener((event) => {
-                event.stopPropagation();
-            });
             this.addNodeListener("mousedown", () => {
-                this.container.setStyle("zIndex", 0);
+                this.container.setStyle("pointerEvents", "all");
             });
             this.container.addNodeListener("mouseup", (event) => {
                 const mouseDownEvent = document.createEvent("MouseEvents");
                 mouseDownEvent.initEvent("click", true, false);
-                const domElement = document.elementFromPoint(parseFloat(event.pageX), parseFloat(event.pageY));
+                const domElement = document.elementFromPoint(parseFloat(event.clientX), parseFloat(event.clientY));
                 setTimeout(() => {
-                    this.container.setStyle("zIndex", -1);
+                    this.container.setStyle("pointerEvents", "none");
                     domElement.dispatchEvent(mouseDownEvent);
                 }, 100);
             });
