@@ -111,6 +111,7 @@ class Modal extends UI.Element {
     static show(options={}) {
         let modal = new this(options);
         modal.show();
+        return modal;
     }
 }
 
