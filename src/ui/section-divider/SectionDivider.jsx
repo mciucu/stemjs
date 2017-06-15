@@ -202,6 +202,9 @@ class SectionDivider extends UI.Element {
     }
 
     recalculateDimensions() {
+        if (!this.isInDocument()) {
+            return;
+        }
         let parentSize = this.getDimension(this);
         let fixedTotalSize = 0;
         let unfixedTotalSize = 0;
@@ -215,8 +218,7 @@ class SectionDivider extends UI.Element {
         let ratio = (parentSize - fixedTotalSize) / parentSize;
         for (let panel of this.panels) {
             if (!panel.options.fixed && !panel.hasClass("hidden")) {
-                this.setDimension(panel, this.getDimension(panel) * 100 * ratio / unfixedTotalSize
-                                  - this.panels.length / 2 + "%");
+                this.setDimension(panel, this.getDimension(panel) * 100 * ratio / unfixedTotalSize + "%");
             }
         }
     }
