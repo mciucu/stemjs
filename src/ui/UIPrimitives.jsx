@@ -34,6 +34,7 @@ UI.Size = {
     NONE: null,
     EXTRA_SMALL: "xs",
     SMALL: "sm",
+    MEDIUM: "default",
     DEFAULT: "default",
     LARGE: "lg",
     EXTRA_LARGE: "xl",

@@ -35,7 +35,6 @@ class IconableInterface extends SimpleStyledElement {
 
     setLabel(label) {
         this.updateOptions({label: label});
-        this.redraw();
     }
 
     //TODO: this should live in a base iconable class, of which you'd only use this.beforeChildren
