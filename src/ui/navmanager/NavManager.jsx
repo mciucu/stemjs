@@ -1,8 +1,9 @@
 import {UI, changeParent} from "../UI";
 import {NavStyle} from "NavStyle";
 import {Carousel, CarouselStyle} from "../Carousel";
-import {LeftSideIcon, RightSideIcon, WrappedIcon} from "NavIcon";
-import {BasicOrientedElement, NavElement, NavSection} from "NavElement";
+import {LeftSideIcon, RightSideIcon, WrappedIcon} from "./NavIcon";
+import {BasicOrientedElement, NavSection} from "./NavElement";
+import {initializeSwipeEvents} from "./NavSwipeDetection";
 import {SessionStorageMap} from "../../base/StorageMap";
 
 
@@ -375,6 +376,8 @@ class NavManager extends UI.Primitive("nav") {
     }
 
     onMount() {
+        NavManager.Global = this;
+        initializeSwipeEvents(this);
         setTimeout(() => this.checkForWrap());
         window.addEventListener("resize", () => this.checkForWrap());
         this.addListener("maybeWrap", () => this.checkForWrap());

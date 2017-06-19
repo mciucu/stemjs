@@ -55,6 +55,12 @@ class Router extends Switcher {
         }
     }
 
+    getDefaultOptions() {
+        return {
+            global: true,
+        }
+    }
+
     getPrefix() {
         return [];
     }
@@ -131,7 +137,14 @@ class Router extends Switcher {
         return this._activeUrlParts;
     }
 
+    isGlobal() {
+        return this.options.global;
+    }
+
     onMount() {
+        if (this.isGlobal()) {
+            Router.Global = this;
+        }
         this.updateURL();
         Dispatcher.Global.addListener("changeURL", (href, event) => {
             history.pushState({}, Router.pageTitle, href);
