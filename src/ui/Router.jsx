@@ -153,9 +153,10 @@ class Router extends Switcher {
             }
             this.updateURL();
         });
-        Dispatcher.Global.addListener("externalURLChange", () => {
+        window.onpopstate = () => {
             this.updateURL();
-        });
+            Dispatcher.Global.dispatch("externalURLChange");
+        };
     }
 }
 Router.pageTitle = "Example";
