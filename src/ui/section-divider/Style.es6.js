@@ -21,6 +21,7 @@ class AccordionStyle extends DividerStyle {
             flexShrink: "1",
             flexBasis: "auto",
             overflow: "auto",
+            position: "relative",
         },
         ">:nth-of-type(odd)": {
             fontSize: "1em",
