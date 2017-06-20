@@ -4,12 +4,23 @@ import {Ajax} from "base/Ajax";
 import {GlobalState} from "state/State";
 
 function StateDependentElement(BaseClass) {
-    return class StateDependentElementClass extends DelayedElement(BaseClass) {
+    class StateDependentElementClass extends DelayedElement(BaseClass) {
         importState(data) {
             GlobalState.importState(data.state || {});
+            for (let key of Object.keys(data)) {
+                if (key !== "state") {
+                    this.options[key] = data[key];
+                }
+            }
         }
 
-        getAjaxUrl() {}
+        getAjaxUrl() {
+            let url = location.pathname;
+            if (!url.endsWith("/")) {
+                url += "/";
+            }
+            return url;
+        }
 
         renderNotLoaded() {
             if (typeof window.loadingAnimation === "function") {
@@ -30,6 +41,7 @@ function StateDependentElement(BaseClass) {
             );
         }
     }
+    return StateDependentElementClass;
 }
 
 export {StateDependentElement};
