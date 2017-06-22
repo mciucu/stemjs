@@ -22,6 +22,10 @@ function StateDependentElement(BaseClass) {
             return url;
         }
 
+        getAjaxRequest() {
+            return {};
+        }
+
         renderNotLoaded() {
             if (typeof window.loadingAnimation === "function") {
                 return window.loadingAnimation();
@@ -30,7 +34,7 @@ function StateDependentElement(BaseClass) {
         }
 
         beforeRedrawNotLoaded() {
-            Ajax.getJSON(this.getAjaxUrl(), {}).then(
+            Ajax.getJSON(this.getAjaxUrl(), this.getAjaxRequest()).then(
                 (data) => {
                     this.importState(data);
                     this.setLoaded();

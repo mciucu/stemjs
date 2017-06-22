@@ -1,15 +1,22 @@
 import {UI} from "../UIBase";
 import {Switcher} from "../Switcher";
+import {Link} from "../UIPrimitives";
 import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
 import {Theme} from "../style/Theme";
 import {DefaultTabAreaStyle} from "./Style";
 import "../Switcher";
 
-class BasicTabTitle extends UI.Primitive("a") {
+class BasicTabTitle extends Link {
     extraNodeAttributes(attr) {
         attr.addClass(this.styleSheet.tab);
         if (this.options.active) {
             attr.addClass(this.styleSheet.activeTab);
+        }
+    }
+
+    getDefaultOptions() {
+        return {
+            newTab: false,
         }
     }
 
@@ -50,6 +57,8 @@ class BasicTabTitle extends UI.Primitive("a") {
     }
 
     onMount() {
+        super.onMount();
+
         if (this.options.active) {
             this.setActive(true);
         }
