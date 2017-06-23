@@ -1,321 +1,183 @@
-import {UI, Switcher} from "./UI";
-import {Dispatcher, Dispatchable} from "../base/Dispatcher";
+import {UI} from "./UIBase";
+import {Switcher} from "./Switcher";
+import {Dispatcher} from "../base/Dispatcher";
+import {PageTitleManager} from "../base/PageTitleManager";
 import {unwrapArray} from "../base/Utils";
 
-function attachSubrouterEvents(subrouter) {
-    let handleChangeUrl = () => {
-        let currentUrl = Router.parseURL();
-        if (currentUrl.length >= subrouter.getPrefix().length) {
-            let currentPrefix = currentUrl.slice(0, subrouter.getPrefix().length);
-            if (currentPrefix.join("/") === subrouter.getPrefix().join("/")) {
-                subrouter.getParentRouter().setActiveSubrouter(subrouter);
-                subrouter.setState(currentUrl.slice(currentPrefix.length), true);
-            } else if (subrouter.getParentRouter().getActiveSubrouter() === subrouter) {
-                subrouter.getParentRouter().resetActiveSubrouter();
-            }
+export class Router extends Switcher {
+    static parseURL(path=location.pathname) {
+        if (!Array.isArray(path)) {
+            path = path.split("/");
         }
-    };
-
-    Dispatcher.Global.addListener("changeURL", handleChangeUrl);
-    Router.Global.addListener("change", handleChangeUrl);
-}
-
-class Router extends Switcher {
-    static parseURL() {
-        let path = location.pathname;
-        let urlParts = path.split("/");
-        while (urlParts.length && urlParts[urlParts.length - 1] === "") {
-            urlParts.pop();
-        }
-        while (urlParts.length && urlParts[0] === "") {
-            urlParts.splice(0, 1);
-        }
-        if (!urlParts.length) {
-            urlParts = [""];
-        }
-        return urlParts;
+        return path.filter(str => str != "");
     }
 
-    static changeURL(urlParts, replaceHistory=false) {
-        urlParts = unwrapArray(urlParts).filter(urlPart => !!urlPart);
-        let url;
+    static joinURLParts(urlParts) {
         if (urlParts.length) {
-            url = "/" + urlParts.join("/") + "/";
+            return "/" + urlParts.join("/") + "/";
         } else {
-            url = "/";
+            return "/";
+        }
+    }
+
+    static changeURL(url, replaceHistory=false) {
+        if (Array.isArray(url)) {
+            url = this.joinURLParts(url);
         }
 
-        if (url === location.pathname) {
+        if (url === window.location.pathname) {
             return;
         }
+        const historyArgs = [{}, PageTitleManager.getTitle(), url];
         if (replaceHistory) {
-            history.replaceState({}, this.pageTitle, url);
+            window.history.replaceState(...historyArgs);
         } else {
-            history.pushState({}, this.pageTitle, url);
+            window.history.pushState(...historyArgs);
         }
+
+        this.Global && this.Global.updateURL();
     }
 
-    getDefaultOptions() {
-        return {
-            global: true,
-        }
+    static setGlobalRouter(router) {
+        this.Global = router;
+
+        // TODO: disable this listener
+        Dispatcher.Global.addListener("changeURL", (href, event) => {
+            Router.changeURL(href);
+            if (event) {
+                event.preventDefault();
+            }
+        });
+
+        window.onpopstate = () => {
+            router.updateURL();
+            Dispatcher.Global.dispatch("externalURLChange");
+        };
+
+        router.updateURL();
     }
 
-    getPrefix() {
-        return [];
-    }
-
+    // TODO: should be named getRootRoute()
     getRoutes() {
         return this.options.routes;
     }
 
-    setRoute(route, urlParts, subArgs) {
-        if (this._activeRoute === route && urlParts.join(" ") === this._activeUrlParts.join(" ")) {
-            return;
-        }
-        this.dispatch("change");
-        this._activeRoute = route;
-        this._activeUrlParts = urlParts;
-        this.setActive(route.getElement(urlParts, this, subArgs));
+    getPageNotFound() {
+        return UI.createElement("h1", {children: ["Can't find url, make sure you typed it correctly"]});
     }
 
     updateURL() {
-        const urlParts = this.constructor.parseURL();
-        for (const route of this.getRoutes()) {
-            let match = route.matches(urlParts);
-            if (match) {
-                this.setRoute(route, match, urlParts.slice(match.length));
-                break;
-            }
-        }
+        this.setURL(this.constructor.parseURL());
     }
 
-    getParentRouter() {
-        return null;
-    }
+    setURL(urlParts) {
+        urlParts = unwrapArray(urlParts);
 
-    registerSubrouter(subrouter, autoActive=true) {
-        if (!this.subrouters) {
-            this.subrouters = [];
-        }
-        this.subrouters.push(subrouter);
-        if (autoActive) {
-            this.setActiveSubrouter(subrouter);
+        const page = this.getRoutes().getPage(urlParts) || this.getPageNotFound();
+
+        const activePage = this.getActive();
+
+        if (activePage !== page) {
+            activePage && activePage.dispatch("urlExit");
+            this.setActive(page);
+            page.dispatch("urlEnter");
         }
 
-        attachSubrouterEvents(subrouter);
-    }
-
-    getActiveSubrouter() {
-        return this.activeSubrouter || null;
-    }
-
-    getCurrentRouter() {
-        let currentRouter = this;
-        while (currentRouter.getActiveSubrouter()) {
-            currentRouter = currentRouter.getActiveSubrouter();
-        }
-        return currentRouter;
-    }
-
-    setActiveSubrouter(subrouter) {
-        if (this.getActiveSubrouter() === subrouter) {
-            return;
-        }
-        if (this.subrouters.indexOf(subrouter) === -1) {
-            throw Error("Invalid subrouter (you need to register it first)");
-        }
-        this.activeSubrouter = subrouter;
-        this.constructor.changeURL([...this.getState(), ...this.getActiveSubrouter().getFullState()], true);
-    }
-
-    resetActiveSubrouter() {
-        this.activeSubrouter = null;
-    }
-
-    getState() {
-        return this._activeUrlParts;
-    }
-
-    isGlobal() {
-        return this.options.global;
+        PageTitleManager.setTitle(page.title);
     }
 
     onMount() {
-        if (this.isGlobal()) {
-            Router.Global = this;
+        if (!Router.Global) {
+            this.constructor.setGlobalRouter(this);
         }
-        this.updateURL();
-        Dispatcher.Global.addListener("changeURL", (href, event) => {
-            history.pushState({}, Router.pageTitle, href);
-            if (event) {
-                event.preventDefault();
-            }
-            this.updateURL();
-        });
-        window.onpopstate = () => {
-            this.updateURL();
-            Dispatcher.Global.dispatch("externalURLChange");
-        };
-    }
-}
-Router.pageTitle = "Example";
-
-class Subrouter extends Dispatchable {
-    constructor(parentRouter, prefix, initialState=[]) {
-        super();
-        this.parentRouter = parentRouter;
-        this.prefix = prefix;
-        this.setState(initialState, true);
-        Dispatcher.Global.addListener("externalURLChange", () => {
-            let router = Router.Global;
-            while (router && router !== this) {
-                router = router.getActiveSubrouter();
-            }
-            if (router === this) {
-                this.dispatch("externalChange", Router.parseURL().slice(this.getPrefix().length));
-            }
-        });
-    }
-
-    getPrefix() {
-        return this.prefix;
-    }
-
-    getParentRouter() {
-        return this.parentRouter;
-    }
-
-    registerSubrouter(subrouter, autoActive=true) {
-        if (!this.subrouters) {
-            this.subrouters = [];
-        }
-        this.subrouters.push(subrouter);
-        if (autoActive) {
-            this.setActiveSubrouter(subrouter);
-        }
-
-        attachSubrouterEvents(subrouter);
-    }
-
-    getActiveSubrouter() {
-        return this.activeSubrouter || null;
-    }
-
-    setActiveSubrouter(subrouter) {
-        if (this.getActiveSubrouter() === subrouter) {
-            return;
-        }
-        if (this.subrouters.indexOf(subrouter) === -1) {
-            throw Error("Invalid subrouter option");
-        }
-        this.activeSubrouter = subrouter;
-        subrouter.setState(subrouter.getState());
-    }
-
-    resetActiveSubrouter() {
-        this.activeSubrouter = null;
-    }
-
-    getState() {
-        return this.state;
-    }
-
-    getFullState() {
-        if (this.getActiveSubrouter()) {
-            return [...this.state, ...this.getActiveSubrouter().getFullState()];
-        }
-        return this.state;
-    }
-
-    setState(state, replaceHistory=false) {
-        if (!(state instanceof Array)) {
-            state = [state];
-        }
-        let realState = [];
-        for (let urlPart of state) {
-            if (urlPart !== "") {
-                realState.push(urlPart);
-            }
-        }
-        state = realState;
-
-        this.state = state;
-        let fullUrlState = [...this.getPrefix(), ...this.getFullState()];
-        Router.changeURL(fullUrlState, replaceHistory);
-        this.dispatch("change", state);
-    }
-
-    openInNewTab(state) {
-        if (!(state instanceof Array)) {
-            state = [state];
-        }
-        let urlParts = [...this.getPrefix(), ...state];
-        if (this.getActiveSubrouter()) {
-            urlParts = [...urlParts, this.getActiveSubrouter().getFullState()];
-        }
-        let url;
-        if (urlParts.length) {
-            url = "/" + urlParts.join("/") + "/";
-        } else {
-            url = "/";
-        }
-        window.open(url, "_blank");
-    }
-
-    addChangeListener(callback) {
-        this.addListener("change", callback);
-    }
-
-    addExternalChangeListener(callback) {
-        this.addListener("externalChange", callback);
     }
 }
 
-class Route {
-    constructor(expr, gen) {
-        this.expr = expr;
-        if (!(this.expr instanceof Array)) {
-            this.expr = [this.expr];
-        }
-        this.gen = gen;
-    }
+export class Route {
+    static ARG_KEY = "%s";
+    cachedPages = new Map();
 
-    matchURLComponent(pattern, string) {
-        return pattern === "%s" || pattern === string;
+    constructor(expr, pageGenerator, subroutes=[], options={}) {
+        this.expr = (expr instanceof Array) ? expr : [expr];
+        this.pageGenerator = pageGenerator;
+        this.subroutes = subroutes;
+        this.options = options;
+        this.cachedPages = new Map();
     }
 
     matches(urlParts) {
-        if (urlParts.length < this.expr.length && !(urlParts.length === this.expr.length - 1 && this.expr[this.expr.length - 1] === "*")) {
+        if (urlParts.length < this.expr.length) {
             return null;
         }
-        let prefix = [];
-        for (let i = 0; i < urlParts.length; ++ i) {
-            if (i >= this.expr.length) {
+        let args = [];
+        for (let i = 0; i < this.expr.length; i += 1) {
+            const isArg = this.expr[i] === this.constructor.ARG_KEY;
+            if (urlParts[i] != this.expr[i] && !isArg) {
                 return null;
             }
-            if (this.expr[i] === "*") {
-                return prefix;
+            if (isArg) {
+                args.push(urlParts[i]);
             }
-            if (!this.matchURLComponent(this.expr[i], urlParts[i])) {
-                return null;
-            }
-            prefix.push(urlParts[i]);
         }
-        return prefix;
+        return {
+            args: args,
+            urlParts: urlParts.slice(this.expr.length)
+        }
     }
 
-    getElement(urlParts, router, subArgs=[]) {
-        let args = this.matches(urlParts);
-        if (!this._cachedChildren) {
-            this._cachedChildren = new Map();
+    generatePage(...argsArray) {
+        if (!this.pageGenerator) {
+            return null;
         }
-        let key = args.join(" ");
-        if (!this._cachedChildren.has(key)) {
-            this._cachedChildren.set(key, <this.gen args={args} router={router} subArgs={subArgs} />);
+
+        const serializedArgs = argsArray.toString();
+        if (!this.cachedPages.has(serializedArgs)) {
+            const pageGenerator = this.pageGenerator;
+            const args = unwrapArray(argsArray);
+            const generatorArgs = {args, argsArray};
+            const page = (pageGenerator.prototype instanceof UI.Element) ? new pageGenerator(generatorArgs) : pageGenerator(generatorArgs);
+            this.cachedPages.set(serializedArgs, page);
         }
-        return this._cachedChildren.get(key);
+        return this.cachedPages.get(serializedArgs);
+    }
+
+    matchesOwnNode(urlParts) {
+        return urlParts.length === 0;
+    }
+
+    getPage(urlParts, router, ...argsArray) {
+        if (this.matchesOwnNode(urlParts)) {
+            return this.generatePage(...argsArray);
+        }
+        for (const subroute of this.subroutes) {
+            const match = subroute.matches(urlParts);
+            if (match) {
+                if (match.args.length) {
+                    argsArray.push(match.args);
+                }
+                return subroute.getPage(match.urlParts, router, ...argsArray);
+            }
+        }
     }
 }
 
-export {Route, Router, Subrouter};
+export class TerminalRoute extends Route {
+    constructor(expr, pageGenerator, options={}) {
+        super(expr, pageGenerator, [], options);
+    }
+
+    matchesOwnNode(urlParts) {
+        return true;
+    }
+
+    getPage(urlParts) {
+        const page = super.getPage(...arguments);
+        setTimeout(() => {
+            page.setURL(urlParts);
+        });
+        return page;
+    }
+}
+
+
+export let Subrouter = Route;

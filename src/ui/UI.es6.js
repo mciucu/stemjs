@@ -10,6 +10,8 @@ export * from "./form/Form";
 export * from "./SVG";
 export * from "./Bootstrap3";
 
+export * from "./Router";
+
 export * from "./Translation";
 export * from "./Switcher";
 export * from "tabs/TabArea";
