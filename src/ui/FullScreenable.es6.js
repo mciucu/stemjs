@@ -2,6 +2,8 @@
 * Implements a Class Factory, to be able to create element that can be easily set to full screen
 */
 
+import {FullScreenStyle} from "./FullScreenStyle";
+
 // TODO: is this a good pattern, and should this method live somewhere else?
 function callFirstMethodAvailable(obj, methodNames) {
     for (let methodName of methodNames) {
@@ -39,14 +41,12 @@ const FULL_SCREEN_CHANGE_EVENTS = [
 
 // TODO: lowercase the s in screen?
 // TODO: this should not be directly in UI namespace
-let FullScreenable = function (BaseClass) {
+export const FullScreenable = function (BaseClass) {
     return class FullScreenable extends BaseClass {
+        static fullScreenStyleSet = FullScreenStyle.getInstance();
         extraNodeAttributes(attr) {
             super.extraNodeAttributes(attr);
             attr.setStyle({
-                backgroundColor: "#FFFFFF",
-                width: "100%",
-                padding: "10px",
                 height: "100%",
             });
         }
@@ -57,6 +57,7 @@ let FullScreenable = function (BaseClass) {
                 console.error("No valid full screen function available");
                 return ;
             }
+            this.addClass(this.constructor.fullScreenStyleSet.fullScreen);
             this._expectingFullScreen = true;
         };
 
@@ -65,6 +66,7 @@ let FullScreenable = function (BaseClass) {
         }
 
         exitFullScreen() {
+            this.removeClass(this.constructor.fullScreenStyleSet.fullScreen);
             if (!callFirstMethodAvailable(document, EXIT_FULL_SCREEN_METHODS)) {
                 console.error("No valid available function to exit fullscreen");
                 return ;
@@ -103,5 +105,3 @@ let FullScreenable = function (BaseClass) {
         }
     };
 };
-
-export {FullScreenable};

@@ -1,11 +1,24 @@
 // TODO: need to have Switcher properly work with a redraw
 import {UI} from "./UIBase";
+import {GlobalStyle} from "./GlobalStyle";
 
 class Switcher extends UI.Element {
     constructor(options) {
         super(options);
         this.childMap = new WeakMap();
         this.numRedraws = 0;
+    }
+
+    getDefaultOptions() {
+        return {
+            fullHeight: false,
+        };
+    }
+
+    extraNodeAttributes(attr) {
+        if (this.options.fullHeight) {
+            attr.addClass(GlobalStyle.Utils.fullHeight);
+        }
     }
 
     copyState(element) {

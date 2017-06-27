@@ -103,6 +103,7 @@ function RangeTableInterface(TableClass) {
             const rangePanelStyleSet = this.constructor.rangePanelStyleSet;
             const fakePanelHeight = (this.getRowHeight() * this.getEntriesManager().getEntriesCount() + 1) + "px";
             const headHeight = this.containerHead ? this.containerHead.getHeight() : 0;
+            this.computeIndices();
             return [
                 <div ref="tableContainer" className={rangePanelStyleSet.tableContainer} style={{paddingTop: headHeight + "px"}}>
                     <div ref="scrollablePanel" className={rangePanelStyleSet.scrollablePanel}>
@@ -170,6 +171,21 @@ function RangeTableInterface(TableClass) {
             this.scrollablePanel.node.scrollTop = scrollRatio * this.scrollablePanel.node.scrollHeight;
         }
 
+        computeIndices() {
+            if (!this.tableContainer || !this.containerHead || !this.footer) {
+                return;
+            }
+            const scrollRatio = this.scrollablePanel.node.scrollTop / this.scrollablePanel.node.scrollHeight;
+            const entriesCount = this.getEntriesManager().getEntriesCount();
+            // Computing of entries range is made using the physical scroll on the fake panel.
+            this.lowIndex = parseInt(scrollRatio * (entriesCount + 0.5));
+            if (isNaN(this.lowIndex)) {
+                this.lowIndex = 0;
+            }
+            this.highIndex = Math.min(this.lowIndex + parseInt((this.getHeight() - this.containerHead.getHeight()
+                    - this.footer.getHeight()) / this.getRowHeight()), entriesCount);
+        }
+
         setScroll() {
             // This is the main logic for rendering the right entries. Right now, it best works with a fixed row height,
             // for other cases no good results are guaranteed. For now, that row height is hardcoded in the class'
@@ -184,20 +200,11 @@ function RangeTableInterface(TableClass) {
                 return;
             }
             this.inSetScroll = true;
+            this.computeIndices();
             // Ugly hack for chrome stabilization.
-            // this.container.setStyle("pointerEvents", "all");
-            const entriesCount = this.getEntriesManager().getEntriesCount();
-            const scrollRatio = this.scrollablePanel.node.scrollTop / this.scrollablePanel.node.scrollHeight;
             // This padding top makes the scrollbar appear only on the tbody side
             this.tableContainer.setStyle("paddingTop", this.containerHead.getHeight() + "px");
-            // Computing of entries range is made using the physical scroll on the fake panel.
-            this.lowIndex = parseInt(scrollRatio * (entriesCount + 0.5));
-            if (isNaN(this.lowIndex)) {
-                this.lowIndex = 0;
-            }
-            this.highIndex = Math.min(this.lowIndex + parseInt((this.tableContainer.getHeight() - this.containerHead.getHeight()
-                    - this.footer.getHeight()) / this.getRowHeight()), entriesCount);
-            this.fakePanel.setHeight(this.getRowHeight() * entriesCount + "px");
+            this.fakePanel.setHeight(this.getRowHeight() * this.getEntriesManager().getEntriesCount() + "px");
             // The scrollable panel must have the exact height of the tbody so that there is consistency between entries
             // rendering and scroll position.
             this.scrollablePanel.setHeight(this.getRowHeight() * (this.highIndex - this.lowIndex) + "px");
@@ -207,7 +214,6 @@ function RangeTableInterface(TableClass) {
             // This is for setting the scrollbar outside of the table area, otherwise the scrollbar wouldn't be clickable
             // because of the logic in "addCompatibilityListeners".
             this.container.setWidth(this.fakePanel.getWidth() + "px");
-            // this.container.setStyle("pointerEvents", "none");
             this.inSetScroll = false;
         }
 
@@ -277,10 +283,6 @@ function RangeTableInterface(TableClass) {
             this.addTableAPIListeners();
 
             this.addSelfListeners();
-
-            setTimeout(() => {
-                this.setScroll();
-            });
         }
     }
     return RangeTable;

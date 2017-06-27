@@ -593,6 +593,14 @@ class ContainerStyle extends StyleSet {
 }
 
 
+class Utils extends StyleSet {
+    @styleRule
+    fullHeight = {
+        height: "100%",
+    }
+}
+
+
 GlobalStyle.Button = ButtonStyle.getInstance();
 GlobalStyle.RadioButtonGroup = RadioButtonGroupStyle.getInstance();
 GlobalStyle.ButtonGroup = ButtonGroupStyle.getInstance();
@@ -602,5 +610,6 @@ GlobalStyle.CardPanel = new CardPanelStyle();
 GlobalStyle.ProgressBar = ProgressBarStyle.getInstance();
 GlobalStyle.FlexContainer = FlexContainerStyle.getInstance();
 GlobalStyle.Container = ContainerStyle.getInstance();
+GlobalStyle.Utils = Utils.getInstance();
 
 export {GlobalStyle};

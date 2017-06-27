@@ -21,6 +21,7 @@ export * from "./CardPanel";
 export * from "collapsible/CollapsiblePanel";
 export * from "modal/FloatingWindow";
 export * from "modal/Modal";
+export * from "global-container/GlobalContainer";
 
 export * from "section-divider/SectionDivider";
 export * from "section-divider/Accordion";
