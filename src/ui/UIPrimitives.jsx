@@ -209,7 +209,7 @@ class Link extends UI.Primitive("a") {
 
     getDefaultOptions() {
         return {
-            newTab: true, //TODO: make this false
+            newTab: false,
         }
     }
 

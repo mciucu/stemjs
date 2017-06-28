@@ -224,8 +224,7 @@ function RangeTableInterface(TableClass) {
                 this.container.setStyle("pointerEvents", "all");
             });
             this.container.addNodeListener("mouseup", (event) => {
-                const mouseDownEvent = document.createEvent("MouseEvents");
-                mouseDownEvent.initEvent("click", true, false);
+                const mouseDownEvent = new MouseEvent("click", event);
                 const domElement = document.elementFromPoint(parseFloat(event.clientX), parseFloat(event.clientY));
                 setTimeout(() => {
                     this.container.setStyle("pointerEvents", "none");
@@ -283,6 +282,10 @@ function RangeTableInterface(TableClass) {
             this.addTableAPIListeners();
 
             this.addSelfListeners();
+
+            setTimeout(() => {
+                this.redraw();
+            })
         }
     }
     return RangeTable;

@@ -1,11 +1,10 @@
-import {UI} from "../UI";
+import {UI, Link} from "../UI";
 import {FACollapseIcon} from "../FontAwesome"; //TODO: more flexibility, do not require FAIcons in NavElements
 import {SessionStorageMap} from "../../base/StorageMap";
 
 let navSessionManager = new SessionStorageMap("navManager");
 
-
-class BasicOrientedElement extends UI.Element {
+const BasicOrientedElementInterface = (BaseClass) => class BasicOrientedElement extends BaseClass {
     getStyleSet() {
         return this.options.styleSet || this.parent.getStyleSet();
     }
@@ -19,17 +18,21 @@ class BasicOrientedElement extends UI.Element {
         }
         return UI.Orientation.HORIZONTAL;
     }
-}
+};
+
+const BasicOrientedElement = BasicOrientedElementInterface(UI.Element);
+const BasicOrientedLinkElement = BasicOrientedElementInterface(Link);
 
 
 // NavElements should know if they are in vertical or horizontal mode, so they can behave differently
-class NavElement extends UI.Primitive(BasicOrientedElement, "li") {
+const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
     constructor() {
         super(...arguments);
         this.isToggled = this.getToggledState();
     }
 
     extraNodeAttributes(attr) {
+        super.extraNodeAttributes(attr);
         if (this.getOrientation() === UI.Orientation.HORIZONTAL) {
             // it is in the navbar
             attr.addClass(this.getStyleSet().navElementHorizontal);
@@ -48,12 +51,13 @@ class NavElement extends UI.Primitive(BasicOrientedElement, "li") {
 
     getSelf() {
         const style = (this.getOrientation() === UI.Orientation.HORIZONTAL ?
-              this.getStyleSet().navElementValueHorizontal : this.getStyleSet().navElementValueVertical);
+                        this.getStyleSet().navElementValueHorizontal : this.getStyleSet().navElementValueVertical);
+        const marginLeft = this.getOrientation() === UI.Orientation.VERTICAL && this.getGivenChildren().length ? "-20px" : "0";
 
-        return <BasicOrientedElement className={style}>
+        return <BasicOrientedElement className={style} style={{marginLeft: marginLeft}}>
             {this.getValue()}
         </BasicOrientedElement>;
-   }
+    }
 
     getSubElements() {
         let childrenToRender = this.getGivenChildren();
@@ -75,10 +79,8 @@ class NavElement extends UI.Primitive(BasicOrientedElement, "li") {
             if (this.getOrientation() === UI.Orientation.VERTICAL) {
                 // is in the sidebar
                 result = [
-                    <BasicOrientedElement style={{marginLeft: "-20px",}}>
-                        <FACollapseIcon ref="collapseIcon" collapsed={!this.isToggled} className={this.getStyleSet().navElementVerticalArrow} />
-                        {this.options.value}
-                    </BasicOrientedElement>
+                    <FACollapseIcon ref="collapseIcon" collapsed={!this.isToggled} className={this.getStyleSet().navElementVerticalArrow} />,
+                    this.options.value
                 ];
             } else if (this.getOrientation() === UI.Orientation.HORIZONTAL) {
                 // is in the navbar
@@ -159,6 +161,7 @@ class NavElement extends UI.Primitive(BasicOrientedElement, "li") {
     }
 
     onMount() {
+        super.onMount();
         this.addNodeListener("mouseenter", () => {
             if (this.getOrientation() === UI.Orientation.HORIZONTAL && this.getGivenChildren().length) {
                 this.showChildren();
@@ -176,10 +179,10 @@ class NavElement extends UI.Primitive(BasicOrientedElement, "li") {
             }
         });
     }
-}
+};
 
-
-class NavLinkElement extends UI.Primitive(NavElement, "a") {
+const NavElement = NavElementInterface(UI.Primitive(BasicOrientedElement, "li"));
+class NavLinkElement extends NavElementInterface(BasicOrientedLinkElement) {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
         attr.addClass(this.getStyleSet().navLinkElement);
