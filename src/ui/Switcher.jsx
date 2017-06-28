@@ -12,6 +12,7 @@ class Switcher extends UI.Element {
     getDefaultOptions() {
         return {
             fullHeight: false,
+            preserveScroll: true,
         };
     }
 
@@ -126,16 +127,13 @@ class Switcher extends UI.Element {
     }
 
     updateActiveChild(element) {
-        if (this.activeChild) {
-            this.activeChild.dispatch("setActive", false);
-        }
-        
         while (this.node.firstChild) {
             //TODO: would be useful here to be able to access the matching UI Element
             this.node.removeChild(this.node.firstChild);
         }
 
         if (element == null) {
+            this.activeChild = null;
             return;
         }
 
@@ -143,8 +141,22 @@ class Switcher extends UI.Element {
 
         this.node.appendChild(element.node);
         this.children[0] = this.activeChild = element;
+    }
 
-        element.dispatch("setActive", true);
+    deactivateChild(child) {
+        child.dispatch("hide");
+        child.dispatch("setActive", false);
+        if (this.options.preserveScroll) {
+            this.getChildProperties(child).scrollTop = this.node.scrollTop;
+        }
+    }
+
+    activateChild(child) {
+        child.dispatch("setActive", true);
+        child.dispatch("show");
+        if (this.options.preserveScroll) {
+            this.node.scrollTop = this.getChildProperties(child).scrollTop || 0;
+        }
     }
 
     setActive(element) {
@@ -152,11 +164,11 @@ class Switcher extends UI.Element {
             return;
         }
         if (this.activeChild) {
-            this.activeChild.dispatch("hide");
+            this.deactivateChild(this.activeChild);
         }
         this.updateActiveChild(element);
         if (this.activeChild) {
-            this.activeChild.dispatch("show");
+            this.activateChild(this.activeChild);
         }
     }
 
