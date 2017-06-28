@@ -184,10 +184,6 @@ class NavLinkElement extends UI.Primitive(NavElement, "a") {
         super.extraNodeAttributes(attr);
         attr.addClass(this.getStyleSet().navLinkElement);
     }
-
-    getValue() {
-        return this.options.value;
-    }
 }
 
 
