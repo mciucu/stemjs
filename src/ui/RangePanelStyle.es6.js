@@ -11,6 +11,7 @@ class RangePanelStyle extends StyleSet {
         flexDirection: "column",
         position: "relative",
         overflow: "auto",
+        overflowY: "hidden",
     };
 
     @styleRule

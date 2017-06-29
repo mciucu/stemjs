@@ -5,24 +5,22 @@ class GlobalContainerStyle extends StyleSet {
     static NAVBAR_HEIGHT = 50;
 
     constructor() {
-        super({updateOnResize: Device.isTouchDevice()});
+        super({updateOnResize: Device.isMobileDevice()});
 
     }
 
     @styleRule
     default = {
-        height: () => {return Device.isTouchDevice() ? `${window.innerHeight}px` : "100vh"},
+        height: () => {return Device.isMobileDevice() ? `${window.innerHeight}px` : "100vh"},
         width: "100%",
-        paddingTop: `${this.constructor.NAVBAR_HEIGHT + (Device.isTouchDevice() ? 3 : 10)}px`,
-        paddingBottom: `${Device.isTouchDevice() ? 25 : 10}px`,
+        paddingTop: `${this.constructor.NAVBAR_HEIGHT + (Device.isMobileDevice() ? 3 : 10)}px`,
+        paddingBottom: `${Device.isMobileDevice() ? 25 : 10}px`,
+        ">*": {
+            height: "100%",
+            width: "100%",
+            overflow: Device.isMobileDevice() ? "" : "auto",
+        }
     };
-
-    @styleRule
-    fullContainer = {
-        height: "100%",
-        width: "100%",
-        overflow: Device.isTouchDevice() ? "" : "auto",
-    }
 }
 
 export {GlobalContainerStyle};

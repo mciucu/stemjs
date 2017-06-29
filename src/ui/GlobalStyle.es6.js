@@ -2,6 +2,7 @@ import {UI} from "UI";
 import {StyleSet} from "Style";
 import {styleRule, styleRuleInherit} from "../decorators/Style";
 import {buildColors} from "Color";
+import {Device} from "../base/Device";
 
 let GlobalStyle = {
 };
@@ -560,27 +561,27 @@ class FlexContainerStyle extends StyleSet {
 class ContainerStyle extends StyleSet {
     @styleRule
     EXTRA_SMALL = {
-        margin: "0% 15%",
+        margin: Device.isMobileDevice() ? "0 6px" : "0% 15%",
     };
 
     @styleRule
     SMALL = {
-        margin: "0% 10%",
+        margin: Device.isMobileDevice() ? "0 4px" : "0% 10%",
     };
 
     @styleRule
     MEDIUM = {
-        margin: "0% 6%",
+        margin: Device.isMobileDevice() ? "0 4px" : "0% 6%",
     };
 
     @styleRule
     LARGE = {
-        margin: "0% 3%",
+        margin: Device.isMobileDevice() ? "0 2px" : "0% 3%",
     };
 
     @styleRule
     EXTRA_LARGE = {
-        margin: "0% 1%",
+        margin: Device.isMobileDevice() ? "0 2px" : "0% 1%",
     };
 
     Size(size) {

@@ -10,6 +10,19 @@ class Device {
         return this._isTouchDevice;
     }
 
+    static isMobileDevice() {
+        if (!this.hasOwnProperty("_isMobileDevice")) {
+            const mobileDevices = ["Android", "webOS", "iPad", "iPhone", "iPod", "BlackBerry", "Windows Phone"];
+            this._isMobileDevice = false;
+            for (let device of mobileDevices) {
+                if (navigator.userAgent.indexOf(device) !== -1) {
+                    this._isMobileDevice = true;
+                }
+            }
+        }
+        return this._isMobileDevice;
+    }
+
     static getEventCoord(event, axis) {
         let pageName = "page" + axis;
         if (this.isTouchDevice()) {
