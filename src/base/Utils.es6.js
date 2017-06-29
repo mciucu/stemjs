@@ -43,6 +43,44 @@ export function unwrapArray(elements) {
     return result;
 }
 
+export function isLocalUrl(url, host=self.location.host, origin=self.location.origin) {
+    // Empty url is considered local
+    if (!url) {
+        return true;
+    }
+    // Protocol-relative url is local if the host matches
+    if (url.startsWith("//")) {
+        return url.startsWith("//" + host);
+    }
+    // Absolute url is local if the origin matches
+    let r = new RegExp("^(?:[a-z]+:)?//", "i");
+    if (r.test(url)) {
+        return url.startsWith(origin);
+    }
+    // Root-relative and document-relative urls are always local
+    return true;
+}
+
+// Trims a local url to root-relative or document-relative url.
+// If the url is protocol-relative, removes the starting "//"+host, transforming it in a root-relative url.
+// If the url is absolute, removes the origin, transforming it in a root-relative url.
+// If the url is root-relative or document-relative, leaves it as is.
+export function trimLocalUrl(url, host=self.location.host, origin=self.location.origin) {
+    if (!isLocalUrl(url, host, origin)) {
+        throw Error("Trying to trim non-local url!");
+    }
+    if (!url) {
+        return url;
+    }
+    if (url.startsWith("//" + host)) {
+        return url.slice(("//" + host).length);
+    }
+    if (url.startsWith(origin)) {
+        return url.slice(origin.length);
+    }
+    return url;
+}
+
 // Split the passed in array into arrays with at most maxChunkSize elements
 export function splitInChunks(array, maxChunkSize) {
     let chunks = [];
