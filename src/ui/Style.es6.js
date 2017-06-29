@@ -10,23 +10,17 @@ import {Dispatchable} from "../base/Dispatcher";
 class StyleSet extends Dispatchable {
     constructor(options={}) {
         super();
-        options = Object.assign({
+        this.options = Object.assign({
             updateOnResize: false,
             parent: document.head,
             name: options.name || this.constructor.getElementName(), // call only if needed
         }, options);
-        this.options = options;
         this.elements = new Set();
         if (this.options.updateOnResize) {
             this.attachEventListener(window, "resize", () => {
                 this.update();
             });
         }
-        let styleElementOptions = {
-            children: [],
-            name: this.options.name,
-        };
-        this.styleElement = StyleElement.create(options.parent, styleElementOptions);
     }
 
     static getInstance() {
@@ -46,11 +40,18 @@ class StyleSet extends Dispatchable {
     }
 
     ensureFirstUpdate() {
-        if (!this._firstUpdate) {
-            this._firstUpdate = true;
-            // Call all listeners before update for the very first time, to update any possible variables
-            this.dispatch("beforeUpdate", this);
+        if (this._firstUpdate) {
+            return;
         }
+
+        this._firstUpdate = true;
+        const styleElementOptions = {
+            children: [],
+            name: this.options.name,
+        };
+        this.styleElement = StyleElement.create(this.options.parent, styleElementOptions);
+        // Call all listeners before update for the very first time, to update any possible variables
+        this.dispatch("beforeUpdate", this);
     }
 
     css(style) {
@@ -60,7 +61,7 @@ class StyleSet extends Dispatchable {
         }
         let elementOptions = {style: style};
 
-        // Get the preffered name, maybe cleanup later
+        // Get the preferred name, maybe cleanup later
         const nameKey = "prefferedClassName";
         if (style[nameKey]) {
             elementOptions.name = style[nameKey];
@@ -93,6 +94,9 @@ class StyleSet extends Dispatchable {
     }
 
     update() {
+        if (!this._firstUpdate) {
+            return;
+        }
         this.dispatch("beforeUpdate", this);
         let children = [];
         for (let value of this.elements) {

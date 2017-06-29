@@ -206,15 +206,20 @@ class UIElement extends BaseUIElement {
         return childrenKeyMap;
     }
 
+    getChildrenForRedraw() {
+        UI.renderingStack.push(this);
+        let children = unwrapArray(this.render());
+        UI.renderingStack.pop();
+        return children;
+    }
+
     redraw() {
         if (!this.node) {
             console.error("Element not yet mounted. Redraw aborted!", this);
             return false;
         }
 
-        UI.renderingStack.push(this);
-        let newChildren = unwrapArray(this.render());
-        UI.renderingStack.pop();
+        let newChildren = this.getChildrenForRedraw();
 
         if (newChildren === this.children) {
             for (let i = 0; i < newChildren.length; i += 1) {
