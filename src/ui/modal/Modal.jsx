@@ -118,9 +118,9 @@ class Modal extends UI.Element {
 
 class ActionModal extends Modal {
     getDefaultOptions() {
-        return {
+        return Object.assign(super.getDefaultOptions(), {
             closeButton: false
-        };
+        });
     }
 
     getActionName() {
@@ -173,24 +173,23 @@ class ActionModal extends Modal {
 }
 
 
-function ActionModalButton(ActionModal) {
-    return class ActionModalButton extends Button {
-        getModalOptions() {
-            let modalOptions = {
-                actionName: this.options.label,
-                level: this.options.level
-            };
+const ActionModalButton = (ActionModal) => class ActionModalButton extends Button {
+    getModalOptions() {
+        let modalOptions = {
+            actionName: this.options.label,
+            level: this.options.level
+        };
 
-            Object.assign(modalOptions, this.options.modalOptions);
-            return modalOptions;
-        }
+        Object.assign(modalOptions, this.options.modalOptions);
+        return modalOptions;
+    }
 
-        onMount() {
-            this.modal = <ActionModal {...this.getModalOptions()}/>;
-            this.addClickListener(() => this.modal.show());
-        }
-    };
-}
+    onMount() {
+        this.addClickListener(() => {
+            ActionModal.show(this.getModalOptions());
+        });
+    }
+};
 
 
 class ErrorModal extends ActionModal {
