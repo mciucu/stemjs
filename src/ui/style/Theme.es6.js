@@ -62,7 +62,6 @@ Theme.Global = new Theme("Global");
 // We're going to add some methods to UI.Element, to be able to access their style sheets
 function styleSheetGetter() {
     return getInstanceForObject(this.options) || getInstanceForObject(this.constructor);
-    // TODO: also add a listener here when the styleSheet changes?
 }
 
 // TODO: should fixate on a single nomenclature, just use StyleSheet everywhere
@@ -70,10 +69,18 @@ UI.Element.prototype.getStyleSheet = UI.Element.prototype.getStyleSet = styleShe
 
 // TODO: not sure if I like the getter pattern
 Object.defineProperty(UI.Element.prototype, "styleSheet", {
-    get: styleSheetGetter,
+    get: function() {
+        return this.getStyleSheet();
+    },
     set: function (value) {
         throw Error("Don't change the styleSheet of a UI Element, change this attribute in this.options");
     }
 });
 
-export {Theme};
+function registerStyle(styleClass) {
+    return (target) => {
+        Theme.register(target, styleClass);
+    }
+}
+
+export {Theme, registerStyle};

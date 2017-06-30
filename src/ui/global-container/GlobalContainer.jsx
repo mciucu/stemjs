@@ -1,16 +1,11 @@
-import {UI} from "../UI";
+import {UI, registerStyle} from "../UI";
 import {GlobalContainerStyle} from "./Style";
 import {Device} from "../../base/Device";
 
+@registerStyle(GlobalContainerStyle)
 class GlobalContainer extends UI.Element {
-    static styleSet = GlobalContainerStyle.getInstance();
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
     extraNodeAttributes(attr) {
-        attr.addClass(this.getStyleSet().default);
+        attr.addClass(this.styleSheet.default);
     }
 
     onMount() {
