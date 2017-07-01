@@ -35,7 +35,7 @@ export class Router extends Switcher {
             window.history.pushState(...historyArgs);
         }
 
-        this.Global && this.Global.updateURL();
+        this.Global.updateURL();
     }
 
     static setGlobalRouter(router) {
@@ -57,13 +57,14 @@ export class Router extends Switcher {
         router.updateURL();
     }
 
-    // TODO: should be named getRootRoute()
+    // TODO: should be named getRootRoute() :)
     getRoutes() {
         return this.options.routes;
     }
 
     getPageNotFound() {
-        return UI.createElement("h1", {children: ["Can't find url, make sure you typed it correctly"]});
+        const element = UI.createElement("h1", {children: ["Can't find url, make sure you typed it correctly"]});
+        element.pageTitle = "Page not found";
     }
 
     updateURL() {
@@ -83,7 +84,9 @@ export class Router extends Switcher {
             page.dispatch("urlEnter");
         }
 
-        PageTitleManager.setTitle(page.title);
+        if (this === this.constructor.Global) {
+            PageTitleManager.setTitle(page.pageTitle);
+        }
     }
 
     onMount() {
@@ -101,6 +104,9 @@ export class Route {
         this.expr = (expr instanceof Array) ? expr : [expr];
         this.pageGenerator = pageGenerator;
         this.subroutes = subroutes;
+        if (typeof options === "string") {
+            options = {title: options}
+        }
         this.options = options;
         this.cachedPages = new Map();
     }
@@ -125,6 +131,10 @@ export class Route {
         }
     }
 
+    getPageTitle() {
+        return this.options.title;
+    }
+
     generatePage(...argsArray) {
         if (!this.pageGenerator) {
             return null;
@@ -136,6 +146,12 @@ export class Route {
             const args = unwrapArray(argsArray);
             const generatorArgs = {args, argsArray};
             const page = (pageGenerator.prototype instanceof UI.Element) ? new pageGenerator(generatorArgs) : pageGenerator(generatorArgs);
+            if (!page.pageTitle) {
+                const myPageTitle = this.getPageTitle();
+                if (myPageTitle) {
+                    page.pageTitle = this.getPageTitle();
+                }
+            }
             this.cachedPages.set(serializedArgs, page);
         }
         return this.cachedPages.get(serializedArgs);
@@ -155,7 +171,11 @@ export class Route {
                 if (match.args.length) {
                     argsArray.push(match.args);
                 }
-                return subroute.getPage(match.urlParts, router, ...argsArray);
+                let page = subroute.getPage(match.urlParts, router, ...argsArray);
+                if (!page.pageTitle) {
+                    page.pageTitle = this.getPageTitle();
+                }
+                return page;
             }
         }
     }
@@ -170,7 +190,7 @@ export class TerminalRoute extends Route {
         return true;
     }
 
-    getPage(urlParts) {
+    getPage(urlParts, router) {
         const page = super.getPage(...arguments);
         setTimeout(() => {
             page.setURL(urlParts);
@@ -178,6 +198,3 @@ export class TerminalRoute extends Route {
         return page;
     }
 }
-
-
-export let Subrouter = Route;
