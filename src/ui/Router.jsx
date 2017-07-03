@@ -65,6 +65,7 @@ export class Router extends Switcher {
     getPageNotFound() {
         const element = UI.createElement("h1", {children: ["Can't find url, make sure you typed it correctly"]});
         element.pageTitle = "Page not found";
+        return element;
     }
 
     updateURL() {
@@ -172,7 +173,7 @@ export class Route {
                     argsArray.push(match.args);
                 }
                 let page = subroute.getPage(match.urlParts, router, ...argsArray);
-                if (!page.pageTitle) {
+                if (page && !page.pageTitle) {
                     page.pageTitle = this.getPageTitle();
                 }
                 return page;
