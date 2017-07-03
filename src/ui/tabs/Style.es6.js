@@ -16,6 +16,18 @@ class BaseTabAreaStyle extends StyleSet {
     nav = {
         listStyle: "none",
     };
+
+    @styleRule
+    switcher = {
+        flex: "1",
+        overflow: "auto",
+    };
+
+    @styleRule
+    tabArea = {
+        display: "flex",
+        flexDirection: "column",
+    }
 }
 
 class DefaultTabAreaStyle extends BaseTabAreaStyle {
@@ -70,7 +82,6 @@ class MinimalistTabAreaStyle extends BaseTabAreaStyle {
         ":hover": {
             cursor: "pointer",
             color: "rgba(51,122,183,1)",
-            // borderBottom: "2px solid rgba(51,122,183,0.5)",
         },
     };
 

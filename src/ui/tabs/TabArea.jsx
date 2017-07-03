@@ -2,9 +2,8 @@ import {UI} from "../UIBase";
 import {Switcher} from "../Switcher";
 import {Link} from "../UIPrimitives";
 import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
-import {Theme} from "../style/Theme";
+import {registerStyle} from "../style/Theme";
 import {DefaultTabAreaStyle} from "./Style";
-import "../Switcher";
 
 class BasicTabTitle extends Link {
     extraNodeAttributes(attr) {
@@ -22,9 +21,7 @@ class BasicTabTitle extends Link {
 
     canOverwrite(existingElement) {
         // Disable reusing with different panels, since we want to attach listeners to the panel
-        // TODO: might want to just return the key as this.options.panel
-        return super.canOverwrite(existingElement) &&
-                this.options.panel === existingElement.options.panel;
+        return super.canOverwrite(existingElement) && this.options.panel === existingElement.options.panel;
     }
 
     setActive(active) {
@@ -53,7 +50,7 @@ class BasicTabTitle extends Link {
     }
 
     render() {
-        return this.getTitle();
+        return [this.getTitle()];
     }
 
     onMount() {
@@ -67,7 +64,6 @@ class BasicTabTitle extends Link {
             this.setActive(true);
         });
 
-        // TODO: less assumptions here
         if (this.options.panel && this.options.panel.addListener) {
             this.attachListener(this.options.panel, "show", () => {
                 this.setActive(true);
@@ -79,25 +75,25 @@ class BasicTabTitle extends Link {
 class TabTitleArea extends UI.Element {
 };
 
+@registerStyle(DefaultTabAreaStyle)
 class TabArea extends UI.Element {
     activeTabDispatcher = new SingleActiveElementDispatcher();
 
     getDefaultOptions() {
         return {
             autoActive: true, // means the first Tab will be automatically selected
+            // lazyRender: true, // TODO: should be true by default
         }
     }
 
     extraNodeAttributes(attr) {
-        // TODO: these should not be in here!
-        attr.setStyle("display", "flex");
-        attr.setStyle("flex-direction", "column");
+        attr.addClass(this.styleSheet.tabArea);
     }
 
     createTabPanel(panel) {
         let tab = <BasicTabTitle panel={panel} activeTabDispatcher={this.activeTabDispatcher}
                                  active={panel.options.active} href={panel.options.tabHref}
-                                 styleSet={this.getStyleSheet()} />;
+                                 styleSheet={this.styleSheet} />;
 
         return [tab, panel];
     }
@@ -108,7 +104,7 @@ class TabArea extends UI.Element {
         this.options.children.push(panel);
 
         this.titleArea.appendChild(tabTitle);
-        this.switcherArea.appendChild(tabPanel, doMount || true);
+        this.switcherArea.appendChild(tabPanel, doMount || !this.options.lazyRender);
     };
 
     getTitleArea(tabTitles) {
@@ -118,7 +114,7 @@ class TabArea extends UI.Element {
     }
 
     getSwitcher(tabPanels) {
-        return <Switcher style={{flex: "1", overflow: "auto", }} ref="switcherArea" lazyRender={this.options.lazyRender}>
+        return <Switcher className={this.styleSheet.switcher} ref="switcherArea" lazyRender={this.options.lazyRender}>
             {tabPanels}
         </Switcher>;
     }
@@ -171,8 +167,6 @@ class TabArea extends UI.Element {
         });
     }
 };
-
-Theme.register(TabArea, DefaultTabAreaStyle);
 
 export * from "./Style";
 export {TabTitleArea, BasicTabTitle, TabArea};

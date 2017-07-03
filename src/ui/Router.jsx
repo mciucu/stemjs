@@ -104,7 +104,7 @@ export class Route {
     constructor(expr, pageGenerator, subroutes=[], options={}) {
         this.expr = (expr instanceof Array) ? expr : [expr];
         this.pageGenerator = pageGenerator;
-        this.subroutes = subroutes;
+        this.subroutes = unwrapArray(subroutes);
         if (typeof options === "string") {
             options = {title: options}
         }
