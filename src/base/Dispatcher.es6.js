@@ -53,6 +53,7 @@ class Dispatcher {
             callback(...arguments);
             handler.remove();
         });
+        return handler;
     }
 
     removeListener(callback) {
@@ -116,6 +117,19 @@ class Dispatchable {
             this.dispatchers.set(name, dispatcher);
         }
         return dispatcher.addListener(callback);
+    }
+
+    // TODO: remove some duplicated logic with method above
+    addListenerOnce(name, callback) {
+        if (Array.isArray(name)) {
+            return new CleanupJobs(name.map(x => this.addListenerOnce(x, callback)));
+        }
+        let dispatcher = this.getDispatcher(name);
+        if (!dispatcher) {
+            dispatcher = new Dispatcher();
+            this.dispatchers.set(name, dispatcher);
+        }
+        return dispatcher.addListenerOnce(callback);
     }
 
     removeListener(name, callback) {
