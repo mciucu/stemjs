@@ -1,3 +1,5 @@
+// A separate implementation of StyleSheet, using native CSSStyleSheet
+
 import {Dispatchable} from "../base/Dispatcher";
 import {dashCase} from "../base/Utils";
 

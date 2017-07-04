@@ -3,6 +3,7 @@ export * from "./UIBase";
 export * from "./Utils";
 
 export * from "./StyleElement";
+export * from "./Style";
 
 export * from "./UIPrimitives";
 export * from "./input/Input";

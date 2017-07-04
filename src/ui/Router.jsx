@@ -35,7 +35,11 @@ export class Router extends Switcher {
             window.history.pushState(...historyArgs);
         }
 
-        this.Global.updateURL();
+        this.updateURL();
+    }
+
+    static updateURL() {
+        this.Global.setURL(this.parseURL());
     }
 
     static setGlobalRouter(router) {
@@ -50,11 +54,11 @@ export class Router extends Switcher {
         });
 
         window.onpopstate = () => {
-            router.updateURL();
+            this.updateURL();
             Dispatcher.Global.dispatch("externalURLChange");
         };
 
-        router.updateURL();
+        this.updateURL();
     }
 
     // TODO: should be named getRootRoute() :)
@@ -66,10 +70,6 @@ export class Router extends Switcher {
         const element = UI.createElement("h1", {children: ["Can't find url, make sure you typed it correctly"]});
         element.pageTitle = "Page not found";
         return element;
-    }
-
-    updateURL() {
-        this.setURL(this.constructor.parseURL());
     }
 
     setURL(urlParts) {

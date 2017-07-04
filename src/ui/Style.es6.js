@@ -1,13 +1,12 @@
-// This file will probably be deprecated in time by StyleSheet, but the API will be backwards compatible, so use it
+// This file may be deprecated in time by CSSNativeStyleSheet, but the API will be backwards compatible
 import {UI} from "./UIBase";
 import {StyleElement, KeyframeElement, DynamicStyleElement} from "./StyleElement";
 import {Dispatchable} from "../base/Dispatcher";
 
 // Class meant to group multiple classes inside a single <style> element, for convenience
-// TODO: should probably be implemented with document.styleSheet
 // TODO: pattern should be more robust, to be able to only update classes
 // TODO: should probably be renamed to StyleSheet?
-class StyleSet extends Dispatchable {
+class StyleSheet extends Dispatchable {
     constructor(options={}) {
         super();
         this.options = Object.assign({
@@ -178,7 +177,8 @@ function css(style) {
     return styleWrapper;
 }
 
-export {css, StyleSet, ExclusiveClassSet, styleMap, wrapCSS, hover, focus, active};
+export {css, StyleSheet, ExclusiveClassSet, styleMap, wrapCSS, hover, focus, active};
 
+export const StyleSet = StyleSheet;
 
 export * from "../decorators/Style";

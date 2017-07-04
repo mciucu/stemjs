@@ -22,8 +22,6 @@ export * from "ui/FontAwesome";
 export * from "ui/FullScreenable";
 export * from "ui/GlobalStyle";
 export * from "ui/NodeAttributes";
-export * from "ui/Style";
-export * from "ui/StyleSheet";
 export * from "ui/Transition";
 export * from "ui/UI";
 export * from "ui/navmanager/NavElement";
