@@ -84,6 +84,14 @@ class CodeEditor extends EnqueuedMethodsClass(UI.Element) {
         super.redraw();
     }
 
+    whenLoaded(callback) {
+        if (this.isLoaded()) {
+            callback();
+        } else {
+            this.addListenerOnce("aceReady", callback);
+        }
+    }
+
     onMount() {
         // Sometimes when the parent div resizes the ace editor doesn't fully update.
         this.addListener("resize", () => {
