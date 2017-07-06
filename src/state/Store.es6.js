@@ -173,6 +173,8 @@ class GenericObjectStore extends BaseStore {
     }
 
     applyEvent(event) {
+        event.data = event.data || {};
+
         if (event.type === "create") {
             return this.applyCreateEvent(event);
         } else if (event.type === "delete") {

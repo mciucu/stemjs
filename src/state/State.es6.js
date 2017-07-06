@@ -37,6 +37,13 @@ class State extends Dispatchable {
             }
             return;
         }
+        if (event.state) {
+            this.importState(event.state);
+            // We can have events that only have a state
+            if (!this.getStoreForEvent(event)) {
+                return;
+            }
+        }
         let store = this.getStoreForEvent(event);
         if (store) {
             return store.applyEvent(event);
