@@ -132,7 +132,7 @@ class ActionModal extends Modal {
     }
 
     getCloseName() {
-        return "Close";
+        return this.options.closeName || "Close";
     }
 
     getGivenChildren() {
