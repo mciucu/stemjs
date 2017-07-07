@@ -518,11 +518,13 @@ class UIElement extends BaseUIElement {
 
     addNodeListener(name, callback, ...args) {
         this.node.addEventListener(name, callback, ...args);
-        return {
-            remove() {
+        const handler = {
+            remove: () => {
                 this.removeNodeListener(name, callback, ...args);
             }
-        }
+        };
+        this.addCleanupJob(handler);
+        return handler;
     }
 
     removeNodeListener(name, callback) {
