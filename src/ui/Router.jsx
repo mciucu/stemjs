@@ -88,6 +88,12 @@ export class Router extends Switcher {
         if (this === this.constructor.Global) {
             PageTitleManager.setTitle(page.pageTitle);
         }
+
+        this.dispatch("change", urlParts, page, activePage);
+    }
+
+    addChangeListener(callback) {
+        return this.addListener("change", callback);
     }
 
     onMount() {

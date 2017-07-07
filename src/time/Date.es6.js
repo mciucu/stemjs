@@ -4,7 +4,7 @@ import {TimeUnit, Duration} from "./Duration";
 // MAX_UNIX_TIME is either ~Feb 2106 in unix seconds or ~Feb 1970 in unix milliseconds
 // Any value less than this is interpreted as a unix time in seconds
 // If you want to go around this behavious, you can use the static method .fromUnixMilliseconds()
-// Of set this value to 0
+// To disable, set this value to 0
 export let MAX_AUTO_UNIX_TIME = Math.pow(2, 32);
 
 const BaseDate = self.Date;
@@ -230,6 +230,7 @@ class StemDate extends BaseDate {
         return new Duration(this.diff(date));
     }
 
+    // TODO: this should be a duration
     diff(date) {
         date = this.constructor.toDate(date);
         return Math.abs(+this - date);
