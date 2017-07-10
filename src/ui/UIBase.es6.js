@@ -116,12 +116,12 @@ class UIElement extends BaseUIElement {
         this.setOptions(options);
     };
 
-    getDefaultOptions() {}
+    getDefaultOptions(options) {}
 
     getPreservedOptions() {}
 
     setOptions(options) {
-        let defaultOptions = this.getDefaultOptions();
+        let defaultOptions = this.getDefaultOptions(options);
         if (defaultOptions) {
             options = Object.assign(defaultOptions, options);
         }
