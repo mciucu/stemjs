@@ -12,12 +12,12 @@ class State extends Dispatchable {
     }
 
     getStore(objectType) {
-        objectType = objectType.toLowerCase();
+        objectType = objectType && objectType.toLowerCase();
         return this.stores.get(objectType);
     }
 
     getStoreForEvent(event) {
-        let objectType = event.objectType || event.store;
+        const objectType = event.objectType || event.store;
         return this.getStore(objectType);
     }
 
