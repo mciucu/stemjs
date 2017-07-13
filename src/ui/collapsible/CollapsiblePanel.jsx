@@ -30,6 +30,11 @@ class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
         }, this.getCollapsibleStyleSet().transitionDuration * 700);
     }
 
+    setTitle(title) {
+        this.options.title = title;
+        this.toggleButton.setChildren(title);
+    }
+
     render() {
         let collapsedPanelClass = "";
         let collapsedHeadingClass = "";
