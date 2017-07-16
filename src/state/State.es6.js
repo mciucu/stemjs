@@ -82,6 +82,12 @@ class State extends Dispatchable {
 
     // Imports the state information from a plain object
     importState(state) {
+        if (Array.isArray(state)) {
+            for (let obj of state) {
+                this.importState(obj);
+            }
+            return;
+        }
         // Import everything in a map and then do an implicit topological sort by dependencies
         let stateMap = new Map();
         for (let objectType in state) {
