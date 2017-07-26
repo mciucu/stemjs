@@ -5,10 +5,10 @@ import {ModalStyle} from "./Style";
 import {Panel, TemporaryMessageArea} from "../UIPrimitives";
 import {UI} from "../UIBase";
 import {Dispatcher} from "../../base/Dispatcher";
+import {registerStyle} from "../style/Theme";
 
+@registerStyle(ModalStyle)
 class Modal extends UI.Element {
-    static styleSet = new ModalStyle();
-
     getDefaultOptions() {
         return {
             closeButton: true,
@@ -17,15 +17,10 @@ class Modal extends UI.Element {
         };
     }
 
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
     render() {
-        const style = this.getStyleSet();
         return [
             <Panel ref="modalContainer" className={(this.options.visible ? "" : "hidden") + style.container}>
-                <Panel ref="behindPanel" className={style.hiddenAnimated + style.background} onClick={() => this.hide()}/>
+                <Panel ref="behindPanel" className={this.styleSheet.hiddenAnimated + style.background} onClick={() => this.hide()}/>
                 {this.getModalWindow()}
             </Panel>
         ];
@@ -73,8 +68,8 @@ class Modal extends UI.Element {
         this.modalWindow.fadeOut();
 
         setTimeout(() => {
-            this.behindPanel.removeClass(this.getStyleSet().visibleAnimated);
-            this.behindPanel.addClass(this.getStyleSet().hiddenAnimated);
+            this.behindPanel.removeClass(this.styleSheet.visibleAnimated);
+            this.behindPanel.addClass(this.styleSheet.hiddenAnimated);
 
             setTimeout(() => {
                 this.modalContainer.addClass("hidden");
@@ -95,8 +90,8 @@ class Modal extends UI.Element {
         }
         this.modalContainer.removeClass("hidden");
         setTimeout(() => {
-            this.behindPanel.addClass(this.getStyleSet().visibleAnimated);
-            this.behindPanel.removeClass(this.getStyleSet().hiddenAnimated);
+            this.behindPanel.addClass(this.styleSheet.visibleAnimated);
+            this.behindPanel.removeClass(this.styleSheet.hiddenAnimated);
 
             setTimeout(() => {
                 this.modalWindow.fadeIn();
@@ -137,9 +132,9 @@ class ActionModal extends Modal {
 
     getGivenChildren() {
         return [
-            <div className={this.getStyleSet().header}>{this.getHeader()}</div>,
-            (this.getBody() ? <div className={this.getStyleSet().body}>{this.getBody()}</div> : null),
-            (this.getFooter() ? <div className={this.getStyleSet().footer}>{this.getFooter()}</div> : null)
+            <div className={this.styleSheet.header}>{this.getHeader()}</div>,
+            (this.getBody() ? <div className={this.styleSheet.body}>{this.getBody()}</div> : null),
+            (this.getFooter() ? <div className={this.styleSheet.footer}>{this.getFooter()}</div> : null)
         ];
     }
 

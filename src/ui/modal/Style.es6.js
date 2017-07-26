@@ -1,6 +1,6 @@
-import {StyleSet, styleRule} from "../Style";
+import {StyleSheet, styleRule} from "../Style";
 
-class FloatingWindowStyle extends StyleSet {
+class FloatingWindowStyle extends StyleSheet {
     @styleRule
     hiddenAnimated = {
         visibility: "hidden",
