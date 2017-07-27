@@ -19,8 +19,8 @@ class Modal extends UI.Element {
 
     render() {
         return [
-            <Panel ref="modalContainer" className={(this.options.visible ? "" : "hidden") + style.container}>
-                <Panel ref="behindPanel" className={this.styleSheet.hiddenAnimated + style.background} onClick={() => this.hide()}/>
+            <Panel ref="modalContainer" className={(this.options.visible ? "" : "hidden") + this.styleSheet.container}>
+                <Panel ref="behindPanel" className={this.styleSheet.hiddenAnimated + this.styleSheet.background} onClick={() => this.hide()}/>
                 {this.getModalWindow()}
             </Panel>
         ];
