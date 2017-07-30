@@ -1,4 +1,4 @@
-import {UI, Link, Router} from "../ui/UI";
+import {UI, Link, Router, GlobalContainer} from "../ui/UI";
 import {isLocalUrl, trimLocalUrl} from "../base/Utils";
 import {Dispatcher} from "../base/Dispatcher";
 
