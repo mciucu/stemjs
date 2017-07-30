@@ -1,7 +1,7 @@
 {
   "name": "stem-core",
-  "version": "0.2.72",
-  "description": "Frontend framework",
+  "version": "0.3.1",
+  "description": "Frontend and core-library framework",
   "main": "src/Stem.es6.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
