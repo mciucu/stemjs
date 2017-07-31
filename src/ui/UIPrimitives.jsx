@@ -5,55 +5,6 @@ import {Draggable} from "./Draggable";
 import {Dispatchable} from "../base/Dispatcher";
 import {getOffset} from "./Utils";
 
-UI.Orientation = {
-    HORIZONTAL: 1,
-    VERTICAL: 2,
-};
-
-UI.Direction = {
-    UP: "up",
-    LEFT: "left",
-    DOWN: "down",
-    RIGHT: "right",
-};
-
-// TODO: move to Bootstrap file
-UI.Level = {
-    NONE: null,
-    DEFAULT: "default",
-    INFO: "info",
-    PRIMARY: "primary",
-    SUCCESS: "success",
-    WARNING: "warning",
-    DANGER: "danger",
-    ERROR: "danger",
-    DARK: "dark",
-};
-
-UI.Size = {
-    NONE: null,
-    EXTRA_SMALL: "xs",
-    SMALL: "sm",
-    MEDIUM: "default",
-    DEFAULT: "default",
-    LARGE: "lg",
-    EXTRA_LARGE: "xl",
-};
-
-// TODO: why is this here?
-UI.VoteStatus = {
-    NONE: null,
-    LIKE: 1,
-    DISLIKE: -1
-};
-
-UI.ActionStatus = {
-    DEFAULT: 1,
-    RUNNING: 2,
-    SUCCESS: 3,
-    FAILED: 4,
-};
-
 // A very simple class, all this does is implement the `getTitle()` method
 class Panel extends UI.Element {
     getTitle() {

@@ -1,0 +1,46 @@
+export const Orientation = {
+    HORIZONTAL: 1,
+    VERTICAL: 2,
+};
+
+export const Direction = {
+    UP: "up",
+    LEFT: "left",
+    DOWN: "down",
+    RIGHT: "right",
+};
+
+export const Level = {
+    NONE: null,
+    DEFAULT: "default",
+    INFO: "info",
+    PRIMARY: "primary",
+    SUCCESS: "success",
+    WARNING: "warning",
+    DANGER: "danger",
+    ERROR: "danger",
+    DARK: "dark",
+};
+
+export const Size = {
+    NONE: null,
+    EXTRA_SMALL: "xs",
+    SMALL: "sm",
+    MEDIUM: "default",
+    DEFAULT: "default",
+    LARGE: "lg",
+    EXTRA_LARGE: "xl",
+};
+
+export const VoteStatus = {
+    NONE: null,
+    LIKE: 1,
+    DISLIKE: -1
+};
+
+export const ActionStatus = {
+    DEFAULT: 1,
+    RUNNING: 2,
+    SUCCESS: 3,
+    FAILED: 4,
+};
