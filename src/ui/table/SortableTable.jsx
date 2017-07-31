@@ -3,6 +3,7 @@ import {FASortIcon} from "../FontAwesome";
 import {UI} from "../UIBase";
 import {Table} from "./Table";
 import {defaultComparator} from "../../base/Utils";
+import {Direction} from "../Constants";
 
 function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
     return class SortableTable extends BaseTableClass {
@@ -40,9 +41,9 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
             let sortIcon = <SortIconClass className={this.getStyleSet().sortIcon}/>;
             if (this.sortBy === column) {
                 if (this.sortDescending) {
-                    sortIcon = <SortIconClass className={this.getStyleSet().sortIcon} style={{visibility: "inherit"}} direction={UI.Direction.DOWN}/>;
+                    sortIcon = <SortIconClass className={this.getStyleSet().sortIcon} style={{visibility: "inherit"}} direction={Direction.DOWN}/>;
                 } else {
-                    sortIcon = <SortIconClass className={this.getStyleSet().sortIcon} style={{visibility: "inherit"}} direction={UI.Direction.UP}/>;
+                    sortIcon = <SortIconClass className={this.getStyleSet().sortIcon} style={{visibility: "inherit"}} direction={Direction.UP}/>;
                 }
             }
 

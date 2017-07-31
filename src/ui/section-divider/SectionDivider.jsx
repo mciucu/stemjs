@@ -3,6 +3,7 @@ import {Device} from "../../base/Device";
 import {Divider} from "./Divider";
 import {UI} from "../UIBase";
 import {SectionDividerStyle} from "./Style";
+import {Orientation} from "../Constants";
 
 // options.orientation is the orientation of the divided elements
 class DividerBar extends Divider {
@@ -14,7 +15,7 @@ class DividerBar extends Divider {
 
     getDefaultOptions() {
         return Object.assign({}, super.getDefaultOptions(), {
-            orientation: UI.Orientation.HORIZONTAL,
+            orientation: Orientation.HORIZONTAL,
         });
     }
 
@@ -28,7 +29,7 @@ class DividerBar extends Divider {
 
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
-        if (this.options.orientation === UI.Orientation.VERTICAL) {
+        if (this.options.orientation === Orientation.VERTICAL) {
             attr.addClass(this.getStyleSet().verticalDivider);
         } else {
             attr.addClass(this.getStyleSet().horizontalDivider);
@@ -54,7 +55,7 @@ class SectionDivider extends UI.Element {
     }
 
     extraNodeAttributes(attr) {
-        if (this.getOrientation() === UI.Orientation.VERTICAL) {
+        if (this.getOrientation() === Orientation.VERTICAL) {
             attr.addClass(this.getStyleSet().verticalSection);
         } else {
             attr.addClass(this.getStyleSet().horizontalSection);
@@ -62,11 +63,11 @@ class SectionDivider extends UI.Element {
     }
 
     getOrientation() {
-        return this.options.orientation || UI.Orientation.VERTICAL;
+        return this.options.orientation || Orientation.VERTICAL;
     }
 
     getDimension(element) {
-        if (this.getOrientation() === UI.Orientation.HORIZONTAL) {
+        if (this.getOrientation() === Orientation.HORIZONTAL) {
             return element.getWidth();
         } else {
             return element.getHeight();
@@ -74,7 +75,7 @@ class SectionDivider extends UI.Element {
     }
 
     setDimension(element, size) {
-        if (this.getOrientation() === UI.Orientation.HORIZONTAL) {
+        if (this.getOrientation() === Orientation.HORIZONTAL) {
             element.setWidth(size);
         } else {
             element.setHeight(size);
@@ -82,9 +83,9 @@ class SectionDivider extends UI.Element {
     }
 
     getMinDimension(element) {
-        if (this.getOrientation() === UI.Orientation.HORIZONTAL && element.options.hasOwnProperty("minWidth")) {
+        if (this.getOrientation() === Orientation.HORIZONTAL && element.options.hasOwnProperty("minWidth")) {
             return element.options.minWidth;
-        } else if (this.getOrientation() === UI.Orientation.VERTICAL && element.options.hasOwnProperty("minHeight")) {
+        } else if (this.getOrientation() === Orientation.VERTICAL && element.options.hasOwnProperty("minHeight")) {
             return element.options.minHeight;
         } else {
             return this.getDimension(this) / this.panels.length / 4;
@@ -260,7 +261,7 @@ class SectionDivider extends UI.Element {
                 }
             }
 
-            const deltaFunction = (this.getOrientation() === UI.Orientation.HORIZONTAL ?
+            const deltaFunction = (this.getOrientation() === Orientation.HORIZONTAL ?
                                  (event) => Device.getEventX(event) :  (event) => Device.getEventY(event));
 
             const mouseMoveListener = this.addListener("dividerMousemove", (event) => {

@@ -1,5 +1,6 @@
 // Contains classes to abstract some generic Font Awesome usecases.
 import {UI} from "./UIBase";
+import {Direction} from "./Constants";
 
 class FAIcon extends UI.Primitive("i") {
     getIcon() {
@@ -41,9 +42,9 @@ class FACollapseIcon extends FAIcon {
 
 class FASortIcon extends FAIcon {
     getIcon() {
-        if (this.options.direction === UI.Direction.UP ) {
+        if (this.options.direction === Direction.UP) {
             return "sort-asc";
-        } else if (this.options.direction === UI.Direction.DOWN){
+        } else if (this.options.direction === Direction.DOWN){
             return "sort-desc";
         } else {
             return "sort";

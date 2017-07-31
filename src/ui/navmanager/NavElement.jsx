@@ -1,6 +1,7 @@
 import {UI, Link} from "../UI";
 import {FACollapseIcon} from "../FontAwesome"; //TODO: more flexibility, do not require FAIcons in NavElements
 import {SessionStorageMap} from "../../base/StorageMap";
+import {Orientation, Direction} from "../Constants";
 
 let navSessionManager = new SessionStorageMap("navManager");
 
@@ -16,7 +17,7 @@ const BasicOrientedElementInterface = (BaseClass) => class BasicOrientedElement 
         if (this.parent && typeof this.parent.getOrientation === "function") {
             return this.parent.getOrientation();
         }
-        return UI.Orientation.HORIZONTAL;
+        return Orientation.HORIZONTAL;
     }
 };
 
@@ -33,7 +34,7 @@ const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
 
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
-        if (this.getOrientation() === UI.Orientation.HORIZONTAL) {
+        if (this.getOrientation() === Orientation.HORIZONTAL) {
             // it is in the navbar
             attr.addClass(this.getStyleSet().navElementHorizontal);
 
@@ -50,9 +51,9 @@ const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
     }
 
     getSelf() {
-        const style = (this.getOrientation() === UI.Orientation.HORIZONTAL ?
+        const style = (this.getOrientation() === Orientation.HORIZONTAL ?
                         this.getStyleSet().navElementValueHorizontal : this.getStyleSet().navElementValueVertical);
-        const marginLeft = this.getOrientation() === UI.Orientation.VERTICAL && this.getGivenChildren().length ? "-20px" : "0";
+        const marginLeft = this.getOrientation() === Orientation.VERTICAL && this.getGivenChildren().length ? "-20px" : "0";
 
         return <BasicOrientedElement className={style} style={{marginLeft: marginLeft}}>
             {this.getValue()}
@@ -76,13 +77,13 @@ const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
     getValue() {
         let result;
         if (this.getGivenChildren().length) {
-            if (this.getOrientation() === UI.Orientation.VERTICAL) {
+            if (this.getOrientation() === Orientation.VERTICAL) {
                 // is in the sidebar
                 result = [
                     <FACollapseIcon ref="collapseIcon" collapsed={!this.isToggled} className={this.getStyleSet().navElementVerticalArrow} />,
                     this.options.value
                 ];
-            } else if (this.getOrientation() === UI.Orientation.HORIZONTAL) {
+            } else if (this.getOrientation() === Orientation.HORIZONTAL) {
                 // is in the navbar
                 result = [
                     this.options.value,
@@ -163,17 +164,17 @@ const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
     onMount() {
         super.onMount();
         this.addNodeListener("mouseenter", () => {
-            if (this.getOrientation() === UI.Orientation.HORIZONTAL && this.getGivenChildren().length) {
+            if (this.getOrientation() === Orientation.HORIZONTAL && this.getGivenChildren().length) {
                 this.showChildren();
             }
         });
         this.addNodeListener("mouseleave", () => {
-            if (this.getOrientation() === UI.Orientation.HORIZONTAL && this.getGivenChildren().length) {
+            if (this.getOrientation() === Orientation.HORIZONTAL && this.getGivenChildren().length) {
                 this.hideChildren();
             }
         });
         this.addClickListener((event) => {
-            if (this.getOrientation() === UI.Orientation.VERTICAL) {
+            if (this.getOrientation() === Orientation.VERTICAL) {
                 event.stopPropagation();
                 this.toggleChildren();
             }
@@ -196,7 +197,7 @@ class NavSection extends UI.Primitive("ul") {
     }
 
     extraNodeAttributes(attr) {
-        if (this.getOrientation() === UI.Orientation.HORIZONTAL) {
+        if (this.getOrientation() === Orientation.HORIZONTAL) {
             // it is in the navbar
             attr.addClass(this.getStyleSet().navSectionHorizontal);
             // this is functionality, I really want this to be isolated from the actual design
@@ -209,7 +210,7 @@ class NavSection extends UI.Primitive("ul") {
     }
 
     getAnchor() {
-        return this.options.anchor || UI.Direction.LEFT;
+        return this.options.anchor || Direction.LEFT;
     }
 
     getOrientation() {

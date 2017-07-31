@@ -6,6 +6,7 @@ import {Panel, TemporaryMessageArea} from "../UIPrimitives";
 import {UI} from "../UIBase";
 import {Dispatcher} from "../../base/Dispatcher";
 import {registerStyle} from "../style/Theme";
+import {Level, Size} from "../Constants";
 
 @registerStyle(ModalStyle)
 class Modal extends UI.Element {
@@ -31,7 +32,7 @@ class Modal extends UI.Element {
         if (this.options.closeButton) {
             // TODO: this should be in a method
             closeButton = <div style={{right: "10px", zIndex: "10", position: "absolute"}}>
-                <Button className="close" size={UI.Size.EXTRA_LARGE} style={{border: "none"}} label="&times;" onClick={() => this.hide()}/>
+                <Button className="close" size={Size.EXTRA_LARGE} style={{border: "none"}} label="&times;" onClick={() => this.hide()}/>
             </div>;
         }
 
@@ -123,7 +124,7 @@ class ActionModal extends Modal {
     }
 
     getActionLevel() {
-        return this.options.level || UI.Level.DEFAULT;
+        return this.options.level || Level.DEFAULT;
     }
 
     getCloseName() {
@@ -197,7 +198,7 @@ class ErrorModal extends ActionModal {
     }
 
     getFooter() {
-        return <Button level={UI.Level.DANGER} label="Dismiss" onClick={() => this.hide()}/>;
+        return <Button level={Level.DANGER} label="Dismiss" onClick={() => this.hide()}/>;
     }
 }
 

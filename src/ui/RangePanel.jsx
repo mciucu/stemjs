@@ -1,6 +1,7 @@
 import {UI, UIElement, NumberInput, Button} from "./UI";
 import {RangePanelStyle} from "./RangePanelStyle";
 import {Dispatchable} from "../base/Dispatcher";
+import {Size} from "./Constants";
 
 function RangePanelInterface(PanelClass) {
     class RangePanel extends PanelClass {
@@ -123,7 +124,7 @@ function RangeTableInterface(TableClass) {
                         {this.getFooterContent()}
                     </span>
                     <NumberInput ref="jumpToInput" placeholder="jump to..." style={{textAlign: "center",}}/>
-                    <Button ref="jumpToButton" size={UI.Size.SMALL} className={rangePanelStyleSet.jumpToButton}>Go</Button>
+                    <Button ref="jumpToButton" size={Size.SMALL} className={rangePanelStyleSet.jumpToButton}>Go</Button>
                 </div>
             ];
         }

@@ -3,6 +3,7 @@ import {StyleSet} from "Style";
 import {styleRule, styleRuleInherit} from "../decorators/Style";
 import {buildColors} from "Color";
 import {Device} from "../base/Device";
+import {Orientation, Level, Size} from "./Constants";
 
 let GlobalStyle = {
 };
@@ -44,8 +45,8 @@ class ButtonGroupStyle extends StyleSet {
     };
 
     Orientation(orientation) {
-        for (let type of Object.keys(UI.Orientation)) {
-            if (orientation == UI.Orientation[type]) {
+        for (let type of Object.keys(Orientation)) {
+            if (orientation == Orientation[type]) {
                 return this[type];
             }
         }
@@ -107,8 +108,8 @@ function BasicLevelStyleSet(colorClassFunction) {
             if (this[level]) {
                 return this[level];
             }
-            for (let type of Object.keys(UI.Level)) {
-                if (level == UI.Level[type]) {
+            for (let type of Object.keys(Level)) {
+                if (level == Level[type]) {
                     return this[type];
                 }
             }
@@ -195,8 +196,8 @@ class ButtonStyle extends BasicLevelStyleSet(buttonColorClassBuilder) {
     };
 
     Size(size) {
-        for (let type of Object.keys(UI.Size)) {
-            if (size == UI.Size[type]) {
+        for (let type of Object.keys(Size)) {
+            if (size == Size[type]) {
                 return this[type];
             }
         }
@@ -271,8 +272,8 @@ class LabelStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
     };
 
     Size(size) {
-        for (let type of Object.keys(UI.Size)) {
-            if (size == UI.Size[type]) {
+        for (let type of Object.keys(Size)) {
+            if (size == Size[type]) {
                 return this[type];
             }
         }
@@ -331,8 +332,8 @@ class BadgeStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
     };
 
     Size(size) {
-        for (let type of Object.keys(UI.Size)) {
-            if (size == UI.Size[type]) {
+        for (let type of Object.keys(Size)) {
+            if (size == Size[type]) {
                 return this[type];
             }
         }
@@ -412,8 +413,8 @@ class CardPanelStyle {
     EXTRA_LARGE = new (cardPanelSizeClassBuilder("21px"))();
 
     Size(size) {
-        for (let type of Object.keys(UI.Size)) {
-            if (size == UI.Size[type]) {
+        for (let type of Object.keys(Size)) {
+            if (size == Size[type]) {
                 return this[type];
             }
         }
@@ -437,8 +438,8 @@ class CardPanelStyle {
         if (this[level]) {
             return this[level];
         }
-        for (let type of Object.keys(UI.Level)) {
-            if (level == UI.Level[type]) {
+        for (let type of Object.keys(Level)) {
+            if (level == Level[type]) {
                 return this[type];
             }
         }
@@ -515,8 +516,8 @@ class ProgressBarStyle extends BasicLevelStyleSet(progressBarColorClassBuilder) 
     };
 
     Size(size) {
-        for (let type of Object.keys(UI.Size)) {
-            if (size == UI.Size[type]) {
+        for (let type of Object.keys(Size)) {
+            if (size == Size[type]) {
                 return this[type];
             }
         }
@@ -550,8 +551,8 @@ class FlexContainerStyle extends StyleSet {
     };
 
     Orientation(orientation) {
-        for (let type of Object.keys(UI.Orientation)) {
-            if (orientation == UI.Orientation[type]) {
+        for (let type of Object.keys(Orientation)) {
+            if (orientation == Orientation[type]) {
                 return this[type];
             }
         }
@@ -585,8 +586,8 @@ class ContainerStyle extends StyleSet {
     };
 
     Size(size) {
-        for (let type of Object.keys(UI.Size)) {
-            if (size == UI.Size[type]) {
+        for (let type of Object.keys(Size)) {
+            if (size == Size[type]) {
                 return this[type];
             }
         }

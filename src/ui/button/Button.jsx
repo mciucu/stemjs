@@ -2,6 +2,7 @@ import {Ajax} from "../../base/Ajax";
 import {GlobalStyle} from "../GlobalStyle";
 import {IconableInterface} from "../Bootstrap3";
 import {UI} from "../UIBase";
+import {ActionStatus} from "../Constants";
 
 class Button extends UI.Primitive(IconableInterface, "button") {
     extraNodeAttributes(attr) {
@@ -35,7 +36,7 @@ class Button extends UI.Primitive(IconableInterface, "button") {
 
 class StateButton extends Button {
     setOptions(options) {
-        options.state = (this.options && this.options.state) || options.state || UI.ActionStatus.DEFAULT;
+        options.state = (this.options && this.options.state) || options.state || ActionStatus.DEFAULT;
 
         super.setOptions(options);
 
@@ -53,12 +54,12 @@ class StateButton extends Button {
 
     setState(status) {
         this.options.state = status;
-        if (status === UI.ActionStatus.DEFAULT) {
+        if (status === ActionStatus.DEFAULT) {
             this.enable();
-        } else if (status === UI.ActionStatus.RUNNING) {
+        } else if (status === ActionStatus.RUNNING) {
             this.disable();
-        } else if (status === UI.ActionStatus.SUCCESS) {
-        } else if (status === UI.ActionStatus.FAILED) {
+        } else if (status === ActionStatus.SUCCESS) {
+        } else if (status === ActionStatus.FAILED) {
         }
 
         this.redraw();
@@ -77,23 +78,23 @@ class StateButton extends Button {
 
 class AjaxButton extends StateButton {
     ajaxCall(data) {
-        this.setState(UI.ActionStatus.RUNNING);
+        this.setState(ActionStatus.RUNNING);
         Ajax.fetch(Object.assign({}, data, {
             success: (successData) => {
                 data.success(successData);
                 if (successData.error) {
-                    this.setState(UI.ActionStatus.FAILED);
+                    this.setState(ActionStatus.FAILED);
                 } else {
-                    this.setState(UI.ActionStatus.SUCCESS);
+                    this.setState(ActionStatus.SUCCESS);
                 }
             },
             error: (xhr, errmsg, err) => {
                 data.error(xhr, errmsg, err);
-                this.setState(UI.ActionStatus.FAILED);
+                this.setState(ActionStatus.FAILED);
             },
             complete: () => {
                 setTimeout(() => {
-                    this.setState(UI.ActionStatus.DEFAULT);
+                    this.setState(ActionStatus.DEFAULT);
                 }, this.options.onCompete || 1000);
             }
         }));

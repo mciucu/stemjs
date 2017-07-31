@@ -1,9 +1,9 @@
 import {UI} from "./UIBase";
 import {StyleSet} from "./Style";
 import {styleRule} from "../decorators/Style";
-import {Panel} from "./UIPrimitives";
 import {GlobalStyle} from "./GlobalStyle";
 import {Ajax} from "../base/Ajax";
+import {Orientation} from "./Constants";
 
 class SimpleStyledElement extends UI.Element {
     getLevel() {
@@ -101,12 +101,12 @@ class ProgressBar extends SimpleStyledElement {
 
     render() {
         let valueInPercent = (this.options.value || 0) * 100;
-        let orientation = UI.Orientation.HORIZONTAL;
+        let orientation = Orientation.HORIZONTAL;
         if (this.options.hasOwnProperty("orientation")) {
             orientation = this.options.orientation;
         }
         let barStyle;
-        if (orientation === UI.Orientation.HORIZONTAL) {
+        if (orientation === Orientation.HORIZONTAL) {
             barStyle = {
                 width: valueInPercent + "%",
                 height: this.options.height + "px",

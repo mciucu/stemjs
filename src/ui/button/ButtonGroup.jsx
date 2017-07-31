@@ -2,11 +2,12 @@ import {Button} from "./Button";
 import {GlobalStyle} from "../GlobalStyle";
 import {SimpleStyledElement} from "../Bootstrap3";
 import {UI} from "../UIBase";
+import {Orientation} from "../Constants";
 
 class ButtonGroup extends SimpleStyledElement {
     getDefaultOptions() {
         return {
-            orientation: UI.Orientation.HORIZONTAL,
+            orientation: Orientation.HORIZONTAL,
         };
     }
 

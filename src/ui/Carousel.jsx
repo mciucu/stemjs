@@ -2,6 +2,7 @@ import {UI, getComputedStyle} from "./UI";
 import {StyleSet} from "./Style";
 import {styleRule} from "../decorators/Style";
 import {FAIcon} from "../ui/FontAwesome";
+import {Orientation} from "./Constants";
 
 class CarouselStyle extends StyleSet {
     navigatorHeight = "35px";
@@ -137,7 +138,7 @@ class Carousel extends UI.Element {
     }
 
     getOrientation() {
-        return this.options.orientation || UI.Orientation.VERTICAL;
+        return this.options.orientation || Orientation.VERTICAL;
     }
 }
 

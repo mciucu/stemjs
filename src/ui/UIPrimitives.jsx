@@ -4,6 +4,7 @@ import {Device} from "../base/Device";
 import {Draggable} from "./Draggable";
 import {Dispatchable} from "../base/Dispatcher";
 import {getOffset} from "./Utils";
+import {Orientation} from "./Constants";
 
 // A very simple class, all this does is implement the `getTitle()` method
 class Panel extends UI.Element {
@@ -94,7 +95,7 @@ class HorizontalSlideBar extends SlideBar {
     }
 
     getOrientation() {
-        return UI.Orientation.HORIZONTAL;
+        return Orientation.HORIZONTAL;
     }
 
     getDragConfig() {
@@ -137,7 +138,7 @@ class VerticalSlideBar extends SlideBar {
     }
 
     getOrientation() {
-        return UI.Orientation.VERTICAL;
+        return Orientation.VERTICAL;
     }
 
     getDragConfig() {

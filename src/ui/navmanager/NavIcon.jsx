@@ -1,6 +1,7 @@
 import {UI} from "UI";
 import {NavElement} from "NavElement";
 import {FAIcon} from "../FontAwesome";
+import {Size} from "../Constants";
 
 class NavIcon extends NavElement {
     extraNodeAttributes(attr) {
@@ -38,7 +39,7 @@ class LeftSideIcon extends NavIcon {
     }
 
     getIcon() {
-        return <FAIcon icon="bars" size={UI.Size.LARGE}/>;
+        return <FAIcon icon="bars" size={Size.LARGE}/>;
     }
 }
 
@@ -50,7 +51,7 @@ class RightSideIcon extends NavIcon {
     }
 
     getIcon() {
-        return <FAIcon icon="ellipsis-v" size={UI.Size.LARGE}/>;
+        return <FAIcon icon="ellipsis-v" size={Size.LARGE}/>;
     }
 }
 
@@ -62,7 +63,7 @@ class WrappedIcon extends NavIcon {
     }
 
     getIcon() {
-        return <FAIcon icon="ellipsis-h" size={UI.Size.LARGE}/>;
+        return <FAIcon icon="ellipsis-h" size={Size.LARGE}/>;
     }
 }
 
