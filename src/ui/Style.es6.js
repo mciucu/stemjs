@@ -31,7 +31,7 @@ class StyleSheet extends Dispatchable {
 
     static getElementName() {
         this.elementNameCounter = (this.elementNameCounter || 0) + 1;
-        let name = this.constructor.name;
+        let name = this.name;
         if (this.elementNameCounter > 1) {
             name += "-" + this.elementNameCounter;
         }
