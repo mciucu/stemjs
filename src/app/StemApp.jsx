@@ -28,9 +28,21 @@ export class StemApp extends UI.Element {
         return null;
     }
 
+    getRouterOptions() {
+        return {
+            style: {
+                height: "100%",
+            }
+        }
+    }
+
+    getRouter() {
+        return <Router routes={this.getRoutes()} ref="router" {...this.getRouterOptions()}/>;
+    }
+
     getContainer() {
         return <GlobalContainer>
-                <Router routes={this.getRoutes()} ref="router" style={{height: "100%"}}/>
+            {this.getRouter()}
             </GlobalContainer>;
     }
 
