@@ -38,6 +38,20 @@ class StyleSheet extends Dispatchable {
         return name;
     }
 
+    getTheme() {
+        return this.options.theme || this.constructor.theme;
+    }
+
+    getThemeProperty(key, defaultValue) {
+        const theme = this.getTheme();
+        return (theme && theme.getProperty(key, defaultValue)) || defaultValue;
+    }
+
+    get themeProperties() {
+        const theme = this.getTheme();
+        return (theme && theme.getProperties()) || {};
+    }
+
     ensureFirstUpdate() {
         if (this._firstUpdate) {
             return;

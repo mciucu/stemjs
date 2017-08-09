@@ -1,9 +1,9 @@
-import {UI} from "UI";
-import {StyleSet} from "Style";
+import {StyleSheet} from "./Style";
 import {styleRule, styleRuleInherit} from "../decorators/Style";
-import {buildColors} from "Color";
+import {buildColors} from "./Color";
 import {Device} from "../base/Device";
 import {Orientation, Level, Size} from "./Constants";
+import {Theme} from "style/Theme";
 
 let GlobalStyle = {
 };
@@ -21,7 +21,9 @@ const COLOR = {
     DARK: "#202e3e",
 };
 
-class ButtonGroupStyle extends StyleSet {
+Theme.Global.setProperty("COLOR", COLOR);
+
+class ButtonGroupStyle extends StyleSheet {
     @styleRule
     HORIZONTAL = {
         ">*": {
@@ -53,7 +55,7 @@ class ButtonGroupStyle extends StyleSet {
     }
 }
 
-class RadioButtonGroupStyle extends StyleSet {
+class RadioButtonGroupStyle extends StyleSheet {
     @styleRule
     DEFAULT = {
         ">*": {
@@ -70,54 +72,55 @@ class RadioButtonGroupStyle extends StyleSet {
     };
 }
 
-function BasicLevelStyleSet(colorClassFunction) {
-    class BasicLevelStyleClass extends StyleSet {
-        colorClassBuilder = colorClassFunction;
+const BasicLevelStyleSet = (colorClassFunction) => class BasicLevelStyleClass extends StyleSheet {
+    colorClassBuilder = colorClassFunction;
 
-        @styleRule
-        PLAIN = {};
+    colorStyleRule(color) {
+        return this.colorClassBuilder(buildColors(color));
+    }
 
-        @styleRule
-        GRAY = {};
+    @styleRule
+    PLAIN = {};
 
-        @styleRule
-        PRIMARY = this.colorClassBuilder(buildColors(COLOR.PRIMARY));
+    @styleRule
+    GRAY = {};
 
-        @styleRule
-        SUCCESS = this.colorClassBuilder(buildColors(COLOR.SUCCESS));
+    @styleRule
+    PRIMARY = this.colorStyleRule(this.themeProperties.COLOR.PRIMARY);
 
-        @styleRule
-        INFO = this.colorClassBuilder(buildColors(COLOR.INFO));
+    @styleRule
+    SUCCESS = this.colorStyleRule(this.themeProperties.COLOR.SUCCESS);
 
-        @styleRule
-        WARNING = this.colorClassBuilder(buildColors(COLOR.WARNING));
+    @styleRule
+    INFO = this.colorStyleRule(this.themeProperties.COLOR.INFO);
 
-        @styleRule
-        DANGER = this.colorClassBuilder(buildColors(COLOR.DANGER));
+    @styleRule
+    WARNING = this.colorStyleRule(this.themeProperties.COLOR.WARNING);
 
-        @styleRule
-        GOOGLE = this.colorClassBuilder(buildColors(COLOR.GOOGLE));
+    @styleRule
+    DANGER = this.colorStyleRule(this.themeProperties.COLOR.DANGER);
 
-        @styleRule
-        FACEBOOK = this.colorClassBuilder(buildColors(COLOR.FACEBOOK));
+    @styleRule
+    GOOGLE = this.colorStyleRule(this.themeProperties.COLOR.GOOGLE);
 
-        @styleRule
-        DARK = this.colorClassBuilder(buildColors(COLOR.DARK, false));
+    @styleRule
+    FACEBOOK = this.colorStyleRule(this.themeProperties.COLOR.FACEBOOK);
 
-        Level(level) {
-            if (this[level]) {
-                return this[level];
-            }
-            for (let type of Object.keys(Level)) {
-                if (level == Level[type]) {
-                    return this[type];
-                }
+    @styleRule
+    DARK = this.colorClassBuilder(buildColors(this.themeProperties.COLOR.DARK, false));
+
+    Level(level) {
+        if (this[level]) {
+            return this[level];
+        }
+        for (let type of Object.keys(Level)) {
+            if (level == Level[type]) {
+                return this[type];
             }
         }
     }
-
-    return BasicLevelStyleClass;
 };
+
 
 let buttonColorClassBuilder = (colors) => {
     let darker1 = {
@@ -167,7 +170,7 @@ class ButtonStyle extends BasicLevelStyleSet(buttonColorClassBuilder) {
         },
     }, {
         fontSize: "14px",
-    }, this.colorClassBuilder(buildColors(COLOR.PLAIN))];
+    }, this.colorStyleRule(this.themeProperties.COLOR.PLAIN)];
 
     @styleRule
     EXTRA_SMALL = {
@@ -243,7 +246,7 @@ class LabelStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
         },
     }, {
         "font-size": "12px",
-    }, this.colorClassBuilder(buildColors(COLOR.GRAY))];
+    }, this.colorStyleRule(this.themeProperties.COLOR.GRAY)];
 
     @styleRule
     EXTRA_SMALL = {
@@ -304,7 +307,7 @@ class BadgeStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
         borderRadius: "0.8em",
     }, {
         "font-size": "12px",
-    }, this.colorClassBuilder(buildColors(COLOR.GRAY))];
+    }, this.colorStyleRule(this.themeProperties.COLOR.GRAY)];
 
     @styleRule
     EXTRA_SMALL = {
@@ -343,7 +346,7 @@ class BadgeStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
 
 function cardPanelColorClassBuilder(color) {
     let colors = buildColors(color);
-    class CardPanelLevelStyle extends StyleSet {
+    class CardPanelLevelStyle extends StyleSheet {
         @styleRule
         heading = {
             color: colors[6],
@@ -365,7 +368,7 @@ function cardPanelSizeClassBuilder(fontSize) {
     if (fontSize) {
         panelStyle.fontSize = fontSize;
     }
-    class CardPanelSizeStyle extends StyleSet {
+    class CardPanelSizeStyle extends StyleSheet {
         @styleRule
         panel = panelStyle;
     };
@@ -478,7 +481,7 @@ class ProgressBarStyle extends BasicLevelStyleSet(progressBarColorClassBuilder) 
         fontColor: "#ffffff",
     }, {
         fontSize: "12px",
-    }, this.colorClassBuilder(buildColors(COLOR.PRIMARY))];
+    }, this.colorClassBuilder(buildColors(this.themeProperties.COLOR.PRIMARY))];
 
     @styleRule
     STRIPED = {
@@ -524,7 +527,7 @@ class ProgressBarStyle extends BasicLevelStyleSet(progressBarColorClassBuilder) 
     }
 }
 
-class FlexContainerStyle extends StyleSet {
+class FlexContainerStyle extends StyleSheet {
     @styleRule
     HORIZONTAL = {
         display: "flex",
@@ -559,7 +562,7 @@ class FlexContainerStyle extends StyleSet {
     }
 }
 
-class ContainerStyle extends StyleSet {
+class ContainerStyle extends StyleSheet {
     @styleRule
     EXTRA_SMALL = {
         margin: Device.isMobileDevice() ? "0 6px" : "0% 15%",
@@ -595,7 +598,7 @@ class ContainerStyle extends StyleSet {
 }
 
 
-class Utils extends StyleSet {
+class Utils extends StyleSheet {
     @styleRule
     fullHeight = {
         height: "100%",
