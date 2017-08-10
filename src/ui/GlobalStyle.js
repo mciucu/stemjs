@@ -72,7 +72,7 @@ class RadioButtonGroupStyle extends StyleSheet {
     };
 }
 
-const BasicLevelStyleSheet = (colorToStyleFunction) => class BasicLevelStyleClass extends StyleSheet {
+export const BasicLevelStyleSheet = (colorToStyleFunction) => class BasicLevelStyleClass extends StyleSheet {
     colorStyleRule(color) {
         return colorToStyleFunction(color);
     }
@@ -319,49 +319,6 @@ class BadgeStyle extends BasicLevelStyleSheet(badgeColorToStyle) {
     };
 }
 
-function cardPanelColorToStyle(color) {
-    let colors = buildColors(color);
-    return {
-        borderColor: colors[4],
-    };
-}
-
-class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) {
-    @styleRule
-    heading = [{
-        padding: "0.8em 1.2em",
-        borderBottomWidth: "0.08em",
-        borderBottomStyle: "solid",
-    },
-        cardPanelHeaderColorToStyle(this.themeProperties.COLOR_PLAIN)
-    ];
-
-    @styleRule
-    body = {
-    };
-
-    @styleRule
-    panel = [{
-        borderWidth: "0.08em",
-        borderRadius: this.themeProperties.BASE_BORDER_RADIUS,
-        borderStyle: "solid",
-        backgroundColor: "#ffffff",
-    },
-        cardPanelColorToStyle(this.themeProperties.COLOR_PLAIN)
-    ];
-}
-
-function cardPanelHeaderColorToStyle(color){
-    let colors = buildColors(color);
-    return {
-        color: colors[6],
-        backgroundColor: colors[1],
-        borderBottomColor: colors[4],
-    };
-}
-
-let CardPanelHeaderStyle = BasicLevelStyleSheet(cardPanelHeaderColorToStyle);
-
 let progressBarColorToStyle = (color) => {
     let colors = buildColors(color);
     return {
@@ -516,8 +473,6 @@ GlobalStyle.RadioButtonGroup = RadioButtonGroupStyle.getInstance();
 GlobalStyle.ButtonGroup = ButtonGroupStyle.getInstance();
 GlobalStyle.Label = LabelStyle.getInstance();
 GlobalStyle.Badge = BadgeStyle.getInstance();
-GlobalStyle.CardPanel = CardPanelStyle.getInstance();
-GlobalStyle.CardPanelHeader = CardPanelHeaderStyle.getInstance();
 GlobalStyle.ProgressBar = ProgressBarStyle.getInstance();
 GlobalStyle.FlexContainer = FlexContainerStyle.getInstance();
 GlobalStyle.Container = ContainerStyle.getInstance();

@@ -20,6 +20,15 @@ class StyleSheet extends Dispatchable {
                 this.update();
             });
         }
+        if (!this.options.delayedMount) {
+            this.ensureMounted();
+        }
+    }
+
+    ensureMounted() {
+        if (this.styleElement) {
+            return;
+        }
         const styleElementOptions = {
             children: [],
             name: this.options.name,
@@ -63,6 +72,7 @@ class StyleSheet extends Dispatchable {
         }
 
         this._firstUpdate = true;
+        this.ensureMounted();
         // Call all listeners before update for the very first time, to update any possible variables
         this.dispatch("beforeUpdate", this);
     }
