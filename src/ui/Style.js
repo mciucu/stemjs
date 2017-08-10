@@ -20,6 +20,11 @@ class StyleSheet extends Dispatchable {
                 this.update();
             });
         }
+        const styleElementOptions = {
+            children: [],
+            name: this.options.name,
+        };
+        this.styleElement = StyleElement.create(this.options.parent, styleElementOptions);
     }
 
     static getInstance() {
@@ -58,11 +63,6 @@ class StyleSheet extends Dispatchable {
         }
 
         this._firstUpdate = true;
-        const styleElementOptions = {
-            children: [],
-            name: this.options.name,
-        };
-        this.styleElement = StyleElement.create(this.options.parent, styleElementOptions);
         // Call all listeners before update for the very first time, to update any possible variables
         this.dispatch("beforeUpdate", this);
     }

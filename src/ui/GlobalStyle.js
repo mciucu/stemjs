@@ -1,5 +1,5 @@
 import {StyleSheet} from "./Style";
-import {styleRule, styleRuleInherit} from "../decorators/Style";
+import {styleRule} from "../decorators/Style";
 import {buildColors} from "./Color";
 import {Device} from "../base/Device";
 import {Orientation, Level, Size} from "./Constants";
@@ -8,20 +8,20 @@ import {Theme} from "style/Theme";
 let GlobalStyle = {
 };
 
-const COLOR = {
-    PLAIN: "#ffffff",
-    GRAY: "#777",
-    PRIMARY: "#337ab7",
-    SUCCESS: "#5cb85c",
-    INFO: "#5bc0de",
-    WARNING: "#f0ad4e",
-    DANGER: "#d9534f",
-    GOOGLE: "#de4b39",
-    FACEBOOK: "#3b5998",
-    DARK: "#202e3e",
-};
+Theme.Global.setProperties({
+    COLOR_PLAIN: "#ffffff",
+    COLOR_GRAY: "#777",
+    COLOR_PRIMARY: "#337ab7",
+    COLOR_SUCCESS: "#5cb85c",
+    COLOR_INFO: "#5bc0de",
+    COLOR_WARNING: "#f0ad4e",
+    COLOR_DANGER: "#d9534f",
+    COLOR_GOOGLE: "#de4b39",
+    COLOR_FACEBOOK: "#3b5998",
+    COLOR_DARK: "#202e3e",
 
-Theme.Global.setProperty("COLOR", COLOR);
+    BASE_BORDER_RADIUS: "0",
+});
 
 class ButtonGroupStyle extends StyleSheet {
     @styleRule
@@ -72,42 +72,28 @@ class RadioButtonGroupStyle extends StyleSheet {
     };
 }
 
-const BasicLevelStyleSet = (colorClassFunction) => class BasicLevelStyleClass extends StyleSheet {
-    colorClassBuilder = colorClassFunction;
-
+const BasicLevelStyleSheet = (colorToStyleFunction) => class BasicLevelStyleClass extends StyleSheet {
     colorStyleRule(color) {
-        return this.colorClassBuilder(buildColors(color));
+        return colorToStyleFunction(color);
     }
 
     @styleRule
-    PLAIN = {};
+    PLAIN = this.colorStyleRule(this.themeProperties.COLOR_PLAIN);
 
     @styleRule
-    GRAY = {};
+    PRIMARY = this.colorStyleRule(this.themeProperties.COLOR_PRIMARY);
 
     @styleRule
-    PRIMARY = this.colorStyleRule(this.themeProperties.COLOR.PRIMARY);
+    SUCCESS = this.colorStyleRule(this.themeProperties.COLOR_SUCCESS);
 
     @styleRule
-    SUCCESS = this.colorStyleRule(this.themeProperties.COLOR.SUCCESS);
+    INFO = this.colorStyleRule(this.themeProperties.COLOR_INFO);
 
     @styleRule
-    INFO = this.colorStyleRule(this.themeProperties.COLOR.INFO);
+    WARNING = this.colorStyleRule(this.themeProperties.COLOR_WARNING);
 
     @styleRule
-    WARNING = this.colorStyleRule(this.themeProperties.COLOR.WARNING);
-
-    @styleRule
-    DANGER = this.colorStyleRule(this.themeProperties.COLOR.DANGER);
-
-    @styleRule
-    GOOGLE = this.colorStyleRule(this.themeProperties.COLOR.GOOGLE);
-
-    @styleRule
-    FACEBOOK = this.colorStyleRule(this.themeProperties.COLOR.FACEBOOK);
-
-    @styleRule
-    DARK = this.colorClassBuilder(buildColors(this.themeProperties.COLOR.DARK, false));
+    DANGER = this.colorStyleRule(this.themeProperties.COLOR_DANGER);
 
     Level(level) {
         if (this[level]) {
@@ -118,11 +104,22 @@ const BasicLevelStyleSet = (colorClassFunction) => class BasicLevelStyleClass ex
                 return this[type];
             }
         }
+        return "";
+    }
+
+    Size(size) {
+        for (let type of Object.keys(Size)) {
+            if (size == Size[type]) {
+                return this[type];
+            }
+        }
+        return "";
     }
 };
 
 
-let buttonColorClassBuilder = (colors) => {
+let buttonColorToStyle = (color) => {
+    const colors = buildColors(color);
     let darker1 = {
         backgroundColor: colors[2],
     };
@@ -132,14 +129,15 @@ let buttonColorClassBuilder = (colors) => {
     let darker3 = {
         backgroundColor: colors[4],
     };
-    let regular = {
+    const regular = {
         backgroundColor: colors[1],
         borderColor: colors[5],
         color: colors[6],
     };
+    const hoverDisabled = Object.assign({}, regular);
     return Object.assign({}, regular, {
         ":hover": darker1,
-        ":hover:disabled": regular,
+        ":hover:disabled": hoverDisabled,
         ":focus": darker1,
         ":active": darker2,
         ":hover:active": darker3,
@@ -148,7 +146,7 @@ let buttonColorClassBuilder = (colors) => {
     });
 };
 
-class ButtonStyle extends BasicLevelStyleSet(buttonColorClassBuilder) {
+class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
     // DEFAULT uses MEDIUM as size and PLAIN as level
     @styleRule
     DEFAULT = [{
@@ -170,7 +168,7 @@ class ButtonStyle extends BasicLevelStyleSet(buttonColorClassBuilder) {
         },
     }, {
         fontSize: "14px",
-    }, this.colorStyleRule(this.themeProperties.COLOR.PLAIN)];
+    }, this.colorStyleRule(this.themeProperties.COLOR_PLAIN)];
 
     @styleRule
     EXTRA_SMALL = {
@@ -197,17 +195,10 @@ class ButtonStyle extends BasicLevelStyleSet(buttonColorClassBuilder) {
         fontSize: "21px",
         padding: "0.2em 0.4em",
     };
-
-    Size(size) {
-        for (let type of Object.keys(Size)) {
-            if (size == Size[type]) {
-                return this[type];
-            }
-        }
-    }
 }
 
-let labelColorClassBuilder = (colors) => {
+let labelColorToStyle = (color) => {
+    const colors = buildColors(color);
     let darker = {
         backgroundColor: colors[2],
         color: colors[6],
@@ -226,7 +217,7 @@ let labelColorClassBuilder = (colors) => {
     });
 };
 
-class LabelStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
+class LabelStyle extends BasicLevelStyleSheet(labelColorToStyle) {
     // DEFAULT uses MEDIUM as size and PLAIN as level
     @styleRule
     DEFAULT = [{
@@ -246,7 +237,7 @@ class LabelStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
         },
     }, {
         "font-size": "12px",
-    }, this.colorStyleRule(this.themeProperties.COLOR.GRAY)];
+    }, this.colorStyleRule(this.themeProperties.COLOR_GRAY)];
 
     @styleRule
     EXTRA_SMALL = {
@@ -273,17 +264,10 @@ class LabelStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
         fontSize: "17px",
         padding: "0.05em 0.2em",
     };
-
-    Size(size) {
-        for (let type of Object.keys(Size)) {
-            if (size == Size[type]) {
-                return this[type];
-            }
-        }
-    }
 }
 
-let badgeColorClassBuilder = (colors) => {
+let badgeColorToStyle = (color) => {
+    const colors = buildColors(color);
     return {
         backgroundColor: colors[1],
         borderColor: colors[5],
@@ -291,7 +275,7 @@ let badgeColorClassBuilder = (colors) => {
     };
 };
 
-class BadgeStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
+class BadgeStyle extends BasicLevelStyleSheet(badgeColorToStyle) {
     // DEFAULT uses MEDIUM as size and PLAIN as level
     @styleRule
     DEFAULT = [{
@@ -307,7 +291,7 @@ class BadgeStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
         borderRadius: "0.8em",
     }, {
         "font-size": "12px",
-    }, this.colorStyleRule(this.themeProperties.COLOR.GRAY)];
+    }, this.colorStyleRule(this.themeProperties.COLOR_GRAY)];
 
     @styleRule
     EXTRA_SMALL = {
@@ -333,130 +317,59 @@ class BadgeStyle extends BasicLevelStyleSet(labelColorClassBuilder) {
         fontSize: "17px",
         padding: "0.1em 0.2em",
     };
-
-    Size(size) {
-        for (let type of Object.keys(Size)) {
-            if (size == Size[type]) {
-                return this[type];
-            }
-        }
-    }
 }
 
-
-function cardPanelColorClassBuilder(color) {
+function cardPanelColorToStyle(color) {
     let colors = buildColors(color);
-    class CardPanelLevelStyle extends StyleSheet {
-        @styleRule
-        heading = {
-            color: colors[6],
-            backgroundColor: colors[0],
-            borderBottomColor: colors[4],
-        };
-
-        @styleRule
-        panel = {
-            borderColor: colors[4],
-        };
-    }
-
-    return CardPanelLevelStyle;
-};
-
-function cardPanelSizeClassBuilder(fontSize) {
-    let panelStyle = {};
-    if (fontSize) {
-        panelStyle.fontSize = fontSize;
-    }
-    class CardPanelSizeStyle extends StyleSheet {
-        @styleRule
-        panel = panelStyle;
+    return {
+        borderColor: colors[4],
     };
-
-    return CardPanelSizeStyle;
-};
-
-class CardPanelStyle {
-    defaultClassBuilder = function() {
-        class DefaultCardPanelStyle extends cardPanelColorClassBuilder(COLOR.PLAIN) {
-            @styleRuleInherit
-            heading = {
-                padding: "0.8em 1.2em",
-                borderBottomWidth: "0.08em",
-                borderBottomStyle: "solid",
-            };
-
-            @styleRule
-            body = {
-                // padding: "0.35em",
-            };
-
-            @styleRuleInherit
-            panel = {
-                borderWidth: "0.08em",
-                borderRadius: "0.3em",
-                borderStyle: "solid",
-                backgroundColor: "#ffffff",
-            };
-        }
-
-        return DefaultCardPanelStyle;
-    };
-
-    DEFAULT = new (this.defaultClassBuilder())();
-
-    EXTRA_SMALL = new (cardPanelSizeClassBuilder("11px"))();
-
-    SMALL = new (cardPanelSizeClassBuilder("12px"))();
-
-    MEDIUM = new (cardPanelSizeClassBuilder)();
-
-    LARGE = new (cardPanelSizeClassBuilder("17px"))();
-
-    EXTRA_LARGE = new (cardPanelSizeClassBuilder("21px"))();
-
-    Size(size) {
-        for (let type of Object.keys(Size)) {
-            if (size == Size[type]) {
-                return this[type];
-            }
-        }
-    }
-
-    PRIMARY = new (cardPanelColorClassBuilder(COLOR.PRIMARY))();
-
-    SUCCESS = new (cardPanelColorClassBuilder(COLOR.SUCCESS))();
-
-    INFO = new (cardPanelColorClassBuilder(COLOR.INFO))();
-
-    WARNING = new (cardPanelColorClassBuilder(COLOR.WARNING))();
-
-    DANGER = new (cardPanelColorClassBuilder(COLOR.DANGER))();
-
-    GOOGLE = new (cardPanelColorClassBuilder(COLOR.GOOGLE))();
-
-    FACEBOOK = new (cardPanelColorClassBuilder(COLOR.FACEBOOK))();
-
-    Level(level) {
-        if (this[level]) {
-            return this[level];
-        }
-        for (let type of Object.keys(Level)) {
-            if (level == Level[type]) {
-                return this[type];
-            }
-        }
-    }
 }
 
+class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) {
+    @styleRule
+    heading = [{
+        padding: "0.8em 1.2em",
+        borderBottomWidth: "0.08em",
+        borderBottomStyle: "solid",
+    },
+        cardPanelHeaderColorToStyle(this.themeProperties.COLOR_PLAIN)
+    ];
 
-let progressBarColorClassBuilder = (colors) => {
+    @styleRule
+    body = {
+    };
+
+    @styleRule
+    panel = [{
+        borderWidth: "0.08em",
+        borderRadius: this.themeProperties.BASE_BORDER_RADIUS,
+        borderStyle: "solid",
+        backgroundColor: "#ffffff",
+    },
+        cardPanelColorToStyle(this.themeProperties.COLOR_PLAIN)
+    ];
+}
+
+function cardPanelHeaderColorToStyle(color){
+    let colors = buildColors(color);
+    return {
+        color: colors[6],
+        backgroundColor: colors[1],
+        borderBottomColor: colors[4],
+    };
+}
+
+let CardPanelHeaderStyle = BasicLevelStyleSheet(cardPanelHeaderColorToStyle);
+
+let progressBarColorToStyle = (color) => {
+    let colors = buildColors(color);
     return {
         backgroundColor: colors[1],
     };
-}
+};
 
-class ProgressBarStyle extends BasicLevelStyleSet(progressBarColorClassBuilder) {
+class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToStyle) {
     @styleRule
     CONTAINER = {
         height: "20px",
@@ -481,7 +394,7 @@ class ProgressBarStyle extends BasicLevelStyleSet(progressBarColorClassBuilder) 
         fontColor: "#ffffff",
     }, {
         fontSize: "12px",
-    }, this.colorClassBuilder(buildColors(this.themeProperties.COLOR.PRIMARY))];
+    }, this.colorStyleRule(this.themeProperties.COLOR_PRIMARY)];
 
     @styleRule
     STRIPED = {
@@ -517,14 +430,6 @@ class ProgressBarStyle extends BasicLevelStyleSet(progressBarColorClassBuilder) 
         fontSize: "17px",
         padding: "0.1em 0.2em",
     };
-
-    Size(size) {
-        for (let type of Object.keys(Size)) {
-            if (size == Size[type]) {
-                return this[type];
-            }
-        }
-    }
 }
 
 class FlexContainerStyle extends StyleSheet {
@@ -611,7 +516,8 @@ GlobalStyle.RadioButtonGroup = RadioButtonGroupStyle.getInstance();
 GlobalStyle.ButtonGroup = ButtonGroupStyle.getInstance();
 GlobalStyle.Label = LabelStyle.getInstance();
 GlobalStyle.Badge = BadgeStyle.getInstance();
-GlobalStyle.CardPanel = new CardPanelStyle();
+GlobalStyle.CardPanel = CardPanelStyle.getInstance();
+GlobalStyle.CardPanelHeader = CardPanelHeaderStyle.getInstance();
 GlobalStyle.ProgressBar = ProgressBarStyle.getInstance();
 GlobalStyle.FlexContainer = FlexContainerStyle.getInstance();
 GlobalStyle.Container = ContainerStyle.getInstance();

@@ -4,9 +4,9 @@ import {GlobalStyle} from "./GlobalStyle";
 
 class CardPanel extends SimpleStyledElement {
     extraNodeAttributes(attr) {
-        attr.addClass(GlobalStyle.CardPanel.DEFAULT.panel);
+        attr.addClass(GlobalStyle.CardPanel.panel);
         if (this.getLevel()) {
-            attr.addClass(GlobalStyle.CardPanel.Level(this.getLevel()).panel);
+            attr.addClass(GlobalStyle.CardPanel.Level(this.getLevel()));
         }
         if (this.getSize()) {
             attr.addClass(GlobalStyle.CardPanel.Size(this.getSize()).panel);
@@ -18,11 +18,11 @@ class CardPanel extends SimpleStyledElement {
     }
 
     render() {
-        let headingLevel = (this.getLevel() ? GlobalStyle.CardPanel.Level(this.getLevel()).heading : "");
+        let headingLevel = GlobalStyle.CardPanelHeader.Level(this.getLevel());
 
         return [
-            <div className={`${GlobalStyle.CardPanel.DEFAULT.heading} ${headingLevel}`}>{this.getTitle()}</div>,
-            <div className={GlobalStyle.CardPanel.DEFAULT.body} style={this.options.bodyStyle}>{this.getGivenChildren()}</div>,
+            <div className={`${GlobalStyle.CardPanel.heading} ${headingLevel}`}>{this.getTitle()}</div>,
+            <div className={GlobalStyle.CardPanel.body} style={this.options.bodyStyle}>{this.getGivenChildren()}</div>,
         ];
     }
 }
