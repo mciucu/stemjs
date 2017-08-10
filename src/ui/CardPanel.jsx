@@ -4,6 +4,7 @@ import {BasicLevelStyleSheet, GlobalStyle} from "./GlobalStyle";
 import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";
 import {styleRule} from "../decorators/Style";
+import {Level} from "ui/Constants";
 
 export function cardPanelColorToStyle(color) {
     let colors = buildColors(color);
@@ -15,9 +16,14 @@ export function cardPanelColorToStyle(color) {
 export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) {
     @styleRule
     heading = [{
-        padding: "0.8em 1.2em",
-        borderBottomWidth: "0.08em",
-        borderBottomStyle: "solid",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: this.themeProperties.BASE_HEADER_HEIGHT,
+        textTransform: this.themeProperties.BASE_HEADER_TEXT_TRANSFORM,
+        // padding: "0.8em 1.2em",
+        // borderBottomWidth: "0.08em",
+        // borderBottomStyle: "solid",
     },
         cardPanelHeaderColorToStyle(this.themeProperties.COLOR_PLAIN)
     ];
@@ -28,13 +34,19 @@ export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) 
 
     @styleRule
     panel = [{
-        borderWidth: "0.08em",
+        borderWidth: this.themeProperties.BASE_BORDER_WIDTH,
         borderRadius: this.themeProperties.BASE_BORDER_RADIUS,
-        borderStyle: "solid",
-        backgroundColor: "#ffffff",
+        boxShadow: this.themeProperties.BASE_BOX_SHADOW,
+        borderStyle: this.themeProperties.BASE_BORDER_STYLE,
+        backgroundColor: this.themeProperties.COLOR_PLAIN,
     },
         cardPanelColorToStyle(this.themeProperties.COLOR_PLAIN)
     ];
+
+    @styleRule
+    bodyCentered = {
+
+    };
 }
 
 function cardPanelHeaderColorToStyle(color){
@@ -59,6 +71,10 @@ class CardPanel extends SimpleStyledElement {
         if (this.getSize()) {
             attr.addClass(this.styleSheet.Size(this.getSize()).panel);
         }
+    }
+
+    getLevel() {
+        return super.getLevel() || Level.PRIMARY;
     }
 
     getTitle() {
