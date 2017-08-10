@@ -45,7 +45,7 @@ export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) 
 
     @styleRule
     bodyCentered = {
-
+        textAlign: "center",
     };
 }
 
@@ -88,9 +88,15 @@ class CardPanel extends SimpleStyledElement {
     render() {
         let headingLevel = this.getHeaderStyleSheet().Level(this.getLevel());
 
+        const {bodyCentered} = this.options;
+        let bodyClassName = this.styleSheet.body;
+        if (bodyCentered) {
+            bodyClassName = bodyClassName + this.styleSheet.bodyCentered;
+        }
+
         return [
             <div className={`${this.styleSheet.heading} ${headingLevel}`}>{this.getTitle()}</div>,
-            <div className={this.styleSheet.body} style={this.options.bodyStyle}>{this.getGivenChildren()}</div>,
+            <div className={bodyClassName} style={this.options.bodyStyle}>{this.getGivenChildren()}</div>,
         ];
     }
 }

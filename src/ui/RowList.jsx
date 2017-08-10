@@ -23,7 +23,7 @@ class RowListStyle extends StyleSheet {
 
     @styleRule
     oddRow = {
-        backgroundColor: this.themeProperties.COLOR_ALTERNATIVE_PLAIN,
+        backgroundColor: this.themeProperties.COLOR_PLAIN_ALTERNATIVE,
     };
 }
 

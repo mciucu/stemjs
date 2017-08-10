@@ -9,7 +9,8 @@ let GlobalStyle = {
 };
 
 Theme.Global.setProperties({
-    COLOR_PLAIN: "#ffffff",
+    COLOR_PLAIN: "#fff",
+    COLOR_PLAIN_ALTERNATIVE: "#eee",
     COLOR_GRAY: "#777",
     COLOR_PRIMARY: "#337ab7",
     COLOR_SUCCESS: "#5cb85c",
@@ -20,14 +21,15 @@ Theme.Global.setProperties({
     COLOR_FACEBOOK: "#3b5998",
     COLOR_DARK: "#202e3e",
 
-
-
     BASE_BORDER_RADIUS: "0",
     BASE_BOX_SHADOW: "0px 0px 10px rgb(160, 162, 168)",
     BASE_BORDER_WIDTH: "0",
     BASE_BORDER_STYLE: "solid",
     BASE_HEADER_HEIGHT: "30px",
     BASE_HEADER_TEXT_TRANSFORM: "uppercase",
+
+    ROW_LIST_ROW_HEIGHT: "30px",
+    ROW_LIST_ROW_PADDING: "10px",
 });
 
 class ButtonGroupStyle extends StyleSheet {
