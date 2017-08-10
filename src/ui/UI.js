@@ -21,6 +21,7 @@ export * from "tabs/TabArea";
 export * from "button/Button";
 export * from "button/ButtonGroup";
 export * from "./CardPanel";
+export * from "./RowList";
 export * from "collapsible/CollapsiblePanel";
 export * from "modal/FloatingWindow";
 export * from "modal/Modal";
