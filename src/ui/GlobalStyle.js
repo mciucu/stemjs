@@ -30,6 +30,16 @@ Theme.Global.setProperties({
 
     ROW_LIST_ROW_HEIGHT: "30px",
     ROW_LIST_ROW_PADDING: "10px",
+
+    FONT_FAMILY_SANS_SERIF: "'Segoe UI', 'Lucida Sans Unicode', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+    FONT_FAMILY_SERIF: "serif",
+    FONT_FAMILY_MONOSPACE: "'Source Code Pro', 'Monaco', 'Consolas', monospace",
+
+    FONT_SIZE_EXTRA_SMALL: "9px",
+    FONT_SIZE_SMALL: "10px",
+    FONT_SIZE_DEFAULT: "12px",
+    FONT_SIZE_LARGE: "17px",
+    FONT_SIZE_EXTRA_LARGE: "21px",
 });
 
 class ButtonGroupStyle extends StyleSheet {
@@ -82,8 +92,11 @@ class RadioButtonGroupStyle extends StyleSheet {
 }
 
 export const BasicLevelStyleSheet = (colorToStyleFunction) => class BasicLevelStyleClass extends StyleSheet {
-    colorStyleRule(color) {
-        return colorToStyleFunction(color);
+    colorStyleRule(color, textColor) {
+        if (!textColor) {
+            textColor = this.themeProperties.COLOR_TEXT || "black";
+        }
+        return colorToStyleFunction(color, textColor);
     }
 
     @styleRule
@@ -162,7 +175,7 @@ class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
         outline: "0",
         border: "0.1em solid transparent",
         padding: "0.4em 0.8em",
-        borderRadius: "0.3em",
+        borderRadius: this.themeProperties.BASE_BORDER_RADIUS,
         textAlign: "center",
         whiteSpace: "nowrap",
         verticalAlign: "middle",
@@ -178,6 +191,10 @@ class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
     }, {
         fontSize: "14px",
     }, this.colorStyleRule(this.themeProperties.COLOR_PLAIN)];
+
+    getLevel(level) {
+        return super.getLevel(level) || this.INFO;
+    }
 
     @styleRule
     EXTRA_SMALL = {
@@ -344,7 +361,7 @@ class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToStyle) {
         backgroundColor: "#f5f5f5",
         borderRadius: "4px",
         boxShadow: "inset 0 1px 2px rgba(0, 0, 0, .1)",
-    }
+    };
 
     @styleRule
     DEFAULT = [{
@@ -434,30 +451,26 @@ class FlexContainerStyle extends StyleSheet {
 }
 
 class ContainerStyle extends StyleSheet {
-    @styleRule
-    EXTRA_SMALL = {
-        margin: Device.isMobileDevice() ? "0 6px" : "0% 15%",
-    };
+    getSizeStyle(mobilePixels, desktopPercent) {
+        return {
+            margin: Device.isMobileDevice() ? `0 ${mobilePixels}px` : `0% ${desktopPercent}%`,
+        }
+    }
 
     @styleRule
-    SMALL = {
-        margin: Device.isMobileDevice() ? "0 4px" : "0% 10%",
-    };
+    EXTRA_SMALL = this.getSizeStyle(6, 15);
 
     @styleRule
-    MEDIUM = {
-        margin: Device.isMobileDevice() ? "0 4px" : "0% 6%",
-    };
+    SMALL = this.getSizeStyle(4, 10);
 
     @styleRule
-    LARGE = {
-        margin: Device.isMobileDevice() ? "0 2px" : "0% 3%",
-    };
+    MEDIUM = this.getSizeStyle(4, 6);
 
     @styleRule
-    EXTRA_LARGE = {
-        margin: Device.isMobileDevice() ? "0 2px" : "0% 1%",
-    };
+    LARGE = this.getSizeStyle(2, 3);
+
+    @styleRule
+    EXTRA_LARGE = this.getSizeStyle(2, 1);
 
     Size(size) {
         for (let type of Object.keys(Size)) {
@@ -473,7 +486,12 @@ class Utils extends StyleSheet {
     @styleRule
     fullHeight = {
         height: "100%",
-    }
+    };
+
+    @styleRule
+    hidden = {
+        display: "hidden"
+    };
 }
 
 
