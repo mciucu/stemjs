@@ -1,7 +1,6 @@
-// TODO: not sure is this needs to actually be *.jsx
 import {UI} from "./UIBase";
 import {dashCase} from "../base/Utils";
-import {NodeAttributes} from "./NodeAttributes";
+import {NodeAttributes, defaultToPixelsAttributes} from "./NodeAttributes";
 
 // TODO: should this be actually better done throught the dynamic CSS API, without doing through the DOM?
 class StyleInstance extends UI.TextElement {
@@ -29,9 +28,17 @@ class StyleInstance extends UI.TextElement {
             if (value == null) {
                 continue;
             }
+
+            key = dashCase(key);
+
+            // If it's a size property, and the value is a number, assume it's in pixels
+            if ((value instanceof Number || typeof value === "number") &&
+                value != 0 && defaultToPixelsAttributes.has(key)) {
+                value = value + "px";
+            }
+
             // TODO: if key starts with vendor-, replace it with the browser specific one (and the plain one)
-            // TODO: on some attributes, do we want to automatically add a px suffix?
-            str += dashCase(key) + ":" + value + ";";
+            str += key + ":" + value + ";";
         }
         return str + "}";
     }

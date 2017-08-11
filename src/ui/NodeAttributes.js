@@ -1,7 +1,45 @@
-import {setObjectPrototype} from "../base/Utils";
+import {dashCase, setObjectPrototype} from "../base/Utils";
 
-// TODO: this method should be made static in NodeAttributes probably
-function CreateNodeAttributesMap(oldAttributesMap, allowedAttributesArray) {
+export const defaultToPixelsAttributes = new Set([
+    "border-bottom-width",
+    "border-left-width",
+    "border-right-width",
+    "border-top-width",
+    "border-width",
+    "bottom",
+    "font-size",
+    "font-stretch",
+    "height",
+    "layer-grid-char",
+    "layer-grid-char-spacing",
+    "layer-grid-line",
+    "left",
+    "letter-spacing",
+    "line-height",
+    "margin",
+    "margin-bottom",
+    "margin-left",
+    "margin-right",
+    "margin-top",
+    "marker-offset",
+    "max-height",
+    "max-width",
+    "min-height",
+    "min-width",
+    "outline-width",
+    "padding",
+    "padding-bottom",
+    "padding-left",
+    "padding-right",
+    "padding-top",
+    "right",
+    "size",
+    "top",
+    "width",
+    "word-spacing",
+]);
+
+export function CreateNodeAttributesMap(oldAttributesMap, allowedAttributesArray) {
     let allowedAttributesMap = new Map(oldAttributesMap);
 
     for (let attribute of allowedAttributesArray || []) {
@@ -27,7 +65,9 @@ function CreateNodeAttributesMap(oldAttributesMap, allowedAttributesArray) {
 }
 
 // A class that can be used to work with a className field as with a Set, while having a toString() usable in the DOM
-class ClassNameSet extends Set {
+// It's used when a UI object has a className attribute, that a string, but we still want it to be modified if we call addClass and removeClass
+// In that case, the string gets converted to a ClassNameSet
+export class ClassNameSet extends Set {
     // Can't use classic super in constructor since Set is build-in type and will throw an error
     // TODO: see if could still be made to have this as constructor
     static create(className) {
@@ -40,7 +80,7 @@ class ClassNameSet extends Set {
     }
 }
 
-class NodeAttributes {
+export class NodeAttributes {
     constructor(obj) {
         Object.assign(this, obj);
         // className and style should be deep copied to be modifiable, the others shallow copied
@@ -81,6 +121,10 @@ class NodeAttributes {
         this.style[key] = value;
         if (typeof value === "function") {
             value = value();
+        }
+        if ((value instanceof Number || typeof value === "number") &&
+            value != 0 && defaultToPixelsAttributes.has(dashCase(key))) {
+            value = value + "px";
         }
         if (node && node.style[key] !== value) {
             node.style[key] = value;
@@ -263,5 +307,3 @@ NodeAttributes.defaultAttributesMap = CreateNodeAttributesMap([
     ["width"],
     //["value"], // Value is intentionally disabled
 ]);
-
-export {CreateNodeAttributesMap, NodeAttributes};
