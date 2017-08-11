@@ -4,7 +4,7 @@ import {BasicLevelStyleSheet, GlobalStyle} from "./GlobalStyle";
 import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";
 import {styleRule} from "../decorators/Style";
-import {Level} from "ui/Constants";
+import {Level, Size} from "ui/Constants";
 
 export function cardPanelColorToStyle(color) {
     let colors = buildColors(color);
@@ -15,18 +15,24 @@ export function cardPanelColorToStyle(color) {
 
 export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) {
     @styleRule
-    heading = [{
+    DEFAULT = [{
         display: "flex",
-        justifyContent: "center",
         alignItems: "center",
-        height: this.themeProperties.BASE_HEADER_HEIGHT,
-        textTransform: this.themeProperties.BASE_HEADER_TEXT_TRANSFORM,
-        // padding: "0.8em 1.2em",
-        // borderBottomWidth: "0.08em",
-        // borderBottomStyle: "solid",
+        flex: "1",
+        height: this.themeProperties.CARD_PANEL_HEADER_HEIGHT,
+        textTransform: this.themeProperties.CARD_PANEL_TEXT_TRANSFORM,
+        paddingLeft: this.themeProperties.CARD_PANEL_HEADING_PADDING,
+        paddingRight: this.themeProperties.CARD_PANEL_HEADING_PADDING,
     },
         cardPanelHeaderColorToStyle(this.themeProperties.COLOR_PLAIN)
     ];
+
+    @styleRule
+    LARGE = {
+        height: this.themeProperties.CARD_PANEL_HEADER_HEIGHT_LARGE,
+        paddingLeft: this.themeProperties.CARD_PANEL_HEADING_PADDING_LARGE,
+        paddingRight: this.themeProperties.CARD_PANEL_HEADING_PADDING_LARGE,
+    };
 
     @styleRule
     body = {
@@ -44,8 +50,9 @@ export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) 
     ];
 
     @styleRule
-    bodyCentered = {
-        textAlign: "center",
+    centered = {
+        display: "flex",
+        justifyContent: "center",
     };
 }
 
@@ -68,9 +75,6 @@ class CardPanel extends SimpleStyledElement {
         if (this.getLevel()) {
             attr.addClass(this.styleSheet.Level(this.getLevel()));
         }
-        if (this.getSize()) {
-            attr.addClass(this.styleSheet.Size(this.getSize()).panel);
-        }
     }
 
     getLevel() {
@@ -85,18 +89,56 @@ class CardPanel extends SimpleStyledElement {
         return CardPanelHeaderStyle.getInstance();
     }
 
-    render() {
-        let headingLevel = this.getHeaderStyleSheet().Level(this.getLevel());
+    getDefaultOptions() {
+        return {
+            headingCentered: true,
+            bodyCentered: false,
+        };
+    }
 
-        const {bodyCentered} = this.options;
-        let bodyClassName = this.styleSheet.body;
-        if (bodyCentered) {
-            bodyClassName = bodyClassName + this.styleSheet.bodyCentered;
+    getHeadingClasses() {
+        let headingClasses = "";
+        const headingLevel = this.getHeaderStyleSheet().Level(this.getLevel()),
+            {headingCentered} = this.options;
+
+        if (headingLevel) {
+            headingClasses = headingClasses + headingLevel;
         }
 
+        headingClasses = headingClasses + this.styleSheet.DEFAULT;
+        if (this.getSize()) {
+            headingClasses = headingClasses + this.styleSheet.Size(this.getSize());
+        }
+
+        if (headingCentered) {
+            headingClasses = headingClasses + this.styleSheet.centered;
+        }
+
+        return headingClasses;
+    }
+
+    getBodyClasses() {
+        const {bodyCentered} = this.options;
+
+        let bodyClasses = this.styleSheet.body;
+        if (bodyCentered) {
+            bodyClasses = bodyClasses + this.styleSheet.centered;
+        }
+
+        return bodyClasses;
+    }
+
+    render() {
+        const bodyClasses = this.getBodyClasses(),
+              headingClasses = this.getHeadingClasses();
+
         return [
-            <div className={`${this.styleSheet.heading} ${headingLevel}`}>{this.getTitle()}</div>,
-            <div className={bodyClassName} style={this.options.bodyStyle}>{this.getGivenChildren()}</div>,
+            <div className={headingClasses}>
+                {this.getTitle()}
+            </div>,
+            <div className={bodyClasses} style={this.options.bodyStyle}>
+                {this.getGivenChildren()}
+            </div>,
         ];
     }
 }

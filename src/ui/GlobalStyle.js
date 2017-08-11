@@ -21,25 +21,33 @@ Theme.Global.setProperties({
     COLOR_FACEBOOK: "#3b5998",
     COLOR_DARK: "#202e3e",
 
-    BASE_BORDER_RADIUS: "0",
-    BASE_BOX_SHADOW: "0px 0px 10px rgb(160, 162, 168)",
-    BASE_BORDER_WIDTH: "0",
-    BASE_BORDER_STYLE: "solid",
-    BASE_HEADER_HEIGHT: "30px",
-    BASE_HEADER_TEXT_TRANSFORM: "uppercase",
-
-    ROW_LIST_ROW_HEIGHT: "30px",
-    ROW_LIST_ROW_PADDING: "10px",
-
-    FONT_FAMILY_SANS_SERIF: "'Segoe UI', 'Lucida Sans Unicode', 'Helvetica Neue', Helvetica, Arial, sans-serif",
-    FONT_FAMILY_SERIF: "serif",
-    FONT_FAMILY_MONOSPACE: "'Source Code Pro', 'Monaco', 'Consolas', monospace",
-
     FONT_SIZE_EXTRA_SMALL: "9px",
     FONT_SIZE_SMALL: "10px",
     FONT_SIZE_DEFAULT: "12px",
     FONT_SIZE_LARGE: "17px",
     FONT_SIZE_EXTRA_LARGE: "21px",
+
+    BASE_BORDER_RADIUS: 0,
+    BASE_BOX_SHADOW: "0px 0px 10px rgb(160, 162, 168)",
+    BASE_BORDER_WIDTH: 0,
+    BASE_BORDER_STYLE: "solid",
+    BASE_BORDER_COLOR: "#ddd",
+
+    CARD_PANEL_HEADER_HEIGHT: 30,
+    CARD_PANEL_HEADER_HEIGHT_LARGE: 40,
+    CARD_PANEL_HEADING_PADDING: 10,
+    CARD_PANEL_HEADING_PADDING_LARGE: 20,
+    CARD_PANEL_TEXT_TRANSFORM: "uppercase",
+
+    ROW_LIST_ROW_HEIGHT: 30,
+    ROW_LIST_ROW_HEIGHT_LARGE: 40,
+    ROW_LIST_ROW_PADDING: 10,
+    ROW_LIST_ROW_PADDING_LARGE: 20,
+    ROW_LIST_ROW_BORDER_WIDTH: 1,
+
+    FONT_FAMILY_SANS_SERIF: "'Segoe UI', 'Lucida Sans Unicode', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+    FONT_FAMILY_SERIF: "serif",
+    FONT_FAMILY_MONOSPACE: "'Source Code Pro', 'Monaco', 'Consolas', monospace",
 
     NAV_MANAGER_NAVBAR_HEIGHT: 50,
     MAIN_CONTAINER_EXTRA_PADDING_TOP_DESKTOP: 10,
@@ -97,10 +105,33 @@ class RadioButtonGroupStyle extends StyleSheet {
     };
 }
 
-export const BasicLevelStyleSheet = (colorToStyleFunction) => class BasicLevelStyleClass extends StyleSheet {
+export class BasicLevelSizeStyleSheet extends StyleSheet {
+    Level(level) {
+        if (this[level]) {
+            return this[level];
+        }
+        for (let type of Object.keys(Level)) {
+            if (level == Level[type]) {
+                return this[type];
+            }
+        }
+        return "";
+    }
+
+    Size(size) {
+        for (let type of Object.keys(Size)) {
+            if (size == Size[type]) {
+                return this[type];
+            }
+        }
+        return "";
+    }
+}
+
+export const BasicLevelStyleSheet = (colorToStyleFunction) => class BasicLevelStyleClass extends BasicLevelSizeStyleSheet {
     colorStyleRule(color, textColor) {
         if (!textColor) {
-            textColor = this.themeProperties.COLOR_TEXT || "black";
+            textColor = this.themeProperties.COLOR_DARK;
         }
         return colorToStyleFunction(color, textColor);
     }
@@ -122,27 +153,6 @@ export const BasicLevelStyleSheet = (colorToStyleFunction) => class BasicLevelSt
 
     @styleRule
     DANGER = this.colorStyleRule(this.themeProperties.COLOR_DANGER);
-
-    Level(level) {
-        if (this[level]) {
-            return this[level];
-        }
-        for (let type of Object.keys(Level)) {
-            if (level == Level[type]) {
-                return this[type];
-            }
-        }
-        return "";
-    }
-
-    Size(size) {
-        for (let type of Object.keys(Size)) {
-            if (size == Size[type]) {
-                return this[type];
-            }
-        }
-        return "";
-    }
 };
 
 

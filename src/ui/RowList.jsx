@@ -1,15 +1,18 @@
 import {UI, registerStyle} from "UI";
 import {StyleSheet, styleRule} from "Style";
+import {Size} from "ui/Constants";
+import {SimpleStyledElement} from "./Bootstrap3";
+import {BasicLevelSizeStyleSheet} from "./GlobalStyle";
 
 
-class RowListStyle extends StyleSheet {
+class RowListStyle extends BasicLevelSizeStyleSheet {
     @styleRule
     rowList = {
         width: "100%",
     };
 
     @styleRule
-    row = {
+    DEFAULT = {
         display: "flex",
         alignItems: "center",
         width: "100%",
@@ -22,14 +25,28 @@ class RowListStyle extends StyleSheet {
     };
 
     @styleRule
-    oddRow = {
+    LARGE = {
+        height: this.themeProperties.ROW_LIST_ROW_HEIGHT_LARGE,
+        paddingLeft: this.themeProperties.ROW_LIST_ROW_PADDING_LARGE,
+        paddingRight: this.themeProperties.ROW_LIST_ROW_PADDING_LARGE,
+    };
+
+    @styleRule
+    alternativeColorsOddRow = {
         backgroundColor: this.themeProperties.COLOR_PLAIN_ALTERNATIVE,
+    };
+
+    @styleRule
+    noAlternativeColors = {
+        borderTopWidth: this.themeProperties.ROW_LIST_ROW_BORDER_WIDTH,
+        borderTopStyle: this.themeProperties.BASE_BORDER_STYLE,
+        borderTopColor: this.themeProperties.BASE_BORDER_COLOR,
     };
 }
 
 
 @registerStyle(RowListStyle)
-export class RowList extends UI.Element {
+export class RowList extends SimpleStyledElement {
     extraNodeAttributes(attr) {
         attr.addClass(this.styleSheet.rowList);
     }
@@ -40,16 +57,28 @@ export class RowList extends UI.Element {
         }
     }
 
+    getRowClasses(index) {
+        let rowClasses = this.styleSheet.DEFAULT;
+        if (this.getSize()) {
+            rowClasses = rowClasses + this.styleSheet.Size(this.getSize());
+        }
+
+        const {alternateColors} = this.options;
+
+        if (alternateColors && index % 2 === 1) {
+            rowClasses = rowClasses + this.styleSheet.alternativeColorsOddRow;
+        } else if (!alternateColors && index > 0) {
+            rowClasses = rowClasses + this.styleSheet.noAlternativeColors;
+        }
+
+        return rowClasses;
+    }
+
     render() {
-        let {rows, rowParser, alternateColors} = this.options;
+        const {rows, rowParser} = this.options;
 
         return rows.map((row, index) => {
-            let parityClass = "";
-            if (alternateColors && index % 2 === 1) {
-                parityClass = this.styleSheet.oddRow;
-            }
-
-            return <div className={this.styleSheet.row + parityClass}>
+            return <div className={this.getRowClasses(index)}>
                 {rowParser(row)}
             </div>
         });
