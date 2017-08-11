@@ -1,9 +1,8 @@
 import {styleRule, StyleSet} from "../Style";
 import {Device} from "../../base/Device";
+import {Theme} from "../style/Theme";
 
 class GlobalContainerStyle extends StyleSet {
-    static NAVBAR_HEIGHT = 50;
-
     constructor() {
         super({updateOnResize: Device.isMobileDevice()});
     }
@@ -15,8 +14,14 @@ class GlobalContainerStyle extends StyleSet {
         ">*": {
             height: "100%",
             width: "100%",
-            paddingTop: `${this.constructor.NAVBAR_HEIGHT + (Device.isMobileDevice() ? 3 : 10)}px`,
-            paddingBottom: `${Device.isMobileDevice() ? 25 : 10}px`,
+            paddingTop: this.themeProperties.NAV_MANAGER_NAVBAR_HEIGHT +
+                (Device.isMobileDevice() ? this.themeProperties.MAIN_CONTAINER_EXTRA_PADDING_TOP_DESKTOP :
+                                           this.themeProperties.MAIN_CONTAINER_EXTRA_PADDING_TOP_MOBILE
+                ),
+            paddingBottom:
+                (Device.isMobileDevice() ? this.themeProperties.MAIN_CONTAINER_EXTRA_PADDING_BOTTOM_DESKTOP :
+                                           this.themeProperties.MAIN_CONTAINER_EXTRA_PADDING_BOTTOM_MOBILE
+                ),
             overflow: Device.isMobileDevice() ? "" : "auto",
         }
     };
