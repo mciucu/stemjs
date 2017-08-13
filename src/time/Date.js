@@ -88,7 +88,10 @@ class StemDate extends BaseDate {
         timeUnit = TimeUnit.toTimeUnit(timeUnit);
         date = this.constructor.toDate(date);
         let diff = this.diff(date);
-        if (timeUnit.isAbsolute() && diff > +timeUnit) {
+        if (diff >= 2 * timeUnit) {
+            // If the distance between the two dates is more than 2 standard lengths of the time unit
+            // This would be wrong if you would have time unit that can sometimes last more than twice their canonical duration
+            // Works correctly for all implemented time units
             return false;
         }
         return this.get(timeUnit) == date.get(timeUnit);
