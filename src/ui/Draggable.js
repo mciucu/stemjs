@@ -1,10 +1,5 @@
-import {lazyInit} from "../decorators/Decorators";
-
 let Draggable = (BaseClass) => class Draggable extends BaseClass {
-    @lazyInit
     _clickCallbacks = new Map();
-
-    @lazyInit
     _clickDragListeners = new Map();
 
     addClickListener(callback) {
