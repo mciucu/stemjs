@@ -1,17 +1,32 @@
-import {StyleSet, styleRule} from "../Style";
+import {StyleSheet, styleRule} from "../Style";
+import {darken, enhance} from "ui/Color";
 
 
-class NavStyle extends StyleSet {
+class NavStyle extends StyleSheet {
     // Custom variables
-    colors = {
-        boxShadow: "#353535",
-        sidepanelBackground: "#202e3e",
-        sidepanelHover: "#364251",
-        navbarBackground: "#1c2937",
-        navbarHover: "#323e4b",
-        hr: "#364251",
-        text: "#eee",
-    };
+    getColors() {
+        if (this.colors) {
+            return this.colors;
+        }
+        const themeProperties = this.themeProperties;
+
+        const navManagerColor = themeProperties.COLOR_PRIMARY;
+        const navBarColor = themeProperties.NAV_MANAGER_COLOR_NAV_BAR || navManagerColor;
+        const sidePanelColor = themeProperties.NAV_MANAGER_COLOR_SIDE_PANEL || enhance(navManagerColor, 0.05);
+
+        this.colors = {
+            boxShadowNavManager: themeProperties.NAV_MANAGER_BOX_SHADOW_NAV_MANAGER,
+            boxShadowSidePanel: themeProperties.NAV_MANAGER_BOX_SHADOW_SIDE_PANEL,
+            sidepanelBackground: themeProperties.NAV_MANAGER_SIDE_PANEL_BACKGROUND_COLOR || sidePanelColor,
+            sidepanelHover: themeProperties.NAV_MANAGER_SIDE_PANEL_HOVER_COLOR || enhance(sidePanelColor, 0.1),
+            navbarBackground: themeProperties.NAV_MANAGER_NAV_BAR_BACKGROUND_COLOR || navBarColor,
+            navbarHover: themeProperties.NAV_MANAGER_NAV_BAR_HOVER_COLOR || enhance(navBarColor, 0.1),
+            hr: themeProperties.NAV_MANAGER_HR_COLOR || enhance(sidePanelColor, 0.15),
+            text: themeProperties.NAV_MANAGER_TEXT_COLOR || enhance(navManagerColor, 1),
+        };
+
+        return this.colors;
+    }
 
     dimensions = {
         collapseArrowWidth: "20px",
@@ -28,7 +43,7 @@ class NavStyle extends StyleSet {
 
     // Icons
     icon = {
-        color: () => this.colors.text,
+        color: () => this.getColors().text,
         lineHeight: () => this.dimensions.navbarHeight,
         height: () => this.dimensions.navbarHeight,
         width: () => this.dimensions.navbarHeight,
@@ -36,7 +51,7 @@ class NavStyle extends StyleSet {
         cursor: "pointer",
         textAlign: "center",
         ":hover": {
-            backgroundColor: () => this.colors.navbarHover,
+            backgroundColor: () => this.getColors().navbarHover,
         }
     };
 
@@ -58,24 +73,24 @@ class NavStyle extends StyleSet {
     @styleRule
     navLinkElement = {
         display: "block",
-        color: this.colors.text,
+        color: this.getColors().text,
         textDecoration: "none",
         listStyleType: "none",
         ":hover": {
-            backgroundColor: this.colors.sidepanelHover,
-            color: this.colors.text,
+            backgroundColor: this.getColors().sidepanelHover,
+            color: this.getColors().text,
             textDecoration: "none",
         },
         ":focus": {
-            color: this.colors.text,
+            color: this.getColors().text,
             textDecoration: "none",
         },
         ":active": {
-            color: this.colors.text,
+            color: this.getColors().text,
             textDecoration: "none",
         },
         ":visited": {
-            color: this.colors.text,
+            color: this.getColors().text,
             textDecoration: "none",
         },
     };
@@ -88,8 +103,8 @@ class NavStyle extends StyleSet {
         height: this.dimensions.navbarHeight,
         lineHeight: this.dimensions.navbarHeight,
         width: "100%",
-        backgroundColor: this.colors.navbarBackground,
-        boxShadow: "0px 0px 10px #000",
+        backgroundColor: this.getColors().navbarBackground,
+        boxShadow: this.getColors().boxShadowNavManager,
         zIndex: "9999",
         position: "fixed",
     };
@@ -98,8 +113,8 @@ class NavStyle extends StyleSet {
     // Navbar elements
     @styleRule
     navElementHorizontal = {
-        color: this.colors.text,
-        backgroundColor: this.colors.navbarBackground,
+        color: this.getColors().text,
+        backgroundColor: this.getColors().navbarBackground,
         listStyleType: "none",
         cursor: "pointer",
         ">:nth-child(2)": {
@@ -117,10 +132,10 @@ class NavStyle extends StyleSet {
     navElementValueHorizontal = [
         this.navElement, {
             padding: "0 0.7em",
-            color: this.colors.text,
+            color: this.getColors().text,
             width: "100%",
             ":hover": {
-                backgroundColor: this.colors.navbarHover,
+                backgroundColor: this.getColors().navbarHover,
             },
         }
     ];
@@ -139,11 +154,11 @@ class NavStyle extends StyleSet {
         top: "0",
         bottom: "0",
         height: "100%",
-        backgroundColor: () => this.colors.sidepanelBackground,
+        backgroundColor: () => this.getColors().sidepanelBackground,
         overflow: "hidden",
         position: "fixed",
         zIndex: "3000",
-        boxShadow: () => "0px 0px 10px " + this.colors.boxShadow,
+        boxShadow: () => this.getColors().boxShadowSidePanel,
         width: () => this.dimensions.sidepanelWidth,
         transitionDuration: () => this.dimensions.sidepanelTransitionDuration,
     };
@@ -168,7 +183,7 @@ class NavStyle extends StyleSet {
     // Sidepanel elements
     @styleRule
     navElementVertical = {
-        color: this.colors.text,
+        color: this.getColors().text,
         cursor: "pointer",
         listStyleType: "none",
         minHeight: this.dimensions.sidepanelElementHeight,
@@ -188,14 +203,14 @@ class NavStyle extends StyleSet {
     @styleRule
     navElementValueVertical = [
         this.navElement, {
-            color: this.colors.text,
+            color: this.getColors().text,
             zIndex: "1",
             position: "relative",
             width: "100%",
             height: this.dimensions.sidepanelElementHeight,
             lineHeight: this.dimensions.sidepanelElementHeight,
             ":hover": {
-                backgroundColor: this.colors.sidepanelHover,
+                backgroundColor: this.getColors().sidepanelHover,
             },
         }
     ];
@@ -209,7 +224,7 @@ class NavStyle extends StyleSet {
 
     @styleRule
     navCollapseElement = {
-        color: this.colors.text,
+        color: this.getColors().text,
         textAlign: "initial",
         lineHeight: this.dimensions.sidepanelElementHeight,
     };
@@ -226,7 +241,7 @@ class NavStyle extends StyleSet {
     @styleRule
     hrStyle = {
         margin: "10px 5%",
-        borderTop: () => "2px solid " + this.colors.hr,
+        borderTop: () => "2px solid " + this.getColors().hr,
     };
 
 

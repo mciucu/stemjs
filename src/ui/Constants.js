@@ -15,11 +15,11 @@ export const Level = {
     DEFAULT: "default",
     INFO: "info",
     PRIMARY: "primary",
+    SECONDARY: "secondary",
     SUCCESS: "success",
     WARNING: "warning",
     DANGER: "danger",
     ERROR: "danger",
-    DARK: "dark",
 };
 
 export const Size = {

@@ -278,6 +278,14 @@ function darken(color, amount) {
     }
 };
 
+function enhance(color, amount) {
+    if (Color.isLight(color)) {
+        return darken(color, amount);
+    } else {
+        return lighten(color, amount);
+    }
+}
+
 function buildColors(color, dark=true) {
     let colors = [];
     let darkenPercents;
@@ -294,4 +302,4 @@ function buildColors(color, dark=true) {
     return colors;
 }
 
-export {Color, lighten, darken, buildColors};
+export {Color, lighten, darken, enhance, buildColors};

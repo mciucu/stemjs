@@ -1,6 +1,6 @@
 import {StyleSheet} from "./Style";
 import {styleRule} from "../decorators/Style";
-import {buildColors} from "./Color";
+import {buildColors, enhance} from "./Color";
 import {Device} from "../base/Device";
 import {Orientation, Level, Size} from "./Constants";
 import {Theme} from "style/Theme";
@@ -13,13 +13,11 @@ Theme.Global.setProperties({
     COLOR_PLAIN_ALTERNATIVE: "#eee",
     COLOR_GRAY: "#777",
     COLOR_PRIMARY: "#337ab7",
+    COLOR_SECONDARY: "#358ba4",
     COLOR_SUCCESS: "#5cb85c",
     COLOR_INFO: "#5bc0de",
     COLOR_WARNING: "#f0ad4e",
     COLOR_DANGER: "#d9534f",
-    COLOR_GOOGLE: "#de4b39",
-    COLOR_FACEBOOK: "#3b5998",
-    COLOR_DARK: "#202e3e",
 
     FONT_SIZE_EXTRA_SMALL: "9px",
     FONT_SIZE_SMALL: "10px",
@@ -32,6 +30,8 @@ Theme.Global.setProperties({
     BASE_BORDER_WIDTH: 0,
     BASE_BORDER_STYLE: "solid",
     BASE_BORDER_COLOR: "#ddd",
+
+    BUTTON_BORDER_RADIUS: "0.2rem",
 
     CARD_PANEL_HEADER_HEIGHT: 30,
     CARD_PANEL_HEADER_HEIGHT_LARGE: 40,
@@ -50,13 +50,19 @@ Theme.Global.setProperties({
     FONT_FAMILY_MONOSPACE: "'Source Code Pro', 'Monaco', 'Consolas', monospace",
 
     NAV_MANAGER_NAVBAR_HEIGHT: 50,
+    NAV_MANAGER_BOX_SHADOW_NAV_MANAGER: "0px 0px 10px rgb(0, 0, 0)",
+    NAV_MANAGER_BOX_SHADOW_SIDE_PANEL: "0px 0px 10px #202e3e",
+    // NAV_MANAGER_SIDE_PANEL_BACKGROUND_COLOR: "#202e3e",
+    // NAV_MANAGER_SIDE_PANEL_HOVER_COLOR: "#364251",
+    // NAV_MANAGER_NAV_BAR_BACKGROUND_COLOR: "#1c2937",
+    // NAV_MANAGER_NAV_BAR_HOVER_COLOR: "#323e4b",
+    // NAV_MANAGER_HR_COLOR: "#364251",
+    // NAV_MANAGER_TEXT_COLOR: "#eee",
+
     MAIN_CONTAINER_EXTRA_PADDING_TOP_DESKTOP: 10,
     MAIN_CONTAINER_EXTRA_PADDING_TOP_MOBILE: 25,
     MAIN_CONTAINER_EXTRA_PADDING_BOTTOM_DESKTOP: 10,
     MAIN_CONTAINER_EXTRA_PADDING_BOTTOM_MOBILE: 25,
-
-    CSA_PLAYER_COLOR_FOCUSED: "#202e3e",
-    CSA_PLAYER_COLOR_UNFOCUSED: "#555",
 });
 
 class ButtonGroupStyle extends StyleSheet {
@@ -134,16 +140,19 @@ export class BasicLevelSizeStyleSheet extends StyleSheet {
 export const BasicLevelStyleSheet = (colorToStyleFunction) => class BasicLevelStyleClass extends BasicLevelSizeStyleSheet {
     colorStyleRule(color, textColor) {
         if (!textColor) {
-            textColor = this.themeProperties.COLOR_DARK;
+            textColor = enhance(color, 1);
         }
         return colorToStyleFunction(color, textColor);
     }
 
     @styleRule
-    PLAIN = this.colorStyleRule(this.themeProperties.COLOR_PLAIN);
+    PRIMARY = this.colorStyleRule(this.themeProperties.COLOR_PRIMARY);
 
     @styleRule
-    PRIMARY = this.colorStyleRule(this.themeProperties.COLOR_PRIMARY);
+    SECONDARY = this.colorStyleRule(this.themeProperties.COLOR_SECONDARY);
+
+    @styleRule
+    PLAIN = this.colorStyleRule(this.themeProperties.COLOR_PLAIN);
 
     @styleRule
     SUCCESS = this.colorStyleRule(this.themeProperties.COLOR_SUCCESS);
@@ -194,7 +203,7 @@ class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
         outline: "0",
         border: "0.1em solid transparent",
         padding: "0.4em 0.8em",
-        borderRadius: this.themeProperties.BASE_BORDER_RADIUS,
+        borderRadius: this.themeProperties.BUTTON_BORDER_RADIUS || this.themeProperties.BASE_BORDER_RADIUS,
         textAlign: "center",
         whiteSpace: "nowrap",
         verticalAlign: "middle",
