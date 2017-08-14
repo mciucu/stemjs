@@ -15,12 +15,12 @@ class GlobalContainerStyle extends StyleSet {
             height: "100%",
             width: "100%",
             paddingTop: this.themeProperties.NAV_MANAGER_NAVBAR_HEIGHT +
-                (Device.isMobileDevice() ? this.themeProperties.MAIN_CONTAINER_EXTRA_PADDING_TOP_DESKTOP :
-                                           this.themeProperties.MAIN_CONTAINER_EXTRA_PADDING_TOP_MOBILE
+                (Device.isMobileDevice() ? this.themeProperties.MAIN_CONTAINER_EXTRA_PADDING_TOP_MOBILE :
+                                           this.themeProperties.MAIN_CONTAINER_EXTRA_PADDING_TOP_DESKTOP
                 ),
             paddingBottom:
-                (Device.isMobileDevice() ? this.themeProperties.MAIN_CONTAINER_EXTRA_PADDING_BOTTOM_DESKTOP :
-                                           this.themeProperties.MAIN_CONTAINER_EXTRA_PADDING_BOTTOM_MOBILE
+                (Device.isMobileDevice() ? this.themeProperties.MAIN_CONTAINER_EXTRA_PADDING_BOTTOM_MOBILE :
+                                           this.themeProperties.MAIN_CONTAINER_EXTRA_PADDING_BOTTOM_DESKTOP
                 ),
             overflow: Device.isMobileDevice() ? "" : "auto",
         }

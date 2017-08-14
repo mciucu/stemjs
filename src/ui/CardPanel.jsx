@@ -18,7 +18,7 @@ export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) 
     DEFAULT = [{
         display: "flex",
         alignItems: "center",
-        flex: "1",
+        width: "100%",
         height: this.themeProperties.CARD_PANEL_HEADER_HEIGHT,
         textTransform: this.themeProperties.CARD_PANEL_TEXT_TRANSFORM,
         paddingLeft: this.themeProperties.CARD_PANEL_HEADING_PADDING,
@@ -133,10 +133,10 @@ class CardPanel extends SimpleStyledElement {
               headingClasses = this.getHeadingClasses();
 
         return [
-            <div className={headingClasses}>
+            <div ref="panelTitle" className={headingClasses}>
                 {this.getTitle()}
             </div>,
-            <div className={bodyClasses} style={this.options.bodyStyle}>
+            <div ref="panelBody" className={bodyClasses} style={this.options.bodyStyle}>
                 {this.getGivenChildren()}
             </div>,
         ];
