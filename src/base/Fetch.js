@@ -83,7 +83,7 @@ class XHRPromise {
 
         this.promise = new Promise((resolve, reject) => {
             this.promiseResolve = resolve;
-            this.promiseReject = reject;
+            this.promiseReject = reject || this.promiseReject;
 
             xhr.onload = () => {
                 let headers = parseHeaders(xhr);
@@ -144,15 +144,28 @@ class XHRPromise {
                 });
             }
         });
-
-        this.request = request;
     }
 
     send(body) {
         this.getXHR().send(body);
     }
 
+    getPostProcessors() {
+        return this.options.postProcessors || fetch.defaultPostprocessors;
+    }
+
     resolve(payload) {
+        const postProcessors = this.getPostProcessors();
+
+        for (const postProcessor of postProcessors) {
+            try {
+                payload = postProcessor(payload);
+            } catch (exception) {
+                this.reject(exception);
+                return;
+            }
+        }
+
         if (this.options.onSuccess) {
             this.options.onSuccess(...arguments);
         } else {
@@ -297,6 +310,7 @@ function fetch(input, ...args) {
 }
 
 fetch.defaultPreprocessors = [jQueryCompatibilityPreprocessor];
+fetch.defaultPostprocessors = [];
 
 fetch.polyfill = true;
 
