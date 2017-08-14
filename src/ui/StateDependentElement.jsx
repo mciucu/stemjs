@@ -1,7 +1,14 @@
-import {UI} from "./UI";
 import {DelayedElement} from "./DelayedElement";
 import {Ajax} from "base/Ajax";
 import {GlobalState} from "state/State";
+
+// You can configure the loading/error states by defining the "renderLoading" and "renderError" attributes of the
+// function somewhere globally in your app.
+// Example:
+// StateDependentElement.renderLoading = "Loading...";
+// or
+// StateDependentElement.renderLoading = () => <MyCustomLoadingAnimation />
+// StateDependentElement.renderError = (error) => <MyCustomErrorMessageClass error={error} />
 
 function StateDependentElement(BaseClass) {
     class StateDependentElementClass extends DelayedElement(BaseClass) {
@@ -27,20 +34,45 @@ function StateDependentElement(BaseClass) {
         }
 
         renderNotLoaded() {
-            if (typeof window.loadingAnimation === "function") {
-                return window.loadingAnimation();
+            let renderLoading = StateDependentElement.renderLoading;
+            if (typeof renderLoading === "function") {
+                renderLoading = renderLoading();
             }
-            return "Loading...";
+            return renderLoading;
+        }
+
+        setError(error) {
+            this.options.error = error;
+        }
+
+        renderError() {
+            let renderError = StateDependentElement.renderError;
+            if (typeof renderError === "function") {
+                renderError = renderError(this.options.error);
+            }
+            return renderError;
+        }
+
+        renderLoaded() {
+            if (this.options.error) {
+                return this.renderError();
+            }
+            return super.renderLoaded();
         }
 
         beforeRedrawNotLoaded() {
             Ajax.getJSON(this.getAjaxUrl(), this.getAjaxRequest()).then(
                 (data) => {
-                    this.importState(data);
+                    if (data.hasOwnProperty("error")) {
+                        this.setError(data.error);
+                    } else {
+                        this.importState(data);
+                    }
                     this.setLoaded();
                 },
                 (error) => {
-                    console.error(error);
+                    this.setError(error);
+                    this.setLoaded();
                 }
             );
         }
