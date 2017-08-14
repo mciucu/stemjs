@@ -150,16 +150,18 @@ class XHRPromise {
         this.getXHR().send(body);
     }
 
-    getPostProcessors() {
-        return this.options.postProcessors || fetch.defaultPostprocessors;
+    getPostprocessors() {
+        return this.options.postprocessors || fetch.defaultPostprocessors;
+    }
+
+    getErrorPostprocessors() {
+        return this.options.errorPostprocessors || fetch.defaultErrorPostprocessors;
     }
 
     resolve(payload) {
-        const postProcessors = this.getPostProcessors();
-
-        for (const postProcessor of postProcessors) {
+        for (const postprocessor of this.getPostprocessors()) {
             try {
-                payload = postProcessor(payload);
+                payload = postprocessor(payload);
             } catch (exception) {
                 this.reject(exception);
                 return;
@@ -177,6 +179,10 @@ class XHRPromise {
     }
 
     reject(error) {
+        for (const postprocessor of this.getErrorPostprocessors()) {
+            error = postprocessor(error);
+        }
+
         if (this.options.onError) {
             this.options.onError(...arguments);
         } else {
@@ -312,6 +318,7 @@ function fetch(input, ...args) {
 
 fetch.defaultPreprocessors = [jQueryCompatibilityPreprocessor];
 fetch.defaultPostprocessors = [];
+fetch.defaultErrorPostprocessors = [];
 
 fetch.polyfill = true;
 
