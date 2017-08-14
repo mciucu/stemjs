@@ -1,4 +1,5 @@
-import {StyleSet, styleRule} from "../Style";
+import {StyleSet, styleRule, styleRuleInherit} from "../Style";
+import {CardPanelStyle} from "../CardPanel";
 
 class CollapsibleStyle extends StyleSet {
     transitionDuration = 0.4;
@@ -20,7 +21,15 @@ class CollapsibleStyle extends StyleSet {
 }
 
 
-class CollapsiblePanelStyle extends StyleSet {
+class CollapsiblePanelStyle extends CardPanelStyle {
+    @styleRuleInherit
+    panel = {
+        boxShadow: null,
+        borderWidth: "1px",
+        borderColor: "#ddd !important",
+        borderRadius: "3px",
+    };
+
     @styleRule
     heading = {
         padding: "10px 15px",

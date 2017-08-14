@@ -2,14 +2,10 @@ import {UI} from "../UIBase";
 import {CollapsibleMixin} from "./CollapsibleMixin";
 import {CardPanel} from "../CardPanel";
 import {CollapsiblePanelStyle} from "./Style";
+import {registerStyle} from "../style/Theme";
 
+@registerStyle(CollapsiblePanelStyle)
 class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
-    static styleSet = new CollapsiblePanelStyle();
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
     toggle() {
         if (this.options.collapsed) {
             this.expand();
@@ -20,13 +16,13 @@ class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
 
     expand() {
         super.expand(this.contentArea);
-        this.toggleButton.removeClass(this.getStyleSet().collapsedButton);
+        this.toggleButton.removeClass(this.styleSheet.collapsedButton);
     }
 
     collapse() {
         super.collapse(this.contentArea);
         setTimeout(() => {
-            this.toggleButton.addClass(this.getStyleSet().collapsedButton);
+            this.toggleButton.addClass(this.styleSheet.collapsedButton);
         }, this.getCollapsibleStyleSet().transitionDuration * 700);
     }
 
@@ -42,8 +38,8 @@ class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
         let contentStyle = {};
 
         if (this.options.collapsed) {
-            collapsedHeadingClass = this.getStyleSet().collapsedButton;
-            collapsedPanelClass = this.getCollapsibleStyleSet().collapsed;
+            collapsedHeadingClass = this.styleSheet.collapsedButton;
+            collapsedPanelClass = this.styleSheet.collapsed;
             hiddenClass = "hidden";
         }
         if (!this.options.noPadding) {
@@ -52,8 +48,8 @@ class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
             };
         }
 
-        return [<div className={this.getStyleSet().heading}>
-                    <a ref="toggleButton"  className={`${this.getStyleSet().button} ${collapsedHeadingClass}`}
+        return [<div className={this.styleSheet.heading}>
+                    <a ref="toggleButton"  className={`${this.styleSheet.button} ${collapsedHeadingClass}`}
                         onClick={() => this.toggle()}>
                         {this.getTitle()}
                     </a>
