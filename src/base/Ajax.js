@@ -1,12 +1,12 @@
 import {fetch} from "./Fetch";
 
 let Ajax = {
-    fetch() {
-        const xhrPromise = fetch(...arguments);
-        if (this.defaultErrorHandler) {
-            xhrPromise.promiseReject = this.defaulErrorHandler;
+    fetch(request, ...args) {
+        let baseOptions = {};
+        if (!request.errorHandler) {
+            baseOptions.errorHandler = this.defaultErrorHandler;
         }
-        return xhrPromise;
+        return fetch(request, baseOptions, ...args);
     },
     request() {
         return this.fetch(...arguments)

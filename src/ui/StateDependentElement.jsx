@@ -63,11 +63,7 @@ function StateDependentElement(BaseClass) {
         beforeRedrawNotLoaded() {
             Ajax.getJSON(this.getAjaxUrl(), this.getAjaxRequest()).then(
                 (data) => {
-                    if (data.hasOwnProperty("error")) {
-                        this.setError(data.error);
-                    } else {
-                        this.importState(data);
-                    }
+                    this.importState(data);
                     this.setLoaded();
                 },
                 (error) => {

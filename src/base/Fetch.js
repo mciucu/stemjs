@@ -83,7 +83,7 @@ class XHRPromise {
 
         this.promise = new Promise((resolve, reject) => {
             this.promiseResolve = resolve;
-            this.promiseReject = reject || this.promiseReject;
+            this.promiseReject = reject;
 
             xhr.onload = () => {
                 let headers = parseHeaders(xhr);
@@ -188,8 +188,9 @@ class XHRPromise {
     }
 
     // TODO: next 2 functions should throw an exception if you have onSuccess/onError
-    then() {
-        return this.getPromise().then(...arguments);
+    then(onResolve, onReject) {
+        onReject = onReject || this.options.errorHandler;
+        return this.getPromise().then(onResolve, onReject);
     }
 
     catch() {
