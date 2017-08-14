@@ -45,15 +45,15 @@ class AjaxHandler {
         return this.post(url, {dataType: "json", data: data});
     }
 
-    addDefaultPreprocessor(preprocessor) {
+    addPreprocessor(preprocessor) {
         this.preprocessors.push(preprocessor);
     }
 
-    addDefaultPostprocessor(postprocessor) {
+    addPostprocessor(postprocessor) {
         this.postprocessors.push(postprocessor);
     }
 
-    addDefaultErrorPostprocessor(postprocessor) {
+    addErrorPostprocessor(postprocessor) {
         this.errorPostprocessors.push(postprocessor);
     }
 }
