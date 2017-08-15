@@ -186,7 +186,15 @@ class XHRPromise {
         if (this.options.onError) {
             this.options.onError(...arguments);
         } else {
-            this.promiseReject(...arguments);
+            if (this._chained) {
+                this.promiseReject(...arguments);
+            } else {
+                if (this.options.errorHandler) {
+                    this.options.errorHandler(...arguments);
+                } else {
+                    console.error("Unhandled fetch error", ...arguments);
+                }
+            }
         }
         if (this.options.onComplete) {
             this.options.onComplete();
@@ -195,11 +203,13 @@ class XHRPromise {
 
     // TODO: next 2 functions should throw an exception if you have onSuccess/onError
     then(onResolve, onReject) {
+        this._chained = true;
         onReject = onReject || this.options.errorHandler;
         return this.getPromise().then(onResolve, onReject);
     }
 
     catch() {
+        this._chained = true;
         return this.getPromise().catch(...arguments);
     }
 
