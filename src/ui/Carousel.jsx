@@ -1,10 +1,10 @@
-import {UI, getComputedStyle} from "./UI";
-import {StyleSet} from "./Style";
+import {UI, getComputedStyle, registerStyle} from "./UI";
+import {StyleSheet} from "./Style";
 import {styleRule} from "../decorators/Style";
 import {FAIcon} from "../ui/FontAwesome";
 import {Orientation} from "./Constants";
 
-class CarouselStyle extends StyleSet {
+class CarouselStyle extends StyleSheet {
     navigatorHeight = "35px";
     hoverColor = "#364251";
     transitionTime = "0.3";
@@ -56,32 +56,27 @@ class CarouselStyle extends StyleSet {
 }
 
 class CarouselNavigator extends UI.Element {
-    getStyleSet() {
-        return this.options.styleSet || this.parent.getStyleSet();
+    get styleSheet() {
+        return this.options.styleSheet || this.parent.styleSheet;
     }
 
     extraNodeAttributes(attr) {
-        attr.addClass(this.getStyleSet().navigator);
+        attr.addClass(this.styleSheet.navigator);
     }
 
     render() {
         return [
-            <FAIcon icon="angle-left" className={this.getStyleSet().navigatorIcon} onClick={() => {this.parent.dispatch("previousPage");}} />,
-            <FAIcon icon="angle-right" className={this.getStyleSet().navigatorIcon} onClick={() => {this.parent.dispatch("nextPage");}} />,
+            <FAIcon icon="angle-left" className={this.styleSheet.navigatorIcon} onClick={() => {this.parent.dispatch("previousPage");}} />,
+            <FAIcon icon="angle-right" className={this.styleSheet.navigatorIcon} onClick={() => {this.parent.dispatch("nextPage");}} />,
         ];
     }
 }
 
 
+@registerStyle(CarouselStyle)
 class Carousel extends UI.Element {
-    static styleSet = CarouselStyle.getInstance();
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
     extraNodeAttributes(attr) {
-        attr.addClass(this.getStyleSet().carousel);
+        attr.addClass(this.styleSheet.carousel);
     }
 
     appendChild(child, doMount) {
@@ -112,8 +107,8 @@ class Carousel extends UI.Element {
             }
         }
 
-        return [<CarouselNavigator className={this.options.children.length > 1 ? "" : "hidden"} styleSet={this.getStyleSet()}/>,
-            <div className={this.getStyleSet().container}>
+        return [<CarouselNavigator className={this.options.children.length > 1 ? "" : "hidden"}/>,
+            <div className={this.styleSheet.container}>
                 <div ref="pusher" style={{marginLeft: `${-this.activeIndex * 100}%`}}/>
                 {this.options.children}
             </div>];

@@ -77,16 +77,18 @@ class EntriesManager extends Dispatchable {
 // row height for functionality reasons.
 function RangeTableInterface(TableClass) {
     class RangeTable extends UI.Primitive(TableClass, "div") {
-        static rangePanelStyleSet = RangePanelStyle.getInstance();
-
         constructor(options) {
             super(options);
             this.lowIndex = 0;
             this.highIndex = 0;
         }
 
+        getRangePanelStyleSheet() {
+            return RangePanelStyle.getInstance();
+        }
+
         getRowHeight() {
-            return this.options.rowHeight || this.constructor.rangePanelStyleSet.rowHeight;
+            return this.options.rowHeight || this.getRangePanelStyleSheet().rowHeight;
         }
 
         getEntriesManager() {
@@ -97,19 +99,19 @@ function RangeTableInterface(TableClass) {
         }
 
         extraNodeAttributes(attr) {
-            attr.addClass(this.constructor.rangePanelStyleSet.default);
+            attr.addClass(this.getRangePanelStyleSheet().default);
         }
 
         render() {
-            const rangePanelStyleSet = this.constructor.rangePanelStyleSet;
+            const rangePanelStyleSheet = this.getRangePanelStyleSheet();
             const fakePanelHeight = (this.getRowHeight() * this.getEntriesManager().getEntriesCount() + 1) + "px";
             const headHeight = this.containerHead ? this.containerHead.getHeight() : 0;
             this.computeIndices();
             return [
-                <div ref="tableContainer" className={rangePanelStyleSet.tableContainer} style={{paddingTop: headHeight + "px"}}>
-                    <div ref="scrollablePanel" className={rangePanelStyleSet.scrollablePanel}>
-                        <div ref="fakePanel" className={rangePanelStyleSet.fakePanel} style={{height: fakePanelHeight}}/>
-                        <table ref="container" className={`${this.getStyleSet().table} ${rangePanelStyleSet.table}`}>
+                <div ref="tableContainer" className={rangePanelStyleSheet.tableContainer} style={{paddingTop: headHeight + "px"}}>
+                    <div ref="scrollablePanel" className={rangePanelStyleSheet.scrollablePanel}>
+                        <div ref="fakePanel" className={rangePanelStyleSheet.fakePanel} style={{height: fakePanelHeight}}/>
+                        <table ref="container" className={`${this.styleSheet.table} ${rangePanelStyleSheet.table}`}>
                             <thead ref="containerHead">
                             {this.renderContainerHead()}
                             </thead>
@@ -119,12 +121,12 @@ function RangeTableInterface(TableClass) {
                         </table>
                     </div>
                 </div>,
-                <div ref="footer" className={rangePanelStyleSet.footer}>
+                <div ref="footer" className={rangePanelStyleSheet.footer}>
                     <span ref="tableFooterText">
                         {this.getFooterContent()}
                     </span>
                     <NumberInput ref="jumpToInput" placeholder="jump to..." style={{textAlign: "center",}}/>
-                    <Button ref="jumpToButton" size={Size.SMALL} className={rangePanelStyleSet.jumpToButton}>Go</Button>
+                    <Button ref="jumpToButton" size={Size.SMALL} className={rangePanelStyleSheet.jumpToButton}>Go</Button>
                 </div>
             ];
         }
@@ -190,7 +192,7 @@ function RangeTableInterface(TableClass) {
         setScroll() {
             // This is the main logic for rendering the right entries. Right now, it best works with a fixed row height,
             // for other cases no good results are guaranteed. For now, that row height is hardcoded in the class'
-            // styleset.
+            // stylesheet.
 
             if (this.inSetScroll) {
                 return;

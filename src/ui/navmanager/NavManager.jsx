@@ -1,4 +1,4 @@
-import {UI, changeParent} from "../UI";
+import {UI, changeParent, registerStyle} from "../UI";
 import {NavStyle} from "NavStyle";
 import {Carousel, CarouselStyle} from "../Carousel";
 import {LeftSideIcon, RightSideIcon, WrappedIcon} from "./NavIcon";
@@ -9,12 +9,12 @@ import {Orientation, Direction} from "../Constants";
 
 
 class SidePanelGroup extends UI.Element {
-    getStyleSet() {
-        return this.options.styleSet || this.parent.getStyleSet();
+    get styleSheet() {
+        return this.options.styleSheet || this.parent.styleSheet;
     }
 
     extraNodeAttributes(attr) {
-        attr.addClass(this.getStyleSet().sidePanelGroup);
+        attr.addClass(this.styleSheet.sidePanelGroup);
         if (this.options.anchor === Direction.RIGHT) {
             attr.setStyle("right", 0);
         } else {
@@ -29,13 +29,8 @@ class SidePanelGroup extends UI.Element {
 }
 
 
+@registerStyle(NavStyle)
 class SidePanel extends UI.Element {
-    static styleSet = NavStyle.getInstance();
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
     constructor() {
         super(...arguments);
 
@@ -57,10 +52,10 @@ class SidePanel extends UI.Element {
 
     extraNodeAttributes(attr) {
         if (this.options.anchor === Direction.RIGHT) {
-            attr.addClass(this.getStyleSet().rightSidePanel);
+            attr.addClass(this.styleSheet.rightSidePanel);
             attr.setStyle("right", "0");
         } else {
-            attr.addClass(this.getStyleSet().leftSidePanel);
+            attr.addClass(this.styleSheet.leftSidePanel);
         }
     }
 
@@ -73,9 +68,9 @@ class SidePanel extends UI.Element {
 
     show() {
         if (this.options.anchor === Direction.RIGHT) {
-            this.removeClass(this.getStyleSet().navVerticalRightHide);
+            this.removeClass(this.styleSheet.navVerticalRightHide);
         } else {
-            this.removeClass(this.getStyleSet().navVerticalLeftHide);
+            this.removeClass(this.styleSheet.navVerticalLeftHide);
         }
 
         this.setVisible(true);
@@ -83,9 +78,9 @@ class SidePanel extends UI.Element {
 
     hide() {
         if (this.options.anchor === Direction.RIGHT) {
-            this.addClass(this.getStyleSet().navVerticalRightHide);
+            this.addClass(this.styleSheet.navVerticalRightHide);
         } else {
-            this.addClass(this.getStyleSet().navVerticalLeftHide);
+            this.addClass(this.styleSheet.navVerticalLeftHide);
         }
 
         this.setVisible(false);
@@ -120,17 +115,10 @@ class NavCarouselStyle extends CarouselStyle {
 }
 
 
+@registerStyle(NavStyle)
 class NavManager extends UI.Primitive("nav") {
-    static styleSet = NavStyle.getInstance();
-
-    static carouselStyleSet = NavCarouselStyle.getInstance();
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
-    getCarouselStyleSet() {
-        return this.options.carouselStyleSet || this.constructor.carouselStyleSet;
+    getCarouselStyleSheet() {
+        return this.options.carouselStyleSheet || NavCarouselStyle.getInstance();
     }
 
     getDefaultOptions() {
@@ -143,18 +131,16 @@ class NavManager extends UI.Primitive("nav") {
     constructor(options) {
         super(options);
 
-        this.leftSidePanel = <SidePanel anchor={Direction.LEFT} name="left" persistent={this.options.persistentLeftSidePanel}
-                                        styleSet={this.getStyleSet()}>
-            <Carousel ref={this.refLink("carousel")} styleSet={this.getCarouselStyleSet()}>
+        this.leftSidePanel = <SidePanel anchor={Direction.LEFT} name="left" persistent={this.options.persistentLeftSidePanel}>
+            <Carousel ref={this.refLink("carousel")} styleSheet={this.getCarouselStyleSheet()}>
                 <BasicOrientedElement orientation={Orientation.VERTICAL} ref={this.refLink("navigationPanel")}
-                                      styleSet={this.getStyleSet()}>
+                                      styleSheet={this.styleSheet}>
                     {this.getLeftSidePanelChildren()}
                 </BasicOrientedElement>
             </Carousel>
         </SidePanel>;
 
-        this.rightSidePanel = <SidePanel anchor={Direction.RIGHT} name="right" persistent={this.options.persistentRightSidePanel}
-                                         styleSet={this.getStyleSet()}>
+        this.rightSidePanel = <SidePanel anchor={Direction.RIGHT} name="right" persistent={this.options.persistentRightSidePanel}>
             {this.getRightSidePanelChildren()}
         </SidePanel>;
     }
@@ -176,7 +162,7 @@ class NavManager extends UI.Primitive("nav") {
     }
 
     extraNodeAttributes(attr) {
-        attr.addClass(this.getStyleSet().navManager);
+        attr.addClass(this.styleSheet.navManager);
     }
 
     getOrientation() {
@@ -337,7 +323,7 @@ class NavManager extends UI.Primitive("nav") {
     checkForWrap() {
         const wrapNavElements = () => {
             this.wrapped = true;
-            this.wrappedPanel = <BasicOrientedElement orientation={Orientation.VERTICAL} styleSet={this.getStyleSet()}/>;
+            this.wrappedPanel = <BasicOrientedElement orientation={Orientation.VERTICAL} styleSheet={this.styleSheet}/>;
             this.carousel.appendChild(this.wrappedPanel);
 
             changeParent(this.getRightConditioned(), this.wrappedPanel);

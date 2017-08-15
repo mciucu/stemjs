@@ -4,18 +4,14 @@ import {UI} from "../UIBase";
 import {Table} from "./Table";
 import {defaultComparator} from "../../base/Utils";
 import {Direction} from "../Constants";
+import {registerStyle} from "../style/Theme";
 
 function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
-    return class SortableTable extends BaseTableClass {
-        static styleSet = SortableTableStyle.getInstance();
-
-        getStyleSet() {
-            return this.options.styleSet || this.constructor.styleSet;
-        }
-
+    @registerStyle(SortableTableStyle)
+    class SortableTable extends BaseTableClass {
         extraNodeAttributes(attr) {
             super.extraNodeAttributes(attr);
-            attr.addClass(this.getStyleSet().table);
+            attr.addClass(this.styleSheet.table);
         }
 
         setOptions(options) {
@@ -38,12 +34,12 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
         }
 
         renderColumnHeader(column) {
-            let sortIcon = <SortIconClass className={this.getStyleSet().sortIcon}/>;
+            let sortIcon = <SortIconClass className={this.styleSheet.sortIcon}/>;
             if (this.sortBy === column) {
                 if (this.sortDescending) {
-                    sortIcon = <SortIconClass className={this.getStyleSet().sortIcon} style={{visibility: "inherit"}} direction={Direction.DOWN}/>;
+                    sortIcon = <SortIconClass className={this.styleSheet.sortIcon} style={{visibility: "inherit"}} direction={Direction.DOWN}/>;
                 } else {
-                    sortIcon = <SortIconClass className={this.getStyleSet().sortIcon} style={{visibility: "inherit"}} direction={Direction.UP}/>;
+                    sortIcon = <SortIconClass className={this.styleSheet.sortIcon} style={{visibility: "inherit"}} direction={Direction.UP}/>;
                 }
             }
 
@@ -120,7 +116,8 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
                 column.cmp = defaultComparator;
             }
         }
-    };
+    }
+    return SortableTable;
 }
 
 let SortableTable = SortableTableInterface(Table);

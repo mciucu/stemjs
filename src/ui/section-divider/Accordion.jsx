@@ -1,34 +1,30 @@
 import {UI} from "../UIBase";
+import {registerStyle} from "../UI";
 import {getComputedStyle} from "../Utils";
 import {Device} from "../../base/Device";
 import {AccordionStyle} from "./Style";
 import {FACollapseIcon} from "../../ui/FontAwesome";
 import {Divider} from "./Divider";
 
+@registerStyle(AccordionStyle)
 class AccordionDivider extends Divider {
-    static styleSet = AccordionStyle.getInstance();
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
     dragMousedown(event) {
-        document.body.classList.add(this.getStyleSet().noTextSelection);
-        this.addClass(this.getStyleSet().grabbing);
+        document.body.classList.add(this.styleSheet.noTextSelection);
+        this.addClass(this.styleSheet.grabbing);
     }
 
     dragMouseup(event) {
-        document.body.classList.remove(this.getStyleSet().noTextSelection);
-        this.removeClass(this.getStyleSet().grabbing);
+        document.body.classList.remove(this.styleSheet.noTextSelection);
+        this.removeClass(this.styleSheet.grabbing);
     }
 
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
-        attr.addClass(this.getStyleSet().grab);
+        attr.addClass(this.styleSheet.grab);
     }
 
     render() {
-        return [<FACollapseIcon ref="collapseIcon" collapsed={false} className={this.getStyleSet().collapseIcon}/>, this.options.children];
+        return [<FACollapseIcon ref="collapseIcon" collapsed={false} className={this.styleSheet.collapseIcon}/>, this.options.children];
     }
 
     setCollapsed(value) {
@@ -42,15 +38,10 @@ class AccordionDivider extends Divider {
 }
 
 
+@registerStyle(AccordionStyle)
 class Accordion extends UI.Element {
-    static styleSet = AccordionStyle.getInstance();
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
     extraNodeAttributes(attr) {
-        attr.addClass(this.getStyleSet().accordion);
+        attr.addClass(this.styleSheet.accordion);
     }
 
     render() {

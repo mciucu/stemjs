@@ -1,7 +1,7 @@
-import {StyleSet} from "../Style";
+import {StyleSheet} from "../Style";
 import {styleRule, styleRuleInherit} from "../../decorators/Style";
 
-class BaseTabAreaStyle extends StyleSet {
+class BaseTabAreaStyle extends StyleSheet {
     @styleRule
     tab = {
         userSelect: "none",

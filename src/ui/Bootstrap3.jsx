@@ -1,6 +1,4 @@
 import {UI} from "./UIBase";
-import {StyleSet} from "./Style";
-import {styleRule} from "../decorators/Style";
 import {GlobalStyle} from "./GlobalStyle";
 import {Ajax} from "../base/Ajax";
 import {Orientation} from "./Constants";

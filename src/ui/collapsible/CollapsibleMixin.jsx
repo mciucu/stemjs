@@ -8,15 +8,15 @@ function CollapsibleMixin(BaseClass, CollapsibleClass = CollapsibleStyle) {
             };
         }
 
-        static collapsibleStyleSet = new CollapsibleClass();
+        static collapsibleStyleSheet = new CollapsibleClass();
 
-        getCollapsibleStyleSet() {
-            return this.options.collapsibleStyleSet || this.constructor.collapsibleStyleSet;
+        getCollapsibleStyleSheet() {
+            return this.options.collapsibleStyleSheet || this.constructor.collapsibleStyleSheet;
         }
 
         expand(panel) {
             this.options.collapsed = false;
-            const collapsibleStyle = this.getCollapsibleStyleSet();
+            const collapsibleStyle = this.getCollapsibleStyleSheet();
             panel.addClass(collapsibleStyle.collapsing);
             panel.removeClass("hidden");
             setTimeout(() => {
@@ -26,7 +26,7 @@ function CollapsibleMixin(BaseClass, CollapsibleClass = CollapsibleStyle) {
 
         collapse(panel) {
             this.options.collapsed = true;
-            const collapsibleStyle = this.getCollapsibleStyleSet();
+            const collapsibleStyle = this.getCollapsibleStyleSheet();
             panel.addClass(collapsibleStyle.collapsing);
             panel.addClass(collapsibleStyle.collapsed);
             let transitionEndFunction = () => {

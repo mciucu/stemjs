@@ -1,15 +1,11 @@
 import {FormStyle} from "./Style";
 import {UI} from "../UIBase";
+import {registerStyle} from "../style/Theme";
 
+@registerStyle(FormStyle)
 class Form extends UI.Primitive("form") {
-    static styleSet = FormStyle.getInstance();
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
     extraNodeAttributes(attr) {
-        attr.addClass(this.getStyleSet().form);
+        attr.addClass(this.styleSheet.form);
     }
 
     onMount() {
@@ -18,25 +14,20 @@ class Form extends UI.Primitive("form") {
     }
 }
 
-
+@registerStyle(FormStyle)
 class FormGroup extends UI.Element {
-    static styleSet = FormStyle.getInstance();
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
     extraNodeAttributes(attr) {
-        attr.addClass(this.getStyleSet().formGroup);
+        attr.addClass(this.styleSheet.formGroup);
     }
 
     setError(errorMessage) {
         this.errorField.node.textContent = errorMessage;
-        this.addClass(this.getStyleSet().hasError);
+        this.addClass(this.styleSheet.hasError);
     }
 
     removeError() {
         this.errorField.node.textContent = "";
-        this.removeClass(this.getStyleSet().hasError);
+        this.removeClass(this.styleSheet.hasError);
     }
 
     getErrorField() {
@@ -56,11 +47,11 @@ class FormField extends FormGroup {
     }
 
     extraNodeAttributes(attr) {
-        attr.addClass(this.getStyleSet().formField);
+        attr.addClass(this.styleSheet.formField);
         if (this.inline()) {
-            attr.addClass(this.getStyleSet().sameLine);
+            attr.addClass(this.styleSheet.sameLine);
         } else {
-            attr.addClass(this.getStyleSet().separatedLine);
+            attr.addClass(this.styleSheet.separatedLine);
         }
     }
 

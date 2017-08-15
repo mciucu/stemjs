@@ -1,6 +1,6 @@
-import {StyleSet, styleRule} from "./Style";
+import {StyleSheet, styleRule} from "./Style";
 
-class FullScreenStyle extends StyleSet {
+class FullScreenStyle extends StyleSheet {
     @styleRule
     fullScreen = {
         width: "100%",

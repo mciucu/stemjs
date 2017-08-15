@@ -1,7 +1,7 @@
-import {StyleSet, styleRule, styleRuleInherit} from "../Style";
+import {StyleSheet, styleRule, styleRuleInherit} from "../Style";
 import {CardPanelStyle} from "../CardPanel";
 
-class CollapsibleStyle extends StyleSet {
+class CollapsibleStyle extends StyleSheet {
     transitionDuration = 0.4;
 
     @styleRule

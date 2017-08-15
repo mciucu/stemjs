@@ -1,7 +1,7 @@
-import {StyleSet} from "../Style";
+import {StyleSheet} from "../Style";
 import {styleRule, styleRuleInherit} from "../../decorators/Style";
 
-class TableStyle extends StyleSet {
+class TableStyle extends StyleSheet {
     cellStyle =  {
         padding: "8px",
         lineHeight: "1.42857143",

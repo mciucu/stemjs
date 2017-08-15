@@ -1,7 +1,7 @@
 import {UI} from "../UIBase";
 import {Table, TableRow} from "./Table";
 import {CollapsibleMixin} from "../collapsible/CollapsibleMixin";
-import {StyleSet} from "../Style";
+import {StyleSheet} from "../Style";
 import {styleRule} from "../../decorators/Style";
 
 class TableRowInCollapsibleTable extends TableRow {
@@ -14,7 +14,7 @@ class TableRowInCollapsibleTable extends TableRow {
     }
 }
 
-class CollapsibleTableStyle extends StyleSet {
+class CollapsibleTableStyle extends StyleSheet {
     @styleRule
     button = {
         marginTop: "0",
@@ -89,7 +89,7 @@ class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
         super.collapse(this.contentArea);
         setTimeout(() => {
             this.toggleButton.addClass(collapsibleTableStyle.collapsedButton);
-        }, this.getCollapsibleStyleSet().transitionDuration * 500);
+        }, this.getCollapsibleStyleSheet().transitionDuration * 500);
     }
 
     // TODO: Very bad redraw practice here
@@ -100,11 +100,11 @@ class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
 
         if (this.options.collapsed) {
             this.toggleButton.addClass(collapsibleTableStyle.collapsedButton);
-            this.contentArea.addClass(this.getCollapsibleStyleSet().collapsed);
+            this.contentArea.addClass(this.getCollapsibleStyleSheet().collapsed);
             this.contentArea.addClass("hidden");
         } else {
             this.toggleButton.removeClass(collapsibleTableStyle.collapsedButton);
-            this.contentArea.removeClass(this.getCollapsibleStyleSet().collapsed);
+            this.contentArea.removeClass(this.getCollapsibleStyleSheet().collapsed);
             this.contentArea.removeClass("hidden");
         }
         return true;
@@ -117,7 +117,7 @@ class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
                 <td style={{overflow: "hidden", padding: "0px"}}
                     colspan={this.options.columns.length}>
                     <div ref="contentArea"
-                         className={`${this.getCollapsibleStyleSet().collapsed} hidden`}>
+                         className={`${this.getCollapsibleStyleSheet().collapsed} hidden`}>
                             {this.renderCollapsible(this.options.entry)}
                     </div>
                 </td>

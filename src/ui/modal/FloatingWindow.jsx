@@ -1,17 +1,13 @@
 import {UI} from "../UIBase";
 import {FloatingWindowStyle} from "./Style";
+import {registerStyle} from "../style/Theme";
 
+@registerStyle(FloatingWindowStyle)
 class FloatingWindow extends UI.Element {
-    static styleSet = FloatingWindowStyle.getInstance();
-
     getDefaultOptions() {
         return {
             transitionTime: 0
         };
-    }
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
     }
 
     extraNodeAttributes(attr) {
@@ -20,13 +16,13 @@ class FloatingWindow extends UI.Element {
     }
 
     fadeOut() {
-        this.removeClass(this.getStyleSet().visibleAnimated);
-        this.addClass(this.getStyleSet().hiddenAnimated);
+        this.removeClass(this.styleSheet.visibleAnimated);
+        this.addClass(this.styleSheet.hiddenAnimated);
     }
 
     fadeIn() {
-        this.removeClass(this.getStyleSet().hiddenAnimated);
-        this.addClass(this.getStyleSet().visibleAnimated);
+        this.removeClass(this.styleSheet.hiddenAnimated);
+        this.addClass(this.styleSheet.visibleAnimated);
     }
 
     show() {

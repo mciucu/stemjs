@@ -1,6 +1,6 @@
-import {StyleSet, styleRule} from "../Style";
+import {StyleSheet, styleRule} from "../Style";
 
-class FormStyle extends StyleSet {
+class FormStyle extends StyleSheet {
     @styleRule
     form = {
         margin: "0 auto",

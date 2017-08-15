@@ -1,4 +1,4 @@
-import {UI, Link} from "../UI";
+import {UI, Link, registerStyle} from "../UI";
 import {FACollapseIcon} from "../FontAwesome"; //TODO: more flexibility, do not require FAIcons in NavElements
 import {SessionStorageMap} from "../../base/StorageMap";
 import {Orientation, Direction} from "../Constants";
@@ -6,8 +6,8 @@ import {Orientation, Direction} from "../Constants";
 let navSessionManager = new SessionStorageMap("navManager");
 
 const BasicOrientedElementInterface = (BaseClass) => class BasicOrientedElement extends BaseClass {
-    getStyleSet() {
-        return this.options.styleSet || this.parent.getStyleSet();
+    get styleSheet() {
+        return this.options.styleSheet || this.parent.styleSheet;
     }
 
     getOrientation() {
@@ -36,23 +36,23 @@ const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
         super.extraNodeAttributes(attr);
         if (this.getOrientation() === Orientation.HORIZONTAL) {
             // it is in the navbar
-            attr.addClass(this.getStyleSet().navElementHorizontal);
+            attr.addClass(this.styleSheet.navElementHorizontal);
 
             if (this.parent instanceof NavSection) {
                 attr.setStyle("float", "left");
             } else {
                 // it is an element in a dropdown
-                attr.addClass(this.getStyleSet().navCollapseElement);
+                attr.addClass(this.styleSheet.navCollapseElement);
             }
         } else {
             // it is in the sidebar
-            attr.addClass(this.getStyleSet().navElementVertical);
+            attr.addClass(this.styleSheet.navElementVertical);
         }
     }
 
     getSelf() {
         const style = (this.getOrientation() === Orientation.HORIZONTAL ?
-                        this.getStyleSet().navElementValueHorizontal : this.getStyleSet().navElementValueVertical);
+                        this.styleSheet.navElementValueHorizontal : this.styleSheet.navElementValueVertical);
         const marginLeft = this.getOrientation() === Orientation.VERTICAL && this.getGivenChildren().length ? "-20px" : "0";
 
         return <BasicOrientedElement className={style} style={{marginLeft: marginLeft}}>
@@ -80,14 +80,14 @@ const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
             if (this.getOrientation() === Orientation.VERTICAL) {
                 // is in the sidebar
                 result = [
-                    <FACollapseIcon ref="collapseIcon" collapsed={!this.isToggled} className={this.getStyleSet().navElementVerticalArrow} />,
+                    <FACollapseIcon ref="collapseIcon" collapsed={!this.isToggled} className={this.styleSheet.navElementVerticalArrow} />,
                     this.options.value
                 ];
             } else if (this.getOrientation() === Orientation.HORIZONTAL) {
                 // is in the navbar
                 result = [
                     this.options.value,
-                    <FACollapseIcon collapsed={false} className={this.getStyleSet().navElementHorizontalArrow} />,
+                    <FACollapseIcon collapsed={false} className={this.styleSheet.navElementHorizontalArrow} />,
                 ];
             }
         } else {
@@ -186,26 +186,26 @@ const NavElement = NavElementInterface(UI.Primitive(BasicOrientedElement, "li"))
 class NavLinkElement extends NavElementInterface(BasicOrientedLinkElement) {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
-        attr.addClass(this.getStyleSet().navLinkElement);
+        attr.addClass(this.styleSheet.navLinkElement);
     }
 }
 
 
 class NavSection extends UI.Primitive("ul") {
-    getStyleSet() {
-        return this.options.styleSet || this.parent.getStyleSet();
+    get styleSheet() {
+        return this.options.styleSheet || this.parent.styleSheet;
     }
 
     extraNodeAttributes(attr) {
         if (this.getOrientation() === Orientation.HORIZONTAL) {
             // it is in the navbar
-            attr.addClass(this.getStyleSet().navSectionHorizontal);
+            attr.addClass(this.styleSheet.navSectionHorizontal);
             // this is functionality, I really want this to be isolated from the actual design
             // TODO: anchor might not be defined
             attr.setStyle("float", this.options.anchor);
         } else {
             // it is in the sidebar
-            attr.addClass(this.getStyleSet().navSectionVertical);
+            attr.addClass(this.styleSheet.navSectionVertical);
         }
     }
 

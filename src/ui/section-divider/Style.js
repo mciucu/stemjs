@@ -1,6 +1,6 @@
-import {StyleSet, styleRule} from "../Style";
+import {StyleSheet, styleRule} from "../Style";
 
-class DividerStyle extends StyleSet {
+class DividerStyle extends StyleSheet {
     @styleRule
     noTextSelection = {
         "-webkit-user-select": "none",

@@ -2,17 +2,13 @@
 import {Device} from "../../base/Device";
 import {Divider} from "./Divider";
 import {UI} from "../UIBase";
+import {registerStyle} from "../UI";
 import {SectionDividerStyle} from "./Style";
 import {Orientation} from "../Constants";
 
 // options.orientation is the orientation of the divided elements
+@registerStyle(SectionDividerStyle)
 class DividerBar extends Divider {
-    static styleSet = SectionDividerStyle.getInstance();
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
     getDefaultOptions() {
         return Object.assign({}, super.getDefaultOptions(), {
             orientation: Orientation.HORIZONTAL,
@@ -20,19 +16,19 @@ class DividerBar extends Divider {
     }
 
     dragMousedown(event) {
-        document.body.classList.add(this.getStyleSet().noTextSelection);
+        document.body.classList.add(this.styleSheet.noTextSelection);
     }
 
     dragMouseup(event) {
-        document.body.classList.remove(this.getStyleSet().noTextSelection);
+        document.body.classList.remove(this.styleSheet.noTextSelection);
     }
 
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
         if (this.options.orientation === Orientation.VERTICAL) {
-            attr.addClass(this.getStyleSet().verticalDivider);
+            attr.addClass(this.styleSheet.verticalDivider);
         } else {
-            attr.addClass(this.getStyleSet().horizontalDivider);
+            attr.addClass(this.styleSheet.horizontalDivider);
         }
     }
 };
@@ -42,13 +38,8 @@ class DividerBar extends Divider {
     - All the children it's dividing
     - An option on how to redivide the sizes of the children
  */
+@registerStyle(SectionDividerStyle)
 class SectionDivider extends UI.Element {
-    static styleSet = SectionDividerStyle.getInstance();
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
     constructor(options) {
         super(options);
         this.uncollapsedSizes = new WeakMap();
@@ -56,9 +47,9 @@ class SectionDivider extends UI.Element {
 
     extraNodeAttributes(attr) {
         if (this.getOrientation() === Orientation.VERTICAL) {
-            attr.addClass(this.getStyleSet().verticalSection);
+            attr.addClass(this.styleSheet.verticalSection);
         } else {
-            attr.addClass(this.getStyleSet().horizontalSection);
+            attr.addClass(this.styleSheet.horizontalSection);
         }
     }
 

@@ -1,8 +1,8 @@
-import {styleRule, StyleSet} from "../Style";
+import {styleRule, StyleSheet} from "../Style";
 import {Device} from "../../base/Device";
 import {Theme} from "../style/Theme";
 
-class GlobalContainerStyle extends StyleSet {
+class GlobalContainerStyle extends StyleSheet {
     constructor() {
         super({updateOnResize: Device.isMobileDevice()});
     }

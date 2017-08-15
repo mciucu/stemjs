@@ -23,7 +23,7 @@ class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
         super.collapse(this.contentArea);
         setTimeout(() => {
             this.toggleButton.addClass(this.styleSheet.collapsedButton);
-        }, this.getCollapsibleStyleSet().transitionDuration * 700);
+        }, this.getCollapsibleStyleSheet().transitionDuration * 700);
     }
 
     setTitle(title) {

@@ -1,5 +1,6 @@
 import {TableStyle} from "./Style";
 import {UI} from "../UIBase";
+import {registerStyle} from "../style/Theme";
 
 // TODO: the whole table architecture probably needs a rethinking
 class TableRow extends UI.Primitive("tr") {
@@ -18,13 +19,8 @@ class TableRow extends UI.Primitive("tr") {
     }
 };
 
+@registerStyle(TableStyle)
 class Table extends UI.Primitive("table") {
-    static styleSet = TableStyle.getInstance();
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
     setOptions(options) {
         super.setOptions(options);
 
@@ -33,7 +29,7 @@ class Table extends UI.Primitive("table") {
     }
 
     extraNodeAttributes(attr) {
-        attr.addClass(this.getStyleSet().table);
+        attr.addClass(this.styleSheet.table);
     }
 
     getRowClass() {

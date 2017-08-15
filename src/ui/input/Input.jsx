@@ -1,17 +1,14 @@
 import {UI} from "../UIBase";
 import {CreateNodeAttributesMap} from "../NodeAttributes";
 import {InputStyle} from "./Style";
+import {registerStyle} from "../style/Theme";
 
+
+@registerStyle(InputStyle)
 class InputableElement extends UI.Element {
-    static styleSet = InputStyle.getInstance();
-
-    getStyleSet() {
-        return this.options.styleSet || this.constructor.styleSet;
-    }
-
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
-        attr.addClass(this.getStyleSet().inputElement);
+        attr.addClass(this.styleSheet.inputElement);
     }
 }
 
@@ -149,7 +146,7 @@ FileInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap
 class CheckboxInput extends Input {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
-        attr.addClass(this.getStyleSet().checkboxInput);
+        attr.addClass(this.styleSheet.checkboxInput);
     }
 
     getInputType() {
@@ -226,7 +223,7 @@ class Select extends UI.Primitive(InputableElement, "select") {
 
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
-        attr.addClass(this.getStyleSet().select);
+        attr.addClass(this.styleSheet.select);
     }
 
     get() {

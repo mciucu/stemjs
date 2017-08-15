@@ -1,6 +1,6 @@
-import {StyleSet, styleRule} from "./Style";
+import {StyleSheet, styleRule} from "./Style";
 
-class RangePanelStyle extends StyleSet {
+class RangePanelStyle extends StyleSheet {
     rowHeight = 52;
 
     @styleRule
