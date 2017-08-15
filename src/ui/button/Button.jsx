@@ -77,27 +77,58 @@ class StateButton extends Button {
 
 
 class AjaxButton extends StateButton {
-    ajaxCall(data) {
+    getDefaultOptions() {
+        return Object.assign(super.getDefaultOptions() || {}, {
+            resetToDefaultTimeout: 1000
+        });
+    }
+
+    getAjaxHandler() {
+        return this.options.ajaxHandler || Ajax;
+    }
+
+    setAjaxHandler(ajaxHandler) {
+        this.options.ajaxHandler = ajaxHandler;
+    }
+
+    clearResetTimeout() {
+        if (this.stateResetTimeout) {
+            clearTimeout(this.stateResetTimeout);
+            delete this.stateResetTimeout;
+        }
+    }
+
+    scheduleStateReset() {
+        this.clearResetTimeout();
+        this.stateResetTimeout = setTimeout(() => {
+            this.setState(ActionStatus.DEFAULT);
+            this.clearResetTimeout();
+        }, this.resetToDefaultTimeout);
+    }
+
+    ajax(methodName, ...args) {
         this.setState(ActionStatus.RUNNING);
-        Ajax.fetch(Object.assign({}, data, {
-            success: (successData) => {
-                data.success(successData);
-                if (successData.error) {
-                    this.setState(ActionStatus.FAILED);
-                } else {
-                    this.setState(ActionStatus.SUCCESS);
-                }
+        let ajaxPromise = this.getAjaxHandler()[methodName](...args);
+        ajaxPromise.getPromise().then(
+            (data) => {
+                this.setState(ActionStatus.SUCCESS);
+                this.scheduleStateReset();
             },
-            error: (xhr, errmsg, err) => {
-                data.error(xhr, errmsg, err);
+            (error) => {
                 this.setState(ActionStatus.FAILED);
-            },
-            complete: () => {
-                setTimeout(() => {
-                    this.setState(ActionStatus.DEFAULT);
-                }, this.options.onCompete || 1000);
+                this.scheduleStateReset();
             }
-        }));
+        );
+        return ajaxPromise;
+    }
+
+    ajaxCall(data) {
+        return this.ajax("fetch", data);
+    }
+}
+for (const methodName of ["fetch", "request", "get", "post", "getJSON", "postJSON"]) {
+    AjaxButton.prototype[methodName] = function(...args) {
+        return this.ajax(methodName, ...args);
     }
 }
 
