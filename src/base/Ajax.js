@@ -80,4 +80,27 @@ export class AjaxHandler {
     }
 }
 
+export class FixedURLAjaxHandler extends AjaxHandler {
+    constructor(url, ajaxHandler=Ajax, errorHandler=null) {
+        super(ajaxHandler, errorHandler);
+        this.url = url;
+    }
+
+    get(options) {
+        return super.get(this.url, ...arguments);
+    }
+
+    getJSON(data) {
+        return super.getJSON(this.url, data);
+    }
+
+    post(options) {
+        return super.post(this.url, ...arguments);
+    }
+
+    postJSON(data) {
+        return super.postJSON(this.url, data);
+    }
+}
+
 export let Ajax = new AjaxHandler();
