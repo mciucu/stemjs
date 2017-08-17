@@ -161,7 +161,7 @@ class XHRPromise {
     resolve(payload) {
         for (const postprocessor of this.getPostprocessors()) {
             try {
-                payload = postprocessor(payload);
+                payload = postprocessor(payload) || payload;
             } catch (exception) {
                 this.reject(exception);
                 return;
@@ -180,7 +180,7 @@ class XHRPromise {
 
     reject(error) {
         for (const postprocessor of this.getErrorPostprocessors()) {
-            error = postprocessor(error);
+            error = postprocessor(error) || error;
         }
 
         if (this.options.onError) {

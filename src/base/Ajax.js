@@ -1,17 +1,20 @@
 import {fetch} from "./Fetch";
 
-class AjaxHandler {
-    preprocessors = Array.from(fetch.defaultPreprocessors);
-    postprocessors = Array.from(fetch.defaultPostprocessors);
-    errorPostprocessors = Array.from(fetch.defaultErrorPostprocessors);
-    errorHandler = null;
+export class AjaxHandler {
+    constructor(ajaxHandler=Ajax, errorHandler=null) {
+        this.parentHandler = ajaxHandler;
+        this.preprocessors = (ajaxHandler) ? [] : Array.from(fetch.defaultPreprocessors);
+        this.postprocessors = (ajaxHandler) ? [] : Array.from(fetch.defaultPostprocessors);
+        this.errorPostprocessors = (ajaxHandler) ? [] : Array.from(fetch.defaultErrorPostprocessors);
+        this.errorHandler = errorHandler;
+    }
 
     fetch(request, ...args) {
         let baseOptions = {
-            preprocessors: this.preprocessors,
-            postprocessors: this.postprocessors,
-            errorPostprocessors: this.errorPostprocessors,
-            errorHandler: this.errorHandler,
+            preprocessors: this.getPreprocessors(),
+            postprocessors: this.getPostprocessors(),
+            errorPostprocessors: this.getErrorPostprocessors(),
+            errorHandler: this.getErrorHandler(),
         };
 
         // Request may be a plain object or a url, not going to duplicate code from fetch
@@ -49,12 +52,31 @@ class AjaxHandler {
         this.preprocessors.push(preprocessor);
     }
 
+    getPreprocessors() {
+        const inherited = (this.parentHandler && this.parentHandler.getPreprocessors()) || [];
+        return [...this.preprocessors, ...inherited];
+    }
+
     addPostprocessor(postprocessor) {
         this.postprocessors.push(postprocessor);
     }
 
+    getPostprocessors() {
+        const inherited = (this.parentHandler && this.parentHandler.getPostprocessors()) || [];
+        return [...inherited, ...this.postprocessors];
+    }
+
     addErrorPostprocessor(postprocessor) {
         this.errorPostprocessors.push(postprocessor);
+    }
+
+    getErrorPostprocessors() {
+        const inherited = (this.parentHandler && this.parentHandler.getErrorPostprocessors()) || [];
+        return [...inherited, ...this.errorPostprocessors];
+    }
+
+    getErrorHandler() {
+        return this.errorHandler || this.parentHandler.errorHandler;
     }
 }
 
