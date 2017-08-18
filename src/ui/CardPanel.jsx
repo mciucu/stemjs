@@ -18,8 +18,11 @@ export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) 
     DEFAULT = [{
         display: "flex",
         alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
         width: "100%",
-        height: this.themeProperties.CARD_PANEL_HEADER_HEIGHT,
+        flexDirection: "column",
+        minHeight: this.themeProperties.CARD_PANEL_HEADER_HEIGHT,
         textTransform: this.themeProperties.CARD_PANEL_TEXT_TRANSFORM,
         paddingLeft: this.themeProperties.CARD_PANEL_HEADING_PADDING,
         paddingRight: this.themeProperties.CARD_PANEL_HEADING_PADDING,
@@ -29,7 +32,7 @@ export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) 
 
     @styleRule
     LARGE = {
-        height: this.themeProperties.CARD_PANEL_HEADER_HEIGHT_LARGE,
+        minHeight: this.themeProperties.CARD_PANEL_HEADER_HEIGHT_LARGE,
         paddingLeft: this.themeProperties.CARD_PANEL_HEADING_PADDING_LARGE,
         paddingRight: this.themeProperties.CARD_PANEL_HEADING_PADDING_LARGE,
     };
@@ -72,9 +75,6 @@ export const CardPanelHeaderStyle = BasicLevelStyleSheet(cardPanelHeaderColorToS
 class CardPanel extends SimpleStyledElement {
     extraNodeAttributes(attr) {
         attr.addClass(this.styleSheet.panel);
-        if (this.getLevel()) {
-            attr.addClass(this.styleSheet.Level(this.getLevel()));
-        }
     }
 
     getLevel() {
@@ -129,8 +129,8 @@ class CardPanel extends SimpleStyledElement {
     }
 
     render() {
-        const bodyClasses = this.getBodyClasses(),
-              headingClasses = this.getHeadingClasses();
+        const headingClasses = this.getHeadingClasses();
+        const bodyClasses = this.getBodyClasses();
 
         return [
             <div ref="panelTitle" className={headingClasses}>
