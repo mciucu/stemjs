@@ -76,7 +76,7 @@ export class AjaxHandler {
     }
 
     getErrorHandler() {
-        return this.errorHandler || this.parentHandler.errorHandler;
+        return this.errorHandler || (this.parentHandler && this.parentHandler.getErrorHandler());
     }
 }
 
