@@ -200,9 +200,8 @@ class NavSection extends UI.Primitive("ul") {
         if (this.getOrientation() === Orientation.HORIZONTAL) {
             // it is in the navbar
             attr.addClass(this.styleSheet.navSectionHorizontal);
-            // this is functionality, I really want this to be isolated from the actual design
-            // TODO: anchor might not be defined
-            attr.setStyle("float", this.options.anchor);
+            // this is functionality, should be isolated from the actual design
+            attr.setStyle("float", this.getAnchor());
         } else {
             // it is in the sidebar
             attr.addClass(this.styleSheet.navSectionVertical);
