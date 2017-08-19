@@ -1,6 +1,6 @@
 import {UI, registerStyle} from "UI";
 import {StyleSheet, styleRule} from "Style";
-import {Size} from "ui/Constants";
+import {Size} from "./Constants";
 import {SimpleStyledElement} from "./Bootstrap3";
 import {BasicLevelSizeStyleSheet} from "./GlobalStyle";
 

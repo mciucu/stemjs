@@ -3,11 +3,11 @@ import uglify from 'rollup-plugin-uglify';
 import includePaths from "rollup-plugin-includepaths";
 
 let includePathOptions = {
-    extensions: [".es6.js", ".jsx"],
+    extensions: [".es6.js", ".jsx", ".js"],
 };
 
 export default {
-    entry: "src/Stem.es6.js",
+    entry: "src/Stem.js",
     format: "umd",
     // moduleId: "stem",
     moduleName: "stem",

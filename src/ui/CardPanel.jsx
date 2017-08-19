@@ -4,7 +4,7 @@ import {BasicLevelStyleSheet, GlobalStyle} from "./GlobalStyle";
 import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";
 import {styleRule} from "../decorators/Style";
-import {Level, Size} from "ui/Constants";
+import {Level, Size} from "./Constants";
 
 export function cardPanelColorToStyle(color) {
     let colors = buildColors(color);
