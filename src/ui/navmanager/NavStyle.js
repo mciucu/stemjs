@@ -38,6 +38,7 @@ class NavStyle extends StyleSheet {
     };
 
     // Icons
+    @styleRule
     icon = {
         color: this.getColors().text,
         lineHeight: this.dimensions.navbarHeight,
@@ -51,15 +52,16 @@ class NavStyle extends StyleSheet {
         }
     };
 
-    sideIcon = Object.assign({}, this.icon, {
+    @styleRule
+    sideIcon = {
         fontSize: "120%",
-    });
+    };
 
-    wrappedIcon = Object.assign({}, this.icon, {
+    @styleRule
+    wrappedIcon = {
         fontSize: "100%",
         flex: "1",
-    });
-
+    };
 
     // Nav manager elements
     navElement = {

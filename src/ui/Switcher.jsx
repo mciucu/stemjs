@@ -1,4 +1,3 @@
-// TODO: need to have Switcher properly work with a redraw
 import {UI} from "./UIBase";
 import {GlobalStyle} from "./GlobalStyle";
 

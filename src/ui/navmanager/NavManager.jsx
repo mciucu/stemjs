@@ -1,7 +1,7 @@
 import {UI, changeParent, registerStyle} from "../UI";
 import {NavStyle} from "NavStyle";
 import {Carousel, CarouselStyle} from "../Carousel";
-import {LeftSideIcon, RightSideIcon, WrappedIcon} from "./NavIcon";
+import {LeftSideNavIcon, RightSideNavIcon, WrappedNavIcon} from "./NavIcon";
 import {BasicOrientedElement, NavSection} from "./NavElement";
 import {initializeSwipeEvents} from "./NavSwipeDetection";
 import {SessionStorageMap} from "../../base/StorageMap";
@@ -191,7 +191,7 @@ class NavManager extends UI.Primitive("nav") {
         }
 
         if (!this.leftPanelToggler) {
-            this.leftPanelToggler = <LeftSideIcon onClick={() => this.leftSideIconAction()} />;
+            this.leftPanelToggler = <LeftSideNavIcon onClick={() => this.leftSideIconAction()} />;
         }
         return this.leftPanelToggler;
     }
@@ -205,7 +205,7 @@ class NavManager extends UI.Primitive("nav") {
             return null;
         }
         if (!this.rightPanelToggler) {
-            this.rightPanelToggler = <RightSideIcon onClick={() => this.rightSideIconAction()} />;
+            this.rightPanelToggler = <RightSideNavIcon onClick={() => this.rightSideIconAction()} />;
         }
         return this.rightPanelToggler;
     }
@@ -237,7 +237,7 @@ class NavManager extends UI.Primitive("nav") {
 
     getWrappedIcon() {
         if (!this.wrappedToggler) {
-            this.wrappedToggler = <WrappedIcon onClick={() => this.wrappedIconAction()}
+            this.wrappedToggler = <WrappedNavIcon onClick={() => this.wrappedIconAction()}
                                                className={this.wrapped ? "" : "hidden"} />;
         }
         return this.wrappedToggler;

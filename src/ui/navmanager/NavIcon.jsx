@@ -3,10 +3,10 @@ import {NavElement} from "NavElement";
 import {FAIcon} from "../FontAwesome";
 import {Size} from "../Constants";
 
-class NavIcon extends NavElement {
+export class NavIcon extends NavElement {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
-        attr.setStyle(this.styleSheet.icon);
+        attr.addClass(this.styleSheet.icon);
     }
 
     getValue() {
@@ -32,10 +32,10 @@ class NavIcon extends NavElement {
 }
 
 
-class LeftSideIcon extends NavIcon {
+export class LeftSideNavIcon extends NavIcon {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
-        attr.setStyle(this.styleSheet.sideIcon);
+        attr.addClass(this.styleSheet.sideIcon);
     }
 
     getIcon() {
@@ -44,10 +44,10 @@ class LeftSideIcon extends NavIcon {
 }
 
 
-class RightSideIcon extends NavIcon {
+export class RightSideNavIcon extends NavIcon {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
-        attr.setStyle(this.styleSheet.sideIcon);
+        attr.addClass(this.styleSheet.sideIcon);
     }
 
     getIcon() {
@@ -56,15 +56,13 @@ class RightSideIcon extends NavIcon {
 }
 
 
-class WrappedIcon extends NavIcon {
+export class WrappedNavIcon extends NavIcon {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
-        attr.setStyle(this.styleSheet.wrappedIcon);
+        attr.addClass(this.styleSheet.wrappedIcon);
     }
 
     getIcon() {
         return <FAIcon icon="ellipsis-h" size={Size.LARGE}/>;
     }
 }
-
-export {NavIcon, LeftSideIcon, RightSideIcon, WrappedIcon};

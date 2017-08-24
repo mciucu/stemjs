@@ -5,6 +5,7 @@ import {Device} from "../base/Device";
 import {Orientation, Level, Size} from "./Constants";
 import {Theme} from "style/Theme";
 
+// TODO: export these properly, don't use a namespace here
 let GlobalStyle = {
 };
 

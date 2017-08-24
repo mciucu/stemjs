@@ -22343,18 +22343,18 @@ var NavIcon = function (_NavElement) {
     return NavIcon;
 }(NavElement);
 
-var LeftSideIcon = function (_NavIcon) {
-    inherits(LeftSideIcon, _NavIcon);
+var LeftSideNavIcon = function (_NavIcon) {
+    inherits(LeftSideNavIcon, _NavIcon);
 
-    function LeftSideIcon() {
-        classCallCheck(this, LeftSideIcon);
-        return possibleConstructorReturn(this, (LeftSideIcon.__proto__ || Object.getPrototypeOf(LeftSideIcon)).apply(this, arguments));
+    function LeftSideNavIcon() {
+        classCallCheck(this, LeftSideNavIcon);
+        return possibleConstructorReturn(this, (LeftSideNavIcon.__proto__ || Object.getPrototypeOf(LeftSideNavIcon)).apply(this, arguments));
     }
 
-    createClass(LeftSideIcon, [{
+    createClass(LeftSideNavIcon, [{
         key: "extraNodeAttributes",
         value: function extraNodeAttributes(attr) {
-            get(LeftSideIcon.prototype.__proto__ || Object.getPrototypeOf(LeftSideIcon.prototype), "extraNodeAttributes", this).call(this, attr);
+            get(LeftSideNavIcon.prototype.__proto__ || Object.getPrototypeOf(LeftSideNavIcon.prototype), "extraNodeAttributes", this).call(this, attr);
             attr.setStyle(this.styleSheet.sideIcon);
         }
     }, {
@@ -22363,21 +22363,21 @@ var LeftSideIcon = function (_NavIcon) {
             return UI.createElement(FAIcon, { icon: "bars", size: Size.LARGE });
         }
     }]);
-    return LeftSideIcon;
+    return LeftSideNavIcon;
 }(NavIcon);
 
-var RightSideIcon = function (_NavIcon2) {
-    inherits(RightSideIcon, _NavIcon2);
+var RightSideNavIcon = function (_NavIcon2) {
+    inherits(RightSideNavIcon, _NavIcon2);
 
-    function RightSideIcon() {
-        classCallCheck(this, RightSideIcon);
-        return possibleConstructorReturn(this, (RightSideIcon.__proto__ || Object.getPrototypeOf(RightSideIcon)).apply(this, arguments));
+    function RightSideNavIcon() {
+        classCallCheck(this, RightSideNavIcon);
+        return possibleConstructorReturn(this, (RightSideNavIcon.__proto__ || Object.getPrototypeOf(RightSideNavIcon)).apply(this, arguments));
     }
 
-    createClass(RightSideIcon, [{
+    createClass(RightSideNavIcon, [{
         key: "extraNodeAttributes",
         value: function extraNodeAttributes(attr) {
-            get(RightSideIcon.prototype.__proto__ || Object.getPrototypeOf(RightSideIcon.prototype), "extraNodeAttributes", this).call(this, attr);
+            get(RightSideNavIcon.prototype.__proto__ || Object.getPrototypeOf(RightSideNavIcon.prototype), "extraNodeAttributes", this).call(this, attr);
             attr.setStyle(this.styleSheet.sideIcon);
         }
     }, {
@@ -22386,21 +22386,21 @@ var RightSideIcon = function (_NavIcon2) {
             return UI.createElement(FAIcon, { icon: "ellipsis-v", size: Size.LARGE });
         }
     }]);
-    return RightSideIcon;
+    return RightSideNavIcon;
 }(NavIcon);
 
-var WrappedIcon = function (_NavIcon3) {
-    inherits(WrappedIcon, _NavIcon3);
+var WrappedNavIcon = function (_NavIcon3) {
+    inherits(WrappedNavIcon, _NavIcon3);
 
-    function WrappedIcon() {
-        classCallCheck(this, WrappedIcon);
-        return possibleConstructorReturn(this, (WrappedIcon.__proto__ || Object.getPrototypeOf(WrappedIcon)).apply(this, arguments));
+    function WrappedNavIcon() {
+        classCallCheck(this, WrappedNavIcon);
+        return possibleConstructorReturn(this, (WrappedNavIcon.__proto__ || Object.getPrototypeOf(WrappedNavIcon)).apply(this, arguments));
     }
 
-    createClass(WrappedIcon, [{
+    createClass(WrappedNavIcon, [{
         key: "extraNodeAttributes",
         value: function extraNodeAttributes(attr) {
-            get(WrappedIcon.prototype.__proto__ || Object.getPrototypeOf(WrappedIcon.prototype), "extraNodeAttributes", this).call(this, attr);
+            get(WrappedNavIcon.prototype.__proto__ || Object.getPrototypeOf(WrappedNavIcon.prototype), "extraNodeAttributes", this).call(this, attr);
             attr.setStyle(this.styleSheet.wrappedIcon);
         }
     }, {
@@ -22409,7 +22409,7 @@ var WrappedIcon = function (_NavIcon3) {
             return UI.createElement(FAIcon, { icon: "ellipsis-h", size: Size.LARGE });
         }
     }]);
-    return WrappedIcon;
+    return WrappedNavIcon;
 }(NavIcon);
 
 var _class$36;
@@ -23148,7 +23148,7 @@ var NavManager = (_dec2$3 = registerStyle(NavStyle), _dec2$3(_class3$9 = functio
             }
 
             if (!this.leftPanelToggler) {
-                this.leftPanelToggler = UI.createElement(LeftSideIcon, { onClick: function onClick() {
+                this.leftPanelToggler = UI.createElement(LeftSideNavIcon, { onClick: function onClick() {
                         return _this5.leftSideIconAction();
                     } });
             }
@@ -23168,7 +23168,7 @@ var NavManager = (_dec2$3 = registerStyle(NavStyle), _dec2$3(_class3$9 = functio
                 return null;
             }
             if (!this.rightPanelToggler) {
-                this.rightPanelToggler = UI.createElement(RightSideIcon, { onClick: function onClick() {
+                this.rightPanelToggler = UI.createElement(RightSideNavIcon, { onClick: function onClick() {
                         return _this6.rightSideIconAction();
                     } });
             }
@@ -23229,7 +23229,7 @@ var NavManager = (_dec2$3 = registerStyle(NavStyle), _dec2$3(_class3$9 = functio
             var _this7 = this;
 
             if (!this.wrappedToggler) {
-                this.wrappedToggler = UI.createElement(WrappedIcon, { onClick: function onClick() {
+                this.wrappedToggler = UI.createElement(WrappedNavIcon, { onClick: function onClick() {
                         return _this7.wrappedIconAction();
                     },
                     className: this.wrapped ? "" : "hidden" });
@@ -23690,9 +23690,9 @@ exports.NavSection = NavSection;
 exports.NavAnchoredNotifications = NavAnchoredNotifications;
 exports.navSessionManager = navSessionManager;
 exports.NavIcon = NavIcon;
-exports.LeftSideIcon = LeftSideIcon;
-exports.RightSideIcon = RightSideIcon;
-exports.WrappedIcon = WrappedIcon;
+exports.LeftSideNavIcon = LeftSideNavIcon;
+exports.RightSideNavIcon = RightSideNavIcon;
+exports.WrappedNavIcon = WrappedNavIcon;
 exports.NavManager = NavManager;
 exports.initializeNavbar = initializeNavbar;
 exports.NavCarouselStyle = NavCarouselStyle;

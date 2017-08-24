@@ -227,7 +227,7 @@ let progressBarColorToStyle = (color) => {
 
 class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToStyle) {
     @styleRule
-    CONTAINER = {
+    container = {
         height: "20px",
         marginBottom: "20px",
         overflow: "hidden",
@@ -253,13 +253,13 @@ class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToStyle) {
     }, this.colorStyleRule(this.themeProperties.COLOR_PRIMARY)];
 
     @styleRule
-    STRIPED = {
+    striped = {
         backgroundImage: "linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent)",
         backgroundSize: "40px 40px",
     };
 
     @styleRule
-    ACTIVE = {
+    active = {
         animation: "progress-bar-stripes 2s linear infinite",
     };
 
@@ -291,7 +291,7 @@ class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToStyle) {
 @registerStyle(ProgressBarStyle)
 class ProgressBar extends SimpleStyledElement {
     extraNodeAttributes(attr) {
-        attr.addClass(this.styleSheet.CONTAINER);
+        attr.addClass(this.styleSheet.container);
     }
 
     render() {
@@ -327,10 +327,10 @@ class ProgressBar extends SimpleStyledElement {
             barOptions.className += " " + this.styleSheet.Level(this.getLevel());
         }
         if (this.options.striped) {
-            barOptions.className += " " + this.styleSheet.STRIPED;
+            barOptions.className += " " + this.styleSheet.striped;
         }
         if (this.options.active) {
-            barOptions.className += " " + this.styleSheet.ACTIVE;
+            barOptions.className += " " + this.styleSheet.active;
         }
         if (this.options.color) {
             barOptions.style.backgroundColor = this.options.color;
