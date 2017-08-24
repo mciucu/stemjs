@@ -60,6 +60,12 @@ function StateDependentElement(BaseClass) {
             return super.renderLoaded();
         }
 
+        onDelayedMount() {
+            if (!this.options.error) {
+                super.onDelayedMount();
+            }
+        }
+
         beforeRedrawNotLoaded() {
             Ajax.getJSON(this.getAjaxUrl(), this.getAjaxRequest()).then(
                 (data) => {
