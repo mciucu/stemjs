@@ -64,7 +64,15 @@ class Modal extends UI.Element {
         };
     }
 
+    isVisible() {
+        return this.options.visible;
+    }
+
     hide() {
+        if (!this.isVisible()) {
+            return;
+        }
+
         this.options.visible = false;
         this.modalWindow.fadeOut();
 
@@ -77,10 +85,10 @@ class Modal extends UI.Element {
                 if (this.options.destroyOnHide) {
                     this.destroyNode();
                 }
-            }, this.modalWindow.options.transitionTime);
+            }, this.modalWindow.options.transitionTime || 0);
 
             this.detachListener(this.closeListenerHandler);
-        }, this.modalWindow.options.transitionTime);
+        }, this.modalWindow.options.transitionTime || 0);
         document.body.classList.remove("unscrollable");
     }
 
