@@ -203,6 +203,4 @@ function css(style) {
 
 export {css, StyleSheet, ExclusiveClassSet, styleMap, wrapCSS, hover, focus, active};
 
-export const StyleSet = StyleSheet;
-
 export * from "../decorators/Style";

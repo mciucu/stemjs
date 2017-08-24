@@ -17,7 +17,7 @@ function getInstanceForObject(obj) {
     if (!obj) {
         return null;
     }
-    let styleSheet = (obj.theme && obj.theme.get(obj)) || obj.styleSheet || obj.styleSet;
+    let styleSheet = (obj.theme && obj.theme.get(obj)) || obj.styleSheet;
     return getInstance(styleSheet);
 }
 
@@ -82,23 +82,9 @@ class Theme extends Dispatchable {
 
 Theme.Global = new Theme("Global");
 
-// We're going to add some methods to UI.Element, to be able to access their style sheets
-function styleSheetGetter() {
+UI.Element.prototype.getStyleSheet = function styleSheetGetter() {
     return getInstanceForObject(this.options) || getInstanceForObject(this.constructor);
-}
-
-// TODO: should fixate on a single nomenclature, just use StyleSheet everywhere
-UI.Element.prototype.getStyleSheet = UI.Element.prototype.getStyleSet = styleSheetGetter;
-
-// TODO: not sure if I like the getter pattern
-Object.defineProperty(UI.Element.prototype, "styleSheet", {
-    get: function() {
-        return this.getStyleSheet();
-    },
-    set: function (value) {
-        throw Error("Don't change the styleSheet of a UI Element, change this attribute in this.options");
-    }
-});
+};
 
 function registerStyle(styleClass, theme=Theme.Global) {
     return (target) => {

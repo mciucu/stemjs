@@ -339,6 +339,15 @@ class UIElement extends BaseUIElement {
         }
     }
 
+    get styleSheet() {
+        return this.getStyleSheet();
+    }
+
+    set styleSheet(value) {
+        this.options.styleSheet = value;
+        this.redraw();
+    }
+
     addListenersFromOptions() {
         for (const key in this.options) {
             if (typeof key === "string" && key.startsWith("on") && key.length > 2) {
