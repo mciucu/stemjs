@@ -5,9 +5,6 @@ import {darken, enhance} from "ui/Color";
 class NavStyle extends StyleSheet {
     // Custom variables
     getColors() {
-        if (this.colors) {
-            return this.colors;
-        }
         const themeProperties = this.themeProperties;
 
         const navManagerColor = themeProperties.COLOR_PRIMARY;
@@ -40,18 +37,17 @@ class NavStyle extends StyleSheet {
         backgroundTransitionDuration: ".2s",
     };
 
-
     // Icons
     icon = {
-        color: () => this.getColors().text,
-        lineHeight: () => this.dimensions.navbarHeight,
-        height: () => this.dimensions.navbarHeight,
-        width: () => this.dimensions.navbarHeight,
+        color: this.getColors().text,
+        lineHeight: this.dimensions.navbarHeight,
+        height: this.dimensions.navbarHeight,
+        width: this.dimensions.navbarHeight,
         display: "inline-block",
         cursor: "pointer",
         textAlign: "center",
         ":hover": {
-            backgroundColor: () => this.getColors().navbarHover,
+            backgroundColor: this.getColors().navbarHover,
         }
     };
 

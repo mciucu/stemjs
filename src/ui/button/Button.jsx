@@ -1,19 +1,21 @@
 import {Ajax} from "../../base/Ajax";
-import {GlobalStyle} from "../GlobalStyle";
 import {IconableInterface} from "../Bootstrap3";
 import {UI} from "../UIBase";
 import {ActionStatus} from "../Constants";
+import {registerStyle} from "../style/Theme";
+import {ButtonStyle} from "./ButtonStyle";
 
+@registerStyle(ButtonStyle)
 class Button extends UI.Primitive(IconableInterface, "button") {
     extraNodeAttributes(attr) {
-        attr.addClass(GlobalStyle.Button.DEFAULT);
+        attr.addClass(this.styleSheet.DEFAULT);
 
         if (this.getSize()) {
-            attr.addClass(GlobalStyle.Button.Size(this.getSize()));
+            attr.addClass(this.styleSheet.Size(this.getSize()));
         }
 
         if (this.getLevel()) {
-            attr.addClass(GlobalStyle.Button.Level(this.getLevel()));
+            attr.addClass(this.styleSheet.Level(this.getLevel()));
         }
     }
 

@@ -26,6 +26,7 @@ class Theme extends Dispatchable {
         super();
         this.styleSheetSymbol = Symbol("Theme" + name);
         this.classSet = new Set();
+        this.styleSheetSet = new Set();
         this.properties = {}
     }
 
@@ -39,7 +40,7 @@ class Theme extends Dispatchable {
 
     set(cls, styleSheet) {
         cls[this.styleSheetSymbol] = styleSheet;
-        this.classSet.add(cls, styleSheet);
+        this.classSet.add(cls);
     }
 
     get(cls) {
@@ -57,18 +58,45 @@ class Theme extends Dispatchable {
         return this.properties[key] || defaultValue;
     }
 
-    setProperties(properties, prefix) {
-        if (!prefix) {
-            Object.assign(this.properties, properties);
-        } else {
-            for (const key in properties) {
-                this.setProperty(prefix + key, properties[key]);
-            }
+    setProperties(properties, update=true) {
+        Object.assign(this.properties, properties);
+        if (update) {
+            this.updateStyleSheets();
         }
     }
 
     setProperty(key, value) {
         this.properties[key] = value;
+    }
+
+    getAllStyleSheets() {
+        let styleSheetSet = new Set(this.styleSheetSet);
+        for (const cls of this.classSet.values()) {
+            styleSheetSet.add(this.get(cls));
+        }
+        return Array.from(styleSheetSet).map(styleSheet => {
+            if (styleSheet.getInstance) {
+                return styleSheet.getInstance();
+            }
+            return styleSheet;
+        });
+    }
+
+    addStyleSheet(styleSheet) {
+        this.styleSheetSet.add(styleSheet);
+    }
+
+    removeStyleSheet(styleSheet) {
+        this.styleSheetSet.delete(styleSheet);
+    }
+
+    updateStyleSheets() {
+        for (const styleSheet of this.getAllStyleSheets()) {
+            if (styleSheet.update) {
+                styleSheet.update();
+            }
+
+        }
     }
 
     static register(cls, styleSheet) {
@@ -77,6 +105,10 @@ class Theme extends Dispatchable {
 
     static get(cls) {
         return this.Global.get(...arguments);
+    }
+
+    static addStyleSheet(styleSheet) {
+        this.Global.addStyleSheet(styleSheet);
     }
 }
 

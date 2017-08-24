@@ -1,7 +1,9 @@
 import {UI} from "./UIBase";
-import {GlobalStyle} from "./GlobalStyle";
-import {Ajax} from "../base/Ajax";
+import {BasicLevelStyleSheet, GlobalStyle} from "./GlobalStyle";
 import {Orientation} from "./Constants";
+import {registerStyle} from "./style/Theme";
+import {buildColors} from "./Color";
+import {styleRule} from "../decorators/Style";
 
 class SimpleStyledElement extends UI.Element {
     getLevel() {
@@ -62,39 +64,234 @@ class IconableInterface extends SimpleStyledElement {
     }
 }
 
+let labelColorToStyle = (color) => {
+    const colors = buildColors(color);
+    let darker = {
+        backgroundColor: colors[2],
+        color: colors[6],
+        textDecoration: "none",
+    };
+    let regular = {
+        backgroundColor: colors[1],
+        borderColor: colors[5],
+        color: colors[6],
+    };
+    return Object.assign({}, regular, {
+        ":hover": darker,
+        ":hover:disabled": regular,
+        ":focus": darker,
+        ":active": darker,
+    });
+};
 
+export class LabelStyle extends BasicLevelStyleSheet(labelColorToStyle) {
+    // DEFAULT uses MEDIUM as size and PLAIN as level
+    @styleRule
+    DEFAULT = [{
+        fontWeight: "bold",
+        border: "0.1em solid transparent",
+        padding: "0.07em 0.4em",
+        borderRadius: "0.3em",
+        textAlign: "center",
+        whiteSpace: "nowrap",
+        verticalAlign: "bottom",
+        lineHeight: 4/3 + "",
+        display: "inline-block",
+        touchAction: "manipulation",
+        ":disabled": {
+            opacity: "0.7",
+            cursor: "not-allowed",
+        },
+    }, {
+        "font-size": "12px",
+    }, this.colorStyleRule(this.themeProperties.COLOR_GRAY)];
+
+    @styleRule
+    EXTRA_SMALL = {
+        fontSize: "10px",
+        padding: "0.05em 0.2em",
+        borderWidth: "0.05em",
+    };
+
+    @styleRule
+    SMALL = {
+        fontSize: "10px",
+    };
+
+    @styleRule
+    MEDIUM = {};
+
+    @styleRule
+    LARGE = {
+        fontSize: "14px",
+    };
+
+    @styleRule
+    EXTRA_LARGE = {
+        fontSize: "17px",
+        padding: "0.05em 0.2em",
+    };
+}
+
+
+@registerStyle(LabelStyle)
 class Label extends UI.Primitive(IconableInterface, "span") {
     extraNodeAttributes(attr) {
-        attr.addClass(GlobalStyle.Label.DEFAULT);
+        attr.addClass(this.styleSheet.DEFAULT);
 
         if (this.getSize()) {
-            attr.addClass(GlobalStyle.Label.Size(this.getSize()));
+            attr.addClass(this.styleSheet.Size(this.getSize()));
         }
 
         if (this.getLevel()) {
-            attr.addClass(GlobalStyle.Label.Level(this.getLevel()));
+            attr.addClass(this.styleSheet.Level(this.getLevel()));
         }
     }
 }
 
+let badgeColorToStyle = (color) => {
+    const colors = buildColors(color);
+    return {
+        backgroundColor: colors[1],
+        borderColor: colors[5],
+        color: colors[6],
+    };
+};
 
+export class BadgeStyle extends BasicLevelStyleSheet(badgeColorToStyle) {
+    // DEFAULT uses MEDIUM as size and PLAIN as level
+    @styleRule
+    DEFAULT = [{
+        display: "inline-block",
+        padding: "0.25em 0.55em",
+        fontWeight: "700",
+        lineHeight: "1",
+        color: "#fff",
+        textAlign: "center",
+        whiteSpace: "nowrap",
+        verticalAlign: "middle",
+        backgroundColor: "#777",
+        borderRadius: "0.8em",
+    }, {
+        "font-size": "12px",
+    }, this.colorStyleRule(this.themeProperties.COLOR_GRAY)];
+
+    @styleRule
+    EXTRA_SMALL = {
+        fontSize: "10px",
+        padding: "0.1em 0.2em",
+    };
+
+    @styleRule
+    SMALL = {
+        fontSize: "10px",
+    };
+
+    @styleRule
+    MEDIUM = {};
+
+    @styleRule
+    LARGE = {
+        fontSize: "14px",
+    };
+
+    @styleRule
+    EXTRA_LARGE = {
+        fontSize: "17px",
+        padding: "0.1em 0.2em",
+    };
+}
+
+
+@registerStyle(BadgeStyle)
 class Badge extends UI.Primitive(IconableInterface, "span") {
     extraNodeAttributes(attr) {
-        attr.addClass(GlobalStyle.Badge.DEFAULT);
+        attr.addClass(this.styleSheet.DEFAULT);
 
         if (this.getSize()) {
-            attr.addClass(GlobalStyle.Badge.Size(this.getSize()));
+            attr.addClass(this.styleSheet.Size(this.getSize()));
         }
 
         if (this.getLevel()) {
-            attr.addClass(GlobalStyle.Badge.Level(this.getLevel()));
+            attr.addClass(this.styleSheet.Level(this.getLevel()));
         }
     }
 }
 
+let progressBarColorToStyle = (color) => {
+    let colors = buildColors(color);
+    return {
+        backgroundColor: colors[1],
+    };
+};
+
+class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToStyle) {
+    @styleRule
+    CONTAINER = {
+        height: "20px",
+        marginBottom: "20px",
+        overflow: "hidden",
+        backgroundColor: "#f5f5f5",
+        borderRadius: "4px",
+        boxShadow: "inset 0 1px 2px rgba(0, 0, 0, .1)",
+    };
+
+    @styleRule
+    DEFAULT = [{
+        float: "left",
+        width: "0",
+        height: "100%",
+        lineHeight: "20px",
+        color: "#fff",
+        textAlign: "center",
+        backgroundColor: "#337ab7",
+        boxShadow: "inset 0 -1px 0 rgba(0, 0, 0, .15)",
+        transition: "width .6s ease",
+        fontColor: "#ffffff",
+    }, {
+        fontSize: "12px",
+    }, this.colorStyleRule(this.themeProperties.COLOR_PRIMARY)];
+
+    @styleRule
+    STRIPED = {
+        backgroundImage: "linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent)",
+        backgroundSize: "40px 40px",
+    };
+
+    @styleRule
+    ACTIVE = {
+        animation: "progress-bar-stripes 2s linear infinite",
+    };
+
+    @styleRule
+    EXTRA_SMALL = {
+        fontSize: "8px",
+    };
+
+    @styleRule
+    SMALL = {
+        fontSize: "10px",
+    };
+
+    @styleRule
+    MEDIUM = {};
+
+    @styleRule
+    LARGE = {
+        fontSize: "14px",
+    };
+
+    @styleRule
+    EXTRA_LARGE = {
+        fontSize: "17px",
+        padding: "0.1em 0.2em",
+    };
+}
+
+@registerStyle(ProgressBarStyle)
 class ProgressBar extends SimpleStyledElement {
     extraNodeAttributes(attr) {
-        attr.addClass(GlobalStyle.ProgressBar.CONTAINER);
+        attr.addClass(this.styleSheet.CONTAINER);
     }
 
     render() {
@@ -116,7 +313,7 @@ class ProgressBar extends SimpleStyledElement {
             }
         }
         let barOptions = {
-            className: GlobalStyle.ProgressBar.DEFAULT,
+            className: this.styleSheet.DEFAULT,
             style: barStyle,
         };
 
@@ -127,13 +324,13 @@ class ProgressBar extends SimpleStyledElement {
         }
 
         if (this.options.level) {
-            barOptions.className += " " + GlobalStyle.ProgressBar.Level(this.getLevel());
+            barOptions.className += " " + this.styleSheet.Level(this.getLevel());
         }
         if (this.options.striped) {
-            barOptions.className += " " + GlobalStyle.ProgressBar.STRIPED;
+            barOptions.className += " " + this.styleSheet.STRIPED;
         }
         if (this.options.active) {
-            barOptions.className += " " + GlobalStyle.ProgressBar.ACTIVE;
+            barOptions.className += " " + this.styleSheet.ACTIVE;
         }
         if (this.options.color) {
             barOptions.style.backgroundColor = this.options.color;

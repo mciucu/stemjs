@@ -1,9 +1,11 @@
-import {Button} from "./Button";
-import {GlobalStyle} from "../GlobalStyle";
-import {SimpleStyledElement} from "../Bootstrap3";
 import {UI} from "../UIBase";
+import {Button} from "./Button";
+import {SimpleStyledElement} from "../Bootstrap3";
 import {Orientation} from "../Constants";
+import {registerStyle} from "../style/Theme";
+import {ButtonGroupStyle, RadioButtonGroupStyle} from "./ButtonStyle";
 
+@registerStyle(ButtonGroupStyle)
 class ButtonGroup extends SimpleStyledElement {
     getDefaultOptions() {
         return {
@@ -12,11 +14,12 @@ class ButtonGroup extends SimpleStyledElement {
     }
 
     extraNodeAttributes(attr) {
-        attr.addClass(GlobalStyle.ButtonGroup.Orientation(this.options.orientation));
+        attr.addClass(this.styleSheet.Orientation(this.options.orientation));
     }
 }
 
 
+@registerStyle(RadioButtonGroupStyle)
 class RadioButtonGroup extends SimpleStyledElement {
     setOptions(options) {
         super.setOptions(options);
@@ -24,7 +27,7 @@ class RadioButtonGroup extends SimpleStyledElement {
     }
 
     extraNodeAttributes(attr) {
-        attr.addClass(GlobalStyle.RadioButtonGroup.DEFAULT);
+        attr.addClass(this.styleSheet.DEFAULT);
     }
 
     render() {

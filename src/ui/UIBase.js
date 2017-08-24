@@ -39,8 +39,8 @@ class BaseUIElement extends Dispatchable {
         this.onUnmount();
         this.cleanup();
         this.removeRef();
-        this.node.remove();
-        this.node = undefined; // Clear for gc
+        this.node && this.node.remove();
+        delete this.node; // Clear for gc
     }
 }
 

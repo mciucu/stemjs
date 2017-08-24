@@ -1,11 +1,8 @@
-// This file may be deprecated in time by CSSNativeStyleSheet, but the API will be backwards compatible
-import {UI} from "./UIBase";
 import {StyleElement, KeyframeElement, DynamicStyleElement} from "./StyleElement";
 import {Dispatchable} from "../base/Dispatcher";
 
 // Class meant to group multiple classes inside a single <style> element, for convenience
 // TODO: pattern should be more robust, to be able to only update classes
-// TODO: should probably be renamed to StyleSheet?
 class StyleSheet extends Dispatchable {
     constructor(options={}) {
         super();
@@ -23,6 +20,7 @@ class StyleSheet extends Dispatchable {
         if (!this.options.delayedMount) {
             this.ensureMounted();
         }
+        this.getTheme().addStyleSheet(this);
     }
 
     ensureMounted() {
@@ -54,6 +52,10 @@ class StyleSheet extends Dispatchable {
 
     getTheme() {
         return this.options.theme || this.constructor.theme;
+    }
+
+    setTheme(theme) {
+        this.options.theme = theme;
     }
 
     getThemeProperty(key, defaultValue) {
@@ -121,6 +123,17 @@ class StyleSheet extends Dispatchable {
             return;
         }
         this.dispatch("beforeUpdate", this);
+
+        for (const key of Object.keys(this)) {
+            if (this[key] instanceof DynamicStyleElement) {
+                const desc = this["__style__" + key];
+                const func = desc && desc.objInitializer;
+                if (func) {
+                    this[key].options.style = func.call(this);
+                }
+            }
+        }
+
         let children = [];
         for (let value of this.elements) {
             if (value instanceof StyleElement) {
@@ -168,9 +181,9 @@ class ExclusiveClassSet {
 }
 
 function wrapCSS(context, style) {
-    let result = {};
-    result[context] = style;
-    return result;
+    return {
+        [context]: style
+    };
 }
 
 function hover(style) {
@@ -187,20 +200,6 @@ function focus(style) {
 
 let styleMap = new WeakMap();
 
-// TODO: deprecate this global css method, or at least rewrite it
-function css(style) {
-    if (arguments.length > 1) {
-        style = Object.assign({}, ...arguments);
-    }
-    // If using the exact same object, return the same class
-    let styleWrapper = styleMap.get(style);
-    if (!styleWrapper) {
-        styleWrapper = DynamicStyleElement.create(document.body, {style: style});
-        styleMap.set(style, styleWrapper);
-    }
-    return styleWrapper;
-}
-
-export {css, StyleSheet, ExclusiveClassSet, styleMap, wrapCSS, hover, focus, active};
+export {StyleSheet, ExclusiveClassSet, styleMap, wrapCSS, hover, focus, active};
 
 export * from "../decorators/Style";

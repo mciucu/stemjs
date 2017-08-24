@@ -1,10 +1,10 @@
 import {UI} from "./UIBase";
 import {SimpleStyledElement} from "./Bootstrap3";
 import {BasicLevelStyleSheet, GlobalStyle} from "./GlobalStyle";
-import {registerStyle} from "./style/Theme";
+import {registerStyle, Theme} from "./style/Theme";
 import {buildColors} from "./Color";
 import {styleRule} from "../decorators/Style";
-import {Level, Size} from "./Constants";
+import {Level} from "./Constants";
 
 export function cardPanelColorToStyle(color) {
     let colors = buildColors(color);
@@ -70,7 +70,6 @@ function cardPanelHeaderColorToStyle(color){
 }
 
 export const CardPanelHeaderStyle = BasicLevelStyleSheet(cardPanelHeaderColorToStyle);
-
 
 @registerStyle(CardPanelStyle)
 class CardPanel extends SimpleStyledElement {
@@ -143,9 +142,5 @@ class CardPanel extends SimpleStyledElement {
         ];
     }
 }
-
-// TODO: delete references to these
-GlobalStyle.CardPanel = CardPanelStyle.getInstance();
-GlobalStyle.CardPanelHeader = CardPanelHeaderStyle.getInstance();
 
 export {CardPanel};
