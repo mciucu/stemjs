@@ -46,7 +46,7 @@ Theme.Global.setProperties({
     ROW_LIST_ROW_PADDING_LARGE: 20,
     ROW_LIST_ROW_BORDER_WIDTH: 1,
 
-    FONT_FAMILY_SANS_SERIF: "'Segoe UI', 'Lucida Sans Unicode', 'Helvetica Neue', Helvetica, Arial, sans-serif",
+    FONT_FAMILY_SANS_SERIF: "Lato, 'Segoe UI', 'Lucida Sans Unicode', 'Helvetica Neue', Helvetica, Arial, sans-serif",
     FONT_FAMILY_SERIF: "serif",
     FONT_FAMILY_MONOSPACE: "'Source Code Pro', 'Monaco', 'Consolas', monospace",
 
