@@ -41,6 +41,16 @@ class StyleSheet extends Dispatchable {
         return this.singletonInstance;
     }
 
+    // Generate an instance, and also make sure to instantiate all style elements
+    static instantiate() {
+        const styleSheet = this.getInstance();
+
+        for (const key of Object.keys(this.prototype)) {
+            // Just hit the getter to instantiate the style
+            styleSheet[key];
+        }
+    }
+
     static getElementName() {
         this.elementNameCounter = (this.elementNameCounter || 0) + 1;
         let name = this.name;
