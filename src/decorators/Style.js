@@ -39,6 +39,10 @@ function styleRuleWithOptions() {
             // TODO: a bit of a hack, clean this up
             style["prefferedClassName"] = key;
 
+            if (options.selector) {
+                style["selectorName"] = options.selector;
+            }
+
             if (options.inherit) {
                 // Get the value we set in the prototype of the parent class
                 let parentDesc = Object.getPrototypeOf(target)[getStyleRuleKey(key)];
@@ -81,6 +85,14 @@ let styleRuleInherit = styleRuleWithOptions({
     getKey: getStyleRuleKey,
     inherit: true,
 });
+
+export function styleRuleCustom(options) {
+    return styleRuleWithOptions(Object.assign({
+        targetMethodName: "css",
+        getKey: getStyleRuleKey,
+        inherit: false,
+    }, options));
+}
 
 let keyframesRule = styleRuleWithOptions({
     targetMethodName: "keyframes",

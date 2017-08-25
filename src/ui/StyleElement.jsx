@@ -132,7 +132,8 @@ class DynamicStyleElement extends StyleElement {
         if (typeof style === "function") {
             style = style();
         }
-        return this.getStyleInstances("." + this.getClassName(), style);
+        const selector = style.selectorName || "." + this.getClassName();
+        return this.getStyleInstances(selector, style);
     }
 
     setStyle(key, value) {
