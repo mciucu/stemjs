@@ -8,7 +8,12 @@ class StoreObject extends Dispatchable {
     constructor(obj, event, store) {
         super();
         Object.assign(this, obj);
+        this.setStore(store);
     };
+
+    static getStoreName() {
+        return this.name;
+    }
 
     setStore(store) {
         this[StoreSymbol] = store;
@@ -48,6 +53,14 @@ class StoreObject extends Dispatchable {
             });
         }
         return this._eventDispatcher.addListener(eventType, callback);
+    }
+
+    getStreamName() {
+        throw "getStreamName not implemented";
+    }
+
+    registerToStream() {
+        this.getStore().getState().registerStream(this.getStreamName());
     }
 }
 
@@ -118,7 +131,7 @@ class GenericObjectStore extends BaseStore {
     }
 
     createObject(event) {
-        let obj = new this.ObjectWrapper(event.data, event, this);
+        const obj = new this.ObjectWrapper(event.data, event, this);
         obj.setStore(this);
         return obj;
     }

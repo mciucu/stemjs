@@ -93,6 +93,10 @@ class DynamicStyleElement extends StyleElement {
         return this.className;
     }
 
+    getSelector() {
+        return this.options.selectorName || "." + this.getClassName();
+    }
+
     // A cyclic dependency in the style object will cause an infinite loop here
     getStyleInstances(selector, style) {
         let result = [];
@@ -132,8 +136,11 @@ class DynamicStyleElement extends StyleElement {
         if (typeof style === "function") {
             style = style();
         }
-        const selector = style.selectorName || "." + this.getClassName();
-        return this.getStyleInstances(selector, style);
+        if (style.selectorName) {
+            this.options.selectorName = style.selectorName;
+            delete style.selectorName;
+        }
+        return this.getStyleInstances(this.getSelector(), style);
     }
 
     setStyle(key, value) {

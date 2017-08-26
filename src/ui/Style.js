@@ -45,7 +45,7 @@ class StyleSheet extends Dispatchable {
     static instantiate() {
         const styleSheet = this.getInstance();
 
-        for (const key of Object.keys(this.prototype)) {
+        for (const key in this.prototype) {
             // Just hit the getter to instantiate the style
             styleSheet[key];
         }
