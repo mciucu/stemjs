@@ -571,6 +571,7 @@ function RawContentModifierMixin(BaseModifierClass) {
     }
 }
 
+// TODO: should be called CodeBlockModified
 class CodeModifier extends Modifier {
     constructor(options) {
         super(options);
@@ -606,12 +607,17 @@ class CodeModifier extends Modifier {
         return "";
     }
 
-    wrap(content, options) {
-        let codeHighlighter = {
-            tag: "CodeSnippet",
-            value: content,
-        };
+    getElement(content) {
+    		return {
+            tag: this.constructor.tag || "pre",
+            children: [content],
+        }
+    }
 
+    wrap(content, options) {
+        let codeHighlighter = this.getElement(content);
+
+        // TODO: this code should not be here
         let codeOptions = {
             aceMode: "c_cpp",
             maxLines: 32,
@@ -1701,6 +1707,7 @@ MarkupParser.parseJSON5 = (function() {
 export {MarkupParser};
 
 
+// TODO: these should be in a unit test file, not here
 export function TestStringStream() {
     let tests = [];
 
