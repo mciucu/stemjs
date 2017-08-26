@@ -607,7 +607,7 @@ export class BlockCodeModifier extends Modifier {
     }
 
     getElement(content) {
-    		return {
+        return {
             tag: this.constructor.tag || "pre",
             children: [content],
         }
