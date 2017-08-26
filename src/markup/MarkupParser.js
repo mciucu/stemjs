@@ -571,8 +571,7 @@ function RawContentModifierMixin(BaseModifierClass) {
     }
 }
 
-// TODO: should be called CodeBlockModified
-class CodeModifier extends Modifier {
+export class BlockCodeModifier extends Modifier {
     constructor(options) {
         super(options);
 
@@ -933,7 +932,7 @@ class LinkModifier extends Modifier {
 
 let MarkupModifier = Modifier;
 
-export {MarkupModifier, CodeModifier, HeaderModifier, ParagraphModifier, InlineCodeModifier, InlineLatexModifier, StrongModifier, LinkModifier};
+export {MarkupModifier, HeaderModifier, ParagraphModifier, InlineCodeModifier, InlineLatexModifier, StrongModifier, LinkModifier};
 
 class MarkupParser {
     constructor(options) {
@@ -1193,7 +1192,7 @@ class MarkupParser {
 }
 
 MarkupParser.modifiers = [
-    new CodeModifier(),
+    new BlockCodeModifier(),
     new HeaderModifier(),
     new HorizontalRuleModifier(),
     new UnorderedListModifier(),
