@@ -172,7 +172,8 @@ SVG.Element.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesM
     ["offset"],
     ["stopColor", {domName: "stop-color"}],
     ["strokeDasharray", {domName: "stroke-dasharray"}],
-    ["strokeLinecap", {domName: "stroke-linecap"}]
+    ["strokeLinecap", {domName: "stroke-linecap"}],
+    ["viewBox", {domName: "viewBox"}],
 ]);
 
 export {SVG};
