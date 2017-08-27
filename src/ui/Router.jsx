@@ -44,15 +44,6 @@ export class Router extends Switcher {
 
     static setGlobalRouter(router) {
         this.Global = router;
-
-        // TODO: disable this listener
-        Dispatcher.Global.addListener("changeURL", (href, event) => {
-            Router.changeURL(href);
-            if (event) {
-                event.preventDefault();
-            }
-        });
-
         window.onpopstate = () => {
             this.updateURL();
             Dispatcher.Global.dispatch("externalURLChange");
