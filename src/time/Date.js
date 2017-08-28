@@ -45,6 +45,11 @@ class StemDate extends BaseDate {
         return this.fromUnixMilliseconds(unixSecons * 1000);
     }
 
+    // Creates a Date object from an instance of DOMHighResTimeStamp, returned by performance.now() for instance
+    static fromHighResTimestamp(highResTimestamp) {
+        return this.fromUnixMilliseconds(highResTimestamp + self.performance.timing.navigationStart)
+    }
+
     // You don't usually need to call this in most cases, constructor uses MAX_AUX_UNIX_TIME
     static unix(unixTime) {
         return this.fromUnixSeconds(unixTime);
