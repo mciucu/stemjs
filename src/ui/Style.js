@@ -47,7 +47,9 @@ class StyleSheet extends Dispatchable {
 
         for (const key in this.prototype) {
             // Just hit the getter to instantiate the style
-            styleSheet[key];
+            if (!styleSheet[key]) {
+                console.log("This is here to prevent a bundling optimization bug");
+            }
         }
     }
 
