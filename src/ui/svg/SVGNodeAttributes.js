@@ -6,12 +6,7 @@ import {NodeAttributes} from "../NodeAttributes";
 // node attribute.
 const MozStyleElements = new Set(["width", "height", "rx", "ry", "cx", "cy", "x", "y"]);
 
-class SVGNodeAttributes extends NodeAttributes {
-    constructor(obj) {
-        super(obj);
-        this.className = null;
-    }
-
+export class SVGNodeAttributes extends NodeAttributes {
     fixMozAttributes(node) {
         if (this.hasOwnProperty("style")) {
             for (let attributeName of MozStyleElements.values()) {
@@ -29,11 +24,18 @@ class SVGNodeAttributes extends NodeAttributes {
         }
     }
 
+    applyClassName(node) {
+        // SVG elements have a different API for setting the className than regular DOM nodes
+        if (this.className) {
+            node.setAttribute("class", String(this.className));
+        } else {
+            node.removeAttribute("class");
+        }
+    }
+
     apply(node, attributesMap) {
         this.transform = this.transform || this.translate;
         super.apply(node, attributesMap);
         this.fixMozAttributes(node);
     }
 }
-
-export {SVGNodeAttributes};

@@ -20,7 +20,7 @@ SVG.Element = class SVGElement extends UI.Element {
 
     setOptions(options) {
         if (typeof this.getDefaultOptions === "function") {
-            let defaultOptions = this.getDefaultOptions();
+            let defaultOptions = this.getDefaultOptions(options);
             // TODO: consider this deep copy, seems really shady!
             const goodRef = options.ref;
             options = deepCopy({}, defaultOptions, options);
@@ -122,6 +122,11 @@ SVG.Element = class SVGElement extends UI.Element {
     }
 
     toFront() {
+        const parentNode = this.node && this.node.parentElement;
+        if (parentNode) {
+            parentNode.removeChild(this.node);
+            parentNode.appendChild(this.node);
+        }
     }
 
     toBack() {

@@ -213,6 +213,19 @@ export class NodeAttributes {
         }
     }
 
+    applyClassName(node) {
+        if (this.className) {
+            const className = String(this.className);
+            if (node.className != className) {
+                node.className = className;
+            }
+        } else {
+            if (node.className) {
+                node.removeAttribute("class");
+            }
+        }
+    }
+
     apply(node, attributesMap) {
         let addedAttributes = {};
         let whitelistedAttributes = this.whitelistedAttributes || {};
@@ -259,16 +272,7 @@ export class NodeAttributes {
             // TODO: also whitelist data- and aria- keys here
         }
 
-        if (this.className) {
-            node.className = String(this.className);
-            // TODO: find out which solution is best
-            // This solution works for svg nodes as well
-            // for (let cls of this.getClassNameSet()) {
-            //    node.classList.add(cls);
-            // }
-        } else {
-            node.removeAttribute("class");
-        }
+        this.applyClassName(node);
 
         node.removeAttribute("style");
         if (this.style) {
