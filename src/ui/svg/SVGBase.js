@@ -31,7 +31,7 @@ SVG.Element = class SVGElement extends UI.Element {
         super.setOptions(options);
     }
 
-    getMouseCoordinates(event=self.event) {
+    getScreenCoordinatedForPoint(point) {
         const node = this.node;
         // TODO: this is a good argument to always keep a reference to the Stem element in the nodes
         const svgNode = node.ownerSVGElement || node;
@@ -39,10 +39,10 @@ SVG.Element = class SVGElement extends UI.Element {
         if (svgNode.createSVGPoint) {
             // Using native SVG transformations
             // See https://msdn.microsoft.com/en-us/library/hh535760(v=vs.85).aspx
-            let point = svgNode.createSVGPoint();
-            point.x = event.clientX;
-            point.y = event.clientY;
-            return point.matrixTransform(node.getScreenCTM().inverse());
+            let svgPoint = svgNode.createSVGPoint();
+            svgPoint.x = point.x;
+            svgPoint.y = point.y;
+            return svgPoint.matrixTransform(node.getScreenCTM().inverse());
         }
 
         const rect = this.getBoundingClientRect();
@@ -50,6 +50,10 @@ SVG.Element = class SVGElement extends UI.Element {
         	x: event.clientX - rect.left - node.clientLeft,
         	y: event.clientY - rect.top - node.clientTop,
         };
+    }
+
+    getMouseCoordinatesForEvent(event=window.event) {
+        return this.getScreenCoordinatedForPoint({x: event.clientX, y: event.clientY});
     }
 
     saveState() {
