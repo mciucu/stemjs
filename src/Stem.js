@@ -6,6 +6,7 @@ export * from "base/Plugin";
 export * from "base/StorageMap";
 export * from "base/URLRouter";
 export * from "base/Utils";
+export * from "base/Device";
 export * from "data-structures/Deque";
 export * from "data-structures/MultiMap";
 export * from "decorators/Decorators";
