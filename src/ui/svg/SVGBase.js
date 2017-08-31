@@ -2,6 +2,7 @@ import {UI} from "../UIBase";
 import {CreateNodeAttributesMap} from "../NodeAttributes";
 import {deepCopy, uniqueId} from "../../base/Utils";
 import {SVGNodeAttributes} from "./SVGNodeAttributes";
+import {Device} from "../../base/Device";
 
 let SVG = {};
 
@@ -47,13 +48,13 @@ SVG.Element = class SVGElement extends UI.Element {
 
         const rect = this.getBoundingClientRect();
         return {
-        	x: event.clientX - rect.left - node.clientLeft,
-        	y: event.clientY - rect.top - node.clientTop,
+        	x: point.x - rect.left - node.clientLeft,
+        	y: point.y - rect.top - node.clientTop,
         };
     }
 
     getMouseCoordinatesForEvent(event=window.event) {
-        return this.getScreenCoordinatedForPoint({x: event.clientX, y: event.clientY});
+        return this.getScreenCoordinatedForPoint({x: Device.getEventX(event), y: Device.getEventY(event)});
     }
 
     saveState() {

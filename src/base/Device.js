@@ -23,25 +23,36 @@ class Device {
         return this._isMobileDevice;
     }
 
-    static getEventCoord(event, axis) {
-        let pageName = "page" + axis;
-        if (this.isTouchDevice()) {
-            if (event.targetTouches) {
-                return event.targetTouches[0][pageName];
-            }
-            if (event.originalEvent && event.originalEvent.targetTouches) {
-                return event.originalEvent.targetTouches[0][pageName];
-            }
+    static getEventTouchIdentifier(event) {
+        return Math.min(...[...event.touches].map(touch => touch.identifier));
+    }
+
+    static getEventTouch(event) {
+        const identifier = this.getEventTouchIdentifier(event);
+        return [...event.touches].find(touch => touch.identifier === identifier);
+    }
+
+    static getEventCoord(event, axis, reference="client") {
+        let coordName = reference + axis;
+        if (event[coordName]) {
+            return event[coordName];
         }
-        return event[pageName];
+        if (event.touches) {
+            return this.getEventTouch(event)[coordName];
+        }
+        if (event.originalEvent) {
+            return this.getEventCoord(event.originalEvent, axis, reference);
+        }
+
+        console.warn("Couldn't find coordinates for event. Maybe wrong reference point? (client/page/screen)");
     }
 
-    static getEventX(event) {
-        return this.getEventCoord(event, "X");
+    static getEventX(event, reference="client") {
+        return this.getEventCoord(event, "X", reference);
     }
 
-    static getEventY(event) {
-        return this.getEventCoord(event, "Y");
+    static getEventY(event, reference="client") {
+        return this.getEventCoord(event, "Y", reference);
     }
 
     static getBrowser() {

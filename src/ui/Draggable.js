@@ -1,4 +1,6 @@
-let Draggable = (BaseClass) => class Draggable extends BaseClass {
+import {Device} from "../base/Device";
+
+export const Draggable = (BaseClass) => class Draggable extends BaseClass {
     _clickCallbacks = new Map();
     _clickDragListeners = new Map();
 
@@ -53,18 +55,20 @@ let Draggable = (BaseClass) => class Draggable extends BaseClass {
         let listenerWrapper = Object.assign({}, listeners);
 
         listenerWrapper.onWrapperDrag = (event) => {
-            let deltaX = event.clientX - listenerWrapper._lastX;
-            listenerWrapper._lastX = event.clientX;
+            const eventX = Device.getEventX(event), eventY = Device.getEventY(event);
 
-            let deltaY = event.clientY - listenerWrapper._lastY;
-            listenerWrapper._lastY = event.clientY;
+            let deltaX = eventX - listenerWrapper._lastX;
+            listenerWrapper._lastX = eventX;
+
+            let deltaY = eventY - listenerWrapper._lastY;
+            listenerWrapper._lastY = eventY;
 
             listeners.onDrag(deltaX, deltaY);
         };
 
         listenerWrapper.onWrapperStart = (event) => {
-            listenerWrapper._lastX = event.clientX;
-            listenerWrapper._lastY = event.clientY;
+            listenerWrapper._lastX = Device.getEventX(event);
+            listenerWrapper._lastY = Device.getEventY(event);
 
             if (listeners.onStart) {
                 listeners.onStart(event);
@@ -76,7 +80,7 @@ let Draggable = (BaseClass) => class Draggable extends BaseClass {
 
         listenerWrapper.onWrapperEnd = (event) => {
             if (listeners.onEnd) {
-                listeners.onEnd(event)
+                listeners.onEnd(event);
             }
             // TODO: Replace with our body
             document.body.removeEventListener("mousemove", listenerWrapper.onWrapperDrag);
@@ -88,20 +92,21 @@ let Draggable = (BaseClass) => class Draggable extends BaseClass {
         let listenerWrapper = Object.assign({}, listeners);
 
         listenerWrapper.onWrapperDrag = (event) => {
-            let touch = event.targetTouches[0];
-            let deltaX = touch.pageX - listenerWrapper._lastX;
-            listenerWrapper._lastX = touch.pageX;
+            const eventX = Device.getEventX(event), eventY = Device.getEventY(event);
 
-            let deltaY = touch.pageY - listenerWrapper._lastY;
-            listenerWrapper._lastY = touch.pageY;
+            let deltaX = eventX - listenerWrapper._lastX;
+            listenerWrapper._lastX = eventX;
+
+            let deltaY = eventY - listenerWrapper._lastY;
+            listenerWrapper._lastY = eventY;
 
             listeners.onDrag(deltaX, deltaY);
         };
 
         listenerWrapper.onWrapperStart = (event) => {
-            let touch = event.targetTouches[0];
-            listenerWrapper._lastX = touch.pageX;
-            listenerWrapper._lastY = touch.pageY;
+            listenerWrapper._lastX = Device.getEventX(event);
+            listenerWrapper._lastY = Device.getEventY(event);
+            listenerWrapper.touchEventIdentifier = Device.getEventTouchIdentifier(event);
 
             if (listeners.onStart) {
                 listeners.onStart(event);
@@ -113,11 +118,23 @@ let Draggable = (BaseClass) => class Draggable extends BaseClass {
         };
 
         listenerWrapper.onWrapperEnd = (event) => {
+            let startNewDrag = false;
+            if (event.touches.length) {
+                if (Device.getEventTouchIdentifier(event) !== listenerWrapper.touchEventIdentifier) {
+                    startNewDrag = true;
+                } else {
+                    return;
+                }
+            }
             if (listeners.onEnd) {
                 listeners.onEnd(event);
             }
             // TODO: Replace with our body
             document.body.removeEventListener("touchmove", listenerWrapper.onWrapperDrag);
+
+            if (startNewDrag) {
+                listenerWrapper.onWrapperStart(event);
+            }
         };
         return listenerWrapper;
     }
@@ -158,5 +175,3 @@ let Draggable = (BaseClass) => class Draggable extends BaseClass {
         }
     }
 };
-
-export {Draggable};
