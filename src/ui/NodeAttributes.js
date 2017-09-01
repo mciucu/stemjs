@@ -105,6 +105,19 @@ export class NodeAttributes {
         }
     }
 
+    applyStyleToNode(key, value, node) {
+        if (typeof value === "function") {
+            value = value();
+        }
+        if ((value instanceof Number || typeof value === "number") &&
+            value != 0 && defaultToPixelsAttributes.has(dashCase(key))) {
+            value = value + "px";
+        }
+        if (node && node.style[key] !== value) {
+            node.style[key] = value;
+        }
+    }
+
     setStyle(key, value, node) {
         if (!(typeof key === "string" || key instanceof String)) {
             // If the key is not a string, it should be a plain object
@@ -119,16 +132,7 @@ export class NodeAttributes {
         }
         this.style = this.style || {};
         this.style[key] = value;
-        if (typeof value === "function") {
-            value = value();
-        }
-        if ((value instanceof Number || typeof value === "number") &&
-            value != 0 && defaultToPixelsAttributes.has(dashCase(key))) {
-            value = value + "px";
-        }
-        if (node && node.style[key] !== value) {
-            node.style[key] = value;
-        }
+        this.applyStyleToNode(key, value, node);
     }
 
     removeStyle(key, node) {
@@ -277,11 +281,7 @@ export class NodeAttributes {
         node.removeAttribute("style");
         if (this.style) {
             for (let key in this.style) {
-                let value = this.style[key];
-                if (typeof value === "function") {
-                    value = value();
-                }
-                node.style[key] = value;
+                this.applyStyleToNode(key, this.style[key], node);
             }
         }
     }

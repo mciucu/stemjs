@@ -19,9 +19,11 @@ if (window) {
 
 // Parse the headers from an xhr object, to return a native Headers object
 function parseHeaders(xhr) {
-    let rawHeader = xhr.getAllResponseHeaders() || "";
+    const rawHeader = xhr.getAllResponseHeaders() || "";
+    const rawHeaderLines = rawHeader.split(/\r?\n/);
     let headers = new Headers();
-    for (let line of rawHeader.split(/\r?\n/)) {
+
+    for (let line of rawHeaderLines) {
         let parts = line.split(":");
         let key = parts.shift().trim();
         if (key) {
@@ -86,7 +88,8 @@ class XHRPromise {
             this.promiseReject = reject;
 
             xhr.onload = () => {
-                let headers = parseHeaders(xhr);
+                let headers = this.getResponseHeaders();
+
                 let body = xhr.response || xhr.responseText;
                 let responseInit = {
                     status: xhr.status,
@@ -146,6 +149,10 @@ class XHRPromise {
         });
     }
 
+    getResponseHeaders() {
+        return parseHeaders(this.xhr);
+    }
+
     send(body) {
         this.getXHR().send(body);
     }
@@ -161,7 +168,7 @@ class XHRPromise {
     resolve(payload) {
         for (const postprocessor of this.getPostprocessors()) {
             try {
-                payload = postprocessor(payload) || payload;
+                payload = postprocessor(payload, this) || payload;
             } catch (exception) {
                 this.reject(exception);
                 return;

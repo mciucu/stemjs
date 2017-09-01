@@ -11,6 +11,12 @@ let ServerTime = {
         return this.offset;
     },
 
+    set(date, onlyIfMissing=false) {
+        if (!onlyIfMissing || this.offset == null) {
+            this.offset = Date.now() - (new StemDate(date));
+        }
+    },
+
     setPageLoadTime(unixTime, estimatedLatency=0) {
         this.serverPageLoad = unixTime;
         this.offset = performance.timing.responseStart - unixTime * 1000;
