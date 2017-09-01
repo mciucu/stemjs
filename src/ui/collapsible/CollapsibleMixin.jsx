@@ -16,6 +16,7 @@ function CollapsibleMixin(BaseClass, CollapsibleClass = CollapsibleStyle) {
 
         expand(panel) {
             this.options.collapsed = false;
+            this.dispatch("expand");
             const collapsibleStyle = this.getCollapsibleStyleSheet();
             panel.addClass(collapsibleStyle.collapsing);
             panel.removeClass("hidden");
@@ -26,6 +27,7 @@ function CollapsibleMixin(BaseClass, CollapsibleClass = CollapsibleStyle) {
 
         collapse(panel) {
             this.options.collapsed = true;
+            this.dispatch("collapse");
             const collapsibleStyle = this.getCollapsibleStyleSheet();
             panel.addClass(collapsibleStyle.collapsing);
             panel.addClass(collapsibleStyle.collapsed);
