@@ -118,23 +118,14 @@ export const Draggable = (BaseClass) => class Draggable extends BaseClass {
         };
 
         listenerWrapper.onWrapperEnd = (event) => {
-            let startNewDrag = false;
-            if (event.touches.length) {
-                if (Device.getEventTouchIdentifier(event) !== listenerWrapper.touchEventIdentifier) {
-                    startNewDrag = true;
-                } else {
-                    return;
-                }
+            if (event.touches.length && Device.getEventTouchIdentifier(event) === listenerWrapper.touchEventIdentifier) {
+                return;
             }
             if (listeners.onEnd) {
                 listeners.onEnd(event);
             }
             // TODO: Replace with our body
             document.body.removeEventListener("touchmove", listenerWrapper.onWrapperDrag);
-
-            if (startNewDrag) {
-                listenerWrapper.onWrapperStart(event);
-            }
         };
         return listenerWrapper;
     }
