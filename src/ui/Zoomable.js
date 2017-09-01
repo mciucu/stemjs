@@ -13,6 +13,9 @@ function generateZoomEvent(rawEvent, delta, unit=200) {
 class WheelZoomEventHandler {
     constructor(uiElement, callback) {
         this.eventHandler = uiElement.addNodeListener("wheel", (event) => {
+            // TODO: see if both of these are needed
+            event.preventDefault();
+            event.stopPropagation();
             callback(event, event.deltaY);
         });
     }
