@@ -110,6 +110,10 @@ class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
         return true;
     }
 
+    getInitialCollapsedContent() {
+        return this.renderCollapsible(this.options.entry);
+    }
+
     render() {
         return [
             <tr className={collapsibleTableStyle.heading}>{super.render()}</tr>,
@@ -118,11 +122,28 @@ class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
                     colspan={this.options.columns.length}>
                     <div ref="contentArea"
                          className={`${this.getCollapsibleStyleSheet().collapsed} hidden`}>
-                            {this.renderCollapsible(this.options.entry)}
+                            {this.getInitialCollapsedContent()}
                     </div>
                 </td>
             </tr>
         ];
+    }
+}
+
+class DelayedCollapsibleTableRow extends CollapsibleTableRow {
+    toggle() {
+        if (!this._haveExpanded) {
+            this._haveExpanded = true;
+            UI.renderingStack.push(this);
+            this.contentArea.options.children = this.renderCollapsible(this.options.entry);
+            UI.renderingStack.pop();
+            this.contentArea.redraw();
+        }
+        super.toggle();
+    }
+
+    getInitialCollapsedContent() {
+        return [];
     }
 }
 
@@ -173,4 +194,5 @@ function CollapsibleTableInterface(BaseTableClass) {
 
 let CollapsibleTable = CollapsibleTableInterface(Table);
 
-export {CollapsibleTable, CollapsibleTableInterface, CollapsibleTableRow, TableRowInCollapsibleTable, collapsibleTableStyle};
+export {CollapsibleTable, CollapsibleTableInterface, CollapsibleTableRow, DelayedCollapsibleTableRow,
+        TableRowInCollapsibleTable, collapsibleTableStyle};
