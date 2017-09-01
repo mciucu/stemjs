@@ -35,6 +35,7 @@ class PinchZoomEventHandler {
             this.recalculateCentroid(event);
         });
         this.touchMoveHandler = uiElement.addNodeListener("touchmove", (event) => {
+
             if (this.pinchActive && event.touches && event.touches.length > 1) {
                 const {centroid, averageDist} = this.calculateCentroid(event.touches);
                 callback(event, this.averageDist - averageDist);
