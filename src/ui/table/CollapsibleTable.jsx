@@ -167,7 +167,7 @@ function CollapsibleTableInterface(BaseTableClass) {
         }
 
         getRowClass() {
-            return UI.CollapsibleTableRow;
+            return CollapsibleTableRow;
         }
 
         setColumns(columns) {

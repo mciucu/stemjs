@@ -5,6 +5,7 @@ import {Draggable} from "./Draggable";
 import {Dispatchable} from "../base/Dispatcher";
 import {getOffset} from "./Utils";
 import {Orientation} from "./Constants";
+import {ProgressBar} from "./Bootstrap3";
 
 // A very simple class, all this does is implement the `getTitle()` method
 class Panel extends UI.Element {
@@ -32,7 +33,7 @@ class SlideBar extends Draggable(UI.Element) {
 
     render() {
         return [
-            <UI.ProgressBar ref="progressBar" active="true" value={this.options.value} disableTransition={true}
+            <ProgressBar ref="progressBar" active="true" value={this.options.value} disableTransition={true}
                             orientation={this.getOrientation()}
                             style={Object.assign({
                                 position: "relative",

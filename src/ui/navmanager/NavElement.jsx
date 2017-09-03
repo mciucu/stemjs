@@ -1,4 +1,4 @@
-import {UI, Link, registerStyle} from "../UI";
+import {UI, Link, Switcher} from "../UI";
 import {FACollapseIcon} from "../FontAwesome"; //TODO: more flexibility, do not require FAIcons in NavElements
 import {SessionStorageMap} from "../../base/StorageMap";
 import {Orientation, Direction} from "../Constants";
@@ -242,8 +242,7 @@ class NavAnchoredNotifications extends NavSection {
     render() {
         return [
             this.options.children,
-            <UI.Switcher ref="switcher" style={this.getSwitcherStyle()} className="hidden">
-            </UI.Switcher>
+            <Switcher ref="switcher" style={this.getSwitcherStyle()} className="hidden" />
         ];
     }
 
