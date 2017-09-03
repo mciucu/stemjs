@@ -4,9 +4,12 @@ import {StaticCodeHighlighter, Panel, Link, Image} from "../ui/UI";
 
 // Class that for every markup tag returns the UI class to instantiate for that element
 class MarkupClassMap {
-    constructor(fallback) {
+    constructor(fallback, extraClasses=[]) {
         this.classMap = new Map();
         this.fallback = fallback;
+        for (const extraClass of extraClasses) {
+            this.addClass(extraClass[0], extraClass[1]);
+        }
     }
 
     addClass(className, classObject) {
