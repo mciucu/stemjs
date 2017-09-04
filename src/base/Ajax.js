@@ -36,16 +36,16 @@ export class AjaxHandler {
         return this.fetch(...arguments, {method: "GET"});
     }
 
-    getJSON(url, data) {
-        return this.get(url, {dataType: "json", data: data});
+    getJSON(url, data, ...args) {
+        return this.get(url, {dataType: "json", data: data}, ...args);
     }
 
     post(url, options) {
         return this.fetch(...arguments, {method: "POST"});
     }
 
-    postJSON(url, data) {
-        return this.post(url, {dataType: "json", data: data});
+    postJSON(url, data, ...args) {
+        return this.post(url, {dataType: "json", data: data}, ...args);
     }
 
     addPreprocessor(preprocessor) {
