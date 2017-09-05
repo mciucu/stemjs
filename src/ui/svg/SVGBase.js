@@ -1,6 +1,6 @@
 import {UI} from "../UIBase";
 import {CreateNodeAttributesMap} from "../NodeAttributes";
-import {deepCopy, uniqueId} from "../../base/Utils";
+import {uniqueId} from "../../base/Utils";
 import {SVGNodeAttributes} from "./SVGNodeAttributes";
 import {Device} from "../../base/Device";
 
