@@ -15,23 +15,6 @@ SVG.Element = class SVGElement extends UI.Element {
         return this.node;
     }
 
-    getDefaultOptions() {
-        return {};
-    }
-
-    setOptions(options) {
-        if (typeof this.getDefaultOptions === "function") {
-            let defaultOptions = this.getDefaultOptions(options);
-            // TODO: consider this deep copy, seems really shady!
-            const goodRef = options.ref;
-            options = deepCopy({}, defaultOptions, options);
-            if (goodRef) {
-                options.ref = goodRef;
-            }
-        }
-        super.setOptions(options);
-    }
-
     getScreenCoordinatedForPoint(point) {
         const node = this.node;
         // TODO: this is a good argument to always keep a reference to the Stem element in the nodes
