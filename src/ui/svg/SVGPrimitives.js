@@ -150,6 +150,18 @@ SVG.Circle = class SVGCircle extends SVG.Element {
     }
 };
 
+SVG.Stop = class SVGStop extends SVG.Element {
+    getNodeType() {
+        return "stop";
+    }
+};
+
+SVG.RadialGradient = class SVGRadialGradient extends SVG.Element {
+    getNodeType() {
+        return "radialGradient";
+    }
+};
+
 //TODO Complete this class
 SVG.Ellipse = class SVGEllipse extends SVG.Element {
     getNodeType() {
