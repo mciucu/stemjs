@@ -328,3 +328,23 @@ export function* filterIterator(iter, func) {
         }
     }
 }
+
+export class UnorderedCallDropper {
+    index = 1;
+    lastExecuted = 0;
+
+    wrap(callback) {
+        const currentIndex = this.index++;
+        return (...args) => {
+            if (currentIndex > this.lastExecuted) {
+                this.lastExecuted = currentIndex;
+                return callback(...args);
+            }
+        }
+    }
+
+    static newInstance() {
+        const instance = new this();
+        return (func) => instance.wrap(func);
+    }
+}
