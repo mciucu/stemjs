@@ -80,7 +80,7 @@ class TextInput extends Input {
     getInputType() {
         return "text";
     }
-};
+}
 
 
 class NumberInput extends Input {
@@ -92,7 +92,7 @@ class NumberInput extends Input {
         let val = super.getValue();
         return parseInt(val) || parseFloat(val);
     }
-};
+}
 NumberInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
     ["min"],
     ["max"],
@@ -104,14 +104,14 @@ class EmailInput extends Input {
     getInputType() {
         return "email";
     }
-};
+}
 
 
 class PasswordInput extends Input {
     getInputType() {
         return "password";
     }
-};
+}
 
 
 class FileInput extends Input {
@@ -135,8 +135,7 @@ class FileInput extends Input {
         }
         return formData;
     }
-};
-
+}
 FileInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
     ["multipleFiles", {domName: "multiple", noValue: true}],
     ["fileTypes", {domName: "accept"}],
@@ -163,6 +162,16 @@ class CheckboxInput extends Input {
 }
 CheckboxInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
     ["checked", {noValue: true}]
+]);
+
+
+class RadioInput extends CheckboxInput {
+    getInputType() {
+        return "radio";
+    }
+}
+RadioInput.domAttributesMap = CreateNodeAttributesMap(CheckboxInput.domAttributesMap, [
+    ["name"]
 ]);
 
 
@@ -259,4 +268,4 @@ class Select extends UI.Primitive(InputableElement, "select") {
 }
 
 export {InputStyle, Input, SubmitInput, TextInput, NumberInput, EmailInput, PasswordInput, FileInput,
-        CheckboxInput, TextArea, Select};
+        CheckboxInput, RadioInput, TextArea, Select};
