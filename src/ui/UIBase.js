@@ -206,9 +206,13 @@ class UIElement extends BaseUIElement {
         return childrenKeyMap;
     }
 
+    getChildrenToRender() {
+        return this.render();
+    }
+
     getChildrenForRedraw() {
         UI.renderingStack.push(this);
-        let children = unwrapArray(this.render());
+        let children = unwrapArray(this.getChildrenToRender());
         UI.renderingStack.pop();
         return children;
     }
