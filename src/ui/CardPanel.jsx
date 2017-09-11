@@ -18,8 +18,6 @@ export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) 
     DEFAULT = [{
         display: "flex",
         alignItems: "center",
-        justifyContent: "center",
-        textAlign: "center",
         width: "100%",
         flexDirection: "row",
         padding: "5px",
@@ -55,7 +53,7 @@ export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) 
 
     @styleRule
     centered = {
-        display: "flex",
+        textAlign: "center",
         justifyContent: "center",
     };
 }

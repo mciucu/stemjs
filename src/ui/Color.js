@@ -1,4 +1,4 @@
-const COLORS_BY_NAME = {
+export const COLORS_BY_NAME = {
     aliceblue: "#f0f8ff",
     antiquewhite: "#faebd7",
     aqua: "#00ffff",
@@ -141,11 +141,12 @@ const COLORS_BY_NAME = {
     yellowgreen: "#9acd32"
 };
 
+
 /*
  * This class contains methods for operating with colors. Its objects are kept in hsva format with normalized
  * attributes (each attribute has value between 0 and 1 inclusive), and can be converted from/to rgba.
  */
-class Color {
+export class Color {
     constructor(color) {
         if (color) {
             this.setColor(color);
@@ -254,15 +255,17 @@ class Color {
     }
 }
 
-function lighten(color, amount) {
+
+export function lighten(color, amount) {
     if (amount >= 0) {
         return Color.interpolate(color, "#fff", amount);
     } else {
         return darken(color, -amount);
     }
-};
+}
 
-function darken(color, amount) {
+
+export function darken(color, amount) {
     if (amount >= 0) {
         let rgba = Color.parseColor(Color.interpolate(color, "#000", amount));
         for (let i = 0; i < 3; i += 1) {
@@ -276,9 +279,10 @@ function darken(color, amount) {
     } else {
         return lighten(color, -amount);
     }
-};
+}
 
-function enhance(color, amount) {
+
+export function enhance(color, amount) {
     if (Color.isLight(color)) {
         return darken(color, amount);
     } else {
@@ -286,7 +290,8 @@ function enhance(color, amount) {
     }
 }
 
-function buildColors(color, dark=true) {
+
+export function buildColors(color, dark=true) {
     let colors = [];
     let darkenPercents;
     if (!dark) {
@@ -302,4 +307,27 @@ function buildColors(color, dark=true) {
     return colors;
 }
 
-export {Color, lighten, darken, enhance, buildColors};
+
+export class ColorGenerator {
+    static FIRST_COLORS = ["#337ab7", "#5cb85c",  "#f0ad4e", "#5bc0de", "#d9534f"];
+    static cache = new WeakMap();
+
+    static getPersistentColor(uniqueId) {
+        if (uniqueId < this.FIRST_COLORS.length) {
+            return this.FIRST_COLORS[uniqueId];
+        }
+        if (!this.cache.has(uniqueId)) {
+            this.cache.set(uniqueId, this.getRandomColor());
+        }
+        return this.cache.get(uniqueId);
+    }
+
+    static getRandomColor() {
+        const allowed = "0123456789ABCDEF";
+        let color = "#";
+        for (let i = 0; i < 6; i += 1) {
+            color += allowed.charAt(parseInt(Math.random() * allowed.length));
+        }
+        return color;
+    }
+}
