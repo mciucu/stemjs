@@ -1,6 +1,6 @@
 import {StyleSheet} from "./Style";
 import {styleRule} from "../decorators/Style";
-import {buildColors, enhance} from "./Color";
+import {enhance} from "./Color";
 import {Device} from "../base/Device";
 import {Orientation, Level, Size} from "./Constants";
 import {Theme} from "style/Theme";
@@ -9,9 +9,18 @@ import {Theme} from "style/Theme";
 let GlobalStyle = {
 };
 
-Theme.Global.setProperties({
+export function setThemeProperties(properties) {
+    Theme.Global.setProperties(properties);
+}
+
+export function getTextColor(backgroundColor) {
+    return enhance(backgroundColor, 1);
+}
+
+setThemeProperties({
     COLOR_BACKGROUND: "#fff",
     COLOR_BACKGROUND_ALTERNATIVE: "#eee",
+    COLOR_BACKGROUND_BODY: "#f8f8f8",
     COLOR_BACKGROUND_BADGE: "#777",
     COLOR_PRIMARY: "#337ab7",
     COLOR_SECONDARY: "#358ba4",
@@ -85,10 +94,7 @@ export class BasicLevelSizeStyleSheet extends StyleSheet {
 
 export const BasicLevelStyleSheet = (colorToStyleFunction) => class BasicLevelStyleClass extends BasicLevelSizeStyleSheet {
     colorStyleRule(color, textColor) {
-        if (!textColor) {
-            textColor = enhance(color, 1);
-        }
-        return colorToStyleFunction(color, textColor);
+        return colorToStyleFunction(color, textColor || getTextColor(color));
     }
 
     @styleRule

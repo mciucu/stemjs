@@ -11,6 +11,7 @@ class GlobalContainerStyle extends StyleSheet {
     default = {
         height: () => {return Device.isMobileDevice() ? `${window.innerHeight}px` : "100vh"},
         paddingTop: this.themeProperties.NAV_MANAGER_NAVBAR_HEIGHT,
+        background: this.themeProperties.COLOR_BACKGROUND_BODY,
         width: "100%",
         ">*": {
             height: "100%",
