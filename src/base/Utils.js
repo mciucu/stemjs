@@ -329,7 +329,21 @@ export function* filterIterator(iter, func) {
     }
 }
 
-export class UnorderedCallDropper {
+export class CallModifier {
+    wrap(func) {
+        throw Error("Implement wrap method");
+    }
+
+    call(func) {
+        return this.wrap(func)();
+    }
+
+    toFunction() {
+        return (func) => this.wrap(func);
+    }
+}
+
+export class UnorderedCallDropper extends CallModifier {
     index = 1;
     lastExecuted = 0;
 
@@ -342,13 +356,7 @@ export class UnorderedCallDropper {
             }
         }
     }
-
-    static newInstance() {
-        const instance = new this();
-        return (func) => instance.wrap(func);
-    }
 }
-
 
 /*
 CallThrottler acts both as a throttler and a debouncer, allowing you to combine both types of functionality.
@@ -359,7 +367,7 @@ Available options:
     requestAnimationFrame instead of setTimeout, to execute before next frame redraw()
     - dropThrottled (boolean, default false): any throttled function call is not delayed, but dropped
  */
-export class CallThrottler {
+export class CallThrottler extends CallModifier {
     static ON_ANIMATION_FRAME = Symbol();
     static AUTOMATIC = Symbol();
 
@@ -369,15 +377,18 @@ export class CallThrottler {
     totalCallDuration = 0;
 
     constructor(options={}) {
+        super();
         Object.assign(this, options);
     }
 
     cancel() {
         this.pendingCall && this.pendingCall.cancel();
+        this.pendingCall = null;
     }
 
     flush() {
         this.pendingCall && this.pendingCall.flush();
+        this.pendingCall = null;
     }
 
     cleanup() {
@@ -385,8 +396,6 @@ export class CallThrottler {
     }
 
     wrap(func) {
-        let cancelCall = NOOP_FUNCTION;
-
         const result = (...args) => {
             const funcCall = () => {
                 this.lastCallTime = Date.now();
@@ -398,7 +407,7 @@ export class CallThrottler {
 
             if (this.throttle === this.constructor.ON_ANIMATION_FRAME) {
                 const cancelHandler = requestAnimationFrame(funcCall);
-                cancelCall = () => cancelAnimationFrame(cancelHandler);
+                result.cancel = () => cancelAnimationFrame(cancelHandler);
                 return;
             }
 
@@ -416,11 +425,11 @@ export class CallThrottler {
                 executionDelay = Math.min(executionDelay || this.debounce, this.debounce);
             }
             const cancelHandler = setTimeout(funcCall, executionDelay);
-            cancelCall = () => clearTimeout(cancelHandler);
+            result.cancel = () => clearTimeout(cancelHandler);
+            this.pendingCall = result;
         };
 
-        this.pendingCall = result;
-        result.cancel = cancelCall;
+        result.cancel = NOOP_FUNCTION;
         result.flush = () => {
             if (result === this.pendingCall) {
                 this.cancel();
