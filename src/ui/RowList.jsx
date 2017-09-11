@@ -21,7 +21,7 @@ class RowListStyle extends BasicLevelSizeStyleSheet {
         paddingLeft: this.themeProperties.ROW_LIST_ROW_PADDING,
         paddingRight: this.themeProperties.ROW_LIST_ROW_PADDING,
 
-        backgroundColor: this.themeProperties.COLOR_PLAIN,
+        backgroundColor: this.themeProperties.COLOR_BACKGROUND,
     };
 
     @styleRule
@@ -33,7 +33,7 @@ class RowListStyle extends BasicLevelSizeStyleSheet {
 
     @styleRule
     alternativeColorsOddRow = {
-        backgroundColor: this.themeProperties.COLOR_PLAIN_ALTERNATIVE,
+        backgroundColor: this.themeProperties.COLOR_BACKGROUND_ALTERNATIVE,
     };
 
     @styleRule

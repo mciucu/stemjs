@@ -85,7 +85,7 @@ let labelColorToStyle = (color) => {
 };
 
 export class LabelStyle extends BasicLevelStyleSheet(labelColorToStyle) {
-    // DEFAULT uses MEDIUM as size and PLAIN as level
+    // DEFAULT uses MEDIUM as size and BASE as level
     @styleRule
     DEFAULT = [{
         fontWeight: "bold",
@@ -104,7 +104,7 @@ export class LabelStyle extends BasicLevelStyleSheet(labelColorToStyle) {
         },
     }, {
         "font-size": "12px",
-    }, this.colorStyleRule(this.themeProperties.COLOR_GRAY)];
+    }, this.colorStyleRule(this.themeProperties.COLOR_BACKGROUND_BADGE)];
 
     @styleRule
     EXTRA_SMALL = {
@@ -159,7 +159,7 @@ let badgeColorToStyle = (color) => {
 };
 
 export class BadgeStyle extends BasicLevelStyleSheet(badgeColorToStyle) {
-    // DEFAULT uses MEDIUM as size and PLAIN as level
+    // DEFAULT uses MEDIUM as size and BASE as level
     @styleRule
     DEFAULT = [{
         display: "inline-block",
@@ -174,7 +174,7 @@ export class BadgeStyle extends BasicLevelStyleSheet(badgeColorToStyle) {
         borderRadius: "0.8em",
     }, {
         "font-size": "12px",
-    }, this.colorStyleRule(this.themeProperties.COLOR_GRAY)];
+    }, this.colorStyleRule(this.themeProperties.COLOR_BACKGROUND_BADGE)];
 
     @styleRule
     EXTRA_SMALL = {

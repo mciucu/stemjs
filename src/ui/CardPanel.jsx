@@ -28,7 +28,7 @@ export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) 
         paddingLeft: this.themeProperties.CARD_PANEL_HEADING_PADDING,
         paddingRight: this.themeProperties.CARD_PANEL_HEADING_PADDING,
     },
-        cardPanelHeaderColorToStyle(this.themeProperties.COLOR_PLAIN)
+        cardPanelHeaderColorToStyle(this.themeProperties.COLOR_BACKGROUND)
     ];
 
     @styleRule
@@ -48,9 +48,9 @@ export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) 
         borderRadius: this.themeProperties.BASE_BORDER_RADIUS,
         boxShadow: this.themeProperties.BASE_BOX_SHADOW,
         borderStyle: this.themeProperties.BASE_BORDER_STYLE,
-        backgroundColor: this.themeProperties.COLOR_PLAIN,
+        backgroundColor: this.themeProperties.COLOR_BACKGROUND,
     },
-        cardPanelColorToStyle(this.themeProperties.COLOR_PLAIN)
+        cardPanelColorToStyle(this.themeProperties.COLOR_BACKGROUND)
     ];
 
     @styleRule

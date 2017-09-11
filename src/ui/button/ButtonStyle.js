@@ -33,7 +33,7 @@ let buttonColorToStyle = (color) => {
 };
 
 export class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
-    // DEFAULT uses MEDIUM as size and PLAIN as level
+    // DEFAULT uses MEDIUM as size and BASE as level
     @styleRule
     DEFAULT = [{
         outline: "0",
@@ -54,7 +54,7 @@ export class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
         },
     }, {
         fontSize: "14px",
-    }, this.colorStyleRule(this.themeProperties.COLOR_PLAIN)];
+    }, this.colorStyleRule(this.themeProperties.COLOR_BACKGROUND)];
 
     getLevel(level) {
         return super.getLevel(level) || this.INFO;

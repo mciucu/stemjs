@@ -10,9 +10,9 @@ let GlobalStyle = {
 };
 
 Theme.Global.setProperties({
-    COLOR_PLAIN: "#fff",
-    COLOR_PLAIN_ALTERNATIVE: "#eee",
-    COLOR_GRAY: "#777",
+    COLOR_BACKGROUND: "#fff",
+    COLOR_BACKGROUND_ALTERNATIVE: "#eee",
+    COLOR_BACKGROUND_BADGE: "#777",
     COLOR_PRIMARY: "#337ab7",
     COLOR_SECONDARY: "#358ba4",
     COLOR_SUCCESS: "#5cb85c",
@@ -92,13 +92,13 @@ export const BasicLevelStyleSheet = (colorToStyleFunction) => class BasicLevelSt
     }
 
     @styleRule
+    BASE = this.colorStyleRule(this.themeProperties.COLOR_BACKGROUND);
+
+    @styleRule
     PRIMARY = this.colorStyleRule(this.themeProperties.COLOR_PRIMARY);
 
     @styleRule
     SECONDARY = this.colorStyleRule(this.themeProperties.COLOR_SECONDARY);
-
-    @styleRule
-    PLAIN = this.colorStyleRule(this.themeProperties.COLOR_PLAIN);
 
     @styleRule
     SUCCESS = this.colorStyleRule(this.themeProperties.COLOR_SUCCESS);
