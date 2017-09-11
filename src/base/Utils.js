@@ -312,7 +312,7 @@ export function extendsNative(targetClass) {
     return newClass;
 }
 
-export const NOOP_FUNCTION = () => {};
+export const NOOP_FUNCTION = () => undefined;
 
 // Helpers to wrap iterators, to wrap all values in a function or to filter them
 export function* mapIterator(iter, func) {
@@ -346,5 +346,87 @@ export class UnorderedCallDropper {
     static newInstance() {
         const instance = new this();
         return (func) => instance.wrap(func);
+    }
+}
+
+
+/*
+CallThrottler acts both as a throttler and a debouncer, allowing you to combine both types of functionality.
+Available options:
+    - debounce (ms): delays the function call by x ms, each call extending the delay
+    - throttle (ms): keeps calls from happening with at most x ms between them. If debounce is also set, will make sure to
+    fire a debounced even if over x ms have passed. If equal to CallTimer.ON_ANIMATION_FRAME, means that we want to use
+    requestAnimationFrame instead of setTimeout, to execute before next frame redraw()
+    - dropThrottled (boolean, default false): any throttled function call is not delayed, but dropped
+ */
+export class CallThrottler {
+    static ON_ANIMATION_FRAME = Symbol();
+    static AUTOMATIC = Symbol();
+
+    lastCallTime = 0;
+    pendingCall = null;
+    numCalls = 0;
+    totalCallDuration = 0;
+
+    constructor(options={}) {
+        Object.assign(this, options);
+    }
+
+    cancel() {
+        this.pendingCall && this.pendingCall.cancel();
+    }
+
+    flush() {
+        this.pendingCall && this.pendingCall.flush();
+    }
+
+    cleanup() {
+        this.cancel();
+    }
+
+    wrap(func) {
+        let cancelCall = NOOP_FUNCTION;
+
+        const result = (...args) => {
+            const funcCall = () => {
+                this.lastCallTime = Date.now();
+                this.pendingCall = null;
+                func(...args);
+            };
+
+            this.cancel();
+
+            if (this.throttle === this.constructor.ON_ANIMATION_FRAME) {
+                const cancelHandler = requestAnimationFrame(funcCall);
+                cancelCall = () => cancelAnimationFrame(cancelHandler);
+                return;
+            }
+
+            const timeNow = Date.now();
+            let executionDelay = null;
+
+            if (this.throttle != null) {
+                executionDelay = Math.max(this.lastCallTime + this.throttle - timeNow, 0);
+                if (this.dropThrottled) {
+                    return executionDelay == 0 && funcCall();
+                }
+            }
+
+            if (this.debounce != null) {
+                executionDelay = Math.min(executionDelay || this.debounce, this.debounce);
+            }
+            const cancelHandler = setTimeout(funcCall, executionDelay);
+            cancelCall = () => clearTimeout(cancelHandler);
+        };
+
+        this.pendingCall = result;
+        result.cancel = cancelCall;
+        result.flush = () => {
+            if (result === this.pendingCall) {
+                this.cancel();
+                result();
+            }
+        };
+        return result;
     }
 }

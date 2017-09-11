@@ -1,6 +1,7 @@
 import {Dispatchable} from "../../base/Dispatcher";
 import {UI} from "../UIBase";
 import {StyleSheet} from "../Style";
+import {CallThrottler} from "../../base/Utils";
 
 function getInstance(styleSheet) {
     if (typeof styleSheet === "function") {
@@ -27,7 +28,10 @@ class Theme extends Dispatchable {
         this.styleSheetSymbol = Symbol("Theme" + name);
         this.classSet = new Set();
         this.styleSheetSet = new Set();
-        this.properties = {}
+        this.properties = {};
+        this.updateThrottler = new CallThrottler({throttle: 50});
+        this.updateThrottled = this.updateThrottler.wrap(() => this.updateStyleSheets());
+        window.addEventListener("resize", this.updateThrottled);
     }
 
     register(cls, styleSheet) {
@@ -61,7 +65,7 @@ class Theme extends Dispatchable {
     setProperties(properties, update=true) {
         Object.assign(this.properties, properties);
         if (update) {
-            this.updateStyleSheets();
+            this.updateThrottled();
         }
     }
 

@@ -7,16 +7,10 @@ class StyleSheet extends Dispatchable {
     constructor(options={}) {
         super();
         this.options = Object.assign({
-            updateOnResize: false,
             parent: document.head,
             name: options.name || this.constructor.getElementName(), // call only if needed
         }, options);
         this.elements = new Set();
-        if (this.options.updateOnResize) {
-            this.attachEventListener(window, "resize", () => {
-                this.update();
-            });
-        }
         if (!this.options.delayedMount) {
             this.ensureMounted();
         }

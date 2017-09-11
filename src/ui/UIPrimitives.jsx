@@ -16,9 +16,9 @@ class Panel extends UI.Element {
 
 class SlideBar extends Draggable(UI.Element) {
     getDefaultOptions() {
-        return Object.assign({}, super.getDefaultOptions(), {
+        return {
             value: 0,
-        });
+        };
     }
 
     extraNodeAttributes(attr) {
@@ -497,27 +497,6 @@ class TimePassedSpan extends UI.Primitive("span") {
     onUnmount() {
         this._updateListener && this._updateListener.remove();
     }
-};
-
-// TODO: deprecate this, to use lazyInit decorators
-export function ConstructorInitMixin(BaseClass) {
-    class ConstructorInitMixin extends BaseClass {
-        static ensureInit() {
-            if (!this._haveInit) {
-                this._haveInit = true;
-                if (typeof this.init === "function") {
-                    this.init();
-                }
-            }
-        }
-
-        createNode() {
-            this.constructor.ensureInit();
-            return super.createNode();
-        }
-    };
-
-    return ConstructorInitMixin;
 };
 
 
