@@ -31,7 +31,7 @@ setThemeProperties({
 
     FONT_SIZE_EXTRA_SMALL: "9px",
     FONT_SIZE_SMALL: "10px",
-    FONT_SIZE_DEFAULT: "12px",
+    FONT_SIZE_DEFAULT: "14px",
     FONT_SIZE_LARGE: "17px",
     FONT_SIZE_EXTRA_LARGE: "21px",
 
