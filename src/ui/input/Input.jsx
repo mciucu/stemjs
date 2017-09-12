@@ -169,6 +169,14 @@ class RadioInput extends CheckboxInput {
     getInputType() {
         return "radio";
     }
+
+    getValue() {
+        return this.node.checked;
+    }
+
+    setValue(newValue) {
+        this.node.checked = newValue;
+    }
 }
 RadioInput.domAttributesMap = CreateNodeAttributesMap(CheckboxInput.domAttributesMap, [
     ["name"]

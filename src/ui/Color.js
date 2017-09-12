@@ -310,7 +310,7 @@ export function buildColors(color, dark=true) {
 
 export class ColorGenerator {
     static FIRST_COLORS = ["#337ab7", "#5cb85c",  "#f0ad4e", "#5bc0de", "#d9534f"];
-    static cache = new WeakMap();
+    static cache = new Map();
 
     static getPersistentColor(uniqueId) {
         if (uniqueId < this.FIRST_COLORS.length) {
@@ -323,7 +323,7 @@ export class ColorGenerator {
     }
 
     static getRandomColor() {
-        const allowed = "0123456789ABCDEF";
+        const allowed = "3456789ABC";
         let color = "#";
         for (let i = 0; i < 6; i += 1) {
             color += allowed.charAt(parseInt(Math.random() * allowed.length));
