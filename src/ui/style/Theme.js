@@ -114,6 +114,14 @@ class Theme extends Dispatchable {
     static addStyleSheet(styleSheet) {
         this.Global.addStyleSheet(styleSheet);
     }
+
+    static setProperties(properties) {
+        this.Global.setProperties(...arguments);
+    }
+
+    static getProperties() {
+        return this.Global.getProperties();
+    }
 }
 
 Theme.Global = new Theme("Global");
