@@ -59,7 +59,8 @@ class Theme extends Dispatchable {
     }
 
     getProperty(key, defaultValue) {
-        return this.properties[key] || defaultValue;
+        const value = this.properties[key] || defaultValue;
+        return (typeof value === "function") ? value() : value;
     }
 
     setProperties(properties, update=true) {

@@ -245,6 +245,16 @@ export class Color {
         ]);
     }
 
+    static addOpacity(color, opacity) {
+        let colorArray = Color.parseColor(color);
+        return Color.convertToRgba([
+            parseInt(colorArray[0]),
+            parseInt(colorArray[1]),
+            parseInt(colorArray[2]),
+            opacity
+        ]);
+    }
+
     static convertToRgba(rgba) {
         return `rgba(${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${rgba[3]})`;
     }
