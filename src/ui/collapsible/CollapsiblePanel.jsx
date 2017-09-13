@@ -31,7 +31,7 @@ class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
         this.toggleButton.setChildren(title);
     }
 
-    render() {
+    getChildrenToRender() {
         let collapsedPanelClass = "";
         let collapsedHeadingClass = "";
         let hiddenClass = "";
@@ -57,7 +57,7 @@ class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
                 <div style={{overflow: "hidden"}}>
                   <div ref="contentArea" className={`${collapsedPanelClass} ${hiddenClass}`}
                        style={contentStyle}>
-                        {this.getGivenChildren()}
+                        {this.render()}
                     </div>
                 </div>
         ];
@@ -70,7 +70,7 @@ class DelayedCollapsiblePanel extends CollapsiblePanel {
         if (!this._haveExpanded) {
             this._haveExpanded = true;
             UI.renderingStack.push(this);
-            this.contentArea.options.children = this.getGivenChildren();
+            this.contentArea.options.children = this.render();
             UI.renderingStack.pop();
             this.contentArea.redraw();
             this.delayedMount();
@@ -78,7 +78,7 @@ class DelayedCollapsiblePanel extends CollapsiblePanel {
         super.toggle();
     }
 
-    getGivenChildren() {
+    render() {
         if (!this._haveExpanded) {
             return [];
         }

@@ -94,9 +94,9 @@ class SidePanel extends UI.Element {
         }
     }
 
-    render() {
+    getChildrenToRender() {
         return <SidePanelGroup ref="this.wrappedPanel" anchor={this.options.anchor}>
-            {this.getGivenChildren()}
+            {this.render()}
         </SidePanelGroup>;
     }
 

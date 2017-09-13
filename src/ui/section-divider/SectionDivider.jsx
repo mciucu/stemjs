@@ -1,5 +1,6 @@
 // TODO: Too much "hidden"
 import {Device} from "../../base/Device";
+import {unwrapArray} from "../../base/Utils";
 import {Divider} from "./Divider";
 import {UI} from "../UIBase";
 import {registerStyle} from "../UI";
@@ -288,13 +289,13 @@ class SectionDivider extends UI.Element {
         });
     }
 
-    render() {
+    getChildrenToRender() {
         let children = [];
         this.dividers = [];
         this.panels = [];
         let leftChildVisible = false;
 
-        for (let child of this.getGivenChildren()) {
+        for (let child of unwrapArray(this.render())) {
             if (this.panels.length) {
                 let hiddenClass = "hidden";
                 if (leftChildVisible && !child.hasClass("hidden")) {

@@ -34,8 +34,8 @@ class FormGroup extends UI.Element {
         return <span ref="errorField" style={{float: "right"}}></span>;
     }
 
-    render() {
-        return [this.getGivenChildren(), this.getErrorField()];
+    getChildrenToRender() {
+        return [this.render(), this.getErrorField()];
     }
 }
 
@@ -62,11 +62,11 @@ class FormField extends FormGroup {
         return null;
     }
 
-    getGivenChildren() {
+    render() {
         if (this.options.contentFirst) {
-            return [<label>{[super.getGivenChildren(),this.getLabel()]}</label>];
+            return [<label>{[super.render(),this.getLabel()]}</label>];
         } else {
-            return [<label>{[this.getLabel(),super.getGivenChildren()]}</label>];
+            return [<label>{[this.getLabel(),super.render()]}</label>];
         }
     }
 }

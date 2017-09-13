@@ -18,7 +18,7 @@ class Modal extends UI.Element {
         };
     }
 
-    render() {
+    getChildrenToRender() {
         return [
             <Panel ref="modalContainer" className={(this.options.visible ? "" : "hidden") + this.styleSheet.container}>
                 <Panel ref="behindPanel" className={this.styleSheet.hiddenAnimated + this.styleSheet.background} onClick={() => this.hide()}/>
@@ -38,7 +38,7 @@ class Modal extends UI.Element {
 
         return <FloatingWindow ref="modalWindow" style={this.getModalWindowStyle()}>
             {closeButton}
-            {this.getGivenChildren()}
+            {this.render()}
         </FloatingWindow>;
     }
 
@@ -139,7 +139,7 @@ class ActionModal extends Modal {
         return this.options.closeName || "Close";
     }
 
-    getGivenChildren() {
+    render() {
         return [
             <div className={this.styleSheet.header}>{this.getHeader()}</div>,
             (this.getBody() ? <div className={this.styleSheet.body}>{this.getBody()}</div> : null),

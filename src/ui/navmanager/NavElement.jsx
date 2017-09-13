@@ -1,6 +1,7 @@
 import {UI, Link, Switcher} from "../UI";
 import {FACollapseIcon} from "../FontAwesome"; //TODO: more flexibility, do not require FAIcons in NavElements
 import {SessionStorageMap} from "../../base/StorageMap";
+import {unwrapArray} from "../../base/Utils";
 import {Orientation, Direction} from "../Constants";
 
 let navSessionManager = new SessionStorageMap("navManager");
@@ -53,7 +54,7 @@ const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
     getSelf() {
         const style = (this.getOrientation() === Orientation.HORIZONTAL ?
                         this.styleSheet.navElementValueHorizontal : this.styleSheet.navElementValueVertical);
-        const marginLeft = this.getOrientation() === Orientation.VERTICAL && this.getGivenChildren().length ? "-20px" : "0";
+        const marginLeft = this.getOrientation() === Orientation.VERTICAL && unwrapArray(this.render()).length ? "-20px" : "0";
 
         return <BasicOrientedElement className={style} style={{marginLeft: marginLeft}}>
             {this.getValue()}
@@ -61,7 +62,7 @@ const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
     }
 
     getSubElements() {
-        let childrenToRender = this.getGivenChildren();
+        let childrenToRender = unwrapArray(this.render());
         if (childrenToRender.length) {
             let subElementsClass;
             if (!this.isToggled) {
@@ -76,7 +77,7 @@ const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
 
     getValue() {
         let result;
-        if (this.getGivenChildren().length) {
+        if (unwrapArray(this.render()).length) {
             if (this.getOrientation() === Orientation.VERTICAL) {
                 // is in the sidebar
                 result = [
@@ -96,7 +97,7 @@ const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
         return result;
     }
 
-    render() {
+    getChildrenToRender() {
         return [
             this.getSelf(),
             this.getSubElements(),
@@ -112,7 +113,7 @@ const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
     }
 
     toggleChildren() {
-        if (!this.getGivenChildren().length) {
+        if (!unwrapArray(this.render()).length) {
             return;
         }
 
@@ -164,12 +165,12 @@ const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
     onMount() {
         super.onMount();
         this.addNodeListener("mouseenter", () => {
-            if (this.getOrientation() === Orientation.HORIZONTAL && this.getGivenChildren().length) {
+            if (this.getOrientation() === Orientation.HORIZONTAL && unwrapArray(this.render()).length) {
                 this.showChildren();
             }
         });
         this.addNodeListener("mouseleave", () => {
-            if (this.getOrientation() === Orientation.HORIZONTAL && this.getGivenChildren().length) {
+            if (this.getOrientation() === Orientation.HORIZONTAL && unwrapArray(this.render()).length) {
                 this.hideChildren();
             }
         });
@@ -187,6 +188,10 @@ class NavLinkElement extends NavElementInterface(BasicOrientedLinkElement) {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
         attr.addClass(this.styleSheet.navLinkElement);
+    }
+
+    render() {
+        return this.options.children;
     }
 }
 

@@ -4,6 +4,8 @@ import {Link} from "../UIPrimitives";
 import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
 import {registerStyle} from "../style/Theme";
 import {DefaultTabAreaStyle} from "./Style";
+import {unwrapArray} from "../../base/Utils";
+
 
 class BasicTabTitle extends Link {
     extraNodeAttributes(attr) {
@@ -70,10 +72,10 @@ class BasicTabTitle extends Link {
             });
         }
     }
-};
+}
 
 class TabTitleArea extends UI.Element {
-};
+}
 
 @registerStyle(DefaultTabAreaStyle)
 class TabArea extends UI.Element {
@@ -119,12 +121,12 @@ class TabArea extends UI.Element {
         </Switcher>;
     }
 
-    render() {
+    getChildrenToRender() {
         let tabTitles = [];
         let tabPanels = [];
         let activeTab;
 
-        for (let panel of this.getGivenChildren()) {
+        for (let panel of unwrapArray(this.render())) {
             let [tabTitle, tabPanel] = this.createTabPanel(panel);
 
             if (tabTitle.options.active) {
@@ -166,7 +168,7 @@ class TabArea extends UI.Element {
             this.switcherArea.dispatch("resize");
         });
     }
-};
+}
 
 export * from "./Style";
 export {TabTitleArea, BasicTabTitle, TabArea};

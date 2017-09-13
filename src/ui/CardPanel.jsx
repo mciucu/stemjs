@@ -126,7 +126,7 @@ class CardPanel extends SimpleStyledElement {
         return bodyClasses;
     }
 
-    render() {
+    getChildrenToRender() {
         const headingClasses = this.getHeadingClasses();
         const bodyClasses = this.getBodyClasses();
 
@@ -135,7 +135,7 @@ class CardPanel extends SimpleStyledElement {
                 {this.getTitle()}
             </div>,
             <div ref="panelBody" className={bodyClasses} style={this.options.bodyStyle}>
-                {this.getGivenChildren()}
+                {this.render()}
             </div>,
         ];
     }

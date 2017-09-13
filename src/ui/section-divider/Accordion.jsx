@@ -1,6 +1,7 @@
 import {UI} from "../UIBase";
 import {registerStyle} from "../UI";
 import {getComputedStyle} from "../Utils";
+import {unwrapArray} from "../../base/Utils";
 import {Device} from "../../base/Device";
 import {AccordionStyle} from "./Style";
 import {FACollapseIcon} from "../../ui/FontAwesome";
@@ -44,11 +45,11 @@ class Accordion extends UI.Element {
         attr.addClass(this.styleSheet.accordion);
     }
 
-    render() {
+    getChildrenToRender() {
         let children = [];
         this.dividers = [];
         this.panels = [];
-        for (let child of this.getGivenChildren()) {
+        for (let child of unwrapArray(this.render())) {
             let title = (child.getTitle ? child.getTitle() : (child.options.title ? child.options.title : ""));
             let divider = <AccordionDivider>{title}</AccordionDivider>;
             this.dividers.push(divider);
