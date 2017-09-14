@@ -422,7 +422,7 @@ export class CallThrottler extends CallModifier {
             }
 
             if (this.debounce != null) {
-                executionDelay = Math.min(executionDelay || this.debounce, this.debounce);
+                executionDelay = Math.min(executionDelay != null ? executionDelay : this.debounce, this.debounce);
             }
             const cancelHandler = setTimeout(funcCall, executionDelay);
             result.cancel = () => clearTimeout(cancelHandler);

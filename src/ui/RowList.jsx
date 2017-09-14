@@ -17,7 +17,7 @@ class RowListStyle extends BasicLevelSizeStyleSheet {
         alignItems: "center",
         width: "100%",
 
-        height: this.themeProperties.ROW_LIST_ROW_HEIGHT,
+        minHeight: this.themeProperties.ROW_LIST_ROW_HEIGHT,
         paddingLeft: this.themeProperties.ROW_LIST_ROW_PADDING,
         paddingRight: this.themeProperties.ROW_LIST_ROW_PADDING,
 
@@ -26,7 +26,7 @@ class RowListStyle extends BasicLevelSizeStyleSheet {
 
     @styleRule
     LARGE = {
-        height: this.themeProperties.ROW_LIST_ROW_HEIGHT_LARGE,
+        minHeight: this.themeProperties.ROW_LIST_ROW_HEIGHT_LARGE,
         paddingLeft: this.themeProperties.ROW_LIST_ROW_PADDING_LARGE,
         paddingRight: this.themeProperties.ROW_LIST_ROW_PADDING_LARGE,
     };
