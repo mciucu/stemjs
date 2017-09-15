@@ -5,11 +5,13 @@ import {Dispatcher} from "../base/Dispatcher";
 
 export function singlePageLinkOnMount() {
     this.addClickListener((event) => {
-        if (event.shiftKey || event.ctrlKey || event.metaKey || !isLocalUrl(this.options.href)) {
+        if (event.shiftKey || event.ctrlKey || event.metaKey || !this.options.href || !isLocalUrl(this.options.href)
+            || this.options.newTab || (this.options.target && this.options.target !== "_self")) {
             // Leave it to the browser
             return;
         }
         event.preventDefault();
+        event.stopPropagation();
         Router.changeURL(trimLocalUrl(this.options.href));
     });
 }
