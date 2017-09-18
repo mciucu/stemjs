@@ -40,7 +40,7 @@ class Switcher extends UI.Element {
     }
 
     overwriteElements(existingElements, newElements) {
-        let keyMap = this.getElementKeyMap(existingElements);
+        let keyMap = this.getElementKeyMap(existingElements) || new Map();
         for (let i = 0; i < newElements.length; i += 1) {
             let newChild = newElements[i];
             let newChildKey = (newChild.options && newChild.options.key) || ("autokey" + i);
