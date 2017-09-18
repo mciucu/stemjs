@@ -25,8 +25,10 @@ Theme.setProperties({
     COLOR_WARNING: "#f0ad4e",
     COLOR_DANGER: "#d9534f",
 
-    FONT_SIZE_EXTRA_SMALL: "9px",
-    FONT_SIZE_SMALL: "10px",
+    COLOR_LINK: "#337ab7",
+
+    FONT_SIZE_EXTRA_SMALL: "10px",
+    FONT_SIZE_SMALL: "12px",
     FONT_SIZE_DEFAULT: "14px",
     FONT_SIZE_LARGE: "17px",
     FONT_SIZE_EXTRA_LARGE: "21px",
