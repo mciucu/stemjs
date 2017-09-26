@@ -373,6 +373,8 @@ export class CallThrottler extends CallModifier {
 
     lastCallTime = 0;
     pendingCall = null;
+    pendingCallArgs = [];
+    pendingCallExpectedTime = 0;
     numCalls = 0;
     totalCallDuration = 0;
 
@@ -381,61 +383,121 @@ export class CallThrottler extends CallModifier {
         Object.assign(this, options);
     }
 
+    isThrottleOnAnimationFrame() {
+        return this.throttle === this.constructor.ON_ANIMATION_FRAME;
+    }
+
+    clearPendingCall() {
+        this.pendingCall = null;
+        this.pendingCallArgs = [];
+        this.pendingCallExpectedTime = 0;
+    }
+
     cancel() {
         this.pendingCall && this.pendingCall.cancel();
-        this.pendingCall = null;
+        this.clearPendingCall();
     }
 
     flush() {
         this.pendingCall && this.pendingCall.flush();
-        this.pendingCall = null;
+        this.clearPendingCall();
     }
 
+    // API compatibility with cleanup jobs
     cleanup() {
         this.cancel();
     }
 
-    wrap(func) {
-        const result = (...args) => {
-            const funcCall = () => {
-                this.lastCallTime = Date.now();
-                this.pendingCall = null;
-                func(...args);
-            };
+    computeExecutionDelay(timeNow) {
+        let executionDelay = null;
+        if (this.throttle != null) {
+            executionDelay = Math.max(this.lastCallTime + this.throttle - timeNow, 0);
+        }
+        if (this.debounce != null) {
+            executionDelay = Math.min(executionDelay != null ? executionDelay : this.debounce, this.debounce);
+        }
+        return executionDelay;
+    }
 
-            this.cancel();
+    replacePendingCall(wrappedFunc, funcCall, funcCallArgs) {
+        this.cancel();
+        if (this.isThrottleOnAnimationFrame()) {
+            const cancelHandler = requestAnimationFrame(funcCall);
+            wrappedFunc.cancel = () => cancelAnimationFrame(cancelHandler);
+            return;
+        }
 
-            if (this.throttle === this.constructor.ON_ANIMATION_FRAME) {
-                const cancelHandler = requestAnimationFrame(funcCall);
-                result.cancel = () => cancelAnimationFrame(cancelHandler);
-                return;
-            }
+        const timeNow = Date.now();
+        let executionDelay = this.computeExecutionDelay(timeNow);
 
+        if (this.dropThrottled) {
+            return executionDelay == 0 && funcCall();
+        }
+
+        const cancelHandler = setTimeout(funcCall, executionDelay);
+        wrappedFunc.cancel = () => clearTimeout(cancelHandler);
+        this.pendingCall = wrappedFunc;
+        this.pendingCallArgs = funcCallArgs;
+        this.pendingCallExpectedTime = timeNow + executionDelay;
+    }
+
+    updatePendingCall(args) {
+        this.pendingCallArgs = args;
+        if (!this.isThrottleOnAnimationFrame()) {
             const timeNow = Date.now();
-            let executionDelay = null;
+            this.pendingCallExpectedTime = timeNow + this.computeExecutionDelay(timeNow);
+        }
+    }
 
-            if (this.throttle != null) {
-                executionDelay = Math.max(this.lastCallTime + this.throttle - timeNow, 0);
-                if (this.dropThrottled) {
-                    return executionDelay == 0 && funcCall();
-                }
+    wrap(func) {
+        const funcCall = () => {
+            const timeNow = Date.now();
+            // The expected time when the function should be executed next might have been changed
+            // Check if that's the case, while allowing a 1ms error for time measurement
+            if (!this.isThrottleOnAnimationFrame() &&
+                timeNow + 1 < this.pendingCallExpectedTime) {
+                this.replacePendingCall(wrappedFunc, funcCall, this.pendingCallArgs);
+            } else {
+                this.lastCallTime = timeNow;
+                this.clearPendingCall();
+                func(...this.pendingCallArgs);
             }
-
-            if (this.debounce != null) {
-                executionDelay = Math.min(executionDelay != null ? executionDelay : this.debounce, this.debounce);
-            }
-            const cancelHandler = setTimeout(funcCall, executionDelay);
-            result.cancel = () => clearTimeout(cancelHandler);
-            this.pendingCall = result;
         };
 
-        result.cancel = NOOP_FUNCTION;
-        result.flush = () => {
-            if (result === this.pendingCall) {
+        const wrappedFunc = (...args) => {
+            // Check if it's our function, and update the arguments and next execution time only
+            if (this.pendingCall && func === this.pendingCall.originalFunc) {
+                // We only need to update the arguments, and maybe mark that we want to executed later than scheduled
+                // It's an optimization to not invoke too many setTimeout/clearTimeout pairs
+                return this.updatePendingCall(args);
+            }
+            return this.replacePendingCall(wrappedFunc, funcCall, args);
+        };
+
+        wrappedFunc.originalFunc = func;
+        wrappedFunc.cancel = NOOP_FUNCTION;
+        wrappedFunc.flush = () => {
+            if (wrappedFunc === this.pendingCall) {
                 this.cancel();
-                result();
+                wrappedFunc();
             }
         };
-        return result;
+        return wrappedFunc;
     }
 }
+
+// export function benchmarkThrottle(options={}) {
+//     const startTime = performance.now();
+//     const calls = options.calls || 100000;
+//
+//     const throttler = new CallThrottler({throttle: options.throttle || 300, debounce: options.debounce || 100});
+//
+//     const func = options.func || NOOP_FUNCTION;
+//
+//     const wrappedFunc = throttler.wrap(func);
+//
+//     for (let i = 0; i < calls; i += 1) {
+//         wrappedFunc();
+//     }
+//     console.warn("Throttle benchmark:", performance.now() - startTime, "for", calls, "calls");
+// }
