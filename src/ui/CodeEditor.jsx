@@ -1,43 +1,10 @@
 // Wrapper over the Ace code editor, needs ace to be loaded
 // TODO: should be renamed to AceCodeEditor?
 import {UI} from "./UIBase";
+import {EnqueueableMethodMixin, enqueueIfNotLoaded} from "../base/EnqueueableMethodMixin";
 
-export function enqueueIfNotLoaded(target, key, descriptor) {
-    const method = descriptor.value;
-    return Object.assign({}, descriptor, {
-        value: function() {
-            if (this.isLoaded()) {
-                return method.call(this, ...arguments);
-            } else {
-                this.enqueueMethodCall(method, arguments);
-                return null;
-            }
-        }
-    });
-}
 
-const EnqueuedMethodsClass = (BaseClass) => class AsyncClass extends BaseClass {
-    isLoaded() {
-        throw Error("Not implemented!");
-    }
-
-    enqueueMethodCall(method, args) {
-        this.methodCallQueue = this.methodCallQueue || [];
-        this.methodCallQueue.push([method, args]);
-    }
-
-    resolveQueuedMethods() {
-        if (!this.isLoaded()) {
-            throw Error("Cannot process scheduled jobs, element not loaded");
-        }
-        for (let methodCall of this.methodCallQueue || []) {
-            methodCall[0].call(this, ...methodCall[1]);
-        }
-        delete this.methodCallQueue;
-    }
-};
-
-class CodeEditor extends EnqueuedMethodsClass(UI.Element) {
+class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
     static requireAce(callback) {
         throw Error("You need to implement requireAce");
     }
