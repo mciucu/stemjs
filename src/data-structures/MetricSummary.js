@@ -1,4 +1,5 @@
 import {Deque} from "./Deque";
+import {StemDate} from "../time/Date";
 
 class MaxLengthDeque extends Deque {
     constructor(maxLength) {
@@ -11,8 +12,8 @@ class MaxLengthDeque extends Deque {
     }
 
     push(value) {
-        if (this.length + 1 >= this.maxLength) {
-            this.unshift();
+        if (this.length + 1 > this.maxLength) {
+            this.popFront();
         }
         super.push(value);
     }
@@ -46,10 +47,11 @@ export class MetricSummary {
         this.options = options;
         // To not have dequeues all resizing at the same time
         this.maxLength = this.options.maxLength || 8;
-        this.rawTimestamps = new MaxLengthDeque(this.maxValues);
-        this.rawValues = new MaxLengthDeque(this.maxValues);
+        this.rawTimestamps = new MaxLengthDeque(this.maxLength);
+        this.rawValues = new MaxLengthDeque(this.maxLength);
+        this.averagers = [];
         for (let i = 0, duration = 5; i < 7; i++, duration *= 4) {
-            this.averages.push(new ChunkAverager(duration, this.maxValues));
+            this.averagers.push(new ChunkAverager(duration, this.maxLength));
         }
     }
 
@@ -74,7 +76,7 @@ export class MetricSummary {
         }
     }
 
-    getValues(startDate, endDate, maxValues=1024) {
+    getValues(startDate=this.rawTimestamps.peekFront(), endDate=this.rawTimestamps.last(), maxValues=1024) {
         startDate = +(new StemDate(startDate));
         endDate = +(new StemDate(endDate));
         let values = [];

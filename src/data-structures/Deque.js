@@ -44,7 +44,7 @@ class Deque {
         }
     }
 
-    pushBack(value) {
+    pushFront(value) {
         if (this._offset == 0) {
             this.rebalance();
         }
@@ -52,7 +52,7 @@ class Deque {
         this._length += 1;
     }
 
-    popBack() {
+    popFront() {
         let value = this.peekBack();
 
         this._values[this._offset++] = undefined;
@@ -62,14 +62,14 @@ class Deque {
         return value;
     }
 
-    peekBack() {
+    peekFront() {
         if (this._length == 0) {
             throw Error("Invalid operation, empty deque");
         }
         return this._values[this._offset];
     }
 
-    pushFront(value) {
+    pushBack(value) {
         if (this._offset + this._length === this._values.length) {
             this.rebalance();
         }
@@ -77,7 +77,7 @@ class Deque {
         this._length += 1;
     }
 
-    popFront() {
+    popBack() {
         let value = this.peekFront();
 
         this._length -= 1;
@@ -87,7 +87,7 @@ class Deque {
         return value;
     }
 
-    peekFront() {
+    peekBack() {
         if (this._length == 0) {
             throw Error("Invalid operation, empty deque");
         }
