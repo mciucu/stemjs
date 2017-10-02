@@ -1,3 +1,4 @@
+import {Dispatchable} from "../base/Dispatcher";
 import {Deque} from "./Deque";
 import {StemDate} from "../time/Date";
 
@@ -41,8 +42,9 @@ class ChunkAverager {
     }
 }
 
-export class MetricSummary {
+export class MetricSummary extends Dispatchable {
     constructor(type, options={}) {
+        super();
         this.type = type;
         this.options = options;
         // To not have dequeues all resizing at the same time
@@ -69,11 +71,29 @@ export class MetricSummary {
             console.error("Invalid new timestamp:", timestamp, this.getLastTimestamp());
             return;
         }
+
         this.rawTimestamps.push(timestamp);
         this.rawValues.push(value);
-        if (lastTimestamp) {
+
+        if (this.type === MetricType.COUNTER_SUM) {
+            if (this.rawValues.length > 0) {
+                const prevValue = this.rawValues.last();
+                if (prevValue <= value) {
+                    value = value - prevValue;
+                } else {
+                    // This is probably a machine reboot, consider the counter was reset to 0
+                }
+            } else {
+                // We'll add once we have a previous value, to not have strange data
+                value = null;
+            }
+        }
+
+        if (lastTimestamp && value != null) {
             this.addInterval(lastTimestamp, timestamp, value);
         }
+
+        this.dispatch("update", {timestamp, value, lastTimestamp});
     }
 
     getValues(startDate=this.rawTimestamps.peekFront(), endDate=this.rawTimestamps.last(), maxValues=1024) {
@@ -83,12 +103,25 @@ export class MetricSummary {
         for (let i = 0; i < this.rawValues.length; i++) {
             const timestamp = this.rawTimestamps.get(i);
             if (startDate <= timestamp && timestamp <= endDate) {
+                let value = this.rawValues.get(i);
+                if (this.type === MetricType.COUNTER_SUM) {
+                    if (i === 0) {
+                        // Ignore the first one
+                        continue;
+                    }
+                    const prevValue = this.rawValues.get(i - 1);
+                    value = (value > prevValue) ? (value - prevValue) : value;
+                }
                 values.push({
                     timestamp: timestamp,
-                    value: this.rawValues.get(i)
+                    value: value,
                 });
             }
         }
         return values;
+    }
+
+    addUpdateListener(...args) {
+        return this.addListener("update", ...args);
     }
 }
