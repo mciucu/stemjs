@@ -112,6 +112,15 @@ export class MetricSummary extends Dispatchable {
                     const prevValue = this.rawValues.get(i - 1);
                     value = (value > prevValue) ? (value - prevValue) : value;
                 }
+                if (this.type === MetricType.COUNTER ||
+                    this.type === MetricType.COUNTER_SUM) {
+                    if (i === 0) {
+                        continue;
+                    }
+                    // Normalize to counts per second
+                    const prevTimestamp = this.rawTimestamps.get(i - 1);
+                    value = 1000.0 * value / (timestamp - prevTimestamp);
+                }
                 values.push({
                     timestamp: timestamp,
                     value: value,
