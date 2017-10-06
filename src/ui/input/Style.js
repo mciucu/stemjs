@@ -21,6 +21,8 @@ class InputStyle extends StyleSheet {
         display: "inline-block",
         width: "initial !important",
         marginRight:"0.5em",
+        marginBottom: "-.1em",
+        height: "1em",
     };
 
     @styleRule
