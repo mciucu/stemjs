@@ -200,7 +200,7 @@ class TextArea extends UI.Primitive(InputableElement, "textarea") {
 
     redraw() {
         super.redraw();
-        if (this.options.value) {
+        if (this.options.hasOwnProperty("value")) {
             this.node.value = this.options.value + "";
         }
     }
