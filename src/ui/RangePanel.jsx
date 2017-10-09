@@ -267,6 +267,16 @@ function RangeTableInterface(TableClass) {
             this.scrollablePanel.addNodeListener("scroll", () => {
                 this.setScroll();
             });
+            this.addNodeListener("scroll", () => {
+                this.tableContainer.setStyle("marginLeft", this.node.scrollLeft);
+                this.footer.setStyle("marginLeft", this.node.scrollLeft);
+                this.container.setStyle("marginLeft", -this.node.scrollLeft);
+            });
+            window.addEventListener("resize", () => {
+                this.tableContainer.setStyle("marginLeft", 0);
+                this.footer.setStyle("marginLeft", 0);
+                this.container.setStyle("marginLeft", 0);
+            });
             this.jumpToInput.addNodeListener("keyup", (event) => {
                 if (event.code === "Enter") {
                     this.jumpToIndex(parseInt(this.jumpToInput.getValue()));
