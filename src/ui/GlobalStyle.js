@@ -47,7 +47,8 @@ Theme.setProperties({
     CARD_PANEL_HEADING_PADDING_LARGE: 20,
     CARD_PANEL_TEXT_TRANSFORM: "inherit",
 
-    DARK_BOX_SHADOW: "0px 0px 5px rgb(55, 55, 55)",
+
+    DARK_BOX_SHADOW: "0px 0px 10px rgba(0, 0, 0, .6)",
 
     ROW_LIST_ROW_HEIGHT: 30,
     ROW_LIST_ROW_HEIGHT_LARGE: 40,
