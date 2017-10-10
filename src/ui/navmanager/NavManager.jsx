@@ -320,7 +320,24 @@ class NavManager extends UI.Primitive("nav") {
         this.onMount();
     }
 
+    // This method enforces the wrapping to be skipped. It is useful when navbar elements change.
+    skipWrap() {
+        this.wrapSkip = true;
+        this.wrapScheduled = false;
+    }
+
+    unskipWrap() {
+        this.wrapSkip = false;
+        if (this.wrapScheduled) {
+            this.checkForWrap();
+        }
+    }
+
     checkForWrap() {
+        if (this.wrapSkip) {
+            this.wrapScheduled = true;
+            return;
+        }
         const wrapNavElements = () => {
             this.wrapped = true;
             this.wrappedPanel = <BasicOrientedElement orientation={Orientation.VERTICAL} styleSheet={this.styleSheet}/>;
