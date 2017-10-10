@@ -42,6 +42,7 @@ class RangePanelStyle extends StyleSheet {
         bottom: "0px",
         width: "100%",
         whiteSpace: "nowrap",
+        paddingBottom: "15px",
     };
 
     @styleRule
