@@ -90,9 +90,11 @@ export class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
 export class ButtonGroupStyle extends StyleSheet {
     @styleRule
     HORIZONTAL = {
+        pointerEvents: "none",
         ">*": {
             "margin-left": "5px",
             "display": "inline-block",
+            pointerEvents: "initial",
         },
         ">:first-child": {
             "margin-left": "0px",
@@ -101,9 +103,11 @@ export class ButtonGroupStyle extends StyleSheet {
 
     @styleRule
     VERTICAL = {
+        pointerEvents: "none",
         ">*": {
             "margin-top": "5px",
             "display": "block",
+            pointerEvents: "initial",
         },
         ">:first-child": {
             "margin-top": "0px",
@@ -122,7 +126,9 @@ export class ButtonGroupStyle extends StyleSheet {
 export class RadioButtonGroupStyle extends StyleSheet {
     @styleRule
     DEFAULT = {
+        pointerEvents: "none",
         ">*": {
+            pointerEvents: "initial",
             borderRadius: "0",
         },
         ">:last-child": {
