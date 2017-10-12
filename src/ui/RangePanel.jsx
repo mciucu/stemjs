@@ -251,7 +251,7 @@ function RangeTableInterface(TableClass) {
             // This event isn't used anywhere but this is how range updates should be made.
             this.addListener("entriesChange", (event) => {
                 if (!(event.leftIndex >= this.highIndex || event.rightIndex < this.lowIndex)) {
-                    this.setScroll();
+                    setTimeout(() => this.setScroll(), 100);
                 }
             });
             this.addListener("showCurrentUser", () => {
@@ -259,7 +259,7 @@ function RangeTableInterface(TableClass) {
                 this.jumpToIndex(index);
             });
             this.attachListener(this.getEntriesManager(), "update", () => {
-                this.setScroll();
+                setTimeout(() => this.setScroll(), 100);
             });
         }
 
