@@ -35,7 +35,7 @@ export const Size = {
 export const VoteStatus = {
     NONE: null,
     LIKE: 1,
-    DISLIKE: -1
+    DISLIKE: 0,
 };
 
 export const ActionStatus = {
