@@ -107,11 +107,17 @@ function RangeTableInterface(TableClass) {
             const fakePanelHeight = (this.getRowHeight() * this.getEntriesManager().getEntriesCount() + 1) + "px";
             const headHeight = this.containerHead ? this.containerHead.getHeight() : 0;
             this.computeIndices();
+
+            // Margin is added at redraw for the case when the scoreboard has horizontal scrolling during a redraw.
+            const margin = (this.node &&  this.node.scrollLeft) || 0;
+
             return [
-                <div ref="tableContainer" className={rangePanelStyleSheet.tableContainer} style={{paddingTop: headHeight + "px"}}>
+                <div ref="tableContainer" className={rangePanelStyleSheet.tableContainer}
+                     style={{paddingTop: headHeight + "px", marginLeft: margin + "px"}}>
                     <div ref="scrollablePanel" className={rangePanelStyleSheet.scrollablePanel}>
                         <div ref="fakePanel" className={rangePanelStyleSheet.fakePanel} style={{height: fakePanelHeight}}/>
-                        <table ref="container" className={`${this.styleSheet.table} ${rangePanelStyleSheet.table}`}>
+                        <table ref="container" className={`${this.styleSheet.table} ${rangePanelStyleSheet.table}`}
+                                               style={{marginLeft: -margin + "px"}}>
                             <thead ref="containerHead">
                             {this.renderContainerHead()}
                             </thead>
@@ -121,7 +127,7 @@ function RangeTableInterface(TableClass) {
                         </table>
                     </div>
                 </div>,
-                <div ref="footer" className={rangePanelStyleSheet.footer}>
+                <div ref="footer" className={rangePanelStyleSheet.footer} style={{marginLeft: margin + "px"}}>
                     <span ref="tableFooterText">
                         {this.getFooterContent()}
                     </span>
@@ -258,6 +264,7 @@ function RangeTableInterface(TableClass) {
                 const index = this.getEntriesManager().getEntries().map(entry => entry.userId).indexOf(USER.id) + 1;
                 this.jumpToIndex(index);
             });
+            // Delay is added for smoother experience of scrolling.
             this.attachListener(this.getEntriesManager(), "update", () => {
                 setTimeout(() => this.setScroll(), 100);
             });
