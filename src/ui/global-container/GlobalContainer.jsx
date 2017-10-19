@@ -10,7 +10,7 @@ class GlobalContainer extends UI.Element {
     }
 
     onMount() {
-        if (!Device.isTouchDevice()) {
+        if (!Device.isTouchDevice() || !Device.isMobileDevice()) {
             Object.assign(document.body.style, {
                 overflow: "hidden",
             });
