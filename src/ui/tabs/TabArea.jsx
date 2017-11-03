@@ -126,15 +126,40 @@ class TabArea extends UI.Element {
         let tabPanels = [];
         let activeTab;
 
-        for (let panel of unwrapArray(this.render())) {
+        for (const panel of unwrapArray(this.render())) {
             let [tabTitle, tabPanel] = this.createTabPanel(panel);
 
-            if (tabTitle.options.active) {
+            if (this.activePanel === tabPanel) {
                 activeTab = tabTitle;
             }
 
             tabTitles.push(tabTitle);
             tabPanels.push(tabPanel);
+        }
+
+        if (!activeTab) {
+            for (const tabTitle of tabTitles) {
+                if (tabTitle.options.active) {
+                    activeTab = tabTitle;
+                }
+            }
+        } else {
+            for (let i = 0; i < tabPanels.length; i += 1) {
+                const tabTitle = tabTitles[i];
+                const tabPanel = tabPanels[i];
+
+                if (tabTitle.options.active) {
+                    tabTitle.options.active = false;
+                }
+                if (tabPanels.options.active) {
+                    tabPanels.options.active = false;
+                }
+
+                if (activeTab === tabTitle) {
+                    tabPanel.options.active = true;
+                    tabTitle.options.active = true;
+                }
+            }
         }
 
         if (this.options.autoActive && !activeTab && tabTitles.length > 0) {
@@ -157,6 +182,7 @@ class TabArea extends UI.Element {
 
     onSetActive(panel) {
         this.switcherArea.setActive(panel);
+        this.activePanel = panel;
     }
 
     onMount() {
