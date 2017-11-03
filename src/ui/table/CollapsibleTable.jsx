@@ -134,12 +134,16 @@ class DelayedCollapsibleTableRow extends CollapsibleTableRow {
     toggle() {
         if (!this._haveExpanded) {
             this._haveExpanded = true;
-            UI.renderingStack.push(this);
-            this.contentArea.options.children = this.renderCollapsible(this.options.entry);
-            UI.renderingStack.pop();
-            this.contentArea.redraw();
+            this.redrawCollapsible();
         }
         super.toggle();
+    }
+
+    redrawCollapsible() {
+        UI.renderingStack.push(this);
+        this.contentArea.options.children = this.renderCollapsible(this.options.entry);
+        UI.renderingStack.pop();
+        this.contentArea.redraw();
     }
 
     getInitialCollapsedContent() {
