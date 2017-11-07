@@ -26,7 +26,7 @@ class CollapsiblePanelStyle extends CardPanelStyle {
     panel = {
         boxShadow: null,
         borderWidth: "1px",
-        borderColor: "#ddd !important",
+        borderColor: "#ccc !important",
         borderRadius: "3px",
     };
 
@@ -36,7 +36,10 @@ class CollapsiblePanelStyle extends CardPanelStyle {
         borderBottom: "1px solid transparent",
         borderTopLeftRadius: "3px",
         borderTopRightRadius: "3px",
-        backgroundColor: "#f5f5f5",
+        backgroundColor: "#fefefe",
+        ":hover": {
+            backgroundColor: "#f3f3f3",
+        }
     };
 
     @styleRule
@@ -60,13 +63,18 @@ class CollapsiblePanelStyle extends CardPanelStyle {
             verticalAlign: "top",
             height: "0.7em",
             textAlign: "center",
+            transition: "margin, transform .2s ease",
+            transform: "rotate(-180deg)",
+            marginTop: ".2em",
+            marginRight: ".2em !important",
         }
     };
 
     @styleRule
     collapsedButton = {
         ":before": {
-            content: "\"\\f105\" !important",
+            transform: "rotate(-90deg) !important",
+            marginTop: ".1em !important",
         },
     };
 }

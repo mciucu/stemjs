@@ -49,10 +49,10 @@ class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
         }
 
         return [<div className={this.styleSheet.heading}>
-                    <a ref="toggleButton"  className={`${this.styleSheet.button} ${collapsedHeadingClass}`}
+                    <div ref="toggleButton"  className={`${this.styleSheet.button} ${collapsedHeadingClass}`}
                         onClick={() => this.toggle()}>
                         {this.getTitle()}
-                    </a>
+                    </div>
                 </div>,
                 <div style={{overflow: "hidden"}}>
                   <div ref="contentArea" className={`${collapsedPanelClass} ${hiddenClass}`}
