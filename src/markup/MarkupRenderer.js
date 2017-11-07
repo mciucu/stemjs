@@ -135,7 +135,24 @@ class MarkupRenderer extends Panel {
 }
 
 MarkupClassMap.addClass("CodeSnippet", StaticCodeHighlighter);
-MarkupClassMap.addClass("Link", Link);
-MarkupClassMap.addClass("Image", Image);
+
+const SafeUriEnhancer = (BaseClass, attribute) => class SafeUriClass extends BaseClass {
+    setOptions(options) {
+        if (options.hasOwnProperty(attribute) && !this.constructor.isSafeUri(options[attribute])) {
+            return super.setOptions(Object.assign({}, options, {[attribute]: undefined}));
+        }
+        return super.setOptions(options);
+    }
+
+    static isSafeUri(uri) {
+        return uri.indexOf(":") === -1 ||
+               uri.startsWith("http:") ||
+               uri.startsWith("https:") ||
+               uri.startsWith("mailto:");
+    }
+};
+
+MarkupClassMap.addClass("Link", SafeUriEnhancer(Link, "href"));
+MarkupClassMap.addClass("Image", SafeUriEnhancer(Image, "src"));
 
 export {MarkupClassMap, MarkupRenderer};
