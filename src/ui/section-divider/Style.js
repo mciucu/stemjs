@@ -73,6 +73,7 @@ class SectionDividerStyle extends DividerStyle {
         borderRight: `${this.barPadding}px solid transparent`,
         marginLeft: `${-this.barThickness / 2 - this.barPadding}px`,
         marginRight: `${-this.barThickness / 2}px`,
+        display: "inline-block",
     };
 
     @styleRule
@@ -97,7 +98,6 @@ class SectionDividerStyle extends DividerStyle {
         whiteSpace: "nowrap",
         ">*": {
             whiteSpace: "initial",
-            display: "inline-block",
             verticalAlign: "top",
             paddingLeft: `${this.barThickness / 2 + this.barPadding}px`,
             paddingRight: `${this.barThickness / 2 + this.barPadding}px`,
@@ -111,6 +111,9 @@ class SectionDividerStyle extends DividerStyle {
         ">:nth-of-type(even)": {
             padding: "0",
         },
+        ">:nth-of-type(odd)": {
+            display: "inline-block",
+        }
     };
 
     @styleRule
@@ -143,7 +146,7 @@ class TitledDividerStyle extends SectionDividerStyle {
 
     @styleRuleInherit
     horizontalDivider = Object.assign(this.dividerStyle, {
-        display: "inline-flex !important",
+        display: "inline-flex",
         alignItems: "center",
     });
 
@@ -157,7 +160,7 @@ class TitledDividerStyle extends SectionDividerStyle {
 
     @styleRuleInherit
     verticalDivider = Object.assign(this.dividerStyle, {
-        display: "flex !important",
+        display: "flex",
         alignItems: "center",
     });
 
@@ -182,6 +185,8 @@ class TitledDividerStyle extends SectionDividerStyle {
     @styleRule
     collapsedBarTitle = {
         cursor: "pointer",
+        borderLeft: "1px solid #ddd",
+        borderRight: "1px solid #ddd",
         display: "flex",
         alignItems: "center",
         backgroundColor: "#fff",
@@ -191,6 +196,7 @@ class TitledDividerStyle extends SectionDividerStyle {
         height: "100%",
         top: 0,
         left: 0,
+        transition: "opacity .3s ease",
         ":hover": {
             backgroundColor: "#f3f3f3",
         },
@@ -206,7 +212,7 @@ class TitledDividerStyle extends SectionDividerStyle {
             fontWeight: "bold",
             fontSize: "130%",
             whiteSpace: "nowrap",
-            marginLeft: "-.4em",
+            marginTop: "-.4em",
             transform: "translate(-50%, -70%)",
         }
     };
@@ -214,12 +220,30 @@ class TitledDividerStyle extends SectionDividerStyle {
     @styleRule
     hiddenBar = {
         display: "none !important",
+        opacity: "0",
     };
 
     @styleRule
     hiddenContent = {
         ">:first-child": {
-            display: "none",
+            display: "none"
+        }
+    };
+
+    @styleRule
+    animatedSectionDivider = {
+        ">*": {
+            transition: ".3s height ease, .3s width ease",
+        }
+    };
+
+    @styleRule
+    paddingRemoved = {
+        ">*": {
+            padding: "0 !important",
+        },
+        ">:nth-of-type(even)": {
+            display: "none !important",
         }
     }
 }

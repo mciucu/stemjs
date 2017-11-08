@@ -46,7 +46,8 @@ class BarCollapsePanel extends UI.Element {
         return [
             this.getGivenChildren(),
             <div ref="whiteBarContainer" style={{position: "relative", width: "100%", height: this.collapsed ? "100%" : 0}}>
-                <div ref="collapsedBarTitle" className={`${this.styleSheet.collapsedBarTitle} ${hiddenClass}`}>
+                <div ref="collapsedBarTitle" className={`${this.styleSheet.collapsedBarTitle} ${hiddenClass}`}
+                                             style={{opacity: this.collapsed ? "1" : "0"}}>
                     <div>
                         <div>
                             {this.options.title}
@@ -60,14 +61,20 @@ class BarCollapsePanel extends UI.Element {
     toggle() {
         if (this.collapsed) {
             this.collapsed = false;
-            this.collapsedBarTitle.addClass(this.styleSheet.hiddenBar);
             this.removeClass(this.styleSheet.hiddenContent);
-            this.whiteBarContainer.setHeight(0);
+            this.collapsedBarTitle.setStyle("opacity", "0");
+            setTimeout(() => {
+                this.whiteBarContainer.setHeight(0);
+                this.collapsedBarTitle.addClass(this.styleSheet.hiddenBar);
+            }, 100);
         } else {
             this.collapsed = true;
             this.collapsedBarTitle.removeClass(this.styleSheet.hiddenBar);
             this.addClass(this.styleSheet.hiddenContent);
-            this.whiteBarContainer.setHeight("100%");
+            setTimeout(() => {
+                this.whiteBarContainer.setHeight("100%");
+                this.collapsedBarTitle.setStyle("opacity", "1");
+            }, 100);
         }
     }
 
@@ -100,8 +107,12 @@ export class TitledSectionDivider extends SectionDivider {
     }
 
     collapseChild(index) {
+        this.addClass(this.styleSheet.paddingRemoved);
+        this.addClass(this.styleSheet.animatedSectionDivider);
+
         let parentSize = this.getDimension(this);
         let child = this.panels[index];
+
         let childSize = this.getDimension(child);
         this.uncollapsedSizes.set(child, childSize);
 
@@ -122,10 +133,17 @@ export class TitledSectionDivider extends SectionDivider {
             }
         }
 
-        this.recalculateDimensions();
+        setTimeout(() => {
+            this.removeClass(this.styleSheet.animatedSectionDivider);
+            this.recalculateDimensions();
+            this.preventListeners = false;
+        }, 300);
     }
 
     expandChild(index) {
+        this.removeClass(this.styleSheet.paddingRemoved);
+        this.addClass(this.styleSheet.animatedSectionDivider);
+
         let parentSize = this.getDimension(this);
         let child = this.panels[index];
 
@@ -148,7 +166,12 @@ export class TitledSectionDivider extends SectionDivider {
         }
 
         this.setDimension(child, childSize * 100 / parentSize + "%");
-        this.recalculateDimensions();
+
+
+        setTimeout(() => {
+            this.removeClass(this.styleSheet.animatedSectionDivider);
+            this.recalculateDimensions();
+        }, 300);
     }
 
 
