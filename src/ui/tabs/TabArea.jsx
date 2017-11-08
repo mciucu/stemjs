@@ -85,6 +85,8 @@ class TabArea extends UI.Element {
         return {
             autoActive: true, // means the first Tab will be automatically selected
             // lazyRender: true, // TODO: should be true by default
+            panelClass: null, // Custom css class can be added to panels
+            titleAreaClass: null, // Custom css class can be added to title area
         }
     }
 
@@ -110,13 +112,21 @@ class TabArea extends UI.Element {
     };
 
     getTitleArea(tabTitles) {
-        return <TabTitleArea ref="titleArea" className={this.styleSheet.nav}>
+        let titleAreaClass = this.styleSheet.nav;
+        if (this.options.titleAreaClass) {
+            titleAreaClass += " " + this.options.titleAreaClass;
+        }
+        return <TabTitleArea ref="titleArea" className={titleAreaClass}>
             {tabTitles}
         </TabTitleArea>;
     }
 
     getSwitcher(tabPanels) {
-        return <Switcher className={this.styleSheet.switcher} ref="switcherArea" lazyRender={this.options.lazyRender}>
+        let switcherClass = this.styleSheet.switcher;
+        if (this.options.panelClass) {
+            switcherClass += " " + this.options.panelClass;
+        }
+        return <Switcher className={switcherClass} ref="switcherArea" lazyRender={this.options.lazyRender}>
             {tabPanels}
         </Switcher>;
     }

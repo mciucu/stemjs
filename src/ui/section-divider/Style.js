@@ -1,4 +1,4 @@
-import {StyleSheet, styleRule} from "../Style";
+import {StyleSheet, styleRule, styleRuleInherit} from "../Style";
 
 class DividerStyle extends StyleSheet {
     @styleRule
@@ -61,28 +61,34 @@ class SectionDividerStyle extends DividerStyle {
 
     @styleRule
     horizontalDivider = {
+        zIndex: "10",
         position: "absolute",
         height: "100%",
         cursor: "col-resize",
-        paddingLeft: this.barThickness + "px !important",
+        paddingLeft: this.barThickness / 2 + "px !important",
+        paddingRight: this.barThickness / 2 + "px !important",
         background: "#DDD",
         backgroundClip: "padding-box",
         borderLeft: `${this.barPadding}px solid transparent`,
         borderRight: `${this.barPadding}px solid transparent`,
-        marginLeft: `${-this.barPadding}px`,
+        marginLeft: `${-this.barThickness / 2 - this.barPadding}px`,
+        marginRight: `${-this.barThickness / 2}px`,
     };
 
     @styleRule
     verticalDivider = {
+        zIndex: "10",
         position: "absolute",
         cursor: "row-resize",
         width: "100%",
-        paddingTop: this.barThickness + "px !important",
+        paddingTop: this.barThickness / 2 + "px !important",
+        paddingBottom: this.barThickness / 2 + "px !important",
         background: "#DDD",
         backgroundClip: "padding-box",
         borderBottom: `${this.barPadding}px solid transparent`,
         borderTop: `${this.barPadding}px solid transparent`,
-        marginTop: `${-this.barPadding}px`,
+        marginBottom: `${-this.barThickness / 2  - this.barPadding}px`,
+        marginTop: `${-this.barThickness / 2 - this.barPadding}px`,
     };
 
     @styleRule
@@ -93,9 +99,8 @@ class SectionDividerStyle extends DividerStyle {
             whiteSpace: "initial",
             display: "inline-block",
             verticalAlign: "top",
-            paddingLeft: "2px",
-            paddingRight: "2px",
-            boxSizing: "border-box",
+            paddingLeft: `${this.barThickness / 2 + this.barPadding}px`,
+            paddingRight: `${this.barThickness / 2 + this.barPadding}px`,
         },
         ">:first-child": {
             paddingLeft: "0",
@@ -112,9 +117,8 @@ class SectionDividerStyle extends DividerStyle {
     verticalSection = {
         position: "relative",
         ">*": {
-            paddingTop: "2px",
-            paddingBottom: "2px",
-            boxSizing: "border-box",
+            paddingTop: `${this.barThickness / 2 + this.barPadding}px`,
+            paddingBottom: `${this.barThickness / 2 + this.barPadding}px`,
         },
         ">:first-child": {
             paddingTop: "0",
@@ -128,4 +132,96 @@ class SectionDividerStyle extends DividerStyle {
     };
 }
 
-export {AccordionStyle, SectionDividerStyle};
+class TitledDividerStyle extends SectionDividerStyle {
+    barThickness = 12;
+    barPadding = 3;
+
+    dividerStyle = {
+        backgroundColor: "white",
+        borderColor: "#DDD !important",
+    };
+
+    @styleRuleInherit
+    horizontalDivider = Object.assign(this.dividerStyle, {
+        display: "inline-flex !important",
+        alignItems: "center",
+    });
+
+    @styleRule
+    horizontalDots = {
+        fontSize: "70% !important",
+        width: 0,
+        color: "rgba(0,0,0, .4)",
+        transform: "scaleY(10) translateX(-.1em)",
+    };
+
+    @styleRuleInherit
+    verticalDivider = Object.assign(this.dividerStyle, {
+        display: "flex !important",
+        alignItems: "center",
+    });
+
+    @styleRule
+    verticalDots = {
+        flex: "1",
+        fontSize: "70% !important",
+        height: 0,
+        color: "rgba(0,0,0, .4)",
+        textAlign: "center",
+        transform: "scaleX(10) translateY(-.4em)",
+    };
+
+    @styleRule
+    barCollapsePanel = {
+        ">:first-child": {
+            width: "100%",
+            height: "100%",
+        }
+    };
+
+    @styleRule
+    collapsedBarTitle = {
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        backgroundColor: "#fff",
+        zIndex: 5,
+        position: "absolute",
+        width: "100%",
+        height: "100%",
+        top: 0,
+        left: 0,
+        ":hover": {
+            backgroundColor: "#f3f3f3",
+        },
+        ">:first-child": {
+            display: "flex",
+            alignItems: "center",
+            transform: "rotate(90deg)",
+            height: "0",
+            width: "0",
+        },
+        ">:first-child>:first-child": {
+            textTransform: "uppercase",
+            fontWeight: "bold",
+            fontSize: "130%",
+            whiteSpace: "nowrap",
+            marginLeft: "-.4em",
+            transform: "translate(-50%, -70%)",
+        }
+    };
+
+    @styleRule
+    hiddenBar = {
+        display: "none !important",
+    };
+
+    @styleRule
+    hiddenContent = {
+        ">:first-child": {
+            display: "none",
+        }
+    }
+}
+
+export {AccordionStyle, SectionDividerStyle, TitledDividerStyle};

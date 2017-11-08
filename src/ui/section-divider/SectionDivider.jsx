@@ -7,9 +7,11 @@ import {registerStyle} from "../UI";
 import {SectionDividerStyle} from "./Style";
 import {Orientation} from "../Constants";
 
+
+
 // options.orientation is the orientation of the divided elements
 @registerStyle(SectionDividerStyle)
-class DividerBar extends Divider {
+export class DividerBar extends Divider {
     getDefaultOptions() {
         return Object.assign({}, super.getDefaultOptions(), {
             orientation: Orientation.HORIZONTAL,
@@ -32,7 +34,8 @@ class DividerBar extends Divider {
             attr.addClass(this.styleSheet.horizontalDivider);
         }
     }
-};
+}
+
 
 /* SectionDivider class should take in:
     - Vertical or horizontal separation
@@ -40,10 +43,14 @@ class DividerBar extends Divider {
     - An option on how to redivide the sizes of the children
  */
 @registerStyle(SectionDividerStyle)
-class SectionDivider extends UI.Element {
+export class SectionDivider extends UI.Element {
     constructor(options) {
         super(options);
         this.uncollapsedSizes = new WeakMap();
+    }
+
+    getDividerBarClass() {
+        return DividerBar;
     }
 
     extraNodeAttributes(attr) {
@@ -290,10 +297,11 @@ class SectionDivider extends UI.Element {
     }
 
     getChildrenToRender() {
-        let children = [];
+        const children = [];
         this.dividers = [];
         this.panels = [];
         let leftChildVisible = false;
+        const DividerBarClass = this.getDividerBarClass();
 
         for (let child of unwrapArray(this.render())) {
             if (this.panels.length) {
@@ -301,7 +309,7 @@ class SectionDivider extends UI.Element {
                 if (leftChildVisible && !child.hasClass("hidden")) {
                     hiddenClass = "";
                 }
-                let divider = <DividerBar className={hiddenClass} orientation={this.getOrientation()} />;
+                let divider = <DividerBarClass className={hiddenClass} orientation={this.getOrientation()} />;
                 children.push(divider);
                 this.dividers.push(divider);
             }
@@ -312,5 +320,3 @@ class SectionDivider extends UI.Element {
         return children;
     }
 }
-
-export {SectionDivider}

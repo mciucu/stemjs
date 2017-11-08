@@ -28,6 +28,7 @@ export * from "modal/Modal";
 export * from "global-container/GlobalContainer";
 
 export * from "section-divider/SectionDivider";
+export * from "section-divider/TitledSectionDivider";
 export * from "section-divider/Accordion";
 export * from "section-divider/Style";
 export * from "./Carousel";
