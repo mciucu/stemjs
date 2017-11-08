@@ -16,14 +16,24 @@ class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
 
     expand() {
         super.expand(this.contentArea);
+        this.toggleButton.addClass(this.styleSheet.transitionButton);
+        this.toggleButton.addClass(this.styleSheet.expandedButton);
         this.toggleButton.removeClass(this.styleSheet.collapsedButton);
+        setTimeout(() => {
+            this.toggleButton.removeClass(this.styleSheet.transitionButton);
+            // setTimeout(() => {
+                this.toggleButton.removeClass(this.styleSheet.expandedButton);
+            // }, 0);
+        }, 200)
     }
 
     collapse() {
         super.collapse(this.contentArea);
+        this.toggleButton.addClass(this.styleSheet.transitionButton);
+        this.toggleButton.addClass(this.styleSheet.collapsedButton);
         setTimeout(() => {
-            this.toggleButton.addClass(this.styleSheet.collapsedButton);
-        }, this.getCollapsibleStyleSheet().transitionDuration * 700);
+            this.toggleButton.removeClass(this.styleSheet.transitionButton);
+        }, 200);
     }
 
     setTitle(title) {

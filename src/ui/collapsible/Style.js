@@ -56,27 +56,39 @@ class CollapsiblePanelStyle extends CardPanelStyle {
             fontFamily: "'FontAwesome'",
             content: "\"\\f107\"",
             color: "grey",
-            float: "left",
-            fontWeight: "bold",
+            display: "inline-block",
+            lineHeight: "0.7em",
             width: "0.7em",
-            fontSize: "130%",
-            verticalAlign: "top",
+            fontSize: "150%",
+            verticalAlign: "bottom",
             height: "0.7em",
             textAlign: "center",
-            transition: "margin, transform .2s ease",
-            transform: "rotate(-180deg)",
-            marginTop: ".2em",
-            marginRight: ".2em !important",
+            transition: "none",
+            transform: "rotate(180deg)",
+            marginRight: ".2em",
         }
     };
 
     @styleRule
     collapsedButton = {
         ":before": {
-            transform: "rotate(-90deg) !important",
-            marginTop: ".1em !important",
+            transform: "rotate(360deg) !important",
         },
     };
+
+    @styleRule
+    expandedButton = {
+        ":before": {
+            transform: "rotate(540deg) !important",
+        }
+    };
+
+    @styleRule
+    transitionButton = {
+        ":before": {
+            transition: "transform .2s linear",
+        }
+    }
 }
 
 export {CollapsibleStyle, CollapsiblePanelStyle};
