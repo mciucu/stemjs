@@ -20,9 +20,9 @@ class TitledSectionDividerBar extends DividerBar {
             ]
         } else {
             return [
-                <div ref="rightButton" ><FAIcon icon="caret-right" className={this.styleSheet.arrowButton}/></div>,
+                <div><FAIcon ref="rightButton" icon="caret-right" className={this.styleSheet.arrowButton}/></div>,
                 <div><FAIcon icon="bars" className={this.styleSheet.horizontalDots}/></div>,
-                <div ref="leftButton" ><FAIcon icon="caret-left" className={this.styleSheet.arrowButton} /></div>,
+                <div><FAIcon ref="leftButton" icon="caret-left" className={this.styleSheet.arrowButton} /></div>,
             ];
         }
     }
@@ -41,10 +41,10 @@ class TitledSectionDividerBar extends DividerBar {
         this.rightButton.addNodeListener("mousedown", (event) => {
             event.stopPropagation();
         });
-        this.leftButton.addClickListener((event) => {
+        this.leftButton.addClickListener(() => {
             this.dispatch("collapsePrevious");
         });
-        this.rightButton.addClickListener((event) => {
+        this.rightButton.addClickListener(() => {
             this.dispatch("collapseNext");
         })
     }
