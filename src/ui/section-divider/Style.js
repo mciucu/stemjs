@@ -65,8 +65,7 @@ class SectionDividerStyle extends DividerStyle {
         position: "absolute",
         height: "100%",
         cursor: "col-resize",
-        paddingLeft: this.barThickness / 2 + "px !important",
-        paddingRight: this.barThickness / 2 + "px !important",
+        width: this.barThickness + 2 * this.barPadding + "px",
         background: "#DDD",
         backgroundClip: "padding-box",
         borderLeft: `${this.barPadding}px solid transparent`,
@@ -82,8 +81,7 @@ class SectionDividerStyle extends DividerStyle {
         position: "absolute",
         cursor: "row-resize",
         width: "100%",
-        paddingTop: this.barThickness / 2 + "px !important",
-        paddingBottom: this.barThickness / 2 + "px !important",
+        height: this.barThickness + 2 * this.barPadding +  "px",
         background: "#DDD",
         backgroundClip: "padding-box",
         borderBottom: `${this.barPadding}px solid transparent`,
@@ -136,8 +134,9 @@ class SectionDividerStyle extends DividerStyle {
 }
 
 class TitledDividerStyle extends SectionDividerStyle {
-    barThickness = 12;
-    barPadding = 3;
+    barThickness = 16;
+    barPadding = 1;
+    transitionTime = 0.3;
 
     dividerStyle = {
         backgroundColor: "white",
@@ -148,14 +147,27 @@ class TitledDividerStyle extends SectionDividerStyle {
     horizontalDivider = Object.assign(this.dividerStyle, {
         display: "inline-flex",
         alignItems: "center",
+        flexDirection: "column",
+        ">*": {
+            flex: "1",
+            display: "flex",
+            color: "rgba(0,0,0, .4)",
+        },
+        ">:first-child": {
+            alignItems: "flex-end",
+        },
+        ">:last-child": {
+            alignItems: "flex-begin",
+        },
+        ">:nth-child(2)": {
+            flex: ".2",
+        }
     });
 
     @styleRule
     horizontalDots = {
-        fontSize: "70% !important",
-        width: 0,
-        color: "rgba(0,0,0, .4)",
-        transform: "scaleY(10) translateX(-.1em)",
+        transform: "rotate(90deg) scaleX(5) translateY(-.5em) translateX(98%)",
+        height: 0,
     };
 
     @styleRuleInherit
@@ -169,71 +181,103 @@ class TitledDividerStyle extends SectionDividerStyle {
         flex: "1",
         fontSize: "70% !important",
         height: 0,
-        color: "rgba(0,0,0, .4)",
         textAlign: "center",
         transform: "scaleX(10) translateY(-.4em)",
     };
 
     @styleRule
+    arrowButton = {
+        fontSize: "230% !important",
+        padding: "1em .2em",
+        color: "rgba(0,0,0, .4)",
+        cursor: "pointer",
+        ":hover": {
+            color: "black",
+        }
+    };
+
+    @styleRule
+    buttonsDisabled = {
+        ">:first-child": {
+            pointerEvents: "none",
+        },
+        ">:last-child": {
+            pointerEvents: "none",
+        },
+    };
+
+    @styleRule
     barCollapsePanel = {
+        position: "relative",
         ">:first-child": {
             width: "100%",
             height: "100%",
-        }
-    };
-
-    @styleRule
-    collapsedBarTitle = {
-        cursor: "pointer",
-        borderLeft: "1px solid #ddd",
-        borderRight: "1px solid #ddd",
-        display: "flex",
-        alignItems: "center",
-        backgroundColor: "#fff",
-        zIndex: 5,
-        position: "absolute",
-        width: "100%",
-        height: "100%",
-        top: 0,
-        left: 0,
-        transition: "opacity .3s ease",
-        ":hover": {
-            backgroundColor: "#f3f3f3",
         },
-        ">:first-child": {
-            display: "flex",
-            alignItems: "center",
-            transform: "rotate(90deg)",
-            height: "0",
-            width: "0",
+        ">:nth-child(2)": {
+            display: "none",
+            opacity: "0",
+            transition: "opacity " + this.transitionTime + "s ease",
         },
-        ">:first-child>:first-child": {
-            textTransform: "uppercase",
-            fontWeight: "bold",
-            fontSize: "130%",
-            whiteSpace: "nowrap",
-            marginTop: "-.4em",
-            transform: "translate(-50%, -70%)",
-        }
-    };
-
-    @styleRule
-    hiddenBar = {
-        display: "none !important",
-        opacity: "0",
     };
 
     @styleRule
     hiddenContent = {
         ">:first-child": {
-            display: "none"
-        }
+            display: "none",
+        },
+        ">:nth-child(2)": {
+            opacity: "1",
+        },
+    };
+
+    @styleRule
+    collapsedBarTitle = {
+        cursor: "pointer",
+        borderLeft: "1px solid #ccc",
+        borderRight: "1px solid #ccc",
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        backgroundColor: "#fff",
+        flexDirection: "column",
+        zIndex: 5,
+        position: "absolute",
+        top: 0,
+        left: 0,
+        ":hover": {
+            backgroundColor: "#f3f3f3",
+        },
+        ">:nth-child(2)": {
+            flex: "1",
+            transform: "rotate(90deg)",
+        },
+        ">:nth-child(2)>:first-child": {
+            textTransform: "uppercase",
+            fontWeight: "bold",
+            fontSize: "130%",
+            whiteSpace: "nowrap",
+            marginTop: "-.4em",
+            transform: "translateY(10%)",
+        },
+        ">*": {
+            display: "flex",
+            alignItems: "center",
+        },
+        ">:first-child": {
+            flex: ".5",
+            fontSize: "180%",
+        },
+        ">:last-child": {
+            flex: ".5",
+            fontSize: "180%",
+        },
     };
 
     @styleRule
     animatedSectionDivider = {
         ">*": {
-            transition: ".3s height ease, .3s width ease",
+            transition: this.transitionTime + "s height ease, " + this.transitionTime + "s width ease",
         }
     };
 
@@ -241,11 +285,12 @@ class TitledDividerStyle extends SectionDividerStyle {
     paddingRemoved = {
         ">*": {
             padding: "0 !important",
+            overflow: "hidden",
         },
         ">:nth-of-type(even)": {
             display: "none !important",
         }
-    }
+    };
 }
 
 export {AccordionStyle, SectionDividerStyle, TitledDividerStyle};

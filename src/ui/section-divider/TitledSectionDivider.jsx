@@ -13,10 +13,40 @@ import {FAIcon} from "../FontAwesome";
 class TitledSectionDividerBar extends DividerBar {
     render() {
         if (this.options.orientation === Orientation.VERTICAL) {
-            return <FAIcon icon="ellipsis-h" className={this.styleSheet.verticalDots}/>
+            return [
+
+                <FAIcon icon="ellipsis-h" className={this.styleSheet.verticalDots} />,
+
+            ]
         } else {
-            return <FAIcon icon="ellipsis-v" className={this.styleSheet.horizontalDots}/>
+            return [
+                <div ref="rightButton" ><FAIcon icon="caret-right" className={this.styleSheet.arrowButton}/></div>,
+                <div><FAIcon icon="bars" className={this.styleSheet.horizontalDots}/></div>,
+                <div ref="leftButton" ><FAIcon icon="caret-left" className={this.styleSheet.arrowButton} /></div>,
+            ];
         }
+    }
+
+    onMount() {
+        super.onMount();
+        this.addNodeListener("mousedown", () => {
+            this.addClass(this.styleSheet.buttonsDisabled);
+        });
+        this.addNodeListener("mouseup", () => {
+            this.removeClass(this.styleSheet.buttonsDisabled);
+        });
+        this.leftButton.addNodeListener("mousedown", (event) => {
+            event.stopPropagation();
+        });
+        this.rightButton.addNodeListener("mousedown", (event) => {
+            event.stopPropagation();
+        });
+        this.leftButton.addClickListener((event) => {
+            this.dispatch("collapsePrevious");
+        });
+        this.rightButton.addClickListener((event) => {
+            this.dispatch("collapseNext");
+        })
     }
 }
 
@@ -42,18 +72,19 @@ class BarCollapsePanel extends UI.Element {
     }
 
     render() {
-        const hiddenClass = this.collapsed ? "" : this.styleSheet.hiddenBar;
+        if (this.collapsed) {
+            this.addClass(this.styleSheet.hiddenContent);
+        }
         return [
             this.getGivenChildren(),
-            <div ref="whiteBarContainer" style={{position: "relative", width: "100%", height: this.collapsed ? "100%" : 0}}>
-                <div ref="collapsedBarTitle" className={`${this.styleSheet.collapsedBarTitle} ${hiddenClass}`}
-                                             style={{opacity: this.collapsed ? "1" : "0"}}>
+            <div ref="collapsedBarTitle" className={this.styleSheet.collapsedBarTitle}>
+                <div><FAIcon icon="caret-right"/></div>
+                <div className={this.styleSheet.title}>
                     <div>
-                        <div>
-                            {this.options.title}
-                        </div>
+                        {this.options.title}
                     </div>
                 </div>
+                <div><FAIcon icon="caret-left"/></div>
             </div>
         ]
     }
@@ -62,19 +93,14 @@ class BarCollapsePanel extends UI.Element {
         if (this.collapsed) {
             this.collapsed = false;
             this.removeClass(this.styleSheet.hiddenContent);
-            this.collapsedBarTitle.setStyle("opacity", "0");
-            setTimeout(() => {
-                this.whiteBarContainer.setHeight(0);
-                this.collapsedBarTitle.addClass(this.styleSheet.hiddenBar);
-            }, 100);
+            this.collapsedBarTitle.setStyle("display", "none");
         } else {
             this.collapsed = true;
-            this.collapsedBarTitle.removeClass(this.styleSheet.hiddenBar);
-            this.addClass(this.styleSheet.hiddenContent);
+            this.collapsedBarTitle.setStyle("display", "flex");
             setTimeout(() => {
-                this.whiteBarContainer.setHeight("100%");
-                this.collapsedBarTitle.setStyle("opacity", "1");
-            }, 100);
+                this.addClass(this.styleSheet.hiddenContent);
+            }, 100)
+
         }
     }
 
@@ -107,6 +133,10 @@ export class TitledSectionDivider extends SectionDivider {
     }
 
     collapseChild(index) {
+        if (this.clearListeners) {
+            this.clearListeners();
+        }
+
         this.addClass(this.styleSheet.paddingRemoved);
         this.addClass(this.styleSheet.animatedSectionDivider);
 
@@ -129,15 +159,14 @@ export class TitledSectionDivider extends SectionDivider {
         for (let panel of this.panels) {
             if (!panel.collapsed && !panel.options.fixed) {
                 this.setDimension(panel, (this.getDimension(panel) + (childSize - this.options.collapsedSize)/ unCollapsedCount) * 100
-                                  / parentSize - 0.5 / this.children.length + "%");
+                                  / parentSize + "%");
             }
         }
 
         setTimeout(() => {
             this.removeClass(this.styleSheet.animatedSectionDivider);
             this.recalculateDimensions();
-            this.preventListeners = false;
-        }, 300);
+        }, this.styleSheet.transitionTime * 1000);
     }
 
     expandChild(index) {
@@ -161,7 +190,7 @@ export class TitledSectionDivider extends SectionDivider {
         for (let panel of this.panels) {
             if (this.getDimension(panel) && !panel.options.fixed) {
                 this.setDimension(panel, (this.getDimension(panel) - (childSize - this.options.collapsedSize)/ (unCollapsedCount - 1)) * 100
-                                  / parentSize - this.panels.length / 2 + "%");
+                                  / parentSize + "%");
             }
         }
 
@@ -171,7 +200,7 @@ export class TitledSectionDivider extends SectionDivider {
         setTimeout(() => {
             this.removeClass(this.styleSheet.animatedSectionDivider);
             this.recalculateDimensions();
-        }, 300);
+        }, this.styleSheet.transitionTime * 1000);
     }
 
 
@@ -235,9 +264,16 @@ export class TitledSectionDivider extends SectionDivider {
             });
 
             const mouseUpListener = this.addListener("dividerMouseup", () => {
+                if (this.clearListeners) {
+                    this.clearListeners();
+                }
+            });
+
+            this.clearListeners = () => {
                 mouseMoveListener.remove();
                 mouseUpListener.remove();
-            });
+                this.clearListeners = null;
+            }
         }
     }
 
@@ -263,13 +299,18 @@ export class TitledSectionDivider extends SectionDivider {
 
     onMount() {
         super.onMount();
+        const parentSize = this.getDimension(this);
         for (let i = 0; i < this.panels.length; i += 1) {
             const panel = this.panels[i];
-            const size = this.getDimension(panel);
+            const size = this.getDimension(panel) / parentSize;
             this.attachListener(panel, "expand", () => {
-                this.uncollapsedSizes.set(panel, size);
+                this.uncollapsedSizes.set(panel, size * this.getDimension(this));
                 this.expandChild(i);
             });
+        }
+        for (let i = 0; i < this.dividers.length; i += 1) {
+            this.attachListener(this.dividers[i], "collapseNext", () => this.collapseChild(i + 1));
+            this.attachListener(this.dividers[i], "collapsePrevious", () => this.collapseChild(i));
         }
     }
 }
