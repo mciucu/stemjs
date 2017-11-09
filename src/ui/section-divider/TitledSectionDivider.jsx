@@ -56,11 +56,16 @@ class BarCollapsePanel extends UI.Element {
     extraNodeAttributes(attr) {
         const panelChild = this.getGivenChildren()[0];
         attr.addClass(this.styleSheet.barCollapsePanel);
-        if (panelChild.options.size) {
+        let panelSize = panelChild.options.size;
+        if (this.collapsed) {
+            attr.addClass(this.styleSheet.hiddenContent);
+            panelSize = this.options.collapsedSize;
+        }
+        if (panelSize) {
             if (this.options.orientation === Orientation.VERTICAL) {
-                attr.setStyle("height", panelChild.options.size);
+                attr.setStyle("height", panelSize);
             } else {
-                attr.setStyle("width", panelChild.options.size);
+                attr.setStyle("width", panelSize);
             }
         }
 
@@ -72,19 +77,22 @@ class BarCollapsePanel extends UI.Element {
     }
 
     render() {
-        if (this.collapsed) {
-            this.addClass(this.styleSheet.hiddenContent);
-        }
+        this.collapsed = this.getGivenChildren()[0].options.collapsed;
+        const isFirst = this.parent.panels.indexOf(this) === 0;
+        const isLast = this.parent.panels.indexOf(this) === this.parent.panels.length - 1;
+        const firstCaret = isLast ? "left" : "right";
+        const lastCaret = isFirst ? "right" : "left";
         return [
             this.getGivenChildren(),
-            <div ref="collapsedBarTitle" className={this.styleSheet.collapsedBarTitle}>
-                <div><FAIcon icon="caret-right"/></div>
+            <div ref="collapsedBarTitle" style={{display: this.collapsed ? "flex": " none"}}
+                 className={this.styleSheet.collapsedBarTitle}>
+                <div><FAIcon icon={"caret-" + firstCaret}/></div>
                 <div className={this.styleSheet.title}>
                     <div>
                         {this.options.title}
                     </div>
                 </div>
-                <div><FAIcon icon="caret-left"/></div>
+                <div><FAIcon icon={"caret-" + lastCaret}/></div>
             </div>
         ]
     }
@@ -284,13 +292,16 @@ export class TitledSectionDivider extends SectionDivider {
         const DividerBarClass = this.getDividerBarClass();
 
         for (const child of unwrapArray(this.render())) {
+            if (child.options.collapsed) {
+                this.addClass(this.styleSheet.paddingRemoved);
+            }
             if (this.panels.length) {
                 let divider = <DividerBarClass orientation={this.getOrientation()} />;
                 children.push(divider);
                 this.dividers.push(divider);
             }
-            const wrappedChild = <BarCollapsePanel orientation={this.options.orientation}
-                                                   title={child.options.title || "..."}>{child}</BarCollapsePanel>
+            const wrappedChild = <BarCollapsePanel orientation={this.options.orientation} collapsedSize={this.options.collapsedSize}
+                                                   title={child.options.title || "..."}>{child}</BarCollapsePanel>;
             children.push(wrappedChild);
             this.panels.push(wrappedChild);
         }
@@ -299,12 +310,10 @@ export class TitledSectionDivider extends SectionDivider {
 
     onMount() {
         super.onMount();
-        const parentSize = this.getDimension(this);
         for (let i = 0; i < this.panels.length; i += 1) {
             const panel = this.panels[i];
-            const size = this.getDimension(panel) / parentSize;
             this.attachListener(panel, "expand", () => {
-                this.uncollapsedSizes.set(panel, size * this.getDimension(this));
+                this.uncollapsedSizes.set(panel, this.getDimension(this) / this.panels.length);
                 this.expandChild(i);
             });
         }
