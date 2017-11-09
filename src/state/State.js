@@ -31,6 +31,9 @@ class State extends Dispatchable {
     }
 
     applyEvent(event) {
+        if (event == null) {
+            return;
+        }
         if (Array.isArray(event)) {
             for (let individualEvent of event) {
                 this.applyEvent(individualEvent);
