@@ -157,7 +157,7 @@ class TitledDividerStyle extends SectionDividerStyle {
             alignItems: "flex-end",
         },
         ">:last-child": {
-            alignItems: "flex-begin",
+            alignItems: "flex-start",
         },
         ">:nth-child(2)": {
             flex: ".2",
