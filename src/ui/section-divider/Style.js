@@ -161,13 +161,13 @@ class TitledDividerStyle extends SectionDividerStyle {
         },
         ">:nth-child(2)": {
             flex: ".2",
+            alignItems: "center",
         }
     });
 
     @styleRule
     horizontalDots = {
-        transform: "rotate(90deg) scaleX(5) translateY(-.5em) translateX(98%)",
-        height: 0,
+        transform: "rotate(90deg) scaleX(5)",
     };
 
     @styleRuleInherit
