@@ -1,3 +1,4 @@
+import {enhance} from "Color";
 import {StyleSheet} from "../Style";
 import {styleRule, styleRuleInherit} from "../../decorators/Style";
 
@@ -100,4 +101,50 @@ class MinimalistTabAreaStyle extends BaseTabAreaStyle {
     };
 }
 
-export {BaseTabAreaStyle, DefaultTabAreaStyle, MinimalistTabAreaStyle};
+class FlatTabAreaStyle extends BaseTabAreaStyle {
+    defaultColor = enhance(this.themeProperties.COLOR_FOREGROUND_BODY, 0.4);
+    hoverOrActiveColor = enhance(this.themeProperties.COLOR_FOREGROUND_BODY, 0.6);
+
+    @styleRuleInherit
+    tab = {
+        height: this.themeProperties.FLAT_TAB_AREA_LINE_HEIGHT,
+        lineHeight: this.themeProperties.FLAT_TAB_AREA_LINE_HEIGHT,
+
+        textDecoration: "none !important",
+
+        paddingLeft: this.themeProperties.FLAT_TAB_AREA_PADDING_SIDES,
+        paddingRight: this.themeProperties.FLAT_TAB_AREA_PADDING_SIDES,
+
+        letterSpacing: "0.3px",
+        color: this.defaultColor + "!important",
+        fontWeight: "bold",
+
+        ":hover": {
+            cursor: "pointer",
+            color: this.hoverOrActiveColor + "!important",
+        },
+    };
+
+    @styleRuleInherit
+    activeTab = {
+        color: this.hoverOrActiveColor + "!important",
+        cursor: "default !important",
+    };
+
+    @styleRuleInherit
+    nav = {
+        position: "relative",
+        height: 30,
+        backgroundColor: this.themeProperties.COLOR_FOREGROUND_BODY,
+    };
+
+    @styleRule
+    activeTabBorder = {
+        height: 2,
+        backgroundColor: this.themeProperties.COLOR_DANGER,
+        position: "absolute",
+        left: 0,
+    }
+}
+
+export {BaseTabAreaStyle, DefaultTabAreaStyle, MinimalistTabAreaStyle, FlatTabAreaStyle};

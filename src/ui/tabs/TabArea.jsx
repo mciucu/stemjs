@@ -3,7 +3,7 @@ import {Switcher} from "../Switcher";
 import {Link} from "../UIPrimitives";
 import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
 import {registerStyle} from "../style/Theme";
-import {DefaultTabAreaStyle} from "./Style";
+import {DefaultTabAreaStyle, FlatTabAreaStyle} from "./Style";
 import {unwrapArray} from "../../base/Utils";
 
 

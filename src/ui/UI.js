@@ -18,6 +18,7 @@ export * from "./Router";
 export * from "./Translation";
 export * from "./Switcher";
 export * from "tabs/TabArea";
+export * from "tabs/FlatTabArea";
 export * from "button/Button";
 export * from "button/ButtonGroup";
 export * from "./CardPanel";
