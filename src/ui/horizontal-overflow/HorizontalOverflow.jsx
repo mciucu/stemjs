@@ -116,5 +116,7 @@ export class HorizontalOverflow extends UI.Element {
 
         // TODO: Create a resizeable-aware UI Element to be extended by this class and manage these listeners.
         window.addEventListener("resize", () => this.handleEventAndHandlePositionChange(() => this.checkForOverflow()));
+
+        setTimeout(() => this.checkForOverflow());
     }
 }
