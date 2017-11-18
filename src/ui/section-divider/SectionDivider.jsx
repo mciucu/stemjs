@@ -44,6 +44,12 @@ export class DividerBar extends Divider {
  */
 @registerStyle(SectionDividerStyle)
 export class SectionDivider extends UI.Element {
+    getDefaultOptions() {
+        return Object.assign({
+            autoCollapse: false,
+        }, super.getDefaultOptions())
+    }
+
     constructor(options) {
         super(options);
         this.uncollapsedSizes = new WeakMap();
@@ -192,9 +198,12 @@ export class SectionDivider extends UI.Element {
         this.recalculateDimensions();
     }
 
+    isCollapsed(child) {
+        return !this.getDimension(child);
+    }
+
     toggleChild(index) {
-        let size = this.getDimension(this.children[index * 2]);
-        if (!size) {
+        if (this.isCollapsed(this.panels[index])) {
             this.expandChild(index);
         } else {
             this.collapseChild(index);
@@ -269,23 +278,53 @@ export class SectionDivider extends UI.Element {
                 const nextSize = this.getDimension(nextPanel) - delta;
                 const previousSize = this.getDimension(previousPanel) + delta;
 
-                if (nextSize < this.getMinDimension(nextPanel) || previousSize < this.getMinDimension(previousPanel)) {
-                    return;
+                if (this.options.autoCollapse) {
+                    if ((delta > 0 && nextPanel.collapsed) || (delta < 0 && previousPanel.collapsed)) {
+                        return;
+                    }
+
+                    if (delta < 0 && nextPanel.collapsed && this.options.autoCollapse) {
+                        this.expandChild(index + 1);
+                        return;
+                    }
+
+                    if (delta > 0 && previousPanel.collapsed) {
+                        this.expandChild(index);
+                        return;
+                    }
+
+                    if (nextSize < this.getMinDimension(nextPanel)) {
+                        this.collapseChild(index + 1);
+                        return;
+                    }
+
+                    if (previousSize < this.getMinDimension(previousPanel)) {
+                        this.collapseChild(index);
+                        return;
+                    }
+                } else {
+                    if (nextSize < this.getMinDimension(nextPanel) || previousSize < this.getMinDimension(previousPanel)) {
+                        return;
+                    }
                 }
 
                 this.setDimension(nextPanel, nextSize * 100 / parentSize + "%");
                 this.setDimension(previousPanel, previousSize * 100 / parentSize + "%");
 
                 previousEvent = event;
-
-                nextPanel.dispatch("resize");
-                previousPanel.dispatch("resize");
             });
 
             const mouseUpListener = this.addListener("dividerMouseup", () => {
+                if (this.clearListeners) {
+                    this.clearListeners();
+                }
+            });
+
+            this.clearListeners = () => {
                 mouseMoveListener.remove();
                 mouseUpListener.remove();
-            });
+                this.clearListeners = null;
+            }
         }
     }
 

@@ -4,7 +4,7 @@ import {styleRule} from "../../decorators/Style";
 import {StyleSheet} from "../Style";
 import {Orientation} from "../Constants";
 
-let buttonColorToStyle = (color) => {
+export const buttonColorToStyle = (color) => {
     const colors = buildColors(color);
     let darker1 = {
         backgroundColor: colors[2],
@@ -33,9 +33,7 @@ let buttonColorToStyle = (color) => {
 };
 
 export class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
-    // DEFAULT uses MEDIUM as size and BASE as level
-    @styleRule
-    DEFAULT = [{
+    base = {
         outline: "0",
         border: "0.1em solid transparent",
         padding: "0.4em 0.8em",
@@ -52,7 +50,11 @@ export class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
             opacity: "0.7",
             cursor: "not-allowed",
         },
-    }, {
+    };
+
+    // DEFAULT uses MEDIUM as size and BASE as level
+    @styleRule
+    DEFAULT = [this.base, {
         fontSize: "14px",
     }, this.colorStyleRule(this.themeProperties.COLOR_BACKGROUND)];
 

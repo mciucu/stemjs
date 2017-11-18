@@ -3,6 +3,7 @@
 */
 
 import {FullScreenStyle} from "./FullScreenStyle";
+import {GlobalStyle} from "./GlobalStyle";
 
 // TODO: is this a good pattern, and should this method live somewhere else?
 function callFirstMethodAvailable(obj, methodNames) {
@@ -44,11 +45,20 @@ const FULL_SCREEN_CHANGE_EVENTS = [
 export const FullScreenable = function (BaseClass) {
     return class FullScreenable extends BaseClass {
         static fullScreenStyleSheet = FullScreenStyle.getInstance();
+
+        getDefaultOptions() {
+            return Object.assign({}, super.getDefaultOptions(), {
+                fullContainer: true,
+            })
+        }
+
         extraNodeAttributes(attr) {
             super.extraNodeAttributes(attr);
-            attr.setStyle({
-                height: "100%",
-            });
+            if (this.options.fullContainer) {
+                attr.addClass(GlobalStyle.Utils.fullContainer);
+            } else {
+                attr.setStyle("height", "100%");
+            }
         }
 
         enterFullScreen() {
@@ -57,21 +67,35 @@ export const FullScreenable = function (BaseClass) {
                 console.error("No valid full screen function available");
                 return ;
             }
-            this.addClass(this.constructor.fullScreenStyleSheet.fullScreen);
             this._expectingFullScreen = true;
         };
+
+        setFullScreenStyle() {
+            this.addClass(this.constructor.fullScreenStyleSheet.fullScreen);
+            if (this.options.fullContainer) {
+                this.removeClass(GlobalStyle.Utils.fullContainer);
+                this.setStyle("height", "100%");
+            }
+        }
 
         isFullScreen() {
             return this._isFullScreen;
         }
 
         exitFullScreen() {
-            this.removeClass(this.constructor.fullScreenStyleSheet.fullScreen);
             if (!callFirstMethodAvailable(document, EXIT_FULL_SCREEN_METHODS)) {
                 console.error("No valid available function to exit fullscreen");
                 return ;
             }
         };
+
+        unsetFullScreenStyle() {
+            this.removeClass(this.constructor.fullScreenStyleSheet.fullScreen);
+            if (this.options.fullContainer) {
+                this.addClass(GlobalStyle.Utils.fullContainer);
+                this.setStyle("height", null);
+            }
+        }
 
         toggleFullScreen() {
             if (this.isFullScreen()) {
@@ -91,10 +115,12 @@ export const FullScreenable = function (BaseClass) {
                     this._expectingFullScreen = false;
                     this._isFullScreen = true;
                     this.dispatch("enterFullScreen");
+                    this.setFullScreenStyle();
                 } else {
                     if (this._isFullScreen) {
                         this._isFullScreen = false;
                         this.dispatch("exitFullScreen");
+                        this.unsetFullScreenStyle();
                     }
                 }
                 this.dispatch("resize");

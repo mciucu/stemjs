@@ -12,7 +12,7 @@ class NavStyle extends StyleSheet {
         const sidePanelColor = themeProperties.NAV_MANAGER_COLOR_SIDE_PANEL || enhance(navManagerColor, 0.05);
 
         this.colors = {
-            boxShadowNavManager: themeProperties.NAV_MANAGER_BOX_SHADOW_NAV_MANAGER,
+            boxShadowNavManager: themeProperties.NAV_MANAGER_BOX_SHADOW_NAVBAR,
             boxShadowSidePanel: themeProperties.NAV_MANAGER_BOX_SHADOW_SIDE_PANEL,
             sidepanelBackground: themeProperties.NAV_MANAGER_SIDE_PANEL_BACKGROUND_COLOR || sidePanelColor,
             sidepanelHover: themeProperties.NAV_MANAGER_SIDE_PANEL_HOVER_COLOR || enhance(sidePanelColor, 0.1),

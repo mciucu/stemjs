@@ -20,6 +20,7 @@ export * from "./Switcher";
 export * from "tabs/TabArea";
 export * from "tabs/FlatTabArea";
 export * from "button/Button";
+export * from "button/ButtonStyle";
 export * from "button/ButtonGroup";
 export * from "./CardPanel";
 export * from "./RowList";
@@ -27,6 +28,9 @@ export * from "collapsible/CollapsiblePanel";
 export * from "modal/FloatingWindow";
 export * from "modal/Modal";
 export * from "global-container/GlobalContainer";
+
+export * from "horizontal-overflow/HorizontalOverflow";
+export * from "horizontal-overflow/Style";
 
 export * from "section-divider/SectionDivider";
 export * from "section-divider/TitledSectionDivider";

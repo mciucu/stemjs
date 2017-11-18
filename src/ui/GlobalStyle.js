@@ -48,7 +48,6 @@ Theme.setProperties({
     CARD_PANEL_HEADING_PADDING_LARGE: 20,
     CARD_PANEL_TEXT_TRANSFORM: "inherit",
 
-
     DARK_BOX_SHADOW: "0px 0px 10px rgba(0, 0, 0, .6)",
 
     ROW_LIST_ROW_HEIGHT: 30,
@@ -63,7 +62,7 @@ Theme.setProperties({
     FONT_FAMILY_DEFAULT: () => Theme.getProperties().FONT_FAMILY_SANS_SERIF,
 
     NAV_MANAGER_NAVBAR_HEIGHT: 50,
-    NAV_MANAGER_BOX_SHADOW_NAV_MANAGER: "0px 0px 10px rgb(0, 0, 0)",
+    NAV_MANAGER_BOX_SHADOW_NAVBAR: "0px 0px 10px rgb(0, 0, 0)",
     NAV_MANAGER_BOX_SHADOW_SIDE_PANEL: "0px 0px 10px #202e3e",
 
     MAIN_CONTAINER_EXTRA_PADDING_TOP_DESKTOP: 0,
@@ -195,6 +194,9 @@ class ContainerStyle extends StyleSheet {
 
 
 class Utils extends StyleSheet {
+    extraTop = () => this.themeProperties[Device.isMobileDevice() ? "MAIN_CONTAINER_EXTRA_PADDING_TOP_MOBILE" :
+        "MAIN_CONTAINER_EXTRA_PADDING_TOP_DESKTOP"];
+
     @styleRule
     fullHeight = {
         height: "100%",
@@ -204,6 +206,14 @@ class Utils extends StyleSheet {
     hidden = {
         display: "hidden"
     };
+
+    // Use this class for content that has no space between it and the navbar.
+    @styleRule
+    fullContainer = {
+        width: "100%",
+        height: () => "calc(100% + " + this.extraTop() + "px)",
+        marginTop: () => -this.extraTop()
+    }
 }
 
 GlobalStyle.FlexContainer = FlexContainerStyle.getInstance();

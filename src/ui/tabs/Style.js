@@ -1,6 +1,7 @@
 import {enhance} from "Color";
 import {StyleSheet} from "../Style";
 import {styleRule, styleRuleInherit} from "../../decorators/Style";
+import {HorizontalOverflowStyle} from "../horizontal-overflow/Style";
 
 class BaseTabAreaStyle extends StyleSheet {
     @styleRule
@@ -102,49 +103,59 @@ class MinimalistTabAreaStyle extends BaseTabAreaStyle {
 }
 
 class FlatTabAreaStyle extends BaseTabAreaStyle {
-    defaultColor = enhance(this.themeProperties.COLOR_FOREGROUND_BODY, 0.4);
-    hoverOrActiveColor = enhance(this.themeProperties.COLOR_FOREGROUND_BODY, 0.6);
+    transitionTime = 0.3;
 
     @styleRuleInherit
     tab = {
-        height: this.themeProperties.FLAT_TAB_AREA_LINE_HEIGHT,
-        lineHeight: this.themeProperties.FLAT_TAB_AREA_LINE_HEIGHT,
-
         textDecoration: "none !important",
-
-        paddingLeft: this.themeProperties.FLAT_TAB_AREA_PADDING_SIDES,
-        paddingRight: this.themeProperties.FLAT_TAB_AREA_PADDING_SIDES,
-
-        letterSpacing: "0.3px",
-        color: this.defaultColor + "!important",
+        padding: () => this.themeProperties.FLAT_TAB_AREA_PADDING_SIDES,
+        letterSpacing: "0.5px",
+        color: () => enhance(this.themeProperties.COLOR_FOREGROUND_BODY, 0.4) + "!important",
         fontWeight: "bold",
-
         ":hover": {
             cursor: "pointer",
-            color: this.hoverOrActiveColor + "!important",
+            color: () => enhance(this.themeProperties.COLOR_FOREGROUND_BODY, 0.6) + "!important",
         },
     };
 
     @styleRuleInherit
     activeTab = {
-        color: this.hoverOrActiveColor + "!important",
+        color: () => enhance(this.themeProperties.COLOR_FOREGROUND_BODY, 0.8) + "!important",
         cursor: "default !important",
     };
 
     @styleRuleInherit
     nav = {
+        whiteSpace: "nowrap",
         position: "relative",
-        height: 30,
-        backgroundColor: this.themeProperties.COLOR_FOREGROUND_BODY,
+        paddingTop: "4px",
+        backgroundColor: () => this.themeProperties.COLOR_FOREGROUND_BODY,
     };
 
     @styleRule
-    activeTabBorder = {
-        height: 2,
-        backgroundColor: this.themeProperties.COLOR_DANGER,
+    activeBar = {
+        height: 3,
+        backgroundColor: () => this.themeProperties.COLOR_PRIMARY,
         position: "absolute",
         left: 0,
-    }
+        bottom: 0,
+        transition: `${this.transitionTime}s width, ${this.transitionTime}s left`,
+    };
+
+    @styleRule
+    activeOnRender = {
+        paddingBottom: () => this.themeProperties.FLAT_TAB_AREA_PADDING_SIDES - 3,
+        borderBottom: () => "3px solid " + this.themeProperties.COLOR_PRIMARY,
+    };
 }
 
-export {BaseTabAreaStyle, DefaultTabAreaStyle, MinimalistTabAreaStyle, FlatTabAreaStyle};
+class FlatTabAreaHorizontalOverflowStyle extends HorizontalOverflowStyle {
+    baseColor = () => this.themeProperties.COLOR_FOREGROUND_BODY;
+    arrowColor = () => enhance(this.baseColor(), .4);
+    arrowBackground = () => this.baseColor();
+    arrowHoverColor = () => enhance(this.baseColor(), .8);
+    arrowHoverBackground = () => enhance(this.baseColor(), .1);
+}
+
+export {BaseTabAreaStyle, DefaultTabAreaStyle, MinimalistTabAreaStyle, FlatTabAreaStyle,
+    FlatTabAreaHorizontalOverflowStyle};

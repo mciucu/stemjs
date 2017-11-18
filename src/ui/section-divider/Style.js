@@ -58,6 +58,7 @@ class AccordionStyle extends DividerStyle {
 class SectionDividerStyle extends DividerStyle {
     barThickness = 2;
     barPadding = 3;
+    dividerColor = () => "#DDD";
 
     @styleRule
     horizontalDivider = {
@@ -66,7 +67,7 @@ class SectionDividerStyle extends DividerStyle {
         height: "100%",
         cursor: "col-resize",
         width: this.barThickness + 2 * this.barPadding + "px",
-        background: "#DDD",
+        background: () => this.dividerColor(),
         backgroundClip: "padding-box",
         borderLeft: `${this.barPadding}px solid transparent`,
         borderRight: `${this.barPadding}px solid transparent`,
@@ -82,7 +83,7 @@ class SectionDividerStyle extends DividerStyle {
         cursor: "row-resize",
         width: "100%",
         height: this.barThickness + 2 * this.barPadding +  "px",
-        background: "#DDD",
+        background: () => this.dividerColor(),
         backgroundClip: "padding-box",
         borderBottom: `${this.barPadding}px solid transparent`,
         borderTop: `${this.barPadding}px solid transparent`,
@@ -136,7 +137,7 @@ class SectionDividerStyle extends DividerStyle {
 class TitledDividerStyle extends SectionDividerStyle {
     barThickness = 16;
     barPadding = 1;
-    transitionTime = 0.3;
+    transitionTime = .3;
 
     dividerStyle = {
         backgroundColor: "white",

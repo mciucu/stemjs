@@ -60,7 +60,6 @@ export class WebNotification extends EnqueueableMethodMixin(Dispatchable) {
         this.clickListeners = this.clickListeners || [];
         this.clickListeners.push(callback);
         this._notification.onclick = (event) => {
-            console.warn("clicked!");
             for (const callback of this.clickListeners) {
                 callback(event);
             }

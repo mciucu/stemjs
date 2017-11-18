@@ -74,8 +74,10 @@ class BasicTabTitle extends Link {
     }
 }
 
+
 class TabTitleArea extends UI.Element {
 }
+
 
 @registerStyle(DefaultTabAreaStyle)
 class TabArea extends UI.Element {

@@ -1,5 +1,6 @@
+// TODO: This class is incomplete for horizontal orientation and more than 2 panels.
+
 import {UI} from "../UIBase";
-import {Device} from "../../base/Device";
 import {registerStyle} from "../style/Theme";
 import {unwrapArray} from "../../base/Utils";
 import {DividerBar, SectionDivider} from "./SectionDivider";
@@ -64,14 +65,14 @@ class BarCollapsePanel extends UI.Element {
         }
     }
 
-    render() {
+    getChildrenToRender() {
         this.collapsed = this.getGivenChildren()[0].options.collapsed;
         const isFirst = this.parent.panels.indexOf(this) === 0;
         const isLast = this.parent.panels.indexOf(this) === this.parent.panels.length - 1;
         const firstCaret = isLast ? "left" : "right";
         const lastCaret = isFirst ? "right" : "left";
         return [
-            this.getGivenChildren(),
+            this.render(),
             <div ref="collapsedBarTitle" style={{display: this.collapsed ? "flex": " none"}}
                  className={this.styleSheet.collapsedBarTitle}>
                 <div><FAIcon icon={"caret-" + firstCaret}/></div>
@@ -104,6 +105,11 @@ class BarCollapsePanel extends UI.Element {
          this.collapsedBarTitle.addClickListener(() => {
              this.dispatch("expand");
          });
+         this.addListener("resize", () => {
+             for (const child of unwrapArray(this.render())) {
+                 child.dispatch("resize");
+             }
+         })
     }
 }
 
@@ -113,6 +119,7 @@ export class TitledSectionDivider extends SectionDivider {
     getDefaultOptions() {
         return Object.assign({}, super.getDefaultOptions(), {
             collapsedSize: 40,
+            autoCollapse: true,
         });
     }
 
@@ -199,79 +206,6 @@ export class TitledSectionDivider extends SectionDivider {
         }, this.styleSheet.transitionTime * 1000);
     }
 
-
-    dividerMouseDownFunction(dividerEvent) {
-        let previousEvent = dividerEvent.domEvent;
-        const index = this.dividers.indexOf(dividerEvent.divider);
-
-        const previousPanel = this.getPreviousUnfixedChild(index);
-        const nextPanel = this.getNextUnfixedChild(index);
-
-        if (previousPanel && nextPanel) {
-            const parentSize = this.getDimension(this);
-            let panelsSize = parentSize;
-
-            for (let panel of this.panels) {
-                if (panel.options.fixed) {
-                    panelsSize -= this.getDimension(panel);
-                }
-            }
-
-            const deltaFunction = (this.getOrientation() === Orientation.HORIZONTAL ?
-                                 (event) => Device.getEventX(event) :  (event) => Device.getEventY(event));
-
-            const mouseMoveListener = this.addListener("dividerMousemove", (event) => {
-                const delta = deltaFunction(event) - deltaFunction(previousEvent);
-
-                const nextSize = this.getDimension(nextPanel) - delta;
-                const previousSize = this.getDimension(previousPanel) + delta;
-
-                if ((delta > 0 && nextPanel.collapsed) || (delta < 0 && previousPanel.collapsed)) {
-                    return;
-                }
-
-                if (delta < 0 && nextPanel.collapsed) {
-                    this.expandChild(index + 1);
-                    return;
-                }
-
-                if (delta > 0 && previousPanel.collapsed) {
-                    this.expandChild(index);
-                    return;
-                }
-
-                if (nextSize < this.getMinDimension(nextPanel)) {
-                    this.collapseChild(index + 1);
-                    return;
-                }
-
-                if (previousSize < this.getMinDimension(previousPanel)) {
-                    this.collapseChild(index);
-                    return;
-                }
-
-                this.setDimension(nextPanel, nextSize * 100 / parentSize + "%");
-                this.setDimension(previousPanel, previousSize * 100 / parentSize + "%");
-
-                previousEvent = event;
-
-                nextPanel.dispatch("resize");
-                previousPanel.dispatch("resize");
-            });
-
-            const mouseUpListener = this.addListener("dividerMouseup", () => {
-                if (this.clearListeners) {
-                    this.clearListeners();
-                }
-            });
-
-            this.clearListeners = () => {
-                mouseMoveListener.remove();
-                mouseUpListener.remove();
-                this.clearListeners = null;
-            }
-        }
-    }
 
     getChildrenToRender() {
         const children = [];
