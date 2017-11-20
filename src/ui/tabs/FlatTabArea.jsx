@@ -5,7 +5,6 @@ import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
 import {TabTitleArea, BasicTabTitle, TabArea} from "./TabArea";
 import {HorizontalOverflow} from "../horizontal-overflow/HorizontalOverflow";
 import {unwrapArray} from "../../base/Utils";
-import {EnqueueableMethodMixin, enqueueIfNotLoaded} from "../../base/EnqueueableMethodMixin";
 
 
 
@@ -21,16 +20,12 @@ class FlatTabTitle extends BasicTabTitle {
 }
 
 
+// This class displays a bottom bar on the active tab, and when changing tabs it also moves the bottom bar.
 @registerStyle(FlatTabAreaStyle)
-class FlatTabTitleArea extends EnqueueableMethodMixin(TabTitleArea) {
+class FlatTabTitleArea extends TabTitleArea {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
         attr.addClass(this.styleSheet.nav);
-    }
-
-    constructor(...args) {
-        super(...args);
-        this.attachListener(this.options.activeTabTitleDispatcher, (tab) => this.setActive(tab));
     }
 
     getChildrenToRender() {
@@ -48,7 +43,7 @@ class FlatTabTitleArea extends EnqueueableMethodMixin(TabTitleArea) {
         for (const tab of unwrapArray(this.render())) {
             const tabWidth = tab.getWidth();
             if (tab === activeTab) {
-                barWidth = this.usingActiveBar ? tabWidth : 0;
+                barWidth = tabWidth;
                 break;
             }
             barLeft += tabWidth;
@@ -59,29 +54,43 @@ class FlatTabTitleArea extends EnqueueableMethodMixin(TabTitleArea) {
         });
     }
 
-    isLoaded() {
-        return !!this.bar;
-    }
-
-    @enqueueIfNotLoaded
     setActive(activeTab) {
         if (this.activeTab) {
-            if (this.usingActiveBar) {
-                this.bar.setWidth(this.activeTab.getWidth());
-            }
+            // Remove the border from the active tab and "prepare" the bar on the current active tab.
+            this.setActiveBar(this.activeTab);
             this.activeTab.removeClass(this.styleSheet.activeOnRender);
         }
-        this.setActiveBar(activeTab);
-        if (!this.usingActiveBar) {
+
+        // Animate the bar.
+        setTimeout(() => {
+            this.bar.addClass(this.styleSheet.activeBarAnimated);
+            this.setActiveBar(activeTab);
+        });
+
+        setTimeout(() => {
+            // Sometimes, another tab has been clicked between the start and end of an animation, so remove the
+            // active class on that tab, just in case.
+            if (this.activeTab) {
+                this.activeTab.removeClass(this.styleSheet.activeOnRender);
+            }
+            // Add the active class on the current tab.
             activeTab.addClass(this.styleSheet.activeOnRender);
-        }
-        this.activeTab = activeTab;
+            // Restore the bar to its "unused" state.
+            this.bar.removeClass(this.styleSheet.activeBarAnimated);
+            this.bar.setWidth(0);
+            // Update the active tab.
+            this.activeTab = activeTab;
+        }, this.styleSheet.transitionTime * 1000);
     }
 
     onMount() {
         super.onMount();
-        this.resolveQueuedMethods();
-        setTimeout(() => {this.usingActiveBar = true;});
+        for (const child of this.options.children) {
+            if (child.options.active) {
+                this.setActive(child);
+            }
+        }
+        this.attachListener(this.options.activeTabTitleDispatcher, (tab) => this.setActive(tab));
         this.addListener("resize", () => this.horizontalOverflow.dispatch("resize"));
     }
 }

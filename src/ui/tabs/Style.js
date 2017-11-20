@@ -103,7 +103,7 @@ class MinimalistTabAreaStyle extends BaseTabAreaStyle {
 }
 
 class FlatTabAreaStyle extends BaseTabAreaStyle {
-    transitionTime = 0.3;
+    transitionTime = .3;
 
     @styleRuleInherit
     tab = {
@@ -139,6 +139,10 @@ class FlatTabAreaStyle extends BaseTabAreaStyle {
         position: "absolute",
         left: 0,
         bottom: 0,
+    };
+
+    @styleRule
+    activeBarAnimated = {
         transition: `${this.transitionTime}s width, ${this.transitionTime}s left`,
     };
 
