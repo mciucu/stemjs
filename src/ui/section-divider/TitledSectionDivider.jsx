@@ -30,8 +30,14 @@ class TitledSectionDividerBar extends DividerBar {
 
     onMount() {
         super.onMount();
+        this.leftButton.addNodeListener("mousedown", (event) => {
+            event.stopPropagation();
+        });
         this.leftButton.addClickListener(() => {
             this.dispatch("collapsePrevious");
+        });
+        this.rightButton.addNodeListener("mousedown", (event) => {
+            event.stopPropagation();
         });
         this.rightButton.addClickListener(() => {
             this.dispatch("collapseNext");
