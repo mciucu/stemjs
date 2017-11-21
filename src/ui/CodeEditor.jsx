@@ -1,6 +1,8 @@
 // Wrapper over the Ace code editor, needs ace to be loaded
 // TODO: should be renamed to AceCodeEditor?
 import {UI} from "./UIBase";
+import {StyleSheet, styleRule} from "./Style";
+import {registerStyle} from "./style/Theme";
 import {EnqueueableMethodMixin, enqueueIfNotLoaded} from "../base/EnqueueableMethodMixin";
 
 
@@ -446,8 +448,32 @@ class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
             this.getAce().scrollToLine(this.getAce().getSession().getLength() - 1, true, true, function () {});
         }
     }
+
+    copyTextToClipboard() {
+        this.getAce().selectAll();
+        this.getAce().focus();
+        document.execCommand('copy');
+    }
 }
 
+
+class StaticCodeHighlighterStyle extends StyleSheet {
+    @styleRule
+    hideActive = {
+        " .ace_gutter-active-line": {
+            display: "none",
+        },
+        " .ace_active-line": {
+            display: "none",
+        },
+        " .ace_cursor": {
+            display: "none",
+        }
+    }
+}
+
+
+@registerStyle(StaticCodeHighlighterStyle)
 class StaticCodeHighlighter extends CodeEditor {
     setOptions(options) {
         options = Object.assign({
@@ -456,6 +482,10 @@ class StaticCodeHighlighter extends CodeEditor {
             lineWrapping: true,
         }, options);
         super.setOptions(options);
+    }
+
+    extraNodeAttributes(attr) {
+        attr.addClass(this.styleSheet.hideActive)
     }
 }
 
