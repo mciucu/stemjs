@@ -5,23 +5,13 @@ import {mapIterator} from "../base/Utils";
 // Can be used for instance to keep a rolling view on a table while scrolling
 // TODO: should probably also support keeping track of a range with dispatchers?
 
-class SortedSetNode {
-    constructor(value, key, parent=null) {
-        this.value = value;
-        this.key = key;
-        this.weight = Math.random();
-        this.size = 1;
 
+class BinarySearchTreeNode {
+    constructor(key, parent=null) {
+        this.weight = Math.random();
         this.parent = parent;
         this.left = this.right = null;
-    }
-
-    leftSize() {
-        return (this.left && this.left.size) || 0;
-    }
-
-    rightSize() {
-        return (this.right && this.right.size) || 0;
+        this.key = key;
     }
 
     leftWeight() {
@@ -38,10 +28,6 @@ class SortedSetNode {
 
     max() {
         return (this.right && this.right.max()) || this;
-    }
-
-    recalcSize() {
-        this.size = this.leftSize() + this.rightSize() + 1;
     }
 
     replaceParentRef(newNode) {
@@ -97,9 +83,7 @@ class SortedSetNode {
             newRoot = this.rotateRight();
         }
 
-        newRoot.left && newRoot.left.recalcSize();
-        newRoot.right && newRoot.right.recalcSize();
-        newRoot.recalcSize();
+        newRoot.update();
 
         return [nodeToReturn, newRoot];
     }
@@ -109,7 +93,7 @@ class SortedSetNode {
         let addedNode, newRoot;
         if (comp < 0) {
             if (this.left == null) {
-                this.left = new SortedSetNode(value, key, this);
+                this.left = new this.constructor(value, key, this);
                 addedNode = this.left;
             } else {
                 [addedNode, newRoot] = this.left.add(value, key, comparator);
@@ -117,7 +101,7 @@ class SortedSetNode {
             }
         } else if (comp > 0) {
             if (this.right == null) {
-                this.right = new SortedSetNode(value, key, this);
+                this.right = new this.constructor(value, key, this);
                 addedNode = this.right;
             } else {
                 [addedNode, newRoot] = this.right.add(value, key, comparator);
@@ -150,6 +134,54 @@ class SortedSetNode {
         return this.balance(removedNode);
     }
 
+    next() {
+        if (this.right) {
+            let node = this.right;
+            while (node.left) {
+                node = node.left;
+            }
+            return node;
+        }
+        let node = this;
+        while (node.parent && node.parent.right === node) {
+            node = node.parent;
+        }
+        return node.parent;
+    }
+
+    update() {
+        // This method is called whenever a change that occurs in the tree influences this node.
+        // This is the only method from this class that should be overwritten.
+    }
+
+}
+
+
+class SortedSetNode extends BinarySearchTreeNode {
+    constructor(value, key, parent=null) {
+        super(key, parent);
+        this.value = value;
+        this.size = 1;
+    }
+
+    leftSize() {
+        return (this.left && this.left.size) || 0;
+    }
+
+    rightSize() {
+        return (this.right && this.right.size) || 0;
+    }
+
+    recalcSize() {
+        this.size = this.leftSize() + this.rightSize() + 1;
+    }
+
+    update() {
+        this.left && this.left.recalcSize();
+        this.right && this.right.recalcSize();
+        this.recalcSize();
+    }
+
     getIndex(value, key, comparator) {
         const comp = comparator(key, this.key);
         if (comp === 0) {
@@ -170,21 +202,6 @@ class SortedSetNode {
             return this.left.get(index);
         }
         return this.right.get(index - leftSize - 1);
-    }
-
-    next() {
-        if (this.right) {
-            let node = this.right;
-            while (node.left) {
-                node = node.left;
-            }
-            return node;
-        }
-        let node = this;
-        while (node.parent && node.parent.right === node) {
-            node = node.parent;
-        }
-        return node.parent;
     }
 
     toJSON() {
@@ -323,7 +340,7 @@ export class SortedSet {
     }
 
     // Return iterator over [key, value]
-    *entries(startIndex=0, endIndex=this.size()) {
+    * entries(startIndex=0, endIndex=this.size()) {
         if (startIndex < endIndex) {
             let node = this.getNodeByIndex(startIndex);
             let position = startIndex;
@@ -500,6 +517,23 @@ export class SortedSetUnitTests {
         }
         if (ok) {
             console.log("Successfully ran all tests " + numRuns + " times.");
+        }
+    }
+}
+export class SortedSetProfiler {
+    static NUM_OPERATIONS = 100000;
+
+    static runProfiler(steps=this.NUM_OPERATIONS) {
+        let s = new SortedSet();
+        let startTime = performance.now();
+        let existing = 0;
+        for (let j = 0; j < 10; j += 1) {
+            startTime = performance.now();
+            for (let i = 0; i < steps; i += 1) {
+                s.add(Math.random());
+            }
+            console.log("Added", steps, "values to set already containing", existing, "values in", performance.now() - startTime, "ms");
+            existing += steps;
         }
     }
 }
