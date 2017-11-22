@@ -53,8 +53,8 @@ export class HorizontalOverflow extends UI.Element {
 
         for (let child of children) {
             const childRect = child.node.getBoundingClientRect();
-            shouldOverflowRight |= elementRect.x + elementRect.width < childRect.x + childRect.width - 1;
-            shouldOverflowLeft |= elementRect.x > childRect.x;
+            shouldOverflowRight |= elementRect.left + elementRect.width < childRect.left + childRect.width - 1;
+            shouldOverflowLeft |= elementRect.left > childRect.left;
         }
 
         const leftArrowHidden = !this.leftArrow.getWidth();
