@@ -6,13 +6,11 @@ import {registerStyle} from "../style/Theme";
 class FloatingWindow extends UI.Element {
     getDefaultOptions() {
         return {
-            transitionTime: 0
+            transitionTime: 0,
+            style: {
+                zIndex: 2016,
+            }
         };
-    }
-
-    extraNodeAttributes(attr) {
-        super.extraNodeAttributes(attr);
-        attr.setStyle("z-index", "2016");
     }
 
     fadeOut() {
