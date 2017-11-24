@@ -80,9 +80,20 @@ export class HorizontalOverflow extends UI.Element {
         } else {
             scrollLeft = Math.min(containerNode.scrollWidth - this.getWidth(), containerNode.scrollLeft + amount * this.getWidth());
         }
-        this.swipeHelperChild.addClass(this.styleSheet.swipeAnimation);
-        this.swipeHelperChild.setStyle("marginLeft", containerNode.scrollLeft - scrollLeft);
+
+        if (amount < 0) {
+            this.swipeHelperChild.setStyle("marginLeft", scrollLeft - containerNode.scrollLeft);
+            containerNode.scrollLeft = scrollLeft;
+        }
+
         this.pusherContainer.setWidth("fit-content");
+        this.swipeHelperChild.addClass(this.styleSheet.swipeAnimation);
+
+        if (amount < 0) {
+            this.swipeHelperChild.setStyle("marginLeft", 0);
+        } else {
+            this.swipeHelperChild.setStyle("marginLeft", containerNode.scrollLeft - scrollLeft);
+        }
 
         setTimeout(() => {
             this.pusherContainer.setWidth("100%");
