@@ -162,6 +162,12 @@ SVG.RadialGradient = class SVGRadialGradient extends SVG.Element {
     }
 };
 
+SVG.LinearGradient = class SVGLinearGradient extends SVG.Element {
+    getNodeType() {
+        return "linearGradient";
+    }
+};
+
 //TODO Complete this class
 SVG.Ellipse = class SVGEllipse extends SVG.Element {
     getNodeType() {
