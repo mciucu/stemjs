@@ -398,4 +398,4 @@ let initializeNavbar = () => {
 };
 
 
-export {NavManager, initializeNavbar, NavCarouselStyle}
+export {NavManager, initializeNavbar, NavCarouselStyle, SidePanel}
