@@ -1,7 +1,7 @@
 # Stem JS
 [![npm package][npm-badge]][npm-url]
 
-[Stem](https://stemjs.org) is somewhere between a framework and a library. It offers a set of classes and functions for all the standard scenarios you can encounter in modern web app developments, with design patterns designed to work together.
+[Stem](https://stemjs.org) is somewhere between a framework and a library. It offers a set of classes and functions for all the standard scenarios you can encounter in modern web app development, with design patterns designed to work together.
 
 ## Installation
 You can either just download the source from git or from the npm repository as the `stem-core` [npm package](https://www.npmjs.com/package/stem-core):
@@ -24,11 +24,11 @@ The source bundle is build with rollup, which you can install with:
 To call it, just run `rollup -c` in the root project folder.
 
 ## Why release another Javascript framework?
-The world is full by them. Most of them are mediocre though, and I wanted to show some effort into another direction.
+The world is full of them. Most of them are mediocre though, and I wanted to show some effort into another direction.
 The architecture isn't optimized for cool one-liners, but for maintenance and flexibility, that keeps intentionally as much of the functionality in non-core code as possible.
 
 Check out the docs at https://stemjs.org/docs/.
-This framework is being used for about a year at https://csacademy.com/, and it really works a lot better for use than any other solution out there.
+This framework is being used for about a year at https://csacademy.com/, and it really works a lot better than any other solution out there.
 
 This is the initial open-sourcing effort, it'll get more cleaned-up and documented in the next few weeks/months, with some concrete examples.
 
@@ -38,10 +38,10 @@ You can check out UIBase for the basics of the UI framework. It's an OOP based a
 I also included the base state classes that we use to store instances of DB-backed objects in the browser. It's a simple alternative to Redux/Flux if you will.
 
 ## License
-The Stem code is released explicitly under public domain (AKA The Unlicence, I just like public domain more than the term "Unlicence").
+The Stem code is released explicitly under public domain (AKA The Unlicense, I just like public domain more than the term "Unlicense").
 There are no ugly copyright headers you need to keep, and you can copy/paste the code without any attribution.
 It make it easier to bundle your code, so you know a minimized production js can strip all comments away.
-In case you need extra assurance, this software is also licences under Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/), you can pick your preferred licence.
+In case you need extra assurance, this software is also licensed under Creative Commons 0 (https://creativecommons.org/publicdomain/zero/1.0/), you can pick your preferred license.
 
 [npm-badge]: https://img.shields.io/npm/v/stem-core.svg?style=flat-square
 [npm-url]: https://www.npmjs.org/package/stem-core
