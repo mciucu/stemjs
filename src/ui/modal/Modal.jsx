@@ -160,7 +160,8 @@ class ActionModal extends Modal {
     }
 
     getActionButton() {
-        return <Button level={this.getActionLevel()} label={this.getActionName()} onClick={() => this.action()}/>;
+        return <Button level={this.getActionLevel()} label={this.getActionName()}
+                       onClick={() => this.action()} ref="actionButton" />;
     }
 
     getFooter() {
