@@ -63,10 +63,14 @@ export class Router extends Switcher {
         return element;
     }
 
+    getPageToRender(urlParts) {
+        return this.getRoutes().getPage(urlParts) || this.getPageNotFound();
+    }
+
     setURL(urlParts) {
         urlParts = unwrapArray(urlParts);
 
-        const page = this.getRoutes().getPage(urlParts) || this.getPageNotFound();
+        const page = this.getPageToRender(urlParts);
 
         const activePage = this.getActive();
 

@@ -1,6 +1,7 @@
 import {unwrapArray, setObjectPrototype, suffixNumber, NOOP_FUNCTION} from "../base/Utils";
 import {Dispatchable} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
+import {applyDebugFlags} from "./Utils";
 
 var UI = {
     renderingStack: [], //keeps track of objects that are redrawing, to know where to assign refs automatically
@@ -78,9 +79,7 @@ UI.TextElement = class UITextElement extends BaseUIElement {
 
     createNode() {
         this.node = document.createTextNode(this.getValue());
-        if (document.STEM_DEBUG) {
-            this.node.stemElement = this;
-        }
+        applyDebugFlags(this);
         return this.node;
     }
 
@@ -170,9 +169,7 @@ class UIElement extends BaseUIElement {
 
     createNode() {
         this.node = document.createElement(this.getNodeType());
-        if (document.STEM_DEBUG) {
-            this.node.stemElement = this;
-        }
+        applyDebugFlags(this);
         return this.node;
     }
 
