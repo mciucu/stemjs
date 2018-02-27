@@ -3,15 +3,15 @@ import {CreateNodeAttributesMap} from "../NodeAttributes";
 import {uniqueId} from "../../base/Utils";
 import {SVGNodeAttributes} from "./SVGNodeAttributes";
 import {Device} from "../../base/Device";
+import {applyDebugFlags} from "../Utils";
+
 
 let SVG = {};
 
 SVG.Element = class SVGElement extends UI.Element {
     createNode() {
         this.node = document.createElementNS("http://www.w3.org/2000/svg", this.getNodeType());
-        if (document.STEM_DEBUG) {
-            this.node.stemElement = this;
-        }
+        applyDebugFlags(this);
         return this.node;
     }
 
