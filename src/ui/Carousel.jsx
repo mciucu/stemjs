@@ -1,4 +1,6 @@
-import {UI, getComputedStyle, registerStyle} from "./UI";
+import {UI} from "./UIBase";
+import {getComputedStyle} from "./Utils";
+import {registerStyle} from "./style/Theme";
 import {StyleSheet} from "./Style";
 import {styleRule} from "../decorators/Style";
 import {FAIcon} from "../ui/FontAwesome";

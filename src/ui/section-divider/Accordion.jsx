@@ -1,5 +1,5 @@
 import {UI} from "../UIBase";
-import {registerStyle} from "../UI";
+import {registerStyle} from "../style/Theme";
 import {getComputedStyle} from "../Utils";
 import {unwrapArray} from "../../base/Utils";
 import {Device} from "../../base/Device";

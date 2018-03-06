@@ -3,7 +3,7 @@ import {Device} from "../../base/Device";
 import {unwrapArray} from "../../base/Utils";
 import {Divider} from "./Divider";
 import {UI} from "../UIBase";
-import {registerStyle} from "../UI";
+import {registerStyle} from "../style/Theme";
 import {SectionDividerStyle} from "./Style";
 import {Orientation} from "../Constants";
 

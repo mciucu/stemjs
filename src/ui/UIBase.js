@@ -1,7 +1,7 @@
 import {unwrapArray, setObjectPrototype, suffixNumber, NOOP_FUNCTION} from "../base/Utils";
 import {Dispatchable} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
-import {applyDebugFlags} from "./Utils";
+import {applyDebugFlags} from "./Debug";
 
 var UI = {
     renderingStack: [], //keeps track of objects that are redrawing, to know where to assign refs automatically
