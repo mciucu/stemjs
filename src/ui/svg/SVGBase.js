@@ -3,7 +3,7 @@ import {CreateNodeAttributesMap} from "../NodeAttributes";
 import {uniqueId} from "../../base/Utils";
 import {SVGNodeAttributes} from "./SVGNodeAttributes";
 import {Device} from "../../base/Device";
-import {applyDebugFlags} from "../Utils";
+import {applyDebugFlags} from "../Debug";
 
 
 let SVG = {};
