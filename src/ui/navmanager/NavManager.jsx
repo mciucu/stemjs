@@ -128,9 +128,7 @@ class NavManager extends UI.Primitive("nav") {
         };
     }
 
-    constructor(options) {
-        super(options);
-
+    initLeftSidePanel() {
         this.leftSidePanel = <SidePanel anchor={Direction.LEFT} name="left" persistent={this.options.persistentLeftSidePanel}>
             <Carousel ref={this.refLink("carousel")} styleSheet={this.getCarouselStyleSheet()}>
                 <BasicOrientedElement orientation={Orientation.VERTICAL} ref={this.refLink("navigationPanel")}
@@ -139,10 +137,19 @@ class NavManager extends UI.Primitive("nav") {
                 </BasicOrientedElement>
             </Carousel>
         </SidePanel>;
+    }
 
+    initRightSidePanel() {
         this.rightSidePanel = <SidePanel anchor={Direction.RIGHT} name="right" persistent={this.options.persistentRightSidePanel}>
             {this.getRightSidePanelChildren()}
         </SidePanel>;
+    }
+
+    constructor(options) {
+        super(options);
+
+        this.initLeftSidePanel();
+        this.initRightSidePanel();
     }
 
     getLeftSidePanelChildren() {
