@@ -27,6 +27,7 @@ export * from "./RowList";
 export * from "collapsible/CollapsiblePanel";
 export * from "modal/FloatingWindow";
 export * from "modal/Modal";
+export * from "modal/Style";
 export * from "global-container/GlobalContainer";
 
 export * from "horizontal-overflow/HorizontalOverflow";
