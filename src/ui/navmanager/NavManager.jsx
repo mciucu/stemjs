@@ -33,16 +33,21 @@ class SidePanelGroup extends UI.Element {
 class SidePanel extends UI.Element {
     constructor() {
         super(...arguments);
-
-        if (!this.node) {
-            this.mount(document.body);
-        }
-
+        this.initNode();
         if (this.options.name) {
             this.storageSerializer = new SessionStorageMap("sidePanel" + this.options.name);
             this.visible = this.storageSerializer.get("visible");
         }
+        this.applyVisibility();
+    }
 
+    initNode() {
+        if (!this.node) {
+            this.mount(document.body);
+        }
+    }
+
+    applyVisibility() {
         if (this.visible) {
             this.show();
         } else {
