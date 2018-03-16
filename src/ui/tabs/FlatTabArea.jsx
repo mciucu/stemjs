@@ -22,7 +22,7 @@ class FlatTabTitle extends BasicTabTitle {
 
 // This class displays a bottom bar on the active tab, and when changing tabs it also moves the bottom bar.
 @registerStyle(FlatTabAreaStyle)
-class FlatTabTitleArea extends TabTitleArea {
+export class FlatTabTitleArea extends TabTitleArea {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
         attr.addClass(this.styleSheet.nav);
