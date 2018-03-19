@@ -112,6 +112,11 @@ class GenericObjectStore extends BaseStore {
         return this.objects.get(parseInt(id));
     }
 
+    clear() {
+        this.objects.clear();
+        this.dispatch("update", null, null);
+    }
+
     getObjectIdForEvent(event) {
         return event.objectId || event.data.id;
     }
