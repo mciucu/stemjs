@@ -34,10 +34,6 @@ class SidePanel extends UI.Element {
     constructor() {
         super(...arguments);
         this.initNode();
-        if (this.options.name) {
-            this.storageSerializer = new SessionStorageMap("sidePanel" + this.options.name);
-            this.visible = this.storageSerializer.get("visible");
-        }
         this.applyVisibility();
     }
 
@@ -48,6 +44,10 @@ class SidePanel extends UI.Element {
     }
 
     applyVisibility() {
+        if (this.options.name) {
+            this.storageSerializer = new SessionStorageMap("sidePanel" + this.options.name);
+            this.visible = this.storageSerializer.get("visible");
+        }
         if (this.visible) {
             this.show();
         } else {
