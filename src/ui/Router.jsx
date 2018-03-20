@@ -52,6 +52,10 @@ export class Router extends Switcher {
         this.updateURL();
     }
 
+    clearCache() {
+        this.getRoutes().clearCache();
+    }
+
     // TODO: should be named getRootRoute() :)
     getRoutes() {
         return this.options.routes;
@@ -111,6 +115,13 @@ export class Route {
         }
         this.options = options;
         this.cachedPages = new Map();
+    }
+
+    clearCache() {
+        this.cachedPages.clear();
+        for (const subroute of this.subroutes) {
+            subroute.clearCache();
+        }
     }
 
     matches(urlParts) {
