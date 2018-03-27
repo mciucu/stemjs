@@ -23,6 +23,13 @@ class FlatTabTitle extends BasicTabTitle {
 // This class displays a bottom bar on the active tab, and when changing tabs it also moves the bottom bar.
 @registerStyle(FlatTabAreaStyle)
 export class FlatTabTitleArea extends TabTitleArea {
+    constructor(...args) {
+        super(...args);
+        // Active bar left and width must be cached so the redraw is done seamlessly.
+        this.barLeft = 0;
+        this.barWidth = 0;
+    }
+
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
         attr.addClass(this.styleSheet.nav);
@@ -32,7 +39,8 @@ export class FlatTabTitleArea extends TabTitleArea {
         return [
             <HorizontalOverflow ref="horizontalOverflow" styleSheet={FlatTabAreaHorizontalOverflowStyle}>
                 {this.render()}
-                <div ref="bar" className={this.styleSheet.activeBar} />
+                <div ref="bar" className={this.styleSheet.activeBar}
+                     style={{left: this.barLeft, width: this.barWidth}}/>
             </HorizontalOverflow>,
         ]
     }
@@ -52,6 +60,8 @@ export class FlatTabTitleArea extends TabTitleArea {
             left: barLeft,
             width: barWidth,
         });
+        this.barLeft = barLeft;
+        this.barWidth = barWidth;
     }
 
     setActive(activeTab) {
