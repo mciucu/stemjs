@@ -36,6 +36,11 @@ export class FlatTabTitleArea extends TabTitleArea {
     }
 
     getChildrenToRender() {
+        for (const child of this.render()) {
+            if (child.options.active) {
+                child.addClass(this.styleSheet.activeOnRender);
+            }
+        }
         return [
             <HorizontalOverflow ref="horizontalOverflow" styleSheet={FlatTabAreaHorizontalOverflowStyle}>
                 {this.render()}
