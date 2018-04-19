@@ -73,10 +73,6 @@ class VolatileFloatingWindow extends FloatingWindow {
         window.addEventListener("click", this.hideListener);
     }
 
-    unbindWindowListeners() {
-        window.removeEventListener("click", this.hideListener);
-    }
-
     toggle() {
         if (!this.isInDocument()) {
             this.show();
@@ -94,9 +90,13 @@ class VolatileFloatingWindow extends FloatingWindow {
 
     hide() {
         if (this.isInDocument()) {
-            this.unbindWindowListeners();
             super.hide();
         }
+    }
+
+    onUnmount() {
+        super.onUnmount();
+        window.removeEventListener("click", this.hideListener);
     }
 
     onMount() {
