@@ -8,7 +8,7 @@ import {unwrapArray} from "../../base/Utils";
 
 
 
-class FlatTabTitle extends BasicTabTitle {
+export class FlatTabTitle extends BasicTabTitle {
     setActive(active) {
         super.setActive(active);
         if (active) {
