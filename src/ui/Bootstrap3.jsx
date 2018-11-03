@@ -1,5 +1,5 @@
 import {UI} from "./UIBase";
-import {BasicLevelStyleSheet, GlobalStyle} from "./GlobalStyle";
+import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {Orientation} from "./Constants";
 import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";

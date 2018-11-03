@@ -1,6 +1,5 @@
 import {styleRule, StyleSheet} from "../Style";
 import {Device} from "../../base/Device";
-import {Theme} from "../style/Theme";
 
 class GlobalContainerStyle extends StyleSheet {
     constructor() {

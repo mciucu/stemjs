@@ -1,4 +1,4 @@
-import {Body} from "Body";
+import {Body} from "./Body";
 
 class Response extends Body {
     constructor(bodyInit, options) {

@@ -1,8 +1,8 @@
 import {UI} from "./UIBase";
 import {ConcentricCirclesLoadingScreen} from "./ConcentricCirclesLoadingScreen";
 import {DelayedElement} from "./DelayedElement";
-import {Ajax} from "base/Ajax";
-import {GlobalState} from "state/State";
+import {Ajax} from "../base/Ajax";
+import {GlobalState} from "../state/State";
 import {CardPanel} from "./CardPanel";
 import {Level} from "./Constants";
 

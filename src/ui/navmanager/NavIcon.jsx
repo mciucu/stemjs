@@ -1,5 +1,5 @@
-import {UI} from "UI";
-import {NavElement} from "NavElement";
+import {UI} from "../UIBase";
+import {NavElement} from "./NavElement";
 import {FAIcon} from "../FontAwesome";
 import {Size} from "../Constants";
 

@@ -1,5 +1,4 @@
 import {deepCopy} from "../base/Utils";
-import {decorate} from "./Utils";
 import {lazyInit} from "./LazyInitialize";
 
 function evaluateStyleRuleObject(target, initializer, value, options) {

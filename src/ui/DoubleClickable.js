@@ -1,10 +1,6 @@
-import {lazyInit} from "../decorators/Decorators";
-
-let DoubleClickable = (BaseClass) => class DoubleClickable extends BaseClass {
-    // @lazyInit
+export const DoubleClickable = (BaseClass) => class DoubleClickable extends BaseClass {
     singleClickCallbacks = new Map();
 
-    // @lazyInit
     doubleClickCallbacks = new Map();
 
     addClickListener(callback) {
@@ -84,5 +80,3 @@ let DoubleClickable = (BaseClass) => class DoubleClickable extends BaseClass {
         }
     }
 };
-
-export {DoubleClickable}
