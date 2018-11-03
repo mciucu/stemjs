@@ -1,4 +1,4 @@
-import {enhance} from "Color";
+import {enhance} from "../Color";
 import {StyleSheet} from "../Style";
 import {styleRule, styleRuleInherit} from "../../decorators/Style";
 import {HorizontalOverflowStyle} from "../horizontal-overflow/Style";

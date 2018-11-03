@@ -1,5 +1,5 @@
 import {UI, changeParent, registerStyle} from "../UI";
-import {NavStyle} from "NavStyle";
+import {NavStyle} from "./NavStyle";
 import {Carousel, CarouselStyle} from "../Carousel";
 import {LeftSideNavIcon, RightSideNavIcon, WrappedNavIcon} from "./NavIcon";
 import {BasicOrientedElement, NavSection} from "./NavElement";

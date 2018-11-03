@@ -1,5 +1,5 @@
 import {StyleSheet, styleRule} from "../Style";
-import {darken, enhance} from "ui/Color";
+import {enhance} from "../Color";
 
 
 class NavStyle extends StyleSheet {

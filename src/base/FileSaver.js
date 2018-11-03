@@ -1,6 +1,6 @@
 // The FileSaver class is mean to be able to create a Save as... file dialog from text/bytes
 // TODO: this file is work in progress
-import {Dispatchable} from "Dispatcher";
+import {Dispatchable} from "./Dispatcher";
 
 let autoBom = function (blob) {
     // Add the unicode boom if not present

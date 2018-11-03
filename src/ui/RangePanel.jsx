@@ -1,4 +1,4 @@
-import {UI, UIElement} from "./UIBase";
+import {UI} from "./UIBase";
 import {Button} from "./button/Button";
 import {NumberInput} from "./input/Input";
 import {RangePanelStyle} from "./RangePanelStyle";
