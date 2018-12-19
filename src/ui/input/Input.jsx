@@ -90,7 +90,7 @@ class NumberInput extends Input {
 
     getValue() {
         let val = super.getValue();
-        return parseInt(val) || parseFloat(val);
+        return parseFloat(val);
     }
 }
 NumberInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [

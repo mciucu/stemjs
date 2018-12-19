@@ -1,8 +1,8 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('Color'), require('UI')) :
-    typeof define === 'function' && define.amd ? define(['exports', 'Color', 'UI'], factory) :
-    (factory((global.stem = {}),global.Color,global.UI));
-}(this, (function (exports,Color,UI) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+    typeof define === 'function' && define.amd ? define(['exports'], factory) :
+    (factory((global.stem = {})));
+}(this, (function (exports) { 'use strict';
 
     // TODO: this whole file is mosly here to not break compatibility with pre-Stem code, need refactoring
     var EPS = 1e-6;
@@ -6594,7 +6594,7 @@
         }
     }
 
-    var UI$1 = {
+    var UI = {
         renderingStack: [] //keeps track of objects that are redrawing, to know where to assign refs automatically
     };
 
@@ -6653,7 +6653,7 @@
         return BaseUIElement;
     }(Dispatchable);
 
-    UI$1.TextElement = function (_BaseUIElement) {
+    UI.TextElement = function (_BaseUIElement) {
         inherits(UITextElement, _BaseUIElement);
 
         function UITextElement() {
@@ -6883,9 +6883,9 @@
         }, {
             key: "getChildrenForRedraw",
             value: function getChildrenForRedraw() {
-                UI$1.renderingStack.push(this);
+                UI.renderingStack.push(this);
                 var children = unwrapArray(this.getChildrenToRender());
-                UI$1.renderingStack.pop();
+                UI.renderingStack.pop();
                 return children;
             }
         }, {
@@ -6917,7 +6917,7 @@
 
                     // Not a UIElement, to be converted to a TextElement
                     if (!newChild.getNodeType) {
-                        newChild = newChildren[_i] = new UI$1.TextElement(newChild);
+                        newChild = newChildren[_i] = new UI.TextElement(newChild);
                     }
 
                     var newChildKey = newChild.options && newChild.options.key || "autokey" + _i;
@@ -7044,7 +7044,7 @@
                         // by a previous call to this function or manually by the user
                         if (typeof _this4[addListenerMethodName] === "function" && !_this4.hasOwnProperty(handlerMethodName)) {
                             _this4[handlerMethodName] = function (event) {
-                                UI$1.event = event;
+                                UI.event = event;
                                 if (_this4.options[key]) {
                                     // TODO: arguments should be (event, this)!
                                     _this4.options[key](_this4, event);
@@ -7088,7 +7088,7 @@
             key: "mount",
             value: function mount(parent, nextSiblingNode) {
                 if (!parent.node) {
-                    parent = new UI$1.Element().bindToNode(parent);
+                    parent = new UI.Element().bindToNode(parent);
                 }
                 this.parent = parent;
                 if (this.node) {
@@ -7313,7 +7313,7 @@
         return UIElement;
     }(BaseUIElement);
 
-    UI$1.createElement = function (tag, options) {
+    UI.createElement = function (tag, options) {
         if (!tag) {
             console.error("Create element needs a valid object tag, did you mistype a class name?");
             return;
@@ -7329,9 +7329,9 @@
 
         if (options.ref) {
             if (typeof options.ref === "string") {
-                if (UI$1.renderingStack.length > 0) {
+                if (UI.renderingStack.length > 0) {
                     options.ref = {
-                        parent: UI$1.renderingStack[UI$1.renderingStack.length - 1],
+                        parent: UI.renderingStack[UI.renderingStack.length - 1],
                         name: options.ref
                     };
                 } else {
@@ -7363,19 +7363,19 @@
     // Explicitly know that extraNodeAttributes doesn't do anything, but have it to be callable when doing inheritance
     UIElement.prototype.extraNodeAttributes = NOOP_FUNCTION;
 
-    UI$1.Element = UIElement;
+    UI.Element = UIElement;
 
-    UI$1.str = function (value) {
-        return new UI$1.TextElement(value);
+    UI.str = function (value) {
+        return new UI.TextElement(value);
     };
 
     // Keep a map for every base class, and for each base class keep a map for each nodeType, to cache classes
     var primitiveMap = new WeakMap();
 
-    UI$1.Primitive = function (BaseClass, nodeType) {
+    UI.Primitive = function (BaseClass, nodeType) {
         if (!nodeType) {
             nodeType = BaseClass;
-            BaseClass = UI$1.Element;
+            BaseClass = UI.Element;
         }
         var baseClassPrimitiveMap = primitiveMap.get(BaseClass);
         if (!baseClassPrimitiveMap) {
@@ -7454,7 +7454,7 @@
     };
 
     function getOffset(node) {
-        if (node instanceof UI$1.Element) {
+        if (node instanceof UI.Element) {
             node = node.node;
         }
         if (!node) {
@@ -7476,7 +7476,7 @@
     }
 
     function getComputedStyle(node, attribute) {
-        if (node instanceof UI$1.Element) {
+        if (node instanceof UI.Element) {
             node = node.node;
         }
         var computedStyle = window.getComputedStyle(node, null);
@@ -7582,7 +7582,7 @@
             }
         }]);
         return StyleInstance;
-    }(UI$1.TextElement);
+    }(UI.TextElement);
 
     var StyleElement = function (_UI$Primitive) {
         inherits(StyleElement, _UI$Primitive);
@@ -7604,7 +7604,7 @@
             }
         }]);
         return StyleElement;
-    }(UI$1.Primitive("style"));
+    }(UI.Primitive("style"));
 
     var ALLOWED_SELECTOR_STARTS = new Set([":", ">", " ", "+", "~", "[", "."]);
 
@@ -8555,16 +8555,16 @@
      * This class contains methods for operating with colors. Its objects are kept in hsva format with normalized
      * attributes (each attribute has value between 0 and 1 inclusive), and can be converted from/to rgba.
      */
-    var Color$1 = function () {
-        function Color$$1(color) {
-            classCallCheck(this, Color$$1);
+    var Color = function () {
+        function Color(color) {
+            classCallCheck(this, Color);
 
             if (color) {
                 this.setColor(color);
             }
         }
 
-        createClass(Color$$1, [{
+        createClass(Color, [{
             key: "setColor",
             value: function setColor(color) {
                 this.color = this.constructor.parseColor(color);
@@ -8584,7 +8584,7 @@
         }], [{
             key: "parseColor",
             value: function parseColor(color) {
-                if (color instanceof Color$$1) {
+                if (color instanceof Color) {
                     return color.color;
                 } else if (color instanceof Array) {
                     // Add the alpha parameter at the end
@@ -8636,16 +8636,16 @@
             value: function interpolate(firstColor, secondColor) {
                 var t = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0.5;
 
-                var firstColorArray = Color$$1.parseColor(firstColor);
-                var secondColorArray = Color$$1.parseColor(secondColor);
+                var firstColorArray = Color.parseColor(firstColor);
+                var secondColorArray = Color.parseColor(secondColor);
 
-                return Color$$1.convertToRgba([parseInt(firstColorArray[0] * (1 - t) + secondColorArray[0] * t), parseInt(firstColorArray[1] * (1 - t) + secondColorArray[1] * t), parseInt(firstColorArray[2] * (1 - t) + secondColorArray[2] * t), parseInt(firstColorArray[3] * (1 - t) + secondColorArray[3] * t)]);
+                return Color.convertToRgba([parseInt(firstColorArray[0] * (1 - t) + secondColorArray[0] * t), parseInt(firstColorArray[1] * (1 - t) + secondColorArray[1] * t), parseInt(firstColorArray[2] * (1 - t) + secondColorArray[2] * t), parseInt(firstColorArray[3] * (1 - t) + secondColorArray[3] * t)]);
             }
         }, {
             key: "addOpacity",
             value: function addOpacity(color, opacity) {
-                var colorArray = Color$$1.parseColor(color);
-                return Color$$1.convertToRgba([parseInt(colorArray[0]), parseInt(colorArray[1]), parseInt(colorArray[2]), opacity]);
+                var colorArray = Color.parseColor(color);
+                return Color.convertToRgba([parseInt(colorArray[0]), parseInt(colorArray[1]), parseInt(colorArray[2]), opacity]);
             }
         }, {
             key: "convertToRgba",
@@ -8655,16 +8655,16 @@
         }, {
             key: "isLight",
             value: function isLight(color) {
-                var values = Color$$1.parseColor(color);
+                var values = Color.parseColor(color);
                 return values[0] * 0.3 + values[1] * 0.59 + values[2] * 0.11 > 188;
             }
         }]);
-        return Color$$1;
+        return Color;
     }();
 
     function lighten(color, amount) {
         if (amount >= 0) {
-            return Color$1.interpolate(color, "#fff", amount);
+            return Color.interpolate(color, "#fff", amount);
         } else {
             return darken(color, -amount);
         }
@@ -8672,7 +8672,7 @@
 
     function darken(color, amount) {
         if (amount >= 0) {
-            var rgba = Color$1.parseColor(Color$1.interpolate(color, "#000", amount));
+            var rgba = Color.parseColor(Color.interpolate(color, "#000", amount));
             for (var i = 0; i < 3; i += 1) {
                 var root = Math.pow(255 - rgba[i], 0.7);
                 rgba[i] = parseInt(rgba[i] - root * amount);
@@ -8680,14 +8680,14 @@
                     rgba[i] = 0;
                 }
             }
-            return Color$1.convertToRgba(rgba);
+            return Color.convertToRgba(rgba);
         } else {
             return lighten(color, -amount);
         }
     }
 
     function enhance(color, amount) {
-        if (Color$1.isLight(color)) {
+        if (Color.isLight(color)) {
             return darken(color, amount);
         } else {
             return lighten(color, amount);
@@ -8701,7 +8701,7 @@
         var darkenPercents = void 0;
         if (!dark) {
             darkenPercents = [0.1, 0, -0.2, -0.3, -0.35, -0.2, -1];
-        } else if (Color$1.isLight(color)) {
+        } else if (Color.isLight(color)) {
             darkenPercents = [0.05, 0, 0.05, 0.1, 0.15, 0.3, 0.8];
         } else {
             darkenPercents = [-0.3, 0, 0.1, 0.2, 0.23, 0.1, -1];
@@ -8944,7 +8944,7 @@
 
     Theme.Global = new Theme("Global");
 
-    UI$1.Element.prototype.getStyleSheet = function styleSheetGetter() {
+    UI.Element.prototype.getStyleSheet = function styleSheetGetter() {
         return getInstanceForObject(this.options) || getInstanceForObject(this.constructor);
     };
 
@@ -9505,7 +9505,7 @@
             }
         }]);
         return SimpleStyledElement;
-    }(UI$1.Element);
+    }(UI.Element);
 
     var IconableInterface = function (_SimpleStyledElement) {
         inherits(IconableInterface, _SimpleStyledElement);
@@ -9559,7 +9559,7 @@
                     };
                 }
 
-                return UI$1.createElement("span", iconOptions);
+                return UI.createElement("span", iconOptions);
             }
         }]);
         return IconableInterface;
@@ -9686,7 +9686,7 @@
             }
         }]);
         return Label;
-    }(UI$1.Primitive(IconableInterface, "span"))) || _class3$1);
+    }(UI.Primitive(IconableInterface, "span"))) || _class3$1);
 
 
     var badgeColorToStyle = function badgeColorToStyle(color) {
@@ -9794,7 +9794,7 @@
             }
         }]);
         return Badge;
-    }(UI$1.Primitive(IconableInterface, "span"))) || _class6);
+    }(UI.Primitive(IconableInterface, "span"))) || _class6);
 
 
     var progressBarColorToStyle = function progressBarColorToStyle(color) {
@@ -9959,10 +9959,10 @@
                     barOptions.style.backgroundColor = this.options.color;
                 }
 
-                return UI$1.createElement(
+                return UI.createElement(
                     "div",
                     barOptions,
-                    UI$1.createElement(
+                    UI.createElement(
                         "span",
                         null,
                         this.options.label
@@ -9999,7 +9999,7 @@
             }
         }]);
         return Panel;
-    }(UI$1.Element);
+    }(UI.Element);
 
     var SlideBar = function (_Draggable) {
         inherits(SlideBar, _Draggable);
@@ -10031,12 +10031,12 @@
         }, {
             key: "render",
             value: function render() {
-                return [UI$1.createElement(ProgressBar, { ref: "progressBar", active: "true", value: this.options.value, disableTransition: true,
+                return [UI.createElement(ProgressBar, { ref: "progressBar", active: "true", value: this.options.value, disableTransition: true,
                     orientation: this.getOrientation(),
                     style: Object.assign({
                         position: "relative"
                     }, this.getProgressBarStyle())
-                }), UI$1.createElement("div", { ref: "slider", style: Object.assign({
+                }), UI.createElement("div", { ref: "slider", style: Object.assign({
                         backgroundColor: "black",
                         position: "absolute"
                     }, this.getSliderStyle()) })];
@@ -10065,7 +10065,7 @@
             }
         }]);
         return SlideBar;
-    }(Draggable(UI$1.Element));
+    }(Draggable(UI.Element));
 
     var HorizontalSlideBar = function (_SlideBar) {
         inherits(HorizontalSlideBar, _SlideBar);
@@ -10233,7 +10233,7 @@
             }
         }]);
         return Link;
-    }(UI$1.Primitive("a"));
+    }(UI.Primitive("a"));
 
     var Image = function (_UI$Primitive2) {
         inherits(Image, _UI$Primitive2);
@@ -10244,7 +10244,7 @@
         }
 
         return Image;
-    }(UI$1.Primitive("img"));
+    }(UI.Primitive("img"));
 
     // Beware coder: If you ever use this class, you should have a well documented reason
 
@@ -10271,7 +10271,7 @@
             }
         }]);
         return RawHTML;
-    }(UI$1.Element);
+    }(UI.Element);
 
     var ViewportMeta = function (_UI$Primitive3) {
         inherits(ViewportMeta, _UI$Primitive3);
@@ -10330,7 +10330,7 @@
             }
         }]);
         return ViewportMeta;
-    }(UI$1.Primitive("meta"));
+    }(UI.Primitive("meta"));
 
     var TemporaryMessageArea = function (_UI$Primitive4) {
         inherits(TemporaryMessageArea, _UI$Primitive4);
@@ -10350,7 +10350,7 @@
         }, {
             key: "render",
             value: function render() {
-                return [UI$1.createElement(UI$1.TextElement, { ref: "textElement", value: this.options.value || "" })];
+                return [UI.createElement(UI.TextElement, { ref: "textElement", value: this.options.value || "" })];
             }
         }, {
             key: "getNodeAttributes",
@@ -10400,7 +10400,7 @@
             }
         }]);
         return TemporaryMessageArea;
-    }(UI$1.Primitive("span"));
+    }(UI.Primitive("span"));
 
     // Just putting in a lot of methods, to try to think of an interface
 
@@ -10535,7 +10535,7 @@
             }
         }]);
         return ScrollableMixin;
-    }(UI$1.Element);
+    }(UI.Element);
 
     //TODO: this class would need some binary searches
 
@@ -10703,7 +10703,7 @@
             }
         }]);
         return TimePassedSpan;
-    }(UI$1.Primitive("span"));
+    }(UI.Primitive("span"));
 
     var _class$7, _descriptor$1, _descriptor2$1, _descriptor3$1;
 
@@ -10819,7 +10819,7 @@
             }
         }]);
         return InputableElement;
-    }(UI$1.Element)) || _class$8);
+    }(UI.Element)) || _class$8);
 
     var Input = function (_UI$Primitive) {
         inherits(Input, _UI$Primitive);
@@ -10873,9 +10873,9 @@
             }
         }]);
         return Input;
-    }(UI$1.Primitive(InputableElement, "input"));
+    }(UI.Primitive(InputableElement, "input"));
 
-    Input.domAttributesMap = CreateNodeAttributesMap(UI$1.Element.domAttributesMap, [["autocomplete"], ["autofocus", { noValue: true }], ["formaction"], ["maxLength", { domName: "maxlength" }], ["minLength", { domName: "minlength" }], ["name"], ["placeholder"], ["readonly"], ["required"], ["value"]]);
+    Input.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [["autocomplete"], ["autofocus", { noValue: true }], ["formaction"], ["maxLength", { domName: "maxlength" }], ["minLength", { domName: "minlength" }], ["name"], ["placeholder"], ["readonly"], ["required"], ["value"]]);
 
     var SubmitInput = function (_Input) {
         inherits(SubmitInput, _Input);
@@ -10894,7 +10894,7 @@
         return SubmitInput;
     }(Input);
 
-    SubmitInput.domAttributesMap = CreateNodeAttributesMap(UI$1.Element.domAttributesMap, [["formenctype"], ["formmethod"], ["formnovalidate"], ["formtarget"]]);
+    SubmitInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [["formenctype"], ["formmethod"], ["formnovalidate"], ["formtarget"]]);
 
     var TextInput = function (_Input2) {
         inherits(TextInput, _Input2);
@@ -10930,13 +10930,13 @@
             key: "getValue",
             value: function getValue() {
                 var val = get(NumberInput.prototype.__proto__ || Object.getPrototypeOf(NumberInput.prototype), "getValue", this).call(this);
-                return parseInt(val) || parseFloat(val);
+                return parseFloat(val);
             }
         }]);
         return NumberInput;
     }(Input);
 
-    NumberInput.domAttributesMap = CreateNodeAttributesMap(UI$1.Element.domAttributesMap, [["min"], ["max"], ["step"]]);
+    NumberInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [["min"], ["max"], ["step"]]);
 
     var EmailInput = function (_Input4) {
         inherits(EmailInput, _Input4);
@@ -11031,7 +11031,7 @@
         return FileInput;
     }(Input);
 
-    FileInput.domAttributesMap = CreateNodeAttributesMap(UI$1.Element.domAttributesMap, [["multipleFiles", { domName: "multiple", noValue: true }], ["fileTypes", { domName: "accept" }]]);
+    FileInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [["multipleFiles", { domName: "multiple", noValue: true }], ["fileTypes", { domName: "accept" }]]);
 
     var CheckboxInput = function (_Input7) {
         inherits(CheckboxInput, _Input7);
@@ -11066,7 +11066,7 @@
         return CheckboxInput;
     }(Input);
 
-    CheckboxInput.domAttributesMap = CreateNodeAttributesMap(UI$1.Element.domAttributesMap, [["checked", { noValue: true }]]);
+    CheckboxInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [["checked", { noValue: true }]]);
 
     var RadioInput = function (_CheckboxInput) {
         inherits(RadioInput, _CheckboxInput);
@@ -11148,7 +11148,7 @@
             }
         }]);
         return TextArea;
-    }(UI$1.Primitive(InputableElement, "textarea"));
+    }(UI.Primitive(InputableElement, "textarea"));
 
     var Select = function (_UI$Primitive3) {
         inherits(Select, _UI$Primitive3);
@@ -11171,7 +11171,7 @@
                     if (this.givenOptions[i] == this.options.selected) {
                         options.selected = true;
                     }
-                    selectOptions.push(UI$1.createElement(
+                    selectOptions.push(UI.createElement(
                         "option",
                         options,
                         this.givenOptions[i].toString()
@@ -11224,7 +11224,7 @@
             }
         }]);
         return Select;
-    }(UI$1.Primitive(InputableElement, "select"));
+    }(UI.Primitive(InputableElement, "select"));
 
     var _class$9, _descriptor$2, _descriptor2$2, _descriptor3$2, _descriptor4$1, _descriptor5$1, _descriptor6$1;
 
@@ -11394,7 +11394,7 @@
             }
         }]);
         return Form;
-    }(UI$1.Primitive("form"))) || _class$a);
+    }(UI.Primitive("form"))) || _class$a);
     var FormGroup = (_dec2$1 = registerStyle(FormStyle), _dec2$1(_class2$1 = function (_UI$Element) {
         inherits(FormGroup, _UI$Element);
 
@@ -11423,7 +11423,7 @@
         }, {
             key: "getErrorField",
             value: function getErrorField() {
-                return UI$1.createElement("span", { ref: "errorField", style: { float: "right" } });
+                return UI.createElement("span", { ref: "errorField", style: { float: "right" } });
             }
         }, {
             key: "getChildrenToRender",
@@ -11432,7 +11432,7 @@
             }
         }]);
         return FormGroup;
-    }(UI$1.Element)) || _class2$1);
+    }(UI.Element)) || _class2$1);
 
     var FormField = function (_FormGroup) {
         inherits(FormField, _FormGroup);
@@ -11461,7 +11461,7 @@
             key: "getLabel",
             value: function getLabel() {
                 if (this.options.label) {
-                    return UI$1.createElement(
+                    return UI.createElement(
                         "strong",
                         null,
                         this.options.label
@@ -11473,13 +11473,13 @@
             key: "render",
             value: function render() {
                 if (this.options.contentFirst) {
-                    return [UI$1.createElement(
+                    return [UI.createElement(
                         "label",
                         null,
                         [get(FormField.prototype.__proto__ || Object.getPrototypeOf(FormField.prototype), "render", this).call(this), this.getLabel()]
                     )];
                 } else {
-                    return [UI$1.createElement(
+                    return [UI.createElement(
                         "label",
                         null,
                         [this.getLabel(), get(FormField.prototype.__proto__ || Object.getPrototypeOf(FormField.prototype), "render", this).call(this)]
@@ -11736,9 +11736,9 @@
             }
         }]);
         return SVGElement;
-    }(UI$1.Element);
+    }(UI.Element);
 
-    SVG.Element.domAttributesMap = CreateNodeAttributesMap(UI$1.Element.domAttributesMap, [["fill"], ["height"], ["opacity"], ["stroke"], ["strokeWidth", { domName: "stroke-width" }], ["clipPath", { domName: "clip-path" }], ["transform"], ["width"], ["cx"], ["cy"], ["rx"], ["ry"], ["x"], ["y"], ["x1"], ["y1"], ["x2"], ["y2"], ["offset"], ["stopColor", { domName: "stop-color" }], ["strokeDasharray", { domName: "stroke-dasharray" }], ["strokeLinecap", { domName: "stroke-linecap" }], ["viewBox", { domName: "viewBox" }]]);
+    SVG.Element.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [["fill"], ["height"], ["opacity"], ["stroke"], ["strokeWidth", { domName: "stroke-width" }], ["clipPath", { domName: "clip-path" }], ["transform"], ["width"], ["cx"], ["cy"], ["rx"], ["ry"], ["x"], ["y"], ["x1"], ["y1"], ["x2"], ["y2"], ["offset"], ["stopColor", { domName: "stop-color" }], ["strokeDasharray", { domName: "stroke-dasharray" }], ["strokeLinecap", { domName: "stroke-linecap" }], ["viewBox", { domName: "viewBox" }]]);
 
     SVG.Text = function (_SVG$Element) {
         inherits(SVGText, _SVG$Element);
@@ -11780,7 +11780,7 @@
         }, {
             key: "render",
             value: function render() {
-                return [UI$1.createElement(UI$1.TextElement, { ref: "textElement", value: this.options.text + "" })];
+                return [UI.createElement(UI.TextElement, { ref: "textElement", value: this.options.text + "" })];
             }
         }, {
             key: "getX",
@@ -13044,7 +13044,7 @@
 
         return new Transition({
             func: function func(t, context) {
-                _this5.setColor(Color$1.interpolate(context.color, color, t));
+                _this5.setColor(Color.interpolate(context.color, color, t));
             },
             context: {
                 color: this.getColor()
@@ -13082,7 +13082,7 @@
 
         return new Transition({
             func: function func(t, context) {
-                _this7.setColor(Color$1.interpolate(context.color, color, t), true);
+                _this7.setColor(Color.interpolate(context.color, color, t), true);
             },
             context: {
                 color: this.getColor()
@@ -13189,9 +13189,9 @@
                 this.applyRef();
 
                 // This render may be required to update this.options.children
-                UI$1.renderingStack.push(this);
+                UI.renderingStack.push(this);
                 this.render();
-                UI$1.renderingStack.pop();
+                UI.renderingStack.pop();
 
                 if (this.options.children.length == 0) {
                     return;
@@ -13348,7 +13348,7 @@
             }
         }]);
         return Switcher;
-    }(UI$1.Element);
+    }(UI.Element);
 
     var _class$b, _temp$6;
 
@@ -13429,7 +13429,7 @@
         }, {
             key: "getPageNotFound",
             value: function getPageNotFound() {
-                var element = UI$1.createElement("h1", { children: ["Can't find url, make sure you typed it correctly"] });
+                var element = UI.createElement("h1", { children: ["Can't find url, make sure you typed it correctly"] });
                 element.pageTitle = "Page not found";
                 return element;
             }
@@ -13627,7 +13627,7 @@
                     var pageGenerator = this.pageGenerator;
                     var args = unwrapArray(argsArray);
                     var generatorArgs = { args: args, argsArray: argsArray };
-                    var page = pageGenerator.prototype instanceof UI$1.Element ? new pageGenerator(generatorArgs) : pageGenerator(generatorArgs);
+                    var page = pageGenerator.prototype instanceof UI.Element ? new pageGenerator(generatorArgs) : pageGenerator(generatorArgs);
                     if (!page.pageTitle) {
                         var myPageTitle = this.getPageTitle();
                         if (myPageTitle) {
@@ -13725,9 +13725,9 @@
     // Keep a set of all UI Element that need to be updated when the language changes
     // Can't use a weak set here unfortunately because we need iteration
     // That's why we must make sure to remove all nodes from the set when destroying them
-    UI$1.TranslationElements = new Set();
+    UI.TranslationElements = new Set();
 
-    UI$1.TranslationTextElement = function (_UI$TextElement) {
+    UI.TranslationTextElement = function (_UI$TextElement) {
         inherits(TranslationTextElement, _UI$TextElement);
 
         function TranslationTextElement(value) {
@@ -13800,21 +13800,21 @@
         }, {
             key: "onMount",
             value: function onMount() {
-                UI$1.TranslationElements.add(this);
+                UI.TranslationElements.add(this);
             }
         }, {
             key: "onUnmount",
             value: function onUnmount() {
-                UI$1.TranslationElements.delete(this);
+                UI.TranslationElements.delete(this);
             }
         }]);
         return TranslationTextElement;
-    }(UI$1.TextElement);
+    }(UI.TextElement);
 
     // This method is a shorthand notation to create a new translatable text element
     // TODO: should also support being used as a string template
-    UI$1.T = function (str) {
-        return new UI$1.TranslationTextElement(str);
+    UI.T = function (str) {
+        return new UI.TranslationTextElement(str);
     };
 
     // TODO @mciucu this should be wrapped in a way that previous requests that arrive later don't get processed
@@ -13831,7 +13831,7 @@
         var _iteratorError = undefined;
 
         try {
-            for (var _iterator = UI$1.TranslationElements.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            for (var _iterator = UI.TranslationElements.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                 var textElement = _step.value;
 
                 textElement.redraw();
@@ -14284,13 +14284,13 @@
                 },
                 letterSpacing: "0.5px",
                 color: function color() {
-                    return Color.enhance(_this5.themeProperties.COLOR_FOREGROUND_BODY, 0.4) + "!important";
+                    return enhance(_this5.themeProperties.COLOR_FOREGROUND_BODY, 0.4) + "!important";
                 },
                 fontWeight: "bold",
                 ":hover": {
                     cursor: "pointer",
                     color: function color() {
-                        return Color.enhance(_this5.themeProperties.COLOR_FOREGROUND_BODY, 0.6) + "!important";
+                        return enhance(_this5.themeProperties.COLOR_FOREGROUND_BODY, 0.6) + "!important";
                     }
                 }
             };
@@ -14302,7 +14302,7 @@
 
             return {
                 color: function color() {
-                    return Color.enhance(_this6.themeProperties.COLOR_FOREGROUND_BODY, 0.8) + "!important";
+                    return enhance(_this6.themeProperties.COLOR_FOREGROUND_BODY, 0.8) + "!important";
                 },
                 cursor: "default !important"
             };
@@ -14376,13 +14376,13 @@
             return _ret5 = (_temp5 = (_this10 = possibleConstructorReturn(this, (_ref5 = FlatTabAreaHorizontalOverflowStyle.__proto__ || Object.getPrototypeOf(FlatTabAreaHorizontalOverflowStyle)).call.apply(_ref5, [this].concat(args))), _this10), _this10.baseColor = function () {
                 return _this10.themeProperties.COLOR_FOREGROUND_BODY;
             }, _this10.arrowColor = function () {
-                return Color.enhance(_this10.baseColor(), .4);
+                return enhance(_this10.baseColor(), .4);
             }, _this10.arrowBackground = function () {
                 return _this10.baseColor();
             }, _this10.arrowHoverColor = function () {
-                return Color.enhance(_this10.baseColor(), .8);
+                return enhance(_this10.baseColor(), .8);
             }, _this10.arrowHoverBackground = function () {
-                return Color.enhance(_this10.baseColor(), .1);
+                return enhance(_this10.baseColor(), .1);
             }, _temp5), possibleConstructorReturn(_this10, _ret5);
         }
 
@@ -14489,7 +14489,7 @@
         }
 
         return TabTitleArea;
-    }(UI$1.Element);
+    }(UI.Element);
 
     var TabArea = (_dec$3 = registerStyle(DefaultTabAreaStyle), _dec$3(_class$f = function (_UI$Element2) {
         inherits(TabArea, _UI$Element2);
@@ -14526,7 +14526,7 @@
         }, {
             key: "createTabPanel",
             value: function createTabPanel(panel) {
-                var tab = UI$1.createElement(BasicTabTitle, { panel: panel, activeTabDispatcher: this.activeTabDispatcher,
+                var tab = UI.createElement(BasicTabTitle, { panel: panel, activeTabDispatcher: this.activeTabDispatcher,
                     active: panel.options.active, href: panel.options.tabHref,
                     styleSheet: this.styleSheet });
 
@@ -14552,7 +14552,7 @@
                 if (this.options.titleAreaClass) {
                     titleAreaClass += " " + this.options.titleAreaClass;
                 }
-                return UI$1.createElement(
+                return UI.createElement(
                     TabTitleArea,
                     { ref: "titleArea", className: titleAreaClass },
                     tabTitles
@@ -14565,7 +14565,7 @@
                 if (this.options.panelClass) {
                     switcherClass += " " + this.options.panelClass;
                 }
-                return UI$1.createElement(
+                return UI.createElement(
                     Switcher,
                     { className: switcherClass, ref: "switcherArea", lazyRender: this.options.lazyRender },
                     tabPanels
@@ -14696,7 +14696,7 @@
             }
         }]);
         return TabArea;
-    }(UI$1.Element)) || _class$f);
+    }(UI.Element)) || _class$f);
 
     // Contains classes to abstract some generic Font Awesome usecases.
 
@@ -14730,7 +14730,7 @@
             }
         }]);
         return FAIcon;
-    }(UI$1.Primitive("i"));
+    }(UI.Primitive("i"));
 
     var FACollapseIcon = function (_FAIcon) {
         inherits(FACollapseIcon, _FAIcon);
@@ -14819,16 +14819,16 @@
         }, {
             key: "getChildrenToRender",
             value: function getChildrenToRender() {
-                return [UI$1.createElement(FAIcon, { ref: "leftArrow", icon: "chevron-left", className: this.styleSheet.leftArrow + " " + this.styleSheet.hiddenArrow }), UI$1.createElement(
+                return [UI.createElement(FAIcon, { ref: "leftArrow", icon: "chevron-left", className: this.styleSheet.leftArrow + " " + this.styleSheet.hiddenArrow }), UI.createElement(
                     "div",
                     { ref: "childrenContainer", className: this.styleSheet.childrenContainer },
-                    UI$1.createElement("div", { ref: "swipeHelperChild" }),
-                    UI$1.createElement(
+                    UI.createElement("div", { ref: "swipeHelperChild" }),
+                    UI.createElement(
                         "div",
                         { ref: "pusherContainer", className: this.styleSheet.pusherContainer },
                         this.render()
                     )
-                ), UI$1.createElement(FAIcon, { ref: "rightArrow", icon: "chevron-right", className: this.styleSheet.rightArrow + " " + this.styleSheet.hiddenArrow })];
+                ), UI.createElement(FAIcon, { ref: "rightArrow", icon: "chevron-right", className: this.styleSheet.rightArrow + " " + this.styleSheet.hiddenArrow })];
             }
         }, {
             key: "appendChild",
@@ -14993,7 +14993,7 @@
             }
         }]);
         return HorizontalOverflow;
-    }(UI$1.Element)) || _class$g);
+    }(UI.Element)) || _class$g);
 
     var _dec$5, _class$h, _dec2$2, _class2$2;
 
@@ -15079,11 +15079,11 @@
                     }
                 }
 
-                return [UI$1.createElement(
+                return [UI.createElement(
                     HorizontalOverflow,
                     { ref: "horizontalOverflow", styleSheet: FlatTabAreaHorizontalOverflowStyle },
                     this.render(),
-                    UI$1.createElement("div", { ref: "bar", className: this.styleSheet.activeBar,
+                    UI.createElement("div", { ref: "bar", className: this.styleSheet.activeBar,
                         style: { left: this.barLeft, width: this.barWidth } })
                 )];
             }
@@ -15225,7 +15225,7 @@
         createClass(FlatTabArea, [{
             key: "getTitleArea",
             value: function getTitleArea(tabTitles) {
-                return UI$1.createElement(
+                return UI.createElement(
                     FlatTabTitleArea,
                     { ref: "titleArea", activeTabTitleDispatcher: this.activeTabTitleDispatcher,
                         className: this.options.titleAreaClass || "" },
@@ -15235,7 +15235,7 @@
         }, {
             key: "createTabPanel",
             value: function createTabPanel(panel) {
-                var tab = UI$1.createElement(FlatTabTitle, { panel: panel, activeTabDispatcher: this.activeTabDispatcher,
+                var tab = UI.createElement(FlatTabTitle, { panel: panel, activeTabDispatcher: this.activeTabDispatcher,
                     activeTabTitleDispatcher: this.activeTabTitleDispatcher,
                     active: panel.options.active, href: panel.options.tabHref,
                     styleSheet: this.styleSheet });
@@ -15567,7 +15567,7 @@
             }
         }]);
         return Button;
-    }(UI$1.Primitive(IconableInterface, "button"))) || _class$j);
+    }(UI.Primitive(IconableInterface, "button"))) || _class$j);
 
     var StateButton = function (_Button) {
         inherits(StateButton, _Button);
@@ -15765,7 +15765,7 @@
                 this.buttons = [];
 
                 var _loop = function _loop(i) {
-                    _this3.buttons.push(UI$1.createElement(Button, { key: i, onClick: function onClick() {
+                    _this3.buttons.push(UI.createElement(Button, { key: i, onClick: function onClick() {
                             _this3.setIndex(i);
                         }, size: _this3.getSize(),
                         label: _this3.options.givenOptions[i].toString(), level: _this3.getLevel(),
@@ -16009,11 +16009,11 @@
                 var headingClasses = this.getHeadingClasses();
                 var bodyClasses = this.getBodyClasses();
 
-                return [UI$1.createElement(
+                return [UI.createElement(
                     "div",
                     { ref: "panelTitle", className: headingClasses },
                     this.getTitle()
-                ), UI$1.createElement(
+                ), UI.createElement(
                     "div",
                     { ref: "panelBody", className: bodyClasses, style: this.options.bodyStyle },
                     this.render()
@@ -16181,7 +16181,7 @@
 
 
                 return rows.map(function (row, index) {
-                    return UI$1.createElement(
+                    return UI.createElement(
                         "div",
                         { className: _this3.getRowClasses(index) },
                         rowParser(row)
@@ -16472,10 +16472,10 @@
                     };
                 }
 
-                return [UI$1.createElement(
+                return [UI.createElement(
                     "div",
                     { className: this.styleSheet.heading },
-                    UI$1.createElement(
+                    UI.createElement(
                         "div",
                         { ref: "toggleButton", className: this.styleSheet.button + " " + collapsedHeadingClass,
                             onClick: function onClick() {
@@ -16483,10 +16483,10 @@
                             } },
                         this.getTitle()
                     )
-                ), UI$1.createElement(
+                ), UI.createElement(
                     "div",
                     { style: { overflow: "hidden" } },
-                    UI$1.createElement(
+                    UI.createElement(
                         "div",
                         { ref: "contentArea", className: collapsedPanelClass + " " + hiddenClass,
                             style: contentStyle },
@@ -16511,9 +16511,9 @@
             value: function toggle() {
                 if (!this._haveExpanded) {
                     this._haveExpanded = true;
-                    UI$1.renderingStack.push(this);
+                    UI.renderingStack.push(this);
                     this.contentArea.options.children = this.render();
-                    UI$1.renderingStack.pop();
+                    UI.renderingStack.pop();
                     this.contentArea.redraw();
                     this.delayedMount();
                 }
@@ -16762,7 +16762,7 @@
             }
         }]);
         return FloatingWindow;
-    }(UI$1.Element)) || _class$q);
+    }(UI.Element)) || _class$q);
 
     var VolatileFloatingWindow = function (_FloatingWindow) {
         inherits(VolatileFloatingWindow, _FloatingWindow);
@@ -16857,10 +16857,10 @@
             value: function getChildrenToRender() {
                 var _this2 = this;
 
-                return [UI$1.createElement(
+                return [UI.createElement(
                     Panel,
                     { ref: "modalContainer", className: (this.options.visible ? "" : "hidden") + this.styleSheet.container },
-                    UI$1.createElement(Panel, { ref: "behindPanel", className: this.styleSheet.hiddenAnimated + this.styleSheet.background, onClick: function onClick() {
+                    UI.createElement(Panel, { ref: "behindPanel", className: this.styleSheet.hiddenAnimated + this.styleSheet.background, onClick: function onClick() {
                             return _this2.hide();
                         } }),
                     this.getModalWindow()
@@ -16874,16 +16874,16 @@
                 var closeButton = null;
                 if (this.options.closeButton) {
                     // TODO: this should be in a method
-                    closeButton = UI$1.createElement(
+                    closeButton = UI.createElement(
                         "div",
                         { style: { right: "10px", zIndex: "10", position: "absolute" } },
-                        UI$1.createElement(Button, { className: "close", size: Size.EXTRA_LARGE, style: { border: "none" }, label: "\xD7", onClick: function onClick() {
+                        UI.createElement(Button, { className: "close", size: Size.EXTRA_LARGE, style: { border: "none" }, label: "\xD7", onClick: function onClick() {
                                 return _this3.hide();
                             } })
                     );
                 }
 
-                return UI$1.createElement(
+                return UI.createElement(
                     FloatingWindow,
                     { ref: "modalWindow", style: this.getModalWindowStyle() },
                     closeButton,
@@ -16979,7 +16979,7 @@
             }
         }]);
         return Modal;
-    }(UI$1.Element)) || _class$r);
+    }(UI.Element)) || _class$r);
 
     var ActionModal = function (_Modal) {
         inherits(ActionModal, _Modal);
@@ -17014,15 +17014,15 @@
         }, {
             key: "render",
             value: function render() {
-                return [UI$1.createElement(
+                return [UI.createElement(
                     "div",
                     { className: this.styleSheet.header },
                     this.getHeader()
-                ), this.getBody() ? UI$1.createElement(
+                ), this.getBody() ? UI.createElement(
                     "div",
                     { className: this.styleSheet.body },
                     this.getBody()
-                ) : null, this.getFooter() ? UI$1.createElement(
+                ) : null, this.getFooter() ? UI.createElement(
                     "div",
                     { className: this.styleSheet.footer },
                     this.getFooter()
@@ -17031,7 +17031,7 @@
         }, {
             key: "getHeader",
             value: function getHeader() {
-                return UI$1.createElement(
+                return UI.createElement(
                     "h4",
                     null,
                     this.getTitle()
@@ -17052,7 +17052,7 @@
             value: function getActionButton() {
                 var _this7 = this;
 
-                return UI$1.createElement(Button, { level: this.getActionLevel(), label: this.getActionName(),
+                return UI.createElement(Button, { level: this.getActionLevel(), label: this.getActionName(),
                     onClick: function onClick() {
                         return _this7.action();
                     }, ref: "actionButton" });
@@ -17062,10 +17062,10 @@
             value: function getFooter() {
                 var _this8 = this;
 
-                return [UI$1.createElement(TemporaryMessageArea, { ref: "messageArea" }), UI$1.createElement(
+                return [UI.createElement(TemporaryMessageArea, { ref: "messageArea" }), UI.createElement(
                     ButtonGroup,
                     null,
-                    UI$1.createElement(Button, { label: this.getCloseName(), onClick: function onClick() {
+                    UI.createElement(Button, { label: this.getCloseName(), onClick: function onClick() {
                             return _this8.hide();
                         } }),
                     this.getActionButton()
@@ -17135,7 +17135,7 @@
             value: function getFooter() {
                 var _this12 = this;
 
-                return UI$1.createElement(Button, { level: Level.DANGER, label: "Dismiss", onClick: function onClick() {
+                return UI.createElement(Button, { level: Level.DANGER, label: "Dismiss", onClick: function onClick() {
                         return _this12.hide();
                     } });
             }
@@ -17246,7 +17246,7 @@
             }
         }]);
         return GlobalContainer;
-    }(UI$1.Element)) || _class$t);
+    }(UI.Element)) || _class$t);
 
     var Divider = function (_UI$Element) {
         inherits(Divider, _UI$Element);
@@ -17311,7 +17311,7 @@
             }
         }]);
         return Divider;
-    }(UI$1.Element);
+    }(UI.Element);
 
     var _class$u, _descriptor$b, _class3$8, _descriptor2$a, _descriptor3$a, _descriptor4$9, _descriptor5$9, _class5$3, _descriptor6$7, _descriptor7$5, _descriptor8$4, _descriptor9$4, _class7$3, _descriptor10$3, _descriptor11$3, _descriptor12$3, _descriptor13$3, _descriptor14$3, _descriptor15$3, _descriptor16$3, _descriptor17$3, _descriptor18$1, _descriptor19$1, _descriptor20$1;
 
@@ -18299,7 +18299,7 @@
                             if (leftChildVisible && !child.hasClass("hidden")) {
                                 hiddenClass = "";
                             }
-                            var divider = UI$1.createElement(DividerBarClass, { className: hiddenClass, orientation: this.getOrientation() });
+                            var divider = UI.createElement(DividerBarClass, { className: hiddenClass, orientation: this.getOrientation() });
                             children.push(divider);
                             this.dividers.push(divider);
                         }
@@ -18326,7 +18326,7 @@
             }
         }]);
         return SectionDivider;
-    }(UI$1.Element)) || _class2$4);
+    }(UI.Element)) || _class2$4);
 
     var _dec$f, _class$w, _dec2$5, _class2$5, _dec3$1, _class3$9;
 
@@ -18342,20 +18342,20 @@
             key: "render",
             value: function render() {
                 if (this.options.orientation === Orientation.VERTICAL) {
-                    return [UI$1.createElement(FAIcon, { icon: "ellipsis-h", className: this.styleSheet.verticalDots })];
+                    return [UI.createElement(FAIcon, { icon: "ellipsis-h", className: this.styleSheet.verticalDots })];
                 } else {
-                    return [UI$1.createElement(
+                    return [UI.createElement(
                         "div",
                         null,
-                        UI$1.createElement(FAIcon, { ref: "rightButton", icon: "caret-right", className: this.styleSheet.arrowButton })
-                    ), UI$1.createElement(
+                        UI.createElement(FAIcon, { ref: "rightButton", icon: "caret-right", className: this.styleSheet.arrowButton })
+                    ), UI.createElement(
                         "div",
                         null,
-                        UI$1.createElement(FAIcon, { icon: "bars", className: this.styleSheet.horizontalDots })
-                    ), UI$1.createElement(
+                        UI.createElement(FAIcon, { icon: "bars", className: this.styleSheet.horizontalDots })
+                    ), UI.createElement(
                         "div",
                         null,
-                        UI$1.createElement(FAIcon, { ref: "leftButton", icon: "caret-left", className: this.styleSheet.arrowButton })
+                        UI.createElement(FAIcon, { ref: "leftButton", icon: "caret-left", className: this.styleSheet.arrowButton })
                     )];
                 }
             }
@@ -18421,28 +18421,28 @@
                 var isLast = this.parent.panels.indexOf(this) === this.parent.panels.length - 1;
                 var firstCaret = isLast ? "left" : "right";
                 var lastCaret = isFirst ? "right" : "left";
-                return [this.render(), UI$1.createElement(
+                return [this.render(), UI.createElement(
                     "div",
                     { ref: "collapsedBarTitle", style: { display: this.collapsed ? "flex" : " none" },
                         className: this.styleSheet.collapsedBarTitle },
-                    UI$1.createElement(
+                    UI.createElement(
                         "div",
                         null,
-                        UI$1.createElement(FAIcon, { icon: "caret-" + firstCaret })
+                        UI.createElement(FAIcon, { icon: "caret-" + firstCaret })
                     ),
-                    UI$1.createElement(
+                    UI.createElement(
                         "div",
                         { className: this.styleSheet.title },
-                        UI$1.createElement(
+                        UI.createElement(
                             "div",
                             null,
                             this.options.title
                         )
                     ),
-                    UI$1.createElement(
+                    UI.createElement(
                         "div",
                         null,
-                        UI$1.createElement(FAIcon, { icon: "caret-" + lastCaret })
+                        UI.createElement(FAIcon, { icon: "caret-" + lastCaret })
                     )
                 )];
             }
@@ -18500,7 +18500,7 @@
             }
         }]);
         return BarCollapsePanel;
-    }(UI$1.Element)) || _class2$5);
+    }(UI.Element)) || _class2$5);
 
     var TitledSectionDivider = (_dec3$1 = registerStyle(TitledDividerStyle), _dec3$1(_class3$9 = function (_SectionDivider) {
         inherits(TitledSectionDivider, _SectionDivider);
@@ -18709,11 +18709,11 @@
                             this.addClass(this.styleSheet.paddingRemoved);
                         }
                         if (this.panels.length) {
-                            var divider = UI$1.createElement(DividerBarClass, { orientation: this.getOrientation() });
+                            var divider = UI.createElement(DividerBarClass, { orientation: this.getOrientation() });
                             children.push(divider);
                             this.dividers.push(divider);
                         }
-                        var wrappedChild = UI$1.createElement(
+                        var wrappedChild = UI.createElement(
                             BarCollapsePanel,
                             { orientation: this.options.orientation, collapsedSize: this.options.collapsedSize,
                                 title: child.options.title || "..." },
@@ -18806,7 +18806,7 @@
         }, {
             key: "render",
             value: function render() {
-                return [UI$1.createElement(FACollapseIcon, { ref: "collapseIcon", collapsed: false, className: this.styleSheet.collapseIcon }), this.options.children];
+                return [UI.createElement(FACollapseIcon, { ref: "collapseIcon", collapsed: false, className: this.styleSheet.collapseIcon }), this.options.children];
             }
         }, {
             key: "setCollapsed",
@@ -18854,7 +18854,7 @@
                         var child = _step.value;
 
                         var title = child.getTitle ? child.getTitle() : child.options.title ? child.options.title : "";
-                        var divider = UI$1.createElement(
+                        var divider = UI.createElement(
                             AccordionDivider,
                             null,
                             title
@@ -19157,7 +19157,7 @@
             }
         }]);
         return Accordion;
-    }(UI$1.Element)) || _class2$6);
+    }(UI.Element)) || _class2$6);
 
     var _class$y, _descriptor$c, _descriptor2$b, _descriptor3$b, _descriptor4$a, _dec$h, _class3$a;
 
@@ -19289,9 +19289,9 @@
             value: function render() {
                 var _this3 = this;
 
-                return [UI$1.createElement(FAIcon, { icon: "angle-left", className: this.styleSheet.navigatorIcon, onClick: function onClick() {
+                return [UI.createElement(FAIcon, { icon: "angle-left", className: this.styleSheet.navigatorIcon, onClick: function onClick() {
                         _this3.parent.dispatch("previousPage");
-                    } }), UI$1.createElement(FAIcon, { icon: "angle-right", className: this.styleSheet.navigatorIcon, onClick: function onClick() {
+                    } }), UI.createElement(FAIcon, { icon: "angle-right", className: this.styleSheet.navigatorIcon, onClick: function onClick() {
                         _this3.parent.dispatch("nextPage");
                     } })];
             }
@@ -19302,7 +19302,7 @@
             }
         }]);
         return CarouselNavigator;
-    }(UI$1.Element);
+    }(UI.Element);
 
     var Carousel = (_dec$h = registerStyle(CarouselStyle), _dec$h(_class3$a = function (_UI$Element2) {
         inherits(Carousel, _UI$Element2);
@@ -19349,10 +19349,10 @@
                     }
                 }
 
-                return [UI$1.createElement(CarouselNavigator, { className: this.options.children.length > 1 ? "" : "hidden" }), UI$1.createElement(
+                return [UI.createElement(CarouselNavigator, { className: this.options.children.length > 1 ? "" : "hidden" }), UI.createElement(
                     "div",
                     { className: this.styleSheet.container },
-                    UI$1.createElement("div", { ref: "pusher", style: { marginLeft: -this.activeIndex * 100 + "%" } }),
+                    UI.createElement("div", { ref: "pusher", style: { marginLeft: -this.activeIndex * 100 + "%" } }),
                     this.options.children
                 )];
             }
@@ -19391,7 +19391,7 @@
             }
         }]);
         return Carousel;
-    }(UI$1.Element)) || _class3$a);
+    }(UI.Element)) || _class3$a);
 
     var _class$z, _descriptor$d, _descriptor2$c, _descriptor3$c, _descriptor4$b, _descriptor5$a, _descriptor6$8, _descriptor7$6;
 
@@ -19682,40 +19682,40 @@
                     // Margin is added at redraw for the case when the scoreboard has horizontal scrolling during a redraw.
                     var margin = this.node && this.node.scrollLeft || 0;
 
-                    return [UI$1.createElement(
+                    return [UI.createElement(
                         "div",
                         { ref: "tableContainer", className: rangePanelStyleSheet.tableContainer,
                             style: { paddingTop: headHeight + "px", marginLeft: margin + "px" } },
-                        UI$1.createElement(
+                        UI.createElement(
                             "div",
                             { ref: "scrollablePanel", className: rangePanelStyleSheet.scrollablePanel },
-                            UI$1.createElement("div", { ref: "fakePanel", className: rangePanelStyleSheet.fakePanel, style: { height: fakePanelHeight } }),
-                            UI$1.createElement(
+                            UI.createElement("div", { ref: "fakePanel", className: rangePanelStyleSheet.fakePanel, style: { height: fakePanelHeight } }),
+                            UI.createElement(
                                 "table",
                                 { ref: "container", className: this.styleSheet.table + " " + rangePanelStyleSheet.table,
                                     style: { marginLeft: -margin + "px" } },
-                                UI$1.createElement(
+                                UI.createElement(
                                     "thead",
                                     { ref: "containerHead" },
                                     this.renderContainerHead()
                                 ),
-                                UI$1.createElement(
+                                UI.createElement(
                                     "tbody",
                                     { ref: "containerBody" },
                                     this.renderContainerBody()
                                 )
                             )
                         )
-                    ), UI$1.createElement(
+                    ), UI.createElement(
                         "div",
                         { ref: "footer", className: rangePanelStyleSheet.footer, style: { marginLeft: margin + "px" } },
-                        UI$1.createElement(
+                        UI.createElement(
                             "span",
                             { ref: "tableFooterText" },
                             this.getFooterContent()
                         ),
-                        UI$1.createElement(NumberInput, { ref: "jumpToInput", placeholder: "jump to...", style: { textAlign: "center" } }),
-                        UI$1.createElement(
+                        UI.createElement(NumberInput, { ref: "jumpToInput", placeholder: "jump to...", style: { textAlign: "center" } }),
+                        UI.createElement(
                             Button,
                             { ref: "jumpToButton", size: Size.SMALL, className: rangePanelStyleSheet.jumpToButton },
                             "Go"
@@ -19750,7 +19750,7 @@
                     for (var i = 0; i < entries.length; i += 1) {
                         var entry = entries[i];
                         var RowClass = this.getRowClass(entry);
-                        this.rows.push(UI$1.createElement(RowClass, _extends({ key: this.getEntryKey(entry, i + this.lowIndex), index: i + this.lowIndex
+                        this.rows.push(UI.createElement(RowClass, _extends({ key: this.getEntryKey(entry, i + this.lowIndex), index: i + this.lowIndex
                         }, this.getRowOptions(entry), { parent: this })));
                     }
                     return this.rows;
@@ -19916,7 +19916,7 @@
                 }
             }]);
             return RangeTable;
-        }(UI$1.Primitive(TableClass, "div"));
+        }(UI.Primitive(TableClass, "div"));
 
         return RangeTable;
     }
@@ -20101,7 +20101,7 @@
         }, {
             key: "renderEntryCell",
             value: function renderEntryCell(column) {
-                return UI$1.createElement(
+                return UI.createElement(
                     "td",
                     { style: column.cellStyle, key: column.id },
                     column.value(this.options.entry, this.options.index)
@@ -20109,7 +20109,7 @@
             }
         }]);
         return TableRow;
-    }(UI$1.Primitive("tr"));
+    }(UI.Primitive("tr"));
 
     var Table = (_dec$i = registerStyle(TableStyle), _dec$i(_class$B = function (_UI$Primitive2) {
         inherits(Table, _UI$Primitive2);
@@ -20148,11 +20148,11 @@
         }, {
             key: "render",
             value: function render() {
-                return [UI$1.createElement(
+                return [UI.createElement(
                     "thead",
                     null,
                     this.renderTableHead()
-                ), UI$1.createElement(
+                ), UI.createElement(
                     "tbody",
                     null,
                     this.renderTableBody()
@@ -20161,7 +20161,7 @@
         }, {
             key: "renderTableHead",
             value: function renderTableHead() {
-                return UI$1.createElement(
+                return UI.createElement(
                     "tr",
                     null,
                     this.columns.map(this.renderHeaderCell, this)
@@ -20181,7 +20181,7 @@
                 for (var i = 0; i < entries.length; i += 1) {
                     var entry = entries[i];
                     var RowClass = this.getRowClass(entry);
-                    this.rows.push(UI$1.createElement(RowClass, _extends({ key: this.getEntryKey(entry, i), index: i }, this.getRowOptions(entry), { parent: this })));
+                    this.rows.push(UI.createElement(RowClass, _extends({ key: this.getEntryKey(entry, i), index: i }, this.getRowOptions(entry), { parent: this })));
                 }
                 return this.rows;
             }
@@ -20191,7 +20191,7 @@
         }, {
             key: "renderHeaderCell",
             value: function renderHeaderCell(column) {
-                return UI$1.createElement(
+                return UI.createElement(
                     "th",
                     { style: column.headerStyle, ref: "columnHeader" + column.id },
                     this.renderColumnHeader(column)
@@ -20231,7 +20231,7 @@
             }
         }]);
         return Table;
-    }(UI$1.Primitive("table"))) || _class$B);
+    }(UI.Primitive("table"))) || _class$B);
 
     var _class$C, _descriptor$f, _descriptor2$e, _descriptor3$e;
 
@@ -20290,7 +20290,7 @@
         }, {
             key: "render",
             value: function render() {
-                return UI$1.createElement(
+                return UI.createElement(
                     "tr",
                     null,
                     get(TableRowInCollapsibleTable.prototype.__proto__ || Object.getPrototypeOf(TableRowInCollapsibleTable.prototype), "render", this).call(this)
@@ -20452,18 +20452,18 @@
         }, {
             key: "render",
             value: function render() {
-                return [UI$1.createElement(
+                return [UI.createElement(
                     "tr",
                     { className: collapsibleTableStyle.heading },
                     get(CollapsibleTableRow.prototype.__proto__ || Object.getPrototypeOf(CollapsibleTableRow.prototype), "render", this).call(this)
-                ), UI$1.createElement(
+                ), UI.createElement(
                     "tr",
                     null,
-                    UI$1.createElement(
+                    UI.createElement(
                         "td",
                         { style: { overflow: "hidden", padding: "0px" },
                             colspan: this.options.columns.length },
-                        UI$1.createElement(
+                        UI.createElement(
                             "div",
                             { ref: "contentArea",
                                 className: this.getCollapsibleStyleSheet().collapsed + " hidden" },
@@ -20496,9 +20496,9 @@
         }, {
             key: "redrawCollapsible",
             value: function redrawCollapsible() {
-                UI$1.renderingStack.push(this);
+                UI.renderingStack.push(this);
                 this.contentArea.options.children = this.renderCollapsible(this.options.entry);
-                UI$1.renderingStack.pop();
+                UI.renderingStack.pop();
                 this.contentArea.redraw();
             }
         }, {
@@ -20531,7 +20531,7 @@
             }, {
                 key: "render",
                 value: function render() {
-                    return [UI$1.createElement(
+                    return [UI.createElement(
                         "thead",
                         null,
                         this.renderTableHead()
@@ -20552,10 +20552,10 @@
                             var rowClass = _this8.getRowClass(entry);
                             // TODO: Fix it lad!
                             if (rowClass === CollapsibleTableRow || rowClass.prototype instanceof CollapsibleTableRow) {
-                                return UI$1.createElement("a", { ref: "toggleButton",
+                                return UI.createElement("a", { ref: "toggleButton",
                                     className: collapsibleTableStyle.button + " " + collapsibleTableStyle.collapsedButton });
                             }
-                            return UI$1.createElement("a", { ref: "toggleButton" });
+                            return UI.createElement("a", { ref: "toggleButton" });
                         },
                         cellStyle: {
                             width: "1%",
@@ -20641,16 +20641,16 @@
             }, {
                 key: "renderColumnHeader",
                 value: function renderColumnHeader(column) {
-                    var sortIcon = UI$1.createElement(SortIconClass, { className: this.styleSheet.sortIcon });
+                    var sortIcon = UI.createElement(SortIconClass, { className: this.styleSheet.sortIcon });
                     if (this.sortBy === column) {
                         if (this.sortDescending) {
-                            sortIcon = UI$1.createElement(SortIconClass, { className: this.styleSheet.sortIcon, style: { visibility: "inherit" }, direction: Direction.DOWN });
+                            sortIcon = UI.createElement(SortIconClass, { className: this.styleSheet.sortIcon, style: { visibility: "inherit" }, direction: Direction.DOWN });
                         } else {
-                            sortIcon = UI$1.createElement(SortIconClass, { className: this.styleSheet.sortIcon, style: { visibility: "inherit" }, direction: Direction.UP });
+                            sortIcon = UI.createElement(SortIconClass, { className: this.styleSheet.sortIcon, style: { visibility: "inherit" }, direction: Direction.UP });
                         }
                     }
 
-                    return UI$1.createElement(
+                    return UI.createElement(
                         "div",
                         { style: { position: "relative" } },
                         get(SortableTable.prototype.__proto__ || Object.getPrototypeOf(SortableTable.prototype), "renderColumnHeader", this).call(this, column),
@@ -21639,7 +21639,7 @@
         }
 
         return DatePickerTable;
-    }(UI$1.Element);
+    }(UI.Element);
 
     var TimePickerWidget = function (_UI$Element2) {
         inherits(TimePickerWidget, _UI$Element2);
@@ -21663,30 +21663,30 @@
                     fontWeight: "bold",
                     padding: "0 5px"
                 };
-                return [UI$1.createElement(
+                return [UI.createElement(
                     "div",
                     { style: { width: "130px", display: "flex" } },
-                    UI$1.createElement("div", { style: textSpanStyle, ref: "hours" }),
-                    UI$1.createElement(
+                    UI.createElement("div", { style: textSpanStyle, ref: "hours" }),
+                    UI.createElement(
                         "div",
                         { style: textSpanStyle },
                         ":"
                     ),
-                    UI$1.createElement("div", { style: textSpanStyle, ref: "minutes" }),
-                    UI$1.createElement(
+                    UI.createElement("div", { style: textSpanStyle, ref: "minutes" }),
+                    UI.createElement(
                         "div",
                         { style: textSpanStyle },
                         ":"
                     ),
-                    UI$1.createElement("div", { style: textSpanStyle, ref: "seconds" })
-                ), UI$1.createElement(
+                    UI.createElement("div", { style: textSpanStyle, ref: "seconds" })
+                ), UI.createElement(
                     "div",
                     { style: { width: "130px", display: "flex" } },
-                    UI$1.createElement(VerticalSlideBar, { value: hours / 23, ref: "hourSlider", height: 200, barHeight: 5, style: { flex: 1 } }),
-                    UI$1.createElement("div", { style: { flex: 1 } }),
-                    UI$1.createElement(VerticalSlideBar, { value: minutes / 59, ref: "minuteSlider", height: 200, barHeight: 5, style: { flex: 1 } }),
-                    UI$1.createElement("div", { style: { flex: 1 } }),
-                    UI$1.createElement(VerticalSlideBar, { value: seconds / 59, ref: "secondSlider", height: 200, barHeight: 5, style: { flex: 1, marginRight: "5px" } })
+                    UI.createElement(VerticalSlideBar, { value: hours / 23, ref: "hourSlider", height: 200, barHeight: 5, style: { flex: 1 } }),
+                    UI.createElement("div", { style: { flex: 1 } }),
+                    UI.createElement(VerticalSlideBar, { value: minutes / 59, ref: "minuteSlider", height: 200, barHeight: 5, style: { flex: 1 } }),
+                    UI.createElement("div", { style: { flex: 1 } }),
+                    UI.createElement(VerticalSlideBar, { value: seconds / 59, ref: "secondSlider", height: 200, barHeight: 5, style: { flex: 1, marginRight: "5px" } })
                 )];
             }
         }, {
@@ -21711,7 +21711,7 @@
             }
         }]);
         return TimePickerWidget;
-    }(UI$1.Element);
+    }(UI.Element);
 
     var DateTimeWindow = function (_VolatileFloatingWind) {
         inherits(DateTimeWindow, _VolatileFloatingWind);
@@ -21741,7 +21741,7 @@
         }, {
             key: "render",
             value: function render() {
-                return [UI$1.createElement(DatePickerTable, { ref: "datePicker", date: this.date }), UI$1.createElement(TimePickerWidget, { ref: "timePicker", time: this.time })];
+                return [UI.createElement(DatePickerTable, { ref: "datePicker", date: this.date }), UI.createElement(TimePickerWidget, { ref: "timePicker", time: this.time })];
             }
         }, {
             key: "computeInitial",
@@ -21887,7 +21887,7 @@
         }, {
             key: "render",
             value: function render() {
-                return [UI$1.createElement(TextInput, { ref: "textInput", placeholder: this.options.format, value: this.options.dateString || "" })];
+                return [UI.createElement(TextInput, { ref: "textInput", placeholder: this.options.format, value: this.options.dateString || "" })];
             }
 
             // onMount() {
@@ -21912,7 +21912,7 @@
 
         }]);
         return DateTimePicker;
-    }(UI$1.Element);
+    }(UI.Element);
 
     function enqueueIfNotLoaded(target, key, descriptor) {
         var method = descriptor.value;
@@ -22528,7 +22528,7 @@
             }
         }]);
         return CodeEditor;
-    }(EnqueueableMethodMixin(UI$1.Element)), (_applyDecoratedDescriptor$h(_class$F.prototype, "applyAceOptions", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "applyAceOptions"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "aceResize", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "aceResize"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setValue", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setValue"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAceOptions", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAceOptions"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setReadOnly", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setReadOnly"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAceMode", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAceMode"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAceKeyboardHandler", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAceKeyboardHandler"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAceTheme", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAceTheme"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAceFontSize", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAceFontSize"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAceTabSize", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAceTabSize"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAceLineNumberVisible", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAceLineNumberVisible"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAcePrintMarginVisible", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAcePrintMarginVisible"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAcePrintMarginSize", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAcePrintMarginSize"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setBasicAutocompletion", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setBasicAutocompletion"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setLiveAutocompletion", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setLiveAutocompletion"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setSnippets", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setSnippets"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAnnotations", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAnnotations"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setUseWrapMode", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setUseWrapMode"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setIndentedSoftWrap", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setIndentedSoftWrap"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "blockScroll", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "blockScroll"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setFoldStyle", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setFoldStyle"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setHighlightActiveLine", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setHighlightActiveLine"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setHighlightGutterLine", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setHighlightGutterLine"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setShowGutter", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setShowGutter"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setScrollTop", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setScrollTop"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "addMarker", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "addMarker"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "removeMarker", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "removeMarker"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setTextRange", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setTextRange"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "removeLine", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "removeLine"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "insertAtLine", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "insertAtLine"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "replaceLine", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "replaceLine"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "addAceSessionEventListener", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "addAceSessionEventListener"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "addAceSessionChangeListener", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "addAceSessionChangeListener"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "addAceChangeListener", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "addAceChangeListener"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "addAceEventListener", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "addAceEventListener"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "focus", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "focus"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "gotoEnd", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "gotoEnd"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setUndoManager", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setUndoManager"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAceRendererOption", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAceRendererOption"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "insert", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "insert"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "append", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "append"), _class$F.prototype)), _class$F);
+    }(EnqueueableMethodMixin(UI.Element)), (_applyDecoratedDescriptor$h(_class$F.prototype, "applyAceOptions", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "applyAceOptions"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "aceResize", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "aceResize"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setValue", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setValue"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAceOptions", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAceOptions"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setReadOnly", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setReadOnly"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAceMode", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAceMode"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAceKeyboardHandler", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAceKeyboardHandler"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAceTheme", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAceTheme"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAceFontSize", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAceFontSize"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAceTabSize", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAceTabSize"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAceLineNumberVisible", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAceLineNumberVisible"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAcePrintMarginVisible", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAcePrintMarginVisible"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAcePrintMarginSize", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAcePrintMarginSize"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setBasicAutocompletion", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setBasicAutocompletion"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setLiveAutocompletion", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setLiveAutocompletion"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setSnippets", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setSnippets"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAnnotations", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAnnotations"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setUseWrapMode", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setUseWrapMode"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setIndentedSoftWrap", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setIndentedSoftWrap"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "blockScroll", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "blockScroll"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setFoldStyle", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setFoldStyle"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setHighlightActiveLine", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setHighlightActiveLine"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setHighlightGutterLine", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setHighlightGutterLine"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setShowGutter", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setShowGutter"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setScrollTop", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setScrollTop"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "addMarker", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "addMarker"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "removeMarker", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "removeMarker"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setTextRange", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setTextRange"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "removeLine", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "removeLine"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "insertAtLine", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "insertAtLine"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "replaceLine", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "replaceLine"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "addAceSessionEventListener", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "addAceSessionEventListener"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "addAceSessionChangeListener", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "addAceSessionChangeListener"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "addAceChangeListener", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "addAceChangeListener"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "addAceEventListener", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "addAceEventListener"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "focus", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "focus"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "gotoEnd", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "gotoEnd"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setUndoManager", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setUndoManager"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "setAceRendererOption", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "setAceRendererOption"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "insert", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "insert"), _class$F.prototype), _applyDecoratedDescriptor$h(_class$F.prototype, "append", [enqueueIfNotLoaded], Object.getOwnPropertyDescriptor(_class$F.prototype, "append"), _class$F.prototype)), _class$F);
     var StaticCodeHighlighterStyle = (_class2$7 = function (_StyleSheet) {
         inherits(StaticCodeHighlighterStyle, _StyleSheet);
 
@@ -22768,13 +22768,13 @@
             value: function convertToUI(value) {
                 var _this2 = this;
 
-                if (value instanceof UI$1.TextElement || value instanceof UI$1.Element) {
+                if (value instanceof UI.TextElement || value instanceof UI.Element) {
                     // TODO: investigate this!
                     return value;
                 }
 
                 if (typeof value === "string") {
-                    return new UI$1.TextElement(value);
+                    return new UI.TextElement(value);
                 }
                 if (Array.isArray(value)) {
                     return value.map(function (x) {
@@ -22789,7 +22789,7 @@
 
                 // TODO: maybe just copy to another object, not delete?
                 //delete value.tag;
-                return UI$1.createElement.apply(UI$1, [classObject, value].concat(toConsumableArray(value.children || [])));
+                return UI.createElement.apply(UI, [classObject, value].concat(toConsumableArray(value.children || [])));
             }
         }, {
             key: "render",
@@ -23793,11 +23793,6 @@
 
                 return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = DoubleClickable.__proto__ || Object.getPrototypeOf(DoubleClickable)).call.apply(_ref, [this].concat(args))), _this), _this.singleClickCallbacks = new Map(), _this.doubleClickCallbacks = new Map(), _temp), possibleConstructorReturn(_this, _ret);
             }
-            // @lazyInit
-
-
-            // @lazyInit
-
 
             createClass(DoubleClickable, [{
                 key: "addClickListener",
@@ -24170,7 +24165,7 @@
         }(BaseClass);
     };
 
-    var BasicOrientedElement = BasicOrientedElementInterface(UI$1.Element);
+    var BasicOrientedElement = BasicOrientedElementInterface(UI.Element);
     var BasicOrientedLinkElement = BasicOrientedElementInterface(Link);
 
     // NavElements should know if they are in vertical or horizontal mode, so they can behave differently
@@ -24212,7 +24207,7 @@
                     var style = this.getOrientation() === Orientation.HORIZONTAL ? this.styleSheet.navElementValueHorizontal : this.styleSheet.navElementValueVertical;
                     var marginLeft = this.getOrientation() === Orientation.VERTICAL && unwrapArray(this.render()).length ? "-20px" : "0";
 
-                    return UI$1.createElement(
+                    return UI.createElement(
                         BasicOrientedElement,
                         { className: style, style: { marginLeft: marginLeft } },
                         this.getValue()
@@ -24227,7 +24222,7 @@
                         if (!this.isToggled) {
                             subElementsClass = "hidden";
                         }
-                        return UI$1.createElement(
+                        return UI.createElement(
                             BasicOrientedElement,
                             { ref: "contentArea", className: subElementsClass },
                             childrenToRender
@@ -24242,10 +24237,10 @@
                     if (unwrapArray(this.render()).length) {
                         if (this.getOrientation() === Orientation.VERTICAL) {
                             // is in the sidebar
-                            result = [UI$1.createElement(FACollapseIcon, { ref: "collapseIcon", collapsed: !this.isToggled, className: this.styleSheet.navElementVerticalArrow }), this.options.value];
+                            result = [UI.createElement(FACollapseIcon, { ref: "collapseIcon", collapsed: !this.isToggled, className: this.styleSheet.navElementVerticalArrow }), this.options.value];
                         } else if (this.getOrientation() === Orientation.HORIZONTAL) {
                             // is in the navbar
-                            result = [this.options.value, UI$1.createElement(FACollapseIcon, { collapsed: false, className: this.styleSheet.navElementHorizontalArrow })];
+                            result = [this.options.value, UI.createElement(FACollapseIcon, { collapsed: false, className: this.styleSheet.navElementHorizontalArrow })];
                         }
                     } else {
                         result = this.options.value;
@@ -24350,7 +24345,7 @@
         }(BaseClass);
     };
 
-    var NavElement = NavElementInterface(UI$1.Primitive(BasicOrientedElement, "li"));
+    var NavElement = NavElementInterface(UI.Primitive(BasicOrientedElement, "li"));
 
     var NavLinkElement = function (_NavElementInterface) {
         inherits(NavLinkElement, _NavElementInterface);
@@ -24413,7 +24408,7 @@
             }
         }]);
         return NavSection;
-    }(UI$1.Primitive("ul"));
+    }(UI.Primitive("ul"));
 
     var NavAnchoredNotifications = function (_NavSection) {
         inherits(NavAnchoredNotifications, _NavSection);
@@ -24448,7 +24443,7 @@
         }, {
             key: "render",
             value: function render() {
-                return [this.options.children, UI$1.createElement(Switcher, { ref: "switcher", style: this.getSwitcherStyle(), className: "hidden" })];
+                return [this.options.children, UI.createElement(Switcher, { ref: "switcher", style: this.getSwitcherStyle(), className: "hidden" })];
             }
         }, {
             key: "show",
@@ -24547,7 +24542,7 @@
         }, {
             key: "getIcon",
             value: function getIcon() {
-                return UI.UI.createElement(FAIcon, { icon: "bars", size: Size.LARGE });
+                return UI.createElement(FAIcon, { icon: "bars", size: Size.LARGE });
             }
         }]);
         return LeftSideNavIcon;
@@ -24570,7 +24565,7 @@
         }, {
             key: "getIcon",
             value: function getIcon() {
-                return UI.UI.createElement(FAIcon, { icon: "ellipsis-v", size: Size.LARGE });
+                return UI.createElement(FAIcon, { icon: "ellipsis-v", size: Size.LARGE });
             }
         }]);
         return RightSideNavIcon;
@@ -24593,7 +24588,7 @@
         }, {
             key: "getIcon",
             value: function getIcon() {
-                return UI.UI.createElement(FAIcon, { icon: "ellipsis-h", size: Size.LARGE });
+                return UI.createElement(FAIcon, { icon: "ellipsis-h", size: Size.LARGE });
             }
         }]);
         return WrappedNavIcon;
@@ -25091,7 +25086,7 @@
             }
         }]);
         return SidePanelGroup;
-    }(UI$1.Element);
+    }(UI.Element);
 
     var SidePanel = (_dec$k = registerStyle(NavStyle), _dec$k(_class$I = function (_UI$Element2) {
         inherits(SidePanel, _UI$Element2);
@@ -25178,7 +25173,7 @@
         }, {
             key: "getChildrenToRender",
             value: function getChildrenToRender() {
-                return UI$1.createElement(
+                return UI.createElement(
                     SidePanelGroup,
                     { ref: "this.wrappedPanel", anchor: this.options.anchor },
                     this.render()
@@ -25193,7 +25188,7 @@
             }
         }]);
         return SidePanel;
-    }(UI$1.Element)) || _class$I);
+    }(UI.Element)) || _class$I);
 
     var NavCarouselStyle = function (_CarouselStyle) {
         inherits(NavCarouselStyle, _CarouselStyle);
@@ -25239,13 +25234,13 @@
         }, {
             key: "initLeftSidePanel",
             value: function initLeftSidePanel() {
-                this.leftSidePanel = UI$1.createElement(
+                this.leftSidePanel = UI.createElement(
                     SidePanel,
                     { anchor: Direction.LEFT, name: "left", persistent: this.options.persistentLeftSidePanel },
-                    UI$1.createElement(
+                    UI.createElement(
                         Carousel,
                         { ref: this.refLink("carousel"), styleSheet: this.getCarouselStyleSheet() },
-                        UI$1.createElement(
+                        UI.createElement(
                             BasicOrientedElement,
                             { orientation: Orientation.VERTICAL, ref: this.refLink("navigationPanel"),
                                 styleSheet: this.styleSheet },
@@ -25257,7 +25252,7 @@
         }, {
             key: "initRightSidePanel",
             value: function initRightSidePanel() {
-                this.rightSidePanel = UI$1.createElement(
+                this.rightSidePanel = UI.createElement(
                     SidePanel,
                     { anchor: Direction.RIGHT, name: "right", persistent: this.options.persistentRightSidePanel },
                     this.getRightSidePanelChildren()
@@ -25334,7 +25329,7 @@
                 }
 
                 if (!this.leftPanelToggler) {
-                    this.leftPanelToggler = UI$1.createElement(LeftSideNavIcon, { onClick: function onClick() {
+                    this.leftPanelToggler = UI.createElement(LeftSideNavIcon, { onClick: function onClick() {
                             return _this5.leftSideIconAction();
                         } });
                 }
@@ -25354,7 +25349,7 @@
                     return null;
                 }
                 if (!this.rightPanelToggler) {
-                    this.rightPanelToggler = UI$1.createElement(RightSideNavIcon, { onClick: function onClick() {
+                    this.rightPanelToggler = UI.createElement(RightSideNavIcon, { onClick: function onClick() {
                             return _this6.rightSideIconAction();
                         } });
                 }
@@ -25415,7 +25410,7 @@
                 var _this7 = this;
 
                 if (!this.wrappedToggler) {
-                    this.wrappedToggler = UI$1.createElement(WrappedNavIcon, { onClick: function onClick() {
+                    this.wrappedToggler = UI.createElement(WrappedNavIcon, { onClick: function onClick() {
                             return _this7.wrappedIconAction();
                         },
                         className: this.wrapped ? "" : "hidden" });
@@ -25436,7 +25431,7 @@
             key: "getLeftConditionedWrapper",
             value: function getLeftConditionedWrapper() {
                 if (!this.leftConditionedWrapper) {
-                    this.leftConditionedWrapper = UI$1.createElement(
+                    this.leftConditionedWrapper = UI.createElement(
                         NavSection,
                         { anchor: Direction.LEFT },
                         this.getLeftConditioned()
@@ -25448,7 +25443,7 @@
             key: "getRightConditionedWrapper",
             value: function getRightConditionedWrapper() {
                 if (!this.rightConditionedWrapper) {
-                    this.rightConditionedWrapper = UI$1.createElement(
+                    this.rightConditionedWrapper = UI.createElement(
                         NavSection,
                         { anchor: Direction.RIGHT },
                         this.getRightConditioned()
@@ -25460,7 +25455,7 @@
             key: "getLeftConditioned",
             value: function getLeftConditioned() {
                 if (!this.leftConditioned) {
-                    this.leftConditioned = UI$1.createElement(
+                    this.leftConditioned = UI.createElement(
                         NavSection,
                         null,
                         this.getLeftConditionedChildren()
@@ -25472,7 +25467,7 @@
             key: "getRightConditioned",
             value: function getRightConditioned() {
                 if (!this.rightConditioned) {
-                    this.rightConditioned = UI$1.createElement(
+                    this.rightConditioned = UI.createElement(
                         NavSection,
                         null,
                         this.getRightConditionedChildren()
@@ -25504,7 +25499,7 @@
         }, {
             key: "render",
             value: function render() {
-                return [this.getLeftSideIcon(), this.getLeftFixed(), this.getLeftConditionedWrapper(), this.getWrappedIcon(), UI$1.createElement(
+                return [this.getLeftSideIcon(), this.getLeftFixed(), this.getLeftConditionedWrapper(), this.getWrappedIcon(), UI.createElement(
                     NavSection,
                     { style: { marginLeft: "auto" } },
                     this.getRightConditionedWrapper()
@@ -25544,7 +25539,7 @@
                 }
                 var wrapNavElements = function wrapNavElements() {
                     _this8.wrapped = true;
-                    _this8.wrappedPanel = UI$1.createElement(BasicOrientedElement, { orientation: Orientation.VERTICAL, styleSheet: _this8.styleSheet });
+                    _this8.wrappedPanel = UI.createElement(BasicOrientedElement, { orientation: Orientation.VERTICAL, styleSheet: _this8.styleSheet });
                     _this8.carousel.appendChild(_this8.wrappedPanel);
 
                     changeParent(_this8.getRightConditioned(), _this8.wrappedPanel);
@@ -25625,7 +25620,7 @@
             }
         }]);
         return NavManager;
-    }(UI$1.Primitive("nav"))) || _class3$c);
+    }(UI.Primitive("nav"))) || _class3$c);
 
 
     var initializeNavbar = function initializeNavbar() {
@@ -25753,7 +25748,7 @@
     exports.addCanonicalTimeUnit = addCanonicalTimeUnit;
     exports.addCanonicalTimeUnits = addCanonicalTimeUnits;
     exports.COLORS_BY_NAME = COLORS_BY_NAME;
-    exports.Color = Color$1;
+    exports.Color = Color;
     exports.lighten = lighten;
     exports.darken = darken;
     exports.enhance = enhance;
@@ -25777,7 +25772,7 @@
     exports.Modifier = Modifier$1;
     exports.TransitionList = TransitionList;
     exports.UIElement = UIElement;
-    exports.UI = UI$1;
+    exports.UI = UI;
     exports.Orientation = Orientation;
     exports.Direction = Direction;
     exports.Level = Level;
