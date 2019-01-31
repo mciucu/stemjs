@@ -185,7 +185,7 @@ export class NodeAttributes {
     }
 
     hasClass(className) {
-        return this.getClassNameSet().has(className);
+        return this.getClassNameSet().has(typeof className === "string" ? className : className.className);
     }
 
     applyAttribute(key, node, attributesMap) {
