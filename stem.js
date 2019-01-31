@@ -6454,7 +6454,7 @@
         }, {
             key: "hasClass",
             value: function hasClass(className) {
-                return this.getClassNameSet().has(className);
+                return this.getClassNameSet().has(typeof className === "string" ? className : className.className);
             }
         }, {
             key: "applyAttribute",
