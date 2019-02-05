@@ -397,8 +397,8 @@ StemDate.tokenFormattersMap = new Map([
 
     ["H", date => date.getHours()],
     ["HH", date => padNumber(date.getHours(), 2)],
-    ["h", date => date.getHours() % 12],
-    ["hh", date => padNumber(date.getHours() % 12, 2)],
+    ["h", date => date.getHours() % 12 ? date.getHours() % 12 : 12],
+    ["hh", date => padNumber(date.getHours() % 12 ? date.getHours() % 12 : 12, 2)],
 
     ["m", date => date.getMinutes()],
     ["mm", date => padNumber(date.getMinutes(), 2)],
@@ -410,6 +410,9 @@ StemDate.tokenFormattersMap = new Map([
     ["SS", date => padNumber(Math.floor(date.getMilliseconds() / 10), 2)],
     ["SSS", date => padNumber(date.getMilliseconds(), 3)],
     ["ms", date => padNumber(date.getMilliseconds(), 3)],
+
+    ["aa", date => date.getHours() > 12 ? "pm" : "am"],
+    ["AA", date => date.getHours() > 12 ? "PM" : "AM"],
 
     ["LL", date => date.format("MMMM Do, YYYY")],
 ]);
