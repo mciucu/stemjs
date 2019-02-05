@@ -21566,9 +21566,9 @@
     }], ["HH", function (date) {
         return padNumber(date.getHours(), 2);
     }], ["h", function (date) {
-        return date.getHours() % 12;
+        return date.getHours() % 12 ? date.getHours() % 12 : 12;
     }], ["hh", function (date) {
-        return padNumber(date.getHours() % 12, 2);
+        return padNumber(date.getHours() % 12 ? date.getHours() % 12 : 12, 2);
     }], ["m", function (date) {
         return date.getMinutes();
     }], ["mm", function (date) {
@@ -21585,6 +21585,10 @@
         return padNumber(date.getMilliseconds(), 3);
     }], ["ms", function (date) {
         return padNumber(date.getMilliseconds(), 3);
+    }], ["aa", function (date) {
+        return date.getHours() > 12 ? "pm" : "am";
+    }], ["AA", function (date) {
+        return date.getHours() > 12 ? "PM" : "AM";
     }], ["LL", function (date) {
         return date.format("MMMM Do, YYYY");
     }]]);
