@@ -1,7 +1,14 @@
 import {fetch} from "./Fetch";
 
 export class AjaxHandler {
-    constructor(ajaxHandler=Ajax, errorHandler=null) {
+    static _baseAjax = null;
+
+    constructor(ajaxHandler, errorHandler=null) {
+        if (this.constructor._baseAjax === null) {
+            this.constructor._baseAjax = this;
+        } else if (arguments.length === 0) {
+            ajaxHandler = this.constructor._baseAjax;
+        }
         this.parentHandler = ajaxHandler;
         this.preprocessors = (ajaxHandler) ? [] : Array.from(fetch.defaultPreprocessors);
         this.postprocessors = (ajaxHandler) ? [] : Array.from(fetch.defaultPostprocessors);
