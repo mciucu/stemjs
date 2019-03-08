@@ -33,15 +33,11 @@ class AccordionStyle extends DividerStyle {
     @styleRule
     grab = {
         cursor: "grab",
-        cursor: "-moz-grab",
-        cursor: "-webkit-grab",
     };
 
     @styleRule
     grabbing = {
         cursor: "grabbing",
-        cursor: "-moz-grabbing",
-        cursor: "-webkit-grabbing",
     };
 
     @styleRule
