@@ -51,10 +51,15 @@ export const Draggable = (BaseClass) => class Draggable extends BaseClass {
         }
     }
 
-    createDragListenerWrapper(listeners) {
+    createDragGenericListenerWrapper(listeners, dragEventType) {
         let listenerWrapper = Object.assign({}, listeners);
+        let dragStarted = false;
 
         listenerWrapper.onWrapperDrag = (event) => {
+            if (!dragStarted) {
+                return;
+            }
+
             const eventX = Device.getEventX(event), eventY = Device.getEventY(event);
 
             let deltaX = eventX - listenerWrapper._lastX;
@@ -67,6 +72,8 @@ export const Draggable = (BaseClass) => class Draggable extends BaseClass {
         };
 
         listenerWrapper.onWrapperStart = (event) => {
+            dragStarted = true;
+
             listenerWrapper._lastX = Device.getEventX(event);
             listenerWrapper._lastY = Device.getEventY(event);
 
@@ -75,69 +82,45 @@ export const Draggable = (BaseClass) => class Draggable extends BaseClass {
             }
 
             // TODO: Replace with our body
-            document.body.addEventListener("mousemove", listenerWrapper.onWrapperDrag);
+            document.body.addEventListener(dragEventType, listenerWrapper.onWrapperDrag);
         };
 
         listenerWrapper.onWrapperEnd = (event) => {
-            if (listeners.onEnd) {
-                listeners.onEnd(event);
+            if (dragStarted) {
+                if (listeners.onEnd) {
+                    listeners.onEnd(event);
+                }
             }
+
+            dragStarted = false;
+
             // TODO: Replace with our body
-            document.body.removeEventListener("mousemove", listenerWrapper.onWrapperDrag);
+            document.body.removeEventListener(dragEventType, listenerWrapper.onWrapperDrag);
         };
         return listenerWrapper;
     }
 
+    createDragListenerWrapper(listeners) {
+        return this.createDragGenericListenerWrapper(listeners, "mousemove");
+    }
+
     createTouchDragListenerWrapper(listeners) {
-        let listenerWrapper = Object.assign({}, listeners);
-
-        listenerWrapper.onWrapperDrag = (event) => {
-            const eventX = Device.getEventX(event), eventY = Device.getEventY(event);
-
-            let deltaX = eventX - listenerWrapper._lastX;
-            listenerWrapper._lastX = eventX;
-
-            let deltaY = eventY - listenerWrapper._lastY;
-            listenerWrapper._lastY = eventY;
-
-            listeners.onDrag(deltaX, deltaY);
-        };
-
-        listenerWrapper.onWrapperStart = (event) => {
-            listenerWrapper._lastX = Device.getEventX(event);
-            listenerWrapper._lastY = Device.getEventY(event);
-            listenerWrapper.touchEventIdentifier = Device.getEventTouchIdentifier(event);
-
-            if (listeners.onStart) {
-                listeners.onStart(event);
-            }
-            event.preventDefault();
-
-            // TODO: Replace with our body
-            document.body.addEventListener("touchmove", listenerWrapper.onWrapperDrag);
-        };
-
-        listenerWrapper.onWrapperEnd = (event) => {
-            if (event.touches.length && Device.getEventTouchIdentifier(event) === listenerWrapper.touchEventIdentifier) {
-                return;
-            }
-            if (listeners.onEnd) {
-                listeners.onEnd(event);
-            }
-            // TODO: Replace with our body
-            document.body.removeEventListener("touchmove", listenerWrapper.onWrapperDrag);
-        };
-        return listenerWrapper;
+        return this.createDragGenericListenerWrapper(listeners, "touchmove");
     }
 
     addDragListener(listeners) {
         let listenerWrapper = this.createDragListenerWrapper(listeners);
         let touchListenerWrapper = this.createTouchDragListenerWrapper(listeners);
         this.addNodeListener("touchstart", touchListenerWrapper.onWrapperStart);
-        this.addNodeListener("mousedown", listenerWrapper.onWrapperStart);
+        if (!Device.isMobileDevice()) {
+            this.addNodeListener("mousedown", listenerWrapper.onWrapperStart);
+        }
+
         // TODO: Replace with our body
         document.body.addEventListener("touchend", touchListenerWrapper.onWrapperEnd);
-        document.body.addEventListener("mouseup", listenerWrapper.onWrapperEnd);
+        if (!Device.isMobileDevice()) {
+            document.body.addEventListener("mouseup", listenerWrapper.onWrapperEnd);
+        }
 
         if (!this.hasOwnProperty("_dragListeners")) {
             this._dragListeners = [];
