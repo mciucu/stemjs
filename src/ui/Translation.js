@@ -29,8 +29,31 @@ UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement 
         }
     }
 
-    evaluateSprintf(str, ...values) {
-        throw Error("Not yet implemented");
+    // str format is a string where the "%s" blocks will be replaced by the passed args in order
+    // optionally, if there are more args than "%s" blocks, the last arg is considered to be an options parameter
+    // currently, the only custom option is {returnValue: "array"}, which will return the translation as an array
+    // instead of a string.
+    evaluateSprintf(key, ...args) {
+        const str = translationMap && translationMap.get(key);
+        if (!str) {
+            return "";
+        }
+        const strArgCount = str.split("%s").length - 1;
+        const options = args[strArgCount];
+
+        if (options && options.returnValue === "array") {
+            const returnValue = [];
+            str.split("%s").forEach((strPart, index) => {
+                returnValue.push(strPart);
+                if (args[index] !== options) {
+                    returnValue.push(args[index]);
+                }
+            });
+            return returnValue;
+        } else {
+            let index = 0;
+            return str.replace(/%s/g, () => (args[index++] || ""));
+        }
     }
 
     evaluate(strings, ...values) {
@@ -60,6 +83,10 @@ UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement 
             value = (translationMap && translationMap.get(value)) || value;
         }
         return value;
+    }
+
+    toString() {
+        return this.getValue();
     }
 
     onMount() {
