@@ -29,31 +29,18 @@ UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement 
         }
     }
 
-    // str format is a string where the "%s" blocks will be replaced by the passed args in order
-    // optionally, if there are more args than "%s" blocks, the last arg is considered to be an options parameter
-    // currently, the only custom option is {returnValue: "array"}, which will return the translation as an array
-    // instead of a string.
-    evaluateSprintf(key, ...args) {
-        const str = translationMap && translationMap.get(key);
+    // args[0] is a string where the "%[number]" block will be replaced by the args[number]
+    evaluateSprintf(...args) {
+        let str = translationMap && translationMap.get(args[0]);
         if (!str) {
             return "";
         }
-        const strArgCount = str.split("%s").length - 1;
-        const options = args[strArgCount];
 
-        if (options && options.returnValue === "array") {
-            const returnValue = [];
-            str.split("%s").forEach((strPart, index) => {
-                returnValue.push(strPart);
-                if (args[index] !== options) {
-                    returnValue.push(args[index]);
-                }
-            });
-            return returnValue;
-        } else {
-            let index = 0;
-            return str.replace(/%s/g, () => (args[index++] || ""));
+        for (let index = 1; index < args.length; index += 1) {
+            str = str.replace("%" + index, args[index]);
         }
+
+        return str;
     }
 
     evaluate(strings, ...values) {
@@ -62,7 +49,7 @@ UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement 
             // This means strings is a string with the sprintf pattern
         } else {
             // Using template literals https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Template_literals
-            if (arguments.length != strings.length) {
+            if (arguments.length !== strings.length) {
                 console.error("Invalid arguments to evaluate ", Array.from(arguments));
             }
             let result = strings[0];
@@ -77,7 +64,7 @@ UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement 
     getValue() {
         let value = this.value;
         if (Array.isArray(this.value)) {
-            value = (translationMap && translationMap.get(...value)) || this.evaluate(...value);
+            value = this.evaluate(...value);
         } else {
             // TODO: if translationMap.get() returns "", keep, skip only if returning null
             value = (translationMap && translationMap.get(value)) || value;
