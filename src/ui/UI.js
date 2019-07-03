@@ -45,6 +45,5 @@ export * from "./table/CollapsibleTable";
 export * from "./table/SortableTable";
 
 export * from "./DateTimePicker";
-export * from "./CodeEditor";
 
 export * from "./style/Theme";
