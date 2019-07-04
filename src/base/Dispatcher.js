@@ -171,20 +171,27 @@ class Dispatchable {
 
 // Creates a method that calls the method methodName on obj, and adds the result as a cleanup task
 function getAttachCleanupJobMethod(methodName) {
+    let addMethodName = "add" + methodName;
+    let removeMethodName = "remove" + methodName;
     return function (obj) {
         let args = Array.prototype.slice.call(arguments, 1);
-        let handler = obj[methodName](...args);
+        let handler = obj[addMethodName](...args);
+        if (!handler) {
+            handler = () => {
+                obj[removeMethodName](...args);
+            }
+        }
         this.addCleanupJob(handler);
         return handler;
     }
 }
 
 // Not sure if these should be added here, but meh
-Dispatchable.prototype.attachListener       = getAttachCleanupJobMethod("addListener");
-Dispatchable.prototype.attachEventListener  = getAttachCleanupJobMethod("addEventListener");
-Dispatchable.prototype.attachCreateListener = getAttachCleanupJobMethod("addCreateListener");
-Dispatchable.prototype.attachUpdateListener = getAttachCleanupJobMethod("addUpdateListener");
-Dispatchable.prototype.attachDeleteListener = getAttachCleanupJobMethod("addDeleteListener");
+Dispatchable.prototype.attachListener       = getAttachCleanupJobMethod("Listener");
+Dispatchable.prototype.attachEventListener  = getAttachCleanupJobMethod("EventListener");
+Dispatchable.prototype.attachCreateListener = getAttachCleanupJobMethod("CreateListener");
+Dispatchable.prototype.attachUpdateListener = getAttachCleanupJobMethod("UpdateListener");
+Dispatchable.prototype.attachDeleteListener = getAttachCleanupJobMethod("DeleteListener");
 
 Dispatcher.Global = new Dispatchable();
 
