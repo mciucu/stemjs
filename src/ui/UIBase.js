@@ -313,6 +313,12 @@ class UIElement extends BaseUIElement {
     }
 
     setStyle(key, value) {
+        if (typeof key === "object") {
+            for (const [styleKey, styleValue] of Array.from(Object.entries(key))) {
+                this.setStyle(styleKey, styleValue);
+            }
+            return;
+        }
         this.getOptionsAsNodeAttributes().setStyle(key, value, this.node);
     }
 
