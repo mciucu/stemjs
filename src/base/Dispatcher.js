@@ -90,6 +90,7 @@ class Dispatchable {
         return this[DispatchersSymbol] || (this[DispatchersSymbol] = new Map());
     }
 
+    // TODO: change to (key, addIfMissing = false)
     getDispatcher(name) {
         return this.dispatchers.get(name);
     }
