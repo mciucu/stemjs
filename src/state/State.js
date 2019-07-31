@@ -108,6 +108,7 @@ let GlobalState = new State();
 
 // When creating a store without an explicit state, this value should be assumes
 // Change it to null for instance of you don't want stores to be added to any state by default
+// TODO: DefaultState and GlobalState should probably be merged together, and maybe not always exported to self
 let DefaultState = GlobalState;
 
 self.GlobalState = GlobalState;
