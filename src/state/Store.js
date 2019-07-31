@@ -3,6 +3,7 @@ import {DefaultState} from "./State";
 
 // The store information is kept in a symbol, to not interfere with serialization/deserialization
 export const StoreSymbol = Symbol("Store");
+export const EventDispatcherSymbol = Symbol("EventDispatcher");
 
 class StoreObject extends Dispatchable {
     constructor(obj, event, store) {
@@ -46,19 +47,20 @@ class StoreObject extends Dispatchable {
             return new CleanupJobs(handlers);
         }
         // Ensure the private event dispatcher exists
-        if (!this._eventDispatcher) {
-            this._eventDispatcher = new Dispatchable();
+        if (!this[EventDispatcherSymbol]) {
+            this[EventDispatcherSymbol] = new Dispatchable();
             this.addUpdateListener((event) => {
-                this._eventDispatcher.dispatch(event.type, event, this);
+                this[EventDispatcherSymbol].dispatch(event.type, event, this);
             });
         }
-        return this._eventDispatcher.addListener(eventType, callback);
+        return this[EventDispatcherSymbol].addListener(eventType, callback);
     }
 
     getStreamName() {
         throw "getStreamName not implemented";
     }
 
+    // TODO: this should not be here by default
     registerToStream() {
         this.getStore().getState().registerStream(this.getStreamName());
     }
@@ -217,17 +219,19 @@ class GenericObjectStore extends BaseStore {
     }
 
     // Create a fake creation event, to insert the raw object
-    fakeCreate(obj, eventType="fakeCreate") {
+    fakeCreate(obj, eventType="fakeCreate", dispatchEvent=true) {
         if (!obj) {
             return;
         }
-        var event = {
+
+        let event = {
             objectType: this.objectType,
             objectId: obj.id,
             type: eventType,
             data: obj,
         };
-        return this.applyCreateEvent(event);
+
+        return this.applyCreateEvent(event, dispatchEvent);
     }
 
     // Add a listener on all object creation events
@@ -258,6 +262,10 @@ class GenericObjectStore extends BaseStore {
     addDeleteListener(callback) {
         return this.addListener("delete", callback);
     }
+
+    addChangeListener(callback) {
+        return this.addListener(["create", "update", "delete"], callback);
+    }
 }
 
 class SingletonStore extends BaseStore {
@@ -280,15 +288,29 @@ class SingletonStore extends BaseStore {
 
     importState(obj) {
         Object.assign(this, obj);
-        this.dispatch("update", event, this);
+        this.dispatch("update", obj, this);
     }
 
     addUpdateListener(callback) {
         return this.addListener("update", callback);
     }
+
+    // Use the same logic as StoreObject when listening to events
+    addEventListener = StoreObject.prototype.addEventListener.bind(this);
 }
 
-// Use the same logic as StoreObject when listening to events
-SingletonStore.prototype.addEventListener = StoreObject.prototype.addEventListener;
+const ObjectStore = (objectType, ObjectWrapper, options={}) => class ObjectStore extends GenericObjectStore {
+    constructor() {
+        super(objectType, ObjectWrapper, options);
+    }
 
-export {StoreObject, BaseStore, GenericObjectStore, SingletonStore};
+    static getObjectType() {
+        return objectType;
+    }
+
+    static getInstance(state=DefaultState) {
+        return state.getStore(this.getObjectType());
+    }
+};
+
+export {StoreObject, BaseStore, GenericObjectStore, SingletonStore, ObjectStore};

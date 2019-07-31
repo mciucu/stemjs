@@ -187,7 +187,7 @@ function getAttachCleanupJobMethod(methodName) {
     }
 }
 
-// Not sure if these should be added here, but meh
+// Not sure if these should be added like this, but meh
 Dispatchable.prototype.attachListener       = getAttachCleanupJobMethod("Listener");
 Dispatchable.prototype.attachEventListener  = getAttachCleanupJobMethod("EventListener");
 Dispatchable.prototype.attachCreateListener = getAttachCleanupJobMethod("CreateListener");
