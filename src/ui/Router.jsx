@@ -5,7 +5,7 @@ import {PageTitleManager} from "../base/PageTitleManager";
 import {unwrapArray} from "../base/Utils";
 
 export class Router extends Switcher {
-    static parseURL(path=location.pathname) {
+    static parseURL(path = location.pathname) {
         if (!Array.isArray(path)) {
             path = path.split("/");
         }
@@ -14,13 +14,17 @@ export class Router extends Switcher {
 
     static joinURLParts(urlParts) {
         if (urlParts.length) {
-            return "/" + urlParts.join("/") + "/";
-        } else {
-            return "/";
+            return "/" + urlParts.join("/");
         }
+        return "/";
     }
 
-    static changeURL(url, replaceHistory=false) {
+    static joinQueryParams(queryParams = {}) {
+        return Object.keys(queryParams)
+            .map((param) => `${encodeURIComponent(param)}=${encodeURIComponent(queryParams[param])}`).join("&");
+    }
+
+    static changeURL(url, options = {queryParams: {}, state: {}, replaceHistory: false}) {
         if (Array.isArray(url)) {
             url = this.joinURLParts(url);
         }
@@ -28,8 +32,14 @@ export class Router extends Switcher {
         if (url === window.location.pathname) {
             return;
         }
-        const historyArgs = [{}, PageTitleManager.getTitle(), url];
-        if (replaceHistory) {
+
+        if (options.queryParams && Object.keys(options.queryParams).length > 0) {
+            const queryString = this.joinQueryParams(options.queryParams);
+            url = `${url}?${queryString}`;
+        }
+
+        const historyArgs = [options.state, PageTitleManager.getTitle(), url];
+        if (options.replaceHistory) {
             window.history.replaceState(...historyArgs);
         } else {
             window.history.pushState(...historyArgs);
@@ -68,27 +78,36 @@ export class Router extends Switcher {
     }
 
     getPageToRender(urlParts) {
-        return this.getRoutes().getPage(urlParts) || this.getPageNotFound();
+        const page = this.getRoutes().getPage(urlParts);
+
+        return Promise.resolve(page).then(pageFound => {
+            if (pageFound === false) {
+                return this.getPageNotFound();
+            }
+            return pageFound;
+        });
     }
 
     setURL(urlParts) {
         urlParts = unwrapArray(urlParts);
 
-        const page = this.getPageToRender(urlParts);
+        this.getPageToRender(urlParts).then(page => {
+            if (!page) return;
 
-        const activePage = this.getActive();
+            const activePage = this.getActive();
 
-        if (activePage !== page) {
-            activePage && activePage.dispatch("urlExit");
-            this.setActive(page);
-            page.dispatch("urlEnter");
-        }
+            if (activePage !== page) {
+                activePage && activePage.dispatch("urlExit");
+                this.setActive(page);
+                page.dispatch("urlEnter");
+            }
 
-        if (this === this.constructor.Global) {
-            PageTitleManager.setTitle(page.pageTitle);
-        }
+            if (page && page.pageTitle && this === this.constructor.Global) {
+                PageTitleManager.setTitle(page.pageTitle);
+            }
 
-        this.dispatch("change", urlParts, page, activePage);
+            this.dispatch("change", urlParts, page, activePage);
+        });
     }
 
     addChangeListener(callback) {
@@ -106,7 +125,7 @@ export class Route {
     static ARG_KEY = "%s";
     cachedPages = new Map();
 
-    constructor(expr, pageGenerator, subroutes=[], options={}) {
+    constructor(expr, pageGenerator, subroutes = [], options = {}) {
         this.expr = (expr instanceof Array) ? expr : [expr];
         this.pageGenerator = pageGenerator;
         this.subroutes = unwrapArray(subroutes);
@@ -148,6 +167,10 @@ export class Route {
         return this.options.title;
     }
 
+    getPageGuard() {
+        return this.options.beforeEnter;
+    }
+
     generatePage(...argsArray) {
         if (!this.pageGenerator) {
             return null;
@@ -174,28 +197,70 @@ export class Route {
         return urlParts.length === 0;
     }
 
+    executeGuard() {
+        return new Promise((resolve, reject) => {
+            const pageGuard = this.getPageGuard();
+
+            if (!pageGuard) {
+                resolve();
+                return;
+            }
+
+            Promise.resolve(pageGuard(this.getSnapshot()))
+            .then((result = true) => {
+                if (result === true) {
+                    resolve();
+                } else {
+                    reject();
+                }})
+            .catch(() => reject());
+        });
+    }
+
     getPage(urlParts, router, ...argsArray) {
         if (this.matchesOwnNode(urlParts)) {
-            return this.generatePage(...argsArray);
+            const page = this.generatePage(...argsArray);
+
+            if (!page) {
+                return false;
+            }
+
+            return this.executeGuard()
+                .then(() => page)
+                .catch(() => {
+                    return null;
+                });
         }
+
         for (const subroute of this.subroutes) {
             const match = subroute.matches(urlParts);
-            if (match) {
-                if (match.args.length) {
-                    argsArray.push(match.args);
-                }
-                let page = subroute.getPage(match.urlParts, router, ...argsArray);
-                if (page && !page.pageTitle) {
-                    page.pageTitle = this.getPageTitle();
-                }
-                return page;
+            if (!match) {
+                continue;
             }
+            if (match.args.length) {
+                argsArray.push(match.args);
+            }
+            return this.executeGuard()
+                .then(() => subroute.getPage(match.urlParts, router, ...argsArray))
+                .catch(() => {
+                    return null;
+                });
+        }
+        return false;
+    }
+
+    getSnapshot() {
+        return {
+            expr: this.expr,
+            url: window.location.href,
+            path: `${window.location.pathname}${window.location.search}`,
+            params: Object.fromEntries(new URLSearchParams(window.location.search))
         }
     }
 }
 
 export class TerminalRoute extends Route {
-    constructor(expr, pageGenerator, options={}) {
+    constructor(expr, pageGenerator, options = {}) {
         super(expr, pageGenerator, [], options);
     }
 
@@ -204,10 +269,13 @@ export class TerminalRoute extends Route {
     }
 
     getPage(urlParts, router) {
-        const page = super.getPage(...arguments);
-        setTimeout(() => {
-            page.setURL(urlParts);
+        return Promise.resolve(super.getPage(...arguments)).then(page => {
+            setTimeout(() => {
+                if (page) {
+                    page.setURL(urlParts);
+                }
+            });
+            return page;
         });
-        return page;
     }
 }
