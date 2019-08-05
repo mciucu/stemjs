@@ -78,36 +78,32 @@ export class Router extends Switcher {
     }
 
     getPageToRender(urlParts) {
-        const page = this.getRoutes().getPage(urlParts);
-
-        return Promise.resolve(page).then(pageFound => {
-            if (pageFound === false) {
-                return this.getPageNotFound();
-            }
-            return pageFound;
-        });
+        const pageFound = this.getRoutes().getPage(urlParts);
+        if (pageFound === false) {
+            return this.getPageNotFound();
+        }
+        return pageFound;
     }
 
     setURL(urlParts) {
         urlParts = unwrapArray(urlParts);
+        const page = this.getPageToRender(urlParts);
 
-        this.getPageToRender(urlParts).then(page => {
-            if (!page) return;
+        if (!page) return;
 
-            const activePage = this.getActive();
+        const activePage = this.getActive();
 
-            if (activePage !== page) {
-                activePage && activePage.dispatch("urlExit");
-                this.setActive(page);
-                page.dispatch("urlEnter");
-            }
+        if (activePage !== page) {
+            activePage && activePage.dispatch("urlExit");
+            this.setActive(page);
+            page.dispatch("urlEnter");
+        }
 
-            if (page && page.pageTitle) {
-                PageTitleManager.setTitle(page.pageTitle);
-            }
+        if (page && page.pageTitle) {
+            PageTitleManager.setTitle(page.pageTitle);
+        }
 
-            this.dispatch("change", urlParts, page, activePage);
-        });
+        this.dispatch("change", urlParts, page, activePage);
     }
 
     addChangeListener(callback) {
@@ -198,38 +194,29 @@ export class Route {
     }
 
     executeGuard() {
-        return new Promise((resolve, reject) => {
             const pageGuard = this.getPageGuard();
 
             if (!pageGuard) {
-                resolve();
-                return;
+                return null;
             }
 
-            Promise.resolve(pageGuard(this.getSnapshot()))
-            .then((result = true) => {
-                if (result === true) {
-                    resolve();
-                } else {
-                    reject();
-                }})
-            .catch(() => reject());
-        });
+            return pageGuard(this.getSnapshot());
     }
 
     getPage(urlParts, router, ...argsArray) {
         if (this.matchesOwnNode(urlParts)) {
-            const page = this.generatePage(...argsArray);
+            const guardResult = this.executeGuard();
 
-            if (!page) {
-                return false;
+            if (!guardResult) {
+                return this.generatePage(...argsArray);
             }
 
-            return this.executeGuard()
-                .then(() => page)
-                .catch(() => {
-                    return null;
-                });
+            if (Array.isArray(guardResult)) {
+                Router.changeURL(...guardResult);
+                return;
+            }
+
+            return false;
         }
 
         for (const subroute of this.subroutes) {
@@ -240,11 +227,7 @@ export class Route {
             if (match.args.length) {
                 argsArray.push(match.args);
             }
-            return this.executeGuard()
-                .then(() => subroute.getPage(match.urlParts, router, ...argsArray))
-                .catch(() => {
-                    return null;
-                });
+            return subroute.getPage(match.urlParts, router, ...argsArray);
         }
         return false;
     }
@@ -269,13 +252,12 @@ export class TerminalRoute extends Route {
     }
 
     getPage(urlParts, router) {
-        return Promise.resolve(super.getPage(...arguments)).then(page => {
-            setTimeout(() => {
-                if (page) {
-                    page.setURL(urlParts);
-                }
-            });
-            return page;
+        const page = super.getPage(...arguments);
+        setTimeout(() => {
+            if (page) {
+                page.setURL(urlParts);
+            }
         });
+        return page;
     }
 }
