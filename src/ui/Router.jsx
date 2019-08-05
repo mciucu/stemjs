@@ -102,7 +102,7 @@ export class Router extends Switcher {
                 page.dispatch("urlEnter");
             }
 
-            if (page && page.pageTitle && this === this.constructor.Global) {
+            if (page && page.pageTitle) {
                 PageTitleManager.setTitle(page.pageTitle);
             }
 
