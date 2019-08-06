@@ -2,7 +2,7 @@ import {UI} from "./UIBase";
 import {Switcher} from "./Switcher";
 import {Dispatcher} from "../base/Dispatcher";
 import {PageTitleManager} from "../base/PageTitleManager";
-import {unwrapArray} from "../base/Utils";
+import {unwrapArray, isString} from "../base/Utils";
 
 export class Router extends Switcher {
     static parseURL(path = location.pathname) {
@@ -12,23 +12,25 @@ export class Router extends Switcher {
         return path.filter(str => str != "");
     }
 
-    static joinURLParts(urlParts) {
-        if (urlParts.length) {
-            return "/" + urlParts.join("/");
-        }
-        return "/";
-    }
-
     static joinQueryParams(queryParams = {}) {
         return Object.keys(queryParams)
             .map((param) => `${encodeURIComponent(param)}=${encodeURIComponent(queryParams[param])}`).join("&");
     }
 
-    static changeURL(url, options = {queryParams: {}, state: {}, replaceHistory: false}) {
+    static formatURL(url) {
         if (Array.isArray(url)) {
-            url = this.joinURLParts(url);
+            url = url.length ? ("/" + url.join("/")) : "/";
         }
 
+        if (isString(url) && url[0] !== "/") {
+            url = "/" + url;
+        }
+
+        return url;
+    }
+
+    static changeURL(url, options = {queryParams: {}, state: {}, replaceHistory: false}) {
+        url = this.formatURL(url);
         if (url === window.location.pathname) {
             return;
         }
@@ -38,6 +40,7 @@ export class Router extends Switcher {
             url = `${url}?${queryString}`;
         }
 
+        options.state = options.state || {};
         const historyArgs = [options.state, PageTitleManager.getTitle(), url];
         if (options.replaceHistory) {
             window.history.replaceState(...historyArgs);
@@ -78,11 +81,17 @@ export class Router extends Switcher {
     }
 
     getPageToRender(urlParts) {
-        const pageFound = this.getRoutes().getPage(urlParts);
-        if (pageFound === false) {
+        const result = this.getRoutes().getPage(urlParts);
+        if (result === false) {
             return this.getPageNotFound();
         }
-        return pageFound;
+
+        if (Array.isArray(result)) {
+            this.constructor.changeURL(...result);
+            return null;
+        }
+
+        return result;
     }
 
     setURL(urlParts) {
@@ -167,14 +176,13 @@ export class Route {
         return this.options.beforeEnter;
     }
 
-    generatePage(...argsArray) {
-        if (!this.pageGenerator) {
+    generatePage(pageGenerator, ...argsArray) {
+        if (!pageGenerator) {
             return null;
         }
 
         const serializedArgs = argsArray.toString();
         if (!this.cachedPages.has(serializedArgs)) {
-            const pageGenerator = this.pageGenerator;
             const args = unwrapArray(argsArray);
             const generatorArgs = {args, argsArray};
             const page = (pageGenerator.prototype instanceof UI.Element) ? new pageGenerator(generatorArgs) : pageGenerator(generatorArgs);
@@ -194,42 +202,48 @@ export class Route {
     }
 
     executeGuard() {
-            const pageGuard = this.getPageGuard();
+        const pageGuard = this.getPageGuard();
+        if (!pageGuard) {
+            return null;
+        }
 
-            if (!pageGuard) {
-                return null;
-            }
-
-            return pageGuard(this.getSnapshot());
+        return pageGuard(this.getSnapshot());
     }
 
     getPage(urlParts, router, ...argsArray) {
-        if (this.matchesOwnNode(urlParts)) {
-            const guardResult = this.executeGuard();
+        let match;
+        let matchingRoute = this.matchesOwnNode(urlParts) ? this : null;
 
-            if (!guardResult) {
-                return this.generatePage(...argsArray);
+        if (!matchingRoute) {
+            for (const subroute of this.subroutes) {
+                match = subroute.matches(urlParts);
+                if (!match) {
+                    continue;
+                }
+                if (match.args.length) {
+                    argsArray.push(match.args);
+                }
+                matchingRoute = subroute;
+                break;
             }
+        }
 
-            if (Array.isArray(guardResult)) {
-                Router.changeURL(...guardResult);
-                return;
-            }
-
+        if (!matchingRoute) {
             return false;
         }
 
-        for (const subroute of this.subroutes) {
-            const match = subroute.matches(urlParts);
-            if (!match) {
-                continue;
-            }
-            if (match.args.length) {
-                argsArray.push(match.args);
-            }
-            return subroute.getPage(match.urlParts, router, ...argsArray);
+        const guardResult = this.executeGuard();
+        if (!guardResult) {
+            return matchingRoute === this ?
+                this.generatePage(this.pageGenerator, ...argsArray) :
+                matchingRoute.getPage(match.urlParts, router, ...argsArray);
         }
-        return false;
+
+        if (Array.isArray(guardResult)) {
+            return guardResult;
+        }
+
+        return this.generatePage(guardResult, ...argsArray);
     }
 
     getSnapshot() {
