@@ -102,6 +102,12 @@ class State extends Dispatchable {
             this.importStateFromTempMap(objectType, stateMap);
         }
     }
+
+    clear() {
+        for (let store of this.stores.values()) {
+            store.clear && store.clear();
+        }
+    }
 }
 
 let GlobalState = new State();
