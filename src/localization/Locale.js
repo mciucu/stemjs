@@ -10,6 +10,7 @@ import {Dispatchable} from "../base/Dispatcher";
 */
 class Locale extends Dispatchable {
     constructor(options = {}) {
+        super();
         Object.assign(this, options);
     }
 
