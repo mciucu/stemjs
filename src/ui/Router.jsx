@@ -267,8 +267,9 @@ export class TerminalRoute extends Route {
 
     getPage(urlParts, router) {
         const page = super.getPage(...arguments);
+        // TODO: why is this in a setTimeout?
         setTimeout(() => {
-            if (page) {
+            if (page && page.setURL) {
                 page.setURL(urlParts);
             }
         });
