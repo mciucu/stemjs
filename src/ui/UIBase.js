@@ -3,7 +3,7 @@ import {Dispatchable} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
 import {applyDebugFlags} from "./Debug";
 
-var UI = {
+const UI = {
     renderingStack: [], //keeps track of objects that are redrawing, to know where to assign refs automatically
 };
 
@@ -614,6 +614,7 @@ UI.createElement = function (tag, options, ...children) {
 UIElement.domAttributesMap = NodeAttributes.defaultAttributesMap;
 
 // Explicitly know that extraNodeAttributes doesn't do anything, but have it to be callable when doing inheritance
+// This is an optimization to having it in the class, to be able to quickly know when to skip calling it.
 UIElement.prototype.extraNodeAttributes = NOOP_FUNCTION;
 
 UI.Element = UIElement;
