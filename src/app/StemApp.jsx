@@ -1,4 +1,5 @@
-import {UI, Link} from "../ui/UI";
+import {UI} from "../ui/UI";
+import {Link} from "../ui/UIPrimitives";
 import {Router} from "../ui/Router";
 import {GlobalContainer} from "../ui/global-container/GlobalContainer";
 import {isLocalUrl, trimLocalUrl} from "../base/Utils";
