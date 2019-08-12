@@ -4,6 +4,7 @@ export class FormData extends MultiMap {
     static polyfill = true;
 
     constructor(obj) {
+        super();
         throw Error("FormData polyfill is not yet implemented");
     }
 }
