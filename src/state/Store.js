@@ -111,7 +111,7 @@ class GenericObjectStore extends BaseStore {
         if (id == null) {
             return null;
         }
-        return this.objects.get(id.toString());
+        return this.objects.get(String(id));
     }
 
     clear() {
@@ -120,7 +120,7 @@ class GenericObjectStore extends BaseStore {
     }
 
     getObjectIdForEvent(event) {
-        return event.objectId || event.data.id;
+        return String(event.objectId || event.data.id);
     }
 
     getObjectForEvent(event) {
