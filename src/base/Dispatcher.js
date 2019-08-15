@@ -140,6 +140,13 @@ class Dispatchable {
         }
     }
 
+    removeAllListeners(name) {
+        let dispatcher = this.getDispatcher(name);
+        if (dispatcher) {
+            dispatcher.removeAllListeners();
+        }
+    }
+
     cleanup() {
         this.runCleanupJobs();
         delete this[DispatchersSymbol];
