@@ -111,7 +111,7 @@ class GenericObjectStore extends BaseStore {
         if (id == null) {
             return null;
         }
-        return this.objects.get(id);
+        return this.objects.get(id.toString());
     }
 
     clear() {
