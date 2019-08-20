@@ -5,7 +5,20 @@ import {PageTitleManager} from "../base/PageTitleManager";
 import {unwrapArray, isString} from "../base/Utils";
 
 export class Router extends Switcher {
-    static parseURL(path = location.pathname) {
+    static localHistory = []; // If we want the router to not alter the window history, use this instead.
+    static useLocalHistory = false;
+
+    static getCurrentPath() {
+        let path = "";
+        if (this.useLocalHistory && this.localHistory.length) {
+            path = this.localHistory[this.localHistory.length - 1];
+        } else {
+            path = location.pathname;
+        }
+        return path;
+    }
+
+    static parseURL(path=location.pathname) {
         if (!Array.isArray(path)) {
             path = path.split("/");
         }
@@ -31,7 +44,7 @@ export class Router extends Switcher {
 
     static changeURL(url, options = {queryParams: {}, state: {}, replaceHistory: false}) {
         url = this.formatURL(url);
-        if (url === window.location.pathname) {
+        if (url === this.getCurrentPath()) {
             return;
         }
 
@@ -42,24 +55,44 @@ export class Router extends Switcher {
 
         options.state = options.state || {};
         const historyArgs = [options.state, PageTitleManager.getTitle(), url];
-        if (options.replaceHistory) {
-            window.history.replaceState(...historyArgs);
+        if (this.useLocalHistory) {
+            if (options.replaceHistory) {
+                this.localHistory.pop();
+            }
+            this.localHistory.push(url);
         } else {
-            window.history.pushState(...historyArgs);
+            if (options.replaceHistory) {
+                window.history.replaceState(...historyArgs);
+            } else {
+                window.history.pushState(...historyArgs);
+            }
         }
 
         this.updateURL();
     }
 
+    static onPopState() {
+        this.updateURL();
+        Dispatcher.Global.dispatch("externalURLChange");
+    }
+
+    static back() {
+        if (this.useLocalHistory) {
+            this.localHistory.pop();
+            this.onPopState();
+        } else {
+            window.history.back();
+        }
+    }
+
     static updateURL() {
-        this.Global.setURL(this.parseURL());
+        this.Global.setURL(this.parseURL(this.getCurrentPath()));
     }
 
     static setGlobalRouter(router) {
         this.Global = router;
         window.onpopstate = () => {
-            this.updateURL();
-            Dispatcher.Global.dispatch("externalURLChange");
+            this.onPopState();
         };
 
         this.updateURL();
