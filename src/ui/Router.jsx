@@ -44,9 +44,6 @@ export class Router extends Switcher {
 
     static changeURL(url, options = {queryParams: {}, state: {}, replaceHistory: false}) {
         url = this.formatURL(url);
-        if (url === this.getCurrentPath()) {
-            return;
-        }
 
         if (options.queryParams && Object.keys(options.queryParams).length > 0) {
             const queryString = this.joinQueryParams(options.queryParams);
@@ -139,6 +136,8 @@ export class Router extends Switcher {
             activePage && activePage.dispatch("urlExit");
             this.setActive(page);
             page.dispatch("urlEnter");
+        } else {
+            page.dispatch("urlReload");
         }
 
         if (page && page.pageTitle) {
