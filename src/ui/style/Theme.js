@@ -23,14 +23,18 @@ function getInstanceForObject(obj) {
 }
 
 class Theme extends Dispatchable {
+    static PropsSymbol = Symbol("Props");
+
+    classSet = new Set();
+    styleSheetSet = new Set();
+    properties = {};
+    updateThrottler = new CallThrottler({throttle: 50});
+    updateThrottled = this.updateThrottler.wrap(() => this.updateStyleSheets());
+
     constructor(name="") {
         super();
         this.styleSheetSymbol = Symbol("Theme" + name);
-        this.classSet = new Set();
-        this.styleSheetSet = new Set();
-        this.properties = {};
-        this.updateThrottler = new CallThrottler({throttle: 50});
-        this.updateThrottled = this.updateThrottler.wrap(() => this.updateStyleSheets());
+
         window.addEventListener("resize", this.updateThrottled);
     }
 
@@ -123,8 +127,26 @@ class Theme extends Dispatchable {
         return this.Global.getProperties();
     }
 
+    get props() {
+        let props = this[this.constructor.PropsSymbol];
+        if (!props) {
+            props = this[this.constructor.PropsSymbol] = new Proxy(this.properties, {
+                get: (properties, key, receiver) => {
+                    // Can default to another theme here.
+                    return properties[key];
+                },
+                set: (properties, key, value) => {
+                    this.setProperty(key, value);
+                    this.updateThrottled();
+                    return value;
+                }
+            });
+        }
+        return props;
+    }
+
     static get props() {
-        return this.getProperties();
+        return this.Global.props;
     }
 }
 
