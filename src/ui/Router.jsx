@@ -271,7 +271,7 @@ export class Route {
                 matchingRoute.getPage(match.urlParts, router, ...argsArray);
         }
 
-        if (Array.isArray(guardResult)) {
+        if (ArraFy.isArray(guardResult)) {
             return guardResult;
         }
 
@@ -283,7 +283,7 @@ export class Route {
             expr: this.expr,
             url: window.location.href,
             path: `${window.location.pathname}${window.location.search}`,
-            params: Object.fromEntries(new URLSearchParams(window.location.search))
+            params: new URLSearchParams(window.location.search)
         }
     }
 }
