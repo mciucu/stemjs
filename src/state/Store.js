@@ -128,13 +128,16 @@ class GenericObjectStore extends BaseStore {
         return this.get(objectId);
     }
 
-    // TODO: should this default to iterable?
     all(asIterable) {
         let values = this.objects.values();
         if (!asIterable) {
             values = Array.from(values);
         }
         return values;
+    }
+
+    find(callback) {
+        return this.all(true).find(callback);
     }
 
     createObject(event) {
