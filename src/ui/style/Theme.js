@@ -100,7 +100,6 @@ class Theme extends Dispatchable {
             if (styleSheet.update) {
                 styleSheet.update();
             }
-
         }
     }
 
@@ -122,6 +121,10 @@ class Theme extends Dispatchable {
 
     static getProperties() {
         return this.Global.getProperties();
+    }
+
+    static get props() {
+        return this.getProperties();
     }
 }
 
