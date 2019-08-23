@@ -271,7 +271,7 @@ export class Route {
                 matchingRoute.getPage(match.urlParts, router, ...argsArray);
         }
 
-        if (ArraFy.isArray(guardResult)) {
+        if (Array.isArray(guardResult)) {
             return guardResult;
         }
 
