@@ -69,9 +69,14 @@ class StyleSheet extends Dispatchable {
         return (theme && theme.getProperty(key, defaultValue)) || defaultValue;
     }
 
+    // Deprecated, use themeProps
     get themeProperties() {
         const theme = this.getTheme();
         return (theme && theme.getProperties()) || {};
+    }
+
+    get themeProps() {
+        return this.themeProperties;
     }
 
     ensureFirstUpdate() {
