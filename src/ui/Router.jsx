@@ -69,7 +69,7 @@ export class Router extends Switcher {
     }
 
     static onPopState() {
-        this.updateURL();
+        this.changeURL(this.parseURL(this.getCurrentPath()), {replaceHistory: true});
         Dispatcher.Global.dispatch("externalURLChange");
     }
 
