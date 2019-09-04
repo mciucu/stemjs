@@ -200,6 +200,7 @@ Dispatchable.prototype.attachEventListener  = getAttachCleanupJobMethod("EventLi
 Dispatchable.prototype.attachCreateListener = getAttachCleanupJobMethod("CreateListener");
 Dispatchable.prototype.attachUpdateListener = getAttachCleanupJobMethod("UpdateListener");
 Dispatchable.prototype.attachDeleteListener = getAttachCleanupJobMethod("DeleteListener");
+Dispatchable.prototype.attachChangeListener = getAttachCleanupJobMethod("ChangeListener");
 
 Dispatcher.Global = new Dispatchable();
 
