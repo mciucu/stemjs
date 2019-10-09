@@ -60,6 +60,8 @@ Input.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
     ["readonly"],
     ["required"],
     ["value"],
+    ["pattern"],
+    ["type"],
 ]);
 
 
