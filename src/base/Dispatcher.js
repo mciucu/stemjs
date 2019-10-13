@@ -90,9 +90,13 @@ class Dispatchable {
         return this[DispatchersSymbol] || (this[DispatchersSymbol] = new Map());
     }
 
-    // TODO: change to (key, addIfMissing = false)
-    getDispatcher(name) {
-        return this.dispatchers.get(name);
+    getDispatcher(name, addIfMissing) {
+        let dispatcher = this.dispatchers.get(name);
+        if (!dispatcher && addIfMissing) {
+            dispatcher = new Dispatcher();
+            this.dispatchers.set(name, dispatcher);
+        }
+        return dispatcher;
     }
 
     dispatch(name, payload) {
@@ -112,12 +116,7 @@ class Dispatchable {
         if (Array.isArray(name)) {
             return new CleanupJobs(name.map(x => this.addListener(x, callback)));
         }
-        let dispatcher = this.getDispatcher(name);
-        if (!dispatcher) {
-            dispatcher = new Dispatcher();
-            this.dispatchers.set(name, dispatcher);
-        }
-        return dispatcher.addListener(callback);
+        this.getDispatcher(name, true).addListener(callback);
     }
 
     // TODO: remove some duplicated logic with method above
@@ -125,12 +124,7 @@ class Dispatchable {
         if (Array.isArray(name)) {
             return new CleanupJobs(name.map(x => this.addListenerOnce(x, callback)));
         }
-        let dispatcher = this.getDispatcher(name);
-        if (!dispatcher) {
-            dispatcher = new Dispatcher();
-            this.dispatchers.set(name, dispatcher);
-        }
-        return dispatcher.addListenerOnce(callback);
+        this.getDispatcher(name, true).addListenerOnce(callback);
     }
 
     removeListener(name, callback) {
