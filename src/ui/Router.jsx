@@ -218,7 +218,7 @@ export class Route {
             const args = unwrapArray(argsArray);
             const generatorArgs = {args, argsArray};
             const page = (pageGenerator.prototype instanceof UI.Element) ? new pageGenerator(generatorArgs) : pageGenerator(generatorArgs);
-            if (!page.pageTitle) {
+            if (page && !page.pageTitle) {
                 const myPageTitle = this.getPageTitle();
                 if (myPageTitle) {
                     page.pageTitle = this.getPageTitle();
