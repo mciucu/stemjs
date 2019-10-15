@@ -116,7 +116,7 @@ class Dispatchable {
         if (Array.isArray(name)) {
             return new CleanupJobs(name.map(x => this.addListener(x, callback)));
         }
-        this.getDispatcher(name, true).addListener(callback);
+        return this.getDispatcher(name, true).addListener(callback);
     }
 
     // TODO: remove some duplicated logic with method above
@@ -124,7 +124,7 @@ class Dispatchable {
         if (Array.isArray(name)) {
             return new CleanupJobs(name.map(x => this.addListenerOnce(x, callback)));
         }
-        this.getDispatcher(name, true).addListenerOnce(callback);
+        return this.getDispatcher(name, true).addListenerOnce(callback);
     }
 
     removeListener(name, callback) {
