@@ -236,6 +236,10 @@ export function getCookie(name) {
     return null;
 }
 
+export function setCookie(name, value, maxAge=60*60*4 /* 4 hours */) {
+    document.cookie = `${name}=${encodeURIComponent(JSON.stringify(value))};path=/;max-age=${maxAge}`;
+}
+
 export function uniqueId(obj) {
     if (!uniqueId.objectWeakMap) {
         uniqueId.objectWeakMap = new WeakMap();
