@@ -73,7 +73,7 @@ Theme.setProperties({
     FLAT_TAB_AREA_COLOR_BACKGROUND: "#f3f3f3",
     FLAT_TAB_AREA_LINE_HEIGHT: 30,
     FLAT_TAB_AREA_PADDING_SIDES: 10,
-});
+}, false);
 
 export class BasicLevelSizeStyleSheet extends StyleSheet {
     Level(level) {
