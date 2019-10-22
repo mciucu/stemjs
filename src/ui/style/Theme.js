@@ -100,11 +100,13 @@ class Theme extends Dispatchable {
     }
 
     updateStyleSheets() {
+        this.dispatch("beforeUpdateStyleSheets");
         for (const styleSheet of this.getAllStyleSheets()) {
             if (styleSheet.update) {
                 styleSheet.update();
             }
         }
+        this.dispatch("afterUpdateStyleSheets");
     }
 
     static register(cls, styleSheet) {
