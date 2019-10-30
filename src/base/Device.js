@@ -23,6 +23,10 @@ class Device {
         return this._isMobileDevice;
     }
 
+    static isLandscape() {
+        return window.innerWidth > window.innerHeight;
+    }
+
     static getEventTouchIdentifier(event) {
         return Math.min(...[...event.touches].map(touch => touch.identifier));
     }
