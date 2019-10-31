@@ -176,7 +176,9 @@ export class Route {
     clearCache() {
         this.cachedPages.clear();
         for (const subroute of this.subroutes) {
-            subroute.clearCache();
+            if (subroute.clearCache) {
+                subroute.clearCache();
+            }
         }
     }
 
