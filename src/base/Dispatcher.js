@@ -56,6 +56,18 @@ class Dispatcher {
         return handler;
     }
 
+    // Replaces existing listeners with the given one.
+    addListenerSingle(callback) {
+        this.removeAllListeners();
+        this.addListener(callback);
+    }
+
+    // Replaces existing listener with the given one, and it only executes once.
+    addListenerSingleOnce(callback) {
+        this.removeAllListeners();
+        this.addListenerOnce(callback);
+    }
+
     removeListener(callback) {
         for (let i = 0; i < this.listeners.length; i += 1) {
             if (this.listeners[i] === callback) {
@@ -112,19 +124,27 @@ class Dispatchable {
         }
     }
 
-    addListener(name, callback) {
+    addListenerGeneric(methodName, name, callback) {
         if (Array.isArray(name)) {
-            return new CleanupJobs(name.map(x => this.addListener(x, callback)));
+            return new CleanupJobs(name.map(x => this[methodName](x, callback)));
         }
-        return this.getDispatcher(name, true).addListener(callback);
+        return this.getDispatcher(name, true)[methodName](callback);
     }
 
-    // TODO: remove some duplicated logic with method above
+    addListener(name, callback) {
+        return this.addListenerGeneric("addListener", name, callback);
+    }
+
     addListenerOnce(name, callback) {
-        if (Array.isArray(name)) {
-            return new CleanupJobs(name.map(x => this.addListenerOnce(x, callback)));
-        }
-        return this.getDispatcher(name, true).addListenerOnce(callback);
+        return this.addListenerGeneric("addListenerOnce", name, callback);
+    }
+
+    addListenerSingle(name, callback) {
+        return this.addListenerGeneric("addListenerSingle", name, callback);
+    }
+
+    addListenerSingleOnce(name, callback) {
+        return this.addListenerGeneric("addListenerSingleOnce", name, callback);
     }
 
     removeListener(name, callback) {
