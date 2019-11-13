@@ -24,7 +24,7 @@ class Device {
     }
 
     static isLandscape() {
-        return window.innerWidth > window.innerHeight;
+        return window.innerWidth > window.innerHeight || window.innerHeight < 380;
     }
 
     static getEventTouchIdentifier(event) {
