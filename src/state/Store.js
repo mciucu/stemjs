@@ -64,6 +64,16 @@ class StoreObject extends Dispatchable {
     registerToStream() {
         this.getStore().getState().registerStream(this.getStreamName());
     }
+
+    toJSON() {
+        const obj = {};
+        for (const key in this) {
+            if (this.hasOwnProperty(key)) {
+                obj[key] = this[key];
+            }
+        }
+        return obj;
+    }
 }
 
 class BaseStore extends Dispatchable {
@@ -138,6 +148,10 @@ class GenericObjectStore extends BaseStore {
 
     find(callback) {
         return this.all(true).find(callback);
+    }
+
+    toJSON() {
+        return this.all().map(entry => entry.toJSON());
     }
 
     createObject(event) {
@@ -282,6 +296,10 @@ class SingletonStore extends BaseStore {
 
     all() {
         return [this];
+    }
+
+    toJSON() {
+        return JSON.stringify([this]);
     }
 
     applyEvent(event) {
