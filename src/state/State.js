@@ -108,6 +108,14 @@ class State extends Dispatchable {
             store.clear && store.clear();
         }
     }
+
+    toJSON() {
+        const state = {};
+        for (let store of this.stores.values()) {
+            state[store.objectType] = store.toJSON();
+        }
+        return state;
+    }
 }
 
 let GlobalState = new State();
