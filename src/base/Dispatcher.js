@@ -189,6 +189,28 @@ class Dispatchable {
             dispatcherHandle.remove();
         }
     }
+
+    attachTimeout(callback, timeout) {
+        let executed = false;
+        const timeoutId = setTimeout((...args) => {
+            executed = true;
+            callback(...args);
+        }, timeout);
+        this.addCleanupJob(() => {
+            if (!executed) {
+                clearTimeout(timeoutId);
+            }
+        });
+        return timeoutId;
+    }
+
+    attachInterval(callback, timeout) {
+        const intervalId = setInterval(callback, timeout);
+        this.addCleanupJob(() => {
+            clearInterval(intervalId);
+        });
+        return intervalId;
+    }
 }
 
 // Creates a method that calls the method methodName on obj, and adds the result as a cleanup task
