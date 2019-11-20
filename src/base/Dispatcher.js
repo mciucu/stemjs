@@ -207,7 +207,7 @@ class Dispatchable {
     attachInterval(callback, timeout) {
         const intervalId = setInterval(callback, timeout);
         this.addCleanupJob(() => {
-            clearTimeout(intervalId);
+            clearInterval(intervalId);
         });
         return intervalId;
     }
