@@ -131,9 +131,14 @@ class UIElement extends BaseUIElement {
         this.children = [];
         this.options = options; // TODO: this is a hack, to not break all the code that references this.options in setOptions
         this.setOptions(options);
+        this.state = this.getDefaultState();
     };
 
     getDefaultOptions(options) {}
+
+    getDefaultState() {
+        return {};
+    }
 
     getPreservedOptions() {}
 
@@ -147,6 +152,11 @@ class UIElement extends BaseUIElement {
 
     updateOptions(options) {
         this.setOptions(Object.assign(this.options, options));
+        this.redraw();
+    }
+
+    updateState(state) {
+        this.state = {...this.state, ...state};
         this.redraw();
     }
 
