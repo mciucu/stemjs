@@ -36,6 +36,10 @@ class BaseUIElement extends Dispatchable {
 
     onUnmount() {}
 
+    beforeRedraw() {}
+
+    afterRedraw() {}
+
     destroyNode() {
         this.onUnmount();
         this.cleanup();
@@ -44,6 +48,12 @@ class BaseUIElement extends Dispatchable {
         delete this.node; // Clear for gc
     }
 }
+
+// Since these hooks should rarely be used, optimize the average case
+// to be a branch rather than an empty function call. The same pattern
+// is used for UIElement.prototype.extraNodeAttributes
+BaseUIElement.prototype.beforeRedraw = NOOP_FUNCTION;
+BaseUIElement.prototype.afterRedraw = NOOP_FUNCTION;
 
 UI.TextElement = class UITextElement extends BaseUIElement {
     constructor(value="") {
@@ -95,6 +105,10 @@ UI.TextElement = class UITextElement extends BaseUIElement {
     }
 
     redraw() {
+        if (this.beforeRedraw !== NOOP_FUNCTION) {
+            this.beforeRedraw();
+        }
+
         if (this.node) {
             let newValue = this.getValue();
             // TODO: check if this is best for performance
@@ -103,6 +117,10 @@ UI.TextElement = class UITextElement extends BaseUIElement {
             }
         }
         this.applyRef();
+
+        if (this.afterRedraw !== NOOP_FUNCTION) {
+            this.afterRedraw();
+        }
     }
 };
 
@@ -220,6 +238,10 @@ class UIElement extends BaseUIElement {
             return false;
         }
 
+        if (this.beforeRedraw !== NOOP_FUNCTION) {
+            this.beforeRedraw();
+        }
+
         let newChildren = this.getChildrenForRedraw();
 
         if (newChildren === this.children) {
@@ -228,6 +250,11 @@ class UIElement extends BaseUIElement {
             }
             this.applyNodeAttributes();
             this.applyRef();
+
+            if (this.afterRedraw !== NOOP_FUNCTION) {
+                this.afterRedraw();
+            }
+
             return true;
         }
 
@@ -278,6 +305,10 @@ class UIElement extends BaseUIElement {
         this.applyNodeAttributes();
 
         this.applyRef();
+
+        if (this.afterRedraw !== NOOP_FUNCTION) {
+            this.afterRedraw();
+        }
 
         return true;
     }
