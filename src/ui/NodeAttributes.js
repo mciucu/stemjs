@@ -309,5 +309,6 @@ NodeAttributes.defaultAttributesMap = CreateNodeAttributesMap([
     ["src"],
     ["height"],
     ["width"],
+    ["tabIndex"],
     //["value"], // Value is intentionally disabled
 ]);
