@@ -5,13 +5,15 @@ import {PageTitleManager} from "../base/PageTitleManager";
 import {unwrapArray, isString} from "../base/Utils";
 
 export class Router extends Switcher {
+    // TODO: This works bad with query params. Fix it!
     static localHistory = []; // If we want the router to not alter the window history, use this instead.
     static useLocalHistory = false;
 
     static getCurrentPath() {
         let path = "";
         if (this.useLocalHistory && this.localHistory.length) {
-            path = this.localHistory[this.localHistory.length - 1];
+            // We do this to get rid of query params or hash params
+            path = this.localHistory[this.localHistory.length - 1].split("?")[0].split("#")[0];
         } else {
             path = location.pathname;
         }
