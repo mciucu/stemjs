@@ -11,6 +11,11 @@ const BaseDate = self.Date;
 
 @extendsNative
 class StemDate extends BaseDate {
+    // This is only to let the IDE know that this class can receive arguments.
+    constructor(...args) {
+        super(...args);
+    }
+
     // Still need to do this mess because of Babel, should be removed when moving to native ES6
     static create(value) {
         // Try to do an educated guess if this date is in unix seconds or milliseconds
