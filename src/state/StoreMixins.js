@@ -143,10 +143,6 @@ const VirtualStoreMixin = (BaseStoreClass) => class VirtualStoreMixin extends Ba
         return this.objects.get("temp-" + event.virtualId);
     }
 
-    get(id) {
-        return this.objects.get(id);
-    }
-
     applyUpdateObjectId(object, id) {
         if (object.id === id) {
             return;
