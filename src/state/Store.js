@@ -161,23 +161,24 @@ class GenericObjectStore extends BaseStore {
     }
 
     applyCreateEvent(event, sendDispatch=true) {
-        let existingObject = this.getObjectForEvent(event);
+        let obj = this.getObjectForEvent(event);
+        let dispatchType;
 
-        if (existingObject) {
+        if (obj) {
             let refreshEvent = Object.assign({}, event);
+            dispatchType = "update";
             refreshEvent.type = "refresh";
-            existingObject.applyEvent(refreshEvent);
-            existingObject.dispatch("update", event);
-            return existingObject;
+            obj.applyEvent(refreshEvent);
+            obj.dispatch("update", event);
         } else {
-            let newObject = this.createObject(event);
-            this.objects.set(this.getObjectIdForEvent(event), newObject);
-
-            if (sendDispatch) {
-                this.dispatch("create", newObject, event);
-            }
-            return newObject;
+            dispatchType = "create";
+            obj = this.createObject(event);
+            this.objects.set(this.getObjectIdForEvent(event), obj);
         }
+        if (sendDispatch) {
+            this.dispatch(dispatchType, obj, event);
+        }
+        return obj;
     }
 
     applyUpdateOrCreateEvent(event) {
