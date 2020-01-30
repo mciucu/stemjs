@@ -108,10 +108,7 @@ class BaseStore extends Dispatchable {
 
 // Store type primarily intended to store objects that come from a server DB, and have a unique numeric .id field
 class GenericObjectStore extends BaseStore {
-    constructor(objectType, ObjectWrapper=StoreObject, options={}) {
-        super(...arguments);
-        this.objects = new Map();
-    }
+    objects = new Map();
 
     has(id) {
         return !!this.get(id);
@@ -122,6 +119,10 @@ class GenericObjectStore extends BaseStore {
             return null;
         }
         return this.objects.get(String(id));
+    }
+
+    addObject(id, obj) {
+        this.objects.set(String(id), obj);
     }
 
     clear() {
@@ -162,7 +163,7 @@ class GenericObjectStore extends BaseStore {
 
     applyCreateEvent(event, sendDispatch=true) {
         let obj = this.getObjectForEvent(event);
-        let dispatchType;
+        let dispatchType = "create";
 
         if (obj) {
             let refreshEvent = Object.assign({}, event);
@@ -171,9 +172,8 @@ class GenericObjectStore extends BaseStore {
             obj.applyEvent(refreshEvent);
             obj.dispatch("update", event);
         } else {
-            dispatchType = "create";
             obj = this.createObject(event);
-            this.objects.set(this.getObjectIdForEvent(event), obj);
+            this.addObject(this.getObjectIdForEvent(event), obj);
         }
         if (sendDispatch) {
             this.dispatch(dispatchType, obj, event);
@@ -182,7 +182,7 @@ class GenericObjectStore extends BaseStore {
     }
 
     applyUpdateOrCreateEvent(event) {
-        var obj = this.getObjectForEvent(event);
+        let obj = this.getObjectForEvent(event);
         if (!obj) {
             obj = this.applyCreateEvent(event, false);
             this.dispatch("create", obj, event);

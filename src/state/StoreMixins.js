@@ -150,7 +150,7 @@ const VirtualStoreMixin = (BaseStoreClass) => class VirtualStoreMixin extends Ba
         let oldId = object.id;
         object.updateId(id);
         this.objects.delete(oldId);
-        this.objects.set(object.id, object);
+        this.addObject(object.id, object);
         this.dispatch("updateObjectId", object, oldId);
     }
 
