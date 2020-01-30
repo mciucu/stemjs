@@ -52,6 +52,11 @@ export class Router extends Switcher {
             url = `${url}?${queryString}`;
         }
 
+        if (url === window.location.pathname) {
+            // We're already here
+            return;
+        }
+
         options.state = options.state || {};
         const historyArgs = [options.state, PageTitleManager.getTitle(), url];
         if (this.useLocalHistory) {
