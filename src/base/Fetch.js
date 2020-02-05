@@ -46,7 +46,7 @@ function getURLSearchParams(data) {
         let value = data[key];
         if (Array.isArray(value)) {
             for (let instance of value) {
-                urlSearchParams.append(key + "[]", instance);
+                urlSearchParams.append(key + jQueryCompatibilityPreprocessor.arrayKeySuffix, instance);
             }
         } else {
             urlSearchParams.set(key, value);
@@ -262,7 +262,7 @@ function jQueryCompatibilityPreprocessor(options) {
         if (method === "GET" || method === "HEAD") {
             options.urlParams = options.urlParams || options.data;
             if (options.cache === false) {
-                options.urlParams = getURLSearchParams(options.urlParams);
+                options.urlParams = getURLSearchParams(options.urlParams, jQueryCompatibilityPreprocessor.arrayKeySuffix);
                 options.urlParams.set("_", Date.now());
             }
         } else {
@@ -270,8 +270,9 @@ function jQueryCompatibilityPreprocessor(options) {
             for (const key of Object.keys(options.data)) {
                 const value = options.data[key];
                 if (Array.isArray(value)) {
+                    const arrayKey = key + jQueryCompatibilityPreprocessor.arrayKeySuffix;
                     for (const arrayValue of value) {
-                        formData.append(key + "[]", arrayValue);
+                        formData.append(arrayKey, arrayValue);
                     }
                 } else {
                     formData.append(key, value);
@@ -332,6 +333,7 @@ function fetch(input, ...args) {
 
     return new XHRPromise(input, options);
 }
+jQueryCompatibilityPreprocessor.arrayKeySuffix = "[]";
 
 fetch.defaultPreprocessors = [jQueryCompatibilityPreprocessor];
 fetch.defaultPostprocessors = [];
