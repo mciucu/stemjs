@@ -270,9 +270,8 @@ function jQueryCompatibilityPreprocessor(options) {
             for (const key of Object.keys(options.data)) {
                 const value = options.data[key];
                 if (Array.isArray(value)) {
-                    const arrayKey = key + options.arraySearchParamSuffix;
                     for (const arrayValue of value) {
-                        formData.append(arrayKey, arrayValue);
+                        formData.append(key + "[]", arrayValue);
                     }
                 } else {
                     formData.append(key, value);
