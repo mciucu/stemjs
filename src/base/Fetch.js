@@ -36,7 +36,7 @@ function parseHeaders(xhr) {
 
 // Creates a new URLSearchParams object from a plain object
 // Fields that are arrays are spread
-function getURLSearchParams(data) {
+function getURLSearchParams(data, arrayKeySuffix = "[]") {
     if (!isPlainObject(data)) {
         return data;
     }
@@ -46,7 +46,7 @@ function getURLSearchParams(data) {
         let value = data[key];
         if (Array.isArray(value)) {
             for (let instance of value) {
-                urlSearchParams.append(key + jQueryCompatibilityPreprocessor.arrayKeySuffix, instance);
+                urlSearchParams.append(key + arrayKeySuffix, instance);
             }
         } else {
             urlSearchParams.set(key, value);
@@ -56,13 +56,13 @@ function getURLSearchParams(data) {
 }
 
 // Appends search parameters from an object to a given URL or Request, and returns the new URL
-function composeURL(url, params) {
+function composeURL(url, urlSearchParams) {
     if (url.url) {
         url = url.url;
     }
     // TODO: also extract the preexisting arguments in the url
-    if (params) {
-        url += "?" + getURLSearchParams(params);
+    if (urlSearchParams) {
+        url += "?" + urlSearchParams;
     }
     return url;
 }
@@ -262,7 +262,7 @@ function jQueryCompatibilityPreprocessor(options) {
         if (method === "GET" || method === "HEAD") {
             options.urlParams = options.urlParams || options.data;
             if (options.cache === false) {
-                options.urlParams = getURLSearchParams(options.urlParams, jQueryCompatibilityPreprocessor.arrayKeySuffix);
+                options.urlParams = getURLSearchParams(options.urlParams, options.arraySearchParamSuffix);
                 options.urlParams.set("_", Date.now());
             }
         } else {
@@ -270,7 +270,7 @@ function jQueryCompatibilityPreprocessor(options) {
             for (const key of Object.keys(options.data)) {
                 const value = options.data[key];
                 if (Array.isArray(value)) {
-                    const arrayKey = key + jQueryCompatibilityPreprocessor.arrayKeySuffix;
+                    const arrayKey = key + options.arraySearchParamSuffix;
                     for (const arrayValue of value) {
                         formData.append(arrayKey, arrayValue);
                     }
@@ -318,22 +318,21 @@ function fetch(input, ...args) {
     }
 
     options.method = options.method || "GET";
-
     // If there are any url search parameters, update the url from the urlParams or urlSearchParams fields
     // These fields can be plain objects (jQuery style) or can be URLSearchParams objects
     const urlParams = options.urlParams || options.urlSearchParams;
     if (urlParams) {
         // Change the URL of the request to add a query
+        const urlSearchParams = getURLSearchParams(urlParams, options.arraySearchParamSuffix);
         if (input instanceof Request) {
-            input = new Request(composeURL(input.url, urlParams), input);
+            input = new Request(composeURL(input.url, urlSearchParams), input);
         } else {
-            input = new Request(composeURL(input, urlParams), {});
+            input = new Request(composeURL(input, urlSearchParams), {});
         }
     }
 
     return new XHRPromise(input, options);
 }
-jQueryCompatibilityPreprocessor.arrayKeySuffix = "[]";
 
 fetch.defaultPreprocessors = [jQueryCompatibilityPreprocessor];
 fetch.defaultPostprocessors = [];
