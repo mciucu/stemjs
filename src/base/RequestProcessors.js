@@ -1,8 +1,9 @@
 import {isPlainObject} from "./Utils";
+
 //region toSnakeCasePreprocessor
 // Request preprocessor for converting object keys to snake case
 
-// helper functions
+// Helper functions
 function _firstToUpper(word) {
     return word[1].toUpperCase();
 }
@@ -25,7 +26,7 @@ function snakeToCamel(key) {
  * @param {string} key -> String to be converted
  * @returns string
  */
-function camelToSnake(key) {
+function camelToSnakeCase(key) {
     return key.replace(/[\w]([A-Z])/g, _concatSnakeCase).toLowerCase();
 }
 
@@ -35,33 +36,25 @@ function camelToSnake(key) {
  * @param {Object} data
  * @returns {*}
  */
-function updateObjectKeys(data) {
-    for (let key in data) {
-        if (!data.hasOwnProperty(key)) {
-            continue;
-        }
+function makeKeysSnakeCase(data) {
+    for (let key of Objects.keys(data)) {
         // check if the current key is a nested object
-        if (typeof data[key] == "object" && data[key] !== null) {
-            let new_key = camelToSnake(key);
-            // move nested key body only if the key has changed
-            if(new_key !== key){
-                data[new_key] = data[key];
+        const newKey = camelToSnakeCase(key);
+        if (typeof data[key] === "object" && data[key] !== null) {
+            // Move nested key body only if the key has changed
+            if (newKey !== key){
+                data[newKey] = data[key];
                 delete data[key];
             }
-            // updated the keys of the nested object
-            updateObjectKeys(data[new_key]);
+            // Updated the keys of the nested object
+            makeKeysSnakeCase(data[newKey]);
         } else {
-            // simple key value pair
-
-            // compute new object key
-            let new_key = camelToSnake(key);
-            if (new_key === key) {
-                continue;
+            // Simple key value pair
+            if (newKey !== key) {
+                // Move the existing data to the new key
+                data[newKey] = data[key];
+                delete data[key];
             }
-
-            // move the existing data to the new key
-            data[new_key] = data[key];
-            delete data[key];
         }
     }
     return data;
@@ -77,34 +70,39 @@ function toSnakeCasePreprocessor(options) {
     if (options.method.toUpperCase() !== "POST") {
         return options;
     }
-    updateObjectKeys(options.data);
+    makeKeysSnakeCase(options.data);
     return options;
 }
 //endregion
 
-//region jsonBodyRequestPreprocessor
-function jsonBodyRequestPreprocessor(options) {
+
+/***
+ * JSON Preprocessor that adds the "application/json" content-type.
+ * The XHRPromise will serialize the options.body using JSON.stringify.
+ * @param options
+ * @returns {*}
+ */
+function jsonRequestPreprocessor(options) {
     if (options.type) {
         options.method = options.type.toUpperCase();
     }
 
-    //Add aplication json header
-    options.headers.set("Content-Type", "application/json");
     options.headers.set("X-Requested-With", "XMLHttpRequest");
 
     if (isPlainObject(options.data)) {
-        let method = options.method.toUpperCase();
+        const method = options.method.toUpperCase();
         if (method === "GET" || method === "HEAD") {
             options.urlParams = options.urlParams || options.data;
         } else {
+            //Add aplication json header
+            options.headers.set("Content-Type", "application/json");
             // move data to body
             options.body = options.data;
         }
     } else {
         options.body = options.body || options.data;
     }
-    return options
+    return options;
 }
-//endregion
 
-export {toSnakeCasePreprocessor, jsonBodyRequestPreprocessor};
+export {toSnakeCasePreprocessor, jsonRequestPreprocessor};

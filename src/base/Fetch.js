@@ -145,12 +145,11 @@ class XHRPromise {
                 this.send(options.body);
             } else if (isApplicationTypeJson) {
                 // if the request has a JSON body, convert object body to JSON and sent it.
-                this.send(JSON.stringify(options.body))
-            }
-            else {
+                this.send(JSON.stringify(options.body));
+            } else {
                 request.blob().then((blob) => {
                     // The blob can be a FormData when we're polyfilling the Request class
-                    let body = ((blob instanceof FormData) || blob.size) ? blob : null;
+                    const body = ((blob instanceof FormData) || blob.size) ? blob : null;
                     this.send(body);
                 });
             }
