@@ -129,20 +129,27 @@ class XHRPromise {
             // TODO: come back to this
             xhr.responseType = "blob";
 
+            let isApplicationTypeJson = false;
             request.headers.forEach((value, name) => {
                 if (options.body instanceof FormData && name.toLowerCase() === "content-type") {
                     return;
                 }
+                // check if the request in JSON object based on headers
+                if (value === "application/json" && name.toLowerCase() === "content-type") {
+                    isApplicationTypeJson = true;
+                }
                 xhr.setRequestHeader(name, value);
             });
-
             // TODO: there's no need to send anything on a GET or HEAD
             if (options.body instanceof FormData) {
                 this.send(options.body);
+            } else if (isApplicationTypeJson) {
+                // if the request has a JSON body, convert object body to JSON and sent it.
+                this.send(JSON.stringify(options.body));
             } else {
                 request.blob().then((blob) => {
                     // The blob can be a FormData when we're polyfilling the Request class
-                    let body = ((blob instanceof FormData) || blob.size) ? blob : null;
+                    const body = ((blob instanceof FormData) || blob.size) ? blob : null;
                     this.send(body);
                 });
             }
@@ -283,10 +290,8 @@ function jQueryCompatibilityPreprocessor(options) {
     } else {
         options.body = options.body || options.data;
     }
-
     return options;
 }
-
 // Can either be called with
 // - 1 argument: (Request)
 // - 2 arguments: (url/Request, options)
@@ -333,7 +338,7 @@ function fetch(input, ...args) {
     return new XHRPromise(input, options);
 }
 
-fetch.defaultPreprocessors = [jQueryCompatibilityPreprocessor];
+fetch.defaultPreprocessors = [];
 fetch.defaultPostprocessors = [];
 fetch.defaultErrorPostprocessors = [];
 
