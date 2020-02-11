@@ -110,4 +110,4 @@ export class FixedURLAjaxHandler extends AjaxHandler {
     }
 }
 
-export let Ajax = new AjaxHandler();
+export const Ajax = new AjaxHandler();
