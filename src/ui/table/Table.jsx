@@ -59,7 +59,7 @@ class Table extends UI.Primitive("table") {
     }
 
     getEntryKey(entry, index) {
-        return entry.id != null ? entry.id : index;
+        return (entry && entry.id != null) ? entry.id : index;
     }
 
     renderTableBody() {
