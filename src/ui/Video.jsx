@@ -24,6 +24,7 @@ Video.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
     ["muted", {noValue: true}],
     ["playsinline"],
     ["poster"],
+    ["preload"],
 ]);
 
 export {Video};
