@@ -44,7 +44,7 @@ export class Router extends Switcher {
         return url;
     }
 
-    static changeURL(url, options = {queryParams: {}, state: {}, replaceHistory: false}) {
+    static changeURL(url, options = {queryParams: {}, state: {}, replaceHistory: false, forceElementUpdate: false}) {
         url = this.formatURL(url);
 
         if (options.queryParams && Object.keys(options.queryParams).length > 0) {
@@ -52,7 +52,7 @@ export class Router extends Switcher {
             url = `${url}?${queryString}`;
         }
 
-        if (url === window.location.pathname) {
+        if (url === window.location.pathname && !options.forceElementUpdate) {
             // We're already here
             return;
         }
@@ -76,7 +76,7 @@ export class Router extends Switcher {
     }
 
     static onPopState() {
-        this.changeURL(this.parseURL(this.getCurrentPath()), {replaceHistory: true});
+        this.changeURL(this.parseURL(this.getCurrentPath()), {replaceHistory: true, forceElementUpdate: true});
         Dispatcher.Global.dispatch("externalURLChange");
     }
 
