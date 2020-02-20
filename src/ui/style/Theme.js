@@ -40,9 +40,7 @@ class Theme extends Dispatchable {
 
     register(cls, styleSheet) {
         cls.theme = this;
-        if (!cls.styleSheet) {
-            cls.styleSheet = styleSheet;
-        }
+        cls.styleSheet = styleSheet;
         this.set(cls, styleSheet);
     }
 
