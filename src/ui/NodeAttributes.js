@@ -1,6 +1,11 @@
 import {dashCase, setObjectPrototype} from "../base/Utils";
 
 export const defaultToPixelsAttributes = new Set([
+    "border-radius",
+    "border-bottom-left-radius",
+    "border-bottom-right-radius",
+    "border-top-left-radius",
+    "border-top-right-radius",
     "border-bottom-width",
     "border-left-width",
     "border-right-width",
