@@ -59,13 +59,13 @@ class Dispatcher {
     // Replaces existing listeners with the given one.
     addListenerSingle(callback) {
         this.removeAllListeners();
-        this.addListener(callback);
+        return this.addListener(callback);
     }
 
-    // Replaces existing listener with the given one, and it only executes once.
+    // Replaces an eventual existing listener with the given one, and it only executes once.
     addListenerSingleOnce(callback) {
         this.removeAllListeners();
-        this.addListenerOnce(callback);
+        return this.addListenerOnce(callback);
     }
 
     removeListener(callback) {
@@ -231,12 +231,15 @@ function getAttachCleanupJobMethod(methodName) {
 }
 
 // Not sure if these should be added like this, but meh
-Dispatchable.prototype.attachListener       = getAttachCleanupJobMethod("Listener");
-Dispatchable.prototype.attachEventListener  = getAttachCleanupJobMethod("EventListener");
-Dispatchable.prototype.attachCreateListener = getAttachCleanupJobMethod("CreateListener");
-Dispatchable.prototype.attachUpdateListener = getAttachCleanupJobMethod("UpdateListener");
-Dispatchable.prototype.attachDeleteListener = getAttachCleanupJobMethod("DeleteListener");
-Dispatchable.prototype.attachChangeListener = getAttachCleanupJobMethod("ChangeListener");
+Dispatchable.prototype.attachListener           = getAttachCleanupJobMethod("Listener");
+Dispatchable.prototype.attachEventListener      = getAttachCleanupJobMethod("EventListener");
+Dispatchable.prototype.attachCreateListener     = getAttachCleanupJobMethod("CreateListener");
+Dispatchable.prototype.attachUpdateListener     = getAttachCleanupJobMethod("UpdateListener");
+Dispatchable.prototype.attachDeleteListener     = getAttachCleanupJobMethod("DeleteListener");
+Dispatchable.prototype.attachChangeListener     = getAttachCleanupJobMethod("ChangeListener");
+Dispatchable.prototype.attachListenerSingle     = getAttachCleanupJobMethod("ListenerSingle");
+Dispatchable.prototype.attachListenerOnce       = getAttachCleanupJobMethod("ListenerOnce");
+Dispatchable.prototype.attachListenerSingleOnce = getAttachCleanupJobMethod("ListenerSingleOnce");
 
 Dispatcher.Global = new Dispatchable();
 
