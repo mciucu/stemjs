@@ -1,5 +1,5 @@
 import {UI} from "UIBase";
-import {CreateNodeAttributesMap} from "NodeAttributes";
+import {DOMAttributesMap} from "NodeAttributes";
 
 
 class Video extends UI.Primitive( "video") {
@@ -14,7 +14,7 @@ class Video extends UI.Primitive( "video") {
     }
 }
 
-Video.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
+Video.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
     ["autoplay", {noValue: true}],
     ["buffered"],
     ["controls"],

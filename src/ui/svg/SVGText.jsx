@@ -1,5 +1,5 @@
 import {SVG} from "./SVGBase";
-import {CreateNodeAttributesMap} from "../NodeAttributes";
+import {DOMAttributesMap} from "../NodeAttributes";
 import {UI} from "../UIBase";
 
 SVG.Text = class SVGText extends SVG.Element {
@@ -80,7 +80,7 @@ SVG.Text = class SVGText extends SVG.Element {
     }
 };
 
-SVG.Text.domAttributesMap = CreateNodeAttributesMap(SVG.Element.domAttributesMap, [
+SVG.Text.domAttributesMap = new DOMAttributesMap(SVG.Element.domAttributesMap, [
     ["dx"],
     ["dy"],
     ["fontFamily", {domName: "font-family"}],
