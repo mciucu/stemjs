@@ -1,5 +1,5 @@
 import {UI} from "../UIBase";
-import {CreateNodeAttributesMap} from "../NodeAttributes";
+import {DOMAttributesMap} from "../NodeAttributes";
 import {uniqueId} from "../../base/Utils";
 import {SVGNodeAttributes} from "./SVGNodeAttributes";
 import {Device} from "../../base/Device";
@@ -143,7 +143,7 @@ SVG.Element = class SVGElement extends UI.Element {
     }
 };
 
-SVG.Element.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
+SVG.Element.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
     ["fill"],
     ["height"],
     ["opacity"],

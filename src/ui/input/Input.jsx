@@ -1,5 +1,5 @@
 import {UI} from "../UIBase";
-import {CreateNodeAttributesMap} from "../NodeAttributes";
+import {DOMAttributesMap} from "../NodeAttributes";
 import {InputStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
 
@@ -49,7 +49,7 @@ class Input extends UI.Primitive(InputableElement, "input") {
         this.addNodeListener("keyup", callback);
     }
 }
-Input.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
+Input.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
     ["autocomplete"],
     ["autofocus", {noValue: true}],
     ["formaction"],
@@ -70,7 +70,7 @@ class SubmitInput extends Input {
         return "submit";
     }
 }
-SubmitInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
+SubmitInput.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
     ["formenctype"],
     ["formmethod"],
     ["formnovalidate"],
@@ -95,7 +95,7 @@ class NumberInput extends Input {
         return parseFloat(val);
     }
 }
-NumberInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
+NumberInput.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
     ["min"],
     ["max"],
     ["step"],
@@ -138,7 +138,8 @@ class FileInput extends Input {
         return formData;
     }
 }
-FileInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
+
+FileInput.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
     ["multipleFiles", {domName: "multiple", noValue: true}],
     ["fileTypes", {domName: "accept"}],
 ]);
@@ -162,7 +163,7 @@ class CheckboxInput extends Input {
         this.node.checked = newValue;
     }
 }
-CheckboxInput.domAttributesMap = CreateNodeAttributesMap(UI.Element.domAttributesMap, [
+CheckboxInput.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
     ["checked", {noValue: true}]
 ]);
 
@@ -180,7 +181,8 @@ class RadioInput extends CheckboxInput {
         this.node.checked = newValue;
     }
 }
-RadioInput.domAttributesMap = CreateNodeAttributesMap(CheckboxInput.domAttributesMap, [
+
+RadioInput.domAttributesMap = new DOMAttributesMap(CheckboxInput.domAttributesMap, [
     ["name"]
 ]);
 

@@ -44,29 +44,51 @@ export const defaultToPixelsAttributes = new Set([
     "word-spacing",
 ]);
 
-export function CreateNodeAttributesMap(oldAttributesMap, allowedAttributesArray) {
-    let allowedAttributesMap = new Map(oldAttributesMap);
+// Used to map from option key to a DOM attribute name.
+// Can recursively fall back to a base mapping, to allow extending of a parent class
+export class DOMAttributesMap {
+    allowedAttributesMap = new Map();
+    reverseNameMap = new Map();
 
-    for (let attribute of allowedAttributesArray || []) {
-        if (!attribute) continue;
-        if (!Array.isArray(attribute)) {
-            attribute = [attribute];
+    constructor(fallbackMapping, allowedAttributesArray = []) {
+        this.fallbackMapping = fallbackMapping;
+
+        for (let attribute of allowedAttributesArray) {
+            if (!Array.isArray(attribute)) {
+                attribute = [attribute];
+            }
+
+            this.setAttribute(attribute[0], attribute[1]);
         }
-        allowedAttributesMap.set(attribute[0], attribute[1] || {});
     }
 
-    allowedAttributesMap.reverseNameMap = new Map();
-
-    for (let [key, value] of allowedAttributesMap) {
+    setAttribute(key, value) {
         value = value || {};
-
         value.domName = value.domName || key;
 
-        allowedAttributesMap.reverseNameMap.set(value.domName, key);
-
-        allowedAttributesMap.set(key, value);
+        this.allowedAttributesMap.set(key, value);
+        this.reverseNameMap.set(value.domName, key);
     }
-    return allowedAttributesMap;
+
+    get(key) {
+        let value = this.allowedAttributesMap.get(key);
+        if (!value && this.fallbackMapping) {
+            value = this.fallbackMapping.get(key);
+        }
+        return value;
+    }
+
+    has(key) {
+        return this.allowedAttributesMap.has(key) || (this.fallbackMapping && this.fallbackMapping.has(key));
+    }
+
+    getKeyFromDOMName(key) {
+        let value = this.reverseNameMap.get(key);
+        if (!value && this.fallbackMapping) {
+            value = this.fallbackMapping.getKeyFromDOMName(key);
+        }
+        return value;
+    }
 }
 
 // A class that can be used to work with a className field as with a Set, while having a toString() usable in the DOM
@@ -250,7 +272,7 @@ export class NodeAttributes {
                 continue;
             }
 
-            let key = attributesMap.reverseNameMap.get(attributeName);
+            let key = attributesMap.getKeyFromDOMName(attributeName);
 
             if (this.hasOwnProperty(key)) {
                 let value = this[key];
@@ -293,7 +315,7 @@ export class NodeAttributes {
 }
 
 // Default node attributes, should be as few of these as possible
-NodeAttributes.defaultAttributesMap = CreateNodeAttributesMap([
+NodeAttributes.defaultAttributesMap = new DOMAttributesMap(null, [
     ["id"],
     ["action"],
     ["colspan"],
