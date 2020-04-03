@@ -231,5 +231,3 @@ class StyleSheet extends Dispatchable {
         }
     }
 }
-
-export {StyleSheet};
