@@ -30,8 +30,8 @@ const BasicOrientedLinkElement = BasicOrientedElementInterface(Link);
 
 // NavElements should know if they are in vertical or horizontal mode, so they can behave differently
 const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
-    constructor() {
-        super(...arguments);
+    constructor(...args) {
+        super(...args);
         this.isToggled = this.getToggledState();
     }
 
