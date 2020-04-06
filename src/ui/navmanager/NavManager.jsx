@@ -31,8 +31,8 @@ class SidePanelGroup extends UI.Element {
 
 @registerStyle(NavStyle)
 class SidePanel extends UI.Element {
-    constructor() {
-        super(...arguments);
+    constructor(...args) {
+        super(...args);
         this.initNode();
         this.applyVisibility();
     }
