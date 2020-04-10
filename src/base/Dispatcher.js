@@ -56,18 +56,6 @@ class Dispatcher {
         return handler;
     }
 
-    // Replaces existing listeners with the given one.
-    addListenerSingle(callback) {
-        this.removeAllListeners();
-        return this.addListener(callback);
-    }
-
-    // Replaces an eventual existing listener with the given one, and it only executes once.
-    addListenerSingleOnce(callback) {
-        this.removeAllListeners();
-        return this.addListenerOnce(callback);
-    }
-
     removeListener(callback) {
         for (let i = 0; i < this.listeners.length; i += 1) {
             if (this.listeners[i] === callback) {
@@ -137,14 +125,6 @@ class Dispatchable {
 
     addListenerOnce(name, callback) {
         return this.addListenerGeneric("addListenerOnce", name, callback);
-    }
-
-    addListenerSingle(name, callback) {
-        return this.addListenerGeneric("addListenerSingle", name, callback);
-    }
-
-    addListenerSingleOnce(name, callback) {
-        return this.addListenerGeneric("addListenerSingleOnce", name, callback);
     }
 
     removeListener(name, callback) {
@@ -237,9 +217,7 @@ Dispatchable.prototype.attachCreateListener     = getAttachCleanupJobMethod("Cre
 Dispatchable.prototype.attachUpdateListener     = getAttachCleanupJobMethod("UpdateListener");
 Dispatchable.prototype.attachDeleteListener     = getAttachCleanupJobMethod("DeleteListener");
 Dispatchable.prototype.attachChangeListener     = getAttachCleanupJobMethod("ChangeListener");
-Dispatchable.prototype.attachListenerSingle     = getAttachCleanupJobMethod("ListenerSingle");
 Dispatchable.prototype.attachListenerOnce       = getAttachCleanupJobMethod("ListenerOnce");
-Dispatchable.prototype.attachListenerSingleOnce = getAttachCleanupJobMethod("ListenerSingleOnce");
 
 Dispatcher.Global = new Dispatchable();
 
