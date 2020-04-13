@@ -230,7 +230,7 @@ export function getCookie(name) {
     for (let cookie of cookies) {
         cookie = cookie.trim();
         if (cookie.startsWith(name + "=")) {
-            return decodeURIComponent(cookie.substring(name.length + 1));
+            return JSON.parse(decodeURIComponent(cookie.substring(name.length + 1)));
         }
     }
     return null;
