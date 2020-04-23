@@ -230,14 +230,26 @@ export function getCookie(name) {
     for (let cookie of cookies) {
         cookie = cookie.trim();
         if (cookie.startsWith(name + "=")) {
-            return JSON.parse(decodeURIComponent(cookie.substring(name.length + 1)));
+            return cookie.substring(name.length + 1);
         }
     }
-    return null;
+    return "";
 }
 
 export function setCookie(name, value, maxAge=60*60*4 /* 4 hours */) {
-    document.cookie = `${name}=${encodeURIComponent(JSON.stringify(value))};path=/;max-age=${maxAge}`;
+    document.cookie = `${name}=${value};path=/;max-age=${maxAge}`;
+}
+
+export function serializeCookie(name, value, maxAge=60*60*4) {
+    setCookie(name, encodeURIComponent(JSON.stringify(value)), maxAge);
+}
+
+export function deserializeCookie(name) {
+    const value = getCookie(name);
+    if (!value) {
+        return value;
+    }
+    return JSON.parse(decodeURIComponent(value));
 }
 
 export function uniqueId(obj) {
