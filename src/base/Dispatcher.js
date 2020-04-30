@@ -200,6 +200,7 @@ function getAttachCleanupJobMethod(methodName) {
     return function (obj) {
         let args = Array.prototype.slice.call(arguments, 1);
         let handler = obj[addMethodName](...args);
+        // TODO: This should be changed. It is bad to receive 2 different types of handlers.
         if (!handler) {
             handler = () => {
                 obj[removeMethodName](...args);
