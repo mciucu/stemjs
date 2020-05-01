@@ -1,6 +1,7 @@
 import {Device} from "../base/Device";
+import {UI} from "./UIBase";
 
-export const Draggable = (BaseClass) => class Draggable extends BaseClass {
+export const Draggable = (BaseClass=UI.Element) => class Draggable extends BaseClass {
     _clickCallbacks = new Map();
     _clickDragListeners = new Map();
 
@@ -149,3 +150,5 @@ export const Draggable = (BaseClass) => class Draggable extends BaseClass {
         }
     }
 };
+
+export const DraggableElement = Draggable();
