@@ -61,7 +61,8 @@ export const Draggable = (BaseClass=UI.Element) => class Draggable extends BaseC
                 return;
             }
 
-            const eventX = Device.getEventX(event), eventY = Device.getEventY(event);
+            const eventX = Device.getEventX(event) || 0;
+            const eventY = Device.getEventY(event) || 0;
 
             let deltaX = eventX - listenerWrapper._lastX;
             listenerWrapper._lastX = eventX;
