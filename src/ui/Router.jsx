@@ -46,6 +46,9 @@ export class Router extends Switcher {
 
     static changeURL(url, options = {queryParams: {}, state: {}, replaceHistory: false, forceElementUpdate: false,
             keepSearchParams: false}) {
+        // TODO(@debug): Remove
+        console.error("Url is", url);
+
         url = this.formatURL(url);
 
         if (options.queryParams && Object.keys(options.queryParams).length > 0) {
