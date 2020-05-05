@@ -932,7 +932,7 @@ class LinkModifier extends Modifier {
 
 let MarkupModifier = Modifier;
 
-export {MarkupModifier, HeaderModifier, ParagraphModifier, InlineCodeModifier, InlineLatexModifier, StrongModifier, LinkModifier};
+export {MarkupModifier, HeaderModifier, ParagraphModifier, InlineCodeModifier, InlineLatexModifier, StrongModifier, LinkModifier, HorizontalRuleModifier, UnorderedListModifier, OrderedListModifier, InlineVarModifier, ItalicModifier};
 
 class MarkupParser {
     constructor(options) {
@@ -1041,7 +1041,7 @@ class MarkupParser {
 
         return result;
     }
-    
+
     parseOptions(stream, optionsEnd) {
         return this.constructor.parseOptions(stream, optionsEnd);
     }
