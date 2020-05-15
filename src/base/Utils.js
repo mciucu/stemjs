@@ -236,8 +236,9 @@ export function getCookie(name) {
     return "";
 }
 
-export function setCookie(name, value, maxAge=60*60*4 /* 4 hours */) {
-    document.cookie = `${name}=${value};path=/;max-age=${maxAge}`;
+export function setCookie(name, value, maxAge=60*60*4 /* 4 hours */, domain) {
+    const defaultDomain = location.hostname === "localhost" ? location.hostname : `.${location.hostname}`;
+    document.cookie = `${name}=${value};path=/;max-age=${maxAge};domain=${domain || defaultDomain}`;
 }
 
 export function serializeCookie(name, value, maxAge=60*60*4) {
