@@ -24,6 +24,10 @@ class Device {
     }
 
     static isLandscape() {
+        if (orientation && (orientation === -90 || orientation === 90)) {
+            return true;
+        }
+
         const width = (window.screen && window.screen.width) ? window.screen.width : window.innerWidth;
         const height = (window.screen && window.screen.height) ? window.screen.height : window.innerHeight;
 
