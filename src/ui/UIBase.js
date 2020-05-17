@@ -7,7 +7,7 @@ const UI = {
     renderingStack: [], //keeps track of objects that are redrawing, to know where to assign refs automatically
 };
 
-class BaseUIElement extends Dispatchable {
+export class BaseUIElement extends Dispatchable {
     canOverwrite(existingChild) {
         return this.constructor === existingChild.constructor &&
                this.getNodeType() === existingChild.getNodeType();
