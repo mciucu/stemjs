@@ -98,8 +98,9 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
         sortEntries(entries) {
             let sortedEntries = entries.slice();
 
-            if (this.getComparator()) {
-                sortedEntries.sort(this.getComparator());
+            const comparator = this.getComparator();
+            if (comparator) {
+                sortedEntries.sort(comparator);
             }
 
             return sortedEntries;

@@ -252,6 +252,10 @@ class Select extends UI.Primitive(InputableElement, "select") {
         return this.givenOptions[selectedIndex];
     }
 
+    getValue() {
+        return this.get();
+    }
+
     set(value) {
         for (let i = 0; i < this.givenOptions.length; i++) {
             if (this.givenOptions[i] === value) {

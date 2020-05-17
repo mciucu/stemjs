@@ -24,8 +24,8 @@ class Table extends UI.Primitive("table") {
     setOptions(options) {
         super.setOptions(options);
 
-        this.setColumns(options.columns || []);
-        this.entries = options.entries || [];
+        this.setColumns(this.options.columns || []);
+        this.entries = this.options.entries || [];
     }
 
     extraNodeAttributes(attr) {
@@ -90,8 +90,14 @@ class Table extends UI.Primitive("table") {
     }
 
     // Original entries should not be modified. Overwrite this function to appy any modification in a new array.
+    // TODO: keeping data top level is very bad practice
     getEntries() {
         return this.entries || [];
+    }
+
+    setEntries(entries) {
+        this.entries = entries;
+        this.redraw();
     }
 
     columnDefaults(column, index) {

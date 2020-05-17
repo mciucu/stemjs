@@ -133,6 +133,7 @@ class UIElement extends BaseUIElement {
         this.options = options;
     }
 
+    // TODO: should probably add a second arg, doRedraw=true - same for setOptions
     updateOptions(options) {
         this.setOptions(Object.assign(this.options, options));
         this.redraw();
