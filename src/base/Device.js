@@ -24,7 +24,7 @@ class Device {
     }
 
     static isLandscape() {
-        if (orientation && (orientation === -90 || orientation === 90)) {
+        if (window.orientation && (window.orientation === -90 || window.orientation === 90)) {
             return true;
         }
 
