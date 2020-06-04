@@ -10,6 +10,14 @@ class InputableElement extends UI.Element {
         super.extraNodeAttributes(attr);
         attr.addClass(this.styleSheet.inputElement);
     }
+
+    focus() {
+        this.node.focus();
+    }
+
+    blur() {
+        this.node.blur();
+    }
 }
 
 
