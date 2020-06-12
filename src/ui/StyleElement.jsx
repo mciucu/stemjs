@@ -39,7 +39,15 @@ class StyleInstance extends UI.TextElement {
             }
 
             // TODO: if key starts with vendor-, replace it with the browser specific one (and the plain one)
-            str += key + ":" + value + ";";
+            const buildKeyValue = (key, value) => key + ":" + value + ";";
+
+            if (Array.isArray(value)) {
+                for (const v of value) {
+                    str += buildKeyValue(key, v);
+                }
+            } else {
+                str += buildKeyValue(key, value);
+            }
         }
         return str + "}";
     }
@@ -108,7 +116,7 @@ class DynamicStyleElement extends StyleElement {
             }
             let isProperValue = (typeof value === "string" || value instanceof String
                               || typeof value === "number" || value instanceof Number
-                              || typeof value === "function");
+                              || typeof value === "function" || Array.isArray(value));
             if (isProperValue) {
                 ownStyle[key] = value;
                 haveOwnStyle = true;
