@@ -124,7 +124,7 @@ class DynamicStyleElement extends StyleElement {
                 // Check that this actually is a valid subselector
                 let firstChar = String(key).charAt(0);
                 if (!ALLOWED_SELECTOR_STARTS.has(firstChar)) {
-                    console.error("First character of your selector is invalid.");
+                    console.error(`First character of your selector is invalid. The key is "${key}"`);
                     continue;
                 }
                 // TODO: maybe optimize for waste here?
