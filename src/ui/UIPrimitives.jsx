@@ -190,7 +190,7 @@ class Image extends UI.Primitive("img") {
 // Beware coder: If you ever use this class, you should have a well documented reason
 class RawHTML extends UI.Element {
     getInnerHTML() {
-        return this.options.innerHTML || this.options.__innerHTML;
+        return this.options.innerHTML || this.options.__innerHTML || "";
     }
 
     redraw() {
