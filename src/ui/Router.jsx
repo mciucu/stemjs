@@ -162,6 +162,10 @@ export class Router extends Switcher {
         return this.addListener("change", callback);
     }
 
+    removeChangeListener(callback) {
+        return this.removeListener("change", callback);
+    }
+
     onMount() {
         if (!Router.Global) {
             this.constructor.setGlobalRouter(this);
