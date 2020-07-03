@@ -17,6 +17,11 @@ export class AjaxHandler {
     }
 
     fetch(request, ...args) {
+        if (!request) {
+            console.error("Missing request for fetch");
+            return;
+        }
+
         let baseOptions = {
             preprocessors: this.getPreprocessors(),
             postprocessors: this.getPostprocessors(),
