@@ -237,7 +237,7 @@ export function getCookie(name) {
 }
 
 export function setCookie(name, value, maxAge=60*60*4 /* 4 hours */, domain) {
-    let cookie = `${name}=${value};path=/;max-age=${maxAge}; SameSite=None; ${window.location.protocol === "http:" ? "" : "Secure;"}`;
+    let cookie = `${name}=${value}; path=/; max-age=${maxAge}; ${window.location.protocol === "http:" ? "" : "SameSite=None; Secure; "}`;
     if (domain && domain.trim().length) {
         cookie += `domain=${domain};`
     }
