@@ -28,8 +28,8 @@ class Device {
             return true;
         }
 
-        const width = (window.screen && window.screen.width) ? window.screen.width : window.innerWidth;
-        const height = (window.screen && window.screen.height) ? window.screen.height : window.innerHeight;
+        const width = (this.isMobileDevice() && window.screen?.width) ||  window.innerWidth;
+        const height = (this.isMobileDevice() && window.screen?.height) ||  window.innerHeight;
 
         return width > height || height < 380;
     }
