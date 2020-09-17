@@ -4,7 +4,7 @@ import {TimeUnit} from "./Duration"
 // File meant to handle server time/client time differences
 let ServerTime = {
     now() {
-        return StemDate().subtract(this.getOffset());
+        return new StemDate().subtract(this.getOffset());
     },
 
     getOffset() {
@@ -28,9 +28,8 @@ export const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 
 // TODO: should have a generic method time1.isSame("x", time);
 export function isDifferentDay(timeA, timeB) {
-    // return !StemDate(timeA).same(TimeUnit.DAY, timeB);
-    timeA = StemDate(timeA);
-    timeB = StemDate(timeB);
+    timeA = new StemDate(timeA);
+    timeB = new StemDate(timeB);
 
     // First check if difference is gre
     if (timeA.diff(timeB) > +TimeUnit.DAY) {
