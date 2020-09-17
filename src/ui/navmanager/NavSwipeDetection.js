@@ -2,7 +2,7 @@ import {Device} from "../../base/Device";
 import {Dispatcher} from "../../base/Dispatcher";
 import {StemDate} from "../../time/Time";
 
-let maxDistanceFromSide = 25; // Pixels
+let DEFAULT_MAX_DISTANCE_FROM_SIDE = 25; // Pixels
 let minSwipeDistance = 60;    // Pixels
 let minSwipeSpeed = 0.5;      // Pixels per millisecond
 
@@ -36,7 +36,7 @@ function touchEventHandler(ignoreCondition, successCondition, onSuccess, xType="
     }
 }
 
-function initializeSwipeRight(navManager, maxDistance=maxDistanceFromSide, minDistance=minSwipeDistance, minSpeed=minSwipeSpeed) {
+function initializeSwipeRight(navManager, maxDistance=DEFAULT_MAX_DISTANCE_FROM_SIDE, minDistance=minSwipeDistance, minSpeed=minSwipeSpeed) {
     document.addEventListener("touchstart", touchEventHandler(
         (touchX) => (navManager.leftSidePanel.visible ||
                         window.pageXOffset !== 0 ||
@@ -51,7 +51,7 @@ function initializeSwipeRight(navManager, maxDistance=maxDistanceFromSide, minDi
     ));
 }
 
-function initializeSwipeLeft(navManager, maxDistance=maxDistanceFromSide, minDistance=minSwipeDistance, minSpeed=minSwipeSpeed) {
+function initializeSwipeLeft(navManager, maxDistance=DEFAULT_MAX_DISTANCE_FROM_SIDE, minDistance=minSwipeDistance, minSpeed=minSwipeSpeed) {
     document.addEventListener("touchstart", touchEventHandler(
         (touchX) => (navManager.rightSidePanel.visible || window.innerWidth - touchX > maxDistance),
         (touchX, startX, duration) => (startX - touchX >= minDistance && (startX - touchX) / duration >= minSpeed),
@@ -64,7 +64,7 @@ function initializeSwipeLeft(navManager, maxDistance=maxDistanceFromSide, minDis
     ));
 }
 
-function initializeSwipeEvents(navManager, maxDistanceFromSide=maxDistanceFromSide, minDistance=minSwipeDistance, minSpeed=minSwipeSpeed) {
+function initializeSwipeEvents(navManager, maxDistanceFromSide=DEFAULT_MAX_DISTANCE_FROM_SIDE, minDistance=minSwipeDistance, minSpeed=minSwipeSpeed) {
     if (!Device.isTouchDevice()) {
         return;
     }
@@ -76,4 +76,4 @@ function initializeSwipeEvents(navManager, maxDistanceFromSide=maxDistanceFromSi
     }
 }
 
-export {maxDistanceFromSide, initializeSwipeRight, initializeSwipeLeft, initializeSwipeEvents};
+export {initializeSwipeRight, initializeSwipeLeft, initializeSwipeEvents};
