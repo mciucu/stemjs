@@ -33,6 +33,6 @@ export class RandGenFast {
     static rand(N) {
         return this.instance.rand(N);
     }
-};
+}
 
 RandGenFast.instance = new RandGenFast();

@@ -42,6 +42,7 @@ class MultiMap {
         this.map.set(this.normalizeKey(key), [this.normalizeValue(value)]);
     }
 
+    // Return the first value
     get(key) {
         let nKey = this.normalizeKey(key);
         if (this.map.has(nKey)) {
