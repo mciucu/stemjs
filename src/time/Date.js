@@ -3,7 +3,7 @@ import {TimeUnit, Duration} from "./Duration";
 
 // MAX_UNIX_TIME is either ~Feb 2106 in unix seconds or ~Feb 1970 in unix milliseconds
 // Any value less than this is interpreted as a unix time in seconds
-// If you want to go around this behavious, you can use the static method .fromUnixMilliseconds()
+// If you want to go around this behavior, you can use the static method .fromUnixMilliseconds()
 // To disable, set this value to 0
 export let MAX_AUTO_UNIX_TIME = Math.pow(2, 32);
 
@@ -304,6 +304,10 @@ class StemDate extends BaseDate {
         let tokens = this.constructor.splitToTokens(str);
         tokens = tokens.map(token => this.evalToken(token));
         return tokens.join("");
+    }
+
+    static format(date, str) {
+        return new StemDate(date).format(str);
     }
 
     isValid() {
