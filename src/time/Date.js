@@ -307,7 +307,7 @@ class StemDate extends BaseDate {
     }
 
     static format(date, str) {
-        return new StemDate(date).format(str);
+        return (new StemDate(date)).format(str);
     }
 
     isValid() {
