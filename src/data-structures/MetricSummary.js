@@ -68,7 +68,7 @@ export class MetricSummary extends Dispatchable {
         timestamp = +(new StemDate(timestamp));
         const lastTimestamp = this.rawTimestamps.length && this.rawTimestamps.last();
         if (lastTimestamp && lastTimestamp >= timestamp) {
-            console.error("Invalid new timestamp:", timestamp, this.getLastTimestamp());
+            console.warn("Invalid new timestamp:", timestamp, lastTimestamp);
             return;
         }
 
