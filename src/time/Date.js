@@ -14,16 +14,13 @@ class StemDate extends BaseDate {
     // This is only to let the IDE know that this class can receive arguments.
     constructor(...args) {
         super(...args);
+        if (arguments.length === 1 && isNumber(arguments[0]) && this.valueOf() < MAX_AUTO_UNIX_TIME) {
+            this.setTime(this.valueOf() * 1000);
+        }
     }
 
-    // Still need to do this mess because of Babel, should be removed when moving to native ES6
     static create(value) {
-        // Try to do an educated guess if this date is in unix seconds or milliseconds
-        if (arguments.length === 1 && isNumber(value) && value < MAX_AUTO_UNIX_TIME) {
-            return instantiateNative(BaseDate, StemDate, value * 1000.0);
-        } else {
-            return instantiateNative(BaseDate, StemDate, ...arguments);
-        }
+        return new this(value);
     }
 
     static toDate(date) {
@@ -46,8 +43,8 @@ class StemDate extends BaseDate {
         return this.create(new BaseDate(unixMilliseconds));
     }
 
-    static fromUnixSeconds(unixSecons) {
-        return this.fromUnixMilliseconds(unixSecons * 1000);
+    static fromUnixSeconds(unixSeconds) {
+        return this.fromUnixMilliseconds(unixSeconds * 1000);
     }
 
     // Creates a Date object from an instance of DOMHighResTimeStamp, returned by performance.now() for instance
