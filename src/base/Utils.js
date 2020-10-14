@@ -324,10 +324,6 @@ export function extendsNative(targetClass) {
         let property = Object.getOwnPropertyDescriptor(targetClass, key);
         if (property != null) {
             Object.defineProperty(newClass, key, property);
-        } else {
-            setTimeout(() => {
-                throw Error(`Failed native extend on ${key}`);
-            });
         }
     }
     newClass.prototype = targetClass.prototype;
