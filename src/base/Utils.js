@@ -319,10 +319,16 @@ export function extendsNative(targetClass) {
     // Fill in the default constructor
     let newClass = targetClass.create || function create() {
         return instantiateNative(BaseClass, newClass, ...arguments);
-        };
+    };
     for (const key of allKeys) {
         let property = Object.getOwnPropertyDescriptor(targetClass, key);
-        Object.defineProperty(newClass, key, property);
+        if (property != null) {
+            Object.defineProperty(newClass, key, property);
+        } else {
+            setTimeout(() => {
+                throw Error(`Failed native extend on ${key}`);
+            });
+        }
     }
     newClass.prototype = targetClass.prototype;
     newClass.__proto__ = targetClass.__proto__;
