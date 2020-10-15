@@ -20,7 +20,18 @@ class StemDate extends BaseDate {
     }
 
     static create(value) {
-        return new this(value);
+        try {
+            // native ES6
+            return new this(value);
+        } catch (e) {
+            // Still need to do this mess because of Babel, should be removed when moving to native ES6
+            // Try to do an educated guess if this date is in unix seconds or milliseconds
+            if (arguments.length === 1 && isNumber(value) && value < MAX_AUTO_UNIX_TIME) {
+                return instantiateNative(BaseDate, StemDate, value * 1000.0);
+            } else {
+                return instantiateNative(BaseDate, StemDate, ...arguments);
+            }
+        }
     }
 
     static toDate(date) {
