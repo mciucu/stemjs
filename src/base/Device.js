@@ -21,12 +21,12 @@ export function isLandscape() {
     if (window.orientation && (window.orientation === -90 || window.orientation === 90)) {
         return true;
     }
-    if (!this.isMobileDevice()) {
+    if (!isMobileDevice()) {
         return window.innerWidth > window.innerHeight;
     }
 
-    const width = (this.isMobileDevice() && window.screen?.width) ||  window.innerWidth;
-    const height = (this.isMobileDevice() && window.screen?.height) ||  window.innerHeight;
+    const width = (isMobileDevice() && window.screen?.width) ||  window.innerWidth;
+    const height = (isMobileDevice() && window.screen?.height) ||  window.innerHeight;
 
     return width > height || height < 380;
 }
