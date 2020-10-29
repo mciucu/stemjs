@@ -311,7 +311,7 @@ export function instantiateNative(BaseClass, NewClass, ...args) {
 export function extendsNative(targetClass) {
     if (targetClass.toString().includes(" extends ")) {
         // Native extended classes are cool, leave them as they are
-        return;
+        return targetClass;
     }
     let BaseClass = targetClass.__proto__;
     let allKeys = Object.getOwnPropertySymbols(targetClass).concat(Object.getOwnPropertyNames(targetClass));
