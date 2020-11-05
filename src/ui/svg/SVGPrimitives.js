@@ -1,4 +1,5 @@
 import {SVG} from "./SVGBase";
+export * from "./SVGBase";
 import * as math from "../../math";
 
 SVG.SVGRoot = class SVGRoot extends SVG.Element {
