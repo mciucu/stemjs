@@ -485,7 +485,7 @@ class StaticCodeHighlighter extends CodeEditor {
     }
 
     extraNodeAttributes(attr) {
-        attr.addClass(this.styleSheet.hideActive)
+        attr.addClass(this.styleSheet.hideActive);
     }
 }
 
