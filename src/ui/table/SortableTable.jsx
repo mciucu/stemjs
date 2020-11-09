@@ -20,19 +20,6 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
             this.columnSortingOrder = options.columnSortingOrder || [];
         }
 
-        onMount() {
-            super.onMount();
-
-            // TODO: fix multiple clicks registered here
-            // Sort table by clicked column
-            for (let column of this.columns) {
-                this["columnHeader" + column.id].addClickListener(() => {
-                    this.sortByColumn(column);
-                    this.dispatch("reorder");
-                });
-            }
-        }
-
         renderColumnHeader(column) {
             let sortIcon = <SortIconClass className={this.styleSheet.sortIcon}/>;
             if (this.sortBy === column) {
@@ -43,7 +30,14 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
                 }
             }
 
-            return <div style={{position: "relative"}}>{super.renderColumnHeader(column)} {sortIcon}</div>;
+            const reorderCallback = () => {
+                this.sortByColumn(column);
+                this.dispatch("reorder");
+            }
+
+            return <div style={{position: "relative"}} onClick={reorderCallback}>
+                {super.renderColumnHeader(column)} {sortIcon}
+            </div>;
         }
 
         sortByColumn(column) {
