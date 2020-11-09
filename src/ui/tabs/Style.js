@@ -108,19 +108,21 @@ class FlatTabAreaStyle extends BaseTabAreaStyle {
     @styleRuleInherit
     tab = {
         textDecoration: "none !important",
-        padding: () => this.themeProperties.FLAT_TAB_AREA_PADDING_SIDES,
+        padding: () => this.themeProps.FLAT_TAB_AREA_PADDING_SIDES,
+        paddingBottom: () => this.themeProps.FLAT_TAB_AREA_PADDING_SIDES - this.themeProps.FLAT_TAB_AREA_UNDERLINE_HEIGHT,
+        borderBottom: () => this.themeProps.FLAT_TAB_AREA_UNDERLINE_HEIGHT + "px solid rgba(0,0,0,0)",
         letterSpacing: "0.5px",
-        color: () => enhance(this.themeProperties.COLOR_FOREGROUND_BODY, 0.4) + "!important",
+        color: () => enhance(this.themeProps.COLOR_FOREGROUND_BODY, 0.4) + "!important",
         fontWeight: "bold",
         ":hover": {
             cursor: "pointer",
-            color: () => enhance(this.themeProperties.COLOR_FOREGROUND_BODY, 0.6) + "!important",
+            color: () => enhance(this.themeProps.COLOR_FOREGROUND_BODY, 0.6) + "!important",
         },
     };
 
     @styleRuleInherit
     activeTab = {
-        color: () => enhance(this.themeProperties.COLOR_FOREGROUND_BODY, 0.8) + "!important",
+        color: () => enhance(this.themeProps.COLOR_FOREGROUND_BODY, 0.8) + "!important",
         cursor: "default !important",
     };
 
@@ -129,13 +131,13 @@ class FlatTabAreaStyle extends BaseTabAreaStyle {
         whiteSpace: "nowrap",
         position: "relative",
         paddingTop: "4px",
-        backgroundColor: () => this.themeProperties.COLOR_FOREGROUND_BODY,
+        backgroundColor: () => this.themeProps.COLOR_FOREGROUND_BODY,
     };
 
     @styleRule
     activeBar = {
-        height: 3,
-        backgroundColor: () => this.themeProperties.COLOR_PRIMARY,
+        height: () => this.themeProps.FLAT_TAB_AREA_UNDERLINE_HEIGHT,
+        backgroundColor: () => this.themeProps.COLOR_PRIMARY,
         position: "absolute",
         left: 0,
         bottom: 0,
@@ -148,13 +150,13 @@ class FlatTabAreaStyle extends BaseTabAreaStyle {
 
     @styleRule
     activeOnRender = {
-        paddingBottom: () => this.themeProperties.FLAT_TAB_AREA_PADDING_SIDES - 3,
-        borderBottom: () => "3px solid " + this.themeProperties.COLOR_PRIMARY,
+        paddingBottom: () => this.themeProps.FLAT_TAB_AREA_PADDING_SIDES - this.themeProps.FLAT_TAB_AREA_UNDERLINE_HEIGHT,
+        borderBottom: () => this.themeProps.FLAT_TAB_AREA_UNDERLINE_HEIGHT + "px solid " + this.themeProps.COLOR_PRIMARY + " !important",
     };
 }
 
 class FlatTabAreaHorizontalOverflowStyle extends HorizontalOverflowStyle {
-    baseColor = () => this.themeProperties.COLOR_FOREGROUND_BODY;
+    baseColor = () => this.themeProps.COLOR_FOREGROUND_BODY;
     arrowColor = () => enhance(this.baseColor(), .4);
     arrowBackground = () => this.baseColor();
     arrowHoverColor = () => enhance(this.baseColor(), .8);
