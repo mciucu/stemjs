@@ -163,8 +163,8 @@ class TabArea extends UI.Element {
                 if (tabTitle.options.active) {
                     tabTitle.options.active = false;
                 }
-                if (tabPanels.options.active) {
-                    tabPanels.options.active = false;
+                if (tabPanel.options.active) {
+                    tabPanel.options.active = false;
                 }
 
                 if (activeTab === tabTitle) {

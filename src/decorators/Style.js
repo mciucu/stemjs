@@ -73,13 +73,13 @@ function styleRuleWithOptions() {
 }
 
 // TODO: Second argument is mostly useless (implied from targetMethodName)
-let styleRule = styleRuleWithOptions({
+const styleRule = styleRuleWithOptions({
     targetMethodName: "css",
     getKey: getStyleRuleKey,
     inherit: false,
 });
 
-let styleRuleInherit = styleRuleWithOptions({
+const styleRuleInherit = styleRuleWithOptions({
     targetMethodName: "css",
     getKey: getStyleRuleKey,
     inherit: true,
@@ -93,14 +93,14 @@ export function styleRuleCustom(options) {
     }, options));
 }
 
-let keyframesRule = styleRuleWithOptions({
+const keyframesRule = styleRuleWithOptions({
     targetMethodName: "keyframes",
     getKey: getKeyframesRuleKey,
     inherit: false,
 });
 
 // TODO: This is currently not working (I think)
-let keyframesRuleInherit = styleRuleWithOptions({
+const keyframesRuleInherit = styleRuleWithOptions({
     targetMethodName: "keyframes",
     getKey: getKeyframesRuleKey,
     inherit: true,
