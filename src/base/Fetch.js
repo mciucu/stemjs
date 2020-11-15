@@ -101,9 +101,12 @@ class XHRPromise {
                 // In case dataType is "arrayBuffer", "blob", "formData", "json", "text"
                 // Response has methods to return these as promises
                 if (typeof response[options.dataType] === "function") {
+                    response = response[options.dataType]();
                     // TODO: should whitelist dataType to json, blob
-                    response[options.dataType]().then((data) => {
+                    response.then((data) => {
                         this.resolve(data);
+                    }, (err) => {
+                        this.reject(err);
                     });
                 } else {
                     this.resolve(response);
