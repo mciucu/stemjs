@@ -136,6 +136,7 @@ class UIElement extends BaseUIElement {
     // TODO: should probably add a second arg, doRedraw=true - same for setOptions
     updateOptions(options) {
         this.setOptions(Object.assign(this.options, options));
+        // TODO: if the old options and the new options are deep equal, we can skip this redraw, right?
         this.redraw();
     }
 
