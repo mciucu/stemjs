@@ -76,6 +76,13 @@ UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement 
         return this.getValue();
     }
 
+    redraw() {
+        if (!this.node) {
+            this.node = this.createNode();
+        }
+        super.redraw();
+    }
+
     onMount() {
         UI.TranslationElements.add(this);
     }
