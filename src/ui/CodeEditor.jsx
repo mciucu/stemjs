@@ -452,7 +452,7 @@ class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
     copyTextToClipboard() {
         this.getAce().selectAll();
         this.getAce().focus();
-        document.execCommand('copy');
+        document.execCommand("copy");
     }
 }
 
