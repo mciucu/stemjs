@@ -9,9 +9,19 @@ class ScriptResolver extends Dispatchable {
         let scriptElement = document.createElement("script");
         scriptElement.async = true;
         scriptElement.src = scriptPath;
-        scriptElement.onload = () => this.onLoad();
-        // TODO: what about error?
-        document.getElementsByTagName("head")[0].appendChild(scriptElement);
+
+        let insertElementTimeout = null;
+        const insertElement = () => document.getElementsByTagName("head")[0].appendChild(scriptElement);
+
+        scriptElement.onload = () => {
+            this.onLoad();
+            clearTimeout(insertElementTimeout);
+        };
+        scriptElement.onerror = e => {
+            insertElementTimeout = setTimeout(insertElement, 1000);
+        };
+
+        insertElement();
     }
 
     onLoad() {
