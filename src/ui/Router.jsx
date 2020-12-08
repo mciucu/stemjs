@@ -177,6 +177,13 @@ export class Route {
     static ARG_KEY = "%s";
     cachedPages = new Map();
 
+    getDefaultOptions() {
+        return {
+            beforeEnter: null,
+            cachePage: true,
+        };
+    }
+
     constructor(expr, pageGenerator, subroutes = [], options = {}) {
         this.expr = (expr instanceof Array) ? expr : [expr];
         this.pageGenerator = pageGenerator;
@@ -184,7 +191,10 @@ export class Route {
         if (typeof options === "string") {
             options = {title: options}
         }
-        this.options = options;
+        this.options = {
+            ...this.getDefaultOptions(),
+            options
+        };
         this.cachedPages = new Map();
     }
 
@@ -241,7 +251,9 @@ export class Route {
                     page.pageTitle = this.getPageTitle();
                 }
             }
-            this.cachedPages.set(serializedArgs, page);
+            if (this.options.cachePage) {
+                this.cachedPages.set(serializedArgs, page);
+            }
         }
         return this.cachedPages.get(serializedArgs);
     }
