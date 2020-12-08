@@ -193,7 +193,7 @@ export class Route {
         }
         this.options = {
             ...this.getDefaultOptions(),
-            options
+            ...options
         };
         this.cachedPages = new Map();
     }
@@ -251,9 +251,10 @@ export class Route {
                     page.pageTitle = this.getPageTitle();
                 }
             }
-            if (this.options.cachePage) {
-                this.cachedPages.set(serializedArgs, page);
+            if (!this.options.cachePage) {
+                return page;
             }
+            this.cachedPages.set(serializedArgs, page);
         }
         return this.cachedPages.get(serializedArgs);
     }
