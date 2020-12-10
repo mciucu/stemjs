@@ -330,7 +330,7 @@ NodeAttributes.defaultAttributesMap = new DOMAttributesMap(null, [
     ["minWidth"],
     ["role"],
     ["target"],
-    ["HTMLtitle", {domName: "title"}],
+    ["domTitle", {domName: "title"}],
     ["type"],
     ["placeholder"],
     ["src"],
