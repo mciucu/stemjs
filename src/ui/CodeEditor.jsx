@@ -98,6 +98,10 @@ class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
         this.dispatch("aceReady");
     }
 
+    onUnmount() {
+        this.getAce().destroy();
+    }
+
     getAce() {
         return this.ace;
     }
