@@ -135,6 +135,13 @@ export class Router extends Switcher {
         return result;
     }
 
+    deactivateChild(child) {
+        super.deactivateChild(child);
+        if (child.options.doNotCache) {
+            child.destroyNode();
+        }
+    }
+
     setURL(urlParts) {
         urlParts = unwrapArray(urlParts);
         const page = this.getPageToRender(urlParts);
@@ -243,7 +250,11 @@ export class Route {
         const serializedArgs = argsArray.toString();
         if (!this.cachedPages.has(serializedArgs)) {
             const args = unwrapArray(argsArray);
-            const generatorArgs = {args, argsArray};
+            const generatorArgs = {
+                args,
+                argsArray,
+                doNotCache: this.options.doNotCache,
+            };
             const page = (pageGenerator.prototype instanceof UI.Element) ? new pageGenerator(generatorArgs) : pageGenerator(generatorArgs);
             if (page && !page.pageTitle) {
                 const myPageTitle = this.getPageTitle();
@@ -251,7 +262,7 @@ export class Route {
                     page.pageTitle = this.getPageTitle();
                 }
             }
-            if (!this.options.cachePage) {
+            if (this.options.doNotCache) {
                 return page;
             }
             this.cachedPages.set(serializedArgs, page);
