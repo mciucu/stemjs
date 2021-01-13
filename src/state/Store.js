@@ -29,11 +29,6 @@ class StoreObject extends Dispatchable {
         Object.assign(this, event.data);
     };
 
-    // Add a listener for all updates, callback will receive the events after they were applied
-    addUpdateListener(callback) {
-        return this.addListener("update", callback);
-    }
-
     addDeleteListener(callback) {
         return this.addListener("delete", callback);
     }
@@ -270,12 +265,6 @@ class GenericObjectStore extends BaseStore {
         return this.addListener("create", callback);
     }
 
-    // Add a listener for any updates to objects in store
-    // The callback will receive the object and the event
-    addUpdateListener(callback) {
-        return this.addListener("update", callback);
-    }
-
     // Add a listener for any object deletions
     addDeleteListener(callback) {
         return this.addListener("delete", callback);
@@ -311,10 +300,6 @@ class SingletonStore extends BaseStore {
     importState(obj) {
         Object.assign(this, obj);
         this.dispatch("update", obj, this);
-    }
-
-    addUpdateListener(callback) {
-        return this.addListener("update", callback);
     }
 
     // Use the same logic as StoreObject when listening to events

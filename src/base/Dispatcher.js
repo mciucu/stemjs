@@ -191,6 +191,14 @@ class Dispatchable {
         });
         return intervalId;
     }
+
+    addUpdateListener(callback) {
+        return this.addListener("update", callback);
+    }
+
+    removeUpdateListener(callback) {
+        return this.removeListener("update", callback);
+    }
 }
 
 // Creates a method that calls the method methodName on obj, and adds the result as a cleanup task
