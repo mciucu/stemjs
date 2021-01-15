@@ -306,6 +306,8 @@ class SingletonStore extends BaseStore {
     addEventListener = StoreObject.prototype.addEventListener.bind(this);
 }
 
+// TODO: rename this to plain Store?
+// TODO: looks like objectType == ObjectWrapper.name usually, consider simplification and optional name in options
 const ObjectStore = (objectType, ObjectWrapper, options={}) => class ObjectStore extends GenericObjectStore {
     constructor() {
         super(objectType, ObjectWrapper, options);
