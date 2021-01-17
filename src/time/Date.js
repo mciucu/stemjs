@@ -34,6 +34,11 @@ class StemDate extends BaseDate {
         }
     }
 
+    // Return a StemDate from the object, else return value if falsy
+    static optionally(value) {
+        return value && this.create(value);
+    }
+
     static toDate(date) {
         if (date instanceof StemDate) {
             return date;
