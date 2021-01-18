@@ -322,4 +322,9 @@ const ObjectStore = (objectType, ObjectWrapper, options={}) => class ObjectStore
     }
 };
 
+export function MakeObjectStore(...args) {
+    const Cls = ObjectStore(...args);
+    return new Cls();
+}
+
 export {StoreObject, BaseStore, GenericObjectStore, SingletonStore, ObjectStore};
