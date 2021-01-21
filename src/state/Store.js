@@ -320,6 +320,21 @@ const ObjectStore = (objectType, ObjectWrapper, options={}) => class ObjectStore
     static getInstance(state=DefaultState) {
         return state.getStore(this.getObjectType());
     }
+
+    // For a response obj with a state field, return the objects that we have in store
+    loadFromResponse(response) {
+        const objectType = this.constructor.getObjectType();
+        const responseState = response?.state || {};
+
+        // Since the backend might have a different lettering case, need a more complex search here
+        for (const [key, value] of Object.entries(responseState)) {
+            if (String(key).toLowerCase() === objectType) {
+                return value.map(obj => this.get(obj.id));
+            }
+        }
+
+        return [];
+    }
 };
 
 export function MakeObjectStore(...args) {
