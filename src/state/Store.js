@@ -314,7 +314,7 @@ const ObjectStore = (objectType, ObjectWrapper, options={}) => class ObjectStore
     }
 
     static getObjectType() {
-        return objectType;
+        return objectType.toLowerCase(); // TODO: minimize the instances of objectType.toLowerCase()
     }
 
     static getInstance(state=DefaultState) {
