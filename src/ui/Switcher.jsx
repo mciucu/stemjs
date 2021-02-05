@@ -126,12 +126,20 @@ class Switcher extends UI.Element {
     }
 
     updateActiveChild(element) {
+        // Removing and reinserting the same node is inefficient, so
+        // just update the internal state of the switcher instead.
+        if (element && element.node === this.node.firstChild) {
+            this.updateChild(element);
+            this.children[0] = this.activeChild = element;
+            return;
+        }
+
         while (this.node.firstChild) {
             //TODO: would be useful here to be able to access the matching UI Element
             this.node.removeChild(this.node.firstChild);
         }
 
-        if (element == null) {
+        if (!element) {
             this.activeChild = null;
             return;
         }
