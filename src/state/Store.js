@@ -80,6 +80,24 @@ class BaseStore extends Dispatchable {
         this.attachToState();
     }
 
+    getObjectType() {
+        return this.objectType;
+    }
+
+    // For a response obj with a state field, return the objects that we have in store
+    loadFromResponse(response) {
+        const responseState = response?.state || {};
+
+        // Since the backend might have a different lettering case, need a more complex search here
+        for (const [key, value] of Object.entries(responseState)) {
+            if (String(key).toLowerCase() === this.getObjectType()) {
+                return value.map(obj => this.get(obj.id));
+            }
+        }
+
+        return [];
+    }
+
     attachToState() {
         if (this.getState()) {
             this.getState().addStore(this);
@@ -102,6 +120,7 @@ class BaseStore extends Dispatchable {
 }
 
 // Store type primarily intended to store objects that come from a server DB, and have a unique numeric .id field
+// TODO: do we ever decouple this from BaseStore? Maybe merge.
 class GenericObjectStore extends BaseStore {
     objects = new Map();
 
@@ -307,36 +326,19 @@ class SingletonStore extends BaseStore {
 }
 
 // TODO: rename this to plain Store?
+// TODO: simplify this layer
 // TODO: looks like objectType == ObjectWrapper.name usually, consider simplification and optional name in options
 const ObjectStore = (objectType, ObjectWrapper, options={}) => class ObjectStore extends GenericObjectStore {
     constructor() {
         super(objectType, ObjectWrapper, options);
     }
 
-    static getObjectType() {
-        return objectType.toLowerCase(); // TODO: minimize the instances of objectType.toLowerCase()
-    }
-
     static getInstance(state=DefaultState) {
         return state.getStore(this.getObjectType());
     }
-
-    // For a response obj with a state field, return the objects that we have in store
-    loadFromResponse(response) {
-        const objectType = this.constructor.getObjectType();
-        const responseState = response?.state || {};
-
-        // Since the backend might have a different lettering case, need a more complex search here
-        for (const [key, value] of Object.entries(responseState)) {
-            if (String(key).toLowerCase() === objectType) {
-                return value.map(obj => this.get(obj.id));
-            }
-        }
-
-        return [];
-    }
 };
 
+// TODO: rename to MakeStore?
 export function MakeObjectStore(...args) {
     const Cls = ObjectStore(...args);
     return new Cls();
