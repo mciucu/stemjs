@@ -165,6 +165,10 @@ class GenericObjectStore extends BaseStore {
         return this.all().find(callback);
     }
 
+    filter(callback) {
+        return this.all().filter(callback);
+    }
+
     toJSON() {
         return this.all().map(entry => entry.toJSON());
     }
