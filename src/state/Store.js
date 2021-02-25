@@ -162,7 +162,7 @@ class GenericObjectStore extends BaseStore {
     }
 
     find(callback) {
-        return this.all(true).find(callback);
+        return this.all().find(callback);
     }
 
     toJSON() {
