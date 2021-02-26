@@ -1,7 +1,7 @@
 // TODO: this file should be refactored
 // consider lazyCSS -> styleRule/styleRule(styleRule.INHERIT)
 import {decorate} from './Utils';
-import {lazyInitialize} from './LazyInitialize'
+import {lazyInit} from './LazyInitialize'
 
 function evaluateInitializer(target, initializer, value) {
     let result = initializer ? initializer.call(target) : value;
@@ -23,7 +23,7 @@ function handleDescriptor(target, key, descriptor) {
     };
     delete descriptor.value;
 
-    return lazyInitialize(target, key, descriptor);
+    return lazyInit(target, key, descriptor);
 }
 
 export function lazyCSS(...args) {

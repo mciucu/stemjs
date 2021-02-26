@@ -30,10 +30,6 @@ function handleDescriptor(target, key, descriptor) {
     };
 }
 
-export function lazyInitialize(...args) {
+export function lazyInit(...args) {
     return decorate(handleDescriptor, args);
 }
-
-let lazyInit = lazyInitialize;
-
-export {lazyInit};
