@@ -330,6 +330,8 @@ export class Route {
 }
 
 export class TerminalRoute extends Route {
+    timeout = null;
+
     constructor(expr, pageGenerator, options = {}) {
         super(expr, pageGenerator, [], options);
     }
@@ -341,7 +343,8 @@ export class TerminalRoute extends Route {
     getPage(urlParts, router) {
         const page = super.getPage(...arguments);
         // TODO: why is this in a setTimeout?
-        setTimeout(() => {
+        clearTimeout(this.timeout);
+        this.timeout = setTimeout(() => {
             if (page && page.setURL) {
                 page.setURL(urlParts);
             }
