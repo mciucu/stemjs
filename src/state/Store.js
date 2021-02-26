@@ -343,7 +343,7 @@ const ObjectStore = (objectType, ObjectWrapper, options={}) => class ObjectStore
 };
 
 // TODO: rename to MakeStore?
-export function MakeObjectStore(...args) {
+export function MakeStore(...args) {
     const Cls = ObjectStore(...args);
     return new Cls();
 }
