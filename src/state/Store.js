@@ -98,6 +98,10 @@ class BaseStore extends Dispatchable {
         return [];
     }
 
+    loadObjectFromResponse(response, index = 0) {
+        return this.loadFromResponse(response)?.[index];
+    }
+
     attachToState() {
         if (this.getState()) {
             this.getState().addStore(this);
