@@ -333,10 +333,9 @@ class SingletonStore extends BaseStore {
     addEventListener = StoreObject.prototype.addEventListener.bind(this);
 }
 
-// TODO: rename this to plain Store?
 // TODO: simplify this layer
 // TODO: looks like objectType == ObjectWrapper.name usually, consider simplification and optional name in options
-const ObjectStore = (objectType, ObjectWrapper, options={}) => class ObjectStore extends GenericObjectStore {
+const Store = (objectType, ObjectWrapper, options={}) => class Store extends GenericObjectStore {
     constructor() {
         super(objectType, ObjectWrapper, options);
     }
@@ -346,10 +345,11 @@ const ObjectStore = (objectType, ObjectWrapper, options={}) => class ObjectStore
     }
 };
 
-// TODO: rename to MakeStore?
+export const ObjectStore = Store; // TODO: temp for backwards compatibility
+
 export function MakeStore(...args) {
     const Cls = ObjectStore(...args);
     return new Cls();
 }
 
-export {StoreObject, BaseStore, GenericObjectStore, SingletonStore, ObjectStore};
+export {StoreObject, BaseStore, GenericObjectStore, SingletonStore, Store};
