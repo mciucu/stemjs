@@ -16,6 +16,7 @@ function handleDescriptor(target, key, descriptor) {
 
             const ret = initializer ? initializer.call(this) : value;
 
+            // Overwrite the getter & setter combo with the plain field on first assignment.
             Object.defineProperty(this, key, {
                 configurable,
                 enumerable,
