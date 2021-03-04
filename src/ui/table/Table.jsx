@@ -89,7 +89,7 @@ class Table extends UI.Primitive("table") {
         return column.headerName;
     }
 
-    // Original entries should not be modified. Overwrite this function to appy any modification in a new array.
+    // Original entries should not be modified. Overwrite this function to apply any modification in a new array.
     // TODO: keeping data top level is very bad practice
     getEntries() {
         return this.entries || [];
