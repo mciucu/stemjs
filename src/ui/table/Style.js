@@ -35,7 +35,7 @@ class TableStyle extends StyleSheet {
 
 }
 
-class SortableTableStyle extends TableStyle {
+class SortableTableStyle extends StyleSheet {
     @styleRule
     sortIcon = {
         position: "absolute",
@@ -45,7 +45,7 @@ class SortableTableStyle extends TableStyle {
         float: "right",
     };
 
-    @styleRuleInherit
+    @styleRule
     table = {
         [" th:hover ." + this.sortIcon.getClassName()]: {
             visibility: "inherit",
