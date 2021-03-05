@@ -7,6 +7,12 @@ import {TimeUnit, Duration} from "./Duration";
 // To disable, set this value to 0
 export let MAX_AUTO_UNIX_TIME = Math.pow(2, 32);
 
+let DEFAULT_DATE_FORMAT = "ISO";
+
+export function setDefaultDateFormat(dateFormat) {
+    DEFAULT_DATE_FORMAT = dateFormat;
+}
+
 const BaseDate = self.Date;
 
 @extendsNative
@@ -49,6 +55,17 @@ class StemDate extends BaseDate {
 
     static now() {
         return new this(BaseDate.now());
+    }
+
+    toBaseString() {
+        return super.toString();
+    }
+
+    toString() {
+        if (!DEFAULT_DATE_FORMAT) {
+            return this.toBaseString();
+        }
+        return this.format(DEFAULT_DATE_FORMAT);
     }
 
     toDate() {
@@ -313,7 +330,7 @@ class StemDate extends BaseDate {
         return func(this);
     }
 
-    format(str="ISO") {
+    format(str = DEFAULT_DATE_FORMAT) {
         let tokens = this.constructor.splitToTokens(str);
         tokens = tokens.map(token => this.evalToken(token));
         return tokens.join("");
@@ -324,7 +341,7 @@ class StemDate extends BaseDate {
     }
 
     isValid() {
-        return (this.toString() !== "Invalid Date");
+        return super.toString() != "Invalid Date";
     }
 
     utc() {
@@ -439,6 +456,6 @@ StemDate.tokenFormattersMap = new Map([
     ["LL", date => date.format("MMMM Do, YYYY")],
 ]);
 
-let Date = StemDate;
+let Date = StemDate; // TODO: do we use this?
 
 export {Date, StemDate};
