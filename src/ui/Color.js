@@ -158,7 +158,7 @@ export class Color {
     }
 
     getColor() {
-        let rgba = this.getRgba();
+        let rgba = Color.parseColor(this);
         return `rgba(${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${rgba[3]})`;
     }
 
@@ -209,7 +209,7 @@ export class Color {
         }
 
         // Check for rgba (e.g. "rgba(255, 0, 0, 0.5)")
-        let rgba = color.match(/^rgba\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+.*\d*)\s*\)$/i);
+        let rgba = color.match(/^rgba\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+\.?\d*)\s*\)$/i);
         if (rgba) {
             values = [
                 parseInt(rgba[1]),
@@ -292,12 +292,49 @@ export function darken(color, amount) {
 }
 
 
-export function enhance(color, amount) {
-    if (Color.isLight(color)) {
-        return darken(color, amount);
+const COLOR_MATCHER_REGEXP = /(#[0-9a-f]{6}|#[0-9a-f]{3}|rgba\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*\d*\.?\d*\s*\)|rgb\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\))/gi;
+
+function saturateColor(color, saturate) {
+    const rgba = Color.parseColor(color);
+    const rgb = rgba.slice(0, 3);
+    const maxValueIndex = rgb.findIndex(x => x === Math.max(...rgb));
+    const minValueIndex = rgb.findIndex((x, i) => x === Math.min(...rgb) && i !== maxValueIndex);
+    const midValueIndex = 3 - minValueIndex - maxValueIndex;
+    const lightness = (rgb[maxValueIndex] + rgb[minValueIndex]) / 2 / 255;
+    const grayValue = lightness * 255;
+    const saturationRange = Math.round(Math.min(255 - grayValue, grayValue));
+    const saturateSign = saturate > 0 ? 1 : -1;
+    const saturateValue = Math.abs(saturate);
+    const maxChange = saturate > 0 ? Math.min(255 - rgb[maxValueIndex], Math.max(saturate * 30, rgb[minValueIndex])) : grayValue - rgb[minValueIndex];
+    const changeAmount = Math.min(saturationRange * saturateValue, maxChange);
+    const highDiff = grayValue - rgb[maxValueIndex];
+    const midDiff = grayValue - rgb[midValueIndex];
+    let midValueRatio;
+    if (highDiff === 0) {
+        midValueRatio = 1;
     } else {
-        return lighten(color, amount);
+        midValueRatio = midDiff / highDiff;
     }
+    rgb[minValueIndex] -= saturateSign * changeAmount;
+    rgb[maxValueIndex] += saturateSign * changeAmount;
+    rgb[midValueIndex] = (grayValue + (rgb[maxValueIndex] - grayValue) * midValueRatio);
+
+    return Color.convertToRgba([...rgb.map(x => Math.min(255, Math.max(0, Math.round(x)))), rgba[3]]);
+}
+
+function enhanceColor(color, amount, saturate) {
+    let enhancedColor;
+    if (Color.isLight(color)) {
+        enhancedColor = darken(color, amount);
+    } else {
+        enhancedColor = lighten(color, amount);
+    }
+    return saturateColor(enhancedColor, saturate);
+}
+
+// gamma: [-1,1], saturate: [-1,1] (you can also try bigger values, seems to be working fine, heh)
+export function enhance(colorContainingString, gamma, saturate=0) {
+    return colorContainingString.replace(COLOR_MATCHER_REGEXP, color => enhanceColor(color, gamma, saturate));
 }
 
 
