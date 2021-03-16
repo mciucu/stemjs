@@ -1,21 +1,41 @@
 import {GenericObjectStore, StoreObject} from "../state/Store";
 
-export const autoRedrawHandlerSymbol = Symbol("autoRedrawHandler");
-export const autoRedrawListenersSymbol = Symbol("autoRedrawListener");
+// Basically a WeakMap with a default getter
+// TODO - mode to another file probably
+class PropertyCache {
+    constructor(key, getter) {
+        this.key = key;
+        this.getter = getter;
+    }
+
+    get(obj) {
+        const key = this.key;
+        if (obj.hasOwnProperty(key)) {
+            return obj[key];
+        }
+        return obj[key] = this.getter(obj);
+    }
+}
+
+// TODO: maybe have better names
+const autoRedrawListenersLazy = new PropertyCache(Symbol.for("autoRedrawHandler"), () => new Set());
+const redrawHandlerLazy = new PropertyCache(Symbol.for("autoRedrawListener"), (obj) => {
+    return () => {
+        obj.node && obj.redraw();
+    }
+});
 
 // Decorator that attaches an update listener on all store objects in options
 // The logic is very crude, but works in most cases
 export function autoredrawDecorator(Cls, ...args) {
+    // TODO: we only need to do this once, throw an error if applying multiple times to the same class
+
     const oldSetOptions = Cls.prototype.setOptions;
     // TODO: optimize to only attach after onMount
     Cls.prototype.setOptions = function setOptions(options) {
         oldSetOptions.call(this, options);
 
-        let listenerTargetSet = this[autoRedrawListenersSymbol];
-        if (!listenerTargetSet) {
-            this[autoRedrawListenersSymbol] = listenerTargetSet = new Set(args);
-            this[autoRedrawHandlerSymbol] = () => this.node && this.redraw();
-        }
+        let listenerTargetSet = autoRedrawListenersLazy.get(this);
 
         const objArray = Object.values(options || {}).filter(obj => {
             return (obj instanceof StoreObject) && !listenerTargetSet.has(obj);
@@ -25,9 +45,12 @@ export function autoredrawDecorator(Cls, ...args) {
 
         // Add the new extra ones, and attach the lister if mounted
         for (let obj of objArray) {
+            // Technically we could just add these listeners, but this would also leave us with listeners on temp ui elements
+            // TODO: probably need to remove at cleanup
             if (this.node) {
-                this.attachUpdateListener(obj, this[autoRedrawHandlerSymbol]);
+                this.attachUpdateListener(obj, redrawHandlerLazy.get(this));
             }
+
             listenerTargetSet.add(obj);
         }
     };
@@ -35,9 +58,9 @@ export function autoredrawDecorator(Cls, ...args) {
     const oldOnMount = Cls.prototype.onMount;
     Cls.prototype.onMount = function onMount() {
         oldOnMount.call(this);
-        let listenerTargetSet = this[autoRedrawListenersSymbol];
-        for (let obj of listenerTargetSet) {
-            const redrawHandler = this[autoRedrawHandlerSymbol];
+        const listenerTargetSet = autoRedrawListenersLazy.get(this);
+        for (const obj of listenerTargetSet) {
+            const redrawHandler = redrawHandlerLazy.get(this);
             this.attachUpdateListener(obj, redrawHandler);
             if (obj instanceof GenericObjectStore) {
                 this.attachCreateListener(obj, redrawHandler);
@@ -45,6 +68,7 @@ export function autoredrawDecorator(Cls, ...args) {
             }
         }
     };
+
     return Cls;
 }
 
