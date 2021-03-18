@@ -185,6 +185,13 @@ class Link extends UI.Primitive("a") {
 }
 
 class Image extends UI.Primitive("img") {
+    addLoadListener(callback) {
+        this.addNodeListener("load", callback);
+    }
+
+    removeLoadListener(callback) {
+        this.removeNodeListener("load", callback);
+    }
 }
 
 // Beware coder: If you ever use this class, you should have a well documented reason
