@@ -292,7 +292,7 @@ export function darken(color, amount) {
 }
 
 
-const COLOR_MATCHER_REGEXP = /(#[0-9a-f]{6}|#[0-9a-f]{3}|rgba\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*\d*\.?\d*\s*\)|rgb\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\))/gi;
+const COLOR_MATCHER_REGEXP = new RegExp(`(#[0-9a-f]{6}|#[0-9a-f]{3}|rgba\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*\d*\.?\d*\s*\)|rgb\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\))|${Object.keys(COLORS_BY_NAME).sort((a,b) => b.length - a.length).join("|")}`, "gi");
 
 function saturateColor(color, saturate) {
     const rgba = Color.parseColor(color);
