@@ -118,6 +118,7 @@ class FlatTabAreaStyle extends BaseTabAreaStyle {
             cursor: "pointer",
             color: () => enhance(this.themeProps.COLOR_FOREGROUND_BODY, 0.6) + "!important",
         },
+        ...this.themeProps.FLAT_TAB_AREA_TAB_STYLE,
     };
 
     @styleRuleInherit

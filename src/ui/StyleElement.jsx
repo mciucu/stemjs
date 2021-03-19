@@ -3,7 +3,7 @@ import {dashCase} from "../base/Utils";
 import {NodeAttributes, defaultToPixelsAttributes} from "./NodeAttributes";
 
 // TODO: should this be actually better done throught the dynamic CSS API, without doing through the DOM?
-// So far it's actually better like this, since browsers like Chrome allow users to edit classes
+// So far it's actually better like this, since we want to edit the classes inline
 class StyleInstance extends UI.TextElement {
     constructor(options) {
         super(options);
