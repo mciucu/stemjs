@@ -23,6 +23,7 @@ class InputableElement extends UI.Element {
 
 class Input extends UI.Primitive(InputableElement, "input") {
     extraNodeAttributes(attr) {
+        super.extraNodeAttributes(attr);
         let type = this.getInputType();
         if (type) {
             attr.setAttribute("type", type);
