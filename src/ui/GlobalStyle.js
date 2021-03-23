@@ -28,11 +28,11 @@ Theme.setProperties({
 
     COLOR_LINK: "#337ab7",
 
-    FONT_SIZE_EXTRA_SMALL: "10px",
-    FONT_SIZE_SMALL: "12px",
-    FONT_SIZE_DEFAULT: "14px",
-    FONT_SIZE_LARGE: "17px",
-    FONT_SIZE_EXTRA_LARGE: "21px",
+    FONT_SIZE_EXTRA_SMALL: 10,
+    FONT_SIZE_SMALL: 12,
+    FONT_SIZE_DEFAULT: 14,
+    FONT_SIZE_LARGE: 17,
+    FONT_SIZE_EXTRA_LARGE: 21,
 
     BASE_BORDER_RADIUS: 0,
     BASE_BOX_SHADOW: "0px 0px 10px rgb(160, 162, 168)",
@@ -41,6 +41,7 @@ Theme.setProperties({
     BASE_BORDER_COLOR: "#ddd",
 
     BUTTON_BORDER_RADIUS: 2,
+    BUTTON_COLOR: props => props.COLOR_BACKGROUND,
 
     CARD_PANEL_HEADER_HEIGHT: 30,
     CARD_PANEL_HEADER_HEIGHT_LARGE: 40,
@@ -59,7 +60,7 @@ Theme.setProperties({
     FONT_FAMILY_SANS_SERIF: "Lato, 'Segoe UI', 'Lucida Sans Unicode', 'Helvetica Neue', Helvetica, Arial, sans-serif",
     FONT_FAMILY_SERIF: "serif",
     FONT_FAMILY_MONOSPACE: "'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace",
-    FONT_FAMILY_DEFAULT: () => Theme.getProperties().FONT_FAMILY_SANS_SERIF,
+    FONT_FAMILY_DEFAULT: props => props.FONT_FAMILY_SANS_SERIF,
 
     NAV_MANAGER_NAVBAR_HEIGHT: 50,
     NAV_MANAGER_BOX_SHADOW_NAVBAR: "0px 0px 10px rgb(0, 0, 0)",
@@ -70,7 +71,7 @@ Theme.setProperties({
     MAIN_CONTAINER_EXTRA_PADDING_BOTTOM_DESKTOP: 0,
     MAIN_CONTAINER_EXTRA_PADDING_BOTTOM_MOBILE: 0,
 
-    FLAT_TAB_AREA_COLOR_BACKGROUND: "#f2f2f2", // alias of COLOR_FOREGROUND_BODY
+    FLAT_TAB_AREA_COLOR_BACKGROUND: props => props.COLOR_FOREGROUND_BODY,
     FLAT_TAB_AREA_LINE_HEIGHT: 30,
     FLAT_TAB_AREA_PADDING_SIDES: 10,
     FLAT_TAB_AREA_UNDERLINE_HEIGHT: 3,
@@ -86,7 +87,6 @@ export class BasicLevelSizeStyleSheet extends StyleSheet {
                 return this[type];
             }
         }
-        return "";
     }
 
     Size(size) {
@@ -95,7 +95,6 @@ export class BasicLevelSizeStyleSheet extends StyleSheet {
                 return this[type];
             }
         }
-        return "";
     }
 }
 
@@ -132,11 +131,11 @@ class FlexContainerStyle extends StyleSheet {
     HORIZONTAL = {
         display: "flex",
         ">*": {
-            marginLeft: "20px",
+            marginLeft: 20,
             flex: "1",
         },
         ">:first-child": {
-            marginLeft: "0px",
+            marginLeft: 0,
         },
     };
 
@@ -145,11 +144,11 @@ class FlexContainerStyle extends StyleSheet {
         display: "flex",
         flexDirection: "column",
         ">*": {
-            marginTop: "20px",
+            marginTop: 20,
             flex: "1",
         },
         ">:first-child": {
-            marginTop: "0px",
+            marginTop: 0,
         }
     };
 
