@@ -6,10 +6,11 @@ import {Dispatchable} from "../base/Dispatcher";
 class StyleSheet extends Dispatchable {
     constructor(options={}) {
         super();
-        this.options = Object.assign({
+        this.options = {
             parent: document.head,
             name: options.name || this.constructor.getElementName(), // call only if needed
-        }, options);
+            ...options,
+        };
         this.elements = new Set();
         if (!this.options.delayedMount) {
             this.ensureMounted();
@@ -64,19 +65,8 @@ class StyleSheet extends Dispatchable {
         this.options.theme = theme;
     }
 
-    getThemeProperty(key, defaultValue) {
-        const theme = this.getTheme();
-        return (theme && theme.getProperty(key, defaultValue)) || defaultValue;
-    }
-
-    // Deprecated, use themeProps
-    get themeProperties() {
-        const theme = this.getTheme();
-        return (theme && theme.getProperties()) || {};
-    }
-
     get themeProps() {
-        return this.themeProperties;
+        return this.getTheme().props || {};
     }
 
     ensureFirstUpdate() {

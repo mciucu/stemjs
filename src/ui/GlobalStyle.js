@@ -104,25 +104,25 @@ export const BasicLevelStyleSheet = (colorToStyleFunction) => class BasicLevelSt
     }
 
     @styleRule
-    BASE = this.colorStyleRule(this.themeProperties.COLOR_BACKGROUND);
+    BASE = this.colorStyleRule(this.themeProps.COLOR_BACKGROUND);
 
     @styleRule
-    PRIMARY = this.colorStyleRule(this.themeProperties.COLOR_PRIMARY);
+    PRIMARY = this.colorStyleRule(this.themeProps.COLOR_PRIMARY);
 
     @styleRule
-    SECONDARY = this.colorStyleRule(this.themeProperties.COLOR_SECONDARY);
+    SECONDARY = this.colorStyleRule(this.themeProps.COLOR_SECONDARY);
 
     @styleRule
-    SUCCESS = this.colorStyleRule(this.themeProperties.COLOR_SUCCESS);
+    SUCCESS = this.colorStyleRule(this.themeProps.COLOR_SUCCESS);
 
     @styleRule
-    INFO = this.colorStyleRule(this.themeProperties.COLOR_INFO);
+    INFO = this.colorStyleRule(this.themeProps.COLOR_INFO);
 
     @styleRule
-    WARNING = this.colorStyleRule(this.themeProperties.COLOR_WARNING);
+    WARNING = this.colorStyleRule(this.themeProps.COLOR_WARNING);
 
     @styleRule
-    DANGER = this.colorStyleRule(this.themeProperties.COLOR_DANGER);
+    DANGER = this.colorStyleRule(this.themeProps.COLOR_DANGER);
 };
 
 
@@ -194,7 +194,7 @@ class ContainerStyle extends StyleSheet {
 
 
 class Utils extends StyleSheet {
-    extraTop = () => this.themeProperties[Device.isMobileDevice() ? "MAIN_CONTAINER_EXTRA_PADDING_TOP_MOBILE" :
+    extraTop = () => this.themeProps[Device.isMobileDevice() ? "MAIN_CONTAINER_EXTRA_PADDING_TOP_MOBILE" :
         "MAIN_CONTAINER_EXTRA_PADDING_TOP_DESKTOP"];
 
     @styleRule
