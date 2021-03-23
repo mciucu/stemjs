@@ -27,7 +27,7 @@ class Theme extends Dispatchable {
 
     classSet = new Set();
     styleSheetSet = new Set();
-    properties = {};
+    properties = {theme: this};
     updateThrottler = new CallThrottler({throttle: 50});
     updateThrottled = this.updateThrottler.wrap(() => this.updateStyleSheets());
 
@@ -132,8 +132,11 @@ class Theme extends Dispatchable {
         if (!props) {
             props = this[this.constructor.PropsSymbol] = new Proxy(this.properties, {
                 get: (properties, key, receiver) => {
-                    // Can default to another theme here.
-                    return properties[key];
+                    let value = properties[key];
+                    if (typeof value === "function") {
+                        value = value(props);
+                    }
+                    return value;
                 },
                 set: (properties, key, value) => {
                     this.setProperty(key, value);

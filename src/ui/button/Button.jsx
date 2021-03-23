@@ -9,14 +9,9 @@ import {ButtonStyle} from "./ButtonStyle";
 class Button extends UI.Primitive(IconableInterface, "button") {
     extraNodeAttributes(attr) {
         attr.addClass(this.styleSheet.DEFAULT);
-
-        if (this.getSize()) {
-            attr.addClass(this.styleSheet.Size(this.getSize()));
-        }
-
-        if (this.getLevel()) {
-            attr.addClass(this.styleSheet.Level(this.getLevel()));
-        }
+        // These might be null
+        attr.addClass(this.styleSheet.Size(this.getSize()));
+        attr.addClass(this.styleSheet.Level(this.getLevel()));
     }
 
     disable() {
@@ -128,6 +123,7 @@ class AjaxButton extends StateButton {
         return this.ajax("fetch", data);
     }
 }
+
 for (const methodName of ["fetch", "request", "get", "post", "getJSON", "postJSON"]) {
     AjaxButton.prototype[methodName] = function(...args) {
         return this.ajax(methodName, ...args);
