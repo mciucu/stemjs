@@ -21,19 +21,19 @@ export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) 
         width: "100%",
         flexDirection: "row",
         padding: "5px",
-        minHeight: this.themeProperties.CARD_PANEL_HEADER_HEIGHT,
-        textTransform: this.themeProperties.CARD_PANEL_TEXT_TRANSFORM,
-        paddingLeft: this.themeProperties.CARD_PANEL_HEADING_PADDING,
-        paddingRight: this.themeProperties.CARD_PANEL_HEADING_PADDING,
+        minHeight: this.themeProps.CARD_PANEL_HEADER_HEIGHT,
+        textTransform: this.themeProps.CARD_PANEL_TEXT_TRANSFORM,
+        paddingLeft: this.themeProps.CARD_PANEL_HEADING_PADDING,
+        paddingRight: this.themeProps.CARD_PANEL_HEADING_PADDING,
     },
-        cardPanelHeaderColorToStyle(this.themeProperties.COLOR_BACKGROUND)
+        cardPanelHeaderColorToStyle(this.themeProps.COLOR_BACKGROUND)
     ];
 
     @styleRule
     LARGE = {
-        minHeight: this.themeProperties.CARD_PANEL_HEADER_HEIGHT_LARGE,
-        paddingLeft: this.themeProperties.CARD_PANEL_HEADING_PADDING_LARGE,
-        paddingRight: this.themeProperties.CARD_PANEL_HEADING_PADDING_LARGE,
+        minHeight: this.themeProps.CARD_PANEL_HEADER_HEIGHT_LARGE,
+        paddingLeft: this.themeProps.CARD_PANEL_HEADING_PADDING_LARGE,
+        paddingRight: this.themeProps.CARD_PANEL_HEADING_PADDING_LARGE,
     };
 
     @styleRule
@@ -42,13 +42,13 @@ export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) 
 
     @styleRule
     panel = [{
-        borderWidth: this.themeProperties.BASE_BORDER_WIDTH,
-        borderRadius: this.themeProperties.BASE_BORDER_RADIUS,
-        boxShadow: this.themeProperties.BASE_BOX_SHADOW,
-        borderStyle: this.themeProperties.BASE_BORDER_STYLE,
-        backgroundColor: this.themeProperties.COLOR_BACKGROUND,
+        borderWidth: this.themeProps.BASE_BORDER_WIDTH,
+        borderRadius: this.themeProps.BASE_BORDER_RADIUS,
+        boxShadow: this.themeProps.BASE_BOX_SHADOW,
+        borderStyle: this.themeProps.BASE_BORDER_STYLE,
+        backgroundColor: this.themeProps.COLOR_BACKGROUND,
     },
-        cardPanelColorToStyle(this.themeProperties.COLOR_BACKGROUND)
+        cardPanelColorToStyle(this.themeProps.COLOR_BACKGROUND)
     ];
 
     @styleRule

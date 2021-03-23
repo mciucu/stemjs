@@ -5,21 +5,21 @@ import {enhance} from "../Color";
 class NavStyle extends StyleSheet {
     // Custom variables
     getColors() {
-        const themeProperties = this.themeProperties;
+        const themeProps = this.themeProps;
 
-        const navManagerColor = themeProperties.COLOR_PRIMARY;
-        const navBarColor = themeProperties.NAV_MANAGER_COLOR_NAV_BAR || navManagerColor;
-        const sidePanelColor = themeProperties.NAV_MANAGER_COLOR_SIDE_PANEL || enhance(navManagerColor, 0.05);
+        const navManagerColor = themeProps.COLOR_PRIMARY;
+        const navBarColor = themeProps.NAV_MANAGER_COLOR_NAV_BAR || navManagerColor;
+        const sidePanelColor = themeProps.NAV_MANAGER_COLOR_SIDE_PANEL || enhance(navManagerColor, 0.05);
 
         this.colors = {
-            boxShadowNavManager: themeProperties.NAV_MANAGER_BOX_SHADOW_NAVBAR,
-            boxShadowSidePanel: themeProperties.NAV_MANAGER_BOX_SHADOW_SIDE_PANEL,
-            sidepanelBackground: themeProperties.NAV_MANAGER_SIDE_PANEL_BACKGROUND_COLOR || sidePanelColor,
-            sidepanelHover: themeProperties.NAV_MANAGER_SIDE_PANEL_HOVER_COLOR || enhance(sidePanelColor, 0.1),
-            navbarBackground: themeProperties.NAV_MANAGER_NAV_BAR_BACKGROUND_COLOR || navBarColor,
-            navbarHover: themeProperties.NAV_MANAGER_NAV_BAR_HOVER_COLOR || enhance(navBarColor, 0.1),
-            hr: themeProperties.NAV_MANAGER_HR_COLOR || enhance(sidePanelColor, 0.15),
-            text: themeProperties.NAV_MANAGER_TEXT_COLOR || enhance(navManagerColor, 1),
+            boxShadowNavManager: themeProps.NAV_MANAGER_BOX_SHADOW_NAVBAR,
+            boxShadowSidePanel: themeProps.NAV_MANAGER_BOX_SHADOW_SIDE_PANEL,
+            sidepanelBackground: themeProps.NAV_MANAGER_SIDE_PANEL_BACKGROUND_COLOR || sidePanelColor,
+            sidepanelHover: themeProps.NAV_MANAGER_SIDE_PANEL_HOVER_COLOR || enhance(sidePanelColor, 0.1),
+            navbarBackground: themeProps.NAV_MANAGER_NAV_BAR_BACKGROUND_COLOR || navBarColor,
+            navbarHover: themeProps.NAV_MANAGER_NAV_BAR_HOVER_COLOR || enhance(navBarColor, 0.1),
+            hr: themeProps.NAV_MANAGER_HR_COLOR || enhance(sidePanelColor, 0.15),
+            text: themeProps.NAV_MANAGER_TEXT_COLOR || enhance(navManagerColor, 1),
         };
 
         return this.colors;

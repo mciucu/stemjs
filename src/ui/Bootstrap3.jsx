@@ -104,7 +104,7 @@ export class LabelStyle extends BasicLevelStyleSheet(labelColorToStyle) {
         },
     }, {
         "font-size": "12px",
-    }, this.colorStyleRule(this.themeProperties.COLOR_BACKGROUND_BADGE)];
+    }, this.colorStyleRule(this.themeProps.COLOR_BACKGROUND_BADGE)];
 
     @styleRule
     EXTRA_SMALL = {
@@ -174,7 +174,7 @@ export class BadgeStyle extends BasicLevelStyleSheet(badgeColorToStyle) {
         borderRadius: "0.8em",
     }, {
         "font-size": "12px",
-    }, this.colorStyleRule(this.themeProperties.COLOR_BACKGROUND_BADGE)];
+    }, this.colorStyleRule(this.themeProps.COLOR_BACKGROUND_BADGE)];
 
     @styleRule
     EXTRA_SMALL = {
@@ -250,7 +250,7 @@ class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToStyle) {
         fontColor: "#ffffff",
     }, {
         fontSize: "12px",
-    }, this.colorStyleRule(this.themeProperties.COLOR_PRIMARY)];
+    }, this.colorStyleRule(this.themeProps.COLOR_PRIMARY)];
 
     @styleRule
     striped = {

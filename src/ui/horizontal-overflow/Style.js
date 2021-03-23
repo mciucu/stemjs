@@ -5,7 +5,7 @@ import {Device} from "../../base/Device";
 
 
 export class HorizontalOverflowStyle extends StyleSheet {
-    baseColor = () =>  this.themeProperties.COLOR_PRIMARY;
+    baseColor = () =>  this.themeProps.COLOR_PRIMARY;
     arrowColor = () => enhance(this.baseColor(), .8);
     arrowBackground = () => this.baseColor();
     arrowHoverColor = () => enhance(this.baseColor(), 1);

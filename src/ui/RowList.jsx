@@ -17,30 +17,30 @@ class RowListStyle extends BasicLevelSizeStyleSheet {
         alignItems: "center",
         width: "100%",
 
-        minHeight: this.themeProperties.ROW_LIST_ROW_HEIGHT,
-        paddingLeft: this.themeProperties.ROW_LIST_ROW_PADDING,
-        paddingRight: this.themeProperties.ROW_LIST_ROW_PADDING,
+        minHeight: this.themeProps.ROW_LIST_ROW_HEIGHT,
+        paddingLeft: this.themeProps.ROW_LIST_ROW_PADDING,
+        paddingRight: this.themeProps.ROW_LIST_ROW_PADDING,
 
-        backgroundColor: this.themeProperties.COLOR_BACKGROUND,
+        backgroundColor: this.themeProps.COLOR_BACKGROUND,
     };
 
     @styleRule
     LARGE = {
-        minHeight: this.themeProperties.ROW_LIST_ROW_HEIGHT_LARGE,
-        paddingLeft: this.themeProperties.ROW_LIST_ROW_PADDING_LARGE,
-        paddingRight: this.themeProperties.ROW_LIST_ROW_PADDING_LARGE,
+        minHeight: this.themeProps.ROW_LIST_ROW_HEIGHT_LARGE,
+        paddingLeft: this.themeProps.ROW_LIST_ROW_PADDING_LARGE,
+        paddingRight: this.themeProps.ROW_LIST_ROW_PADDING_LARGE,
     };
 
     @styleRule
     alternativeColorsOddRow = {
-        backgroundColor: this.themeProperties.COLOR_BACKGROUND_ALTERNATIVE,
+        backgroundColor: this.themeProps.COLOR_BACKGROUND_ALTERNATIVE,
     };
 
     @styleRule
     noAlternativeColors = {
-        borderTopWidth: this.themeProperties.ROW_LIST_ROW_BORDER_WIDTH,
-        borderTopStyle: this.themeProperties.BASE_BORDER_STYLE,
-        borderTopColor: this.themeProperties.BASE_BORDER_COLOR,
+        borderTopWidth: this.themeProps.ROW_LIST_ROW_BORDER_WIDTH,
+        borderTopStyle: this.themeProps.BASE_BORDER_STYLE,
+        borderTopColor: this.themeProps.BASE_BORDER_COLOR,
     };
 }
 
