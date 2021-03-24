@@ -3,6 +3,7 @@ import {CollapsibleMixin} from "./CollapsibleMixin";
 import {CardPanel} from "../CardPanel";
 import {CollapsiblePanelStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
+import {MakeIcon} from "../Bootstrap3";
 
 @registerStyle(CollapsiblePanelStyle)
 class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
@@ -16,48 +17,35 @@ class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
 
     expand() {
         super.expand(this.contentArea);
-        this.toggleButton.removeClass(this.styleSheet.collapsedButton);
+        this.icon.removeClass(this.styleSheet.iconCollapsed);
     }
 
     collapse() {
         super.collapse(this.contentArea);
-        this.toggleButton.addClass(this.styleSheet.collapsedButton);
-    }
-
-    setTitle(title) {
-        this.options.title = title;
-        this.toggleButton.setChildren(title);
+        this.icon.addClass(this.styleSheet.iconCollapsed);
     }
 
     getChildrenToRender() {
-        let collapsedPanelClass = "";
-        let collapsedHeadingClass = "";
-        let hiddenClass = "";
-        let contentStyle = {};
+        let contentClassName = this.styleSheet.content;
+        let iconClassName = this.styleSheet.icon;
 
         if (this.options.collapsed) {
-            collapsedHeadingClass = this.styleSheet.collapsedButton;
-            collapsedPanelClass = this.styleSheet.collapsed;
-            hiddenClass = "hidden";
-        }
-        if (!this.options.noPadding) {
-            contentStyle = {
-                padding: "8px 8px",
-            };
+            iconClassName += this.styleSheet.iconCollapsed;
+            contentClassName += " hidden " + this.styleSheet.collapsed;
         }
 
-        return [<div className={this.styleSheet.heading}>
-                    <div ref="toggleButton"  className={`${this.styleSheet.button} ${collapsedHeadingClass}`}
-                        onClick={() => this.toggle()}>
-                        {this.getTitle()}
-                    </div>
-                </div>,
-                <div style={{overflow: "hidden"}}>
-                  <div ref="contentArea" className={`${collapsedPanelClass} ${hiddenClass}`}
-                       style={contentStyle}>
-                        {this.render()}
-                    </div>
+        return [
+            <div onClick={() => this.toggle()} className={this.styleSheet.heading}>
+                <div ref="icon" className={iconClassName}>
+                    {MakeIcon("chevron-down")}
                 </div>
+                <span className={this.styleSheet.title}>{this.getTitle()}</span>
+            </div>,
+            <div style={{overflow: "hidden"}}>
+                <div ref="contentArea" className={contentClassName}>
+                    {this.render()}
+                </div>
+            </div>
         ];
     }
 }
