@@ -37,6 +37,7 @@ export class BaseUIElement extends Dispatchable {
     onUnmount() {}
 
     destroyNode() {
+        this.dispatch("unmount", this);
         this.onUnmount();
         this.cleanup();
         this.removeRef();
@@ -166,8 +167,9 @@ class UIElement extends BaseUIElement {
     }
 
     static create(parentNode, options) {
-        let uiElement = new this(options);
+        const uiElement = new this(options);
         uiElement.mount(parentNode, null);
+        uiElement.dispatch("mount", uiElement);
         return uiElement;
     }
 
