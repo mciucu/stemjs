@@ -25,17 +25,16 @@ class CollapsiblePanelStyle extends CardPanelStyle {
     @styleRuleInherit
     panel = {
         boxShadow: null,
-        borderWidth: "1px",
+        borderWidth: 1,
         borderColor: "#ccc !important",
-        borderRadius: "3px",
+        borderRadius: this.themeProps.BUTTON_BORDER_RADIUS,
     };
 
     @styleRule
     heading = {
-        padding: "10px 15px",
-        borderBottom: "1px solid transparent",
-        borderTopLeftRadius: "3px",
-        borderTopRightRadius: "3px",
+        padding: 10,
+        cursor: "pointer",
+        fontSize: 16,
         backgroundColor: "#fefefe",
         ":hover": {
             backgroundColor: "#f3f3f3",
@@ -43,37 +42,24 @@ class CollapsiblePanelStyle extends CardPanelStyle {
     };
 
     @styleRule
-    button = {
-        marginTop: "0",
-        marginBottom: "0",
-        fontSize: "16px",
-        color: "inherit",
-        cursor: "pointer",
-        ":hover": {
-            color: "inherit",
-        },
-        ":before": {
-            transition: "transform .2s linear",
-            fontFamily: "'FontAwesome'",
-            content: "\"\\f107\"",
-            color: "grey",
-            display: "inline-block",
-            lineHeight: "0.7em",
-            width: "0.7em",
-            fontSize: "150%",
-            verticalAlign: "bottom",
-            height: "0.7em",
-            textAlign: "center",
-            transform: "rotate(0deg)",
-            marginRight: ".2em",
-        }
+    title = {
+        padding: 4,
+    }
+
+    @styleRule
+    content = {
+        padding: 8,
+    }
+
+    @styleRule
+    icon = {
+        transition: "0.3s ease",
+        display: "inline-block",
     };
 
     @styleRule
-    collapsedButton = {
-        ":before": {
-            transform: "rotate(-90deg) !important",
-        },
+    iconCollapsed = {
+        transform: "rotate(-90deg) !important",
     };
 }
 

@@ -1,9 +1,17 @@
+// TODO: rename this file, it doesn't do this anymore
 import {UI} from "./UIBase";
 import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {Orientation} from "./Constants";
 import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";
 import {styleRule} from "../decorators/Style";
+
+export let MakeIcon = (icon, options) => <span className={"fa fa-" + icon} {...options} />;
+
+// Change the icon function
+export function SetMakeIcon(value) {
+    MakeIcon = value;
+}
 
 class SimpleStyledElement extends UI.Element {
     getLevel() {
@@ -30,40 +38,24 @@ class IconableInterface extends SimpleStyledElement {
     };
 
     getLabel() {
-        return (this.options.label != null) ? this.options.label : "";
+        return this.options.label;
     }
 
     setLabel(label) {
         this.updateOptions({label: label});
     }
 
-    //TODO: this should live in a base iconable class, of which you'd only use this.beforeChildren
-    getFaIcon() {
-        return this.options.faIcon;
-    }
-
-    setFaIcon(value) {
-        this.options.faIcon = value;
-        this.redraw();
+    setIcon(value) {
+        this.updateOptions({icon: value});
     }
 
     beforeChildren() {
-        if (!this.getFaIcon()) {
-            return null;
-        }
-        let iconOptions = {
-            className: "fa fa-" + this.getFaIcon(),
-        };
-        if (this.getLabel()) {
-            iconOptions.style = {
-                marginRight: "5px",
-            }
-        }
-
-        return <span {...iconOptions} />;
+        const {icon} = this.options;
+        return icon && MakeIcon(icon);
     }
 }
 
+// TODO: move this to another file
 let labelColorToStyle = (color) => {
     const colors = buildColors(color);
     let darker = {
