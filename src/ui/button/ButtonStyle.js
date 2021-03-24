@@ -130,7 +130,8 @@ export class RadioButtonGroupStyle extends StyleSheet {
         pointerEvents: "none",
         ">*": {
             pointerEvents: "initial",
-            borderRadius: "0",
+            borderRadius: 0,
+            margin: 0,
         },
         ">:last-child": {
             borderTopRightRadius: "0.3em",

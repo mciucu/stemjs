@@ -31,6 +31,7 @@ class RadioButtonGroup extends SimpleStyledElement {
     }
 
     render() {
+        // TODO @branch map
         this.buttons = [];
         for (let i = 0; i < this.options.givenOptions.length; i += 1) {
             this.buttons.push(
