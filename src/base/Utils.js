@@ -143,6 +143,10 @@ export function suffixNumber(value, suffix) {
     return value;
 }
 
+export function capitalize(text) {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 export function setObjectPrototype(obj, Class) {
     obj.__proto__ = Class.prototype;
     return obj;
