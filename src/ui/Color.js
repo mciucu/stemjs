@@ -241,7 +241,7 @@ export class Color {
             parseInt(firstColorArray[0] * (1 - t) + secondColorArray[0] * t),
             parseInt(firstColorArray[1] * (1 - t) + secondColorArray[1] * t),
             parseInt(firstColorArray[2] * (1 - t) + secondColorArray[2] * t),
-            parseInt(firstColorArray[3] * (1 - t) + secondColorArray[3] * t)
+            parseFloat(firstColorArray[3] * (1 - t) + secondColorArray[3] * t)
         ]);
     }
 
@@ -292,7 +292,7 @@ export function darken(color, amount) {
 }
 
 
-const COLOR_MATCHER_REGEXP = new RegExp(`(#[0-9a-f]{6}|#[0-9a-f]{3}|rgba\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*\d*\.?\d*\s*\)|rgb\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\))|${Object.keys(COLORS_BY_NAME).sort((a,b) => b.length - a.length).join("|")}`, "gi");
+const COLOR_MATCHER_REGEXP = new RegExp(`(#[0-9a-f]{6}|#[0-9a-f]{3}|rgba\\s*\\(\\s*\\d+\\s*,\\s*\\d+\\s*,\\s*\\d+\\s*,\\s*\\d*\\.?\\d*\\s*\\)|rgb\\s*\\(\\s*\\d+\\s*,\\s*\\d+\\s*,\\s*\\d+\\s*\\))|${Object.keys(COLORS_BY_NAME).sort((a,b) => b.length - a.length).join("|")}`, "gi");
 
 function saturateColor(color, saturate) {
     const rgba = Color.parseColor(color);
