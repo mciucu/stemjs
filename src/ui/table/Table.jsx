@@ -44,8 +44,10 @@ class Table extends UI.Primitive("table") {
     }
 
     render() {
+        const {noHeader} = this.options;
+
         return [
-            <thead>
+            noHeader ? null : <thead>
                 {this.renderTableHead()}
             </thead>,
             <tbody>
@@ -65,10 +67,10 @@ class Table extends UI.Primitive("table") {
     renderTableBody() {
         this.rows = [];
 
-        let entries = this.getEntries();
+        const entries = this.getEntries();
         for (let i = 0; i < entries.length; i += 1) {
-            let entry = entries[i];
-            let RowClass = this.getRowClass(entry);
+            const entry = entries[i];
+            const RowClass = this.getRowClass(entry);
             this.rows.push(<RowClass key={this.getEntryKey(entry, i)} index={i} {...this.getRowOptions(entry)} parent={this}/>);
         }
         return this.rows;
