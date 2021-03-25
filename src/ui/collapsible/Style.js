@@ -1,5 +1,6 @@
 import {StyleSheet, styleRule, styleRuleInherit} from "../Style";
 import {CardPanelStyle} from "../CardPanel";
+import {enhance} from "../Color";
 
 class CollapsibleStyle extends StyleSheet {
     transitionDuration = 0.4;
@@ -35,9 +36,10 @@ class CollapsiblePanelStyle extends CardPanelStyle {
         padding: 10,
         cursor: "pointer",
         fontSize: 16,
-        backgroundColor: "#fefefe",
+        color: this.themeProps.CARD_HEADER_TEXT_COLOR,
+        backgroundColor: this.themeProps.CARD_HEADER_BACKGROUND_COLOR,
         ":hover": {
-            backgroundColor: "#f3f3f3",
+            backgroundColor: enhance(this.themeProps.CARD_HEADER_BACKGROUND_COLOR, 0.1),
         }
     };
 
