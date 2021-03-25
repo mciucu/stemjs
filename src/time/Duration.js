@@ -1,4 +1,4 @@
-import {isPlainObject, isNumber} from "../base/Utils";
+import {isPlainObject, isNumber, capitalize} from "../base/Utils";
 
 export class TimeUnit {
     static CANONICAL = {};
@@ -14,6 +14,8 @@ export class TimeUnit {
         this.milliseconds = ((baseUnit && baseUnit.getMilliseconds()) || 1) * multiplier;
         this.variableMultiplier = options.variableMultiplier || false;
         this.variableDuration = this.variableMultiplier || (baseUnit && baseUnit.isVariable());
+        this.getterName = (name === "year") ? "getFullYear" : ("get" + capitalize(name));
+        this.setterName = (name === "year") ? "setFullYear" : ("set" + capitalize(name));
     }
 
     static toTimeUnit(timeUnit) {
@@ -48,10 +50,11 @@ export class TimeUnit {
     }
 
     getDateValue(date) {
-
+        return date[this.getterName]();
     }
 
     setDateValue(date, value) {
+        return date[this.setterName](value);
     }
 }
 
