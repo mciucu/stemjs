@@ -10,10 +10,8 @@ class Button extends UI.Primitive(IconableInterface, "button") {
     extraNodeAttributes(attr) {
         attr.addClass(this.styleSheet.DEFAULT);
         // These might be null
-        if (typeof this.styleSheet.Size === "function" && typeof this.styleSheet.Level === "function") {
-            attr.addClass(this.styleSheet.Size(this.getSize()));
-            attr.addClass(this.styleSheet.Level(this.getLevel()));
-        }
+        attr.addClass(this.styleSheet.Size(this.getSize()));
+        attr.addClass(this.styleSheet.Level(this.getLevel()));
     }
 
     disable() {
