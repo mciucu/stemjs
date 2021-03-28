@@ -18,12 +18,7 @@ class InputStyle extends StyleSheet {
 
     @styleRule
     checkboxInput = {
-        marginLeft: "0.2em",
         display: "inline-block",
-        width: "initial !important",
-        marginRight:"0.5em",
-        marginBottom: "-.1em",
-        height: "1em",
     };
 
     @styleRule
