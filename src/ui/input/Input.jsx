@@ -24,17 +24,7 @@ class InputableElement extends UI.Element {
 class Input extends UI.Primitive(InputableElement, "input") {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
-        let type = this.getInputType();
-        if (type) {
-            attr.setAttribute("type", type);
-        }
-    }
-
-    redraw() {
-        super.redraw();
-        if (this.options.hasOwnProperty("value")) {
-            this.setValue(this.options.value);
-        }
+        attr.setAttribute("type", this.getInputType());
     }
 
     getValue() {
@@ -56,6 +46,12 @@ class Input extends UI.Primitive(InputableElement, "input") {
 
     onKeyUp(callback) {
         this.addNodeListener("keyup", callback);
+    }
+
+    onMount() {
+        if (this.options.value) {
+            this.setValue(this.options.value);
+        }
     }
 }
 Input.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
