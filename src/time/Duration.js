@@ -87,6 +87,11 @@ export class Duration {
             Object.assign(this, duration);
             return;
         }
+        if (duration instanceof TimeUnit) {
+            this[duration.name] = 1;
+            this.relativeDuration = duration.isVariable();
+            return;
+        }
         if (isPlainObject(duration)) {
             this.milliseconds = 0;
             for (const key of Object.keys(duration)) {
