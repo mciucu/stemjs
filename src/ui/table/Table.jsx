@@ -17,7 +17,7 @@ class TableRow extends UI.Primitive("tr") {
     renderEntryCell(column) {
         return <td style={column.cellStyle} key={column.id}>{column.value(this.options.entry, this.options.index)}</td>;
     }
-};
+}
 
 @registerStyle(TableStyle)
 class Table extends UI.Primitive("table") {
@@ -34,6 +34,14 @@ class Table extends UI.Primitive("table") {
 
     getRowClass() {
         return TableRow;
+    }
+
+    makeRow(entry, index) {
+        if (entry instanceof UI.Element && entry.getNodeType() === "tr") {
+            return entry;
+        }
+        const RowClass = this.getRowClass(entry, index);
+        return <RowClass key={this.getEntryKey(entry, index)} index={index} {...this.getRowOptions(entry)} parent={this}/>
     }
 
     getRowOptions(entry) {
@@ -65,15 +73,8 @@ class Table extends UI.Primitive("table") {
     }
 
     renderTableBody() {
-        this.rows = [];
-
         const entries = this.getEntries();
-        for (let i = 0; i < entries.length; i += 1) {
-            const entry = entries[i];
-            const RowClass = this.getRowClass(entry);
-            this.rows.push(<RowClass key={this.getEntryKey(entry, i)} index={i} {...this.getRowOptions(entry)} parent={this}/>);
-        }
-        return this.rows;
+        return this.rows = entries.map((entry, index) => this.makeRow(entry, index));
     }
 
     // Renders the whole header cell based on a column

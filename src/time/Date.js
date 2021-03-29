@@ -377,6 +377,14 @@ class StemDate extends BaseDate {
     getWeekInYear() {
         return (this.getDayInYear() - this.getWeekDay()) / 7;
     }
+
+    getStartOfDay() {
+        return new StemDate(this.getFullYear(), this.getMonth(), this.getDate());
+    }
+
+    getEndOfDay() {
+        return this.getStartOfDay().add(TimeUnit.DAY).subtract(TimeUnit.MILLISECOND);
+    }
 }
 
 Duration.prototype.format = function (pattern) {
