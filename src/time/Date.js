@@ -385,6 +385,14 @@ class StemDate extends BaseDate {
     getEndOfDay() {
         return this.getStartOfDay().add(TimeUnit.DAY).subtract(TimeUnit.MILLISECOND);
     }
+
+    getStartOfMonth() {
+        return new StemDate(this.getFullYear(), this.getMonth(), 1);
+    }
+
+    getEndOfMonth() {
+        return this.getStartOfMonth().add(TimeUnit.MONTH).subtract(TimeUnit.MILLISECOND);
+    }
 }
 
 Duration.prototype.format = function (pattern) {
