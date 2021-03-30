@@ -1,4 +1,4 @@
-import {dashCase, setObjectPrototype} from "../base/Utils";
+import {dashCase, isNumber, setObjectPrototype} from "../base/Utils";
 
 export const defaultToPixelsAttributes = new Set([
     "border-radius",
@@ -136,8 +136,7 @@ export class NodeAttributes {
         if (typeof value === "function") {
             value = value();
         }
-        if ((value instanceof Number || typeof value === "number") &&
-            value != 0 && defaultToPixelsAttributes.has(dashCase(key))) {
+        if (isNumber(value) && value != 0 && defaultToPixelsAttributes.has(dashCase(key))) {
             value = value + "px";
         }
         if (node && node.style[key] !== value) {
