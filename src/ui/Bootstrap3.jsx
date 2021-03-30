@@ -6,6 +6,7 @@ import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";
 import {styleRule} from "../decorators/Style";
 
+// TODO handle is instance of UI.Element or if UI class
 export let MakeIcon = (icon, options) => <span className={"fa fa-" + icon} {...options} />;
 
 // Change the icon function
@@ -37,21 +38,25 @@ class IconableInterface extends SimpleStyledElement {
         return [this.beforeChildren(), this.getLabel(), super.render()];
     };
 
-    getLabel() {
-        return this.options.label;
-    }
-
     setLabel(label) {
         this.updateOptions({label: label});
+    }
+
+    getLabel() {
+        return this.options.label;
     }
 
     setIcon(value) {
         this.updateOptions({icon: value});
     }
 
-    beforeChildren() {
+    getIcon() {
         const {icon} = this.options;
         return icon && MakeIcon(icon);
+    }
+
+    beforeChildren() {
+        return this.getIcon();
     }
 }
 
