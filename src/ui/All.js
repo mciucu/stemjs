@@ -11,7 +11,7 @@ export * from "./UIPrimitives";
 export * from "./input/Input";
 export * from "./form/Form";
 export * from "./SVG";
-export * from "./Bootstrap3";
+export * from "./SimpleElements";
 
 export * from "./Router";
 

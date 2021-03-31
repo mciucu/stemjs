@@ -1,5 +1,5 @@
 import {NavManager} from "./NavManager";
-import {Badge} from "../Bootstrap3";
+import {Badge} from "../SimpleElements";
 
 export class NavCounterBadge extends Badge {
     getDefaultOptions() {

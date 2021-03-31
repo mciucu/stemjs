@@ -5,7 +5,7 @@ import {Draggable} from "./Draggable";
 import {Dispatchable} from "../base/Dispatcher";
 import {getOffset} from "./Utils";
 import {Orientation} from "./Constants";
-import {ProgressBar} from "./Bootstrap3";
+import {ProgressBar} from "./ProgressBar";
 
 // A very simple class, all this does is implement the `getTitle()` method
 class Panel extends UI.Element {
