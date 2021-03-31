@@ -1,7 +1,7 @@
 import {UI} from "./UIBase";
 import {styleRule} from "./Style";
 import {registerStyle} from "./style/Theme"
-import {SimpleStyledElement} from "./Bootstrap3";
+import {SimpleStyledElement} from "./SimpleElements";
 import {BasicLevelSizeStyleSheet} from "./GlobalStyle";
 
 

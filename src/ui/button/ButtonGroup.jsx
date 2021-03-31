@@ -1,6 +1,6 @@
 import {UI} from "../UIBase";
 import {Button} from "./Button";
-import {SimpleStyledElement} from "../Bootstrap3";
+import {SimpleStyledElement} from "../SimpleElements";
 import {Orientation} from "../Constants";
 import {registerStyle} from "../style/Theme";
 import {ButtonGroupStyle, RadioButtonGroupStyle} from "./ButtonStyle";

@@ -3,7 +3,7 @@ import {CollapsibleMixin} from "./CollapsibleMixin";
 import {CardPanel} from "../CardPanel";
 import {CollapsiblePanelStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
-import {MakeIcon} from "../Bootstrap3";
+import {MakeIcon} from "../SimpleElements";
 
 @registerStyle(CollapsiblePanelStyle)
 class CollapsiblePanel extends CollapsibleMixin(CardPanel) {

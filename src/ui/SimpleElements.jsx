@@ -1,17 +1,25 @@
-// TODO: rename this file, it doesn't do this anymore
+// TODO: this file should be broken down
 import {UI} from "./UIBase";
 import {BasicLevelStyleSheet} from "./GlobalStyle";
-import {Orientation} from "./Constants";
 import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";
 import {styleRule} from "../decorators/Style";
 
 // TODO handle is instance of UI.Element or if UI class
-export let MakeIcon = (icon, options) => <span className={"fa fa-" + icon} {...options} />;
+let MakeIconFunc = (icon, options) => {
+    if (icon instanceof UI.Element) {
+        return icon;
+    }
+    return <span className={"fa fa-" + icon} {...options} />;
+}
 
 // Change the icon function
 export function SetMakeIcon(value) {
-    MakeIcon = value;
+    MakeIconFunc = value;
+}
+
+export function MakeIcon() {
+    return MakeIconFunc(...arguments);
 }
 
 class SimpleStyledElement extends UI.Element {
@@ -105,14 +113,14 @@ export class LabelStyle extends BasicLevelStyleSheet(labelColorToStyle) {
 
     @styleRule
     EXTRA_SMALL = {
-        fontSize: "10px",
+        fontSize: 10,
         padding: "0.05em 0.2em",
         borderWidth: "0.05em",
     };
 
     @styleRule
     SMALL = {
-        fontSize: "10px",
+        fontSize: 10,
     };
 
     @styleRule
@@ -120,12 +128,12 @@ export class LabelStyle extends BasicLevelStyleSheet(labelColorToStyle) {
 
     @styleRule
     LARGE = {
-        fontSize: "14px",
+        fontSize: 14,
     };
 
     @styleRule
     EXTRA_LARGE = {
-        fontSize: "17px",
+        fontSize: 17,
         padding: "0.05em 0.2em",
     };
 }
@@ -215,138 +223,4 @@ class Badge extends UI.Primitive(IconableInterface, "span") {
     }
 }
 
-let progressBarColorToStyle = (color) => {
-    let colors = buildColors(color);
-    return {
-        backgroundColor: colors[1],
-    };
-};
-
-class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToStyle) {
-    @styleRule
-    container = {
-        height: "20px",
-        marginBottom: "20px",
-        overflow: "hidden",
-        backgroundColor: "#f5f5f5",
-        borderRadius: "4px",
-        boxShadow: "inset 0 1px 2px rgba(0, 0, 0, .1)",
-    };
-
-    @styleRule
-    DEFAULT = [{
-        float: "left",
-        width: "0",
-        height: "100%",
-        lineHeight: "20px",
-        color: "#fff",
-        textAlign: "center",
-        backgroundColor: "#337ab7",
-        boxShadow: "inset 0 -1px 0 rgba(0, 0, 0, .15)",
-        transition: "width .6s ease",
-        fontColor: "#ffffff",
-    }, {
-        fontSize: "12px",
-    }, this.colorStyleRule(this.themeProps.COLOR_PRIMARY)];
-
-    @styleRule
-    striped = {
-        backgroundImage: "linear-gradient(45deg, rgba(255, 255, 255, .15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .15) 50%, rgba(255, 255, 255, .15) 75%, transparent 75%, transparent)",
-        backgroundSize: "40px 40px",
-    };
-
-    @styleRule
-    active = {
-        animation: "progress-bar-stripes 2s linear infinite",
-    };
-
-    @styleRule
-    EXTRA_SMALL = {
-        fontSize: "8px",
-    };
-
-    @styleRule
-    SMALL = {
-        fontSize: "10px",
-    };
-
-    @styleRule
-    MEDIUM = {};
-
-    @styleRule
-    LARGE = {
-        fontSize: "14px",
-    };
-
-    @styleRule
-    EXTRA_LARGE = {
-        fontSize: "17px",
-        padding: "0.1em 0.2em",
-    };
-}
-
-@registerStyle(ProgressBarStyle)
-class ProgressBar extends SimpleStyledElement {
-    extraNodeAttributes(attr) {
-        attr.addClass(this.styleSheet.container);
-    }
-
-    render() {
-        let valueInPercent = (this.options.value || 0) * 100;
-        let orientation = Orientation.HORIZONTAL;
-        if (this.options.hasOwnProperty("orientation")) {
-            orientation = this.options.orientation;
-        }
-        let barStyle;
-        if (orientation === Orientation.HORIZONTAL) {
-            barStyle = {
-                width: valueInPercent + "%",
-                height: this.options.height + "px",
-            };
-        } else {
-            barStyle = {
-                height: valueInPercent + "%",
-                width: "5px",
-            }
-        }
-        let barOptions = {
-            className: this.styleSheet.DEFAULT,
-            style: barStyle,
-        };
-
-        if (this.options.disableTransition) {
-            Object.assign(barOptions.style, {
-                transition: "none",
-            });
-        }
-
-        if (this.options.level) {
-            barOptions.className += " " + this.styleSheet.Level(this.getLevel());
-        }
-        if (this.options.striped) {
-            barOptions.className += " " + this.styleSheet.striped;
-        }
-        if (this.options.active) {
-            barOptions.className += " " + this.styleSheet.active;
-        }
-        if (this.options.color) {
-            barOptions.style.backgroundColor = this.options.color;
-        }
-
-        return <div {...barOptions}>
-            <span>{this.options.label}</span>
-        </div>;
-    }
-
-    set(value) {
-        if (value < 0)
-            value = 0;
-        else if (value > 1)
-            value = 1;
-        this.options.value = value;
-        this.redraw();
-    }
-}
-
-
-export {SimpleStyledElement, IconableInterface, Label, Badge, ProgressBar};
+export {SimpleStyledElement, IconableInterface, Label, Badge};

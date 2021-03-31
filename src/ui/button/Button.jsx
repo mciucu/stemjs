@@ -1,5 +1,5 @@
 import {Ajax} from "../../base/Ajax";
-import {IconableInterface} from "../Bootstrap3";
+import {IconableInterface} from "../SimpleElements";
 import {UI} from "../UIBase";
 import {ActionStatus} from "../Constants";
 import {registerStyle} from "../style/Theme";

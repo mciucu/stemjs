@@ -1,5 +1,5 @@
 import {UI} from "./UIBase";
-import {SimpleStyledElement} from "./Bootstrap3";
+import {SimpleStyledElement} from "./SimpleElements";
 import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";
