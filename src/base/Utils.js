@@ -152,6 +152,10 @@ export function setObjectPrototype(obj, Class) {
     return obj;
 }
 
+export function isBoolean(obj) {
+    return obj === true || obj === false;
+}
+
 export function isNumber(obj) {
     return (typeof obj === "number") || (obj instanceof Number);
 }
