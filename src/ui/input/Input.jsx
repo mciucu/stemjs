@@ -32,7 +32,11 @@ class Input extends UI.Primitive(InputableElement, "input") {
     }
 
     setValue(newValue) {
-        this.node.value = newValue;
+        if (newValue != null) {
+            this.node.value = newValue;
+        } else {
+            this.node.removeAttribute("value");
+        }
     }
 
     getInputType() {
@@ -40,7 +44,7 @@ class Input extends UI.Primitive(InputableElement, "input") {
         return null;
     }
 
-    onInput(callback) {
+    addInputListener(callback) {
         this.addNodeListener("input change", callback);
     }
 
@@ -49,9 +53,7 @@ class Input extends UI.Primitive(InputableElement, "input") {
     }
 
     onMount() {
-        if (this.options.value) {
-            this.setValue(this.options.value);
-        }
+        this.setValue(this.options.value);
     }
 }
 Input.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [

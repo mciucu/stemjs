@@ -123,7 +123,7 @@ export class NodeAttributes {
     setAttribute(key, value, node, attributesMap=this.constructor.defaultAttributesMap) {
         // TODO: might want to find a better way than whitelistAttributes field to do this
         if (!attributesMap.has(key)) {
-            this.whitelistedAttributes = this.whitelistedAttributes || {};
+            this.whitelistedAttributes = this.whitelistedAttributes || {}; // TODO: reconsider the whitelisted attributes
             this.whitelistedAttributes[key] = true;
         }
         this[key] = value;
