@@ -21,14 +21,9 @@ export class FlatTabTitle extends BasicTabTitle {
 
 
 // This class displays a bottom bar on the active tab, and when changing tabs it also moves the bottom bar.
-@registerStyle(FlatTabAreaStyle)
 export class FlatTabTitleArea extends TabTitleArea {
-    constructor(...args) {
-        super(...args);
-        // Active bar left and width must be cached so the redraw is done seamlessly.
-        this.barLeft = 0;
-        this.barWidth = 0;
-    }
+    barLeft = 0; // Active bar left and width must be cached so the redraw is done seamlessly.
+    barWidth = 0;
 
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
@@ -116,8 +111,11 @@ export class FlatTabArea extends TabArea {
     activeTabTitleDispatcher = new SingleActiveElementDispatcher();
 
     getTitleArea(tabTitles) {
-        return <FlatTabTitleArea ref="titleArea" activeTabTitleDispatcher={this.activeTabTitleDispatcher}
-                                 className={this.options.titleAreaClass || ""}>
+        return <FlatTabTitleArea
+            ref="titleArea"
+            styleSheet={this.styleSheet}
+            activeTabTitleDispatcher={this.activeTabTitleDispatcher}
+            className={this.options.titleAreaClass || ""}>
             {tabTitles}
         </FlatTabTitleArea>;
     }
