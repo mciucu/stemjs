@@ -5,7 +5,6 @@ class InputStyle extends StyleSheet {
     inputElement = {
         fontSize: 14,  // TODO: theme input size
         backgroundColor: this.themeProps.INPUT_BACKGROUND_COLOR || "#FFF",
-        height: this.themeProps.INPUT_ELEMENT_DEFAULT_HEIGHT,
         transition: "border-color ease-in-out .15s, box-shadow ease-in-out .15s",
         padding: "0.4em 0.54em",
         border: "1px solid " + (this.themeProps.INPUT_BORDER_COLOR || "#CCC"),
@@ -24,7 +23,6 @@ class InputStyle extends StyleSheet {
 
     @styleRule
     select = {
-        height: this.themeProps.INPUT_ELEMENT_DEFAULT_HEIGHT || "2.12em",
     };
 }
 
