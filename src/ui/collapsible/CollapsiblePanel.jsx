@@ -7,6 +7,12 @@ import {MakeIcon} from "../SimpleElements";
 
 @registerStyle(CollapsiblePanelStyle)
 class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
+    getPreservedOptions() {
+        return {
+            collapsed: this.options.collapsed, // TODO: rename to defaultCollapsed?
+        }
+    }
+
     toggle() {
         if (this.options.collapsed) {
             this.expand();
