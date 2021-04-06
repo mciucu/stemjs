@@ -79,7 +79,7 @@ class Table extends UI.Primitive("table") {
 
     // Renders the whole header cell based on a column
     renderHeaderCell(column) {
-        return <th style={column.headerStyle} ref={"columnHeader" + column.id}>
+        return <th style={column.headerStyle} ref={"columnHeader" + column.id} style={column.headerCellStyle || {}}>
                 {this.renderColumnHeader(column)}
             </th>;
     }
