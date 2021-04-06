@@ -109,6 +109,13 @@ NumberInput.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap,
 ]);
 
 
+class TelInput extends Input {
+    getInputType() {
+        return "tel";
+    }
+}
+
+
 class EmailInput extends Input {
     getInputType() {
         return "email";
@@ -290,5 +297,5 @@ class Select extends UI.Primitive(InputableElement, "select") {
     }
 }
 
-export {InputStyle, Input, SubmitInput, TextInput, NumberInput, EmailInput, PasswordInput, FileInput,
+export {InputStyle, Input, SubmitInput, TextInput, NumberInput, TelInput, EmailInput, PasswordInput, FileInput,
         CheckboxInput, RadioInput, TextArea, Select};
