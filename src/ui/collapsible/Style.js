@@ -36,6 +36,11 @@ class CollapsiblePanelStyle extends CardPanelStyle {
         padding: 10,
         cursor: "pointer",
         fontSize: 16,
+        ...(this.themeProps.CARD_HEADER_HEIGHT ? {
+            display: "flex",
+            alignItems: "center",
+        } : {}),
+        height: this.themeProps.CARD_HEADER_HEIGHT,
         color: this.themeProps.CARD_HEADER_TEXT_COLOR,
         backgroundColor: this.themeProps.CARD_HEADER_BACKGROUND_COLOR,
         ":hover": {
