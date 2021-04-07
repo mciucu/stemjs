@@ -68,16 +68,20 @@ class State extends Dispatchable {
 
     // Import the store for objectType and remove it from stateMap
     importStateFromTempMap(objectType, stateMap) {
-        let storeState = stateMap.get(objectType);
+        const storeState = stateMap.get(objectType);
         stateMap.delete(objectType);
+        if (storeState == null) {
+            // Probably a dependency that isn't in the state
+            return;
+        }
 
-        let store = this.getStore(objectType);
+        const store = this.getStore(objectType);
 
         if (!store) {
             console.error("Failed to import state, can't find store ", objectType);
             return;
         }
-        for (let dependency of store.getDependencies()) {
+        for (const dependency of store.getDependencies()) {
             this.importStateFromTempMap(dependency.toLowerCase(), stateMap);
         }
         store.importState(storeState);
