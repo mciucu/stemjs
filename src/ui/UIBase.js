@@ -378,9 +378,9 @@ class UIElement extends BaseUIElement {
                 // by a previous call to this function or manually by the user
                 if (typeof this[addListenerMethodName] === "function" && !this.hasOwnProperty(handlerMethodName)) {
                     this[handlerMethodName] = (event) => {
-                        UI.event = event;
+                        UI.event = event;  // TODO: probably not, redesign this pattern better
                         if (this.options[key]) {
-                            // TODO: arguments should be (event, this)!
+                            // TODO @urgent! arguments should be (event, this)!
                             this.options[key](this, event);
                         }
                     };
