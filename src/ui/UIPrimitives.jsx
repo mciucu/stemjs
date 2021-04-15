@@ -6,6 +6,7 @@ import {Dispatchable} from "../base/Dispatcher";
 import {getOffset} from "./Utils";
 import {Orientation} from "./Constants";
 import {ProgressBar} from "./ProgressBar";
+import {DOMAttributesMap} from "./NodeAttributes";
 
 // A very simple class, all this does is implement the `getTitle()` method
 class Panel extends UI.Element {
@@ -193,6 +194,29 @@ class Image extends UI.Primitive("img") {
         this.removeNodeListener("load", callback);
     }
 }
+
+class IFrame extends UI.Primitive("iframe") {
+
+}
+IFrame.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
+    ["allow"],
+    ["allowfullscreen", {noValue: true}],
+    ["allowpaymentrequest", {noValue: true}],
+    ["csp"],
+    ["loading"],
+    ["name"],
+    ["referrerpolicy"],
+    ["sandbox"],
+    ["src"],
+    ["srcdoc"],
+    ["align"],
+    ["frameborder"],
+    ["longdesc"],
+    ["marginheight"],
+    ["marginwidth"],
+    ["scrolling"],
+    ["mozbrowser"],
+]);
 
 // Beware coder: If you ever use this class, you should have a well documented reason
 class RawHTML extends UI.Element {
