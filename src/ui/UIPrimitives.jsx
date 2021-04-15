@@ -531,5 +531,5 @@ class TimePassedSpan extends UI.Primitive("span") {
 };
 
 
-export {Link, Panel, Image, RawHTML, TimePassedSpan, TemporaryMessageArea, SlideBar, VerticalSlideBar,
+export {Link, Panel, Image, IFrame, RawHTML, TimePassedSpan, TemporaryMessageArea, SlideBar, VerticalSlideBar,
     HorizontalSlideBar, ScrollableMixin, InfiniteScrollable, ViewportMeta};
