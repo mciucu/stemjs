@@ -92,7 +92,7 @@ class StemDate extends BaseDate {
 
     set(date) {
         date = this.constructor.toDate(date);
-        this.setTime(date.setTime());
+        this.setTime(date.getTime());
     }
 
     clone() {
