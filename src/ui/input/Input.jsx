@@ -239,14 +239,6 @@ class TextArea extends UI.Primitive(InputableElement, "textarea") {
 
 
 class Select extends UI.Primitive(InputableElement, "select") {
-    getDefaultOptions() {
-        return {
-            // A function that transforms each given option into a string,
-            // to be displayed in the select dropdown.
-            renderOption: String,
-        };
-    }
-
     render() {
         this.givenOptions = this.options.options || [];
         let selectOptions = [];
@@ -258,7 +250,7 @@ class Select extends UI.Primitive(InputableElement, "select") {
             if (this.givenOptions[i] == this.options.selected) {
                 options.selected = true;
             }
-            selectOptions.push(<option {...options}>{this.options.renderOption(this.givenOptions[i])}</option>);
+            selectOptions.push(<option {...options}>{this.givenOptions[i].toString()}</option>);
         }
 
         return selectOptions;
