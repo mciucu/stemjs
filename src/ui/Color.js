@@ -263,6 +263,16 @@ export class Color {
         let values = Color.parseColor(color);
         return values[0] * 0.3 + values[1] * 0.59 + values[2] * 0.11 > 188;
     }
+
+    static isWhite(color) {
+        let values = Color.parseColor(color);
+        return values[0] === 255 && values[1] === 255 && values[2] === 255 && values[3] === 1;
+    }
+
+    static isBlack(color) {
+        let values = Color.parseColor(color);
+        return values[0] === 0 && values[1] === 0 && values[2] === 0 && values[3] === 1;
+    }
 }
 
 
