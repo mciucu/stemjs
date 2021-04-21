@@ -11,7 +11,7 @@ export class TimeUnit {
         this.pluralName = name + "s";
         this.baseUnit = baseUnit;
         this.multiplier = multiplier;
-        this.milliseconds = ((baseUnit && baseUnit.getMilliseconds()) || 1) * multiplier;
+        this.milliseconds = (baseUnit?.getMilliseconds() || 1) * multiplier;
         this.variableMultiplier = options.variableMultiplier || false;
         this.variableDuration = this.variableMultiplier || (baseUnit && baseUnit.isVariable());
         this.getterName = (name === "year") ? "getFullYear" : ("get" + capitalize(name));
@@ -88,8 +88,11 @@ export class Duration {
             return;
         }
         if (duration instanceof TimeUnit) {
-            this[duration.name] = 1;
-            this.relativeDuration = duration.isVariable();
+            if (this.relativeDuration = duration.isVariable()) {
+                this[duration.name] = 1;
+            } else {
+                this.milliseconds = duration.getMilliseconds();
+            }
             return;
         }
         if (isPlainObject(duration)) {
