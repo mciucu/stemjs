@@ -393,17 +393,26 @@ class StemDate extends BaseDate {
     getEndOfMonth() {
         return this.getStartOfMonth().add(TimeUnit.MONTH).subtract(TimeUnit.MILLISECOND);
     }
+
+    getStartOfYear() {
+        return new StemDate(this.getFullYear(), 0, 1);
+    }
+
+    getEndOfYear() {
+        return this.getStartOfYear().add(TimeUnit.YEAR).subtract(TimeUnit.MILLISECOND);
+    }
 }
 
 Duration.prototype.format = function (pattern) {
     return StemDate.fromUnixMilliseconds(this.toMilliseconds()).utc().format(pattern);
 };
 
-const miniWeekDays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
-const shortWeekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const longWeekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const shortMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const longMonths = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+// TODO Maybe rename these
+export const miniWeekDays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+export const shortWeekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+export const longWeekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+export const shortMonthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+export const longMonthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 class DateLocale {
     constructor(obj={}) {
@@ -437,8 +446,8 @@ StemDate.tokenFormattersMap = new Map([
 
     ["M", date => (date.getMonth() + 1)],
     ["MM", date => padNumber(date.getMonth() + 1, 2)],
-    ["MMM", date => shortMonths[date.getMonth()]],
-    ["MMMM", date => longMonths[date.getMonth()]],
+    ["MMM", date => shortMonthNames[date.getMonth()]],
+    ["MMMM", date => longMonthNames[date.getMonth()]],
 
     ["D", date => date.getDate()],
     ["Do", date => suffixWithOrdinal(date.getDate())],
