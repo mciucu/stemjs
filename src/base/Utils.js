@@ -309,6 +309,25 @@ export function suffixWithOrdinal(num) {
     return num + getOrdinalSuffix(num);
 }
 
+function appendNumberInParanthesis(str, index) {
+    if (!index) {
+        return str;
+    }
+    return str + " (" + index + ")";
+}
+
+// Starting from the suggestion, tries a bunch of versioning values until one is free (passes checkFunc)
+export function findFirstFreeVersion(suggestion, checkFunc, versioning=appendNumberInParanthesis) {
+    for (let index = 0; index < 100; index++) {
+        const str = versioning(suggestion, index);
+        if (!checkFunc(str)) {
+            return str;
+        }
+    }
+    // Hail Mary
+    return versioning(suggestion, Math.random().toString().substring(2));
+}
+
 export function instantiateNative(BaseClass, NewClass, ...args) {
     let obj = new BaseClass(...args);
     obj.__proto__ = NewClass.prototype;
