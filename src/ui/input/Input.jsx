@@ -2,6 +2,7 @@ import {UI} from "../UIBase";
 import {DOMAttributesMap} from "../NodeAttributes";
 import {InputStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
+import {StemDate} from "../../time/Date";
 
 
 @registerStyle(InputStyle)
@@ -17,6 +18,13 @@ class InputableElement extends UI.Element {
 
     blur() {
         this.node.blur();
+    }
+
+    onMount() {
+        const {defaultValue} = this.options;
+        if (defaultValue) {
+            this.setValue(defaultValue);
+        }
     }
 }
 
@@ -112,6 +120,26 @@ NumberInput.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap,
 class TelInput extends Input {
     getInputType() {
         return "tel";
+    }
+}
+
+export class TimeInput extends Input {
+    getInputType() {
+        return "time";
+    }
+
+    setValue(value) {
+        if (value instanceof Date) {
+            value = StemDate.format(value, "hh:mm");
+        }
+        super.setValue(value);
+    }
+
+    // Returns a Date with that hour
+    getValue(baseDate=new StemDate()) {
+        let newDate = new StemDate(baseDate);
+        newDate.setHours(0, 0, 0, this.node.valueAsNumber);
+        return newDate;
     }
 }
 
@@ -278,6 +306,10 @@ class Select extends UI.Primitive(InputableElement, "select") {
             }
         }
         console.error("Can't set the select option ", value, "\nAvailable options: ", this.givenOptions);
+    }
+
+    setValue(value) {
+        this.set(value);
     }
 
     getIndex() {
