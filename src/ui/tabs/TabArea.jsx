@@ -141,7 +141,10 @@ class TabArea extends UI.Element {
         for (const panel of unwrapArray(this.render())) {
             let [tabTitle, tabPanel] = this.createTabPanel(panel);
 
-            if (this.activePanel === tabPanel) {
+            const tabPanelKey = tabPanel.options && tabPanel.options.key;
+            const activePanelKey = this.activePanel && this.activePanel.options && this.activePanel.options.key;
+
+            if (this.activePanel === tabPanel || (tabPanelKey != null && tabPanelKey === activePanelKey)) {
                 activeTab = tabTitle;
             }
 
