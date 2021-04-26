@@ -88,7 +88,8 @@ export class Duration {
             return;
         }
         if (duration instanceof TimeUnit) {
-            if (this.relativeDuration = duration.isVariable()) {
+            this.relativeDuration = duration.isVariable();
+            if (this.relativeDuration) {
                 this[duration.name] = 1;
             } else {
                 this.milliseconds = duration.getMilliseconds();
