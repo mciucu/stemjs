@@ -31,14 +31,10 @@ class RadioButtonGroup extends SimpleStyledElement {
     }
 
     render() {
-        // TODO @branch map
-        this.buttons = [];
-        for (let i = 0; i < this.options.givenOptions.length; i += 1) {
-            this.buttons.push(
-                <Button key={i} onClick={() => {this.setIndex(i);}} size={this.getSize()}
-                  label={this.options.givenOptions[i].toString()} level={this.getLevel()}
-                  className={this.index === i ? "active" : ""}/>);
-        }
+        this.buttons = this.options.givenOptions.map((option, index) =>
+            <Button key={index} onClick={() => this.setIndex(index)} size={this.getSize()}
+                    label={option.toString()} level={this.getLevel()}
+                    className={this.index === index ? "active" : ""}/>);
         return this.buttons;
     }
 
