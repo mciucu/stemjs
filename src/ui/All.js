@@ -12,6 +12,7 @@ export * from "./input/Input";
 export * from "./form/Form";
 export * from "./SVG";
 export * from "./SimpleElements";
+export * from "./ProgressBar";
 
 export * from "./Router";
 
