@@ -130,7 +130,7 @@ export class TimeInput extends Input {
 
     setValue(value) {
         if (value instanceof Date) {
-            value = StemDate.format(value, "hh:mm");
+            value = StemDate.format(value, "HH:mm");
         }
         super.setValue(value);
     }
