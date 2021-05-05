@@ -173,6 +173,19 @@ class GenericObjectStore extends BaseStore {
         return this.all().filter(callback);
     }
 
+    filterBy(filter) {
+        const entries = Object.entries(filter); // Some minimal caching
+
+        return this.filter(obj => {
+            for (const [key, value] of entries) {
+                if (obj[key] != value) {
+                    return false;
+                }
+            }
+            return true;
+        })
+    }
+
     toJSON() {
         return this.all().map(entry => entry.toJSON());
     }
