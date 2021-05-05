@@ -333,6 +333,7 @@ NodeAttributes.defaultAttributesMap = new DOMAttributesMap(null, [
     ["type"],
     ["placeholder"],
     ["src"],
+    ["alt"],
     ["height"],
     ["width"],
     ["tabIndex"],
