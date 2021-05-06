@@ -4,6 +4,7 @@ import {UI} from "./UIBase";
 import {StyleSheet, styleRule} from "./Style";
 import {registerStyle} from "./style/Theme";
 import {EnqueueableMethodMixin, enqueueIfNotLoaded} from "../base/EnqueueableMethodMixin";
+import {ensure} from "../base/Require";
 
 
 class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
@@ -145,8 +146,10 @@ class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
         }
         if (this.options.hasOwnProperty("enableBasicAutocompletion") ||
             this.options.hasOwnProperty("enableLiveAutocompletion")) {
-            let langTools ="/static/js/ext/ace/ext-language_tools.js";
-            require([langTools], () => {
+            let langTools = this.options.langToolsSrc || "/static/js/ext/ace/ext-language_tools.js";
+            // TODO: This is to keep compatibility with CSAcademy. Don't do this anymore.
+            const ensureScriptFunction = typeof require === "undefined" ? ensure : require;
+            ensureScriptFunction([langTools], () => {
                 this.setBasicAutocompletion(this.options.enableBasicAutocompletion);
                 this.setLiveAutocompletion(this.options.enableLiveAutocompletion);
                 this.setSnippets(this.options.enableSnippets);
