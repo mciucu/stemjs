@@ -16,7 +16,7 @@ export function unwrapArray(elements) {
     // Check if the passed in array is valid, and try to return it if possible to preserve references
     let allProperElements = true;
     for (let i = 0; i < elements.length; i++) {
-        if (Array.isArray(elements[i]) || elements[i] == null) {
+        if (Array.isArray(elements[i]) || elements[i] == null || elements[i] === false) {
             allProperElements = false;
             break;
         }
@@ -35,7 +35,7 @@ export function unwrapArray(elements) {
                 result.push(unwrappedElement[j]);
             }
         } else {
-            if (elements[i] != null) {
+            if (elements[i] != null && elements[i] !== false) {
                 result.push(elements[i]);
             }
         }
