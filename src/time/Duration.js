@@ -142,7 +142,7 @@ export class Duration {
     }
 
     add(duration) {
-        return this.clone().increm(duration);
+        return this.clone().increment(duration);
     }
 
     subtract(duration) {
