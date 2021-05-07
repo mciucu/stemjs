@@ -8,6 +8,8 @@ import {ensure} from "../base/Require";
 
 
 class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
+    static langToolsSrc = null;
+
     static requireAce(callback) {
         throw Error("You need to implement requireAce");
     }
@@ -146,14 +148,16 @@ class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
         }
         if (this.options.hasOwnProperty("enableBasicAutocompletion") ||
             this.options.hasOwnProperty("enableLiveAutocompletion")) {
-            let langTools = this.options.langToolsSrc || "/static/js/ext/ace/ext-language_tools.js";
-            // TODO: This is to keep compatibility with CSAcademy. Don't do this anymore.
-            const ensureScriptFunction = typeof require === "undefined" ? ensure : require;
-            ensureScriptFunction([langTools], () => {
-                this.setBasicAutocompletion(this.options.enableBasicAutocompletion);
-                this.setLiveAutocompletion(this.options.enableLiveAutocompletion);
-                this.setSnippets(this.options.enableSnippets);
-            });
+            const {langToolsSrc} = this.constructor;
+            if (!langToolsSrc) {
+                console.warn("Autocompletion requires setting 'langToolSrc' in CodeEditor");
+            } else {
+                ensure([langToolsSrc], () => {
+                    this.setBasicAutocompletion(this.options.enableBasicAutocompletion);
+                    this.setLiveAutocompletion(this.options.enableLiveAutocompletion);
+                    this.setSnippets(this.options.enableSnippets);
+                });
+            }
         }
     }
 
