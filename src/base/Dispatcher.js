@@ -192,6 +192,14 @@ class Dispatchable {
         return intervalId;
     }
 
+    attachAnimationFrame(callback) {
+        const animationId = requestAnimationFrame(callback);
+        this.addCleanupJob(() => {
+            cancelAnimationFrame(animationId);
+        });
+        return animationId;
+    }
+
     addUpdateListener(callback) {
         return this.addListener("update", callback);
     }
