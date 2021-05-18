@@ -31,6 +31,7 @@ class Button extends UI.Primitive(IconableInterface, "button") {
 }
 
 
+// TODO move these buttons to another file
 class StateButton extends Button {
     setOptions(options) {
         options.state = (this.options && this.options.state) || options.state || ActionStatus.DEFAULT;
@@ -71,7 +72,6 @@ class StateButton extends Button {
         return super.render();
     }
 }
-
 
 class AjaxButton extends StateButton {
     getDefaultOptions() {

@@ -171,32 +171,20 @@ class Dispatchable {
     }
 
     attachTimeout(callback, timeout) {
-        let executed = false;
-        const timeoutId = setTimeout((...args) => {
-            executed = true;
-            callback(...args);
-        }, timeout);
-        this.addCleanupJob(() => {
-            if (!executed) {
-                clearTimeout(timeoutId);
-            }
-        });
+        const timeoutId = setTimeout(callback, timeout);
+        this.addCleanupJob(() => clearTimeout(timeoutId));
         return timeoutId;
     }
 
     attachInterval(callback, timeout) {
         const intervalId = setInterval(callback, timeout);
-        this.addCleanupJob(() => {
-            clearInterval(intervalId);
-        });
+        this.addCleanupJob(() => clearInterval(intervalId));
         return intervalId;
     }
 
     attachAnimationFrame(callback) {
         const animationId = requestAnimationFrame(callback);
-        this.addCleanupJob(() => {
-            cancelAnimationFrame(animationId);
-        });
+        this.addCleanupJob(() => cancelAnimationFrame(animationId));
         return animationId;
     }
 
