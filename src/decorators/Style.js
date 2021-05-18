@@ -35,7 +35,7 @@ function styleRuleWithOptions() {
         descriptor.objInitializer = function () {
             let style = evaluateStyleRuleObject(this, initializer, value, options);
 
-            // TODO: a bit of a hack, clean this up
+            // TODO: a bit of a hack, clean this up with Symbol and fix typo
             style["prefferedClassName"] = key;
 
             if (options.selector) {
