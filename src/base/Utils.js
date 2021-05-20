@@ -365,6 +365,7 @@ export function extendsNative(targetClass) {
     return newClass;
 }
 
+export const UNICODE_BOM_CHARACTER = 0xFEFF;
 export const NOOP_FUNCTION = () => undefined;
 
 // Helpers to wrap iterators, to wrap all values in a function or to filter them

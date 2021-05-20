@@ -1,11 +1,12 @@
 // The FileSaver class is mean to be able to create a Save as... file dialog from text/bytes
 // TODO: this file is work in progress
 import {Dispatchable} from "./Dispatcher";
+import {UNICODE_BOM_CHARACTER} from "./Utils";
 
 let autoBom = function (blob) {
     // Add the unicode boom if not present
     if (/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(blob.type)) {
-        return new Blob([String.fromCharCode(0xFEFF), blob], {type: blob.type});
+        return new Blob([String.fromCharCode(UNICODE_BOM_CHARACTER), blob], {type: blob.type});
     }
     return blob;
 };
