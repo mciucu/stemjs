@@ -1,3 +1,4 @@
+// TODO deprecate
 import {UI} from "./UIBase";
 import {TextInput} from "./input/Input";
 import {VolatileFloatingWindow} from "./modal/FloatingWindow";
