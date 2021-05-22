@@ -70,12 +70,13 @@ export class CSVReader {
     static DELIMITER_COMMA = ","; // The only 2 supported delimiters
     static DELIMITER_TAB = "\t";
 
-    constructor({delimiter=CSVReader.DELIMITER_COMMA, multilineInsideQuotes = true, autotrim = true, skipBom=true} = {}) {
+    constructor({delimiter=CSVReader.DELIMITER_COMMA, multilineInsideQuotes = true, autotrim = true, skipBom=true, validate=true} = {}) {
         this.allowQuotes = true;
         this.delimiter = delimiter;
         this.multilineInsideQuotes = multilineInsideQuotes;
         this.autotrim = autotrim;
         this.skipBom = skipBom;
+        this.validate = validate;
     }
 
     // Run a state machine here
@@ -164,9 +165,11 @@ export class CSVReader {
 
         finishRow(); // Flush the last row
 
-        for (const row of rows) {
-            if (row.length != rows[0].length) {
-                throw "Row detected with a different number of columns than the header";
+        if (this.validate) {
+            for (const row of rows) {
+                if (row.length != rows[0].length) {
+                    throw "Row detected with a different number of columns than the header";
+                }
             }
         }
 
