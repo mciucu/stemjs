@@ -176,3 +176,54 @@ export class CSVReader {
         return rows;
     }
 }
+
+export class CSVColumnMapper {
+    columns = [];
+
+    constructor(headerRow, selectedColumns) {
+        selectedColumns = selectedColumns || headerRow.map(x => [x]);
+        for (const col of selectedColumns) {
+            const mappedColumn = this.makeColumn(headerRow, col);
+            if (mappedColumn) {
+                this.columns.push(mappedColumn);
+            }
+        }
+    }
+
+    makeColumn(headerRow, column) {
+        const key = column[0];
+        const alternateNames = column[1] || [key];
+        const extraOptions = {
+            ...column[2],
+        }
+        for (let index = 0; index < headerRow.length; index++) {
+            for (const name of alternateNames) {
+                if (headerRow[index].toLowerCase() === name.toLowerCase()) {
+                    return {
+                        index,
+                        key,
+                        ...extraOptions,
+                    };
+                }
+            }
+        }
+        if (extraOptions.required) {
+            throw `Missing column ${extraOptions.key}. Accepted variations (case insensitive): ${alternateNames.join(", ")}`;
+        }
+        return null;
+    }
+
+    // Select only the columns we care about
+    toRow(row) {
+        this.columns.map(col => row[col.index]);
+    }
+
+    toObject(row) {
+        let obj = {};
+        for (const col of this.columns) {
+            const value = row[col.index];
+            obj[col.key] = col.loader? col.loader(value) :  value;
+        }
+        return obj;
+    }
+}
