@@ -181,6 +181,7 @@ export class CSVColumnMapper {
     columns = [];
 
     constructor(headerRow, selectedColumns) {
+        this.headerRow = headerRow;
         selectedColumns = selectedColumns || headerRow.map(x => [x]);
         for (const col of selectedColumns) {
             const mappedColumn = this.makeColumn(headerRow, col);
@@ -190,25 +191,36 @@ export class CSVColumnMapper {
         }
     }
 
+    numColumns() {
+        return this.columns.length;
+    }
+
+    numOriginalColumns() {
+        return this.headerRow.length;
+    }
+
     makeColumn(headerRow, column) {
-        const key = column[0];
-        const alternateNames = column[1] || [key];
+        const nameVariations = Array.isArray(column[0]) ? column[0] : [column[0]];
+        const key = nameVariations[0];
         const extraOptions = {
-            ...column[2],
+            ...column[1],
         }
         for (let index = 0; index < headerRow.length; index++) {
-            for (const name of alternateNames) {
+            for (const name of nameVariations) {
                 if (headerRow[index].toLowerCase() === name.toLowerCase()) {
                     return {
                         index,
                         key,
+                        originalName: headerRow[index],
                         ...extraOptions,
                     };
                 }
             }
         }
         if (extraOptions.required) {
-            throw `Missing column ${extraOptions.key}. Accepted variations (case insensitive): ${alternateNames.join(", ")}`;
+            let errorMessage = `The file needs to have a column labeled ${key}.`;
+            errorMessage += ` Accepted variations (case insensitive): ${nameVariations.join(", ")}`;
+            throw errorMessage;
         }
         return null;
     }
