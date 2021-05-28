@@ -1,6 +1,6 @@
 // TODO: should this be renamed to "toUnwrappedArray"?
 export function unwrapArray(elements) {
-    if (!elements) {
+    if (elements == null || elements === false) {
         return [];
     }
 
