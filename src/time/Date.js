@@ -78,6 +78,7 @@ class StemDate extends BaseDate {
     set(date) {
         date = this.constructor.toDate(date);
         this.setTime(date.getTime());
+        return this;
     }
 
     clone() {
@@ -206,7 +207,7 @@ class StemDate extends BaseDate {
         timeUnit = TimeUnit.toTimeUnit(timeUnit);
         // TODO: this is wrong for semester, etc, should be different then
         while (timeUnit = timeUnit.baseUnit) {
-            this["set" + timeUnit.dateMethodSuffix](0);
+            timeUnit.setDateValue(this, 0);
         }
         return this;
     }
@@ -214,8 +215,7 @@ class StemDate extends BaseDate {
     roundUp(timeUnit) {
         const roundDown = this.clone().roundDown(timeUnit);
         if (this.equals(roundDown)) {
-            this.set(roundDown);
-            return this;
+            return this.set(roundDown);
         }
         this.addUnit(timeUnit);
         return this.roundDown(timeUnit);
@@ -253,6 +253,7 @@ class StemDate extends BaseDate {
         return this.add(duration);
     }
 
+    // TODO deprecate this
     diffDuration(date) {
         return new Duration(this.diff(date));
     }
@@ -386,10 +387,6 @@ class StemDate extends BaseDate {
         return this.getStartOfYear().add(TimeUnit.YEAR).subtract(TimeUnit.MILLISECOND);
     }
 }
-
-Duration.prototype.format = function (pattern) {
-    return StemDate.fromUnixMilliseconds(this.toMilliseconds()).utc().format(pattern);
-};
 
 // TODO Maybe rename these
 export const miniWeekDays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];

@@ -37,6 +37,14 @@ export class TimeUnit {
         return this.pluralName;
     }
 
+    formatCount(numTimeUnits) {
+        if (numTimeUnits != 1) {
+            return numTimeUnits + " " + this.getPluralName();
+        } else {
+            return numTimeUnits + " " + this.getName();
+        }
+    }
+
     getMilliseconds() {
         return this.milliseconds;
     }
@@ -141,6 +149,7 @@ export class Duration {
         return this;
     }
 
+    // TODO really decide if we want all these to modify the object or not
     add(duration) {
         return this.clone().increment(duration);
     }
@@ -188,6 +197,7 @@ export class Duration {
     }
 
     // TODO: for all these units, should have a way to get the float and int value
+    // TODO use methods that use TimeUnit
     toMilliseconds() {
         return Math.floor(+this);
     }
@@ -232,8 +242,32 @@ export class Duration {
         return Math.floor(+this / (1000 * 60 * 60 * 24 * 365));
     }
 
-    toString(locale) {
-        // Humanize the duration (should work with localization)
+    toTimeUnit(timeUnit) {
+        return Math.floor(+this / timeUnit.getMilliseconds());
+    }
+
+    // TODO this doesn't handle cases with variable length fields
+    format({maxEntries = 2, locale = null, separator=", "} = {}) {
+        let duration = this.abs();
+        let timeUnit = TimeUnit.YEAR;
+        let entries = [];
+        let numEntriesIncludingSkipped = 0; // Use a separate counter to include skipped zero entries
+        while (timeUnit && numEntriesIncludingSkipped < maxEntries) {
+            const numWholeTimeUnits = duration.toTimeUnit(timeUnit);
+            if (numWholeTimeUnits) {
+                duration = duration.subtract(numWholeTimeUnits * timeUnit);
+                entries.push(timeUnit.formatCount(numWholeTimeUnits));
+            }
+            if (entries.length > 0) {
+                numEntriesIncludingSkipped += 1;
+            }
+            timeUnit = timeUnit.baseUnit;
+        }
+        return entries.join(separator);
+    }
+
+    toString(...args) {
+        return this.format(...args);
     }
 }
 
