@@ -79,6 +79,10 @@ Theme.setProperties({
     FLAT_TAB_AREA_LINE_HEIGHT: 30,
     FLAT_TAB_AREA_PADDING_SIDES: 10,
     FLAT_TAB_AREA_UNDERLINE_HEIGHT: 3,
+
+    INPUT_BACKGROUND_COLOR: "#fff",
+    INPUT_BORDER_COLOR: "#E5EAE9",
+    INPUT_BORDER_RADIUS: 4,
 }, false);
 
 export class BasicLevelSizeStyleSheet extends StyleSheet {
