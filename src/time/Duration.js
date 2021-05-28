@@ -16,6 +16,10 @@ export class TimeUnit {
         this.variableDuration = this.variableMultiplier || (baseUnit && baseUnit.isVariable());
         this.getterName = (name === "year") ? "getFullYear" : ("get" + capitalize(name));
         this.setterName = (name === "year") ? "setFullYear" : ("set" + capitalize(name));
+        if (!Date.prototype[this.getterName] && Date.prototype[this.getterName + "s"]) {
+            this.getterName += "s";
+            this.setterName += "s";
+        }
     }
 
     static toTimeUnit(timeUnit) {
@@ -246,24 +250,35 @@ export class Duration {
         return Math.floor(+this / timeUnit.getMilliseconds());
     }
 
-    // TODO this doesn't handle cases with variable length fields
-    format({maxEntries = 2, locale = null, separator=", "} = {}) {
+    // Split the duration in absolute value into component parts
+    // Will skip zero parts
+    // TODO this doesn't yet handle cases with variable length fields
+    splitInParts(maxParts) {
         let duration = this.abs();
         let timeUnit = TimeUnit.YEAR;
-        let entries = [];
-        let numEntriesIncludingSkipped = 0; // Use a separate counter to include skipped zero entries
-        while (timeUnit && numEntriesIncludingSkipped < maxEntries) {
+        let parts = [];
+        let numPartsIncludingSkipped = 0; // Use a separate counter to include skipped zero entries
+        while (timeUnit) {
             const numWholeTimeUnits = duration.toTimeUnit(timeUnit);
             if (numWholeTimeUnits) {
                 duration = duration.subtract(numWholeTimeUnits * timeUnit);
-                entries.push(timeUnit.formatCount(numWholeTimeUnits));
+                parts.push({numUnits: numWholeTimeUnits, timeUnit});
             }
-            if (entries.length > 0) {
-                numEntriesIncludingSkipped += 1;
+            if (parts.length > 0) {
+                numPartsIncludingSkipped += 1;
+                if (numPartsIncludingSkipped >= maxParts) {
+                    break;
+                }
             }
             timeUnit = timeUnit.baseUnit;
         }
-        return entries.join(separator);
+
+        return {parts, timeUnit, duration};
+    }
+
+    format({maxEntries = 2, locale = null, separator=", ", raw=false} = {}) {
+        const {parts} = this.splitInParts(maxEntries);
+        return parts.map(part => part.timeUnit.formatCount(part.numUnits)).join(separator);
     }
 
     toString(...args) {
