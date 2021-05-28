@@ -334,6 +334,7 @@ export function instantiateNative(BaseClass, NewClass, ...args) {
     return obj;
 }
 
+// TODO Consider deleting this, as all browsers now have native classes
 // This function can be used as a decorator in case we're extending native classes (Map/Set/Date)
 // and we want to fix the way babel breaks this scenario
 // WARNING: it destroys the code in constructor
