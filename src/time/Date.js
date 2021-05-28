@@ -1,11 +1,11 @@
-import {padNumber, suffixWithOrdinal, extendsNative, instantiateNative, isNumber} from "../base/Utils";
+import {padNumber, suffixWithOrdinal, isNumber} from "../base/Utils";
 import {TimeUnit, Duration} from "./Duration";
 
-// MAX_UNIX_TIME is either ~Feb 2106 in unix seconds or ~Feb 1970 in unix milliseconds
+// By default, StemDate will guess if the value is in milliseconds or seconds.
 // Any value less than this is interpreted as a unix time in seconds
 // If you want to go around this behavior, you can use the static method .fromUnixMilliseconds()
 // To disable, set this value to 0
-export let MAX_AUTO_UNIX_TIME = Math.pow(2, 32);
+export let MAX_AUTO_UNIX_TIME = Math.pow(2, 32); // Either ~Feb 2106 in unix seconds or ~Feb 1970 in unix milliseconds
 
 let DEFAULT_DATE_FORMAT = "ISO";
 
@@ -15,34 +15,22 @@ export function setDefaultDateFormat(dateFormat) {
 
 const BaseDate = self.Date;
 
-@extendsNative
 class StemDate extends BaseDate {
     // This is only to let the IDE know that this class can receive arguments.
     constructor(...args) {
         super(...args);
-        if (arguments.length === 1 && isNumber(arguments[0]) && this.valueOf() < MAX_AUTO_UNIX_TIME) {
+        if (args.length === 1 && isNumber(args[0]) && this.valueOf() < MAX_AUTO_UNIX_TIME) {
             this.setTime(this.valueOf() * 1000);
         }
     }
 
     static create(value) {
-        try {
-            // native ES6
-            return new this(value);
-        } catch (e) {
-            // Still need to do this mess because of Babel, should be removed when moving to native ES6
-            // Try to do an educated guess if this date is in unix seconds or milliseconds
-            if (arguments.length === 1 && isNumber(value) && value < MAX_AUTO_UNIX_TIME) {
-                return instantiateNative(BaseDate, StemDate, value * 1000.0);
-            } else {
-                return instantiateNative(BaseDate, StemDate, ...arguments);
-            }
-        }
+        return new this(value);
     }
 
     // Return a StemDate from the object, else return value if falsy
     static optionally(value) {
-        return value && this.create(value);
+        return (value != null) && this.create(value);
     }
 
     static toDate(date) {
@@ -53,6 +41,7 @@ class StemDate extends BaseDate {
         }
     }
 
+    // Contract change: Date.now() returns a time in milliseconds, while we return an actual date
     static now() {
         return new this(BaseDate.now());
     }
@@ -68,10 +57,6 @@ class StemDate extends BaseDate {
         return this.format(DEFAULT_DATE_FORMAT);
     }
 
-    toDate() {
-        return this;
-    }
-
     static fromUnixMilliseconds(unixMilliseconds) {
         return this.create(new BaseDate(unixMilliseconds));
     }
@@ -80,14 +65,14 @@ class StemDate extends BaseDate {
         return this.fromUnixMilliseconds(unixSeconds * 1000);
     }
 
-    // Creates a Date object from an instance of DOMHighResTimeStamp, returned by performance.now() for instance
-    static fromHighResTimestamp(highResTimestamp) {
-        return this.fromUnixMilliseconds(highResTimestamp + self.performance.timing.navigationStart)
-    }
-
     // You don't usually need to call this in most cases, constructor uses MAX_AUX_UNIX_TIME
     static unix(unixTime) {
         return this.fromUnixSeconds(unixTime);
+    }
+
+    // Creates a Date object from an instance of DOMHighResTimeStamp, returned by performance.now() for instance
+    static fromHighResTimestamp(highResTimestamp) {
+        return this.fromUnixMilliseconds(highResTimestamp + self.performance.timing.navigationStart)
     }
 
     set(date) {
@@ -236,11 +221,10 @@ class StemDate extends BaseDate {
         return this.roundDown(timeUnit);
     }
 
-
     round(timeUnit) {
         let roundUp = this.clone().roundUp(timeUnit);
         let roundDown = this.clone().roundDown(timeUnit);
-        // At a tie, preffer to round up, that's where time's going
+        // On a tie we round up, as that's where time is flowing towards in our human perception of "reality"
         if (this.diff(roundUp) <= this.diff(roundDown)) {
             this.setTime(roundUp.getTime());
         } else {
