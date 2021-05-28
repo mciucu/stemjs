@@ -171,6 +171,7 @@ class Dispatchable {
     }
 
     attachTimeout(callback, timeout) {
+        // TODO when the timeout executes, it doesn't get cleared from the cleanup jobs and would leak
         const timeoutId = setTimeout(callback, timeout);
         this.addCleanupJob(() => clearTimeout(timeoutId));
         return timeoutId;
