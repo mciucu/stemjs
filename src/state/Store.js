@@ -20,8 +20,12 @@ class StoreObject extends Dispatchable {
         this[StoreSymbol] = store;
     }
 
-    getStore() {
-        return this[StoreSymbol];
+    getStore(storeName) {
+        const ownStore = this[StoreSymbol];
+        if (storeName) {
+            return ownStore.getState().getStore(storeName);
+        }
+        return ownStore;
     }
 
     // By default, applying an event just shallow copies the fields from event.data
