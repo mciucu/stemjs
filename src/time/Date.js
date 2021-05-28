@@ -481,6 +481,4 @@ StemDate.tokenFormattersMap = new Map([
     ["LL", date => date.format("MMMM Do, YYYY")],
 ]);
 
-let Date = StemDate; // TODO: do we use this?
-
-export {Date, StemDate};
+export {StemDate};
