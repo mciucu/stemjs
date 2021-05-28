@@ -258,10 +258,14 @@ class StemDate extends BaseDate {
         return new Duration(this.diff(date));
     }
 
-    // TODO: this should be a duration
-    diff(date) {
+    // The different in absolute value
+    diff(date, inAbsolute= true) {
         date = this.constructor.toDate(date);
-        return Math.abs(+this - date);
+        let diffMilliseconds = +this - date;
+        if (inAbsolute) {
+            diffMilliseconds = Math.abs(diffMilliseconds);
+        }
+        return new Duration(diffMilliseconds);
     }
 
     // Just to keep moment compatibility, until we actually implement locales
