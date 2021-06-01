@@ -253,12 +253,12 @@ export class Duration {
     // Split the duration in absolute value into component parts
     // Will skip zero parts
     // TODO this doesn't yet handle cases with variable length fields
-    splitInParts(maxParts) {
+    splitInParts(maxParts, minTimeUnit) {
         let duration = this.abs();
         let timeUnit = TimeUnit.YEAR;
         let parts = [];
         let numPartsIncludingSkipped = 0; // Use a separate counter to include skipped zero entries
-        while (timeUnit) {
+        while (true) {
             const numWholeTimeUnits = duration.toTimeUnit(timeUnit);
             if (numWholeTimeUnits) {
                 duration = duration.subtract(numWholeTimeUnits * timeUnit);
@@ -270,7 +270,13 @@ export class Duration {
                     break;
                 }
             }
-            timeUnit = timeUnit.baseUnit;
+            const nextUnit = timeUnit.baseUnit;
+            // Either stop at milliseconds or when we're too low
+            // Don't modify timeUnit just we have it in the response
+            if (nextUnit == null || (minTimeUnit && nextUnit < minTimeUnit)) {
+                break;
+            }
+            timeUnit = nextUnit;
         }
 
         return {parts, timeUnit, duration};
