@@ -177,6 +177,7 @@ class GenericObjectStore extends BaseStore {
         return this.all().filter(callback);
     }
 
+    // TODO Stores should have configurable indexes from FK ids, for quick filtering
     filterBy(filter) {
         const entries = Object.entries(filter); // Some minimal caching
 
@@ -188,6 +189,11 @@ class GenericObjectStore extends BaseStore {
             }
             return true;
         })
+    }
+
+    findBy(filter) {
+        // TODO - need a better implementation with rapid termination
+        return this.filterBy(filter)[0];
     }
 
     toJSON() {
