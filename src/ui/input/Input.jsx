@@ -266,6 +266,7 @@ class TextArea extends UI.Primitive(InputableElement, "textarea") {
 }
 
 
+// TODO this element is inconsistent with the rest. Properly fix the defaultValue pattern
 class Select extends UI.Primitive(InputableElement, "select") {
     render() {
         this.givenOptions = this.options.options || [];
