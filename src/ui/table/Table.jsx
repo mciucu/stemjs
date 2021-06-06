@@ -15,6 +15,7 @@ class TableRow extends UI.Primitive("tr") {
     }
 
     renderEntryCell(column) {
+        // TODO support more complex style options and {...columns.extraOptions(entry)}
         return <td style={column.cellStyle} key={column.id}>{column.value(this.options.entry, this.options.index)}</td>;
     }
 }
@@ -33,7 +34,7 @@ class Table extends UI.Primitive("table") {
     }
 
     getRowClass() {
-        return TableRow;
+        return this.options.rowClass || TableRow;
     }
 
     makeRow(entry, index) {
