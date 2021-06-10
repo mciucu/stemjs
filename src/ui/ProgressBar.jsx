@@ -1,3 +1,4 @@
+import {UI} from "./UIBase";
 import {buildColors} from "./Color";
 import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {styleRule} from "../decorators/Style";
