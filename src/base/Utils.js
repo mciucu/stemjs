@@ -155,6 +155,10 @@ export function setObjectPrototype(obj, Class) {
     return obj;
 }
 
+export function isFunction(obj) {
+    return typeof obj === "function";
+}
+
 export function isBoolean(obj) {
     return obj === true || obj === false;
 }

@@ -310,6 +310,7 @@ class UIElement extends BaseUIElement {
         }
     }
 
+    // Don't make changes here, unless you're also removing the optimization with NOOP_FUNCTION
     extraNodeAttributes(attr) {}
 
     applyNodeAttributes() {
@@ -322,6 +323,7 @@ class UIElement extends BaseUIElement {
             attr = this.getNodeAttributes(false);
         }
         attr.apply(this.node, this.constructor.domAttributesMap);
+        // TODO: this.styleSheet.container should be added to this.addClass
     }
 
     setAttribute(key, value) {

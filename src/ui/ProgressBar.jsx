@@ -16,11 +16,11 @@ let progressBarColorToStyle = (color) => {
 export class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToStyle) {
     @styleRule
     container = {
-        height: "20px",
-        marginBottom: "20px",
+        height: 20,
+        marginBottom: 20,
         overflow: "hidden",
         backgroundColor: "#f5f5f5",
-        borderRadius: "4px",
+        borderRadius: 4,
         boxShadow: "inset 0 1px 2px rgba(0, 0, 0, .1)",
     };
 
