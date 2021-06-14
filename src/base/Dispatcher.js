@@ -216,6 +216,7 @@ function getAttachCleanupJobMethod(methodName) {
     }
 }
 
+// TODO maybe this can be handle better through a Proxy?
 // Not sure if these should be added like this, but meh
 Dispatchable.prototype.attachListener           = getAttachCleanupJobMethod("Listener");
 Dispatchable.prototype.attachEventListener      = getAttachCleanupJobMethod("EventListener");
