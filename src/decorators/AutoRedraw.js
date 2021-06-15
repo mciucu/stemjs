@@ -1,26 +1,11 @@
 import {GenericObjectStore, StoreObject} from "../state/Store";
-
-// Basically a WeakMap with a default getter
-// TODO - mode to another file probably
-class PropertyCache {
-    constructor(key, getter) {
-        this.key = key;
-        this.getter = getter;
-    }
-
-    get(obj, getter = this.getter) {
-        const key = this.key;
-        if (obj.hasOwnProperty(key)) {
-            return obj[key];
-        }
-        return obj[key] = getter(obj);
-    }
-}
+import {PropertyCache} from "../data-structures/PropertyCache";
 
 // TODO: maybe have better names
 const autoRedrawListenersLazy = new PropertyCache(Symbol.for("autoRedrawHandler"), () => new Set());
 const redrawHandlerLazy = new PropertyCache(Symbol.for("autoRedrawListener"), (obj) => {
     return () => {
+        // TODO @branch have this do a microtask that doesn't do more than one redraw per cycle
         obj.node && obj.redraw();
     }
 });
