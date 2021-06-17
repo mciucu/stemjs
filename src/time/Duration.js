@@ -41,6 +41,10 @@ export class TimeUnit {
         return this.pluralName;
     }
 
+    getFrequencyName() {
+        return this.name + "ly";
+    }
+
     formatCount(numTimeUnits) {
         if (numTimeUnits != 1) {
             return numTimeUnits + " " + this.getPluralName();
