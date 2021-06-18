@@ -61,9 +61,11 @@ class Input extends UI.Primitive(InputableElement, "input") {
     }
 
     onMount() {
-        this.setValue(this.options.value);
+        // TODO Fix value and defaultValue logic
+        this.setValue(this.options.value || this.options.defaultValue);
     }
 }
+
 Input.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
     ["autocomplete"],
     ["autofocus", {noValue: true}],
@@ -99,7 +101,6 @@ class TextInput extends Input {
     }
 }
 
-
 class NumberInput extends Input {
     getInputType() {
         return "number";
@@ -110,6 +111,7 @@ class NumberInput extends Input {
         return parseFloat(val);
     }
 }
+
 NumberInput.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
     ["min"],
     ["max"],
