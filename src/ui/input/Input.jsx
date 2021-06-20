@@ -5,8 +5,10 @@ import {registerStyle} from "../style/Theme";
 import {StemDate} from "../../time/Date";
 
 
+// TODO rename to BaseInputElement
+// TODO handle the setOptions - defaultValue lifecycle
 @registerStyle(InputStyle)
-class InputableElement extends UI.Element {
+export class InputableElement extends UI.Element {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
         attr.addClass(this.styleSheet.inputElement);
