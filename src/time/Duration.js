@@ -45,11 +45,15 @@ export class TimeUnit {
         return this.name + "ly";
     }
 
-    formatCount(numTimeUnits) {
+    formatCount(numTimeUnits, omitCountOnSingular) {
         if (numTimeUnits != 1) {
             return numTimeUnits + " " + this.getPluralName();
         } else {
-            return numTimeUnits + " " + this.getName();
+            if (omitCountOnSingular) {
+                return this.getName();
+            } else {
+                return numTimeUnits + " " + this.getName();
+            }
         }
     }
 
