@@ -283,10 +283,19 @@ class Select extends UI.Primitive(InputableElement, "select") {
             if (this.givenOptions[i] == this.options.selected) {
                 options.selected = true;
             }
-            selectOptions.push(<option {...options}>{this.givenOptions[i].toString()}</option>);
+            selectOptions.push(<option {...options}>{this.serializeEntry(this.givenOptions[i])}</option>);
         }
 
         return selectOptions;
+    }
+
+    serializeEntry(obj) {
+        const {serializer} = this.options;
+        if (serializer) {
+            return serializer(obj);
+        } else {
+            return obj.toString();
+        }
     }
 
     extraNodeAttributes(attr) {
