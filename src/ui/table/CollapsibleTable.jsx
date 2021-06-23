@@ -1,5 +1,5 @@
 import {UI} from "../UIBase";
-import {Table, TableRow} from "./Table";
+import {ColumnHandler, Table, TableRow} from "./Table";
 import {CollapsibleMixin} from "../collapsible/CollapsibleMixin";
 import {StyleSheet} from "../Style";
 import {styleRule} from "../../decorators/Style";
@@ -110,8 +110,8 @@ function CollapsibleTableInterface(BaseTableClass) {
 
         setOptions(options) {
             super.setOptions(options);
-            if (options.columns) {
-                this.options.columns = [this.getToggleColumn(), ...options.columns];
+            if (options.columns && !options.columns[0]?.isToggleColumn) {
+                this.options.columns = [this.getToggleColumn(), ...this.options.columns];
             }
         }
 
@@ -128,12 +128,13 @@ function CollapsibleTableInterface(BaseTableClass) {
         }
 
         getToggleColumn() {
-            return {
+            return new ColumnHandler({
+                isToggleColumn: true,
                 cellStyle: {
                     width: "1%",
                     "whiteSpace": "nowrap",
                 }
-            }
+            });
         }
     };
 }
