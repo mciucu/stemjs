@@ -59,7 +59,7 @@ class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
     }
 
     getInitialCollapsedContent() {
-        return this.options.renderCollapsible(this.options.entry);
+        return this.options.renderCollapsible(this.options.entry, this);
     }
 
     render() {
