@@ -68,7 +68,7 @@ class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
         return [
             <tr className={this.styleSheet.heading}>{super.render()}</tr>,
             <tr>
-                <td style={{padding: 0, overflow: "hidden", height: "auto", border: 0}} colspan={this.options.columns.length}>
+                <td style={{padding: 0, overflow: "hidden", height: "auto"}} colspan={this.options.columns.length}>
                     <div ref="contentArea" className={collapsed ? GlobalStyle.hidden : null}>
                         {this.getInitialCollapsedContent()}
                     </div>
