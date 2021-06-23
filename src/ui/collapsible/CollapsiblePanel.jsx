@@ -3,7 +3,7 @@ import {CollapsibleMixin} from "./CollapsibleMixin";
 import {CardPanel} from "../CardPanel";
 import {CollapsiblePanelStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
-import {MakeIcon} from "../SimpleElements";
+import {GlobalStyle} from "../GlobalStyle";
 
 @registerStyle(CollapsiblePanelStyle)
 class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
@@ -13,38 +13,16 @@ class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
         }
     }
 
-    toggle() {
-        if (this.options.collapsed) {
-            this.expand();
-        } else {
-            this.collapse();
-        }
-    }
-
-    expand() {
-        super.expand(this.contentArea);
-        this.icon.removeClass(this.styleSheet.iconCollapsed);
-    }
-
-    collapse() {
-        super.collapse(this.contentArea);
-        this.icon.addClass(this.styleSheet.iconCollapsed);
-    }
-
     getChildrenToRender() {
         let contentClassName = this.styleSheet.content;
-        let iconClassName = this.styleSheet.icon;
 
         if (this.options.collapsed) {
-            iconClassName += this.styleSheet.iconCollapsed;
-            contentClassName += " hidden " + this.styleSheet.collapsed;
+            contentClassName += GlobalStyle.hidden;
         }
 
         return [
             <div onClick={() => this.toggle()} className={this.styleSheet.heading}>
-                <div ref="icon" className={iconClassName}>
-                    {MakeIcon("chevron-down")}
-                </div>
+                {this.getToggleIcon()}
                 <span className={this.styleSheet.title}>{this.getTitle()}</span>
             </div>,
             <div style={{overflow: "hidden"}}>

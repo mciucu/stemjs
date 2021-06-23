@@ -488,6 +488,7 @@ class UIElement extends BaseUIElement {
         return erasedChild;
     }
 
+    // TODO deprecate?
     eraseAllChildren() {
         while (this.children.length > 0) {
             this.eraseChildAtIndex(this.children.length - 1);

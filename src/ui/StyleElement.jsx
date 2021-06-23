@@ -88,7 +88,7 @@ class DynamicStyleElement extends StyleElement {
 
     // Overwrite valueOf, so when using the + operator should seamlessly concatenate to create a valid className
     valueOf() {
-        return " " + this.getClassName();
+        return " " + this.getClassName() + " ";
     }
 
     // TODO: use a cached decorator here

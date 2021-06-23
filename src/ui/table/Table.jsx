@@ -5,82 +5,82 @@ import {registerStyle} from "../style/Theme";
 // TODO: the whole table architecture probably needs a rethinking
 class TableRow extends UI.Primitive("tr") {
     render() {
-        let rowCells = [];
-
-        for (let column of this.options.columns) {
-            rowCells.push(this.renderEntryCell(column));
-        }
-
-        return rowCells;
+        return this.options.columns.map((column, index) => this.renderEntryCell(column, index));
     }
 
-    renderEntryCell(column) {
+    renderEntryCell(column, columnIndex) {
         // TODO support more complex style options and {...columns.extraOptions(entry)}
-        return <td style={column.cellStyle} key={column.id}>{column.value(this.options.entry, this.options.index)}</td>;
+        return <td style={column.cellStyle} key={columnIndex}>{column.value(this.options.entry, this.options.index)}</td>;
     }
 }
 
 @registerStyle(TableStyle)
 class Table extends UI.Primitive("table") {
-    setOptions(options) {
-        super.setOptions(options);
-
-        this.setColumns(this.options.columns || []);
-        this.entries = this.options.entries || [];
+    getDefaultOptions(options) {
+        return {
+            columns: [],
+            entries: [],
+            rowClass: TableRow,
+        }
     }
 
     extraNodeAttributes(attr) {
-        attr.addClass(this.styleSheet.table);
+        attr.addClass(this.styleSheet.table); // TODO user container instead of table
     }
 
     getRowClass() {
-        return this.options.rowClass || TableRow;
+        return this.options.rowClass;
     }
 
     makeRow(entry, index) {
-        if (entry instanceof UI.Element && entry.getNodeType() === "tr") {
+        if (entry instanceof UI.Element && (entry.getNodeType() === "tr" || entry.getNodeType() === "tbody")) {
             return entry;
         }
         const RowClass = this.getRowClass(entry, index);
-        return <RowClass key={this.getEntryKey(entry, index)} index={index} {...this.getRowOptions(entry)} parent={this}/>
+        return <RowClass {...this.getRowOptions(entry, index)} />
     }
 
-    getRowOptions(entry) {
+    getRowOptions(entry, index) {
+        const {columns} = this.options;
         return {
-            entry: entry,
-            columns: this.columns,
+            entry,
+            columns,
+            index,
+            parent: this,
+            key: this.getEntryKey(entry, index),
         };
     }
 
     render() {
-        const {noHeader} = this.options;
-
         return [
-            noHeader ? null : <thead>
-                {this.renderTableHead()}
-            </thead>,
-            <tbody>
-                {this.renderTableBody()}
-            </tbody>
+            this.renderTableHead(),
+            this.renderTableBody(),
         ];
     }
 
     renderTableHead() {
-        return <tr>{this.columns.map(this.renderHeaderCell, this)}</tr>;
+        const {noHeader} = this.options;
+        return !noHeader && <thead>
+            <tr>{this.options.columns.map(this.renderHeaderCell, this)}</tr>
+        </thead>;
     }
 
     getEntryKey(entry, index) {
         return (entry && entry.id != null) ? entry.id : index;
     }
 
-    renderTableBody() {
+    renderRows() {
         const entries = this.getEntries();
         return this.rows = entries.map((entry, index) => this.makeRow(entry, index));
     }
 
+    renderTableBody() {
+        return <tbody>{this.renderRows()}</tbody>;
+    }
+
     // Renders the whole header cell based on a column
-    renderHeaderCell(column) {
-        return <th style={column.headerStyle} ref={"columnHeader" + column.id}>
+    renderHeaderCell(column, index) {
+        return <th style={column.headerStyle} ref={"columnHeader" + index}>
                 {this.renderColumnHeader(column)}
             </th>;
     }
@@ -93,26 +93,16 @@ class Table extends UI.Primitive("table") {
         return column.headerName;
     }
 
-    // Original entries should not be modified. Overwrite this function to apply any modification in a new array.
-    // TODO: keeping data top level is very bad practice
     getEntries() {
-        return this.entries || [];
+        return this.options.entries || [];
     }
 
     setEntries(entries) {
-        this.entries = entries;
-        this.redraw();
-    }
-
-    columnDefaults(column, index) {
-        column.id = index;
+        this.updateOptions({entries});
     }
 
     setColumns(columns) {
-        this.columns = columns;
-        for (let i = 0; i < this.columns.length; i += 1) {
-            this.columnDefaults(this.columns[i], i);
-        }
+        this.options.columns = columns;
     }
 }
 
