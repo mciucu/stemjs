@@ -1,9 +1,29 @@
-import {TableStyle} from "./Style";
 import {UI} from "../UIBase";
+import {TableStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
 
+export class ColumnHandler {
+    constructor(options, index) {
+        if (Array.isArray(options)) {
+            options = {
+                headerName: options[0],
+                value: options[1],
+                ...options[2],
+            }
+        }
+        Object.assign(this, options);
+        if (index != null) {
+            this.index = index;
+        }
+    }
+
+    static mapColumns(columns) {
+        return columns.map((col, index) => new ColumnHandler(col, index));
+    }
+}
+
 // TODO: the whole table architecture probably needs a rethinking
-class TableRow extends UI.Primitive("tr") {
+export class TableRow extends UI.Primitive("tr") {
     render() {
         return this.options.columns.map((column, index) => this.renderEntryCell(column, index));
     }
@@ -15,12 +35,19 @@ class TableRow extends UI.Primitive("tr") {
 }
 
 @registerStyle(TableStyle)
-class Table extends UI.Primitive("table") {
+export class Table extends UI.Primitive("table") {
     getDefaultOptions(options) {
         return {
             columns: [],
             entries: [],
             rowClass: TableRow,
+        }
+    }
+
+    setOptions(options) {
+        super.setOptions(options);
+        if (options.columns) {
+            this.options.columns = ColumnHandler.mapColumns(options.columns);
         }
     }
 
@@ -105,6 +132,3 @@ class Table extends UI.Primitive("table") {
         this.options.columns = columns;
     }
 }
-
-export * from "./Style";
-export {Table, TableRow};
