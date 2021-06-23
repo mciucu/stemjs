@@ -1,5 +1,5 @@
 import {UI} from "./UIBase";
-import {dashCase} from "../base/Utils";
+import {dashCase, isFunction, isString, unwrapArray} from "../base/Utils";
 import {NodeAttributes, defaultToPixelsAttributes} from "./NodeAttributes";
 
 // TODO: should this be actually better done throught the dynamic CSS API, without doing through the DOM?
@@ -141,6 +141,10 @@ class DynamicStyleElement extends StyleElement {
 
     render() {
         let style = this.options.style || {};
+        if (Array.isArray(style)) {
+            const styleArray = unwrapArray(style).map(styleElement => isFunction(styleElement) ? styleElement() : styleElement);
+            style = Object.assign({}, ...styleArray);
+        }
         if (typeof style === "function") {
             style = style();
         }

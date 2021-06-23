@@ -3,12 +3,6 @@ import {lazyInit} from "./LazyInitialize";
 
 function evaluateStyleRuleObject(target, initializer, value, options) {
     let result = initializer ? initializer.call(target) : value;
-    if (typeof result === "function") {
-        result = result();
-    }
-    if (Array.isArray(result)) {
-        result = Object.assign({}, ...result);
-    }
     return result;
 }
 
@@ -36,7 +30,7 @@ function styleRuleWithOptions() {
             let style = evaluateStyleRuleObject(this, initializer, value, options);
 
             // TODO: a bit of a hack, clean this up with Symbol and fix typo
-            style["prefferedClassName"] = key;
+            style["preferredClassName"] = key;
 
             if (options.selector) {
                 style["selectorName"] = options.selector;
@@ -49,7 +43,7 @@ function styleRuleWithOptions() {
                     console.error("You're trying to inherit a rule that isn't implemented in the parent: " + key);
                 }
                 let parentStyle = evaluateStyleRuleObject(this, parentDesc.objInitializer, parentDesc.value, options);
-                style = deepCopy({}, parentStyle, style);
+                style = [parentStyle, style];
                 return style;
             }
 

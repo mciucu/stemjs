@@ -1,7 +1,7 @@
 // A separate implementation of StyleSheet, using native CSSStyleSheet
 
 import {Dispatchable} from "../base/Dispatcher";
-import {dashCase} from "../base/Utils";
+import {dashCase, isString} from "../base/Utils";
 
 class StyleRuleInstance {
     constructor(styleSheet, index, selector, style) {
@@ -17,11 +17,9 @@ class StyleRuleInstance {
         this.cssRule = styleSheet.cssRules[insertedIndex];
     }
 
-    getCSSText() {
-        let style = this.style;
-        let text = this.selector + "{";
-        for (let key of Object.keys(style)) {
-            let value = style[key];
+    static appendCSSText(text, obj) {
+        for (let key of Object.keys(obj)) {
+            let value = obj[key];
             if (typeof value === "function") {
                 value = value();
             }
@@ -29,10 +27,23 @@ class StyleRuleInstance {
             if (value == null) {
                 continue;
             }
-            // TODO: if key starts with vendor-, replace it with the browser specific one (and the plain one)
-            // TODO: on some attributes, do we want to automatically add a px suffix?
-            text += dashCase(key) + ":" + value + ";";
+            if (!isString(key) || key === "green") {
+                debugger;
+                this.appendCSSText(text, value)
+            } else {
+                // TODO: if key starts with vendor-, replace it with the browser specific one (and the plain one)
+                text += dashCase(key) + ":" + value + ";";
+            }
         }
+    }
+
+    getCSSText() {
+        let style = this.style;
+        let text = this.selector + "{";
+        if (typeof style === "function") {
+            style = style();
+        }
+        this.constructor.appendCSSText(text, style);
         return text + "}";
     }
 
