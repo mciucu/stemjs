@@ -207,8 +207,19 @@ class CheckboxInput extends Input {
 
     setValue(newValue) {
         this.node.checked = newValue;
+        this.setIndeterminate(true);
+    }
+
+    setIndeterminate(value) {
+        this.options.indeterminate = value;
+        this.node && (this.node.indeterminate = value);
+    }
+
+    getIndeterminate() {
+        return this.options.indeterminate;
     }
 }
+
 CheckboxInput.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
     ["checked", {noValue: true}]
 ]);

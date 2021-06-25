@@ -16,7 +16,7 @@ export class BaseUIElement extends Dispatchable {
     applyRef() {
         if (this.options && this.options.ref) {
             let obj = this.options.ref.parent;
-            let name = this.options.ref.name;
+            let name = this.options.ref.name || this.options.ref.key; // TODO: should be key
             obj[name] = this;
         }
     }
