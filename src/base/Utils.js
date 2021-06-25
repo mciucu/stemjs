@@ -146,6 +146,10 @@ export function capitalize(text) {
     return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
+export function pluralize(count, text) {
+    return `${count} ${text}${count > 1 ? "s" : ""}`;
+}
+
 export function titleCase(text) {
      return text.toLowerCase().split(" ").map(word => capitalize(word)).join(" ");
 }

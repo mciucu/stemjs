@@ -205,9 +205,11 @@ class CheckboxInput extends Input {
         return this.node.checked;
     }
 
-    setValue(newValue) {
+    setValue(newValue, indeterminate) {
         this.node.checked = newValue;
-        this.setIndeterminate(true);
+        if (indeterminate != null) {
+            this.setIndeterminate(indeterminate);
+        }
     }
 
     setIndeterminate(value) {
@@ -217,6 +219,14 @@ class CheckboxInput extends Input {
 
     getIndeterminate() {
         return this.options.indeterminate;
+    }
+
+    // TODO @branch fix this
+    render() {
+        super.render();
+        if (this.options.value != this.getValue() || this.getIndeterminate() != this.node?.indeterminate) {
+            this.setValue(this.options.value, this.options.indeterminate);
+        }
     }
 }
 
