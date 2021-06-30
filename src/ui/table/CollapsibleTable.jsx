@@ -62,18 +62,29 @@ class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
         return this.options.renderCollapsible(this.options.entry, this);
     }
 
-    render() {
-        const {collapsed} = this.options;
+    getMainRowContent() {
+        return super.render();
+    }
 
+    getMainRow() {
+        return <tr className={this.styleSheet.heading}>{this.getMainRowContent()}</tr>;
+    }
+
+    getCollapsibleRow() {
+        const {collapsed} = this.options;
+        return <tr>
+            <td style={{padding: 0, overflow: "hidden", height: "auto"}} colspan={this.options.columns.length}>
+                <div ref="contentArea" className={collapsed ? GlobalStyle.hidden : null}>
+                    {this.getInitialCollapsedContent()}
+                </div>
+            </td>
+        </tr>
+    }
+
+    render() {
         return [
-            <tr className={this.styleSheet.heading}>{super.render()}</tr>,
-            <tr>
-                <td style={{padding: 0, overflow: "hidden", height: "auto"}} colspan={this.options.columns.length}>
-                    <div ref="contentArea" className={collapsed ? GlobalStyle.hidden : null}>
-                        {this.getInitialCollapsedContent()}
-                    </div>
-                </td>
-            </tr>
+            this.getMainRow(),
+            this.getCollapsibleRow(),
         ];
     }
 }
