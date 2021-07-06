@@ -109,8 +109,8 @@ class NumberInput extends Input {
     }
 
     getValue() {
-        let val = super.getValue();
-        return parseFloat(val);
+        const value = super.getValue();
+        return value ? parseFloat(value) : null;
     }
 }
 
