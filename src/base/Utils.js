@@ -3,6 +3,10 @@ export function unwrapArray(elements) {
         return [];
     }
 
+    if (isString(elements)) {
+        return [elements];
+    }
+
     if (!Array.isArray(elements)) {
         // In case this is an iterable, convert to array
         if (elements[Symbol.iterator]) {
