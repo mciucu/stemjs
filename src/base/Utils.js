@@ -185,6 +185,21 @@ export function isPlainObject(obj) {
     return true;
 }
 
+export function cleanObject(obj, {skipEmptyString = true, filterFunc = null} = {}) {
+    const cleanObject = {};
+    if (!filterFunc) {
+        filterFunc = (key, value) => {
+            return value != null && (value !== "" || !skipEmptyString);
+        }
+    }
+    for (const [key, value] of Object.entries(obj)) {
+        if (filterFunc(key, value)) {
+            cleanObject[key] = value;
+        }
+    }
+    return cleanObject;
+}
+
 export function deepCopy() {
 	let target = arguments[0] || {};
 	// Handle case when target is a string or something (possible in deep copy)
