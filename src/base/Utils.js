@@ -3,13 +3,9 @@ export function unwrapArray(elements) {
         return [];
     }
 
-    if (isString(elements)) {
-        return [elements];
-    }
-
     if (!Array.isArray(elements)) {
-        // In case this is an iterable, convert to array
-        if (elements[Symbol.iterator]) {
+        // In case this is an iterable collection, convert to array
+        if (elements[Symbol.iterator] && !isString(elements)) {
             return unwrapArray(Array.from(elements));
         } else {
             return [elements];
