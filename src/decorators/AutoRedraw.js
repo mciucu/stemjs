@@ -3,9 +3,19 @@ import {PropertyCache} from "../data-structures/PropertyCache";
 
 // TODO: maybe have better names
 const autoRedrawListenersLazy = new PropertyCache(Symbol.for("autoRedrawHandler"), () => new Set());
+
+const REDRAW_MICROTASK_SYMBOL = Symbol.for("RedrawMicrotask");
 const redrawHandlerLazy = new PropertyCache(Symbol.for("autoRedrawListener"), (obj) => {
     return () => {
         // TODO @branch have this do a microtask that doesn't do more than one redraw per cycle
+        // if (obj[REDRAW_MICROTASK_SYMBOL]) {
+        //     return;
+        // }
+        // obj[REDRAW_MICROTASK_SYMBOL] = true;
+        // queueMicrotask(() => {
+        //     obj[REDRAW_MICROTASK_SYMBOL] = undefined;
+        //     obj.node && obj.redraw();
+        // });
         obj.node && obj.redraw();
     }
 });
