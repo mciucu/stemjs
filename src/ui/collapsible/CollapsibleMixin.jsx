@@ -47,6 +47,7 @@ function CollapsibleMixin(BaseClass, CollapsibleClass = CollapsibleStyle) {
 
             panel.addClass(collapsibleStyle.collapsing);
             panel.addClass(collapsibleStyle.collapsed);
+            // TODO(@mihai): Implement a pattern for this
             panel.addNodeListener("transitionend", () => {
                 if (this.options.collapsed) {
                     panel.addClass(GlobalStyle.hidden);
