@@ -19,6 +19,22 @@ class CollapsibleStyle extends StyleSheet {
         marginTop: "-100% !important",
         transitionDelay: "0s !important",
     };
+
+    @styleRule
+    toggleButton = {
+        cursor: "pointer",
+    }
+
+    @styleRule
+    toggleIcon = {
+        transition: "0.3s ease",
+        display: "inline-block",
+    };
+
+    @styleRule
+    toggleIconCollapsed = {
+        transform: "rotate(-90deg) !important",
+    };
 }
 
 
@@ -57,17 +73,6 @@ class CollapsiblePanelStyle extends CardPanelStyle {
     content = {
         padding: 8,
     }
-
-    @styleRule
-    icon = {
-        transition: "0.3s ease",
-        display: "inline-block",
-    };
-
-    @styleRule
-    iconCollapsed = {
-        transform: "rotate(-90deg) !important",
-    };
 }
 
 export {CollapsibleStyle, CollapsiblePanelStyle};

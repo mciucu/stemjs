@@ -109,8 +109,8 @@ class NumberInput extends Input {
     }
 
     getValue() {
-        let val = super.getValue();
-        return parseFloat(val);
+        const value = super.getValue();
+        return value ? parseFloat(value) : null;
     }
 }
 
@@ -205,10 +205,31 @@ class CheckboxInput extends Input {
         return this.node.checked;
     }
 
-    setValue(newValue) {
+    setValue(newValue, indeterminate) {
         this.node.checked = newValue;
+        if (indeterminate != null) {
+            this.setIndeterminate(indeterminate);
+        }
+    }
+
+    setIndeterminate(value) {
+        this.options.indeterminate = value;
+        this.node && (this.node.indeterminate = value);
+    }
+
+    getIndeterminate() {
+        return this.options.indeterminate;
+    }
+
+    // TODO @branch fix this
+    render() {
+        super.render();
+        if (this.options.value != this.getValue() || this.getIndeterminate() != this.node?.indeterminate) {
+            this.setValue(this.options.value, this.options.indeterminate);
+        }
     }
 }
+
 CheckboxInput.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
     ["checked", {noValue: true}]
 ]);

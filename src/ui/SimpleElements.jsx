@@ -108,7 +108,7 @@ export class LabelStyle extends BasicLevelStyleSheet(labelColorToStyle) {
             cursor: "not-allowed",
         },
     }, {
-        "font-size": "12px",
+        fontSize: 12,
     }, this.colorStyleRule(this.themeProps.COLOR_BACKGROUND_BADGE)];
 
     @styleRule

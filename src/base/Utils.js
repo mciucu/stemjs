@@ -146,6 +146,10 @@ export function capitalize(text) {
     return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
+export function pluralize(count, text) {
+    return `${count} ${text}${count > 1 ? "s" : ""}`;
+}
+
 export function titleCase(text) {
      return text.toLowerCase().split(" ").map(word => capitalize(word)).join(" ");
 }
@@ -179,6 +183,21 @@ export function isPlainObject(obj) {
         return false;
     }
     return true;
+}
+
+export function cleanObject(obj, {skipEmptyString = true, filterFunc = null} = {}) {
+    const cleanObject = {};
+    if (!filterFunc) {
+        filterFunc = (key, value) => {
+            return value != null && (value !== "" || !skipEmptyString);
+        }
+    }
+    for (const [key, value] of Object.entries(obj)) {
+        if (filterFunc(key, value)) {
+            cleanObject[key] = value;
+        }
+    }
+    return cleanObject;
 }
 
 export function deepCopy() {
