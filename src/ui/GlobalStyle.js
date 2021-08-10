@@ -6,8 +6,6 @@ import {Orientation, Level, Size} from "./Constants";
 import {Theme} from "./style/Theme";
 
 // TODO: export these properly, don't use a namespace here
-let GlobalStyle = {
-};
 
 export function getTextColor(backgroundColor) {
     return enhance(backgroundColor, 1);
@@ -201,7 +199,7 @@ class ContainerStyle extends StyleSheet {
 }
 
 
-class Utils extends StyleSheet {
+class StyleUtils extends StyleSheet {
     extraTop = () => this.themeProps[Device.isMobileDevice() ? "MAIN_CONTAINER_EXTRA_PADDING_TOP_MOBILE" :
         "MAIN_CONTAINER_EXTRA_PADDING_TOP_DESKTOP"];
 
@@ -212,7 +210,7 @@ class Utils extends StyleSheet {
 
     @styleRule
     hidden = {
-        display: "hidden"
+        display: "none",
     };
 
     // Use this class for content that has no space between it and the navbar.
@@ -224,8 +222,11 @@ class Utils extends StyleSheet {
     }
 }
 
+// TODO simplify this
+const GlobalStyle = StyleUtils.getInstance();
+
 GlobalStyle.FlexContainer = FlexContainerStyle.getInstance();
 GlobalStyle.Container = ContainerStyle.getInstance();
-GlobalStyle.Utils = Utils.getInstance();
+GlobalStyle.Utils = StyleUtils.getInstance();
 
 export {GlobalStyle};

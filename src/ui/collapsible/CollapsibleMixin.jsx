@@ -1,42 +1,68 @@
+import {UI} from "../UIBase";
 import {CollapsibleStyle} from "./Style";
+import {GlobalStyle} from "../GlobalStyle";
+import {MakeIcon} from "../SimpleElements";
 
 function CollapsibleMixin(BaseClass, CollapsibleClass = CollapsibleStyle) {
     class CollapsibleElement extends BaseClass {
+        static collapsibleStyleSheet = CollapsibleClass.getInstance();
+
         getDefaultOptions() {
             return {
                 collapsed: true,
             };
         }
 
-        static collapsibleStyleSheet = new CollapsibleClass();
-
         getCollapsibleStyleSheet() {
             return this.options.collapsibleStyleSheet || this.constructor.collapsibleStyleSheet;
         }
 
-        expand(panel) {
-            this.options.collapsed = false;
-            this.dispatch("expand");
+        getToggleIcon() {
             const collapsibleStyle = this.getCollapsibleStyleSheet();
-            panel.addClass(collapsibleStyle.collapsing);
-            panel.removeClass("hidden");
-            setTimeout(() => {
-                panel.removeClass(collapsibleStyle.collapsed);
-            }, 100);
+            let iconClassName = collapsibleStyle.toggleIcon;
+            if (this.options.collapsed) {
+                iconClassName += collapsibleStyle.toggleIconCollapsed;
+            }
+            return <div ref="toggleIcon" className={iconClassName}>
+                {MakeIcon("chevron-down")}
+            </div>
         }
 
-        collapse(panel) {
-            this.options.collapsed = true;
-            this.dispatch("collapse");
+        expand(panel = this.contentArea) {
             const collapsibleStyle = this.getCollapsibleStyleSheet();
+            this.options.collapsed = false;
+
+            panel.removeClass(GlobalStyle.hidden);
+            panel.addClass(collapsibleStyle.collapsing);
+            setTimeout(() => {
+                panel.removeClass(collapsibleStyle.collapsed);
+            }, 100); // TODO @branch take this from this.themeProps
+
+            this.toggleIcon?.removeClass(this.getCollapsibleStyleSheet().toggleIconCollapsed);
+        }
+
+        collapse(panel = this.contentArea) {
+            const collapsibleStyle = this.getCollapsibleStyleSheet();
+            this.options.collapsed = true;
+
             panel.addClass(collapsibleStyle.collapsing);
             panel.addClass(collapsibleStyle.collapsed);
-            let transitionEndFunction = () => {
+            // TODO(@mihai): Implement a pattern for this
+            panel.addNodeListener("transitionend", () => {
                 if (this.options.collapsed) {
-                    panel.addClass("hidden");
+                    panel.addClass(GlobalStyle.hidden);
                 }
-            };
-            panel.addNodeListener("transitionend", transitionEndFunction);
+            });
+
+            this.toggleIcon?.addClass(this.getCollapsibleStyleSheet().toggleIconCollapsed);
+        }
+
+        toggle() {
+            if (this.options.collapsed) {
+                this.expand();
+            } else {
+                this.collapse();
+            }
         }
     }
 

@@ -16,7 +16,7 @@ export class BaseUIElement extends Dispatchable {
     applyRef() {
         if (this.options && this.options.ref) {
             let obj = this.options.ref.parent;
-            let name = this.options.ref.name;
+            let name = this.options.ref.name || this.options.ref.key; // TODO: should be key
             obj[name] = this;
         }
     }
@@ -486,12 +486,6 @@ class UIElement extends BaseUIElement {
             this.node.removeChild(erasedChild.node);
         }
         return erasedChild;
-    }
-
-    eraseAllChildren() {
-        while (this.children.length > 0) {
-            this.eraseChildAtIndex(this.children.length - 1);
-        }
     }
 
     show() {
