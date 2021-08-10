@@ -143,7 +143,7 @@ function CollapsibleTableInterface(BaseTableClass) {
                 isToggleColumn: true,
                 cellStyle: {
                     width: "1%",
-                    "whiteSpace": "nowrap",
+                    whiteSpace: "nowrap",
                 }
             });
         }

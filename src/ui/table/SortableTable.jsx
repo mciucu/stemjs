@@ -107,7 +107,7 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
             return this.sortEntries(super.getEntries());
         }
 
-        // TODO @branch fix this
+        // TODO fix this
         columnDefaults(column, index) {
             super.columnDefaults(column, index);
 
