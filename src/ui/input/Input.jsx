@@ -6,7 +6,7 @@ import {StemDate} from "../../time/Date";
 
 
 // TODO rename to BaseInputElement
-// TODO handle the setOptions - defaultValue lifecycle
+// TODO handle the setOptions - initialValue lifecycle
 @registerStyle(InputStyle)
 export class InputableElement extends UI.Element {
     extraNodeAttributes(attr) {
@@ -23,9 +23,9 @@ export class InputableElement extends UI.Element {
     }
 
     onMount() {
-        const {defaultValue} = this.options;
-        if (defaultValue) {
-            this.setValue(defaultValue);
+        const {initialValue} = this.options;
+        if (initialValue) {
+            this.setValue(initialValue);
         }
     }
 }
@@ -63,8 +63,8 @@ class Input extends UI.Primitive(InputableElement, "input") {
     }
 
     onMount() {
-        // TODO Fix value and defaultValue logic
-        this.setValue(this.options.value || this.options.defaultValue);
+        // TODO Fix value and initialValue logic
+        this.setValue(this.options.value || this.options.initialValue);
     }
 }
 
@@ -291,7 +291,7 @@ class TextArea extends UI.Primitive(InputableElement, "textarea") {
 }
 
 
-// TODO this element is inconsistent with the rest. Properly fix the defaultValue pattern
+// TODO this element is inconsistent with the rest. Properly fix the initialValue pattern
 class Select extends UI.Primitive(InputableElement, "select") {
     render() {
         this.givenOptions = this.options.options || [];
