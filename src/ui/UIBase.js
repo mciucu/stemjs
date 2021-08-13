@@ -379,11 +379,9 @@ class UIElement extends BaseUIElement {
                 // The handlerMethod might have been previously added
                 // by a previous call to this function or manually by the user
                 if (typeof this[addListenerMethodName] === "function" && !this.hasOwnProperty(handlerMethodName)) {
-                    this[handlerMethodName] = (event) => {
-                        UI.event = event;  // TODO: probably not, redesign this pattern better
+                    this[handlerMethodName] = (...args) => {
                         if (this.options[key]) {
-                            // TODO @urgent! arguments should be (event, this)!
-                            this.options[key](this, event);
+                            this.options[key](...args, this);
                         }
                     };
 
