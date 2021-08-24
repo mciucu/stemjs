@@ -66,8 +66,7 @@ UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement 
         if (Array.isArray(this.value)) {
             value = this.evaluate(...value);
         } else {
-            // TODO: if translationMap.get() returns "", keep, skip only if returning null
-            value = (translationMap && translationMap.get(value)) || value;
+            value = (translationMap && translationMap.get(value)) ?? value;
         }
         return value;
     }
