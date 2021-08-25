@@ -37,7 +37,7 @@ UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement 
         }
 
         for (let index = 1; index < args.length; index += 1) {
-            str = str.replace("%" + index, args[index]);
+            str = str.replaceAll("%" + index, args[index]);
         }
 
         return str;
