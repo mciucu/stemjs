@@ -2,10 +2,10 @@ import {GenericObjectStore, StoreObject} from "../state/Store";
 import {PropertyCache} from "../data-structures/PropertyCache";
 
 // TODO: maybe have better names
-const autoRedrawListenersLazy = new PropertyCache(Symbol.for("autoRedrawHandler"), () => new Set());
+const autoRedrawListenersLazy = new PropertyCache("autoRedrawHandler", () => new Set());
 
 const REDRAW_MICROTASK_SYMBOL = Symbol.for("RedrawMicrotask");
-const redrawHandlerLazy = new PropertyCache(Symbol.for("autoRedrawListener"), (obj) => {
+const redrawHandlerLazy = new PropertyCache("autoRedrawListener", (obj) => {
     return () => {
         // TODO @branch have this do a microtask that doesn't do more than one redraw per cycle
         // if (obj[REDRAW_MICROTASK_SYMBOL]) {
