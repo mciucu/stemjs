@@ -18,7 +18,12 @@ export class ColumnHandler {
     }
 
     static mapColumns(columns) {
-        return columns.map((col, index) => new ColumnHandler(col, index));
+        return columns.map((col, index) => {
+            if (col instanceof ColumnHandler) {
+                return col;
+            }
+            return new ColumnHandler(col, index);
+        });
     }
 }
 
