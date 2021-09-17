@@ -28,6 +28,10 @@ export class InputableElement extends UI.Element {
             this.setValue(initialValue);
         }
     }
+
+    addChangeListener(callback) {
+        return this.addNodeListener("change", callback);
+    }
 }
 
 

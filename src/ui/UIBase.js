@@ -568,10 +568,6 @@ class UIElement extends BaseUIElement {
     removeDoubleClickListener(callback) {
         this.removeNodeListener("dblclick", callback);
     }
-
-    addChangeListener(callback) {
-        return this.addNodeListener("change", callback);
-    }
 }
 
 UI.createElement = function (tag, options, ...children) {
