@@ -53,6 +53,22 @@ class Input extends UI.Primitive(InputableElement, "input") {
         }
     }
 
+    setOptions(options) {
+        const oldInitialValue = this.options.initialValue;
+        const oldValue = this.options.value;
+        super.setOptions(options);
+        if (!this.node) {
+            return;
+        }
+        const {initialValue, value} = this.options;
+        if (initialValue && initialValue !== oldInitialValue) {
+            this.setValue(initialValue);
+        }
+        if (value && value !== oldValue) {
+            this.setValue(value);
+        }
+    }
+
     getInputType() {
         // Must be overloaded
         return null;
