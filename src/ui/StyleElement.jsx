@@ -96,8 +96,8 @@ class DynamicStyleElement extends StyleElement {
         if (this.className) {
             return this.className;
         }
-        this.constructor.instanceCounter = (this.constructor.instanceCounter || 0) + 1;
-        this.className = (this.options.name ||  "autocls") + "-" + this.constructor.instanceCounter;
+        self.styleInstanceCounter = (self.styleInstanceCounter || 0) + 1;
+        this.className = (this.options.name ||  "autocls") + "-" + self.styleInstanceCounter;
         return this.className;
     }
 
@@ -174,8 +174,8 @@ class KeyframeElement extends StyleElement {
         if (this.keyframeName) {
             return this.keyframeName;
         }
-        this.constructor.instanceCounter = (this.constructor.instanceCounter || 0) + 1;
-        this.keyframeName = (this.options.name || "autokeyframe") + "-" + this.constructor.instanceCounter;
+        self.styleInstanceCounter = (self.styleInstanceCounter || 0) + 1;
+        this.keyframeName = (this.options.name || "autokeyframe") + "-" + self.styleInstanceCounter;
         return this.keyframeName;
     }
 
