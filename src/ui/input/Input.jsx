@@ -78,7 +78,7 @@ class Input extends UI.Primitive(InputableElement, "input") {
         this.addNodeListener("input change", callback);
     }
 
-    onKeyUp(callback) {
+    addKeyUpListener(callback) {
         this.addNodeListener("keyup", callback);
     }
 
@@ -301,11 +301,11 @@ class TextArea extends UI.Primitive(InputableElement, "textarea") {
         this.node.value = value;
     }
 
-    onInput(callback) {
+    addInputListener(callback) {
         this.addNodeListener("input change", callback);
     }
 
-    onKeyUp(callback) {
+    addKeyUpListener(callback) {
         this.addNodeListener("keyup", callback);
     }
 }
