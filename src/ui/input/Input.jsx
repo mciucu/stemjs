@@ -32,6 +32,10 @@ export class InputableElement extends UI.Element {
     addChangeListener(callback) {
         return this.addNodeListener("change", callback);
     }
+
+    addInputListener(callback) {
+        return this.addNodeListener("input", callback);
+    }
 }
 
 
@@ -72,10 +76,6 @@ class Input extends UI.Primitive(InputableElement, "input") {
     getInputType() {
         // Must be overloaded
         return null;
-    }
-
-    addInputListener(callback) {
-        this.addNodeListener("input change", callback);
     }
 
     addKeyUpListener(callback) {
@@ -299,10 +299,6 @@ class TextArea extends UI.Primitive(InputableElement, "textarea") {
     setValue(value) {
         this.options.value = value;
         this.node.value = value;
-    }
-
-    addInputListener(callback) {
-        this.addNodeListener("input change", callback);
     }
 
     addKeyUpListener(callback) {
