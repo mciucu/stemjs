@@ -1,4 +1,4 @@
-import {unwrapArray, setObjectPrototype, suffixNumber, NOOP_FUNCTION} from "../base/Utils";
+import {unwrapArray, setObjectPrototype, suffixNumber, NOOP_FUNCTION, isPlainObject} from "../base/Utils";
 import {Dispatchable} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
 import {applyDebugFlags} from "./Debug";
@@ -50,11 +50,11 @@ export class BaseUIElement extends Dispatchable {
 UI.TextElement = class UITextElement extends BaseUIElement {
     constructor(value="") {
         super();
-        if (value && value.hasOwnProperty("value")) {
+        if (value && value.hasOwnProperty("value") && isPlainObject(value)) {
             this.value = value.value;
             this.options = value;
         } else {
-            this.value = (value != null) ? value : "";
+            this.value = value ?? "";
         }
     }
 
