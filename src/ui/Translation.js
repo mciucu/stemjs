@@ -1,4 +1,5 @@
 import {UI} from "./UIBase";
+import {isString} from "../base/Utils";
 
 // This is the object that will be used to translate text
 let translationMap = null;
@@ -7,6 +8,18 @@ let translationMap = null;
 // Can't use a weak set here unfortunately because we need iteration
 // That's why we must make sure to remove all nodes from the set when destroying them
 UI.TranslationElements = new Set();
+
+if (!String.prototype.replaceAll) {
+    String.prototype.replaceAll = function(pattern, replacement) {
+        if (isString(pattern)) {
+            pattern = new RegExp(pattern, "g");
+        }
+        if (this?.replace) {
+            return this.replace(pattern, replacement);
+        }
+        return this;
+    };
+}
 
 UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement {
     constructor(value) {
