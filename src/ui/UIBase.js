@@ -96,6 +96,10 @@ UI.TextElement = class UITextElement extends BaseUIElement {
         return String(this.value);
     }
 
+    toString() {
+        return this.getValue();
+    }
+
     redraw() {
         if (this.node) {
             let newValue = this.getValue();
