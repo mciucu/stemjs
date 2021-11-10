@@ -237,6 +237,7 @@ class StemDate extends BaseDate {
         return this;
     }
 
+    // TODO @branch have all of these return a new objects and have dates immutable
     add(duration) {
         duration = Duration.toDuration(duration);
         if (duration.isAbsolute()) {
@@ -330,7 +331,7 @@ class StemDate extends BaseDate {
     }
 
     static format(date, str) {
-        return (new StemDate(date)).format(str);
+        return StemDate.toDate(date).format(str);
     }
 
     isValid() {
