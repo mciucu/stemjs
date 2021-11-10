@@ -14,8 +14,10 @@ export class TimeUnit {
         this.milliseconds = (baseUnit?.getMilliseconds() || 1) * multiplier;
         this.variableMultiplier = options.variableMultiplier || false;
         this.variableDuration = this.variableMultiplier || (baseUnit && baseUnit.isVariable());
-        this.getterName = (name === "year") ? "getFullYear" : ("get" + capitalize(name));
-        this.setterName = (name === "year") ? "setFullYear" : ("set" + capitalize(name));
+
+        let methodSuffix = (name === "year") ? "FullYear" : (name === "day" ? "Date" : capitalize(name));
+        this.getterName = "get" + methodSuffix;
+        this.setterName = "set" + methodSuffix;
         if (!Date.prototype[this.getterName] && Date.prototype[this.getterName + "s"]) {
             this.getterName += "s";
             this.setterName += "s";
@@ -42,6 +44,9 @@ export class TimeUnit {
     }
 
     getFrequencyName() {
+        if (this.name.toLowerCase() === "day") {
+            return "daily"
+        }
         return this.name + "ly";
     }
 
