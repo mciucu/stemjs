@@ -14,6 +14,23 @@ export class InputableElement extends UI.Element {
         attr.addClass(this.styleSheet.inputElement);
     }
 
+    isEqual(valueA, valueB) {
+        return valueA === valueB;
+    }
+
+    setOptions(options) {
+        const oldInitialValue = this.options.initialValue;
+        super.setOptions(options);
+        const {initialValue} = this.options;
+        if (oldInitialValue == null && initialValue == null) {
+            return;
+        }
+        // TODO @branch reimplement to be like Denis's code
+        if (this.node && !this.isEqual(initialValue, oldInitialValue)) {
+            this.setValue(initialValue);
+        }
+    }
+
     focus() {
         this.node.focus();
     }
