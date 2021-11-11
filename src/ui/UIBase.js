@@ -259,9 +259,14 @@ class UIElement extends BaseUIElement {
             let prevChildNode = (i > 0) ? newChildren[i - 1].node : null;
             let currentChildNode = (prevChildNode) ? prevChildNode.nextSibling : domNode.firstChild;
 
-            // Not a UIElement, to be converted to a TextElement
+            // Not a UIElement, to be converted to a TextElement probably
             if (!newChild.getNodeType) {
-                newChild = newChildren[i] = new UI.TextElement(newChild);
+                if (newChild.toUI) {
+                    newChild = newChild.toUI();
+                } else {
+                    newChild = new UI.TextElement({value: String(newChild)});
+                }
+                newChildren[i] = newChild;
             }
 
             let newChildKey = (newChild.options && newChild.options.key) || ("autokey" + i);
