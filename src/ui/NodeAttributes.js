@@ -305,8 +305,10 @@ export class NodeAttributes {
         this.applyClassName(node);
 
         node.removeAttribute("style");
-        if (this.style) {
-            for (let key in this.style) {
+        if (typeof this.style === "string") {
+            node.style = this.style;
+        } else if (this.style && typeof this.style === "object") {
+            for (const key of Object.keys(this.style)) {
                 this.applyStyleToNode(key, this.style[key], node);
             }
         }
