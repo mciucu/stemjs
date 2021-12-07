@@ -114,7 +114,7 @@ export class NodeAttributes {
         if (this.className instanceof ClassNameSet) {
             this.className = ClassNameSet.create(String(this.className));
         }
-        if (this.style) {
+        if (this.style && typeof this.style !== "string") {
             this.style = Object.assign({}, this.style);
         }
     }
