@@ -1,4 +1,4 @@
-import {dashCase, isNumber, setObjectPrototype} from "../base/Utils";
+import {dashCase, isNumber, isPlainObject, setObjectPrototype} from "../base/Utils";
 
 export const defaultToPixelsAttributes = new Set([
     "border-radius",
@@ -114,7 +114,8 @@ export class NodeAttributes {
         if (this.className instanceof ClassNameSet) {
             this.className = ClassNameSet.create(String(this.className));
         }
-        if (this.style && typeof this.style !== "string") {
+        if (isPlainObject(this.style)) {
+            // Make a copy, since we might modify it later
             this.style = Object.assign({}, this.style);
         }
     }
