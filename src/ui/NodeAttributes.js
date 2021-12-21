@@ -1,4 +1,4 @@
-import {dashCase, isNumber, isPlainObject, setObjectPrototype} from "../base/Utils";
+import {dashCase, isNumber, isString, isPlainObject, setObjectPrototype} from "../base/Utils";
 
 export const defaultToPixelsAttributes = new Set([
     "border-radius",
@@ -146,7 +146,7 @@ export class NodeAttributes {
     }
 
     setStyle(key, value, node) {
-        if (!(typeof key === "string" || key instanceof String)) {
+        if (!isString(key)) {
             // If the key is not a string, it should be a plain object
             for (const styleKey of Object.keys(key)) {
                 this.setStyle(styleKey, key[styleKey], node);
@@ -212,7 +212,7 @@ export class NodeAttributes {
     }
 
     hasClass(className) {
-        return this.getClassNameSet().has(typeof className === "string" ? className : className.className);
+        return this.getClassNameSet().has(isString(className) ? className : className.className);
     }
 
     applyAttribute(key, node, attributesMap) {
@@ -306,11 +306,13 @@ export class NodeAttributes {
         this.applyClassName(node);
 
         node.removeAttribute("style");
-        if (typeof this.style === "string") {
-            node.style = this.style;
-        } else if (this.style && typeof this.style === "object") {
-            for (const key of Object.keys(this.style)) {
-                this.applyStyleToNode(key, this.style[key], node);
+        if (this.style) {
+            if (isString(this.style)) {
+                node.style = this.style;
+            } else {
+                for (const key of Object.keys(this.style)) {
+                    this.applyStyleToNode(key, this.style[key], node);
+                }
             }
         }
     }
