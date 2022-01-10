@@ -145,6 +145,14 @@ export class NodeAttributes {
         }
     }
 
+    // Should the style property have been passed in as a string, save it to the variable that will be applied before the string object.
+    ensureNoStringStyle() {
+        if (isString(this.style)) {
+            this.styleString = this.style; // Keep in a temp value
+            delete this.style;
+        }
+    }
+
     setStyle(key, value, node) {
         if (!isString(key)) {
             // If the key is not a string, it should be a plain object
@@ -157,6 +165,7 @@ export class NodeAttributes {
             this.removeStyle(key, node);
             return;
         }
+        this.ensureNoStringStyle();
         this.style = this.style || {};
         this.style[key] = value;
         this.applyStyleToNode(key, value, node);
@@ -306,13 +315,13 @@ export class NodeAttributes {
         this.applyClassName(node);
 
         node.removeAttribute("style");
+        this.ensureNoStringStyle();
+        if (this.styleString) {
+            node.style = this.styleString;
+        }
         if (this.style) {
-            if (isString(this.style)) {
-                node.style = this.style;
-            } else {
-                for (const key of Object.keys(this.style)) {
-                    this.applyStyleToNode(key, this.style[key], node);
-                }
+            for (const key of Object.keys(this.style)) {
+                this.applyStyleToNode(key, this.style[key], node);
             }
         }
     }
