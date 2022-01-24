@@ -110,7 +110,7 @@ class TabArea extends UI.Element {
         this.options.children.push(panel);
 
         this.titleArea.appendChild(tabTitle);
-        this.switcherArea.appendChild(tabPanel, doMount || !this.options.lazyRender);
+        this.switcher.appendChild(tabPanel, doMount || !this.options.lazyRender);
     };
 
     getTitleArea(tabTitles) {
@@ -128,7 +128,7 @@ class TabArea extends UI.Element {
         if (this.options.panelClass) {
             switcherClass += " " + this.options.panelClass;
         }
-        return <Switcher className={switcherClass} ref="switcherArea" lazyRender={this.options.lazyRender}>
+        return <Switcher className={switcherClass} ref="switcher" lazyRender={this.options.lazyRender}>
             {tabPanels}
         </Switcher>;
     }
@@ -138,7 +138,11 @@ class TabArea extends UI.Element {
         let tabPanels = [];
         let activeTab;
 
-        for (const panel of unwrapArray(this.render())) {
+        let givenChildren = unwrapArray(this.render());
+        if (this.switcher) {
+            this.switcher.overwriteChildren(this.switcher.options.children || [], givenChildren);
+        }
+        for (const panel of givenChildren) {
             let [tabTitle, tabPanel] = this.createTabPanel(panel);
 
             const tabPanelKey = tabPanel.options && tabPanel.options.key;
@@ -196,7 +200,7 @@ class TabArea extends UI.Element {
     }
 
     onSetActive(panel) {
-        this.switcherArea.setActive(panel);
+        this.switcher.setActive(panel);
         this.activePanel = panel;
     }
 
@@ -206,7 +210,7 @@ class TabArea extends UI.Element {
         });
 
         this.addListener("resize", () => {
-            this.switcherArea.dispatch("resize");
+            this.switcher.dispatch("resize");
         });
     }
 }
