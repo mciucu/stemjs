@@ -140,6 +140,8 @@ class TabArea extends UI.Element {
 
         let givenChildren = unwrapArray(this.render());
         if (this.switcher) {
+            // In order to keep track of the active tab we'll use the switcher's logic
+            // This also reuses the children
             this.switcher.overwriteChildren(this.switcher.options.children || [], givenChildren);
         }
         for (const panel of givenChildren) {
