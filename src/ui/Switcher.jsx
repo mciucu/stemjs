@@ -15,7 +15,7 @@ class Switcher extends UI.Element {
                 return child;
             }
         }
-        return children[0];
+        return children[0] || this.activeChild;
     }
 
     getDefaultOptions() {
