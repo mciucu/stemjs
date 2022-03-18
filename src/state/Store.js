@@ -183,8 +183,16 @@ class GenericObjectStore extends BaseStore {
 
         return this.filter(obj => {
             for (const [key, value] of entries) {
-                if (obj[key] != value) {
-                    return false;
+                const objectValue = obj[key];
+                // Can match by array (any value) or otherwise exact match
+                if (Array.isArray(value)) {
+                    if (!value.includes(objectValue)) {
+                        return false;
+                    }
+                } else {
+                    if (objectValue != value) {
+                        return false;
+                    }
                 }
             }
             return true;
