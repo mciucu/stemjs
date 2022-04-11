@@ -124,6 +124,20 @@ class UIElement extends BaseUIElement {
 
     getDefaultOptions(options) {}
 
+    // Return our options without the UI specific fields, so they can be passed along
+    getCleanedOptions() {
+        let options = {
+            ...this.options,
+        };
+
+        delete options.ref;
+        delete options.children;
+        delete options.key;
+        delete options.nodeType;
+
+        return options;
+    }
+
     getDefaultState() {
         return {};
     }
