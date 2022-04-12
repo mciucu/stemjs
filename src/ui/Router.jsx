@@ -103,6 +103,10 @@ export class Router extends Switcher {
             this.onPopState();
         };
 
+        if (this.globalSetURL) {
+            this.Global.setURL = this.globalSetURL;
+        }
+
         this.updateURL();
     }
 
