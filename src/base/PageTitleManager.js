@@ -1,10 +1,12 @@
+import {unwrapArray} from "./Utils.js";
+
 export class PageTitleManager {
     static title = null;
     static defaultTitle = "Website";
     static prefix = null;
 
     static getPrefix() {
-        return this.prefix ? "(" + this.prefix + ") " : "";
+        return this.prefix;
     }
 
     static setPrefix(prefix) {
@@ -26,7 +28,7 @@ export class PageTitleManager {
     }
 
     static getFullPageTitle() {
-        return this.getPrefix() + this.getTitle();
+        return unwrapArray([this.getPrefix(), this.getTitle()]).join(" - ");
     }
 
     static updatePageTitle() {
