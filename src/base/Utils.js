@@ -1,3 +1,10 @@
+export function toArray(objOrArray) {
+    if (objOrArray == null) {
+        return [];
+    }
+    return Array.isArray(objOrArray) ? objOrArray : [objOrArray];
+}
+
 export function unwrapArray(elements) {
     if (elements == null || elements === false) {
         return [];
@@ -163,6 +170,7 @@ export function setObjectPrototype(obj, Class) {
     return obj;
 }
 
+// TODO @cleanup use from Stem
 export function isFunction(obj) {
     return typeof obj === "function";
 }
@@ -204,6 +212,26 @@ export function cleanObject(obj, {skipEmptyString = true, filterFunc = null} = {
     return cleanObject;
 }
 
+export function deepSetAttr(obj, keys, value) {
+    keys.forEach((key, index) => {
+        if (index + 1 < keys.length) {
+            if (!obj[key]) {
+                obj[key] = {};
+            }
+            obj = obj[key];
+        } else {
+            obj[key] = value;
+        }
+    });
+}
+
+export function deepGetAttr(obj, keys) {
+    for (const key of keys) {
+        obj = obj && obj[key];
+    }
+    return obj;
+}
+
 export function deepCopy() {
 	let target = arguments[0] || {};
 	// Handle case when target is a string or something (possible in deep copy)
@@ -239,12 +267,6 @@ export function deepCopy() {
 	}
 
 	return target;
-}
-
-export function objectFromKeyValue(key, value) {
-    return {
-        [key]: value,
-    }
 }
 
 export function dashCase(str) {
@@ -358,38 +380,6 @@ export function instantiateNative(BaseClass, NewClass, ...args) {
     let obj = new BaseClass(...args);
     obj.__proto__ = NewClass.prototype;
     return obj;
-}
-
-// TODO Consider deleting this, as all browsers now have native classes
-// This function can be used as a decorator in case we're extending native classes (Map/Set/Date)
-// and we want to fix the way babel breaks this scenario
-// WARNING: it destroys the code in constructor
-// If you want a custom constructor, you need to implement a static create method that generates new objects
-// Check the default constructor this code, or an example where this is done.
-export function extendsNative(targetClass) {
-    if (targetClass.toString().includes(" extends ")) {
-        // Native extended classes are cool, leave them as they are
-        return targetClass;
-    }
-    let BaseClass = targetClass.__proto__;
-    let allKeys = Object.getOwnPropertySymbols(targetClass).concat(Object.getOwnPropertyNames(targetClass));
-
-    // Fill in the default constructor
-    let newClass = targetClass.create || function create() {
-        return instantiateNative(BaseClass, newClass, ...arguments);
-    };
-    for (const key of allKeys) {
-        let property = Object.getOwnPropertyDescriptor(targetClass, key);
-        if (property != null) {
-            Object.defineProperty(newClass, key, property);
-        }
-    }
-    newClass.prototype = targetClass.prototype;
-    newClass.__proto__ = targetClass.__proto__;
-
-    newClass.prototype.constructor = newClass;
-
-    return newClass;
 }
 
 export const UNICODE_BOM_CHARACTER = 0xFEFF;
