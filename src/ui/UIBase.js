@@ -118,8 +118,8 @@ class UIElement extends BaseUIElement {
         super();
         this.children = [];  // These are the rendered children
         this.options = options; // TODO: this is a hack, to not break all the code that references this.options in setOptions
+        this.state = this.getDefaultState();  // TODO @cleanup implement a simpler state pattern, that allows custom state types
         this.setOptions(options);
-        this.state = this.getDefaultState();
     };
 
     getDefaultOptions(options) {}
