@@ -188,7 +188,7 @@ export function isString(obj) {
 }
 
 export function isPlainObject(obj) {
-    if (!obj || typeof obj !== "object" || obj.nodeType) {
+    if (!obj || typeof obj !== "object") {
         return false;
     }
     if (obj.constructor && obj.constructor != Object) {
@@ -197,7 +197,7 @@ export function isPlainObject(obj) {
     return true;
 }
 
-export function cleanObject(obj, {skipEmptyString = true, filterFunc = null} = {}) {
+export function cleanObject(obj, {skipEmptyString = true, filterFunc = null, emptyAsNull = false} = {}) {
     const cleanObject = {};
     if (!filterFunc) {
         filterFunc = (key, value) => {
@@ -208,6 +208,9 @@ export function cleanObject(obj, {skipEmptyString = true, filterFunc = null} = {
         if (filterFunc(key, value)) {
             cleanObject[key] = value;
         }
+    }
+    if (emptyAsNull && Object.entries(cleanObject).length === 0) {
+        return null;
     }
     return cleanObject;
 }
