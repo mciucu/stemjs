@@ -170,7 +170,6 @@ export function setObjectPrototype(obj, Class) {
     return obj;
 }
 
-// TODO @cleanup use from Stem
 export function isFunction(obj) {
     return typeof obj === "function";
 }
