@@ -588,6 +588,7 @@ class UIElement extends BaseUIElement {
         return this.addNodeListener("click", (...args) => {
             console.warn("Click", this, ...args);
             callback(...args);
+            console.warn("Well executed click");
         });
     }
 
