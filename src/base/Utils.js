@@ -378,10 +378,19 @@ export function findFirstFreeVersion(suggestion, checkFunc, versioning=appendNum
     return versioning(suggestion, Math.random().toString().substring(2));
 }
 
-export function instantiateNative(BaseClass, NewClass, ...args) {
-    let obj = new BaseClass(...args);
-    obj.__proto__ = NewClass.prototype;
-    return obj;
+export function base64Encode(value, {jsonFormat = true} = {}) {
+    if (jsonFormat) {
+        value = JSON.stringify(value);
+    }
+    return btoa(value);
+}
+
+export function base64Decode(value, {jsonFormat = true} = {}) {
+    value = atob(value);
+    if (jsonFormat) {
+        value = JSON.parse(value);
+    }
+    return value;
 }
 
 export const UNICODE_BOM_CHARACTER = 0xFEFF;
