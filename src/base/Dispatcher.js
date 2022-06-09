@@ -304,6 +304,11 @@ export class OnceDispatcher extends Dispatcher {
         });
         return handler;
     }
+
+    // Either of these methods do the same thing
+    addListenerOnce(callback) {
+        return this.addListener(callback);
+    }
 }
 
 // Class that can be used to pass around ownership of a resource.
