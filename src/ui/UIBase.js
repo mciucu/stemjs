@@ -1,4 +1,4 @@
-import {unwrapArray, setObjectPrototype, suffixNumber, NOOP_FUNCTION, isPlainObject} from "../base/Utils";
+import {unwrapArray, setObjectPrototype, suffixNumber, NOOP_FUNCTION, isPlainObject, isFunction} from "../base/Utils";
 import {Dispatchable} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
 import {applyDebugFlags} from "./Debug";
@@ -272,6 +272,12 @@ class UIElement extends BaseUIElement {
             let newChild = newChildren[i];
             let prevChildNode = (i > 0) ? newChildren[i - 1].node : null;
             let currentChildNode = (prevChildNode) ? prevChildNode.nextSibling : domNode.firstChild;
+
+            if (isFunction(newChild)) {
+                // Call functions
+                // TODO we probably want to do this through unwrapArray, that takes in an expander function
+                newChild = newChild();
+            }
 
             // Not a UIElement, to be converted to a TextElement probably
             if (!newChild.getNodeType) {
