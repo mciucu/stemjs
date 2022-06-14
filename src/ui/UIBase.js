@@ -1,4 +1,11 @@
-import {unwrapArray, setObjectPrototype, suffixNumber, NOOP_FUNCTION, isPlainObject, isFunction} from "../base/Utils";
+import {
+    unwrapArray,
+    setObjectPrototype,
+    suffixNumber,
+    NOOP_FUNCTION,
+    isPlainObject,
+    unwrapElementWithFunc
+} from "../base/Utils";
 import {Dispatchable} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
 import {applyDebugFlags} from "./Debug";
@@ -6,6 +13,10 @@ import {applyDebugFlags} from "./Debug";
 const UI = {
     renderingStack: [], //keeps track of objects that are redrawing, to know where to assign refs automatically
 };
+
+export function cleanChildren(children) {
+    return unwrapArray(children, unwrapElementWithFunc);
+}
 
 export class BaseUIElement extends Dispatchable {
     canOverwrite(existingChild) {
@@ -165,7 +176,7 @@ class UIElement extends BaseUIElement {
     }
 
     setChildren(...args) {
-        this.updateOptions({children: unwrapArray(args)})
+        this.updateOptions({children: cleanChildren(args)})
     }
 
     // Used when we want to reuse the current element, with the options from the passed in argument
@@ -242,7 +253,7 @@ class UIElement extends BaseUIElement {
 
     getChildrenForRedraw() {
         UI.renderingStack.push(this);
-        let children = unwrapArray(this.getChildrenToRender());
+        let children = cleanChildren(this.getChildrenToRender());
         UI.renderingStack.pop();
         return children;
     }
@@ -272,12 +283,6 @@ class UIElement extends BaseUIElement {
             let newChild = newChildren[i];
             let prevChildNode = (i > 0) ? newChildren[i - 1].node : null;
             let currentChildNode = (prevChildNode) ? prevChildNode.nextSibling : domNode.firstChild;
-
-            if (isFunction(newChild)) {
-                // Call functions
-                // TODO we probably want to do this through unwrapArray, that takes in an expander function
-                newChild = newChild();
-            }
 
             // Not a UIElement, to be converted to a TextElement probably
             if (!newChild.getNodeType) {
@@ -607,7 +612,7 @@ UI.createElement = function (tag, options, ...children) {
 
     options = options || {};
 
-    options.children = unwrapArray(children);
+    options.children = cleanChildren(children);
 
     if (options.ref) {
         if (typeof options.ref === "string") {
