@@ -199,6 +199,10 @@ class Dispatchable {
     addChangeListener(callback) {
         return this.addListener("change", callback);
     }
+
+    dispatchChange(value) {
+        this.dispatch("change", value, this);
+    }
 }
 
 // Creates a method that calls the method methodName on obj, and adds the result as a cleanup task
