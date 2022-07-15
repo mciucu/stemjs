@@ -402,6 +402,10 @@ class UIElement extends BaseUIElement {
         return this.getStyleSheet();
     }
 
+    get themeProps() {
+        return this.styleSheet.themeProps;  // TODO @Mihai || Theme.props
+    }
+
     addListenersFromOptions() {
         for (const key in this.options) {
             if (typeof key === "string" && key.startsWith("on") && key.length > 2) {
