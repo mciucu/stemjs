@@ -76,6 +76,7 @@ export function autoredrawDecorator(Cls, ...args) {
         }
     };
 
+    // TODO @Mihai this should be a listener with @mounted
     const oldOnMount = Cls.prototype.onMount;
     Cls.prototype.onMount = function onMount() {
         oldOnMount.call(this);
