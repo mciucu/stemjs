@@ -78,10 +78,6 @@ export class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToSty
 
 @registerStyle(ProgressBarStyle)
 export class ProgressBar extends SimpleStyledElement {
-    extraNodeAttributes(attr) {
-        attr.addClass(this.styleSheet.container);
-    }
-
     render() {
         let valueInPercent = (this.options.value || 0) * 100;
         let orientation = Orientation.HORIZONTAL;
