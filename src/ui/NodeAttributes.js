@@ -125,7 +125,7 @@ export class NodeAttributes {
         }
         if (isPlainObject(this.style)) {
             // Make a copy, since we might modify it later
-            this.style = Object.assign({}, this.style);
+            this.style = {...this.style};
         }
     }
 
