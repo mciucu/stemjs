@@ -316,7 +316,7 @@ class UIElement extends BaseUIElement {
             // Remove children that don't need to be here
             let newChildrenSet = new Set(newChildren);
 
-            for (const currentChild of this.children.length) {
+            for (const currentChild of this.children) {
                 if (!newChildrenSet.has(currentChild)) {
                     currentChild.destroyNode();
                 }
