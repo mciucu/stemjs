@@ -169,14 +169,6 @@ export class Router extends Switcher {
         this.dispatch("change", urlParts, page, activePage);
     }
 
-    addChangeListener(callback) {
-        return this.addListener("change", callback);
-    }
-
-    removeChangeListener(callback) {
-        return this.removeListener("change", callback);
-    }
-
     onMount() {
         if (!Router.Global) {
             this.constructor.setGlobalRouter(this);
