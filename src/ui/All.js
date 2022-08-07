@@ -23,6 +23,7 @@ export * from "./tabs/FlatTabArea";
 export * from "./button/Button";
 export * from "./button/ButtonStyle";
 export * from "./button/ButtonGroup";
+export * from "./button/AjaxButton";
 export * from "./CardPanel";
 export * from "./RowList";
 export * from "./collapsible/CollapsiblePanel";
