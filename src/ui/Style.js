@@ -1,5 +1,6 @@
 import {StyleElement, KeyframeElement, DynamicStyleElement} from "./StyleElement";
 import {Dispatchable} from "../base/Dispatcher";
+import {PREFERRED_CLASS_NAME_KEY} from "../decorators/Style.js";
 
 // Class meant to group multiple classes inside a single <style> element, for convenience
 // TODO: pattern should be more robust, to be able to only update classes
@@ -87,11 +88,8 @@ class StyleSheet extends Dispatchable {
         }
         let elementOptions = {style: style};
 
-        // Get the preferred name, maybe cleanup later
-        const nameKey = "prefferedClassName";
-        if (style[nameKey]) {
-            elementOptions.name = style[nameKey];
-            delete style[nameKey];
+        if (style[PREFERRED_CLASS_NAME_KEY]) {
+            elementOptions.name = style[PREFERRED_CLASS_NAME_KEY];
         }
 
         let element = new DynamicStyleElement(elementOptions);
