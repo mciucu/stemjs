@@ -48,8 +48,6 @@ function styleRuleWithOptions() {
         descriptor.objInitializer = function () {
             let style = evaluateStyleRuleObject(this, initializer, value, options);
 
-            style[PREFERRED_CLASS_NAME_KEY] = getPreferredClassName(target, key, descriptor);
-
             if (options.selector) {
                 style["selectorName"] = options.selector;
             }
@@ -62,8 +60,9 @@ function styleRuleWithOptions() {
                 }
                 let parentStyle = evaluateStyleRuleObject(this, parentDesc.objInitializer, parentDesc.value, options);
                 style = deepCopy({}, parentStyle, style);
-                return style;
             }
+
+            style[PREFERRED_CLASS_NAME_KEY] = getPreferredClassName(target, key, descriptor);
 
             return style;
         };
