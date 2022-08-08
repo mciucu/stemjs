@@ -394,6 +394,9 @@ class UIElement extends BaseUIElement {
         }
     }
 
+    // Will the overwritten in Theme, look into moving here directly
+    getStyleSheet() { return null; }
+
     get styleSheet() {
         return this.getStyleSheet();
     }
