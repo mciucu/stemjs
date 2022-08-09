@@ -116,6 +116,3 @@ export class State extends Dispatchable {
 
 // When creating a store without an explicit state, this value should be assumed
 export const GlobalState = new State();
-
-// // TODO @cleanup don't expose this automatically anymore
-self.GlobalState = GlobalState;
