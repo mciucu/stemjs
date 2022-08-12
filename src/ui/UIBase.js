@@ -337,8 +337,12 @@ class UIElement extends BaseUIElement {
         return setObjectPrototype(this.options, NodeAttributes);
     }
 
+    instantiateNodeAttributes() {
+        return new NodeAttributes(this.options);
+    }
+
     getNodeAttributes() {
-        const attr = new NodeAttributes(this.options);
+        const attr = this.instantiateNodeAttributes();
         // Add the default class "container" from our style sheet (if there is one)
         const containerClassName = this.styleSheet?.container;
         if (containerClassName) {
@@ -347,7 +351,6 @@ class UIElement extends BaseUIElement {
         return attr;
     }
 
-    // Don't make changes here, unless you're also removing the optimization with NOOP_FUNCTION
     extraNodeAttributes(attr) {}
 
     applyNodeAttributes() {

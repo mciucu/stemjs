@@ -1,6 +1,6 @@
 import {UI} from "../UIBase";
-import {DOMAttributesMap} from "../NodeAttributes";
-import {uniqueId} from "../../base/Utils";
+import {DOMAttributesMap, NodeAttributes} from "../NodeAttributes";
+import {setObjectPrototype, uniqueId} from "../../base/Utils";
 import {SVGNodeAttributes} from "./SVGNodeAttributes";
 import {Device} from "../../base/Device";
 import {applyDebugFlags} from "../Debug";
@@ -8,6 +8,7 @@ import {applyDebugFlags} from "../Debug";
 
 let SVG = {};
 
+// TODO Simplify this class
 SVG.Element = class SVGElement extends UI.Element {
     createNode() {
         this.node = document.createElementNS("http://www.w3.org/2000/svg", this.getNodeType());
@@ -50,26 +51,17 @@ SVG.Element = class SVGElement extends UI.Element {
         this.setOptions(state.options);
     }
 
+    // TODO @cleanup deprecate
     getOptionsAsNodeAttributes() {
-        let attr = this.options;
-        attr.__proto__ = SVGNodeAttributes.prototype;
-        return attr;
+        return setObjectPrototype(this.options, SVGNodeAttributes);
     }
 
-    getNodeAttributes(returnCopy=true) {
-        if (returnCopy) {
-            return new SVGNodeAttributes(this.options);
-        } else {
-            return this.getOptionsAsNodeAttributes();
-        }
+    instantiateNodeAttributes() {
+        return new SVGNodeAttributes(this.options);
     }
 
     translate(x=0, y=0) {
         this.options.translate = "translate(" + x + "," + y + ")";
-    }
-
-    getHashCode() {
-        return uniqueId(this);
     }
 
     //TODO(@all) : getBoundingClientRect is unreliable, reimplement it.
