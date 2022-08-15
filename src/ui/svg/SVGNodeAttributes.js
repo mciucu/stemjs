@@ -24,10 +24,11 @@ export class SVGNodeAttributes extends NodeAttributes {
         }
     }
 
+    // SVG elements have a different API for setting the className than regular DOM nodes
     applyClassName(node) {
-        // SVG elements have a different API for setting the className than regular DOM nodes
         if (this.className) {
-            node.setAttribute("class", String(this.className));
+            const className = String(this.className);
+            node.setAttribute("class", className);
         } else {
             node.removeAttribute("class");
         }
