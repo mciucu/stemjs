@@ -33,7 +33,7 @@ class ScriptResolver extends Dispatchable {
 
 let scriptResolveMap = new Map();
 
-function ensureSingle(script) {
+async function ensureSingle(script) {
     let scriptResolver = scriptResolveMap.get(script);
     if (!scriptResolver) {
         scriptResolver = new ScriptResolver(script);
@@ -44,12 +44,12 @@ function ensureSingle(script) {
     });
 }
 
-function ensure(scripts, callback) {
+async function ensure(scripts, callback) {
     if (!Array.isArray(scripts)) {
         scripts = [scripts];
     }
     let promises = scripts.map(script => ensureSingle(script));
-    Promise.all(promises).then(function () {
+    return Promise.all(promises).then(function () {
         if (callback) {
             callback(...arguments);
         }
