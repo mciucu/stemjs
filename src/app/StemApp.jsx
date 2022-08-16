@@ -22,9 +22,9 @@ export function singlePageLinkOnMount() {
 
 export class StemApp extends UI.Element {
     static init() {
+        self.GlobalState = GlobalState; // Expose it for debugging
         Link.prototype.onMount = singlePageLinkOnMount;
         return self.appInstance = this.create(document.body);
-        self.GlobalState = GlobalState; // expose it for debugging
     }
 
     getRoutes() {
