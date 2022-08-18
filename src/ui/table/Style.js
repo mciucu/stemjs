@@ -46,7 +46,7 @@ class SortableTableStyle extends StyleSheet {
     };
 
     @styleRule
-    table = {
+    container = {
         [" th:hover ." + this.sortIcon.getClassName()]: {
             visibility: "inherit",
         },
