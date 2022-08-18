@@ -13,7 +13,7 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
 
         extraNodeAttributes(attr) {
             super.extraNodeAttributes(attr);
-            attr.addClass(this.getSortableStyleSheet().container);
+            attr.addClass(this.getSortableStyleSheet().table);
         }
 
         setOptions(options) {

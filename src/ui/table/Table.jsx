@@ -42,15 +42,22 @@ export class TableRow extends UI.Primitive("tr") {
 @registerStyle(TableStyle)
 export class Table extends UI.Primitive("table") {
     getDefaultOptions(options) {
+        const entries = this.getDefaultEntries(options);
+        const columns = this.getDefaultColumns(options, entries);
+
         return {
-            columns: this.getDefaultColumns(options),
-            entries: [],
+            columns,
+            entries,
             rowClass: TableRow,
         }
     }
 
-    getDefaultColumns(options) {
-        return [];
+    getDefaultEntries(options) {
+        return options.entries || [];
+    }
+
+    getDefaultColumns(options, entries) {
+        return options.columns || [];
     }
 
     setOptions(options) {
@@ -95,9 +102,9 @@ export class Table extends UI.Primitive("table") {
     }
 
     renderTableHead() {
-        const {noHeader} = this.options;
+        const {noHeader, columns} = this.options;
         return !noHeader && <thead>
-            <tr>{this.options.columns.map(this.renderHeaderCell, this)}</tr>
+            <tr>{columns.map(column => this.renderHeaderCell(column, this)}</tr>
         </thead>;
     }
 
@@ -135,9 +142,5 @@ export class Table extends UI.Primitive("table") {
 
     setEntries(entries) {
         this.updateOptions({entries});
-    }
-
-    setColumns(columns) {
-        this.options.columns = columns;
     }
 }
