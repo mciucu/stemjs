@@ -24,8 +24,13 @@ export class ColumnHandler {
 
 // TODO: the whole table architecture probably needs a rethinking
 export class TableRow extends UI.Primitive("tr") {
+    getColumns() {
+        return this.options.columns;
+    }
+
     render() {
-        return this.options.columns.map((column, index) => this.renderEntryCell(column, index));
+        const columns = this.getColumns();
+        return columns.map((column, index) => this.renderEntryCell(column, index));
     }
 
     renderEntryCell(column, columnIndex) {
@@ -38,10 +43,14 @@ export class TableRow extends UI.Primitive("tr") {
 export class Table extends UI.Primitive("table") {
     getDefaultOptions(options) {
         return {
-            columns: [],
+            columns: this.getDefaultColumns(options),
             entries: [],
             rowClass: TableRow,
         }
+    }
+
+    getDefaultColumns(options) {
+        return [];
     }
 
     setOptions(options) {
