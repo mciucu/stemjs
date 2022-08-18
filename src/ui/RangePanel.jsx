@@ -113,6 +113,9 @@ function RangeTableInterface(TableClass) {
             // Margin is added at redraw for the case when the scoreboard has horizontal scrolling during a redraw.
             const margin = (this.node &&  this.node.scrollLeft) || 0;
 
+            const tableHead = this.renderTableHead();
+            tableHead.ref = "containerHead"; // TODO Pure shit
+
             return [
                 <div ref="tableContainer" className={rangePanelStyleSheet.tableContainer}
                      style={{paddingTop: headHeight + "px", marginLeft: margin + "px"}}>
@@ -120,9 +123,7 @@ function RangeTableInterface(TableClass) {
                         <div ref="fakePanel" className={rangePanelStyleSheet.fakePanel} style={{height: fakePanelHeight}}/>
                         <table ref="container" className={`${this.styleSheet.table} ${rangePanelStyleSheet.table}`}
                                                style={{marginLeft: -margin + "px"}}>
-                            <thead ref="containerHead">
-                            {this.renderContainerHead()}
-                            </thead>
+                            {tableHead}
                             <tbody ref="containerBody">
                             {this.renderContainerBody()}
                             </tbody>
