@@ -50,7 +50,9 @@ function ensure(scripts, callback) {
     }
     let promises = scripts.map(script => ensureSingle(script));
     Promise.all(promises).then(function () {
-        callback(...arguments);
+        if (callback) {
+            callback(...arguments);
+        }
     })
 }
 

@@ -1,4 +1,4 @@
-import {unwrapArray, setObjectPrototype, suffixNumber, NOOP_FUNCTION, isPlainObject} from "../base/Utils";
+import {unwrapArray, setObjectPrototype, suffixNumber, NOOP_FUNCTION, isPlainObject, isFunction} from "../base/Utils";
 import {Dispatchable} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
 import {applyDebugFlags} from "./Debug";
@@ -118,8 +118,8 @@ class UIElement extends BaseUIElement {
         super();
         this.children = [];  // These are the rendered children
         this.options = options; // TODO: this is a hack, to not break all the code that references this.options in setOptions
+        this.state = this.getDefaultState();  // TODO @cleanup implement a simpler state pattern, that allows custom state types
         this.setOptions(options);
-        this.state = this.getDefaultState();
     };
 
     getDefaultOptions(options) {}
@@ -272,6 +272,12 @@ class UIElement extends BaseUIElement {
             let newChild = newChildren[i];
             let prevChildNode = (i > 0) ? newChildren[i - 1].node : null;
             let currentChildNode = (prevChildNode) ? prevChildNode.nextSibling : domNode.firstChild;
+
+            if (isFunction(newChild)) {
+                // Call functions
+                // TODO we probably want to do this through unwrapArray, that takes in an expander function
+                newChild = newChild();
+            }
 
             // Not a UIElement, to be converted to a TextElement probably
             if (!newChild.getNodeType) {

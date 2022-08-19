@@ -56,6 +56,10 @@ class Dispatcher {
         return handler;
     }
 
+    async awaitOnce() {
+        return new Promise((resolve) => this.addListenerOnce((...args) => resolve(...args)));
+    }
+
     removeListener(callback) {
         for (let i = 0; i < this.listeners.length; i += 1) {
             if (this.listeners[i] === callback) {
@@ -72,7 +76,6 @@ class Dispatcher {
     dispatch(payload) {
         for (let i = 0; i < this.listeners.length; ) {
             let listener = this.listeners[i];
-            // TODO: optimize common cases
             listener(...arguments);
             // In case the current listener deleted itself, keep the loop counter the same
             // If it deleted listeners that were executed before it, that's just wrong and there are no guaranteed about
@@ -90,7 +93,7 @@ class Dispatchable {
         return this[DispatchersSymbol] || (this[DispatchersSymbol] = new Map());
     }
 
-    getDispatcher(name, addIfMissing) {
+    getDispatcher(name, addIfMissing = true) {
         let dispatcher = this.dispatchers.get(name);
         if (!dispatcher && addIfMissing) {
             dispatcher = new Dispatcher();
@@ -100,7 +103,7 @@ class Dispatchable {
     }
 
     dispatch(name, payload) {
-        let dispatcher = this.getDispatcher(name);
+        let dispatcher = this.getDispatcher(name, false);
         if (dispatcher) {
             // Optimize the average case
             if (arguments.length <= 2) {
@@ -116,7 +119,7 @@ class Dispatchable {
         if (Array.isArray(name)) {
             return new CleanupJobs(name.map(x => this[methodName](x, callback)));
         }
-        return this.getDispatcher(name, true)[methodName](callback);
+        return this.getDispatcher(name)[methodName](callback);
     }
 
     addListener(name, callback) {
@@ -128,17 +131,13 @@ class Dispatchable {
     }
 
     removeListener(name, callback) {
-        let dispatcher = this.getDispatcher(name);
-        if (dispatcher) {
-            dispatcher.removeListener(callback);
-        }
+        const dispatcher = this.getDispatcher(name, false);
+        dispatcher?.removeListener(callback);
     }
 
     removeAllListeners(name) {
-        let dispatcher = this.getDispatcher(name);
-        if (dispatcher) {
-            dispatcher.removeAllListeners();
-        }
+        const dispatcher = this.getDispatcher(name, false);
+        dispatcher?.removeAllListeners();
     }
 
     cleanup() {
@@ -276,6 +275,39 @@ class CleanupJobs {
         } else {
             this.cleanup();
         }
+    }
+}
+
+
+// Class for events that should only happen once. Any listener added after the first firing will be automatically called with those arguments.
+// Useful for caching initializations for instance.
+export class OnceDispatcher extends Dispatcher {
+    dispatch(...args) {
+        this.dispatchArgs = args; // Save the arguments
+        super.dispatch(...args);
+    }
+
+    haveDispatched() {
+        return this.dispatchArgs;
+    }
+
+    addListener(callback) {
+        if (this.haveDispatched()) {
+            // Just pass the existing arguments
+            callback(...this.dispatchArgs);
+            return new CleanupJobs();
+        }
+
+        const handler = super.addListener(function () {
+            callback(...arguments);
+            handler.remove();
+        });
+        return handler;
+    }
+
+    // Either of these methods do the same thing
+    addListenerOnce(callback) {
+        return this.addListener(callback);
     }
 }
 
