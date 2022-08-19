@@ -107,14 +107,11 @@ function RangeTableInterface(TableClass) {
         render() {
             const rangePanelStyleSheet = this.getRangePanelStyleSheet();
             const fakePanelHeight = (this.getRowHeight() * this.getEntriesManager().getEntriesCount() + 1) + "px";
-            const headHeight = this.containerHead ? this.containerHead.getHeight() : 0;
+            const headHeight = this.thead?.getHeight() || 0;
             this.computeIndices();
 
             // Margin is added at redraw for the case when the scoreboard has horizontal scrolling during a redraw.
             const margin = (this.node &&  this.node.scrollLeft) || 0;
-
-            const tableHead = this.renderTableHead();
-            tableHead.ref = "containerHead"; // TODO Pure shit
 
             return [
                 <div ref="tableContainer" className={rangePanelStyleSheet.tableContainer}
@@ -123,7 +120,7 @@ function RangeTableInterface(TableClass) {
                         <div ref="fakePanel" className={rangePanelStyleSheet.fakePanel} style={{height: fakePanelHeight}}/>
                         <table ref="container" className={`${this.styleSheet.table} ${rangePanelStyleSheet.table}`}
                                                style={{marginLeft: -margin + "px"}}>
-                            {tableHead}
+                            {this.renderTableHead()}
                             <tbody ref="containerBody">
                             {this.renderContainerBody()}
                             </tbody>
@@ -148,10 +145,6 @@ function RangeTableInterface(TableClass) {
             if (this.scrollablePanel && this.scrollablePanel.node) {
                 this.scrollState = this.scrollablePanel.node.scrollTop;
             }
-        }
-
-        renderContainerHead() {
-            return this.renderTableHead();
         }
 
         renderContainerBody() {
@@ -184,7 +177,7 @@ function RangeTableInterface(TableClass) {
         }
 
         computeIndices() {
-            if (!this.tableContainer || !this.containerHead || !this.footer) {
+            if (!this.tableContainer || !this.thead || !this.footer) {
                 return;
             }
             const scrollRatio = this.scrollablePanel.node.scrollTop / this.scrollablePanel.node.scrollHeight;
@@ -194,7 +187,7 @@ function RangeTableInterface(TableClass) {
             if (isNaN(this.lowIndex)) {
                 this.lowIndex = 0;
             }
-            this.highIndex = Math.min(this.lowIndex + parseInt((this.getHeight() - this.containerHead.getHeight()
+            this.highIndex = Math.min(this.lowIndex + parseInt((this.getHeight() - this.thead.getHeight()
                     - this.footer.getHeight()) / this.getRowHeight()), entriesCount);
         }
 
@@ -215,7 +208,7 @@ function RangeTableInterface(TableClass) {
             this.computeIndices();
             // Ugly hack for chrome stabilization.
             // This padding top makes the scrollbar appear only on the tbody side
-            this.tableContainer.setStyle("paddingTop", this.containerHead.getHeight() + "px");
+            this.tableContainer.setStyle("paddingTop", this.thead.getHeight() + "px");
             this.fakePanel.setHeight(this.getRowHeight() * this.getEntriesManager().getEntriesCount() + "px");
             // The scrollable panel must have the exact height of the tbody so that there is consistency between entries
             // rendering and scroll position.
