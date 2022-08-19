@@ -34,7 +34,7 @@ export class InputableElement extends UI.Element {
 class Input extends UI.Primitive(InputableElement, "input") {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
-        attr.setAttribute("type", this.getInputType());
+        attr.setAttribute("type", this.getInputType() || this.options.type);
     }
 
     getValue() {
