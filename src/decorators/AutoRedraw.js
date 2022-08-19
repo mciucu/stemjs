@@ -4,14 +4,6 @@ import {PropertyCache} from "../data-structures/PropertyCache";
 // TODO: maybe have better names
 const autoRedrawListenersLazy = new PropertyCache("autoRedrawHandler", () => new Set());
 
-// TODO merge with AsyncAggregateDispatcher implementation
-function getQueueMicrotaskFunc() {
-    if (self.queueMicrotask && (typeof self.queueMicrotask === "function")) {
-        return self.queueMicrotask;
-    }
-    return (task) => setTimeout(task, 0);
-}
-export const queueMicrotaskWrapper = getQueueMicrotaskFunc();
 
 // TODO put together with RunOnce
 export class OncePerTickRunner {
@@ -25,7 +17,7 @@ export class OncePerTickRunner {
             return false;
         }
         this.weakMap.set(obj, true);
-        queueMicrotaskWrapper(() => {
+        queueMicrotask(() => {
             this.weakMap.delete(obj);
             this.callback(obj);
         });
@@ -76,6 +68,7 @@ export function autoredrawDecorator(Cls, ...args) {
         }
     };
 
+    // TODO @Mihai this should be a listener with @mounted
     const oldOnMount = Cls.prototype.onMount;
     Cls.prototype.onMount = function onMount() {
         oldOnMount.call(this);

@@ -281,12 +281,11 @@ class TemporaryMessageArea extends UI.Primitive("span") {
         return [<UI.TextElement ref="textElement" value={this.options.value || ""}/>];
     }
 
-    getNodeAttributes() {
-        let attr = super.getNodeAttributes();
-        // TODO: nope, not like this
-        attr.setStyle("marginLeft", this.options.margin + "px");
-        attr.setStyle("marginRight", this.options.margin + "px");
-        return attr;
+    extraNodeAttributes(attr) {
+        attr.setStyle({
+            marginLeft: this.options.margin,
+            marginRight: this.options.margin,
+        });
     }
 
     setValue(value) {
