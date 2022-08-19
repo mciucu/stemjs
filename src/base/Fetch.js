@@ -312,7 +312,7 @@ function fetch(input, ...args) {
     const preprocessors = options.preprocessors || fetch.defaultPreprocessors || [];
 
     for (const preprocessor of preprocessors) {
-        options = preprocessor(options) || options;
+        options = preprocessor(options, input) || options;
     }
 
     options.onSuccess = options.onSuccess || options.success;
