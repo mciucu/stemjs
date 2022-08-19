@@ -6,7 +6,7 @@ import {styleRule} from "../../decorators/Style";
 import {registerStyle} from "../style/Theme";
 import {GlobalStyle} from "../GlobalStyle";
 
-class TableRowInCollapsibleTable extends TableRow {
+export class TableRowInCollapsibleTable extends TableRow {
     getNodeType() {
         return "tbody";
     }
@@ -26,7 +26,7 @@ class CollapsibleTableStyle extends StyleSheet {
 
 // TODO: refactor this to support redraw and render override
 @registerStyle(CollapsibleTableStyle)
-class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
+export class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
     getNodeType() {
         return "tbody";
     }
@@ -97,28 +97,7 @@ class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
     }
 }
 
-class DelayedCollapsibleTableRow extends CollapsibleTableRow {
-    toggle() {
-        if (!this._haveExpanded) {
-            this._haveExpanded = true;
-            this.redrawCollapsible();
-        }
-        super.toggle();
-    }
-
-    redrawCollapsible() {
-        UI.renderingStack.push(this);
-        this.contentArea.options.children = super.getInitialCollapsedContent();
-        UI.renderingStack.pop();
-        this.contentArea.redraw();
-    }
-
-    getInitialCollapsedContent() {
-        return [];
-    }
-}
-
-function CollapsibleTableInterface(BaseTableClass) {
+export function CollapsibleTableInterface(BaseTableClass) {
     return class CollapsibleTable extends BaseTableClass {
         getDefaultOptions(options) {
             return {
@@ -129,7 +108,7 @@ function CollapsibleTableInterface(BaseTableClass) {
 
         setOptions(options) {
             super.setOptions(options);
-            if (options.columns && !options.columns[0]?.isToggleColumn) {
+            if (!this.options.columns[0]?.isToggleColumn) {
                 this.options.columns = [this.getToggleColumn(), ...this.options.columns];
             }
         }
@@ -158,7 +137,4 @@ function CollapsibleTableInterface(BaseTableClass) {
     };
 }
 
-const CollapsibleTable = CollapsibleTableInterface(Table);
-
-export {CollapsibleTable, CollapsibleTableInterface, CollapsibleTableRow, DelayedCollapsibleTableRow,
-        TableRowInCollapsibleTable};
+export const CollapsibleTable = CollapsibleTableInterface(Table);
