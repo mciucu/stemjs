@@ -60,31 +60,31 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
                 return null;
             }
 
-            const colCmp = (a, b, col) => {
-                if (!col) return 0;
+            const colCmp = (a, b, column, sortDescending) => {
+                if (!column) {
+                    return 0;
+                }
 
-                let keyA = col.rawValue ? col.rawValue(a) : col.value(a);
-                let keyB = col.rawValue ? col.rawValue(b) : col.value(b);
-                return col.cmp(keyA, keyB);
+                const keyA = column.rawValue ? column.rawValue(a) : column.value(a);
+                const keyB = column.rawValue ? column.rawValue(b) : column.value(b);
+
+                const comparator = column.cmp || defaultComparator;
+                const result = comparator(keyA, keyB);
+                return sortDescending ? -result : result;
             };
 
             return (a, b) => {
-                let cmpRes;
-
                 if (this.sortBy) {
-                    cmpRes = colCmp(a, b, this.sortBy);
-                    if (cmpRes !== 0) {
-                        return (this.sortDescending ? -cmpRes : cmpRes);
+                    const cmpRes = colCmp(a, b, this.sortBy, this.sortDescending);
+                    if (cmpRes) {
+                        return cmpRes;
                     }
                 }
 
-                for (let i = 0; i < this.columnSortingOrder.length; i += 1) {
-                    cmpRes = colCmp(a, b, this.columnSortingOrder[i]);
-                    if (this.columnSortingOrder[i].sortDescending) {
-                        cmpRes = -cmpRes;
-                    }
+                for (const column of this.columnSortingOrder) {
+                    const cmpRes = colCmp(a, b, column, column.sortDescending);
 
-                    if (cmpRes !== 0) {
+                    if (cmpRes) {
                         return cmpRes;
                     }
                 }
@@ -105,15 +105,6 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
 
         getEntries() {
             return this.sortEntries(super.getEntries());
-        }
-
-        // TODO fix this
-        columnDefaults(column, index) {
-            super.columnDefaults(column, index);
-
-            if (!column.hasOwnProperty("cmp")) {
-                column.cmp = defaultComparator;
-            }
         }
     }
     return SortableTable;
