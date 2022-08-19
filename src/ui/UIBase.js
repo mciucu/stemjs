@@ -2,7 +2,6 @@ import {
     unwrapArray,
     setObjectPrototype,
     suffixNumber,
-    NOOP_FUNCTION,
     isPlainObject,
     unwrapElementWithFunc
 } from "../base/Utils";
@@ -336,28 +335,23 @@ class UIElement extends BaseUIElement {
         return setObjectPrototype(this.options, NodeAttributes);
     }
 
-    getNodeAttributes(returnCopy=true) {
-        if (returnCopy) {
-            return new NodeAttributes(this.options);
-        } else {
-            return this.getOptionsAsNodeAttributes();
+    getNodeAttributes() {
+        const attr = new NodeAttributes(this.options);
+        // Add the default class "container" from our style sheet (if there is one)
+        const containerClassName = this.styleSheet?.container;
+        if (containerClassName) {
+            attr.addClass(containerClassName);
         }
+        return attr;
     }
 
     // Don't make changes here, unless you're also removing the optimization with NOOP_FUNCTION
     extraNodeAttributes(attr) {}
 
     applyNodeAttributes() {
-        let attr;
-        if (this.extraNodeAttributes != NOOP_FUNCTION) {
-            // Create a copy of options, that is modifiable
-            attr = this.getNodeAttributes(true);
-            this.extraNodeAttributes(attr);
-        } else {
-            attr = this.getNodeAttributes(false);
-        }
+        const attr = this.getNodeAttributes();
+        this.extraNodeAttributes(attr);
         attr.apply(this.node, this.constructor.domAttributesMap);
-        // TODO: this.styleSheet.container should be added to this.addClass
     }
 
     setAttribute(key, value) {
@@ -400,6 +394,10 @@ class UIElement extends BaseUIElement {
 
     get styleSheet() {
         return this.getStyleSheet();
+    }
+
+    get themeProps() {
+        return this.styleSheet.themeProps;  // TODO @Mihai || Theme.props
     }
 
     addListenersFromOptions() {
@@ -647,10 +645,6 @@ UI.createElement = function (tag, options, ...children) {
 };
 
 UIElement.domAttributesMap = NodeAttributes.defaultAttributesMap;
-
-// Explicitly know that extraNodeAttributes doesn't do anything, but have it to be callable when doing inheritance
-// This is an optimization to having it in the class, to be able to quickly know when to skip calling it.
-UIElement.prototype.extraNodeAttributes = NOOP_FUNCTION;
 
 UI.Element = UIElement;
 
