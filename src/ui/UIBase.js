@@ -9,6 +9,7 @@ import {Dispatchable} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
 import {applyDebugFlags} from "./Debug";
 
+// TODO Probably get rid of the UI namespace
 const UI = {
     renderingStack: [], //keeps track of objects that are redrawing, to know where to assign refs automatically
 };
@@ -24,7 +25,7 @@ export class BaseUIElement extends Dispatchable {
     }
 
     applyRef() {
-        if (this.options && this.options.ref) {
+        if (this.options?.ref) {
             let obj = this.options.ref.parent;
             let name = this.options.ref.name ?? this.options.ref.key; // TODO: should be key
             obj[name] = this;
@@ -32,7 +33,7 @@ export class BaseUIElement extends Dispatchable {
     }
 
     removeRef() {
-        if (this.options && this.options.ref) {
+        if (this.options?.ref) {
             let obj = this.options.ref.parent;
             let name = this.options.ref.name;
             if (obj[name] === this) {
@@ -51,7 +52,7 @@ export class BaseUIElement extends Dispatchable {
         this.onUnmount();
         this.cleanup();
         this.removeRef();
-        this.node && this.node.remove();
+        this.node?.remove();
         delete this.node; // Clear for gc
     }
 }
@@ -219,7 +220,7 @@ class UIElement extends BaseUIElement {
     // Abstract, gets called when removing DOM node associated with the
     cleanup() {
         this.runCleanupJobs();
-        for (let child of this.children) {
+        for (const child of this.children) {
             child.destroyNode();
         }
         this.clearNode();
@@ -266,8 +267,8 @@ class UIElement extends BaseUIElement {
         let newChildren = this.getChildrenForRedraw();
 
         if (newChildren === this.children) {
-            for (let i = 0; i < newChildren.length; i += 1) {
-                newChildren[i].redraw();
+            for (const child of newChildren) {
+                child.redraw();
             }
             this.applyNodeAttributes();
             this.applyRef();
@@ -286,14 +287,14 @@ class UIElement extends BaseUIElement {
             // Not a UIElement, to be converted to a TextElement probably
             if (!newChild.getNodeType) {
                 if (newChild.toUI) {
-                    newChild = newChild.toUI();
+                    newChild = newChild.toUI(); // TODO move this inside the unwrap logic
                 } else {
                     newChild = new UI.TextElement({value: String(newChild)});
                 }
                 newChildren[i] = newChild;
             }
 
-            let newChildKey = (newChild.options && newChild.options.key) || ("autokey" + i);
+            let newChildKey = newChild.options?.key || ("autokey" + i);
             let existingChild = childrenKeyMap && childrenKeyMap.get(newChildKey);
 
             if (existingChild && newChildren[i].canOverwrite(existingChild)) {
@@ -315,9 +316,9 @@ class UIElement extends BaseUIElement {
             // Remove children that don't need to be here
             let newChildrenSet = new Set(newChildren);
 
-            for (let i = 0; i < this.children.length; i += 1) {
-                if (!newChildrenSet.has(this.children[i])) {
-                    this.children[i].destroyNode();
+            for (const currentChild of this.children) {
+                if (!newChildrenSet.has(currentChild)) {
+                    currentChild.destroyNode();
                 }
             }
         }
@@ -331,12 +332,17 @@ class UIElement extends BaseUIElement {
         return true;
     }
 
+    // TODO This is actually slightly wrong, since we need to reuse the attr object we previously created
     getOptionsAsNodeAttributes() {
         return setObjectPrototype(this.options, NodeAttributes);
     }
 
+    instantiateNodeAttributes() {
+        return new NodeAttributes(this.options);
+    }
+
     getNodeAttributes() {
-        const attr = new NodeAttributes(this.options);
+        const attr = this.instantiateNodeAttributes();
         // Add the default class "container" from our style sheet (if there is one)
         const containerClassName = this.styleSheet?.container;
         if (containerClassName) {
@@ -345,7 +351,6 @@ class UIElement extends BaseUIElement {
         return attr;
     }
 
-    // Don't make changes here, unless you're also removing the optimization with NOOP_FUNCTION
     extraNodeAttributes(attr) {}
 
     applyNodeAttributes() {
@@ -391,6 +396,9 @@ class UIElement extends BaseUIElement {
             this.removeClass(className);
         }
     }
+
+    // Will the overwritten in Theme, look into moving here directly
+    getStyleSheet() { return null; }
 
     get styleSheet() {
         return this.getStyleSheet();
@@ -465,7 +473,7 @@ class UIElement extends BaseUIElement {
         this.onMount();
     }
 
-    // You need to overwrite the next child manipulation rutines if this.options.children !== this.children
+    // You need to overwrite the next child manipulation routines if this.options.children !== this.children
     appendChild(child) {
         // TODO: the next check should be done with a decorator
         if (this.children !== this.options.children) {

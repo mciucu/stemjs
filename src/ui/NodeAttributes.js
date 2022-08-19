@@ -341,6 +341,7 @@ export class NodeAttributes {
 NodeAttributes.defaultAttributesMap = new DOMAttributesMap(null, [
     ["id"],
     ["action"],
+    ["checked", {noValue: true}],
     ["colspan"],
     ["default"],
     ["disabled", {noValue: true}],

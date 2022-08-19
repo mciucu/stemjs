@@ -20,6 +20,19 @@ function getKeyframesRuleKey(key) {
     return "__keyframes__" + key;
 }
 
+export const PREFERRED_CLASS_NAME_KEY = Symbol("PreferredClassName");
+
+function getPreferredClassName(cls, key, descriptor) {
+    if (key !== "container") {
+        return key;
+    }
+    let className = cls.constructor.name;
+    if (className.endsWith("Style")) {
+        className = className.substr(0, className.length - 5);
+    }
+    return className + "-container";
+}
+
 // TODO: this function can be made a lot more generic, to wrap plain object initializer with inheritance support
 function styleRuleWithOptions() {
     let options = Object.assign({}, ...arguments); //Simpler notation?
@@ -35,9 +48,6 @@ function styleRuleWithOptions() {
         descriptor.objInitializer = function () {
             let style = evaluateStyleRuleObject(this, initializer, value, options);
 
-            // TODO: a bit of a hack, clean this up with Symbol and fix typo
-            style["prefferedClassName"] = key;
-
             if (options.selector) {
                 style["selectorName"] = options.selector;
             }
@@ -50,8 +60,9 @@ function styleRuleWithOptions() {
                 }
                 let parentStyle = evaluateStyleRuleObject(this, parentDesc.objInitializer, parentDesc.value, options);
                 style = deepCopy({}, parentStyle, style);
-                return style;
             }
+
+            style[PREFERRED_CLASS_NAME_KEY] = getPreferredClassName(target, key, descriptor);
 
             return style;
         };
