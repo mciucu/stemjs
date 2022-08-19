@@ -35,7 +35,7 @@ export class TableRow extends UI.Primitive("tr") {
 
     renderEntryCell(column, columnIndex) {
         // TODO support more complex style options and {...columns.extraOptions(entry)}
-        return <td style={column.cellStyle} key={columnIndex}>{column.value(this.options.entry, this.options.index)}</td>;
+        return <td style={column.cellStyle} key={columnIndex}>{column.value(this.options.entry, this.options.index, columnIndex, this)}</td>;
     }
 }
 
@@ -75,22 +75,22 @@ export class Table extends UI.Primitive("table") {
         return this.options.rowClass;
     }
 
-    makeRow(entry, index) {
+    makeRow(entry, rowIndex) {
         if (entry instanceof UI.Element && (entry.getNodeType() === "tr" || entry.getNodeType() === "tbody")) {
             return entry;
         }
-        const RowClass = this.getRowClass(entry, index);
-        return <RowClass {...this.getRowOptions(entry, index)} />
+        const RowClass = this.getRowClass(entry, rowIndex);
+        return <RowClass {...this.getRowOptions(entry, rowIndex)} />
     }
 
-    getRowOptions(entry, index) {
+    getRowOptions(entry, rowIndex) {
         const {columns} = this.options;
         return {
             entry,
             columns,
-            index,
+            rowIndex,
             parent: this,
-            key: this.getEntryKey(entry, index),
+            key: this.getEntryKey(entry, rowIndex),
         };
     }
 
