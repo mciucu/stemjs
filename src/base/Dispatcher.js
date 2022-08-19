@@ -196,6 +196,10 @@ class Dispatchable {
     removeUpdateListener(callback) {
         return this.removeListener("update", callback);
     }
+
+    addChangeListener(callback) {
+        return this.addListener("change", callback);
+    }
 }
 
 // Creates a method that calls the method methodName on obj, and adds the result as a cleanup task

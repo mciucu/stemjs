@@ -50,7 +50,7 @@ export class DOMAttributesMap {
     allowedAttributesMap = new Map();
     reverseNameMap = new Map();
 
-    constructor(fallbackMapping, allowedAttributesArray = []) {
+    constructor(fallbackMapping, allowedAttributesArray = [], allowedPrefixes = []) {
         this.fallbackMapping = fallbackMapping;
 
         for (let attribute of allowedAttributesArray) {
@@ -60,6 +60,8 @@ export class DOMAttributesMap {
 
             this.setAttribute(attribute[0], attribute[1]);
         }
+
+        this.allowedPrefixes = allowedPrefixes;
     }
 
     setAttribute(key, value) {
@@ -71,6 +73,13 @@ export class DOMAttributesMap {
     }
 
     get(key) {
+        for (const prefix of this.allowedPrefixes) {
+            if (key.startsWith(prefix)) {
+                return {
+                    domName: key,
+                }
+            }
+        }
         let value = this.allowedAttributesMap.get(key);
         if (!value && this.fallbackMapping) {
             value = this.fallbackMapping.get(key);
@@ -120,6 +129,7 @@ export class NodeAttributes {
         }
     }
 
+    // Change the attribute & apply it, regardless if it exists in the attribute map (in that case it's whitelisted)
     // TODO: should this use the domName or the reverseName? Still needs work
     setAttribute(key, value, node, attributesMap=this.constructor.defaultAttributesMap) {
         // TODO: might want to find a better way than whitelistAttributes field to do this
@@ -224,6 +234,7 @@ export class NodeAttributes {
         return this.getClassNameSet().has(isString(className) ? className : className.className);
     }
 
+    // Apply the attribute only if it's in the attributesMap
     applyAttribute(key, node, attributesMap) {
         let attributeOptions = attributesMap.get(key);
         if (!attributeOptions) {
@@ -309,7 +320,6 @@ export class NodeAttributes {
                 continue;
             }
             this.applyAttribute(key, node, attributesMap);
-            // TODO: also whitelist data- and aria- keys here
         }
 
         this.applyClassName(node);
@@ -343,7 +353,7 @@ NodeAttributes.defaultAttributesMap = new DOMAttributesMap(null, [
     ["minWidth"],
     ["role"],
     ["target"],
-    ["domTitle", {domName: "title"}],
+    ["domTitle", {domName: "title"}],  // TODO titleAttr?
     ["type"],
     ["placeholder"],
     ["src"],
@@ -352,4 +362,7 @@ NodeAttributes.defaultAttributesMap = new DOMAttributesMap(null, [
     ["width"],
     ["tabIndex"],
     //["value"], // Value is intentionally disabled
+], [
+    "data-",
+    "aria-",
 ]);
