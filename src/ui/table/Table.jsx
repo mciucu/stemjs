@@ -18,7 +18,7 @@ export class ColumnHandler {
     }
 
     static mapColumns(columns) {
-        return columns.map((col, index) => new ColumnHandler(col, index));
+        return columns.map((column, index) => new ColumnHandler(column, index));
     }
 }
 
