@@ -37,7 +37,7 @@ UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement 
         }
 
         for (let index = 1; index < args.length; index += 1) {
-            str = str.replace("%" + index, args[index]);
+            str = str.replaceAll("%" + index, args[index]);
         }
 
         return str;
@@ -66,8 +66,7 @@ UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement 
         if (Array.isArray(this.value)) {
             value = this.evaluate(...value);
         } else {
-            // TODO: if translationMap.get() returns "", keep, skip only if returning null
-            value = (translationMap && translationMap.get(value)) || value;
+            value = (translationMap && translationMap.get(value)) ?? value;
         }
         return value;
     }
