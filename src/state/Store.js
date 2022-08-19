@@ -1,5 +1,5 @@
 import {Dispatchable, CleanupJobs} from "../base/Dispatcher";
-import {DefaultState} from "./State";
+import {GlobalState} from "./State";
 
 // The store information is kept in a symbol, to not interfere with serialization/deserialization
 export const StoreSymbol = Symbol("Store");
@@ -117,7 +117,7 @@ class BaseStore extends Dispatchable {
         if (this.options.hasOwnProperty("state")) {
             return this.options.state;
         } else {
-            return DefaultState;
+            return GlobalState;
         }
     }
 

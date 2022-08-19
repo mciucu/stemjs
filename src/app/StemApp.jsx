@@ -4,6 +4,7 @@ import {Router} from "../ui/Router";
 import {GlobalContainer} from "../ui/global-container/GlobalContainer";
 import {isLocalUrl, trimLocalUrl} from "../base/Utils";
 import {Dispatcher} from "../base/Dispatcher";
+import {GlobalState} from "../state/State.js";
 
 
 export function singlePageLinkOnMount() {
@@ -21,6 +22,7 @@ export function singlePageLinkOnMount() {
 
 export class StemApp extends UI.Element {
     static init() {
+        self.GlobalState = GlobalState; // Expose it for debugging
         Link.prototype.onMount = singlePageLinkOnMount;
         return self.appInstance = this.create(document.body);
     }

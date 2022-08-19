@@ -13,17 +13,14 @@ export class Button extends UI.Primitive(IconableInterface, "button") {
     }
 
     disable() {
-        this.options.disabled = true;
-        this.node.disabled = true;
+        this.setEnabled(false);
     }
 
     enable() {
-        this.options.disabled = false;
-        this.node.disabled = false;
+        this.setEnabled(true);
     }
 
     setEnabled(enabled) {
-        this.options.disabled = !enabled;
-        this.node.disabled = !enabled;
+        this.updateOptions({disabled: !enabled});
     };
 }

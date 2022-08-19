@@ -51,7 +51,8 @@ export class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
         },
     };
 
-    // DEFAULT uses MEDIUM as size and BASE as level
+    // By default uses MEDIUM as size and BASE as level
+    // TODO @cleanup rename to container
     @styleRule
     DEFAULT = [this.base, {
         fontSize: this.themeProps.FONT_SIZE_DEFAULT,
