@@ -14,6 +14,23 @@ export class InputableElement extends UI.Element {
         attr.addClass(this.styleSheet.inputElement);
     }
 
+    isEqual(valueA, valueB) {
+        return valueA === valueB;
+    }
+
+    setOptions(options) {
+        const oldInitialValue = this.options.initialValue;
+        super.setOptions(options);
+        const {initialValue} = this.options;
+        if (oldInitialValue == null && initialValue == null) {
+            return;
+        }
+        // TODO @branch reimplement to be like Denis's code
+        if (this.node && !this.isEqual(initialValue, oldInitialValue)) {
+            this.setValue(initialValue);
+        }
+    }
+
     focus() {
         this.node.focus();
     }
@@ -27,6 +44,14 @@ export class InputableElement extends UI.Element {
         if (initialValue) {
             this.setValue(initialValue);
         }
+    }
+
+    addChangeListener(callback) {
+        return this.addNodeListener("change", callback);
+    }
+
+    addInputListener(callback) {
+        return this.addNodeListener("input", callback);
     }
 }
 
@@ -49,16 +74,28 @@ class Input extends UI.Primitive(InputableElement, "input") {
         }
     }
 
+    setOptions(options) {
+        const oldInitialValue = this.options.initialValue;
+        const oldValue = this.options.value;
+        super.setOptions(options);
+        if (!this.node) {
+            return;
+        }
+        const {initialValue, value} = this.options;
+        if (initialValue && initialValue !== oldInitialValue) {
+            this.setValue(initialValue);
+        }
+        if (value && value !== oldValue) {
+            this.setValue(value);
+        }
+    }
+
     getInputType() {
         // Must be overloaded
         return null;
     }
 
-    addInputListener(callback) {
-        this.addNodeListener("input change", callback);
-    }
-
-    onKeyUp(callback) {
+    addKeyUpListener(callback) {
         this.addNodeListener("keyup", callback);
     }
 
@@ -281,11 +318,7 @@ class TextArea extends UI.Primitive(InputableElement, "textarea") {
         this.node.value = value;
     }
 
-    onInput(callback) {
-        this.addNodeListener("input change", callback);
-    }
-
-    onKeyUp(callback) {
+    addKeyUpListener(callback) {
         this.addNodeListener("keyup", callback);
     }
 }

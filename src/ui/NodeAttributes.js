@@ -1,4 +1,4 @@
-import {dashCase, isNumber, setObjectPrototype} from "../base/Utils";
+import {dashCase, isNumber, isString, isPlainObject, setObjectPrototype} from "../base/Utils";
 
 export const defaultToPixelsAttributes = new Set([
     "border-radius",
@@ -114,7 +114,8 @@ export class NodeAttributes {
         if (this.className instanceof ClassNameSet) {
             this.className = ClassNameSet.create(String(this.className));
         }
-        if (this.style) {
+        if (isPlainObject(this.style)) {
+            // Make a copy, since we might modify it later
             this.style = Object.assign({}, this.style);
         }
     }
@@ -144,8 +145,16 @@ export class NodeAttributes {
         }
     }
 
+    // Should the style property have been passed in as a string, save it to the variable that will be applied before the string object.
+    ensureNoStringStyle() {
+        if (isString(this.style)) {
+            this.styleString = this.style; // Keep in a temp value
+            delete this.style;
+        }
+    }
+
     setStyle(key, value, node) {
-        if (!(typeof key === "string" || key instanceof String)) {
+        if (!isString(key)) {
             // If the key is not a string, it should be a plain object
             for (const styleKey of Object.keys(key)) {
                 this.setStyle(styleKey, key[styleKey], node);
@@ -156,6 +165,7 @@ export class NodeAttributes {
             this.removeStyle(key, node);
             return;
         }
+        this.ensureNoStringStyle();
         this.style = this.style || {};
         this.style[key] = value;
         this.applyStyleToNode(key, value, node);
@@ -211,7 +221,7 @@ export class NodeAttributes {
     }
 
     hasClass(className) {
-        return this.getClassNameSet().has(typeof className === "string" ? className : className.className);
+        return this.getClassNameSet().has(isString(className) ? className : className.className);
     }
 
     applyAttribute(key, node, attributesMap) {
@@ -305,8 +315,12 @@ export class NodeAttributes {
         this.applyClassName(node);
 
         node.removeAttribute("style");
+        this.ensureNoStringStyle();
+        if (this.styleString) {
+            node.style = this.styleString;
+        }
         if (this.style) {
-            for (let key in this.style) {
+            for (const key of Object.keys(this.style)) {
                 this.applyStyleToNode(key, this.style[key], node);
             }
         }

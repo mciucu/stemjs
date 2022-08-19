@@ -1,4 +1,4 @@
-import {padNumber, suffixWithOrdinal, isNumber} from "../base/Utils";
+import {padNumber, suffixWithOrdinal, isNumber, isFunction, isString} from "../base/Utils";
 import {TimeUnit, Duration} from "./Duration";
 
 // By default, StemDate will guess if the value is in milliseconds or seconds.
@@ -54,7 +54,11 @@ class StemDate extends BaseDate {
         if (!DEFAULT_DATE_FORMAT) {
             return this.toBaseString();
         }
-        return this.format(DEFAULT_DATE_FORMAT);
+        if (isString(DEFAULT_DATE_FORMAT)) {
+            return this.format(DEFAULT_DATE_FORMAT);
+        } else {
+            return DEFAULT_DATE_FORMAT(this);
+        }
     }
 
     static fromUnixMilliseconds(unixMilliseconds) {
@@ -233,6 +237,7 @@ class StemDate extends BaseDate {
         return this;
     }
 
+    // TODO @branch have all of these return a new objects and have dates immutable
     add(duration) {
         duration = Duration.toDuration(duration);
         if (duration.isAbsolute()) {
@@ -326,7 +331,7 @@ class StemDate extends BaseDate {
     }
 
     static format(date, str) {
-        return (new StemDate(date)).format(str);
+        return StemDate.toDate(date).format(str);
     }
 
     isValid() {
