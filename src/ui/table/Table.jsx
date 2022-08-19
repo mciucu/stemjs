@@ -18,35 +18,51 @@ export class ColumnHandler {
     }
 
     static mapColumns(columns) {
-        return columns.map((col, index) => {
-            if (col instanceof ColumnHandler) {
-                return col;
+        return columns.map((column, index) => {
+            if (column instanceof ColumnHandler) {
+                return column;
             }
-            return new ColumnHandler(col, index);
+            return new ColumnHandler(column, index);
         });
     }
 }
 
 // TODO: the whole table architecture probably needs a rethinking
 export class TableRow extends UI.Primitive("tr") {
+    getColumns() {
+        return this.options.columns;
+    }
+
     render() {
-        return this.options.columns.map((column, index) => this.renderEntryCell(column, index));
+        const columns = this.getColumns();
+        return columns.map((column, index) => this.renderEntryCell(column, index));
     }
 
     renderEntryCell(column, columnIndex) {
         // TODO support more complex style options and {...columns.extraOptions(entry)}
-        return <td style={column.cellStyle} key={columnIndex}>{column.value(this.options.entry, this.options.index)}</td>;
+        return <td style={column.cellStyle} key={columnIndex}>{column.value(this.options.entry, this.options.index, columnIndex, this)}</td>;
     }
 }
 
 @registerStyle(TableStyle)
 export class Table extends UI.Primitive("table") {
     getDefaultOptions(options) {
+        const entries = this.getDefaultEntries(options);
+        const columns = this.getDefaultColumns(options, entries);
+
         return {
-            columns: [],
-            entries: [],
+            columns,
+            entries,
             rowClass: TableRow,
         }
+    }
+
+    getDefaultEntries(options) {
+        return options.entries || [];
+    }
+
+    getDefaultColumns(options, entries) {
+        return options.columns || [];
     }
 
     setOptions(options) {
@@ -64,22 +80,22 @@ export class Table extends UI.Primitive("table") {
         return this.options.rowClass;
     }
 
-    makeRow(entry, index) {
+    makeRow(entry, rowIndex) {
         if (entry instanceof UI.Element && (entry.getNodeType() === "tr" || entry.getNodeType() === "tbody")) {
             return entry;
         }
-        const RowClass = this.getRowClass(entry, index);
-        return <RowClass {...this.getRowOptions(entry, index)} />
+        const RowClass = this.getRowClass(entry, rowIndex);
+        return <RowClass {...this.getRowOptions(entry, rowIndex)} />
     }
 
-    getRowOptions(entry, index) {
+    getRowOptions(entry, rowIndex) {
         const {columns} = this.options;
         return {
             entry,
             columns,
-            index,
+            rowIndex,
             parent: this,
-            key: this.getEntryKey(entry, index),
+            key: this.getEntryKey(entry, rowIndex),
         };
     }
 
@@ -91,9 +107,12 @@ export class Table extends UI.Primitive("table") {
     }
 
     renderTableHead() {
-        const {noHeader} = this.options;
-        return !noHeader && <thead>
-            <tr>{this.options.columns.map(this.renderHeaderCell, this)}</tr>
+        const {noHeader, columns} = this.options;
+
+        return !noHeader && <thead ref="thead">
+            <tr>
+                {columns.map((column, index) => this.renderHeaderCell(column, index))}
+            </tr>
         </thead>;
     }
 
@@ -131,9 +150,5 @@ export class Table extends UI.Primitive("table") {
 
     setEntries(entries) {
         this.updateOptions({entries});
-    }
-
-    setColumns(columns) {
-        this.options.columns = columns;
     }
 }

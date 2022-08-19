@@ -27,7 +27,7 @@ export class BaseUIElement extends Dispatchable {
     applyRef() {
         if (this.options?.ref) {
             let obj = this.options.ref.parent;
-            let name = this.options.ref.name || this.options.ref.key; // TODO: should be key
+            let name = this.options.ref.name ?? this.options.ref.key; // TODO: should be key
             obj[name] = this;
         }
     }
@@ -437,7 +437,7 @@ class UIElement extends BaseUIElement {
     }
 
     refLinkArray(arrayName, index) {
-        if (!this.hasOwnProperty(arrayName)) {
+        if (!this[arrayName]) {
             this[arrayName] = [];
         }
         return {parent: this[arrayName], name: index};

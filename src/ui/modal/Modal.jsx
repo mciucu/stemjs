@@ -18,12 +18,20 @@ class Modal extends UI.Element {
         };
     }
 
+    extraNodeAttributes(attr) {
+        if (!this.options.visible) {
+            attr.addClass("hidden");
+        }
+    }
+
     getChildrenToRender() {
         return [
-            <Panel ref="modalContainer" className={(this.options.visible ? "" : "hidden") + this.styleSheet.container}>
-                <Panel ref="behindPanel" className={this.styleSheet.hiddenAnimated + this.styleSheet.background} onClick={() => this.hide()}/>
-                {this.getModalWindow()}
-            </Panel>
+            <Panel
+                ref="behindPanel"
+                className={this.styleSheet.hiddenAnimated + this.styleSheet.background}
+                onClick={() => this.hide()}
+            />,
+            this.getModalWindow(),
         ];
     }
 
@@ -81,7 +89,7 @@ class Modal extends UI.Element {
             this.behindPanel.addClass(this.styleSheet.hiddenAnimated);
 
             setTimeout(() => {
-                this.modalContainer.addClass("hidden");
+                this.addClass("hidden");
                 if (this.options.destroyOnHide) {
                     this.destroyNode();
                 }
@@ -97,7 +105,7 @@ class Modal extends UI.Element {
         if (!this.node) {
             this.mount(document.body);
         }
-        this.modalContainer.removeClass("hidden");
+        this.removeClass("hidden");
         setTimeout(() => {
             this.behindPanel.addClass(this.styleSheet.visibleAnimated);
             this.behindPanel.removeClass(this.styleSheet.hiddenAnimated);
