@@ -25,7 +25,9 @@ class EntriesManager extends Dispatchable {
     }
 
     cacheEntries() {
-        this.cachedEntries = this.sortEntries(this.filterEntries(this.getRawEntries()));
+        let entries = this.getRawEntries();
+        entries = this.filterEntries(entries);
+        this.cachedEntries = this.sortEntries(entries);
         this.dispatch("update");
     }
 
@@ -47,7 +49,11 @@ class EntriesManager extends Dispatchable {
     }
 
     sortEntries(entries) {
-        return this.getComparator() ? entries.sort(this.getComparator()) : entries;
+        const comparator = this.getComparator();
+        if (comparator) {
+            entries = entries.sort(comparator);
+        }
+        return entries;
     }
 
     filterEntries(entries) {
