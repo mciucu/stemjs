@@ -1,3 +1,4 @@
+// TODO @cleanup merge with unwrapArray
 export function toArray(objOrArray) {
     if (objOrArray == null) {
         return [];
@@ -5,48 +6,59 @@ export function toArray(objOrArray) {
     return Array.isArray(objOrArray) ? objOrArray : [objOrArray];
 }
 
-export function unwrapArray(elements) {
+export function unwrapElementPlain(element) {
+    if (element == null || element === false) {
+        return undefined;
+    }
+    return element;
+}
+
+export function unwrapElementWithFunc(element) {
+    while (isFunction(element)) {
+        element = element();
+    }
+    return unwrapElementPlain(element);
+}
+
+export function unwrapArray(elements, unwrapFunc = unwrapElementPlain) {
     if (elements == null || elements === false) {
         return [];
     }
 
     if (!Array.isArray(elements)) {
-        // In case this is an iterable collection, convert to array
+        // Convert to an array
         if (elements[Symbol.iterator] && !isString(elements)) {
-            return unwrapArray(Array.from(elements));
+            elements = Array.from(elements);
         } else {
-            return [elements];
+            elements = [elements];
         }
-    }
-
-    // Check if the passed in array is valid, and try to return it if possible to preserve references
-    let allProperElements = true;
-    for (let i = 0; i < elements.length; i++) {
-        if (Array.isArray(elements[i]) || elements[i] == null || elements[i] === false) {
-            allProperElements = false;
-            break;
-        }
-    }
-
-    if (allProperElements) {
-        // Return the exact same array as was passed in
-        return elements;
     }
 
     let result = [];
-    for (let i = 0; i < elements.length; i++) {
-        if (Array.isArray(elements[i])) {
-            let unwrappedElement = unwrapArray(elements[i]);
-            for (let j = 0; j < unwrappedElement.length; j += 1) {
-                result.push(unwrappedElement[j]);
+    for (const rawElement of elements) {
+        const element = unwrapFunc(rawElement); // First unwrap the element
+        if (element === undefined) {
+            continue;
+        }
+        if (Array.isArray(element)) {
+            const subelements = unwrapArray(element, unwrapFunc);
+            for (const subelement of subelements) {
+                result.push(subelement);
             }
         } else {
-            if (elements[i] != null && elements[i] !== false) {
-                result.push(elements[i]);
-            }
+            result.push(element);
         }
     }
-    return result;
+
+    let sameAsInput = (result.length === elements.length);
+
+    for (let index = 0; sameAsInput && index < result.length; index += 1) {
+        if (result[index] !== elements[index]) {
+            sameAsInput = false;
+        }
+    }
+
+    return sameAsInput ? elements : result;
 }
 
 export function isLocalUrl(url, host=self.location.host, origin=self.location.origin) {
