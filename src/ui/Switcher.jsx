@@ -8,6 +8,16 @@ class Switcher extends UI.Element {
         this.numRedraws = 0;
     }
 
+    getPreferredActive() {
+        const {children} = this.options;
+        for (const child of children) {
+            if (child.options.active) {
+                return child;
+            }
+        }
+        return children[0] || this.activeChild;
+    }
+
     getDefaultOptions() {
         return {
             fullHeight: false,
@@ -23,36 +33,37 @@ class Switcher extends UI.Element {
 
     copyState(element) {
         let options = Object.assign({}, element.options, {
-            children: this.overwriteElements(this.options.children || [], element.options.children || []),
+            children: this.overwriteChildren(this.options.children || [], element.options.children || []),
         });
 
+        // TODO @Mihai use the logic from UIElement.copyState
         this.setOptions(options);
 
-        for (let child of this.options.children) {
-            if (child.options.active) {
-                this.activeChild = child;
-            }
-        }
+        this.activeChild = this.getPreferredActive();
     }
 
     render() {
         return this.activeChild || this.options.children[0];
     }
 
-    overwriteElements(existingElements, newElements) {
-        let keyMap = this.getElementKeyMap(existingElements) || new Map();
-        for (let i = 0; i < newElements.length; i += 1) {
-            let newChild = newElements[i];
+    overwriteChildren(existingChildren, newChildren) {
+        let keyMap = this.getElementKeyMap(existingChildren) || new Map();
+        for (let i = 0; i < newChildren.length; i += 1) {
+            let newChild = newChildren[i];
             let newChildKey = (newChild.options && newChild.options.key) || ("autokey" + i);
             let existingChild = keyMap.get(newChildKey);
             if (existingChild === newChild) {
                 continue;
             }
+            const wasActive = (existingChild === this.activeChild);
             if (existingChild && newChild.canOverwrite(existingChild)) {
-                newElements[i] = newChild = this.overwriteChild(existingChild, newChild);
+                newChildren[i] = newChild = this.overwriteChild(existingChild, newChild);
+            }
+            if (wasActive) {
+                newChild.options.active = true;
             }
         }
-        return newElements;
+        return newChildren;
     }
 
     redraw() {
@@ -71,7 +82,12 @@ class Switcher extends UI.Element {
             return;
         }
 
+        const activeChild = this.activeChild || this.options.children[0];
+
         for (let child of this.options.children) {
+            if (child === activeChild) {
+                continue;
+            }
             if (this.options.lazyRender) {
                 this.getChildProperties(child).isUpToDate = false;
                 child.applyRef();
@@ -80,7 +96,7 @@ class Switcher extends UI.Element {
             }
         }
 
-        this.updateActiveChild(this.activeChild || this.options.children[0]);
+        this.updateActiveChild(activeChild);
     }
 
     getChildProperties(child) {
