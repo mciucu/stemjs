@@ -1,4 +1,4 @@
-import {unwrapArray, setObjectPrototype, suffixNumber, NOOP_FUNCTION} from "../base/Utils";
+import {unwrapArray, setObjectPrototype, suffixNumber, NOOP_FUNCTION, isPlainObject} from "../base/Utils";
 import {Dispatchable} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
 import {applyDebugFlags} from "./Debug";
@@ -50,11 +50,11 @@ export class BaseUIElement extends Dispatchable {
 UI.TextElement = class UITextElement extends BaseUIElement {
     constructor(value="") {
         super();
-        if (value && value.hasOwnProperty("value")) {
+        if (value && value.hasOwnProperty("value") && isPlainObject(value)) {
             this.value = value.value;
             this.options = value;
         } else {
-            this.value = (value != null) ? value : "";
+            this.value = value ?? "";
         }
     }
 
@@ -94,6 +94,10 @@ UI.TextElement = class UITextElement extends BaseUIElement {
 
     getValue() {
         return String(this.value);
+    }
+
+    toString() {
+        return this.getValue();
     }
 
     redraw() {
@@ -255,9 +259,14 @@ class UIElement extends BaseUIElement {
             let prevChildNode = (i > 0) ? newChildren[i - 1].node : null;
             let currentChildNode = (prevChildNode) ? prevChildNode.nextSibling : domNode.firstChild;
 
-            // Not a UIElement, to be converted to a TextElement
+            // Not a UIElement, to be converted to a TextElement probably
             if (!newChild.getNodeType) {
-                newChild = newChildren[i] = new UI.TextElement(newChild);
+                if (newChild.toUI) {
+                    newChild = newChild.toUI();
+                } else {
+                    newChild = new UI.TextElement({value: String(newChild)});
+                }
+                newChildren[i] = newChild;
             }
 
             let newChildKey = (newChild.options && newChild.options.key) || ("autokey" + i);
@@ -567,10 +576,6 @@ class UIElement extends BaseUIElement {
 
     removeDoubleClickListener(callback) {
         this.removeNodeListener("dblclick", callback);
-    }
-
-    addChangeListener(callback) {
-        return this.addNodeListener("change", callback);
     }
 }
 

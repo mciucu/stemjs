@@ -4,20 +4,39 @@ import {PropertyCache} from "../data-structures/PropertyCache";
 // TODO: maybe have better names
 const autoRedrawListenersLazy = new PropertyCache("autoRedrawHandler", () => new Set());
 
-const REDRAW_MICROTASK_SYMBOL = Symbol.for("RedrawMicrotask");
-const redrawHandlerLazy = new PropertyCache("autoRedrawListener", (obj) => {
-    return () => {
-        // TODO @branch have this do a microtask that doesn't do more than one redraw per cycle
-        // if (obj[REDRAW_MICROTASK_SYMBOL]) {
-        //     return;
-        // }
-        // obj[REDRAW_MICROTASK_SYMBOL] = true;
-        // queueMicrotask(() => {
-        //     obj[REDRAW_MICROTASK_SYMBOL] = undefined;
-        //     obj.node && obj.redraw();
-        // });
-        obj.node && obj.redraw();
+// TODO merge with AsyncAggregateDispatcher implementation
+function getQueueMicrotaskFunc() {
+    if (self.queueMicrotask && (typeof self.queueMicrotask === "function")) {
+        return self.queueMicrotask;
     }
+    return (task) => setTimeout(task, 0);
+}
+export const queueMicrotaskWrapper = getQueueMicrotaskFunc();
+
+// TODO put together with RunOnce
+export class OncePerTickRunner {
+    constructor(callback) {
+        this.callback = callback;
+        this.weakMap = new WeakMap();
+    }
+
+    maybeEnqueue(obj) {
+        if (this.weakMap.has(obj)) {
+            return false;
+        }
+        this.weakMap.set(obj, true);
+        queueMicrotaskWrapper(() => {
+            this.weakMap.delete(obj);
+            this.callback(obj);
+        });
+        return true;
+    }
+}
+
+export const redrawPerTickRunner = new OncePerTickRunner((obj) => obj.node && obj.redraw());
+
+const redrawHandlerLazy = new PropertyCache("autoRedrawListener", (obj) => {
+    return () => redrawPerTickRunner.maybeEnqueue(obj);
 });
 
 // Decorator that attaches an update listener on all store objects in options
