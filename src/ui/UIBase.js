@@ -397,15 +397,22 @@ class UIElement extends BaseUIElement {
         }
     }
 
-    // Will the overwritten in Theme, look into moving here directly
-    getStyleSheet() { return null; }
+    getTheme() {
+        return this.options.theme || this.constructor.theme || Theme.Global;
+    }
 
     get styleSheet() {
-        return this.getStyleSheet();
+        let {styleSheet} = this.options;
+        const theme = this.getTheme();
+
+        if (!styleSheet) {
+            styleSheet = theme.getStyleSheet(this.constructor);
+        }
+        return styleSheet?.getInstance(theme);
     }
 
     get themeProps() {
-        return this.styleSheet.themeProps;  // TODO @Mihai || Theme.props
+        return this.options.styleSheet?.themeProps || this.getTheme().props;
     }
 
     addListenersFromOptions() {
