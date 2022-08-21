@@ -1,13 +1,10 @@
 import {styleRule, StyleSheet} from "../Style";
 import {Device} from "../../base/Device";
 
+// TODO @cleanup this seems to be too complicated
 class GlobalContainerStyle extends StyleSheet {
-    constructor() {
-        super({updateOnResize: Device.isMobileDevice()});
-    }
-
     @styleRule
-    default = {
+    container = {
         height: () => {return Device.isMobileDevice() ? `${window.innerHeight}px` : "100vh"},
         paddingTop: this.themeProps.NAV_MANAGER_NAVBAR_HEIGHT,
         background: this.themeProps.COLOR_BACKGROUND_BODY,
