@@ -1,68 +1,41 @@
 import {Dispatchable} from "../../base/Dispatcher";
-import {UI} from "../UIBase";
-import {StyleSheet} from "../Style";
 import {CallThrottler} from "../../base/Utils";
 
-function getInstance(styleSheet) {
-    if (typeof styleSheet === "function") {
-        if (typeof styleSheet.getInstance === "function") {
-            styleSheet = styleSheet.getInstance();
-        } else {
-            styleSheet = styleSheet();
-        }
-    }
-    return styleSheet;
-}
-
-function getInstanceForObject(obj) {
-    if (!obj) {
-        return null;
-    }
-    let styleSheet = (obj.theme && obj.theme.get(obj)) || obj.styleSheet;
-    return getInstance(styleSheet);
-}
 
 class Theme extends Dispatchable {
     static PropsSymbol = Symbol("Props");
+    static Global = new this(null, "Global");
 
     classSet = new Set();
-    styleSheetSet = new Set();
-    properties = {theme: this};
-    updateThrottler = new CallThrottler({throttle: 50});
-    updateThrottled = this.updateThrottler.wrap(() => this.updateStyleSheets());
+    styleSheetInstances = new Map(); // map from StyleSheet class to instance
+    styleSheetSymbol = Symbol(this.name + "StyleSheet");
+    updateThrottled = (new CallThrottler({throttle: 50})).wrap(() => this.updateStyleSheets()); // TODO @cleanup CallThrottler syntax is really ugly
 
-    constructor(name="") {
+    constructor(baseTheme, name, props) {
         super();
-        this.styleSheetSymbol = Symbol("Theme" + name);
+        this.name = name;
+        this.baseTheme = baseTheme;
+        this.properties = {
+            theme: this,
+            ...props,
+        }
 
-        window.addEventListener("resize", this.updateThrottled);
+        window.addEventListener("resize", () => this.updateThrottled());
+    }
+
+    // Create a new Theme, based on the current one
+    fork(name, extraProps) {
+        return new Theme(this, name, extraProps);
     }
 
     register(cls, styleSheet) {
         cls.theme = this;
-        cls.styleSheet = styleSheet;
-        this.set(cls, styleSheet);
-    }
-
-    set(cls, styleSheet) {
         cls[this.styleSheetSymbol] = styleSheet;
         this.classSet.add(cls);
     }
 
-    get(cls) {
-        if (!(typeof cls === "function")) {
-            cls = cls.constructor;
-        }
-        return cls[this.styleSheetSymbol];
-    }
-
-    getProperties() {
-        return this.properties;
-    }
-
-    getProperty(key, defaultValue) {
-        const value = this.properties[key] || defaultValue;
-        return (typeof value === "function") ? value() : value;
+    getStyleSheet(cls) {
+        return cls[this.styleSheetSymbol] || this.baseTheme?.getStyleSheet(cls);
     }
 
     setProperties(properties, update=true) {
@@ -72,29 +45,21 @@ class Theme extends Dispatchable {
         }
     }
 
-    setProperty(key, value) {
-        this.properties[key] = value;
-    }
-
     getAllStyleSheets() {
-        let styleSheetSet = new Set(this.styleSheetSet);
+        let styleSheetSet = new Set(this.styleSheetInstances.values());
         for (const cls of this.classSet.values()) {
-            styleSheetSet.add(this.get(cls));
+            styleSheetSet.add(this.getStyleSheet(cls));
         }
-        return Array.from(styleSheetSet).map(styleSheet => {
-            if (styleSheet.getInstance) {
-                return styleSheet.getInstance();
-            }
-            return styleSheet;
-        });
+        return Array.from(styleSheetSet).map(styleSheet => styleSheet.getInstance(this));
     }
 
-    addStyleSheet(styleSheet) {
-        this.styleSheetSet.add(styleSheet);
-    }
-
-    removeStyleSheet(styleSheet) {
-        this.styleSheetSet.delete(styleSheet);
+    getStyleSheetInstance(Cls) {
+        let instance = this.styleSheetInstances.get(Cls);
+        if (!instance) {
+            instance = new Cls({theme: this});
+            this.styleSheetInstances.set(Cls, instance);
+        }
+        return instance;
     }
 
     updateStyleSheets() {
@@ -115,16 +80,8 @@ class Theme extends Dispatchable {
         return this.Global.get(...arguments);
     }
 
-    static addStyleSheet(styleSheet) {
-        this.Global.addStyleSheet(styleSheet);
-    }
-
     static setProperties(properties) {
         this.Global.setProperties(...arguments);
-    }
-
-    static getProperties() {
-        return this.Global.getProperties();
     }
 
     get props() {
@@ -132,14 +89,14 @@ class Theme extends Dispatchable {
         if (!props) {
             props = this[this.constructor.PropsSymbol] = new Proxy(this.properties, {
                 get: (properties, key, receiver) => {
-                    let value = properties[key];
+                    let value = properties[key] || this.baseTheme?.props[key];
                     if (typeof value === "function") {
                         value = value(props);
                     }
                     return value;
                 },
                 set: (properties, key, value) => {
-                    this.setProperty(key, value);
+                    this.properties[key] = value;
                     this.updateThrottled();
                     return value;
                 }
@@ -153,18 +110,10 @@ class Theme extends Dispatchable {
     }
 }
 
-Theme.Global = new Theme("Global");
-
-UI.Element.prototype.getStyleSheet = function styleSheetGetter() {
-    return getInstanceForObject(this.options) || getInstanceForObject(this.constructor);
-};
-
 function registerStyle(styleClass, theme=Theme.Global) {
     return (target) => {
         theme.register(target, styleClass);
     }
 }
-
-StyleSheet.theme = Theme.Global;
 
 export {Theme, registerStyle};
