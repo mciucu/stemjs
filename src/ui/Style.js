@@ -22,10 +22,11 @@ class StyleSheet extends Dispatchable {
     }
 
     getDefaultOptions(options) {
+        const theme = options.theme || Theme.Global;
         return {
             parent: document.head,
-            theme: Theme.Global,
-            name: options.name || this.constructor.getElementName(), // call only if needed
+            theme,
+            name: options.name || this.constructor.getElementName(theme), // call only if needed
         }
     }
 
@@ -61,9 +62,12 @@ class StyleSheet extends Dispatchable {
         }
     }
 
-    static getElementName() {
+    static getElementName(theme) {
         this.elementNameCounter = (this.elementNameCounter || 0) + 1;
         let name = this.name;
+        if (theme !== Theme.Global) {
+            name += "-" + theme.name;
+        }
         if (this.elementNameCounter > 1) {
             name += "-" + this.elementNameCounter;
         }
