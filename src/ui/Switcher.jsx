@@ -1,4 +1,4 @@
-import {UI} from "./UIBase";
+import {RenderStack, UI} from "./UIBase";
 import {GlobalStyle} from "./GlobalStyle";
 
 class Switcher extends UI.Element {
@@ -74,9 +74,9 @@ class Switcher extends UI.Element {
         this.applyRef();
 
         // This render may be required to update this.options.children
-        UI.renderingStack.push(this);
+        RenderStack.push(this);
         this.render();
-        UI.renderingStack.pop();
+        RenderStack.pop();
 
         if (this.options.children.length == 0) {
             return;

@@ -8,7 +8,7 @@ class Theme extends Dispatchable {
 
     classSet = new Set();
     styleSheetInstances = new Map(); // map from StyleSheet class to instance
-    styleSheetSymbol = Symbol(this.name + "StyleSheet");
+    styleSheetSymbol = (this.name + "StyleSheet");
     updateThrottled = (new CallThrottler({throttle: 50})).wrap(() => this.updateStyleSheets()); // TODO @cleanup CallThrottler syntax is really ugly
 
     constructor(baseTheme, name, props) {
