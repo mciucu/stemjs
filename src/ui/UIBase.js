@@ -8,6 +8,7 @@ import {
 import {Dispatchable} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
 import {applyDebugFlags} from "./Debug";
+import {Theme} from "./style/Theme.js";
 
 export let RenderContext = {};
 export const RenderStack = []; //keeps track of objects that are redrawing, to know where to assign refs automatically
