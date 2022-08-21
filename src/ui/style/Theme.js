@@ -8,7 +8,6 @@ class Theme extends Dispatchable {
 
     classSet = new Set();
     styleSheetInstances = new Map(); // map from StyleSheet class to instance
-    styleSheetSymbol = Symbol(this.name + "StyleSheet");
     updateThrottled = (new CallThrottler({throttle: 50})).wrap(() => this.updateStyleSheets()); // TODO @cleanup CallThrottler syntax is really ugly
 
     constructor(baseTheme, name, props) {
@@ -19,6 +18,7 @@ class Theme extends Dispatchable {
             theme: this,
             ...props,
         }
+        this.styleSheetSymbol = Symbol(this.name + "StyleSheet");
 
         window.addEventListener("resize", () => this.updateThrottled());
     }
@@ -65,19 +65,13 @@ class Theme extends Dispatchable {
     updateStyleSheets() {
         this.dispatch("beforeUpdateStyleSheets");
         for (const styleSheet of this.getAllStyleSheets()) {
-            if (styleSheet.update) {
-                styleSheet.update();
-            }
+            styleSheet.update();
         }
         this.dispatch("afterUpdateStyleSheets");
     }
 
     static register(cls, styleSheet) {
         return this.Global.register(...arguments);
-    }
-
-    static get(cls) {
-        return this.Global.get(...arguments);
     }
 
     static setProperties(properties) {
