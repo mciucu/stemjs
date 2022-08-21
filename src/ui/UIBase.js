@@ -291,9 +291,9 @@ class UIElement extends BaseUIElement {
             for (const child of newChildren) {
                 child.redraw();
             }
+
             this.applyNodeAttributes();
             this.applyRef();
-
             RenderContext = previousRenderContext;
 
             return true;
@@ -348,10 +348,9 @@ class UIElement extends BaseUIElement {
 
         this.children = newChildren;
 
+        // TODO this end logic is duplicated
         this.applyNodeAttributes();
         this.applyRef();
-
-        // Revert the state of the world
         RenderContext = previousRenderContext;
 
         return true;
