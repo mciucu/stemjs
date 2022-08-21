@@ -264,9 +264,6 @@ class UIElement extends BaseUIElement {
     }
 
     extraRenderContext() {
-        if (this.constructor.name === "AddFundsExpanded") {
-            debugger;
-        }
         const {theme} = this.options;
         return cleanObject({theme});
     }
@@ -429,9 +426,6 @@ class UIElement extends BaseUIElement {
     }
 
     get styleSheet() {
-        if (this.constructor.name === "AddFundsButton") {
-            debugger;
-        }
         let {styleSheet} = this.options;
         const theme = this.getTheme();
 
