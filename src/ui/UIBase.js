@@ -397,9 +397,13 @@ class UIElement extends BaseUIElement {
         }
     }
 
+    getTheme() {
+        return this.options.theme || this.constructor.theme || Theme.Global;
+    }
+
     get styleSheet() {
-        let {styleSheet, theme} = this.options;
-        theme = theme || this.constructor.theme || Theme.Global;
+        let {styleSheet} = this.options;
+        const theme = this.getTheme();
 
         if (!styleSheet) {
             styleSheet = theme.getStyleSheet(this.constructor);
@@ -408,10 +412,7 @@ class UIElement extends BaseUIElement {
     }
 
     get themeProps() {
-        let {styleSheet, theme} = this.options;
-        theme = theme || this.constructor.theme || Theme.Global;
-
-        return styleSheet?.themeProps || theme.props;
+        return this.options.styleSheet?.themeProps || this.getTheme().props;
     }
 
     addListenersFromOptions() {
