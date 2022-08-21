@@ -13,15 +13,18 @@ class StyleSheet extends Dispatchable {
             ...options,
         };
         this.elements = new Set();
-        if (!this.options.delayedMount) {
+        const {delayedMount} = this.options;
+        if (!delayedMount) {
             this.ensureMounted();
         }
-        this.getTheme().addStyleSheet(this);
+
+        this.themeProps = this.options.theme.props;
     }
 
     getDefaultOptions(options) {
         return {
             parent: document.head,
+            theme: Theme.Global,
             name: options.name || this.constructor.getElementName(), // call only if needed
         }
     }
@@ -38,11 +41,12 @@ class StyleSheet extends Dispatchable {
     }
 
     static getInstance(theme = (this.theme || Theme.Global)) {
-        // TODO @branch map per theme
-        if (!this.hasOwnProperty("singletonInstance")) {
-            this.singletonInstance = new this({theme});
-        }
-        return this.singletonInstance;
+        return theme.getStyleSheetInstance(this);
+    }
+
+    // Just to have the same pattern as objects or not
+    getInstance() {
+        return this;
     }
 
     // Generate an instance, and also make sure to instantiate all style elements
@@ -64,18 +68,6 @@ class StyleSheet extends Dispatchable {
             name += "-" + this.elementNameCounter;
         }
         return name;
-    }
-
-    getTheme() {
-        return this.options.theme || this.constructor.theme;
-    }
-
-    setTheme(theme) {
-        this.options.theme = theme;
-    }
-
-    get themeProps() {
-        return this.getTheme().props || {};
     }
 
     ensureFirstUpdate() {
