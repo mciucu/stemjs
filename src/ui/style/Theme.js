@@ -1,6 +1,5 @@
 import {Dispatchable} from "../../base/Dispatcher";
 import {UI} from "../UIBase";
-import {StyleSheet} from "../Style";
 import {CallThrottler} from "../../base/Utils";
 
 function getInstance(styleSheet) {
@@ -93,10 +92,6 @@ class Theme extends Dispatchable {
         this.styleSheetSet.add(styleSheet);
     }
 
-    removeStyleSheet(styleSheet) {
-        this.styleSheetSet.delete(styleSheet);
-    }
-
     updateStyleSheets() {
         this.dispatch("beforeUpdateStyleSheets");
         for (const styleSheet of this.getAllStyleSheets()) {
@@ -164,7 +159,5 @@ function registerStyle(styleClass, theme=Theme.Global) {
         theme.register(target, styleClass);
     }
 }
-
-StyleSheet.theme = Theme.Global;
 
 export {Theme, registerStyle};
