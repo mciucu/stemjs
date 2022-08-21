@@ -3,16 +3,28 @@ import {
     setObjectPrototype,
     suffixNumber,
     isPlainObject,
-    unwrapElementWithFunc
+    unwrapElementWithFunc, cleanObject
 } from "../base/Utils";
 import {Dispatchable} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
 import {applyDebugFlags} from "./Debug";
 
+export let RenderContext = {};
+export const RenderStack = []; //keeps track of objects that are redrawing, to know where to assign refs automatically
+
 // TODO Probably get rid of the UI namespace
-const UI = {
-    renderingStack: [], //keeps track of objects that are redrawing, to know where to assign refs automatically
-};
+const UI = {};
+
+export function updateRenderContext(props) {
+    if (Object.keys(props).length === 0) {
+        // Don't fork if there isn't anything to be done
+        return;
+    }
+    RenderContext = {
+        ...RenderContext,
+        ...props,
+    }
+}
 
 export function cleanChildren(children) {
     return unwrapArray(children, unwrapElementWithFunc);
@@ -251,10 +263,18 @@ class UIElement extends BaseUIElement {
         return this.render();
     }
 
+    extraRenderContext() {
+        if (this.constructor.name === "AddFundsExpanded") {
+            debugger;
+        }
+        const {theme} = this.options;
+        return cleanObject({theme});
+    }
+
     getChildrenForRedraw() {
-        UI.renderingStack.push(this);
+        RenderStack.push(this);
         let children = cleanChildren(this.getChildrenToRender());
-        UI.renderingStack.pop();
+        RenderStack.pop();
         return children;
     }
 
@@ -264,6 +284,9 @@ class UIElement extends BaseUIElement {
             return false;
         }
 
+        const previousRenderContext = RenderContext;
+        updateRenderContext(this.extraRenderContext());
+
         let newChildren = this.getChildrenForRedraw();
 
         if (newChildren === this.children) {
@@ -272,6 +295,8 @@ class UIElement extends BaseUIElement {
             }
             this.applyNodeAttributes();
             this.applyRef();
+
+            RenderContext = previousRenderContext;
 
             return true;
         }
@@ -326,8 +351,10 @@ class UIElement extends BaseUIElement {
         this.children = newChildren;
 
         this.applyNodeAttributes();
-
         this.applyRef();
+
+        // Revert the state of the world
+        RenderContext = previousRenderContext;
 
         return true;
     }
@@ -398,10 +425,13 @@ class UIElement extends BaseUIElement {
     }
 
     getTheme() {
-        return this.options.theme || this.constructor.theme || Theme.Global;
+        return this.options.theme || RenderContext.theme || Theme.Global;
     }
 
     get styleSheet() {
+        if (this.constructor.name === "AddFundsButton") {
+            debugger;
+        }
         let {styleSheet} = this.options;
         const theme = this.getTheme();
 
@@ -629,9 +659,9 @@ UI.createElement = function (tag, options, ...children) {
 
     if (options.ref) {
         if (typeof options.ref === "string") {
-            if (UI.renderingStack.length > 0) {
+            if (RenderStack.length > 0) {
                 options.ref = {
-                    parent: UI.renderingStack[UI.renderingStack.length - 1],
+                    parent: RenderStack[RenderStack.length - 1],
                     name: options.ref
                 };
             } else {
@@ -663,9 +693,7 @@ UIElement.domAttributesMap = NodeAttributes.defaultAttributesMap;
 
 UI.Element = UIElement;
 
-UI.str = function (value) {
-    return new UI.TextElement(value);
-};
+UI.str = (value) => new UI.TextElement(value);
 
 // Keep a map for every base class, and for each base class keep a map for each nodeType, to cache classes
 let primitiveMap = new WeakMap();
