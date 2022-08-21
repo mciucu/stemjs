@@ -3,29 +3,17 @@ import {
     setObjectPrototype,
     suffixNumber,
     isPlainObject,
-    unwrapElementWithFunc, cleanObject
+    unwrapElementWithFunc
 } from "../base/Utils";
 import {Dispatchable} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
 import {applyDebugFlags} from "./Debug";
 import {Theme} from "./style/Theme.js";
 
-export let RenderContext = {};
 export const RenderStack = []; //keeps track of objects that are redrawing, to know where to assign refs automatically
 
 // TODO Probably get rid of the UI namespace
 const UI = {};
-
-export function updateRenderContext(props) {
-    if (Object.keys(props).length === 0) {
-        // Don't fork if there isn't anything to be done
-        return;
-    }
-    RenderContext = {
-        ...RenderContext,
-        ...props,
-    }
-}
 
 export function cleanChildren(children) {
     return unwrapArray(children, unwrapElementWithFunc);
@@ -183,11 +171,6 @@ class UIElement extends BaseUIElement {
         this.redraw();
     }
 
-    updateState(state) {
-        this.state = {...this.state, ...state};
-        this.redraw();
-    }
-
     setChildren(...args) {
         this.updateOptions({children: cleanChildren(args)})
     }
@@ -264,9 +247,17 @@ class UIElement extends BaseUIElement {
         return this.render();
     }
 
-    extraRenderContext() {
+    getExtraContext() {
         const {theme} = this.options;
-        return cleanObject({theme});
+        if (theme) {
+            return {theme};
+        }
+        return null;  // cleanObject({theme}, {emptyAsNull: true});
+    }
+
+    updateContext(context = this.parent.context) {
+        const extraContext = this.getExtraContext();
+        this.context = extraContext ? {...context, ...extraContext} : context;
     }
 
     getChildrenForRedraw() {
@@ -282,8 +273,7 @@ class UIElement extends BaseUIElement {
             return false;
         }
 
-        const previousRenderContext = RenderContext;
-        updateRenderContext(this.extraRenderContext());
+        this.updateContext();
 
         let newChildren = this.getChildrenForRedraw();
 
@@ -294,7 +284,6 @@ class UIElement extends BaseUIElement {
 
             this.applyNodeAttributes();
             this.applyRef();
-            RenderContext = previousRenderContext;
 
             return true;
         }
@@ -351,7 +340,6 @@ class UIElement extends BaseUIElement {
         // TODO this end logic is duplicated
         this.applyNodeAttributes();
         this.applyRef();
-        RenderContext = previousRenderContext;
 
         return true;
     }
@@ -422,7 +410,7 @@ class UIElement extends BaseUIElement {
     }
 
     getTheme() {
-        return this.options.theme || RenderContext.theme || Theme.Global;
+        return this.options.theme || this.context?.theme || Theme.Global;
     }
 
     get styleSheet() {
