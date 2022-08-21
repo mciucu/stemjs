@@ -1,9 +1,8 @@
 import {Dispatchable} from "../../base/Dispatcher";
-import {CallThrottler} from "../../base/Utils";
+import {CallThrottler, isFunction} from "../../base/Utils";
 
 
 class Theme extends Dispatchable {
-    static PropsSymbol = Symbol("Props");
     static Global = new this(null, "Global");
 
     classSet = new Set();
@@ -18,6 +17,22 @@ class Theme extends Dispatchable {
             theme: this,
             ...props,
         }
+
+        this.props = new Proxy(this.properties, {
+            get: (properties, key, receiver) => {
+                let value = this.getProperty(key);
+                if (isFunction(value)) {
+                    value = value(this.props);
+                }
+                return value;
+            },
+            set: (properties, key, value) => {
+                this.setProperties({key: value});
+                // TODO this should also update all themes that inherit from us
+                return value;
+            }
+        });
+
         this.styleSheetSymbol = Symbol(this.name + "StyleSheet");
 
         window.addEventListener("resize", () => this.updateThrottled());
@@ -36,6 +51,10 @@ class Theme extends Dispatchable {
 
     getStyleSheet(cls) {
         return cls[this.styleSheetSymbol] || this.baseTheme?.getStyleSheet(cls);
+    }
+
+    getProperty(key) {
+        return this.properties[key] ?? this.baseTheme?.getProperty(key);
     }
 
     setProperties(properties, update=true) {
@@ -78,36 +97,13 @@ class Theme extends Dispatchable {
         this.Global.setProperties(...arguments);
     }
 
-    get props() {
-        let props = this[this.constructor.PropsSymbol];
-        if (!props) {
-            props = this[this.constructor.PropsSymbol] = new Proxy(this.properties, {
-                get: (properties, key, receiver) => {
-                    let value = properties[key] || this.baseTheme?.props[key];
-                    if (typeof value === "function") {
-                        value = value(props);
-                    }
-                    return value;
-                },
-                set: (properties, key, value) => {
-                    this.properties[key] = value;
-                    this.updateThrottled();
-                    return value;
-                }
-            });
-        }
-        return props;
-    }
-
     static get props() {
         return this.Global.props;
     }
 }
 
 function registerStyle(styleClass, theme=Theme.Global) {
-    return (target) => {
-        theme.register(target, styleClass);
-    }
+    return (target) => theme.register(target, styleClass);
 }
 
 export {Theme, registerStyle};
