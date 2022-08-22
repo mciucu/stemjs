@@ -6,10 +6,10 @@ import {ButtonStyle} from "./ButtonStyle";
 @registerStyle(ButtonStyle)
 export class Button extends UI.Primitive(IconableInterface, "button") {
     extraNodeAttributes(attr) {
-        attr.addClass(this.styleSheet.DEFAULT);
+        const {styleSheet} = this;
         // These might be null
-        attr.addClass(this.styleSheet.Size(this.getSize()));
-        attr.addClass(this.styleSheet.Level(this.getLevel()));
+        attr.addClass(styleSheet.Size(this.getSize()));
+        attr.addClass(styleSheet.Level(this.getLevel()));
     }
 
     disable() {
