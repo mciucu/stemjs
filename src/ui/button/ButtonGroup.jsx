@@ -26,10 +26,6 @@ class RadioButtonGroup extends SimpleStyledElement {
         this.index = this.options.index || 0;
     }
 
-    extraNodeAttributes(attr) {
-        attr.addClass(this.styleSheet.DEFAULT);
-    }
-
     render() {
         this.buttons = this.options.givenOptions.map((option, index) =>
             <Button key={index} onClick={() => this.setIndex(index)} size={this.getSize()}

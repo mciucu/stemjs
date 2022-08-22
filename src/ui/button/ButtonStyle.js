@@ -35,11 +35,13 @@ export const buttonColorToStyle = (color) => {
 };
 
 export class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
-    base = {
+    @styleRule
+    container = {
         outline: 0,
         border: "1px solid",
         padding: "6px 12px",
         borderRadius: this.themeProps.BUTTON_BORDER_RADIUS,
+        fontSize: this.themeProps.FONT_SIZE_DEFAULT,
         textAlign: "center",
         whiteSpace: "nowrap",
         verticalAlign: "middle",
@@ -49,14 +51,8 @@ export class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
             opacity: 0.7,
             cursor: "not-allowed",
         },
+        ...this.colorStyleRule(this.themeProps.BUTTON_COLOR)
     };
-
-    // By default uses MEDIUM as size and BASE as level
-    // TODO @cleanup rename to container
-    @styleRule
-    DEFAULT = [this.base, {
-        fontSize: this.themeProps.FONT_SIZE_DEFAULT,
-    }, this.colorStyleRule(this.themeProps.BUTTON_COLOR)];
 
     getLevel(level) {
         return super.getLevel(level) || this.INFO;
@@ -73,9 +69,6 @@ export class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
     SMALL = {
         fontSize: this.themeProps.FONT_SIZE_SMALL,
     };
-
-    @styleRule
-    MEDIUM = {};
 
     @styleRule
     LARGE = {
@@ -118,7 +111,7 @@ export class ButtonGroupStyle extends StyleSheet {
 
     Orientation(orientation) {
         for (let type of Object.keys(Orientation)) {
-            if (orientation == Orientation[type]) {
+            if (orientation === Orientation[type]) {
                 return this[type];
             }
         }
@@ -127,7 +120,7 @@ export class ButtonGroupStyle extends StyleSheet {
 
 export class RadioButtonGroupStyle extends StyleSheet {
     @styleRule
-    DEFAULT = {
+    container = {
         pointerEvents: "none",
         ">*": {
             pointerEvents: "initial",
