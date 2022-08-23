@@ -208,19 +208,25 @@ export function isPlainObject(obj) {
     return true;
 }
 
+function FILTER_NULLS(key, value) {
+    return value != null;
+}
+
+function FILTER_NULLS_AND_EMPTY_STR(key, value) {
+    return value != null && value !== "";
+}
+
 export function cleanObject(obj, {skipEmptyString = true, filterFunc = null, emptyAsNull = false} = {}) {
     const cleanObject = {};
     if (!filterFunc) {
-        filterFunc = (key, value) => {
-            return value != null && (value !== "" || !skipEmptyString);
-        }
+        filterFunc = skipEmptyString ? FILTER_NULLS_AND_EMPTY_STR : FILTER_NULLS;
     }
     for (const [key, value] of Object.entries(obj)) {
         if (filterFunc(key, value)) {
             cleanObject[key] = value;
         }
     }
-    if (emptyAsNull && Object.entries(cleanObject).length === 0) {
+    if (emptyAsNull && Object.keys(cleanObject).length === 0) {
         return null;
     }
     return cleanObject;

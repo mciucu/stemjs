@@ -27,7 +27,7 @@ export class AjaxButton extends StateButton {
     scheduleStateReset() {
         this.clearResetTimeout();
         this.stateResetTimeout = setTimeout(() => {
-            this.setState(ActionStatus.DEFAULT);
+            this.setState(ActionStatus.INITIAL);
             this.clearResetTimeout();
         }, this.resetToDefaultTimeout);
     }

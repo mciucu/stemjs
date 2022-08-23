@@ -7,7 +7,7 @@ import {ButtonStyle} from "./ButtonStyle";
 export class Button extends UI.Primitive(IconableInterface, "button") {
     extraNodeAttributes(attr) {
         const {styleSheet} = this;
-        // These might be null
+        // TODO Maybe StyleSheet should have a method onElementRedraw(attr, element), that just adds container by default
         attr.addClass(styleSheet.Size(this.getSize()));
         attr.addClass(styleSheet.Level(this.getLevel()));
     }
