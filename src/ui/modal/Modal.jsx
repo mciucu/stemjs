@@ -130,9 +130,10 @@ class Modal extends UI.Element {
 
 class ActionModal extends Modal {
     getDefaultOptions() {
-        return Object.assign(super.getDefaultOptions(), {
+        return {
+            ...super.getDefaultOptions(),
             closeButton: false
-        });
+        };
     }
 
     getActionName() {
