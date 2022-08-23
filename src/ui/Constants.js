@@ -11,8 +11,6 @@ export const Direction = {
 };
 
 export const Level = {
-    NONE: null,
-    DEFAULT: "default",
     INFO: "info",
     PRIMARY: "primary",
     SECONDARY: "secondary",
@@ -26,8 +24,6 @@ export const Size = {
     NONE: null,
     EXTRA_SMALL: "xs",
     SMALL: "sm",
-    MEDIUM: "default",
-    DEFAULT: "default",
     LARGE: "lg",
     EXTRA_LARGE: "xl",
 };
@@ -39,7 +35,7 @@ export const VoteStatus = {
 };
 
 export const ActionStatus = {
-    DEFAULT: 1,
+    INITIAL: 1,
     RUNNING: 2,
     SUCCESS: 3,
     FAILED: 4,

@@ -85,6 +85,9 @@ Theme.setProperties({
 
 export class BasicLevelSizeStyleSheet extends StyleSheet {
     Level(level) {
+        if (!level) {
+            return null;
+        }
         if (this[level]) {
             return this[level];
         }
@@ -96,6 +99,9 @@ export class BasicLevelSizeStyleSheet extends StyleSheet {
     }
 
     Size(size) {
+        if (!size) {
+            return null;
+        }
         for (let type of Object.keys(Size)) {
             if (size == Size[type]) {
                 return this[type];

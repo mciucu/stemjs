@@ -3,7 +3,7 @@ import {Button} from "./Button.jsx";
 
 export class StateButton extends Button {
     setOptions(options) {
-        options.state = (this.options && this.options.state) || options.state || ActionStatus.DEFAULT;
+        options.state = (this.options && this.options.state) || options.state || ActionStatus.INITIAL;
 
         super.setOptions(options);
 
@@ -21,7 +21,7 @@ export class StateButton extends Button {
 
     setState(status) {
         this.options.state = status;
-        if (status === ActionStatus.DEFAULT) {
+        if (status === ActionStatus.INITIAL) {
             this.enable();
         } else if (status === ActionStatus.RUNNING) {
             this.disable();

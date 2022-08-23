@@ -46,10 +46,6 @@ class IconableInterface extends SimpleStyledElement {
         return [this.beforeChildren(), this.getLabel(), super.render()];
     };
 
-    setLabel(label) {
-        this.updateOptions({label: label});
-    }
-
     getLabel() {
         return this.options.label;
     }
@@ -90,9 +86,9 @@ let labelColorToStyle = (color) => {
 };
 
 export class LabelStyle extends BasicLevelStyleSheet(labelColorToStyle) {
-    // DEFAULT uses MEDIUM as size and BASE as level
     @styleRule
-    DEFAULT = [{
+    container = {
+        fontSize: 12,
         fontWeight: "bold",
         border: "0.1em solid transparent",
         padding: "0.07em 0.4em",
@@ -100,16 +96,15 @@ export class LabelStyle extends BasicLevelStyleSheet(labelColorToStyle) {
         textAlign: "center",
         whiteSpace: "nowrap",
         verticalAlign: "bottom",
-        lineHeight: 4/3 + "",
+        lineHeight: 4 / 3 + "",
         display: "inline-block",
         touchAction: "manipulation",
         ":disabled": {
             opacity: "0.7",
             cursor: "not-allowed",
         },
-    }, {
-        fontSize: 12,
-    }, this.colorStyleRule(this.themeProps.COLOR_BACKGROUND_BADGE)];
+        ...this.colorStyleRule(this.themeProps.COLOR_BACKGROUND_BADGE),
+    };
 
     @styleRule
     EXTRA_SMALL = {
@@ -142,15 +137,8 @@ export class LabelStyle extends BasicLevelStyleSheet(labelColorToStyle) {
 @registerStyle(LabelStyle)
 class Label extends UI.Primitive(IconableInterface, "span") {
     extraNodeAttributes(attr) {
-        attr.addClass(this.styleSheet.DEFAULT);
-
-        if (this.getSize()) {
-            attr.addClass(this.styleSheet.Size(this.getSize()));
-        }
-
-        if (this.getLevel()) {
-            attr.addClass(this.styleSheet.Level(this.getLevel()));
-        }
+        attr.addClass(this.styleSheet.Size(this.getSize()));
+        attr.addClass(this.styleSheet.Level(this.getLevel()));
     }
 }
 
@@ -164,9 +152,8 @@ let badgeColorToStyle = (color) => {
 };
 
 export class BadgeStyle extends BasicLevelStyleSheet(badgeColorToStyle) {
-    // DEFAULT uses MEDIUM as size and BASE as level
     @styleRule
-    DEFAULT = [{
+    container = {
         display: "inline-block",
         padding: "0.25em 0.55em",
         fontWeight: "700",
@@ -177,9 +164,9 @@ export class BadgeStyle extends BasicLevelStyleSheet(badgeColorToStyle) {
         verticalAlign: "middle",
         backgroundColor: "#777",
         borderRadius: "0.8em",
-    }, {
-        "font-size": "12px",
-    }, this.colorStyleRule(this.themeProps.COLOR_BACKGROUND_BADGE)];
+        fontSize: 12,
+        ...this.colorStyleRule(this.themeProps.COLOR_BACKGROUND_BADGE),
+    };
 
     @styleRule
     EXTRA_SMALL = {
@@ -211,15 +198,8 @@ export class BadgeStyle extends BasicLevelStyleSheet(badgeColorToStyle) {
 @registerStyle(BadgeStyle)
 class Badge extends UI.Primitive(IconableInterface, "span") {
     extraNodeAttributes(attr) {
-        attr.addClass(this.styleSheet.DEFAULT);
-
-        if (this.getSize()) {
-            attr.addClass(this.styleSheet.Size(this.getSize()));
-        }
-
-        if (this.getLevel()) {
-            attr.addClass(this.styleSheet.Level(this.getLevel()));
-        }
+        attr.addClass(this.styleSheet.Size(this.getSize()));
+        attr.addClass(this.styleSheet.Level(this.getLevel()));
     }
 }
 
