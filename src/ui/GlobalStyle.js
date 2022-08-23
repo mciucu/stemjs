@@ -73,7 +73,6 @@ Theme.setProperties({
     MAIN_CONTAINER_EXTRA_PADDING_BOTTOM_DESKTOP: 0,
     MAIN_CONTAINER_EXTRA_PADDING_BOTTOM_MOBILE: 0,
 
-    FLAT_TAB_AREA_COLOR_BACKGROUND: props => props.COLOR_FOREGROUND_BODY,
     FLAT_TAB_AREA_LINE_HEIGHT: 30,
     FLAT_TAB_AREA_PADDING_SIDES: 10,
     FLAT_TAB_AREA_UNDERLINE_HEIGHT: 3,
@@ -85,6 +84,9 @@ Theme.setProperties({
 
 export class BasicLevelSizeStyleSheet extends StyleSheet {
     Level(level) {
+        if (!level) {
+            return null;
+        }
         if (this[level]) {
             return this[level];
         }
@@ -96,6 +98,9 @@ export class BasicLevelSizeStyleSheet extends StyleSheet {
     }
 
     Size(size) {
+        if (!size) {
+            return null;
+        }
         for (let type of Object.keys(Size)) {
             if (size == Size[type]) {
                 return this[type];

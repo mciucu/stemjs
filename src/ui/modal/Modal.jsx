@@ -140,7 +140,7 @@ class ActionModal extends Modal {
     }
 
     getActionLevel() {
-        return this.options.level || Level.DEFAULT;
+        return this.options.level;
     }
 
     getCloseName() {
