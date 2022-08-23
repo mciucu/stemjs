@@ -2,17 +2,14 @@ import {IconableInterface} from "../SimpleElements";
 import {UI} from "../UIBase";
 import {registerStyle} from "../style/Theme";
 import {ButtonStyle} from "./ButtonStyle";
-import {Level} from "../Constants.js";
 
 @registerStyle(ButtonStyle)
 export class Button extends UI.Primitive(IconableInterface, "button") {
     extraNodeAttributes(attr) {
         const {styleSheet} = this;
-        // These might be null
-        debugger;
+        // TODO Maybe StyleSheet should have a method onElementRedraw(attr, element), that just adds container by default
         attr.addClass(styleSheet.Size(this.getSize()));
-        const level = Level.SECONDARY; //this.getLevel();
-        attr.addClass(styleSheet.Level(level));
+        attr.addClass(styleSheet.Level(this.getLevel()));
     }
 
     disable() {
