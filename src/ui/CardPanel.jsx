@@ -15,7 +15,17 @@ export function cardPanelColorToStyle(color) {
 
 export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) {
     @styleRule
-    DEFAULT = [{
+    container = {
+        borderWidth: this.themeProps.BASE_BORDER_WIDTH,
+        borderRadius: this.themeProps.BASE_BORDER_RADIUS,
+        boxShadow: this.themeProps.BASE_BOX_SHADOW,
+        borderStyle: this.themeProps.BASE_BORDER_STYLE,
+        backgroundColor: this.themeProps.COLOR_BACKGROUND,
+        ...cardPanelColorToStyle(this.themeProps.COLOR_BACKGROUND),
+    };
+
+    @styleRule
+    heading = {
         display: "flex",
         alignItems: "center",
         width: "100%",
@@ -25,9 +35,8 @@ export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) 
         textTransform: this.themeProps.CARD_PANEL_TEXT_TRANSFORM,
         paddingLeft: this.themeProps.CARD_PANEL_HEADING_PADDING,
         paddingRight: this.themeProps.CARD_PANEL_HEADING_PADDING,
-    },
-        cardPanelHeaderColorToStyle(this.themeProps.COLOR_BACKGROUND)
-    ];
+        ...cardPanelHeaderColorToStyle(this.themeProps.COLOR_BACKGROUND),
+    };
 
     @styleRule
     LARGE = {
@@ -39,17 +48,6 @@ export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) 
     @styleRule
     body = {
     };
-
-    @styleRule
-    panel = [{
-        borderWidth: this.themeProps.BASE_BORDER_WIDTH,
-        borderRadius: this.themeProps.BASE_BORDER_RADIUS,
-        boxShadow: this.themeProps.BASE_BOX_SHADOW,
-        borderStyle: this.themeProps.BASE_BORDER_STYLE,
-        backgroundColor: this.themeProps.COLOR_BACKGROUND,
-    },
-        cardPanelColorToStyle(this.themeProps.COLOR_BACKGROUND)
-    ];
 
     @styleRule
     centered = {
@@ -71,10 +69,6 @@ export const CardPanelHeaderStyle = BasicLevelStyleSheet(cardPanelHeaderColorToS
 
 @registerStyle(CardPanelStyle)
 class CardPanel extends SimpleStyledElement {
-    extraNodeAttributes(attr) {
-        attr.addClass(this.styleSheet.panel);
-    }
-
     getLevel() {
         return super.getLevel() || Level.PRIMARY;
     }
@@ -95,32 +89,34 @@ class CardPanel extends SimpleStyledElement {
     }
 
     getHeadingClasses() {
-        let headingClasses = "";
-        const headingLevel = this.getHeaderStyleSheet().Level(this.getLevel()),
-            {headingCentered} = this.options;
+        const {styleSheet} = this;
+        const {headingCentered} = this.options;
+        const headingLevel = this.getHeaderStyleSheet().Level(this.getLevel());
+
+        let headingClasses = styleSheet.heading;
 
         if (headingLevel) {
             headingClasses = headingClasses + headingLevel;
         }
 
-        headingClasses = headingClasses + this.styleSheet.DEFAULT;
         if (this.getSize()) {
-            headingClasses = headingClasses + this.styleSheet.Size(this.getSize());
+            headingClasses = headingClasses + styleSheet.Size(this.getSize());
         }
 
         if (headingCentered) {
-            headingClasses = headingClasses + this.styleSheet.centered;
+            headingClasses = headingClasses + styleSheet.centered;
         }
 
         return headingClasses;
     }
 
     getBodyClasses() {
+        const {styleSheet} = this;
         const {bodyCentered} = this.options;
 
-        let bodyClasses = this.styleSheet.body;
+        let bodyClasses = styleSheet.body;
         if (bodyCentered) {
-            bodyClasses = bodyClasses + this.styleSheet.centered;
+            bodyClasses = bodyClasses + styleSheet.centered;
         }
 
         return bodyClasses;

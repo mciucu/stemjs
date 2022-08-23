@@ -25,7 +25,7 @@ export class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToSty
     };
 
     @styleRule
-    DEFAULT = [{
+    bar = {
         float: "left",
         width: "0",
         height: "100%",
@@ -36,9 +36,9 @@ export class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToSty
         boxShadow: "inset 0 -1px 0 rgba(0, 0, 0, .15)",
         transition: "width .6s ease",
         fontColor: "#ffffff",
-    }, {
-        fontSize: "12px",
-    }, this.colorStyleRule(this.themeProps.COLOR_PRIMARY)];
+        fontSize: 12,
+        ...this.colorStyleRule(this.themeProps.COLOR_PRIMARY),
+    };
 
     @styleRule
     striped = {
@@ -97,7 +97,7 @@ export class ProgressBar extends SimpleStyledElement {
             }
         }
         let barOptions = {
-            className: this.styleSheet.DEFAULT,
+            className: this.styleSheet.bar,
             style: barStyle,
         };
 

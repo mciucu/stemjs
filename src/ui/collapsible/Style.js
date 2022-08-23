@@ -40,7 +40,7 @@ class CollapsibleStyle extends StyleSheet {
 
 class CollapsiblePanelStyle extends CardPanelStyle {
     @styleRuleInherit
-    panel = {
+    container = {
         boxShadow: null,
         borderWidth: 1,
         borderColor: "#ccc !important",

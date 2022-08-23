@@ -7,12 +7,12 @@ import {BasicLevelSizeStyleSheet} from "./GlobalStyle";
 
 class RowListStyle extends BasicLevelSizeStyleSheet {
     @styleRule
-    rowList = {
+    container = {
         width: "100%",
     };
 
     @styleRule
-    DEFAULT = {
+    rowListEntry = {
         display: "flex",
         alignItems: "center",
         width: "100%",
@@ -45,12 +45,9 @@ class RowListStyle extends BasicLevelSizeStyleSheet {
 }
 
 
+//TODO @cleanup just delete this?
 @registerStyle(RowListStyle)
 export class RowList extends SimpleStyledElement {
-    extraNodeAttributes(attr) {
-        attr.addClass(this.styleSheet.rowList);
-    }
-
     getDefaultOptions(options) {
         return {
             alternateColors: true,
@@ -58,7 +55,7 @@ export class RowList extends SimpleStyledElement {
     }
 
     getRowClasses(index) {
-        let rowClasses = this.styleSheet.DEFAULT;
+        let rowClasses = this.styleSheet.rowListEntry;
         if (this.getSize()) {
             rowClasses = rowClasses + this.styleSheet.Size(this.getSize());
         }
