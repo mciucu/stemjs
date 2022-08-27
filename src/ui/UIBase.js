@@ -299,7 +299,7 @@ class UIElement extends BaseUIElement {
             // Not a UIElement, to be converted to a TextElement probably
             if (!newChild.getNodeType) {
                 if (newChild.toUI) {
-                    newChild = newChild.toUI(); // TODO move this inside the unwrap logic
+                    newChild = newChild.toUI(this); // TODO move this inside the unwrap logic
                 } else {
                     newChild = new UI.TextElement({value: String(newChild)});
                 }
