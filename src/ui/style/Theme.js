@@ -24,6 +24,10 @@ class Theme extends Dispatchable {
                 if (isFunction(value)) {
                     value = value(this.props);
                 }
+                if (value === undefined) {
+                    // TODO only do in debug mode/TEST_MODE
+                    console.warn("Failed to find theme prop", key);
+                }
                 return value;
             },
             set: (properties, key, value) => {
