@@ -3,20 +3,6 @@
 
 import {isPlainObject} from "./Utils";
 
-// May need to polyfill Headers, Request, Response, Body, URLSearchParams classes, so import them
-import {polyfillRequest} from "../polyfill/Request";
-import {polyfillResponse} from "../polyfill/Response";
-import {polyfillHeaders} from "../polyfill/Headers";
-import {polyfillURLSearchParams} from "../polyfill/URLSearchParams";
-
-// TODO: should only call this in the first call to fetch, to not create unneeded dependencies?
-if (window) {
-    polyfillRequest(window);
-    polyfillResponse(window);
-    polyfillHeaders(window);
-    polyfillURLSearchParams(window);
-}
-
 // Parse the headers from an xhr object, to return a native Headers object
 function parseHeaders(xhr) {
     const rawHeader = xhr.getAllResponseHeaders() || "";
@@ -65,14 +51,6 @@ function composeURL(url, urlSearchParams) {
         url += "?" + urlSearchParams;
     }
     return url;
-}
-
-export function toFormData(data) {
-    let formData = new FormData();
-    for (const key of Object.keys(data)) {
-        formData.append(key, data[key]);
-    }
-    return formData;
 }
 
 class XHRPromise {
@@ -255,7 +233,7 @@ class XHRPromise {
     }
 }
 
-// TODO: this offers only partial compatibility with $.ajax
+// TODO: this offers only partial compatibility with $.ajax, remove
 function jQueryCompatibilityPreprocessor(options) {
     if (options.type) {
         options.method = options.type.toUpperCase();
