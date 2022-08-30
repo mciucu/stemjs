@@ -50,8 +50,12 @@ class IconableInterface extends SimpleStyledElement {
         return this.options.label;
     }
 
-    setIcon(value) {
-        this.updateOptions({icon: value});
+    setLabel(label) {
+        this.updateOptions({label});
+    }
+
+    setIcon(icon) {
+        this.updateOptions({icon});
     }
 
     getIcon() {
