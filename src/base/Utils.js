@@ -36,8 +36,11 @@ export function unwrapArray(elements, unwrapFunc = unwrapElementPlain) {
 
     let result = [];
     for (const rawElement of elements) {
-        const element = unwrapFunc(rawElement); // First unwrap the element
-        if (element === undefined) {
+        if (rawElement == null) {
+            continue;
+        }
+        const element = Array.isArray(rawElement) ? rawElement : unwrapFunc(rawElement); // First unwrap the element
+        if (element == null) {
             continue;
         }
         if (Array.isArray(element)) {
