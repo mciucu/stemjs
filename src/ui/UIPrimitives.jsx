@@ -178,10 +178,9 @@ class Link extends UI.Primitive("a") {
     }
 
     render() {
-        if (this.options.value) {
-            return [this.options.value];
-        }
-        return super.render();
+        const {value, label} = this.options;
+
+        return value || label || super.render();
     }
 }
 
