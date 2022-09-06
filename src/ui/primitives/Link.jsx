@@ -65,11 +65,16 @@ export class Link extends UI.Primitive("a") {
 
     onMount() {
         this.addClickListener((event) => {
-            if (event.shiftKey || event.ctrlKey || event.metaKey || !this.options.href || !isLocalUrl(this.options.href)
-                || this.options.newTab || (this.options.target && this.options.target !== "_self")) {
+            const {href, newTab, target} = this.options;
+
+            const specialKeyPressed = event.shiftKey || event.ctrlKey || event.metaKey;
+            const unroutable = !href || !isLocalUrl(href);
+
+            if (specialKeyPressed || unroutable || newTab || (target && target !== "_self")) {
                 // Leave it to the browser
                 return;
             }
+
             event.preventDefault();
             event.stopPropagation();
 
