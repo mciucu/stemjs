@@ -6,16 +6,19 @@ import {Dispatchable} from "../base/Dispatcher";
 import {getOffset} from "./Utils";
 import {Orientation} from "./Constants";
 import {ProgressBar} from "./ProgressBar";
-import {DOMAttributesMap} from "./NodeAttributes";
+
+export * from "./primitives/Link.jsx";
+export * from "./primitives/IFrame.jsx";
+export * from "./primitives/Image.jsx";
 
 // A very simple class, all this does is implement the `getTitle()` method
-class Panel extends UI.Element {
+export class Panel extends UI.Element {
     getTitle() {
         return this.options.title;
     }
 }
 
-class SlideBar extends Draggable(UI.Element) {
+export class SlideBar extends Draggable(UI.Element) {
     getDefaultOptions() {
         return {
             value: 0,
@@ -68,7 +71,7 @@ class SlideBar extends Draggable(UI.Element) {
     }
 }
 
-class HorizontalSlideBar extends SlideBar {
+export class HorizontalSlideBar extends SlideBar {
     setOptions(options) {
         options.size = options.size || options.width || 100;
         options.barSize = options.barSize || options.barWidth || 5;
@@ -111,7 +114,7 @@ class HorizontalSlideBar extends SlideBar {
         };
     }
 }
-class VerticalSlideBar extends SlideBar {
+export class VerticalSlideBar extends SlideBar {
     setOptions(options) {
         options.size = options.size || options.height || 100;
         options.barSize = options.barSize || options.barHeight || 5;
@@ -155,70 +158,8 @@ class VerticalSlideBar extends SlideBar {
     }
 }
 
-class Link extends UI.Primitive("a") {
-    extraNodeAttributes(attr) {
-        // TODO: do we want this as a default?
-        attr.setStyle("cursor", "pointer");
-    }
-
-    getDefaultOptions() {
-        return {
-            newTab: false,
-        }
-    }
-
-    setOptions(options) {
-        super.setOptions(options);
-
-        if (this.options.newTab) {
-            this.options.target = "_blank";
-        }
-
-        return options;
-    }
-
-    render() {
-        const {value, label} = this.options;
-
-        return value || label || super.render();
-    }
-}
-
-class Image extends UI.Primitive("img") {
-    addLoadListener(callback) {
-        this.addNodeListener("load", callback);
-    }
-
-    removeLoadListener(callback) {
-        this.removeNodeListener("load", callback);
-    }
-}
-
-class IFrame extends UI.Primitive("iframe") {
-
-}
-IFrame.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
-    ["allow"],
-    ["allowfullscreen", {noValue: true}],
-    ["allowpaymentrequest", {noValue: true}],
-    ["csp"],
-    ["loading"],
-    ["name"],
-    ["referrerpolicy"],
-    ["sandbox"],
-    ["src"],
-    ["srcdoc"],
-    ["align"],
-    ["frameborder"],
-    ["longdesc"],
-    ["marginheight"],
-    ["marginwidth"],
-    ["scrolling"],
-    ["mozbrowser"],
-]);
-
 // Beware coder: If you ever use this class, you should have a well documented reason
-class RawHTML extends UI.Element {
+export class RawHTML extends UI.Element {
     getInnerHTML() {
         return this.options.innerHTML || this.options.__innerHTML || "";
     }
@@ -230,7 +171,7 @@ class RawHTML extends UI.Element {
     }
 }
 
-class ViewportMeta extends UI.Primitive("meta") {
+export class ViewportMeta extends UI.Primitive("meta") {
     getDefaultOptions() {
         return {
             scale: this.getDesiredScale(),
@@ -269,7 +210,7 @@ class ViewportMeta extends UI.Primitive("meta") {
     }
 }
 
-class TemporaryMessageArea extends UI.Primitive("span") {
+export class TemporaryMessageArea extends UI.Primitive("span") {
     getDefaultOptions() {
         return {
             margin: 10
@@ -315,7 +256,7 @@ class TemporaryMessageArea extends UI.Primitive("span") {
 }
 
 // Just putting in a lot of methods, to try to think of an interface
-class ScrollableMixin extends UI.Element {
+export class ScrollableMixin extends UI.Element {
     getDesiredExcessHeightTop() {
         return 600;
     }
@@ -413,10 +354,10 @@ class ScrollableMixin extends UI.Element {
     scrollToBottom() {
         this.scrollToHeight(this.node.scrollHeight);
     }
-};
+}
 
 //TODO: this class would need some binary searches
-class InfiniteScrollable extends ScrollableMixin {
+export class InfiniteScrollable extends ScrollableMixin {
     setOptions(options) {
         options = Object.assign({
             entries: [],
@@ -477,7 +418,7 @@ class InfiniteScrollable extends ScrollableMixin {
     }
 }
 
-class TimePassedSpan extends UI.Primitive("span") {
+export class TimePassedSpan extends UI.Primitive("span") {
     render() {
         return this.getTimeDeltaDisplay(this.options.timeStamp);
     }
@@ -526,8 +467,5 @@ class TimePassedSpan extends UI.Primitive("span") {
     onUnmount() {
         this._updateListener && this._updateListener.remove();
     }
-};
+}
 
-
-export {Link, Panel, Image, IFrame, RawHTML, TimePassedSpan, TemporaryMessageArea, SlideBar, VerticalSlideBar,
-    HorizontalSlideBar, ScrollableMixin, InfiniteScrollable, ViewportMeta};
