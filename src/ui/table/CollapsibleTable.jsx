@@ -128,6 +128,7 @@ export function CollapsibleTableInterface(BaseTableClass) {
         getToggleColumn() {
             return new ColumnHandler({
                 isToggleColumn: true,
+                value: () => null,
                 cellStyle: {
                     width: "1%",
                     whiteSpace: "nowrap",
