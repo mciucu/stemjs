@@ -34,7 +34,7 @@ export class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToSty
         textAlign: "center",
         backgroundColor: "#337ab7",
         boxShadow: "inset 0 -1px 0 rgba(0, 0, 0, .15)",
-        transition: "width .6s ease",
+        transition: "width .25s ease",
         fontColor: "#ffffff",
         fontSize: 12,
         ...this.colorStyleRule(this.themeProps.COLOR_PRIMARY),
