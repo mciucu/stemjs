@@ -57,7 +57,7 @@ class Theme extends Dispatchable {
     }
 
     getProperty(key) {
-        if (Object.hasOwn(this.properties, key)) {
+        if (this.properties.hasOwnProperty(key)) {
             // Return nulls as well
             return this.properties[key];
         }
