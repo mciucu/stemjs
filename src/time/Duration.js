@@ -101,7 +101,7 @@ TimeUnit.YEAR.dateMethodSuffix = "FullYear";
 
 export class Duration {
     constructor(duration) {
-        if (duration instanceof self.Date) {
+        if (duration instanceof Date) {
             throw new Error("Can't automatically transform Date to Duration, use date.getTime() if you really want to");
         }
         if (isNumber(duration)) {
