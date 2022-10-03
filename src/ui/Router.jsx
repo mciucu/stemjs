@@ -9,11 +9,24 @@ export class Router extends Switcher {
     static localHistory = []; // If we want the router to not alter the window history, use this instead.
     static useLocalHistory = false;
 
+    // Return a historic page, depth = 0 current, depth = 1 previous, etc
+    static getHistoricPath(depth) {
+        depth = Math.abs(depth); // So negatives also work
+        const index = this.localHistory.length - 1 - depth;
+        if (index < 0) {
+            return null;
+        }
+        const url = this.localHistory[index];
+
+        // TODO @cleanup this should use new URL(url), only keeping Denis's shit code to not break anything
+        return url.split("?")[0].split("#")[0];
+    }
+
     static getCurrentPath() {
         let path = "";
         if (this.useLocalHistory && this.localHistory.length) {
             // We do this to get rid of query params or hash params
-            path = this.localHistory[this.localHistory.length - 1].split("?")[0].split("#")[0];
+            path = this.getHistoricPath(0);
         } else {
             path = location.pathname;
         }
