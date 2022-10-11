@@ -79,7 +79,9 @@ export class Router extends Switcher {
             if (options.replaceHistory) {
                 this.localHistory.pop();
             }
-            this.localHistory.push(url);
+            if (this.localHistory.length === 0 || this.localHistory[this.localHistory.length - 1] != url) {
+                this.localHistory.push(url);
+            }
         } else {
             if (options.replaceHistory) {
                 window.history.replaceState(...historyArgs);
