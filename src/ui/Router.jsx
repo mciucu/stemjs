@@ -57,8 +57,13 @@ export class Router extends Switcher {
         return url;
     }
 
-    static changeURL(url, options = {queryParams: {}, state: {}, replaceHistory: false, forceElementUpdate: false,
-            keepSearchParams: false}) {
+    static changeURL(url, options = {
+        queryParams: {},
+        state: {},
+        replaceHistory: false,
+        forceElementUpdate: false,
+        keepSearchParams: false,
+    }) {
         url = this.formatURL(url);
 
         if (options.queryParams && Object.keys(options.queryParams).length > 0) {
