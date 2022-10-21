@@ -1,4 +1,5 @@
-import {isPlainObject, isNumber, capitalize} from "../base/Utils";
+import {isPlainObject, isNumber, capitalize, isString, padNumber} from "../base/Utils";
+import {TokenFormatter} from "./Formatter.js";
 
 export class TimeUnit {
     static CANONICAL = {};
@@ -295,7 +296,13 @@ export class Duration {
         return {parts, timeUnit, duration};
     }
 
+    // If you pass in a string like "HH:mm:ss", this will trigger a special case
     format({maxEntries = 2, locale = null, separator=", ", raw=false} = {}) {
+        if (isString(arguments[0])) {
+            //
+            return this.constructor.formatter.format(this, arguments[0]);
+        }
+
         const {parts} = this.splitInParts(maxEntries);
         return parts.map(part => part.timeUnit.formatCount(part.numUnits)).join(separator);
     }
@@ -303,6 +310,21 @@ export class Duration {
     toString(...args) {
         return this.format(...args);
     }
+
+    static formatter = new TokenFormatter([
+        ["h", date => date.getHours()],
+        ["hh", date => padNumber(date.getHours(), 2)],
+
+        ["m", date => date.getMinutes()],
+        ["mm", date => padNumber(date.getMinutes(), 2)],
+
+        ["s", date => date.getSeconds()],
+        ["ss", date => padNumber(date.getSeconds(), 2)],
+
+        ["ts", date => Math.floor(date.getMilliseconds() / 100)],
+        ["hs", date => padNumber(Math.floor(date.getMilliseconds() / 10), 2)],
+        ["ms", date => padNumber(date.getMilliseconds(), 3)],
+    ]);
 }
 
 export function addCanonicalTimeUnit(key, timeUnit) {
