@@ -162,12 +162,7 @@ function RangeTableInterface(TableClass) {
             for (let i = 0; i < entries.length; i += 1) {
                 const entry = entries[i];
                 const RowClass = this.getRowClass(entry);
-                this.rows.push(<RowClass
-                    key={this.getEntryKey(entry, i + this.lowIndex)}
-                    rowIndex={i + this.lowIndex}
-                    {...this.getRowOptions(entry)}
-                    parent={this}
-                />);
+                this.rows.push(<RowClass {...this.getRowOptions(entry, i + this.lowIndex)} />);
             }
             return this.rows;
         }

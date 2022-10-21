@@ -113,10 +113,10 @@ export function CollapsibleTableInterface(BaseTableClass) {
             }
         }
 
-        getRowOptions(entry) {
+        getRowOptions(entry, rowIndex) {
             const {renderCollapsible} = this.options;
             return {
-                ...super.getRowOptions(entry),
+                ...super.getRowOptions(entry, rowIndex),
                 renderCollapsible,
             }
         }
