@@ -40,7 +40,7 @@ export class TableRow extends UI.Primitive("tr") {
 
     renderEntryCell(column, columnIndex) {
         // TODO support more complex style options and {...columns.extraOptions(entry)}
-        return <td style={column.cellStyle} key={columnIndex}>{column.value(this.options.entry, this.options.index, columnIndex, this)}</td>;
+        return <td style={column.cellStyle} key={columnIndex}>{column.value(this.options.entry, this.options.rowIndex, columnIndex, this)}</td>;
     }
 }
 
