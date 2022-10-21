@@ -1,5 +1,6 @@
 import {padNumber, suffixWithOrdinal, isNumber, isFunction, isString} from "../base/Utils";
 import {TimeUnit, Duration} from "./Duration";
+import {TokenFormatter} from "./Formatter.js";
 
 // By default, StemDate will guess if the value is in milliseconds or seconds.
 // Any value less than this is interpreted as a unix time in seconds
@@ -278,56 +279,8 @@ class StemDate extends BaseDate {
         return this;
     }
 
-    static splitToTokens(str) {
-        // TODO: "[HH]HH" will be split to ["HH", "HH"], so the escape does not solve the problem
-        let tokens = [];
-        let lastIsLetter = null;
-        let escapeByCurlyBracket = false;
-        let escapeBySquareBracket = false;
-        for (let i = 0; i < str.length; i++) {
-            let charCode = str.charCodeAt(i);
-            if (charCode === 125 && escapeByCurlyBracket) { // '}' ending the escape
-                escapeByCurlyBracket = false;
-                lastIsLetter = null;
-            } else if (charCode === 93 && escapeBySquareBracket) { // ']' ending the escape
-                escapeBySquareBracket = false;
-                lastIsLetter = null;
-            } else if (escapeByCurlyBracket || escapeBySquareBracket) { // The character is escaped no matter what it is
-                tokens[tokens.length - 1] += str[i];
-            } else if (charCode === 123) { // '{' starts a new escape
-                escapeByCurlyBracket = true;
-                tokens.push("");
-            } else if (charCode === 91) { // '[' starts a new escape
-                escapeBySquareBracket = true;
-                tokens.push("");
-            } else {
-                let isLetter = (65 <= charCode && charCode <= 90) || (97 <= charCode && charCode <= 122);
-                if (isLetter === lastIsLetter) {
-                    tokens[tokens.length - 1] += str[i];
-                } else {
-                    tokens.push(str[i]);
-                }
-                lastIsLetter = isLetter;
-            }
-        }
-        if (escapeByCurlyBracket || escapeBySquareBracket) {
-            console.warn("Unfinished escaped sequence!");
-        }
-        return tokens;
-    }
-
-    evalToken(token) {
-        let func = this.constructor.tokenFormattersMap.get(token);
-        if (!func) {
-            return token;
-        }
-        return func(this);
-    }
-
     format(str = DEFAULT_DATE_FORMAT) {
-        let tokens = this.constructor.splitToTokens(str);
-        tokens = tokens.map(token => this.evalToken(token));
-        return tokens.join("");
+        return this.constructor.formatter.format(this, str);
     }
 
     static format(date, str) {
@@ -427,7 +380,7 @@ class DateLocale {
     }
 }
 
-StemDate.tokenFormattersMap = new Map([
+StemDate.formatter = new TokenFormatter([
     ["ISO", date => date.toISOString()],
 
     ["Y", date => date.getFullYear()],
