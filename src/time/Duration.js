@@ -296,11 +296,11 @@ export class Duration {
         return {parts, timeUnit, duration};
     }
 
-    // If you pass in a string like "HH:mm:ss", this will trigger a special case
+    // If you pass in a string like "hh:mm:ss", this will trigger a special case
     format({maxEntries = 2, locale = null, separator=", ", raw=false} = {}) {
         if (isString(arguments[0])) {
-            //
-            return this.constructor.formatter.format(this, arguments[0]);
+            const pattern = String(arguments[0]).toLowerCase();
+            return this.constructor.formatter.format(this, pattern);
         }
 
         const {parts} = this.splitInParts(maxEntries);
