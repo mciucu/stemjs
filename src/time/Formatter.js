@@ -57,5 +57,5 @@ export class TokenFormatter {
         let tokens = this.splitToTokens(str);
         tokens = tokens.map(token => this.evalToken(value, token));
         return tokens.join("");
-    }d
+    }
 }
