@@ -261,6 +261,10 @@ class CheckboxInput extends Input {
     // TODO @branch fix this
     render() {
         super.render();
+        if (this.options.noStupid) {
+            // Temp hack
+            return;
+        }
         if (this.options.value != this.getValue() || this.getIndeterminate() != this.node?.indeterminate) {
             this.setValue(this.options.value, this.options.indeterminate);
         }
