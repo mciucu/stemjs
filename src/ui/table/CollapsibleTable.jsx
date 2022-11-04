@@ -31,9 +31,15 @@ export class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
         return "tbody";
     }
 
-    getDefaultOptions() {
+    getDefaultOptions(options) {
         return {
             collapsed: true,
+        }
+    }
+
+    getPreservedOptions() {
+        return {
+            collapsed: this.options.collapsed
         }
     }
 
