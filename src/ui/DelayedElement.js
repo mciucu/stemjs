@@ -1,6 +1,6 @@
 import {ensure} from "../base/Require";
 
-let DelayedElement = (BaseClass) => class DelayedElement extends BaseClass {
+export const DelayedElement = (BaseClass) => class DelayedElement extends BaseClass {
     applyNodeAttributesNotLoaded() {
         super.applyNodeAttributes();
     }
@@ -80,13 +80,10 @@ let DelayedElement = (BaseClass) => class DelayedElement extends BaseClass {
     }
 };
 
-let ScriptDelayedElement = (BaseClass, scripts) => class ScriptDelayedElement extends DelayedElement(BaseClass) {
+export const ScriptDelayedElement = (BaseClass, scripts) => class ScriptDelayedElement extends DelayedElement(BaseClass) {
     beforeRedrawNotLoaded() {
-        // TODO: what happens if this gets destroyed before the load finishes? Should cancel this
         ensure(scripts, () => {
             this.setLoaded();
         });
     }
 };
-
-export {DelayedElement, ScriptDelayedElement}
