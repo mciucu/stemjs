@@ -348,9 +348,9 @@ class Select extends UI.Primitive(InputableElement, "select") {
     }
 
     serializeEntry(obj) {
-        const {serializer} = this.options;
-        if (serializer) {
-            return serializer(obj);
+        const formatter = this.options.formatter || this.options.serializer;
+        if (formatter) {
+            return formatter(obj);
         } else {
             return obj.toString();
         }
