@@ -112,16 +112,16 @@ const VirtualStoreObjectMixin = (BaseStoreObjectClass) => class VirtualStoreObje
 
     // Meant for updating temporary objects that need to exist before being properly created
     updateId(newId) {
-            if (this.id == newId) {
-                return;
-            }
-            let oldId = this.id;
-            if (!this.hasTemporaryId()) {
-                console.error("This is only meant to replace temporary ids!");
-            }
-            this.id = newId;
-            this.dispatch("updateId", {oldId: oldId});
+        if (this.id == newId) {
+            return;
         }
+        let oldId = this.id;
+        if (!this.hasTemporaryId()) {
+            console.error("This is only meant to replace temporary ids!");
+        }
+        this.id = newId;
+        this.dispatch("updateId", {oldId: oldId});
+    }
 };
 
 // TODO: there's still a bug in this class when not properly matching virtual obj sometimes I think
