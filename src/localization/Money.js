@@ -1,8 +1,8 @@
 // TODO Add Money to Stem
-import {Currency, CurrencyStore} from "../../../stem-core/src/localization/CurrencyStore.js";
-import {StoreObject} from "../../../stem-core/src/state/Store";
-import {isString} from "../../../stem-core/src/base/Utils";
-import {FIELD_LOADERS} from "../../../stem-core/src/state/StoreField.js";
+import {Currency, CurrencyStore} from "./CurrencyStore.js";
+import {StoreObject} from "../state/Store.js";
+import {isString} from "../base/Utils.js";
+import {FIELD_LOADERS} from "../state/StoreField.js";
 
 const MoneyErrors = {
     INVALID_CURRENCY_PROVIDED: "Invalid currency provided.",
