@@ -2,6 +2,7 @@ import {StemDate} from "../time/Date.js";
 import {GlobalState} from "./State.js";
 import {lazyInit} from "../decorators/LazyInitialize.js";
 import {isString} from "../base/Utils.js";
+import {Money} from "../localization/Money.js";
 
 export const FIELD_LOADERS = {
     [Date]: (value) => StemDate.optionally(value),
@@ -10,6 +11,9 @@ export const FIELD_LOADERS = {
     [Number]: null,
     [Array]: null, // TODO @Mihai implement a way to say @field(Array, "Merchant") or @field(Array, Class)
     [Object]: null, // meaning generic JSON field
+    // TODO: maybe have a Currency.fromObject helper
+    // TODO: consider not using optionally, returning 0?
+    [Money]: (value, obj) => Money.optionally(value, obj.currency || obj.currencyId),
     // TODO: Enum support? Assume plain object here or if Object.isFrozen(key)?
 }
 
