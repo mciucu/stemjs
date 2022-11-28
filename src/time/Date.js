@@ -10,7 +10,7 @@ export let MAX_AUTO_UNIX_TIME = Math.pow(2, 32); // Either ~Feb 2106 in unix sec
 
 let DEFAULT_DATE_FORMAT = "ISO";
 
-export function setDefaultDateFormat(dateFormat) {
+export function SetDefaultDateFormat(dateFormat) {
     DEFAULT_DATE_FORMAT = dateFormat;
 }
 
