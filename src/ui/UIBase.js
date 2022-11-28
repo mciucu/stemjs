@@ -255,7 +255,7 @@ class UIElement extends BaseUIElement {
         return null;  // cleanObject({theme}, {emptyAsNull: true});
     }
 
-    updateContext(context = this.parent.context) {
+    updateContext(context = this.parent?.context) {
         const extraContext = this.getExtraContext();
         this.context = extraContext ? {...context, ...extraContext} : context;
     }
