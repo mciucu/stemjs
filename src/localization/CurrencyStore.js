@@ -1,4 +1,4 @@
-import {StoreObject, Store} from "../../stem-core/src/state/Store";
+import {StoreObject, Store} from "../state/Store.js";
 
 export class Currency extends StoreObject {
     getDecimalDigitsCount() {
