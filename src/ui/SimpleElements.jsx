@@ -14,8 +14,8 @@ let MakeIconFunc = (icon, options) => {
 }
 
 // Change the icon function
-export function SetMakeIcon(value) {
-    MakeIconFunc = value;
+export function SetMakeIcon(func) {
+    MakeIconFunc = func;
 }
 
 export function MakeIcon() {
