@@ -1,4 +1,3 @@
-// TODO Add Money to Stem
 import {Currency, CurrencyStore} from "./CurrencyStore.js";
 import {StoreObject} from "../state/Store.js";
 import {isString} from "../base/Utils.js";
@@ -11,13 +10,6 @@ const MoneyErrors = {
 };
 
 export class Money {
-    static {
-        // Register money inside the field object list
-        // TODO: maybe have a Currency.fromObject helper
-        // TODO: consider not using optionally, returning 0?
-        FIELD_LOADERS[this] = (value, obj) => this.optionally(value, obj.currency || obj.currencyId);
-    }
-
     static useFormatter = false; // TODO: preserving behaviour now, reconsider defaults
 
     defaultDecimalsDisplayed = 2; // TODO: this should be a property of the currency
