@@ -230,6 +230,7 @@ class GenericObjectStore extends BaseStore {
         }
         if (sendDispatch) {
             this.dispatch(dispatchType, obj, event);
+            this.dispatch("change", obj, event);
         }
         return obj;
     }
@@ -243,6 +244,7 @@ class GenericObjectStore extends BaseStore {
             this.applyEventToObject(obj, event);
         }
         this.dispatch("updateOrCreate", obj, event);
+        this.dispatch("change", obj, event);
         return obj;
     }
 
@@ -252,6 +254,7 @@ class GenericObjectStore extends BaseStore {
             this.objects.delete(this.getObjectIdForEvent(event));
             objDeleted.dispatch("delete", event, objDeleted);
             this.dispatch("delete", objDeleted, event);
+            this.dispatch("change", objDeleted, event);
         }
         return objDeleted;
     }

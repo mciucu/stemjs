@@ -85,12 +85,13 @@ function makeWrapperField(type, options) {
     return (target, name, descriptor) => {
         const rawField = options.wrapIdField ? (name + "Id") : options.rawField;
 
+        // TODO We might need to have the getter be dynamic, since order of loading fields at first shouldn't matter (see Money)
         if (!rawField) {
             // We're proxying the same field
             const nameSymbol = Symbol.for(name);
             return {
                 get() {
-                    return this[nameSymbol]; //  TOD
+                    return this[nameSymbol];
                 },
                 set(value) {
                     return this[nameSymbol] = loader(value, this);
