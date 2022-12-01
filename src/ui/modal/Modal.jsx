@@ -132,7 +132,8 @@ class ActionModal extends Modal {
     getDefaultOptions() {
         return {
             ...super.getDefaultOptions(),
-            closeButton: false
+            closeButton: false,
+            closeName: "Cancel",
         };
     }
 
@@ -145,7 +146,7 @@ class ActionModal extends Modal {
     }
 
     getCloseName() {
-        return this.options.closeName || "Close";
+        return this.options.closeName;
     }
 
     render() {
@@ -168,9 +169,19 @@ class ActionModal extends Modal {
         return null;
     }
 
+    // If the main action is allowed
+    isValid() {
+        return true;
+    }
+
     getActionButton() {
-        return <Button level={this.getActionLevel()} label={this.getActionName()}
-                       onClick={() => this.action()} ref="actionButton" />;
+        return <Button
+            ref="actionButton"
+            level={this.getActionLevel()}
+            label={this.getActionName()}
+            disabled={!this.isValid()}
+            onClick={() => this.action()}
+        />;
     }
 
     getFooter() {
@@ -178,7 +189,7 @@ class ActionModal extends Modal {
             <TemporaryMessageArea ref="messageArea"/>,
             <ButtonGroup>
                 <Button label={this.getCloseName()} onClick={() => this.hide()}/>
-                  {this.getActionButton()}
+                {this.getActionButton()}
             </ButtonGroup>
         ];
     }
