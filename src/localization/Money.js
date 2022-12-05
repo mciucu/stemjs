@@ -73,6 +73,15 @@ export class Money {
         return new Money(sum, this.getCurrency());
     }
 
+    multiply(value) {
+        return new Money(this.getAmount() * value, this.getCurrency());
+    }
+
+    divide(value) {
+        // TODO Check division by 0
+        return this.multiply(1.0 / value);
+    }
+
     isZero() {
         return this.getAmount() === 0;
     }
