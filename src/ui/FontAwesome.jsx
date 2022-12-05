@@ -50,11 +50,6 @@ class FASortIcon extends FAIcon {
             return "sort";
         }
     }
-
-    setDirection(direction) {
-        this.options.direction = direction;
-        this.redraw();
-    }
 }
 
 export {FAIcon, FACollapseIcon, FASortIcon};
