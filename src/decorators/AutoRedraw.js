@@ -77,8 +77,7 @@ export function autoredrawDecorator(Cls, ...args) {
             const redrawHandler = redrawHandlerLazy.get(this);
             this.attachUpdateListener(obj, redrawHandler);
             if (obj instanceof GenericObjectStore) {
-                this.attachCreateListener(obj, redrawHandler);
-                this.attachDeleteListener(obj, redrawHandler);
+                this.attachChangeListener(obj, redrawHandler);
             }
         }
     };
