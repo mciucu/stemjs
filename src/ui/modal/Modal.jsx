@@ -134,6 +134,7 @@ class ActionModal extends Modal {
             ...super.getDefaultOptions(),
             closeButton: false,
             closeName: "Cancel",
+            actionName: "Default Action"
         };
     }
 
