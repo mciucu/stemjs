@@ -330,10 +330,6 @@ class GenericObjectStore extends BaseStore {
     addDeleteListener(callback) {
         return this.addListener("delete", callback);
     }
-
-    addChangeListener(callback) {
-        return this.addListener(["create", "update", "delete"], callback);
-    }
 }
 
 class SingletonStore extends BaseStore {
