@@ -63,6 +63,11 @@ export class Link extends UI.Primitive("a") {
         return value || label || super.render();
     }
 
+    changeRouteInternal() {
+        // TODO Only if Router.Global exists?
+        Router.changeURL(trimLocalUrl(this.options.href));
+    }
+
     onMount() {
         this.addClickListener((event) => {
             const {href, newTab, target} = this.options;
@@ -78,8 +83,7 @@ export class Link extends UI.Primitive("a") {
             event.preventDefault();
             event.stopPropagation();
 
-            // TODO Only if Router.Global exists?
-            Router.changeURL(trimLocalUrl(this.options.href));
+            this.changeRouteInternal();
         });
     }
 }
