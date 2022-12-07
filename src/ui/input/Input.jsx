@@ -208,6 +208,14 @@ class FileInput extends Input {
         return this.node.files;
     }
 
+    getTotalSize() {
+        let totalSize = 0;
+        for (const file of this.getFiles()) {
+            totalSize += file.size;
+        }
+        return totalSize;
+    }
+
     getFile() {
         // TODO: this is valid only if multipleFiles is false
         return this.getFiles()[0];
