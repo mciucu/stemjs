@@ -21,3 +21,21 @@ export function ratioToPercent(a, b) {
 export function formatPercentFromRatio(a, b, numDigits = 2) {
     return formatPercent(ratioToPercent(a, b), numDigits);
 }
+
+export function formatBytes(bytes) {
+    const UNIT_SYMBOL = ["B", "KB", "MB", "GB", "TB", "PB"];
+    if (bytes == null) {
+        return "-";
+    }
+    if (bytes === 0) {
+        return "0 " + UNIT_SYMBOL[0];
+    }
+    bytes = parseInt(bytes, 10);
+    const unitIndex = Math.min(parseInt(Math.floor(Math.log(bytes) / Math.log(1024))), UNIT_SYMBOL.length - 1);
+    if (unitIndex === 0) {
+        return bytes + " " + UNIT_SYMBOL[unitIndex];
+    }
+    const amountInUnits = (bytes / Math.pow(1024, unitIndex));
+    const decimalDigits = (amountInUnits < 10) ? 2 : 1;
+    return amountInUnits.toFixed(decimalDigits) + " " + UNIT_SYMBOL[unitIndex];
+}
