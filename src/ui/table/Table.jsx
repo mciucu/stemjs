@@ -18,6 +18,7 @@ export class ColumnHandler {
     }
 
     static mapColumns(columns) {
+        columns = columns.filter(x => x); // Remove null or false columns
         return columns.map((column, index) => {
             if (column instanceof ColumnHandler) {
                 return column;
