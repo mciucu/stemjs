@@ -228,6 +228,10 @@ class FileInput extends Input {
         }
         return formData;
     }
+
+    clear() {
+        this.node.value = null;
+    }
 }
 
 FileInput.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
