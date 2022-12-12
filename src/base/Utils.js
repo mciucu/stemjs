@@ -417,6 +417,21 @@ export function base64Decode(value, {jsonFormat = true} = {}) {
 export const UNICODE_BOM_CHARACTER = 0xFEFF;
 export const NOOP_FUNCTION = () => undefined;
 
+export function isFirefox() {
+    return navigator && navigator.userAgent && (navigator.userAgent.indexOf("Firefox") !== -1
+        || navigator.userAgent.indexOf("FxiOS") !== -1) && navigator.userAgent.indexOf("Chrome") === -1;
+}
+
+export function isSafari() {
+    let firefox = isFirefox();
+    let safari = navigator.userAgent.indexOf("Safari") > -1;
+    let chrome = navigator.userAgent.indexOf("Chrome") > -1;
+    if (chrome || firefox) {
+        safari = false;
+    }
+    return safari;
+}
+
 // Helpers to wrap iterators, to wrap all values in a function or to filter them
 export function* mapIterator(iter, func) {
     for (let value of iter) {
