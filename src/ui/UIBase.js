@@ -131,7 +131,7 @@ class UIElement extends BaseUIElement {
         this.children = [];  // These are the rendered children
         this.options = options; // TODO: this is a hack, to not break all the code that references this.options in setOptions
         this.state = this.getDefaultState();  // TODO @cleanup implement a simpler state pattern, that allows custom state types
-        this.setOptions(options);
+        this.setOptions(options); // TODO maybe this actually needs to be removed, since on a copy we don't want the default options of the other object
     };
 
     getDefaultOptions(options) {}

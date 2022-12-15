@@ -145,6 +145,10 @@ export class Money {
         }
     }
 
+    valueOf() {
+        return this.amount;
+    }
+
     ensureCurrencyMatch(money) {
         if (this.getCurrency() != money.getCurrency()) { // There should never be more than a store object per currency
             // Money error should be stopped early, since we don't want to make a bad API call
