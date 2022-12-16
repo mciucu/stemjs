@@ -152,6 +152,10 @@ export class Duration {
         return new this(duration);
     }
 
+    static optionally(value) {
+        return (value != null) ? this.toDuration(value) : value;
+    }
+
     increment(duration) {
         duration = this.constructor.toDuration(duration);
         for (const key in duration) {
