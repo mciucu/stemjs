@@ -175,6 +175,12 @@ class ActionModal extends Modal {
         return true;
     }
 
+    updateActionButtonEnabled() {
+        this.actionButton.updateOptions({
+            disabled: this.isValid(),
+        });
+    }
+
     getActionButton() {
         return <Button
             ref="actionButton"
