@@ -1,4 +1,4 @@
-import {UI} from "../../../stem-core/src/ui/UIBase.js";
+import {UI} from "../UIBase.js";
 
 export class BaseInputElement extends UI.Element {
     getValue() {
