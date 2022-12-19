@@ -5,12 +5,12 @@ export class BaseInputElement extends UI.Element {
         return this.value;
     }
 
-    setValue(value, dispatchChange=true) {
+    setValue(value, dispatchChange=true, doRedraw = true) {
         if (this.isEqual(this.value, value)) {
             return;
         }
         this.value = value;
-        if (this.node) {
+        if (doRedraw && this.node) {
             this.redraw();
         }
         if (dispatchChange) {
