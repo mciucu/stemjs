@@ -5,6 +5,7 @@ export class BaseInputElement extends UI.Element {
         return this.value;
     }
 
+    // TODO This should be an options object, not a list of bools
     setValue(value, dispatchChange=true, doRedraw = true) {
         if (this.isEqual(this.value, value)) {
             return;
