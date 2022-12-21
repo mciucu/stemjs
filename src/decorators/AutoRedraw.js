@@ -1,5 +1,6 @@
 import {GenericObjectStore, StoreObject} from "../state/Store";
 import {PropertyCache} from "../data-structures/PropertyCache";
+import {BaseUIElement} from "../ui/UIBase.js";
 
 // TODO: maybe have better names
 const autoRedrawListenersLazy = new PropertyCache("autoRedrawHandler", () => new Set());
@@ -87,7 +88,7 @@ export function autoredrawDecorator(Cls, ...args) {
 
 // Can be called decorated as @autoredraw or @autoredraw(Watch1, Watch2, ...)
 export function autoredraw(...args) {
-    if (args[0]?.prototype?.attachUpdateListener) {
+    if (args[0]?.prototype instanceof BaseUIElement) {
         return autoredrawDecorator(args[0]);
     } else {
         return (Cls) => autoredrawDecorator(Cls, ...args);
