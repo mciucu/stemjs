@@ -1,4 +1,4 @@
-import {GenericObjectStore, StoreObject} from "../state/Store";
+import {StoreObject} from "../state/Store";
 import {PropertyCache} from "../data-structures/PropertyCache";
 import {BaseUIElement} from "../ui/UIBase.js";
 
@@ -32,7 +32,7 @@ const redrawHandlerLazy = new PropertyCache("autoRedrawListener", (obj) => {
     return () => redrawPerTickRunner.maybeEnqueue(obj);
 });
 
-// Decorator that attaches an update listener on all store objects in options
+// Decorator that attaches a change listener on all store objects in options
 // The logic is very crude, but works in most cases
 export function autoredrawDecorator(Cls, ...args) {
     const listenersDefault = () => new Set([...args]);
@@ -62,7 +62,7 @@ export function autoredrawDecorator(Cls, ...args) {
             // Technically we could just add these listeners, but this would also leave us with listeners on temp ui elements
             // TODO: probably need to remove at cleanup
             if (this.node) {
-                this.attachUpdateListener(obj, redrawHandlerLazy.get(this));
+                this.attachChangeListener(obj, redrawHandlerLazy.get(this));
             }
 
             listenerTargetSet.add(obj);
@@ -76,10 +76,7 @@ export function autoredrawDecorator(Cls, ...args) {
         const listenerTargetSet = autoRedrawListenersLazy.get(this, listenersDefault);
         for (const obj of listenerTargetSet) {
             const redrawHandler = redrawHandlerLazy.get(this);
-            this.attachUpdateListener(obj, redrawHandler);
-            if (obj instanceof GenericObjectStore) {
-                this.attachChangeListener(obj, redrawHandler);
-            }
+            this.attachChangeListener(obj, redrawHandler);
         }
     };
 

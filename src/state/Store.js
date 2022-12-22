@@ -383,7 +383,7 @@ export function GlobalStore(objectType, options={dependencies: []}) {
         Cls.store = store;
         Cls.objectType = objectType;
 
-        return new Proxy(Cls, {
+        const proxy = new Proxy(Cls, {
             get(target, key) {
                 if (key in target) {
                     return target[key];
@@ -391,7 +391,11 @@ export function GlobalStore(objectType, options={dependencies: []}) {
                     return store[key];
                 }
             }
-        })
+        });
+
+        store.ObjectWrapper = proxy;
+
+        return proxy;
     }
 }
 
