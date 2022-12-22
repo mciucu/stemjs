@@ -30,6 +30,9 @@ export class BaseInputElement extends UI.Element {
         if (this.value === undefined || !this.node || !this.isEqual(initialValue, oldInitialValue)) {
             this.setValue(initialValue);
         }
+        if (Object.hasOwn(this.options, "value")) {
+            this.setValue(this.options.value);
+        }
     }
 
     focus() {
