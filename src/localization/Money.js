@@ -1,7 +1,6 @@
 import {Currency, CurrencyStore} from "./CurrencyStore.js";
 import {StoreObject} from "../state/Store.js";
 import {isString} from "../base/Utils.js";
-import {FIELD_LOADERS} from "../state/StoreField.js";
 
 const MoneyErrors = {
     INVALID_CURRENCY_PROVIDED: "Invalid currency provided.",
