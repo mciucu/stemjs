@@ -224,6 +224,7 @@ class GenericObjectStore extends BaseStore {
             refreshEvent.type = "refresh";
             obj.applyEvent(refreshEvent);
             obj.dispatch("update", event);
+            obj.dispatch("change", event); // TODO Changes for autoredraw compatibility, remove "update"
         } else {
             obj = this.createObject(event);
             this.addObject(this.getObjectIdForEvent(event), obj);
