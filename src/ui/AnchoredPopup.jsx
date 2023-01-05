@@ -129,7 +129,7 @@ export class AnchoredPopup extends UI.Element {
                 return;
             }
             const rect = anchor.node.getBoundingClientRect();
-            if (rect.top !== top || rect.left !== left || rect.width !== width || rect.height !== height) {
+            if (rect.top !== top || rect.left !== left) {
                 this.hide();
             }
         }, 300);
