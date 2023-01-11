@@ -2,11 +2,12 @@ import {ButtonGroup} from "../button/ButtonGroup";
 import {Button} from "../button/Button";
 import {FloatingWindow} from "./FloatingWindow";
 import {ModalStyle} from "./Style";
-import {Panel, TemporaryMessageArea} from "../UIPrimitives";
+import {Panel} from "../UIPrimitives";
 import {UI} from "../UIBase";
 import {Dispatcher} from "../../base/Dispatcher";
 import {registerStyle} from "../style/Theme";
 import {Level, Size} from "../Constants";
+import {TemporaryMessageArea} from "../misc/TemporaryMessageArea.jsx";
 
 @registerStyle(ModalStyle)
 class Modal extends UI.Element {

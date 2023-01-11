@@ -51,3 +51,12 @@ export * from "./DateTimePicker";
 export * from "./style/Theme";
 
 export * from "./CodeEditor";
+export {TemporaryMessageArea} from "./misc/TemporaryMessageArea.jsx";
+export {TimePassedSpan} from "./misc/TimePassedSpan.jsx";
+export {InfiniteScrollable} from "./misc/Scrollable.jsx";
+export {ScrollableMixin} from "./misc/Scrollable.jsx";
+export {ViewportMeta} from "./ViewportMeta.jsx";
+export {VerticalSlideBar} from "./input/SlideBar.jsx";
+export {HorizontalSlideBar} from "./input/SlideBar.jsx";
+export {SlideBar} from "./input/SlideBar.jsx";
+export {RawHTML} from "./RawHTML.jsx";

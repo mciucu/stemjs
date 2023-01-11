@@ -2,8 +2,8 @@
 import {UI} from "./UIBase";
 import {TextInput} from "./input/Input";
 import {VolatileFloatingWindow} from "./modal/FloatingWindow";
-import {VerticalSlideBar} from "./UIPrimitives";
 import {StemDate, DAY_IN_MILLISECONDS} from "../time/Time";
+import {VerticalSlideBar} from "./input/SlideBar.jsx";
 
 class DatePickerTable extends UI.Element {
 
