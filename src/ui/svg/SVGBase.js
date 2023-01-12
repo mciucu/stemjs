@@ -1,6 +1,6 @@
 import {UI} from "../UIBase";
-import {DOMAttributesMap, NodeAttributes} from "../NodeAttributes";
-import {setObjectPrototype, uniqueId} from "../../base/Utils";
+import {DOMAttributesMap} from "../NodeAttributes";
+import {setObjectPrototype} from "../../base/Utils";
 import {SVGNodeAttributes} from "./SVGNodeAttributes";
 import {Device} from "../../base/Device";
 import {applyDebugFlags} from "../Debug";
@@ -32,8 +32,8 @@ SVG.Element = class SVGElement extends UI.Element {
 
         const rect = this.getBoundingClientRect();
         return {
-        	x: point.x - rect.left - node.clientLeft,
-        	y: point.y - rect.top - node.clientTop,
+            x: point.x - rect.left - node.clientLeft,
+            y: point.y - rect.top - node.clientTop,
         };
     }
 

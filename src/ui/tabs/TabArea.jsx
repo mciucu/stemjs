@@ -111,7 +111,7 @@ class TabArea extends UI.Element {
 
         this.titleArea.appendChild(tabTitle);
         this.switcher.appendChild(tabPanel, doMount || !this.options.lazyRender);
-    };
+    }
 
     getTitleArea(tabTitles) {
         let titleAreaClass = this.styleSheet.nav;
@@ -191,7 +191,7 @@ class TabArea extends UI.Element {
             this.getTitleArea(tabTitles),
             this.getSwitcher(tabPanels),
         ];
-    };
+    }
 
     setActive(panel) {
         this.activeTabDispatcher.setActive(panel);

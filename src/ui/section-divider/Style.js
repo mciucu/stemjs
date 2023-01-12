@@ -133,7 +133,7 @@ class SectionDividerStyle extends DividerStyle {
 class TitledDividerStyle extends SectionDividerStyle {
     barThickness = 16;
     barPadding = 1;
-    transitionTime = .3;
+    transitionTime = 0.3;
 
     dividerStyle = {
         backgroundColor: "white",

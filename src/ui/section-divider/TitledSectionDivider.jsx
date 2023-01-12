@@ -19,13 +19,13 @@ class TitledSectionDividerBar extends DividerBar {
                 <FAIcon icon="ellipsis-h" className={this.styleSheet.verticalDots} />,
 
             ]
-        } else {
-            return [
-                <div><FAIcon ref="rightButton" icon="caret-right" className={this.styleSheet.arrowButton}/></div>,
-                <div><FAIcon icon="bars" className={this.styleSheet.horizontalDots}/></div>,
-                <div><FAIcon ref="leftButton" icon="caret-left" className={this.styleSheet.arrowButton} /></div>,
-            ];
         }
+
+        return [
+            <div><FAIcon ref="rightButton" icon="caret-right" className={this.styleSheet.arrowButton}/></div>,
+            <div><FAIcon icon="bars" className={this.styleSheet.horizontalDots}/></div>,
+            <div><FAIcon ref="leftButton" icon="caret-left" className={this.styleSheet.arrowButton} /></div>,
+        ];
     }
 
     onMount() {
