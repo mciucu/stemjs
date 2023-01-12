@@ -103,7 +103,7 @@ class MinimalistTabAreaStyle extends BaseTabAreaStyle {
 }
 
 class FlatTabAreaStyle extends BaseTabAreaStyle {
-    transitionTime = .3;
+    transitionTime = 0.3;
 
     @styleRuleInherit
     tab = {
@@ -158,10 +158,10 @@ class FlatTabAreaStyle extends BaseTabAreaStyle {
 
 class FlatTabAreaHorizontalOverflowStyle extends HorizontalOverflowStyle {
     baseColor = () => this.themeProps.COLOR_FOREGROUND_BODY;
-    arrowColor = () => enhance(this.baseColor(), .4);
+    arrowColor = () => enhance(this.baseColor(), 0.4);
     arrowBackground = () => this.baseColor();
-    arrowHoverColor = () => enhance(this.baseColor(), .8);
-    arrowHoverBackground = () => enhance(this.baseColor(), .1);
+    arrowHoverColor = () => enhance(this.baseColor(), 0.8);
+    arrowHoverBackground = () => enhance(this.baseColor(), 0.1);
 }
 
 export {BaseTabAreaStyle, DefaultTabAreaStyle, MinimalistTabAreaStyle, FlatTabAreaStyle,

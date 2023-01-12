@@ -1,5 +1,5 @@
 import {StyleSheet} from "../Style";
-import {styleRule, styleRuleInherit} from "../../decorators/Style";
+import {styleRule} from "../../decorators/Style";
 
 class TableStyle extends StyleSheet {
     cellStyle =  {
