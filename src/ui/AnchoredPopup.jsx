@@ -15,9 +15,9 @@ export class AnchoredPopupStyle extends StyleSheet {
 
     @styleRule
     popup = {
-        background: this.themeProps.MERCHANT_POPUP_BACKGROUND,
-        boxShadow: this.themeProps.MERCHANT_POPUP_SHADOW,
-        border: this.themeProps.MERCHANT_POPUP_BORDER,
+        background: this.themeProps.POPUP_BACKGROUND,
+        boxShadow: this.themeProps.POPUP_SHADOW,
+        border: this.themeProps.POPUP_BORDER,
         borderRadius: this.themeProps.CARD_BORDER_RADIUS,
         // TODO: Create a constants object with all of the floating elements' zIndexes so we have an idea of the overlapping.
         zIndex: 100005,
