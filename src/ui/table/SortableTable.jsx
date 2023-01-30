@@ -1,11 +1,10 @@
 import {UI} from "../UIBase";
 import {SortableTableStyle} from "./Style";
-import {FASortIcon} from "../FontAwesome";
 import {Table} from "./Table";
 import {defaultComparator} from "../../base/Utils";
-import {Direction} from "../Constants";
+import {MakeIcon} from "../SimpleElements.jsx";
 
-function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
+function SortableTableInterface(BaseTableClass) {
     class SortableTable extends BaseTableClass {
         getSortableStyleSheet() {
             return SortableTableStyle.getInstance(); // Make this optional maybe
@@ -23,15 +22,19 @@ function SortableTableInterface(BaseTableClass, SortIconClass = FASortIcon) {
         }
 
         renderColumnHeader(column) {
+            if (column.noSort) {
+                return super.renderColumnHeader(column);
+            }
             const sortableStyleSheet = this.getSortableStyleSheet();
-            let sortIcon = <SortIconClass className={sortableStyleSheet.sortIcon}/>;
+            let sortIcon =<span style={{opacity: 0.4}}>{MakeIcon("sort")}</span>;
             if (this.sortBy === column) {
                 if (this.sortDescending) {
-                    sortIcon = <SortIconClass className={sortableStyleSheet.sortIcon} style={{visibility: "inherit"}} direction={Direction.DOWN}/>;
+                    sortIcon = MakeIcon("sort-desc");
                 } else {
-                    sortIcon = <SortIconClass className={sortableStyleSheet.sortIcon} style={{visibility: "inherit"}} direction={Direction.UP}/>;
+                    sortIcon = MakeIcon("sort-asc");
                 }
             }
+            // sortIcon = <span className={sortableStyleSheet.sortIcon}>{sortIcon}</span>;
 
             const reorderCallback = () => {
                 this.sortByColumn(column);
