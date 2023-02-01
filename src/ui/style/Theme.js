@@ -1,8 +1,9 @@
 import {Dispatchable} from "../../base/Dispatcher";
 import {CallThrottler, isFunction} from "../../base/Utils";
+import {ThemeType} from "./ThemeTypes.js";
 
 
-class Theme extends Dispatchable {
+export class Theme extends Dispatchable {
     static Global = new this(null, "Global");
 
     classSet = new Set();
@@ -17,6 +18,8 @@ class Theme extends Dispatchable {
             theme: this,
             ...props,
         }
+
+        this.propTypes = {};
 
         this.props = new Proxy(this.properties, {
             get: (properties, key, receiver) => {
@@ -65,7 +68,14 @@ class Theme extends Dispatchable {
     }
 
     setProperties(properties, update=true) {
-        Object.assign(this.properties, properties);
+        for (const [key, value] of Object.entries(properties)) {
+            if (value instanceof ThemeType) {
+                this.properties[key] = value.value;
+                this.propTypes[key] = value;
+            } else {
+                this.properties[key] = value;
+            }
+        }
         if (update) {
             this.updateThrottled();
         }
@@ -109,8 +119,6 @@ class Theme extends Dispatchable {
     }
 }
 
-function registerStyle(styleClass, theme=Theme.Global) {
+export function registerStyle(styleClass, theme=Theme.Global) {
     return (target) => theme.register(target, styleClass);
 }
-
-export {Theme, registerStyle};
