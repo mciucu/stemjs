@@ -24,5 +24,6 @@ export const TextShadowType = MakeThemeType("Text Shadow");
 export const BoxShadowType = MakeThemeType("Box Shadow");
 export const FontFamilyType = MakeThemeType("Font Family");
 export const FontWeightType = MakeThemeType("Font Weight");
+export const FloatType = MakeThemeType("Float");
 export const BoolType = MakeThemeType("Boolean");
 export const ObjectType = MakeThemeType("Generic Object")
