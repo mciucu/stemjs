@@ -20,7 +20,9 @@ export function MakeThemeType(type) {
 export const ColorType = MakeThemeType("Color");
 export const SizeType = MakeThemeType("Size");
 export const BorderType = MakeThemeType("Border");
+export const TextShadowType = MakeThemeType("Text Shadow");
 export const BoxShadowType = MakeThemeType("Box Shadow");
 export const FontFamilyType = MakeThemeType("Font Family");
 export const FontWeightType = MakeThemeType("Font Weight");
 export const BoolType = MakeThemeType("Boolean");
+export const ObjectType = MakeThemeType("Generic Object")
