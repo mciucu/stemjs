@@ -1,10 +1,11 @@
 import {UI} from "../UIBase";
-import {ColumnHandler, Table, TableRow} from "./Table";
+import {Table, TableRow} from "./Table";
 import {CollapsibleMixin} from "../collapsible/CollapsibleMixin";
 import {StyleSheet} from "../Style";
 import {styleRule} from "../../decorators/Style";
 import {registerStyle} from "../style/Theme";
 import {GlobalStyle} from "../GlobalStyle";
+import {ColumnHandler} from "../../base/ColumnHandler.js";
 
 export class TableRowInCollapsibleTable extends TableRow {
     getNodeType() {
