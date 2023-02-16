@@ -1,32 +1,7 @@
 import {UI} from "../UIBase";
 import {TableStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
-
-export class ColumnHandler {
-    constructor(options, index) {
-        if (Array.isArray(options)) {
-            options = {
-                headerName: options[0],
-                value: options[1],
-                ...options[2],
-            }
-        }
-        Object.assign(this, options);
-        if (index != null) {
-            this.index = index;
-        }
-    }
-
-    static mapColumns(columns) {
-        columns = columns.filter(x => x); // Remove null or false columns
-        return columns.map((column, index) => {
-            if (column instanceof ColumnHandler) {
-                return column;
-            }
-            return new ColumnHandler(column, index);
-        });
-    }
-}
+import {ColumnHandler} from "../../base/ColumnHandler.js";
 
 // TODO: the whole table architecture probably needs a rethinking
 export class TableRow extends UI.Primitive("tr") {

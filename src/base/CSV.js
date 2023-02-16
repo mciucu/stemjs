@@ -1,5 +1,6 @@
 import {FileSaver} from "./FileSaver";
 import {UNICODE_BOM_CHARACTER} from "./Utils";
+import {ColumnHandler} from "./ColumnHandler.js";
 
 const DEFAULT_FILE_NAME = "data.csv";
 
@@ -10,7 +11,7 @@ export class CSVBuilder {
     }
 
     setColumns(columns) {
-        this.columns = columns;
+        this.columns = ColumnHandler.mapColumns(columns);
     }
 
     static escapeEntry(str) {
