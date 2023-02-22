@@ -12,10 +12,6 @@ class StoreObject extends Dispatchable {
         this.setStore(store);
     }
 
-    static getStoreName() {
-        return this.name;
-    }
-
     static makeFieldLoader(fieldDescriptor) {
         fieldDescriptor.cacheField = false;
         fieldDescriptor.rawField = fieldDescriptor.rawField || (key => key + "Id");
@@ -387,7 +383,7 @@ export function MakeStore(...args) {
 
 
 // Experimental, to allow the store to also have the store methods be available on the object class
-export function GlobalStore(objectType, options={dependencies: []}) {
+export function registerStore(objectType, options={dependencies: []}) {
     return (Cls) => {
         const store = MakeStore(objectType, Cls, options);
 
