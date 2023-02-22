@@ -19,11 +19,18 @@ class FieldDescriptor {
         this.rawDescriptor = rawDescriptor;
     }
 
+    // TODO Use this to support lazy initialization
+    getDefaultValue(obj) {
+        const {initializer} = this.rawDescriptor;
+        return initializer?.call(obj);
+    }
+
     makeDescriptor() {
         // TODO "self" should mean type = this.targetProto
         if (isString(this.type)) {
             // We're a Foreign key
             this.rawField = this.rawField || (key => key + "Id"); // By default we'll add a suffix
+            this.cacheField = false;
 
             const storeName = (this.type === "self") ? null : this.type;
 
