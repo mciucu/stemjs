@@ -47,6 +47,10 @@ export class Money {
         return null;
     }
 
+    static makeFieldLoader() {
+        return (value, obj) => this.optionally(value, obj.currency || obj.currencyId);
+    }
+
     static format(amount, currency) {
         return (new Money(amount, currency)).toMainUnitString();
     }

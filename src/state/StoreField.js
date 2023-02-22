@@ -1,144 +1,104 @@
 import {StemDate} from "../time/Date.js";
-import {GlobalState} from "./State.js";
-import {lazyInit} from "../decorators/LazyInitialize.js";
-import {isString} from "../base/Utils.js";
-import {Money} from "../localization/Money.js";
+import {isFunction, isString} from "../base/Utils.js";
 
-export const FIELD_LOADERS = {
-    [Date]: (value) => StemDate.optionally(value),
-    [String]: null, // No change to the underlying value
-    [Boolean]: null,
-    [Number]: null,
-    [Array]: null, // TODO @Mihai implement a way to say @field(Array, "Merchant") or @field(Array, Class)
-    [Object]: null, // meaning generic JSON field
-    // TODO: maybe have a Currency.fromObject helper
-    // TODO: consider not using optionally, returning 0?
-    [Money]: (value, obj) => Money.optionally(value, obj.currency || obj.currencyId),
-    // TODO: Enum support? Assume plain object here or if Object.isFrozen(key)?
-}
 
-function makeForeignKeyField(type, options) {
-    let {
-        rawField,
-    } = options;
+class FieldDescriptor {
+    constructor(type, options) {
+        this.type = type;
+        Object.assign(this, options);
+    }
 
-    return (targetProto, name, descriptor) => {
-        rawField = rawField || (name + "Id");
+    setTarget(targetProto, key, rawDescriptor) {
+        if (!targetProto.fieldDescriptors) {
+            targetProto.fieldDescriptors = [];
+        }
+        targetProto.fieldDescriptors.push(this);
 
-        // TODO: also mark the target with this info, so be able to run code analysis and compare with backend.
+        this.targetProto = targetProto;
+        this.key = key;
+        this.rawDescriptor = rawDescriptor;
+    }
+
+    makeDescriptor() {
+        // TODO "self" should mean type = this.targetProto
+        if (isString(this.type)) {
+            // We're a Foreign key
+            this.rawField = this.rawField || (key => key + "Id"); // By default we'll add a suffix
+
+            const storeName = (this.type === "self") ? null : this.type;
+
+            this.loader = (value, obj) => {
+                const store = obj.getStore(storeName);
+                return store.get(value);
+            }
+        }
+
+        if (isFunction(this.rawField)) {
+            this.rawField = this.rawField(this.key, this);
+        }
+
+        if (!this.rawField) {
+            this.rawField = Symbol("_" + this.key);
+        } else {
+            this.isReadOnly = true;
+        }
+
+        if (!this.loader && this.type.makeFieldLoader) {
+            this.loader = this.type.makeFieldLoader(this);
+            // We actually prefer by default to have a cache to that object[field] === object[field] (which would have been invalidated by another load)
+            this.cacheField = this.cacheField ?? Symbol("cached-" + this.key);
+        }
+
+        // Extracting for speed in the functions bellow
+        const {rawField, cacheField, loader, isReadOnly, key} = this;
 
         return {
             get() {
-                const store = (type != "self") ? GlobalState.getStore(type) : this.getStore();
-                const id = this[rawField];
-                return store.get(id);
+                if (cacheField && Object.hasOwn(this, cacheField)) {
+                    return this[cacheField];
+                }
+
+                const value = this[rawField];
+
+                if (value == null || !loader) {
+                    return value;
+                }
+
+                const result = loader(value, this);
+                if (cacheField) {
+                    this[cacheField] = result
+                }
+                return result;
             },
-            set() {
-                throw "Read only field " + name;
-            }
-        }
-    }
-}
-
-function makeManyToOneField(type, options) {
-    let {
-        manyField
-    } = options;
-
-    return (target, name, descriptor) => {
-        return {
-            get() {
-                // TODO: we can probably pre-index these, good enough for now
-                const store = GlobalState.getStore(type);
-                return store.filter(obj => obj[manyField] == this.id);
-            },
-            set() {
-                throw "Read only field " + name;
-            }
-        }
-    }
-}
-
-function makeWrapperField(type, options) {
-    const fieldLoaderSymbol = type?.fieldLoaderSymbol ? type.fieldLoaderSymbol : type;
-
-    if (!FIELD_LOADERS.hasOwnProperty(fieldLoaderSymbol)) {
-        // We'd need to explicitly handle the type. Otherwise, just use the plain way -- @field fieldName
-        throw "Can't process field type" + type;
-    }
-
-    const loader = FIELD_LOADERS[fieldLoaderSymbol];
-
-    if (loader == null) {
-        return lazyInit;
-    }
-
-    if (loader.wrapIdField) {
-        // We want to wrap the IdField by default for some loaders.
-        options = {
-            wrapIdField: true,
-            ...options,
-        }
-    }
-
-    // We're proxying a different field (like an Id field)
-    return (target, name, descriptor) => {
-        const rawField = options.wrapIdField ? (name + "Id") : options.rawField;
-
-        // TODO We might need to have the getter be dynamic, since order of loading fields at first shouldn't matter (see Money)
-        if (!rawField) {
-            // We're proxying the same field
-            const nameSymbol = Symbol.for(name);
-            return {
-                get() {
-                    return this[nameSymbol];
-                },
-                set(value) {
-                    return this[nameSymbol] = loader(value, this);
+            set(value) {
+                if (isReadOnly) {
+                    throw `Not allowed to change field ${key}`;
+                }
+                // TODO type validation
+                // if (!(value instanceof type)) {
+                //     console.warn("Invalid type detected", key, value);
+                // }
+                this[rawField] = value;
+                if (cacheField) {
+                    delete this[cacheField];
                 }
             }
         }
-
-        const rawFieldSymbol = Symbol.for(rawField);
-
-        Object.defineProperty(target, rawField, {
-            get() {
-                return this[rawFieldSymbol];
-            },
-            set(value) {
-                this[rawFieldSymbol] = loader(value, this);
-            },
-        });
-
-        return {
-            get() {
-                return this[rawFieldSymbol];
-            },
-            set(value) {
-                throw "Can't overwrite proxy field";
-            }
-        };
     }
 }
 
-// Decorator for store fields, to not overwrite what was received in the constructor
-// In the admin, this also makes the field observable
-function field(type, options = {}) {
-    if (arguments.length === 3) {
-        // We're being called directly on the field
-        return lazyInit(...arguments);
-    }
 
-    if (isString(type)) {
-        // This is DB relationship, either a foreign key or many to one.
-        const {manyField} = options;
-        if (manyField) {
-            return makeManyToOneField(type, options);
-        }
-        return makeForeignKeyField(type, options);
+// TODO Implement a way to say @field(Array, "StoreObject") for instance
+export function field(type, arg={}) {
+    // The actual descriptor
+    return (targetProto, name, rawDescriptor) => {
+        const fieldDescriptor = new FieldDescriptor(type, arg);
+        fieldDescriptor.setTarget(targetProto, name, rawDescriptor);
+        return fieldDescriptor.makeDescriptor();
     }
-
-    return makeWrapperField(type, options);
 }
 
-export {field}
+// Default handling of objects
+Date.makeFieldLoader = () => {
+    return (value) => StemDate.optionally(value);
+}
