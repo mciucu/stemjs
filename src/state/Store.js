@@ -10,10 +10,20 @@ class StoreObject extends Dispatchable {
         super();
         Object.assign(this, obj);
         this.setStore(store);
-    };
+    }
 
     static getStoreName() {
         return this.name;
+    }
+
+    static makeFieldLoader(fieldDescriptor) {
+        fieldDescriptor.cacheField = false;
+        fieldDescriptor.rawField = fieldDescriptor.rawField || (key => key + "Id");
+
+        return (value, obj) => {
+            const store = obj.getStore(this[StoreSymbol].objectType);
+            return store.get(value);
+        }
     }
 
     setStore(store) {
@@ -31,7 +41,7 @@ class StoreObject extends Dispatchable {
     // By default, applying an event just shallow copies the fields from event.data
     applyEvent(event) {
         Object.assign(this, event.data);
-    };
+    }
 
     addDeleteListener(callback) {
         return this.addListener("delete", callback);

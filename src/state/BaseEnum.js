@@ -1,5 +1,4 @@
 import {isString, isBoolean, isNumber, titleCase} from "../base/Utils.js";
-import {FIELD_LOADERS} from "./StoreField.js";
 
 export class BaseEnum {
     constructor(obj) {
@@ -58,6 +57,11 @@ export class BaseEnum {
         }
         return null;
     }
+
+    static makeFieldLoader() {
+        // TODO log if invalid value?
+        return (value) => this.fromValue(value) || value;
+    }
 }
 
 // Experimental enum maker method
@@ -74,8 +78,7 @@ export function makeEnum(cls) {
         }
     }
 
-    cls.fieldLoaderSymbol = Symbol("Field loader");
     cls.allEntries = allEntries;
-    FIELD_LOADERS[cls.fieldLoaderSymbol] = s => cls.fromValue(s) || s; // TODO @Mihai log if invalid value
+
     return Object.freeze(cls);
 }
