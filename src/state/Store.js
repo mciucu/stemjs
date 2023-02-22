@@ -113,9 +113,7 @@ class BaseStore extends Dispatchable {
     }
 
     attachToState() {
-        if (this.getState()) {
-            this.getState().addStore(this);
-        }
+        this.getState()?.addStore(this);
     }
 
     getState() {
