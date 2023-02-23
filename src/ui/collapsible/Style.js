@@ -3,7 +3,7 @@ import {CardPanelStyle} from "../CardPanel";
 import {enhance} from "../Color";
 
 class CollapsibleStyle extends StyleSheet {
-    transitionDuration = 0.4;
+    transitionDuration = 0.4; // TODO @theme use this.themeProps.DEFAULT_TRANSITION_DURATION_MS
 
     @styleRule
     collapsing = {
