@@ -12,6 +12,7 @@ export function getTextColor(backgroundColor) {
 }
 
 Theme.setProperties({
+    // TODO use _COLOR as a suffix
     COLOR_BACKGROUND: "#fff",
     COLOR_BACKGROUND_ALTERNATIVE: "#eee",
     COLOR_BACKGROUND_BODY: "#f8f8f8",
