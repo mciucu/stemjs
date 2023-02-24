@@ -16,8 +16,8 @@ export const Level = {
     SECONDARY: "secondary",
     SUCCESS: "success",
     WARNING: "warning",
-    DANGER: "danger",
-    ERROR: "danger",
+    DANGER: "error",
+    ERROR: "error",
 };
 
 export const Size = {
