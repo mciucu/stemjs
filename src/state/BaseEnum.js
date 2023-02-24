@@ -43,7 +43,8 @@ export class BaseEnum {
     }
 
     static all() {
-        return this.allEntries;
+        // Clone the Array to be able to make changes
+        return Array.from(this.allEntries);
     }
 
     static fromValue(value) {
