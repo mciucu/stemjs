@@ -40,6 +40,14 @@ class FieldDescriptor {
             }
         }
 
+        // First let the type modify this, in case it needs to overwrite some behavior
+        if (!this.loader && this.type.makeFieldLoader) {
+            this.loader = this.type.makeFieldLoader(this);
+            // We actually prefer by default to have a cache to that object[field] === object[field] (which would have been invalidated by another load)
+            this.cacheField = this.cacheField ?? Symbol("cached-" + this.key);
+        }
+
+        // Apply default logic in case it was not explicitly given
         if (isFunction(this.rawField)) {
             this.rawField = this.rawField(this.key, this);
         }
@@ -50,18 +58,12 @@ class FieldDescriptor {
             this.isReadOnly = true;
         }
 
-        if (!this.loader && this.type.makeFieldLoader) {
-            this.loader = this.type.makeFieldLoader(this);
-            // We actually prefer by default to have a cache to that object[field] === object[field] (which would have been invalidated by another load)
-            this.cacheField = this.cacheField ?? Symbol("cached-" + this.key);
-        }
-
         // Extracting for speed in the functions bellow
         const {rawField, cacheField, loader, isReadOnly, key} = this;
 
         return {
             get() {
-                if (cacheField && Object.hasOwn(this, cacheField)) {
+                if (cacheField && this[cacheField]) {
                     return this[cacheField];
                 }
 
