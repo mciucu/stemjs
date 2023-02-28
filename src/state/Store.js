@@ -267,6 +267,7 @@ class GenericObjectStore extends BaseStore {
     applyEventToObject(obj, event) {
         obj.applyEvent(event);
         obj.dispatch("update", event);
+        obj.dispatch("change", event); // TODO only use change for everything globally, deprecate "update"
         this.dispatch("update", obj, event);
         return obj;
     }
@@ -281,10 +282,10 @@ class GenericObjectStore extends BaseStore {
         } else if (event.type === "updateOrCreate") {
             return this.applyUpdateOrCreateEvent(event);
         } else {
-            var obj = this.getObjectForEvent(event);
+            const obj = this.getObjectForEvent(event);
             if (!obj) {
                 console.error("I don't have object of type ", this.objectType, " ", event.objectId);
-                return;
+                return null;
             }
             return this.applyEventToObject(obj, event);
         }
