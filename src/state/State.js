@@ -73,7 +73,7 @@ export class State extends Dispatchable {
             console.error("Failed to import state, can't find store ", objectType);
             return;
         }
-        for (const dependency of store.getDependencies()) {
+        for (const dependency of store.dependencies) {
             this.importStateFromTempMap(dependency.toLowerCase(), stateMap);
         }
         store.importState(storeState);

@@ -19,7 +19,7 @@ const AjaxFetchMixin = (BaseStoreClass) => class AjaxFetchMixin extends BaseStor
         if (!this.fetchTimeout) {
             this.fetchTimeout = setTimeout(() => {
                 this.executeAjaxFetch();
-            }, this.options.fetchTimeoutDuration || 0);
+            }, this.fetchTimeoutDuration);
         }
     };
 
@@ -34,8 +34,8 @@ const AjaxFetchMixin = (BaseStoreClass) => class AjaxFetchMixin extends BaseStor
 
         // TODO: options.fetchURL should also support a function(ids, fetchJobs), do it when needed
         return {
-            url: this.options.fetchURL,
-            type: this.options.fetchType || "GET",
+            url: this.fetchURL,
+            type: this.fetchType || "GET",
             dataType: "json",
             data: requestData,
             cache: false,
@@ -76,7 +76,7 @@ const AjaxFetchMixin = (BaseStoreClass) => class AjaxFetchMixin extends BaseStor
             idFetchJobs.get(objectId).push(fetchJob);
         }
 
-        let maxChunkSize = this.options.maxFetchObjectCount || 256;
+        let maxChunkSize = this.maxFetchObjectCount || 256;
 
         let idChunks = splitInChunks(Array.from(idFetchJobs.keys()), maxChunkSize);
         let fetchJobsChunks = splitInChunks(Array.from(idFetchJobs.values()), maxChunkSize);

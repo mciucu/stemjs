@@ -5,7 +5,7 @@ import {GlobalState} from "./State";
 export const StoreSymbol = Symbol("Store");
 export const EventDispatcherSymbol = Symbol("EventDispatcher");
 
-class StoreObject extends Dispatchable {
+export class StoreObject extends Dispatchable {
     constructor(obj, event, store) {
         super();
         Object.assign(this, obj);
@@ -61,15 +61,6 @@ class StoreObject extends Dispatchable {
         return this[EventDispatcherSymbol].addListener(eventType, callback);
     }
 
-    getStreamName() {
-        throw "getStreamName not implemented";
-    }
-
-    // TODO: this should not be here by default
-    registerToStream() {
-        this.getStore().getState().registerStream(this.getStreamName());
-    }
-
     toJSON() {
         const obj = {};
         for (const key in this) {
@@ -81,17 +72,17 @@ class StoreObject extends Dispatchable {
     }
 }
 
-class BaseStore extends Dispatchable {
-    constructor(objectType, ObjectWrapper=StoreObject, options={}) {
+export class BaseStore extends Dispatchable {
+    constructor(objectType, ObjectClass=StoreObject, options={}) {
         super();
-        this.options = options;
         this.objectType = objectType.toLowerCase();
-        this.ObjectWrapper = ObjectWrapper;
-        this.attachToState();
-    }
-
-    getObjectType() {
-        return this.objectType;
+        this.ObjectClass = ObjectClass;
+        Object.assign(this, {
+            state: GlobalState, // Can be null as well
+            dependencies: [], // A list of other stores we want imported first
+            ...options
+        });
+        this.state?.addStore(this);
     }
 
     // For a response obj with a state field, return the objects that we have in store
@@ -100,7 +91,7 @@ class BaseStore extends Dispatchable {
 
         // Since the backend might have a different lettering case, need a more complex search here
         for (const [key, value] of Object.entries(responseState)) {
-            if (String(key).toLowerCase() === this.getObjectType()) {
+            if (String(key).toLowerCase() === this.objectType) {
                 return value.map(obj => this.get(obj.id));
             }
         }
@@ -112,33 +103,15 @@ class BaseStore extends Dispatchable {
         return this.loadFromResponse(response)?.[index];
     }
 
-    attachToState() {
-        this.getState()?.addStore(this);
-    }
-
     getState() {
-        // Allow explicit no state
-        if (this.options.hasOwnProperty("state")) {
-            return this.options.state;
-        } else {
-            return GlobalState;
-        }
-    }
-
-    // Is used by the state object to see which stores need to be loaded first
-    getDependencies() {
-        return this.options.dependencies || [];
+        return this.state;
     }
 }
 
 // Store type primarily intended to store objects that come from a server DB, and have a unique numeric .id field
 // TODO: do we ever decouple this from BaseStore? Maybe merge.
-class GenericObjectStore extends BaseStore {
+export class GenericObjectStore extends BaseStore {
     objects = new Map();
-
-    has(id) {
-        return !!this.get(id);
-    }
 
     get(id) {
         if (id == null) {
@@ -212,12 +185,6 @@ class GenericObjectStore extends BaseStore {
         return this.all().map(entry => entry.toJSON());
     }
 
-    createObject(event) {
-        const obj = new this.ObjectWrapper(event.data, event, this);
-        obj.setStore(this);
-        return obj;
-    }
-
     applyCreateEvent(event, sendDispatch=true) {
         let obj = this.getObjectForEvent(event);
         let dispatchType = "create";
@@ -230,7 +197,7 @@ class GenericObjectStore extends BaseStore {
             obj.dispatch("update", event);
             obj.dispatch("change", event); // TODO Changes for autoredraw compatibility, remove "update"
         } else {
-            obj = this.createObject(event);
+            obj = new this.ObjectClass(event.data, event, this);
             this.addObject(this.getObjectIdForEvent(event), obj);
         }
         if (sendDispatch) {
@@ -291,9 +258,8 @@ class GenericObjectStore extends BaseStore {
         }
     }
 
-    importState(objects) {
-        objects = objects || [];
-        for (let obj of objects) {
+    importState(objects = []) {
+        for (const obj of objects) {
             this.fakeCreate(obj);
         }
     }
@@ -338,7 +304,7 @@ class GenericObjectStore extends BaseStore {
     }
 }
 
-class SingletonStore extends BaseStore {
+export class SingletonStore extends BaseStore {
     constructor(objectType, options={}) {
         super(objectType, SingletonStore, options);
     }
@@ -369,9 +335,9 @@ class SingletonStore extends BaseStore {
     addEventListener = StoreObject.prototype.addEventListener.bind(this);
 }
 
-const Store = (objectType, ObjectWrapper, options={}) => class Store extends GenericObjectStore {
+export const Store = (objectType, ObjectClass, options={}) => class Store extends GenericObjectStore {
     constructor() {
-        super(objectType, ObjectWrapper, options);
+        super(objectType, ObjectClass, options);
     }
 };
 
@@ -399,10 +365,8 @@ export function registerStore(objectType, options={dependencies: []}) {
             }
         });
 
-        store.ObjectWrapper = proxy;
+        store.ObjectClass = proxy;
 
         return proxy;
     }
 }
-
-export {StoreObject, BaseStore, GenericObjectStore, SingletonStore, Store};
