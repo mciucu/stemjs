@@ -4,7 +4,7 @@ export class State extends Dispatchable {
     stores = new Map();
 
     getStore(objectType) {
-        objectType = objectType && objectType.toLowerCase();
+        objectType = objectType?.objectType || objectType?.toLowerCase();
         return this.stores.get(objectType);
     }
 
@@ -14,7 +14,7 @@ export class State extends Dispatchable {
     }
 
     addStore(store) {
-        let objectType = store.objectType.toLowerCase();
+        let objectType = store.objectType;
         if (!this.stores.has(objectType)) {
             this.stores.set(objectType, store);
         } else {
