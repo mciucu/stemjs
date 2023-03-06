@@ -260,23 +260,28 @@ export class GenericObjectStore extends BaseStore {
 
     importState(objects = []) {
         for (const obj of objects) {
-            this.fakeCreate(obj);
+            this.create(obj);
+        }
+    }
+
+    makeEventFromObject(obj, eventExtra=null) {
+        return {
+            isFake: true,
+            type: "create",
+            objectType: this.objectType,
+            objectId: obj.id,
+            data: obj,
+            ...eventExtra,
         }
     }
 
     // Create a fake creation event, to insert the raw object
-    fakeCreate(obj, eventType="fakeCreate", dispatchEvent=true) {
+    create(obj, eventExtra=null, dispatchEvent=true) {
         if (!obj) {
             return;
         }
 
-        let event = {
-            objectType: this.objectType,
-            objectId: obj.id,
-            type: eventType,
-            data: obj,
-        };
-
+        const event = this.makeEventFromObject(obj, eventExtra);
         return this.applyCreateEvent(event, dispatchEvent);
     }
 
@@ -284,14 +289,9 @@ export class GenericObjectStore extends BaseStore {
     // If fakeExisting, will also pass existing objects to your callback
     addCreateListener(callback, fakeExisting) {
         if (fakeExisting) {
-            for (let object of this.objects.values()) {
-                let event = {
-                    objectType: this.objectType,
-                    objectId: object.id,
-                    type: "fakeCreate",
-                    data: object,
-                };
-                callback(object, event);
+            for (const obj of this.objects.values()) {
+                const event = this.makeEventFromObject(obj);
+                callback(obj, event);
             }
         }
 
