@@ -187,13 +187,11 @@ export class GenericObjectStore extends BaseStore {
 
     applyCreateEvent(event, sendDispatch=true) {
         let obj = this.getObjectForEvent(event);
-        let dispatchType = "create";
+
+        const dispatchType = obj ? "update" : "create";
 
         if (obj) {
-            let refreshEvent = Object.assign({}, event);
-            dispatchType = "update";
-            refreshEvent.type = "refresh";
-            obj.applyEvent(refreshEvent);
+            obj.applyEvent(event);
             obj.dispatch("update", event);
             obj.dispatch("change", event); // TODO Changes for autoredraw compatibility, remove "update"
         } else {
@@ -204,19 +202,6 @@ export class GenericObjectStore extends BaseStore {
             this.dispatch(dispatchType, obj, event);
             this.dispatch("change", obj, event);
         }
-        return obj;
-    }
-
-    applyUpdateOrCreateEvent(event) {
-        let obj = this.getObjectForEvent(event);
-        if (!obj) {
-            obj = this.applyCreateEvent(event, false);
-            this.dispatch("create", obj, event);
-        } else {
-            this.applyEventToObject(obj, event);
-        }
-        this.dispatch("updateOrCreate", obj, event);
-        this.dispatch("change", obj, event);
         return obj;
     }
 
@@ -231,31 +216,30 @@ export class GenericObjectStore extends BaseStore {
         return objDeleted;
     }
 
-    applyEventToObject(obj, event) {
+    applyEvent(event) {
+        event.data = event.data || {};
+
+        if (event.type === "create" || event.type === "updateOrCreate") {
+            return this.applyCreateEvent(event);
+        }
+
+        if (event.type === "delete") {
+            return this.applyDeleteEvent(event);
+        }
+
+        // We're in the general case
+        const obj = this.getObjectForEvent(event);
+        if (!obj) {
+            console.error("I don't have object of type ", this.objectType, " ", event.objectId);
+            return null;
+        }
+
         obj.applyEvent(event);
         obj.dispatch("update", event);
         obj.dispatch("change", event); // TODO only use change for everything globally, deprecate "update"
         this.dispatch("update", obj, event);
+
         return obj;
-    }
-
-    applyEvent(event) {
-        event.data = event.data || {};
-
-        if (event.type === "create") {
-            return this.applyCreateEvent(event);
-        } else if (event.type === "delete") {
-            return this.applyDeleteEvent(event);
-        } else if (event.type === "updateOrCreate") {
-            return this.applyUpdateOrCreateEvent(event);
-        } else {
-            const obj = this.getObjectForEvent(event);
-            if (!obj) {
-                console.error("I don't have object of type ", this.objectType, " ", event.objectId);
-                return null;
-            }
-            return this.applyEventToObject(obj, event);
-        }
     }
 
     importState(objects = []) {
