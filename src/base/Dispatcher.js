@@ -235,7 +235,7 @@ Dispatchable.prototype.attachListenerOnce       = getAttachCleanupJobMethod("Lis
 
 Dispatcher.Global = new Dispatchable();
 
-class RunOnce {
+export class RunOnce {
     run(callback, timeout = 0) {
         if (this.timeout) {
             return;
@@ -244,6 +244,33 @@ class RunOnce {
             callback();
             this.timeout = undefined;
         }, timeout);
+    }
+}
+
+export class OncePerTickRunner {
+    constructor(callback) {
+        this.callback = callback;
+        this.throttle = new WeakMap();
+    }
+
+    maybeEnqueue(obj) {
+        if (this.throttle.get(obj)) {
+            return false;
+        }
+        this.throttle.set(obj, true);
+        queueMicrotask(() => {
+            if (!this.throttle.get(obj)) {
+                // We have been canceled
+                return;
+            }
+            this.clear(obj);
+            this.callback(obj);
+        });
+        return true;
+    }
+
+    clear(obj) {
+        this.throttle.delete(obj);
     }
 }
 
@@ -318,7 +345,7 @@ export class OnceDispatcher extends Dispatcher {
 // Class that can be used to pass around ownership of a resource.
 // It informs the previous owner of the change (once) and dispatches the new element for all listeners
 // TODO: a better name
-class SingleActiveElementDispatcher extends Dispatcher {
+export class SingleActiveElementDispatcher extends Dispatcher {
     setActive(element, addChangeListener, forceDispatch) {
         if (!forceDispatch && element === this._active) {
             return;
@@ -339,4 +366,4 @@ class SingleActiveElementDispatcher extends Dispatcher {
     }
 }
 
-export {Dispatcher, Dispatchable, RunOnce, CleanupJobs, SingleActiveElementDispatcher, getAttachCleanupJobMethod};
+export {Dispatcher, Dispatchable, CleanupJobs, getAttachCleanupJobMethod};

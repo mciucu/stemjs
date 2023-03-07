@@ -5,12 +5,13 @@ import {
     isPlainObject,
     unwrapElementWithFunc
 } from "../base/Utils";
-import {Dispatchable} from "../base/Dispatcher";
+import {Dispatchable, OncePerTickRunner} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
 import {applyDebugFlags} from "./Debug";
 import {Theme} from "./style/Theme.js";
 
 export const RenderStack = []; //keeps track of objects that are redrawing, to know where to assign refs automatically
+export const redrawPerTickRunner = new OncePerTickRunner((obj) => obj.node && obj.redraw());
 
 // TODO Probably get rid of the UI namespace
 const UI = {};
@@ -31,6 +32,9 @@ export class BaseUIElement extends Dispatchable {
             let name = this.options.ref.name ?? this.options.ref.key; // TODO: should be key
             obj[name] = this;
         }
+
+        // We do this here since this is done on every redraw, and we just needed a way to hook into all redraw
+        this.cancelEnqueuedRedraw();
     }
 
     removeRef() {
@@ -41,6 +45,15 @@ export class BaseUIElement extends Dispatchable {
                 obj[name] = undefined;
             }
         }
+    }
+
+    // Calls a queueMicrotask(() => this.redraw()), but only if one isn't already enqueued
+    enqueueRedraw() {
+        redrawPerTickRunner.maybeEnqueue(this);
+    }
+
+    cancelEnqueuedRedraw() {
+        redrawPerTickRunner.clear(this);
     }
 
     // Lifecycle methods, called when the element was first inserted in the DOM, and before it's removed

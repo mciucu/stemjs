@@ -5,31 +5,8 @@ import {BaseUIElement} from "../ui/UIBase.js";
 // TODO: maybe have better names
 const autoRedrawListenersLazy = new PropertyCache("autoRedrawHandler", () => new Set());
 
-
-// TODO put together with RunOnce
-export class OncePerTickRunner {
-    constructor(callback) {
-        this.callback = callback;
-        this.weakMap = new WeakMap();
-    }
-
-    maybeEnqueue(obj) {
-        if (this.weakMap.has(obj)) {
-            return false;
-        }
-        this.weakMap.set(obj, true);
-        queueMicrotask(() => {
-            this.weakMap.delete(obj);
-            this.callback(obj);
-        });
-        return true;
-    }
-}
-
-export const redrawPerTickRunner = new OncePerTickRunner((obj) => obj.node && obj.redraw());
-
 const redrawHandlerLazy = new PropertyCache("autoRedrawListener", (obj) => {
-    return () => redrawPerTickRunner.maybeEnqueue(obj);
+    return () => obj.enqueueRedraw();
 });
 
 // Decorator that attaches a change listener on all store objects in options
