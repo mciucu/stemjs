@@ -96,7 +96,7 @@ export class MetricSummary extends Dispatchable {
             this.addInterval(lastTimestamp, timestamp, value);
         }
 
-        this.dispatch("update", {timestamp, value, lastTimestamp});
+        this.dispatchChange({timestamp, value, lastTimestamp});
     }
 
     getValues(startDate=this.rawTimestamps.peekFront(), endDate=this.rawTimestamps.last(), maxValues=1024) {
