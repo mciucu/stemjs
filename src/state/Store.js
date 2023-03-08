@@ -268,7 +268,7 @@ export class GenericObjectStore extends BaseStore {
         }
 
         const event = this.makeEventFromObject(obj, eventExtra);
-        return this.applyCreateEvent(event, dispatchEvent);
+        return this.applyCreateOrUpdateEvent(event, dispatchEvent);
     }
 
     // Add a listener on all object creation events
