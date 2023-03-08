@@ -209,14 +209,14 @@ export class GenericObjectStore extends BaseStore {
     }
 
     applyDeleteEvent(event) {
-        let objDeleted = this.getObjectForEvent(event);
-        if (objDeleted) {
+        const obj = this.getObjectForEvent(event);
+        if (obj) {
             this.objects.delete(this.getObjectIdForEvent(event));
-            objDeleted.dispatch("delete", event, objDeleted);
-            this.dispatch("delete", objDeleted, event);
-            this.dispatch("change", objDeleted, event);
+            obj.dispatch("delete", event, obj);
+            this.dispatch("delete", obj, event);
+            this.dispatch("change", obj, event);
         }
-        return objDeleted;
+        return obj;
     }
 
     applyEvent(event) {
