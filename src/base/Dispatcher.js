@@ -192,10 +192,6 @@ class Dispatchable {
         return this.addListener("update", callback);
     }
 
-    removeUpdateListener(callback) {
-        return this.removeListener("update", callback);
-    }
-
     addChangeListener(callback) {
         return this.addListener("change", callback);
     }
@@ -228,7 +224,7 @@ function getAttachCleanupJobMethod(methodName) {
 Dispatchable.prototype.attachListener           = getAttachCleanupJobMethod("Listener");
 Dispatchable.prototype.attachEventListener      = getAttachCleanupJobMethod("EventListener");
 Dispatchable.prototype.attachCreateListener     = getAttachCleanupJobMethod("CreateListener");
-Dispatchable.prototype.attachUpdateListener     = getAttachCleanupJobMethod("UpdateListener");
+Dispatchable.prototype.attachUpdateListener     = getAttachCleanupJobMethod("UpdateListener"); // TODO @branch turn into attachChangeListener
 Dispatchable.prototype.attachDeleteListener     = getAttachCleanupJobMethod("DeleteListener");
 Dispatchable.prototype.attachChangeListener     = getAttachCleanupJobMethod("ChangeListener");
 Dispatchable.prototype.attachListenerOnce       = getAttachCleanupJobMethod("ListenerOnce");
