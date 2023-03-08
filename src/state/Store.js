@@ -41,7 +41,6 @@ export class StoreObject extends Dispatchable {
 
     applyEventAndDispatch(event) {
         this.applyEvent(event);
-        this.dispatch("update", event); // TODO Changes for autoredraw compatibility, remove "update"
         this.dispatchChange(event);
     }
 
@@ -194,7 +193,7 @@ export class GenericObjectStore extends BaseStore {
     applyCreateEvent(event, sendDispatch=true) {
         let obj = this.getObjectForEvent(event);
 
-        const dispatchType = obj ? "update" : "create";
+        const dispatchType = obj ? "change" : "create";
 
         if (obj) {
             obj.applyEventAndDispatch(event);
@@ -204,7 +203,9 @@ export class GenericObjectStore extends BaseStore {
         }
         if (sendDispatch) {
             this.dispatch(dispatchType, obj, event);
-            this.dispatch("change", obj, event);
+            if (dispatchType != change) {
+                this.dispatch("change", obj, event);
+            }
         }
         return obj;
     }
@@ -310,12 +311,12 @@ export class SingletonStore extends BaseStore {
 
     applyEvent(event) {
         Object.assign(this, event.data);
-        this.dispatch("update", event, this);
+        this.dispatchChange(event);
     }
 
     importState(obj) {
         Object.assign(this, obj);
-        this.dispatch("update", obj, this);
+        this.dispatchChange(obj);
     }
 
     // Use the same logic as StoreObject when listening to events
