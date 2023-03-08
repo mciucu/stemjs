@@ -190,22 +190,20 @@ export class GenericObjectStore extends BaseStore {
         return this.all().map(entry => entry.toJSON());
     }
 
-    applyCreateEvent(event, sendDispatch=true) {
+    applyCreateOrUpdateEvent(event, sendDispatch=true) {
         let obj = this.getObjectForEvent(event);
-
-        const dispatchType = obj ? "change" : "create";
 
         if (obj) {
             obj.applyEventAndDispatch(event);
         } else {
             obj = new this.ObjectClass(event.data, event, this);
             this.addObject(this.getObjectIdForEvent(event), obj);
+            if (sendDispatch) {
+                this.dispatch("create", obj, event);
+            }
         }
         if (sendDispatch) {
-            this.dispatch(dispatchType, obj, event);
-            if (dispatchType != change) {
-                this.dispatch("change", obj, event);
-            }
+            this.dispatchChange(obj, event);
         }
         return obj;
     }
@@ -224,8 +222,8 @@ export class GenericObjectStore extends BaseStore {
     applyEvent(event) {
         event.data = event.data || {};
 
-        if (event.type === "create" || event.type === "updateOrCreate") {
-            return this.applyCreateEvent(event);
+        if (event.type === "create" || event.type === "createOrUpdate") {
+            return this.applyCreateOrUpdateEvent(event);
         }
 
         if (event.type === "delete") {
