@@ -192,6 +192,7 @@ class Dispatchable {
         return this.addListener("change", callback);
     }
 
+    // TODO change to dispatch(...args, this)?
     dispatchChange(value) {
         this.dispatch("change", value, this);
     }
