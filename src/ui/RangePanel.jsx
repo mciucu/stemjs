@@ -28,7 +28,7 @@ class EntriesManager extends Dispatchable {
         let entries = this.getRawEntries();
         entries = this.filterEntries(entries);
         this.cachedEntries = this.sortEntries(entries);
-        this.dispatch("update");
+        this.dispatchChange();
     }
 
     getEntries() {
@@ -266,7 +266,7 @@ function RangeTableInterface(TableClass) {
                 this.jumpToIndex(index);
             });
             // Delay is added for smoother experience of scrolling.
-            this.attachListener(this.getEntriesManager(), "update", () => {
+            this.attachChangeListener(this.getEntriesManager(), () => {
                 this.setScroll();
             });
         }

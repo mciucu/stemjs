@@ -39,6 +39,12 @@ export class StoreObject extends Dispatchable {
         Object.assign(this, event.data);
     }
 
+    applyEventAndDispatch(event) {
+        this.applyEvent(event);
+        this.dispatch("update", event); // TODO Changes for autoredraw compatibility, remove "update"
+        this.dispatchChange(event);
+    }
+
     addDeleteListener(callback) {
         return this.addListener("delete", callback);
     }
@@ -54,7 +60,7 @@ export class StoreObject extends Dispatchable {
         // Ensure the private event dispatcher exists
         if (!this[EventDispatcherSymbol]) {
             this[EventDispatcherSymbol] = new Dispatchable();
-            this.addUpdateListener((event) => {
+            this.addChangeListener((event) => {
                 this[EventDispatcherSymbol].dispatch(event.type, event, this);
             });
         }
@@ -126,7 +132,7 @@ export class GenericObjectStore extends BaseStore {
 
     clear() {
         this.objects.clear();
-        this.dispatch("update", null, null);
+        this.dispatch("change", null, null);
     }
 
     getObjectIdForEvent(event) {
@@ -191,9 +197,7 @@ export class GenericObjectStore extends BaseStore {
         const dispatchType = obj ? "update" : "create";
 
         if (obj) {
-            obj.applyEvent(event);
-            obj.dispatch("update", event);
-            obj.dispatch("change", event); // TODO Changes for autoredraw compatibility, remove "update"
+            obj.applyEventAndDispatch(event);
         } else {
             obj = new this.ObjectClass(event.data, event, this);
             this.addObject(this.getObjectIdForEvent(event), obj);
@@ -230,14 +234,13 @@ export class GenericObjectStore extends BaseStore {
         // We're in the general case
         const obj = this.getObjectForEvent(event);
         if (!obj) {
-            console.error("I don't have object of type ", this.objectType, " ", event.objectId);
+            console.error("Missing object of type ", this.objectType, " ", event.objectId);
             return null;
         }
 
-        obj.applyEvent(event);
-        obj.dispatch("update", event);
-        obj.dispatch("change", event); // TODO only use change for everything globally, deprecate "update"
-        this.dispatch("update", obj, event);
+        obj.applyEventAndDispatch(event);
+
+        this.dispatch("change", obj, event); // TODO this is not a store event, but how can we still register for all of these?
 
         return obj;
     }

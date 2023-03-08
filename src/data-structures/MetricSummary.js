@@ -132,8 +132,4 @@ export class MetricSummary extends Dispatchable {
         }
         return values;
     }
-
-    addUpdateListener(...args) {
-        return this.addListener("update", ...args);
-    }
 }
