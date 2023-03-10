@@ -158,10 +158,7 @@ export function slugify(string) {
 
 // If the first argument is a number, it's returned concatenated with the suffix, otherwise it's returned unchanged
 export function suffixNumber(value, suffix) {
-    if (typeof value === "number" || value instanceof Number) {
-        return value + suffix;
-    }
-    return value;
+    return isNumber(value) ? value + suffix : value;
 }
 
 export function capitalize(text) {
@@ -178,6 +175,20 @@ export function pluralize(count, text) {
 
 export function titleCase(text) {
      return text.toLowerCase().split(" ").map(word => capitalize(word)).join(" ");
+}
+
+// Cap a string (when sending to DB for instance), and also add a total length info
+// Don't use this in the frontend, use ellipsis css
+// Length is exceeded a bit by the extra description
+export function limitString(str, maxLength) {
+    if (str.length > maxLength) {
+        const newStr = str.substring(0, maxLength) + `...[${str.length} initial chr.]`;
+        // Even if we're a bit over the length limit, let's not be stupid and bloat the input
+        if (newStr.length < str.length) {
+            str = newStr;
+        }
+    }
+    return str;
 }
 
 export function setObjectPrototype(obj, Class) {
