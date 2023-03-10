@@ -1,5 +1,5 @@
 import {UI} from "./UIBase";
-import {dashCase} from "../base/Utils";
+import {dashCase, isFunction, isNumber, isString} from "../base/Utils";
 import {NodeAttributes, defaultToPixelsAttributes} from "./NodeAttributes";
 
 // TODO: should this be actually better done throught the dynamic CSS API, without doing through the DOM?
@@ -33,8 +33,7 @@ class StyleInstance extends UI.TextElement {
             key = dashCase(key);
 
             // If it's a size property, and the value is a number, assume it's in pixels
-            if ((value instanceof Number || typeof value === "number") &&
-                value != 0 && defaultToPixelsAttributes.has(key)) {
+            if (isNumber(value) && value != 0 && defaultToPixelsAttributes.has(key)) {
                 value = value + "px";
             }
 
@@ -70,7 +69,7 @@ class StyleInstance extends UI.TextElement {
 class StyleElement extends UI.Primitive("style") {
     getNodeAttributes() {
         // TODO: allow custom style attributes (media, scoped, etc)
-        let attr = new NodeAttributes({});
+        const attr = new NodeAttributes({});
         if (this.options.name) {
             attr.setAttribute("name", this.options.name);
         }
@@ -107,28 +106,26 @@ class DynamicStyleElement extends StyleElement {
 
     // A cyclic dependency in the style object will cause an infinite loop here
     getStyleInstances(selector, style) {
-        let result = [];
-        let ownStyle = {}, haveOwnStyle = false;
-        for (let key in style) {
-            let value = style[key];
+        const result = [], ownStyle = {};
+        let haveOwnStyle = false;
+        for (const key in style) {
+            const value = style[key];
             if (value == null) {
                 continue;
             }
-            let isProperValue = (typeof value === "string" || value instanceof String
-                              || typeof value === "number" || value instanceof Number
-                              || typeof value === "function" || Array.isArray(value));
+            const isProperValue = (isString(value) || isNumber(value) || isFunction(value) || Array.isArray(value));
             if (isProperValue) {
                 ownStyle[key] = value;
                 haveOwnStyle = true;
             } else {
                 // Check that this actually is a valid subselector
-                let firstChar = String(key).charAt(0);
+                const firstChar = String(key).charAt(0);
                 if (!ALLOWED_SELECTOR_STARTS.has(firstChar)) {
                     console.error(`First character of your selector is invalid. The key is "${key}"`);
                     continue;
                 }
                 // TODO: maybe optimize for waste here?
-                let subStyle = this.getStyleInstances(selector + key, value);
+                const subStyle = this.getStyleInstances(selector + key, value);
                 result.push(...subStyle);
             }
         }
