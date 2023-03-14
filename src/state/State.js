@@ -88,13 +88,13 @@ export class State extends Dispatchable {
             return;
         }
         // Import everything in a map and then do an implicit topological sort by dependencies
-        let stateMap = new Map();
-        for (let objectType in state) {
-            stateMap.set(objectType.toLowerCase(), state[objectType]);
+        const stateMap = new Map();
+        for (const [objectType, objects] of Object.entries(state)) {
+            stateMap.set(objectType.toLowerCase(), objects);
         }
         while (stateMap.size > 0) {
-            let allKeys = stateMap.keys();
-            let objectType = allKeys.next().value;
+            // Pick to start from any object type
+            const objectType = stateMap.keys().next().value;
             this.importStateFromTempMap(objectType, stateMap);
         }
     }
