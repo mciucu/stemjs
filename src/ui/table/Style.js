@@ -15,7 +15,7 @@ class TableStyle extends StyleSheet {
     };
 
     @styleRule
-    table = {
+    container = {
         width: "100%",
         maxWidth: "100%",
         marginBottom: "20px",
@@ -23,7 +23,7 @@ class TableStyle extends StyleSheet {
         borderCollapse: "collapse",
         ">*>*>td": this.cellStyle,
         ">*>*>th": this.cellStyle,
-        ">*>thead>*>*": this.theadCellStyle,
+        ">thead>*>*": this.theadCellStyle,
     };
 
     @styleRule
