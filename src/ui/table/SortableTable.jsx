@@ -1,18 +1,40 @@
 import {UI} from "../UIBase";
-import {SortableTableStyle} from "./Style";
 import {Table} from "./Table";
 import {defaultComparator} from "../../base/Utils";
 import {MakeIcon} from "../SimpleElements.jsx";
+import {styleRule, StyleSheet} from "../Style.js";
 
-function SortableTableInterface(BaseTableClass) {
+
+export class SortableTableStyle extends StyleSheet {
+    @styleRule
+    container = {
+        [" th:hover ." + this.sortIcon.getClassName()]: {
+            visibility: "inherit",
+        },
+        " th:hover": {
+            cursor: "pointer",
+        }
+    };
+
+    @styleRule
+    sortIcon = {
+        position: "absolute",
+        right: 0,
+        bottom: 0,
+        visibility: "hidden",
+        float: "right",
+    };
+}
+
+export function SortableTableInterface(BaseTableClass) {
     class SortableTable extends BaseTableClass {
         getSortableStyleSheet() {
-            return SortableTableStyle.getInstance(); // Make this optional maybe
+            return SortableTableStyle.getInstance(this.getTheme()); // Make this optional maybe
         }
 
         extraNodeAttributes(attr) {
             super.extraNodeAttributes(attr);
-            attr.addClass(this.getSortableStyleSheet().table);
+            attr.addClass(this.getSortableStyleSheet().container);
         }
 
         setOptions(options) {
@@ -25,8 +47,9 @@ function SortableTableInterface(BaseTableClass) {
             if (column.noSort) {
                 return super.renderColumnHeader(column);
             }
-            const sortableStyleSheet = this.getSortableStyleSheet();
-            let sortIcon =<span style={{opacity: 0.4}}>{MakeIcon("sort")}</span>;
+            const sortableStyleSheet = this.getSortableStyleSheet(); // TODO: use properly
+
+            let sortIcon = <span style={{opacity: 0.4}}>{MakeIcon("sort")}</span>;
             if (this.sortBy === column) {
                 if (this.sortDescending) {
                     sortIcon = MakeIcon("sort-desc");
@@ -34,7 +57,6 @@ function SortableTableInterface(BaseTableClass) {
                     sortIcon = MakeIcon("sort-asc");
                 }
             }
-            // sortIcon = <span className={sortableStyleSheet.sortIcon}>{sortIcon}</span>;
 
             const reorderCallback = () => {
                 this.sortByColumn(column);
@@ -113,6 +135,4 @@ function SortableTableInterface(BaseTableClass) {
     return SortableTable;
 }
 
-let SortableTable = SortableTableInterface(Table);
-
-export {SortableTable, SortableTableInterface};
+export const SortableTable = SortableTableInterface(Table);
