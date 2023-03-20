@@ -2,12 +2,18 @@ import {StyleSheet} from "../Style";
 import {styleRule} from "../../decorators/Style";
 
 export class TableStyle extends StyleSheet {
-    cellStyle =  {
+    cellStyle = {
         padding: 8,
         lineHeight: "1.42857143",
         verticalAlign: "top",
         borderTop: "1px solid #ddd",
     };
+
+    @styleRule
+    thead = {
+        borderBottom: "2px solid #ddd",
+        borderTop: 0,
+    }
 
     @styleRule
     container = {
@@ -16,12 +22,7 @@ export class TableStyle extends StyleSheet {
         marginBottom: 20,
         borderSpacing: 0,
         borderCollapse: "collapse",
-        ">*>*>td": this.cellStyle,
-        ">*>*>th": this.cellStyle,
-        ">thead>*>*": {
-            borderBottom: "2px solid #ddd",
-            borderTop: 0,
-        },
+        ">*>*>td,th": this.cellStyle,
     };
 
     @styleRule
