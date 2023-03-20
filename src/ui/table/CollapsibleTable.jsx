@@ -141,7 +141,7 @@ export function CollapsibleTableInterface(BaseTableClass) {
                     whiteSpace: "nowrap",
                 },
                 headerStyle: {
-                    width: 30,
+                    width: 30, // TODO not flexible to hardcode this here
                 }
             });
         }
