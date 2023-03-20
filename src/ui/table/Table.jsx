@@ -48,10 +48,6 @@ export class Table extends UI.Primitive("table") {
         }
     }
 
-    extraNodeAttributes(attr) {
-        attr.addClass(this.styleSheet.table); // TODO user container instead of table
-    }
-
     getRowClass() {
         return this.options.rowClass;
     }
@@ -85,7 +81,7 @@ export class Table extends UI.Primitive("table") {
     renderTableHead() {
         const {noHeader, columns} = this.options;
 
-        return !noHeader && <thead ref="thead">
+        return !noHeader && <thead ref="thead" className={this.styleSheet.thead}>
             <tr>
                 {columns.map((column, index) => this.renderHeaderCell(column, index))}
             </tr>
