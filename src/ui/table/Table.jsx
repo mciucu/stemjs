@@ -81,7 +81,7 @@ export class Table extends UI.Primitive("table") {
     renderTableHead() {
         const {noHeader, columns} = this.options;
 
-        return !noHeader && <thead ref="thead" style={this.styleSheet.thead}>
+        return !noHeader && <thead ref="thead" className={this.styleSheet.thead}>
             <tr>
                 {columns.map((column, index) => this.renderHeaderCell(column, index))}
             </tr>
