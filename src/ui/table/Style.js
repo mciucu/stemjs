@@ -31,4 +31,9 @@ export class TableStyle extends StyleSheet {
             backgroundColor: "#f5f5f5",
         }
     };
+
+    @styleRule
+    tableRow = {
+        // Available for overwriting
+    }
 }
