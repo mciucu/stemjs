@@ -67,8 +67,19 @@ export class Table extends UI.Primitive("table") {
             columns,
             rowIndex,
             parent: this,
+            className: this.styleSheet.tableRow,
             key: this.getEntryKey(entry, rowIndex),
         };
+    }
+
+    getRowByEntry(entry) {
+        // TODO not nice that this is O(N)
+        for (const row of this.rows) {
+            if (row.options.entry === entry) {
+                return row;
+            }
+        }
+        return null;
     }
 
     render() {
@@ -89,12 +100,13 @@ export class Table extends UI.Primitive("table") {
     }
 
     getEntryKey(entry, index) {
-        return (entry && entry.id != null) ? entry.id : index;
+        return entry?.id ?? index;
     }
 
     renderRows() {
         const entries = this.getEntries();
-        return this.rows = entries.map((entry, index) => this.makeRow(entry, index));
+        this.rows = entries.map((entry, index) => this.makeRow(entry, index));
+        return this.rows;
     }
 
     renderTableBody() {

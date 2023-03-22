@@ -1,4 +1,4 @@
-import {padNumber, suffixWithOrdinal, isNumber, isFunction, isString} from "../base/Utils";
+import {padNumber, suffixWithOrdinal, isNumber, isString} from "../base/Utils";
 import {TimeUnit, Duration} from "./Duration";
 import {TokenFormatter} from "./Formatter.js";
 
@@ -55,11 +55,12 @@ class StemDate extends BaseDate {
         if (!DEFAULT_DATE_FORMAT) {
             return this.toBaseString();
         }
+        
         if (isString(DEFAULT_DATE_FORMAT)) {
             return this.format(DEFAULT_DATE_FORMAT);
-        } else {
-            return DEFAULT_DATE_FORMAT(this);
         }
+
+        return DEFAULT_DATE_FORMAT(this);
     }
 
     static fromUnixMilliseconds(unixMilliseconds) {
