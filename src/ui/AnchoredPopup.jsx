@@ -15,6 +15,7 @@ export class AnchoredPopupStyle extends StyleSheet {
 
     @styleRule
     popup = {
+        color: this.themeProps.TEXT_PRIMARY_COLOR,
         background: this.themeProps.POPUP_BACKGROUND,
         boxShadow: this.themeProps.POPUP_SHADOW,
         border: this.themeProps.POPUP_BORDER,
@@ -124,7 +125,7 @@ export class AnchoredPopup extends UI.Element {
     addAnchorListeners() {
         const {anchor} = this.options;
 
-        const {top, left, width, height} = this.anchorRect;
+        const {top, left} = this.anchorRect;
         this.interval = this.attachInterval(() => {
             if (!anchor.node) {
                 this.hide();
