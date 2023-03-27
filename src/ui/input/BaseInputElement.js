@@ -28,7 +28,7 @@ export class BaseInputElement extends UI.Element {
         super.setOptions(options);
         const {initialValue} = this.options;
         if (this.value === undefined || !this.node || !this.isEqual(initialValue, oldInitialValue)) {
-            this.setValue(initialValue);
+            this.setValue(initialValue, false, false);
         }
         if (Object.hasOwn(this.options, "value")) {
             this.setValue(this.options.value);
