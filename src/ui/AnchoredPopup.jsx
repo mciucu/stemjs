@@ -18,6 +18,8 @@ export class AnchoredPopupStyle extends StyleSheet {
         background: this.themeProps.POPUP_BACKGROUND,
         boxShadow: this.themeProps.POPUP_SHADOW,
         border: this.themeProps.POPUP_BORDER,
+        maxHeight: this.themeProps.POPUP_MAX_HEIGHT,
+        maxWidth: this.themeProps.POPUP_MAX_WIDTH,
         borderRadius: this.themeProps.CARD_BORDER_RADIUS,
         // TODO: Create a constants object with all of the floating elements' zIndexes so we have an idea of the overlapping.
         zIndex: 100005,
@@ -60,7 +62,7 @@ export class AnchoredPopup extends UI.Element {
             }
         }
 
-        this.lastShownModal = this.create(document.body, options)
+        this.lastShownModal = this.create(document.body, options);
         return this.lastShownModal;
     }
 
