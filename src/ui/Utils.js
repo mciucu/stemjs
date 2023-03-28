@@ -35,3 +35,16 @@ export function changeParent(element, newParent) {
     currentParent.eraseChild(element, false);
     newParent.appendChild(element);
 }
+
+export function isElementInView(element) {
+    const node = element.node || element;
+
+    const {top, bottom} = node.getBoundingClientRect();
+    for (let pathNode = node; pathNode && pathNode !== document; pathNode = pathNode.parentNode) {
+        if (window.getComputedStyle(pathNode).overflowY === "auto" && pathNode.scrollHeight !== pathNode.offsetHeight) {
+            const rect = pathNode.getBoundingClientRect();
+            return (top >= rect.top && top <= rect.bottom && bottom >= rect.top && bottom <= rect.bottom);
+        }
+    }
+    return true;
+}
