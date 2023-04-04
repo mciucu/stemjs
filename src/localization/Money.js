@@ -35,8 +35,8 @@ export class Money {
             if (isNaN(value)) {
                 throw MoneyErrors.INVALID_AMOUNT;
             }
-            this.amount = this.currency.mainUnitsToAmount(value);
-            this.amount = Math.floor(this.amount);
+            // Rounding to nearest integer, so 0.01 and 0.03 are alrays 10000 and 30000
+            this.amount = Math.round(this.currency.mainUnitsToAmount(value));
         }
     }
 
@@ -156,6 +156,13 @@ export class Money {
         if (this.getCurrency() != money.getCurrency()) { // There should never be more than a store object per currency
             // Money error should be stopped early, since we don't want to make a bad API call
             throw MoneyErrors.CURRENCY_MISMATCH;
+        }
+    }
+
+    toJSON() {
+        return {
+            amount: this.amount,
+            currencyId: this.currency.id,
         }
     }
 }
