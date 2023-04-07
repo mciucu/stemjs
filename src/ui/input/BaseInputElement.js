@@ -30,7 +30,7 @@ export class BaseInputElement extends UI.Element {
         if (this.value === undefined || !this.node || !this.isEqual(initialValue, oldInitialValue)) {
             this.setValue(initialValue, false, false);
         }
-        if (Object.hasOwn(this.options, "value")) {
+        if (this.options.hasOwnProperty("value")) {
             this.setValue(this.options.value);
         }
     }
