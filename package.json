@@ -3,7 +3,6 @@
   "version": "6.4.6",
   "description": "Frontend and core-library framework",
   "type": "module",
-  "main": "src/Stem.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
