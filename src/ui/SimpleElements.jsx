@@ -22,7 +22,7 @@ export function MakeIcon() {
     return MakeIconFunc(...arguments);
 }
 
-class SimpleStyledElement extends UI.Element {
+export class SimpleStyledElement extends UI.Element {
     getLevel() {
         return this.options.level || (this.parent && this.parent.getLevel && this.parent.getLevel());
     }
@@ -41,7 +41,7 @@ class SimpleStyledElement extends UI.Element {
 }
 
 
-class IconableInterface extends SimpleStyledElement {
+export class IconableInterface extends SimpleStyledElement {
     render() {
         return [this.beforeChildren(), this.getLabel(), super.render()];
     };
@@ -139,7 +139,7 @@ export class LabelStyle extends BasicLevelStyleSheet(labelColorToStyle) {
 
 
 @registerStyle(LabelStyle)
-class Label extends UI.Primitive(IconableInterface, "span") {
+export class Label extends UI.Primitive(IconableInterface, "span") {
     extraNodeAttributes(attr) {
         attr.addClass(this.styleSheet.Size(this.getSize()));
         attr.addClass(this.styleSheet.Level(this.getLevel()));
@@ -200,11 +200,9 @@ export class BadgeStyle extends BasicLevelStyleSheet(badgeColorToStyle) {
 
 
 @registerStyle(BadgeStyle)
-class Badge extends UI.Primitive(IconableInterface, "span") {
+export class Badge extends UI.Primitive(IconableInterface, "span") {
     extraNodeAttributes(attr) {
         attr.addClass(this.styleSheet.Size(this.getSize()));
         attr.addClass(this.styleSheet.Level(this.getLevel()));
     }
 }
-
-export {SimpleStyledElement, IconableInterface, Label, Badge};

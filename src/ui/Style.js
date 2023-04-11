@@ -201,7 +201,7 @@ function focus(style) {
     return wrapCSS(":focus", style);
 }
 
-let styleMap = new WeakMap();
+let styleMap = new WeakMap(); // TODO Delete this?
 
 export {StyleSheet, ExclusiveClassSet, styleMap, wrapCSS, hover, focus, active};
 
