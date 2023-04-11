@@ -1,4 +1,4 @@
-import {UI, BaseUIElement} from "../UIBase.js";
+import {UI, BaseUIElement, RenderStack} from "../UIBase.js";
 
 const stemInReactContext = {
     reactComponentDecorator: (Component) => Component,
@@ -96,6 +96,9 @@ export function enableStemInReactApp(ReactDOM, React, reactComponentDecorators) 
     const oldReactCreateElement = React.createElement;
     React.createElement = (...args) => {
         const firstArg = args[0];
+        if (RenderStack.length > 0) {
+            return UI.createElement(...args);
+        }
         if (firstArg && firstArg.prototype && firstArg.prototype instanceof BaseUIElement) {
             args[0] = wrapStemInReact(React, firstArg);
         }
