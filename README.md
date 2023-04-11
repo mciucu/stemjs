@@ -18,11 +18,6 @@ create-stem-app your_app_name
 ## Using the library
 The Stem code is designed to be used as ES6 modules. The code is meant to be included in the build path for whatever bundling tool you use (webpack, rollup).
 
-## Build requirements
-The source bundle is build with rollup, which you can install with:
-`npm install -g rollup`.
-To call it, just run `rollup -c` in the root project folder.
-
 ## Why release another Javascript framework?
 The world is full of them. Most of them are mediocre though, and I wanted to show some effort into another direction.
 The architecture isn't optimized for cool one-liners, but for maintenance and flexibility, that keeps intentionally as much of the functionality in non-core code as possible.
