@@ -14,7 +14,7 @@ export class State extends Dispatchable {
     }
 
     addStore(store) {
-        let objectType = store.objectType;
+        const objectType = store.objectType;
         if (!this.stores.has(objectType)) {
             this.stores.set(objectType, store);
         } else {
@@ -39,7 +39,7 @@ export class State extends Dispatchable {
                 return;
             }
         }
-        let store = this.getStoreForEvent(event);
+        const store = this.getStoreForEvent(event);
         if (store) {
             return store.applyEvent(event);
         } else {
@@ -48,7 +48,7 @@ export class State extends Dispatchable {
     }
 
     get(objectType, objectId) {
-        let store = this.getStore(objectType);
+        const store = this.getStore(objectType);
         if (store) {
             let args = Array.prototype.slice.call(arguments, 1);
             return store.get(...args);
@@ -82,7 +82,7 @@ export class State extends Dispatchable {
     // Imports the state information from a plain object
     importState(state) {
         if (Array.isArray(state)) {
-            for (let obj of state) {
+            for (const obj of state) {
                 this.importState(obj);
             }
             return;
@@ -93,21 +93,21 @@ export class State extends Dispatchable {
             stateMap.set(objectType.toLowerCase(), objects);
         }
         while (stateMap.size > 0) {
-            // Pick to start from any object type
-            const objectType = stateMap.keys().next().value;
+            const allKeys = stateMap.keys();
+            const objectType = allKeys.next().value;
             this.importStateFromTempMap(objectType, stateMap);
         }
     }
 
     clear() {
-        for (let store of this.stores.values()) {
+        for (const store of this.stores.values()) {
             store.clear && store.clear();
         }
     }
 
     toJSON() {
         const state = {};
-        for (let store of this.stores.values()) {
+        for (const store of this.stores.values()) {
             state[store.objectType] = store.toJSON();
         }
         return state;
