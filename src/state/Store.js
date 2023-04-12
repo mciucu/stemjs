@@ -50,7 +50,6 @@ export class StoreObject extends Dispatchable {
 
     // Add a listener on updates from events with this specific type.
     // Can accept an array as eventType
-    // Returns an object that implements the Cleanup interface.
     addEventListener(eventType, callback) {
         if (Array.isArray(eventType)) {
             const handlers = eventType.map(e => this.addEventListener(e, callback));
