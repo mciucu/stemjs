@@ -35,7 +35,7 @@ export class Theme extends Dispatchable {
             set: (properties, key, value) => {
                 this.setProperties({[key]: value});
                 // TODO this should also update all themes that inherit from us
-                return value;
+                return true;
             }
         });
 
