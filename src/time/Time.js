@@ -2,7 +2,7 @@ import {StemDate} from "./Date";
 import {TimeUnit} from "./Duration"
 
 // File meant to handle server time/client time differences
-let ServerTime = {
+export const ServerTime = {
     now() {
         return new StemDate().subtract(this.getOffset());
     },
@@ -23,10 +23,10 @@ let ServerTime = {
     }
 };
 
-// TODO: should use +TimeUnit.DAY
+// TODO deprecate
 export const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 
-// TODO: should have a generic method time1.isSame("x", time);
+// TODO deprecate
 export function isDifferentDay(timeA, timeB) {
     timeA = new StemDate(timeA);
     timeB = new StemDate(timeB);
@@ -39,7 +39,6 @@ export function isDifferentDay(timeA, timeB) {
     return (timeA.getDate() !== timeB.getDate());
 }
 
-export {ServerTime};
-
+// TODO remove re-exports
 export * from "./Date";
 export * from "./Duration";
