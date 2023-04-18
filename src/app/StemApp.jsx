@@ -1,14 +1,14 @@
-import {UI} from "../ui/UI";
-import {Router} from "../ui/Router";
-import {GlobalContainer} from "../ui/global-container/GlobalContainer";
-import {isLocalUrl, trimLocalUrl} from "../base/Utils";
-import {Dispatcher} from "../base/Dispatcher";
+import {UI} from "../ui/UIBase.js";
+import {Router} from "../ui/Router.jsx";
+import {GlobalContainer} from "../ui/global-container/GlobalContainer.jsx";
+import {Dispatcher} from "../base/Dispatcher.js";
 import {GlobalState} from "../state/State.js";
 
 export class StemApp extends UI.Element {
     static init() {
         self.GlobalState = GlobalState; // Expose it for debugging
-        return self.appInstance = this.create(document.body);
+        self.appInstance = this.create(document.body);
+        return self.appInstance;
     }
 
     getRoutes() {
@@ -34,7 +34,7 @@ export class StemApp extends UI.Element {
     getContainer() {
         return <GlobalContainer>
             {this.getRouter()}
-            </GlobalContainer>;
+        </GlobalContainer>;
     }
 
     getAfterContainer() {
@@ -50,7 +50,7 @@ export class StemApp extends UI.Element {
     }
 
     onMount() {
-        this.router && this.router.addListener("change", () => {
+        this.router?.addListener("change", () => {
             document.body.click();
             Dispatcher.Global.dispatch("closeAllModals");
         });
