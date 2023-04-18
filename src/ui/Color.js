@@ -347,6 +347,12 @@ export function enhance(colorContainingString, gamma, saturate=0) {
     return colorContainingString.replace(COLOR_MATCHER_REGEXP, color => enhanceColor(color, gamma, saturate));
 }
 
+export function autoenhance(color){
+    const enhanceToDark = Color.isLight(color) || Color.isBlack(color);
+    const gammaEnhance = enhanceToDark ? 0.03 : -0.15;
+    const saturationEnhance = enhanceToDark ? 0.1 : 0.2;
+    return enhance(color, gammaEnhance, saturationEnhance);
+}
 
 export function buildColors(color, dark=true) {
     let colors = [];
