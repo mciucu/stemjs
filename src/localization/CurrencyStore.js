@@ -67,8 +67,8 @@ export class Currency extends StoreObject {
 
 class CurrencyStoreClass extends Store("Currency", Currency) {
     getByIsoCode(isoCode="") {
-        isoCode = String(isoCode);
-        return this.find(currency => currency.getIsoCode() === (isoCode && isoCode.toLowerCase()));
+        isoCode = String(isoCode).toLowerCase();
+        return this.find(currency => currency.getIsoCode() === isoCode);
     }
 
     get(id) {
