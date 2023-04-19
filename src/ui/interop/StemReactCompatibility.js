@@ -31,14 +31,12 @@ export function wrapStemInReact(React, StemClass) {
         componentWillUnmount() {
             if (this.stemElement.node) {
                 stemInReactContext.stemRootComponentProps = this.props;
-                // The code of UIElement.destroyNode() is inline-d here
+                // The code of UIElement.destroyNode() is inlined here
                 // because react itself will call remove() on the DOM node.
-                // We just want to execute the rest of the code from that
-                // method.
+                // We just want to execute the rest of the code from that method.
                 this.stemElement.onUnmount();
                 this.stemElement.cleanup();
                 this.stemElement.removeRef();
-                // this.stemElement.node && this.stemElement.node.remove();
                 delete this.stemElement.node; // Clear for gc
             }
         }
@@ -48,6 +46,9 @@ export function wrapStemInReact(React, StemClass) {
                 return;
             }
             stemInReactContext.stemRootComponentProps = this.props;
+            if (this.stemElement.node) {
+                this.stemElement = new StemClass({...this.props});
+            }
             this.stemElement.node = node;
             this.stemElement.redraw();
             this.stemElement.addListenersFromOptions();

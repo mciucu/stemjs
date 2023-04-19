@@ -175,18 +175,18 @@ export class Router extends Switcher {
         const activePage = this.getActive();
 
         if (activePage !== page) {
-            activePage && activePage.dispatch("urlExit");
+            activePage?.dispatch("urlExit");
             this.setActive(page);
             page.dispatch("urlEnter");
         } else {
             page.dispatch("urlReload");
         }
 
-        if (page && page.pageTitle) {
+        if (page.pageTitle) {
             PageTitleManager.setTitle(page.pageTitle);
         }
 
-        this.dispatch("change", urlParts, page, activePage);
+        this.dispatchChange(urlParts, page, activePage);
     }
 
     onMount() {
