@@ -27,8 +27,18 @@ export class StemApp extends UI.Element {
         }
     }
 
+    handleRouteChange() {
+        document.body.click(); // TODO Really bro?
+        Dispatcher.Global.dispatch("closeAllModals");
+    }
+
     getRouter() {
-        return <Router routes={this.getRoutes()} ref="router" {...this.getRouterOptions()}/>;
+        return <Router
+            ref="router"
+            routes={this.getRoutes()}
+            onChange={(...args) => this.handleRouteChange(...args)}
+            {...this.getRouterOptions()}
+        />;
     }
 
     getContainer() {
@@ -47,12 +57,5 @@ export class StemApp extends UI.Element {
             this.getContainer(),
             this.getAfterContainer(),
         ]
-    }
-
-    onMount() {
-        this.router?.addListener("change", () => {
-            document.body.click();
-            Dispatcher.Global.dispatch("closeAllModals");
-        });
     }
 }
