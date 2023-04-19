@@ -152,10 +152,21 @@ class ActionModal extends Modal {
     }
 
     render() {
+        const {styleSheet} = this;
+        const headerContent = this.getHeader(); // TODO need a rewrite/rename
+        const bodyContent = this.getBody();
+        const footerContent = this.getFooter();
+
         return [
-            <div className={this.styleSheet.header}>{this.getHeader()}</div>,
-            (this.getBody() ? <div className={this.styleSheet.body}>{this.getBody()}</div> : null),
-            (this.getFooter() ? <div className={this.styleSheet.footer}>{this.getFooter()}</div> : null)
+            <div className={styleSheet.header}>
+                {headerContent}
+            </div>,
+            bodyContent && <div className={styleSheet.body}>
+                {bodyContent}
+            </div>,
+            footerContent && <div className={styleSheet.footer}>
+                {footerContent}
+            </div>,
         ];
     }
 

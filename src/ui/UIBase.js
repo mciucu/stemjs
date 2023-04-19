@@ -13,8 +13,8 @@ import {Theme} from "./style/Theme.js";
 export const RenderStack = []; //keeps track of objects that are redrawing, to know where to assign refs automatically
 export const redrawPerTickRunner = new OncePerTickRunner((obj) => obj.node && obj.redraw());
 
-// TODO Probably get rid of the UI namespace
-const UI = {};
+// TODO Maybe get rid of the UI namespace
+export const UI = {};
 
 export function cleanChildren(children) {
     return unwrapArray(children, unwrapElementWithFunc);
@@ -138,7 +138,7 @@ UI.TextElement = class UITextElement extends BaseUIElement {
 };
 
 // TODO: rename to Element
-class UIElement extends BaseUIElement {
+export class UIElement extends BaseUIElement {
     constructor(options={}) {
         super();
         this.children = [];  // These are the rendered children
@@ -715,5 +715,3 @@ UI.Primitive = (BaseClass, nodeType) => {
     baseClassPrimitiveMap.set(nodeType, resultClass);
     return resultClass;
 };
-
-export {UIElement, UI};
