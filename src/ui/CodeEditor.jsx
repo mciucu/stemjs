@@ -32,15 +32,15 @@ class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
         };
         options = Object.assign(defaultOptions, options);
 
+        if (options.aceMode) {
+            options.aceMode = options.aceMode.toLowerCase();
+        }
+
+        if (options.aceMode === "cpp" || options.aceMode === "c") {
+            options.aceMode = "c_cpp";
+        }
+
         super.setOptions(options);
-
-        if (this.options.aceMode) {
-            this.options.aceMode = this.options.aceMode.toLowerCase();
-        }
-
-        if (this.options.aceMode === "cpp" || this.options.aceMode === "c") {
-            this.options.aceMode = "c_cpp";
-        }
 
         if (this.getAce()) {
             this.applyAceOptions();
@@ -115,7 +115,7 @@ class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
 
     @enqueueIfNotLoaded
     applyAceOptions() {
-        //set the language mode
+        // TODO maybe only this should be with enqueueIfNotLoaded
         this.setAceMode(this.options.aceMode);
         this.setAceKeyboardHandler(this.options.aceKeyboardHandler);
         this.setAceTheme(this.options.aceTheme);
