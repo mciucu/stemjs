@@ -47,8 +47,9 @@ export class Money {
         return null;
     }
 
-    static makeFieldLoader() {
-        return (value, obj) => this.optionally(value, obj.currency || obj.currencyId);
+    static makeFieldLoader(fieldDescriptor) {
+        const currencyFieldName = fieldDescriptor.currencyField || "currency";
+        return (value, obj) => this.optionally(value, obj[currencyFieldName] || obj[currencyFieldName + "Id"]);
     }
 
     static format(amount, currency) {
