@@ -1,4 +1,4 @@
-import {isPlainObject, isNumber, capitalize, isString, padNumber} from "../base/Utils";
+import {isPlainObject, isNumber, capitalize, isString, padNumber} from "../base/Utils.js";
 import {TokenFormatter} from "./Formatter.js";
 
 export class TimeUnit {
