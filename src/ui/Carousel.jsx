@@ -5,6 +5,7 @@ import {styleRule} from "../decorators/Style";
 import {FAIcon} from "../ui/FontAwesome";
 import {Orientation} from "./Constants";
 
+// TODO Review CSS
 class CarouselStyle extends StyleSheet {
     navigatorHeight = "35px";
     hoverColor = "#364251";
@@ -14,7 +15,7 @@ class CarouselStyle extends StyleSheet {
 
     @styleRule
     carousel = {
-        overflow: "hidden",
+        overflow: "auto",
     };
 
     @styleRule
@@ -58,7 +59,7 @@ class CarouselStyle extends StyleSheet {
 
 class CarouselNavigator extends UI.Element {
     get styleSheet() {
-        return this.options.styleSheet || this.parent.styleSheet;
+        return super.styleSheet || this.parent.styleSheet;
     }
 
     extraNodeAttributes(attr) {
