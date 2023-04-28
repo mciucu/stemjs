@@ -64,6 +64,18 @@ export function unwrapArray(elements, unwrapFunc = unwrapElementPlain) {
     return sameAsInput ? elements : result;
 }
 
+export function areSetsEqual(a, b) {
+    if (a.size !== b.size) {
+        return false;
+    }
+    for (const element of a) {
+        if (!b.has(element)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 export function isLocalUrl(url, host=self.location.host, origin=self.location.origin) {
     // Empty url is considered local
     if (!url) {
