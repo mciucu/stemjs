@@ -3,6 +3,7 @@ import {DOMAttributesMap} from "../NodeAttributes";
 import {InputStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
 import {StemDate} from "../../time/Date";
+import {CleanupJobs} from "../../base/Dispatcher.js";
 
 
 // TODO rename to BaseInputElement
@@ -47,7 +48,13 @@ export class InputableElement extends UI.Element {
     }
 
     addChangeListener(callback) {
-        return this.addNodeListener("change", callback);
+        const callbackWrapper = () => {
+            callback(this.getValue(), this);
+        }
+        return new CleanupJobs([
+            this.addNodeListener("change", callbackWrapper),
+            this.addNodeListener("input", callbackWrapper),
+        ]);
     }
 
     addInputListener(callback) {
