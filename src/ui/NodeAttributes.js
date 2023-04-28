@@ -362,6 +362,7 @@ NodeAttributes.defaultAttributesMap = new DOMAttributesMap(null, [
     ["height"],
     ["width"],
     ["tabIndex"],
+    ["data"],
     //["value"], // Value is intentionally disabled
 ], [
     "data-",
