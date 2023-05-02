@@ -48,6 +48,7 @@ export class BaseUIElement extends Dispatchable {
     }
 
     // Calls a queueMicrotask(() => this.redraw()), but only if one isn't already enqueued
+    // The enqueued task will be canceled if a redraw is manually called in the meantime
     enqueueRedraw() {
         redrawPerTickRunner.maybeEnqueue(this);
     }
