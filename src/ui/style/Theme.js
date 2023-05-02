@@ -1,5 +1,5 @@
 import {Dispatchable} from "../../base/Dispatcher";
-import {CallThrottler, isFunction} from "../../base/Utils";
+import {CallThrottler, isFunction, resolveFuncValue} from "../../base/Utils";
 import {ThemeType} from "./ThemeTypes.js";
 
 
@@ -23,13 +23,13 @@ export class Theme extends Dispatchable {
 
         this.props = new Proxy(this.properties, {
             get: (properties, key, receiver) => {
-                let value = this.getProperty(key);
-                if (isFunction(value)) {
-                    value = value(this.props);
-                }
+                const rawValue = this.getProperty(key);
+                const value = resolveFuncValue(rawValue, {args: [this.props]});
+
                 if (self.STEM_DEBUG && value === undefined) {
                     console.warn("Failed to find theme prop", key);
                 }
+
                 return value;
             },
             set: (properties, key, value) => {

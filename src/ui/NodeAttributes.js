@@ -1,4 +1,4 @@
-import {dashCase, isNumber, isString, isPlainObject, setObjectPrototype} from "../base/Utils";
+import {dashCase, isNumber, isString, isPlainObject, setObjectPrototype, resolveFuncValue} from "../base/Utils";
 
 export const defaultToPixelsAttributes = new Set([
     "border-radius",
@@ -164,6 +164,7 @@ export class NodeAttributes {
     }
 
     setStyle(key, value, node) {
+        value = resolveFuncValue(value);
         if (!isString(key)) {
             // If the key is not a string, it should be a plain object
             for (const styleKey of Object.keys(key)) {
