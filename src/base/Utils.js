@@ -470,6 +470,19 @@ export function* filterIterator(iter, func) {
     }
 }
 
+// Used so that a value or a function can be used anywhere
+// If the value is a function, it will call it at most maxIter (default 32) times
+export function resolveFuncValue(value, {maxIter = 32, args = null, allowUnresolved = false} = {}) {
+    while (maxIter > 0 && isFunction(value)) {
+        value = value(...args);
+        maxIter -= 1;
+    }
+    if (!allowUnresolved && maxIter === 0) {
+        console.error("Failed to resolve value to a non-function");
+    }
+    return value;
+}
+
 export class CallModifier {
     wrap(func) {
         throw Error("Implement wrap method");
