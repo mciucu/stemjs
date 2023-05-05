@@ -43,8 +43,8 @@ export class Table extends UI.Primitive("table") {
 
     setOptions(options) {
         super.setOptions(options);
-        if (options.columns) {
-            this.options.columns = ColumnHandler.mapColumns(options.columns);
+        if (this.options.columns) {
+            this.options.columns = ColumnHandler.mapColumns(this.options.columns);
         }
     }
 
