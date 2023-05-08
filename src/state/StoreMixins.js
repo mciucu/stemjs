@@ -154,7 +154,7 @@ const VirtualStoreMixin = (BaseStoreClass) => class VirtualStoreMixin extends Ba
         this.dispatch("updateObjectId", object, oldId);
     }
 
-    applyCreateEvent(event, sendDispatch=true) {
+    applyCreateOrUpdateEvent(event, sendDispatch=true) {
         if (event.virtualId) {
             let existingVirtualObject = this.getVirtualObject(event);
             if (existingVirtualObject) {
@@ -162,7 +162,7 @@ const VirtualStoreMixin = (BaseStoreClass) => class VirtualStoreMixin extends Ba
             }
         }
 
-        return super.applyCreateEvent(...arguments);
+        return super.applyCreateOrUpdateEvent(...arguments);
     }
 };
 
