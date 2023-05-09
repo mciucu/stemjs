@@ -11,7 +11,7 @@ import {applyDebugFlags} from "./Debug";
 import {Theme} from "./style/Theme.js";
 
 export const RenderStack = []; //keeps track of objects that are redrawing, to know where to assign refs automatically
-export const redrawPerTickRunner = new OncePerTickRunner((obj) => obj.node && obj.redraw());
+export const redrawPerTickRunner = new OncePerTickRunner((obj, event) => obj.node && obj.redraw(event));
 
 // TODO Maybe get rid of the UI namespace
 export const UI = {};
@@ -49,8 +49,8 @@ export class BaseUIElement extends Dispatchable {
 
     // Calls a queueMicrotask(() => this.redraw()), but only if one isn't already enqueued
     // The enqueued task will be canceled if a redraw is manually called in the meantime
-    enqueueRedraw() {
-        redrawPerTickRunner.maybeEnqueue(this);
+    enqueueRedraw(event) {
+        redrawPerTickRunner.maybeEnqueue(this, event);
     }
 
     cancelEnqueuedRedraw() {

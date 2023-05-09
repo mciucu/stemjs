@@ -6,7 +6,7 @@ import {BaseUIElement} from "../ui/UIBase.js";
 const autoRedrawListenersLazy = new PropertyCache("autoRedrawHandler", () => new Set());
 
 const redrawHandlerLazy = new PropertyCache("autoRedrawListener", (obj) => {
-    return () => obj.enqueueRedraw();
+    return (event) => obj.enqueueRedraw(event);
 });
 
 // Decorator that attaches a change listener on all store objects in options
