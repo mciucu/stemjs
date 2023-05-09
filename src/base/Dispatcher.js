@@ -244,19 +244,25 @@ export class OncePerTickRunner {
         this.throttle = new WeakMap();
     }
 
-    maybeEnqueue(obj) {
-        if (this.throttle.get(obj)) {
+    maybeEnqueue(obj, ...args) {
+        const existingArgs = this.throttle.get(obj);
+        this.throttle.set(obj, args);
+
+        if (existingArgs) {
+            // We just updated the args
             return false;
         }
-        this.throttle.set(obj, true);
+
         queueMicrotask(() => {
-            if (!this.throttle.get(obj)) {
+            const existingArgs = this.throttle.get(obj)
+            if (!existingArgs) {
                 // We have been canceled
                 return;
             }
             this.clear(obj);
-            this.callback(obj);
+            this.callback(obj, ...existingArgs);
         });
+
         return true;
     }
 
