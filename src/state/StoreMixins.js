@@ -3,6 +3,7 @@ import {unwrapArray, splitInChunks} from "../base/Utils";
 import {Ajax} from "../base/Ajax";
 import {GlobalState} from "./State";
 
+// TODO This should be an async method
 const AjaxFetchMixin = (BaseStoreClass) => class AjaxFetchMixin extends BaseStoreClass {
     fetch(id, successCallback, errorCallback, forceFetch=false) {
         if (!forceFetch) {
