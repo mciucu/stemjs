@@ -6,10 +6,9 @@ export const StoreSymbol = Symbol("Store");
 export const EventDispatcherSymbol = Symbol("EventDispatcher");
 
 export class StoreObject extends Dispatchable {
-    constructor(obj, event, store) {
+    constructor(obj, event) {
         super();
         Object.assign(this, obj);
-        this.setStore(store);
     }
 
     static makeFieldLoader(fieldDescriptor) {
@@ -196,6 +195,7 @@ export class GenericObjectStore extends BaseStore {
             obj.applyEventAndDispatch(event);
         } else {
             obj = new this.ObjectClass(event.data, event, this);
+            obj.setStore(this);
             this.addObject(this.getObjectIdForEvent(event), obj);
             if (sendDispatch) {
                 this.dispatch("create", obj, event);
