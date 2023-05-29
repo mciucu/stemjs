@@ -30,6 +30,7 @@ function getPreferredClassName(cls, key, descriptor) {
     if (className.endsWith("Style")) {
         className = className.substr(0, className.length - 5);
     }
+    className = className.replaceAll("$", ""); // Fix minify mangling
     return className + "-container";
 }
 
