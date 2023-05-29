@@ -68,6 +68,7 @@ class StyleSheet extends Dispatchable {
         if (theme !== Theme.Global) {
             name += "-" + theme.name;
         }
+        name = name.replaceAll("$", ""); // Fix minify mangling
         if (this.elementNameCounter > 1) {
             name += "-" + this.elementNameCounter;
         }
