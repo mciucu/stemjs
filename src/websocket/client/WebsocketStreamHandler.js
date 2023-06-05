@@ -36,10 +36,7 @@ export class WebsocketStreamHandler extends Dispatcher {
         }
 
         this.subscribeTryCount++;
-
-        const subscribeTimeout = websocketSubscriber.constructor.STREAM_SUBSCRIBE_TIMEOUT || 3000;
-        const subscribeTimeoutMax = websocketSubscriber.constructor.STREAM_SUBSCRIBE_MAX_TIMEOUT || 30000;
-        const timeoutDuration = Math.min(subscribeTimeout * this.subscribeTryCount, subscribeTimeoutMax);
+        const timeoutDuration = websocketSubscriber.calcRetryTimeout(this.subscribeTryCount);
 
         this.resendSubscribeTimeout = setTimeout(() => {
             console.log("WebsocketSubscriber: stream subscribe timeout for #" + this.streamName + " reached! Trying to resubscribe again!");
@@ -87,8 +84,6 @@ export class WebsocketStreamHandler extends Dispatcher {
             this.processIndexedPacket(payload);
         } else if (type === "v") {
             this.processVanillaPacket(payload);
-        } else if (type === "n") {
-            this.processMissedPacket(payload);
         } else {
             console.error("WebsocketStreamHandler: invalid packet type " + type);
         }
@@ -96,10 +91,10 @@ export class WebsocketStreamHandler extends Dispatcher {
 
     processIndexedMessage(index, message) {
         this.isIndexed = true;
-        if (this.lastMessageIndex == -1) {
+        if (this.lastMessageIndex === -1) {
             this.lastMessageIndex = index;
             this.processVanillaPacket(message);
-        } else if (this.lastMessageIndex + 1 == index) {
+        } else if (this.lastMessageIndex + 1 === index) {
             this.lastMessageIndex = index;
             this.processVanillaPacket(message);
             ++index;

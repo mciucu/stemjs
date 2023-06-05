@@ -1,7 +1,7 @@
 import {createClient as redisCreateClient} from "redis";
 import {App as WSApp} from "uWebSockets.js";
 import {CheckStreamPermission, IdentifySessionId, LoadSessionId, RPCCaller} from "./PermissionChecking.js";
-
+import {DEFAULT_HEARTBEAT_MESSAGE} from "../Shared.js";
 
 const CONNECTION_KEYS = ["ipAddress", "userId", "sessionId"];
 
@@ -136,7 +136,7 @@ export class WebsocketServer {
         });
 
         setInterval(() => {
-            this.rawServer.publish("heartbeat", "-hrtbt-");
+            this.rawServer.publish("heartbeat", DEFAULT_HEARTBEAT_MESSAGE);
             if (global.gc) {
                 const startTime = performance.now();
                 global.gc();
