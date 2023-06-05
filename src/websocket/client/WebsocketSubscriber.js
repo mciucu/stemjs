@@ -1,6 +1,7 @@
 import {Dispatchable} from "../../base/Dispatcher.js";
 import {WebsocketStreamHandler} from "./WebsocketStreamHandler.js";
 import {toArray} from "../../base/Utils.js";
+import {DEFAULT_HEARTBEAT_MESSAGE} from "../Shared.js";
 
 function splitPayload(str) {
     const delimitedIndex = str.indexOf(" ");
@@ -23,20 +24,22 @@ export class WebsocketSubscriber extends Dispatchable {
         DISCONNECTED: 3
     };
 
-    static CONNECT_RETRY_TIMEOUT = 3000;
-    static CONNECT_RETRY_MAX_TIMEOUT = 30000;
+    // TODO sync globally cleaner
+    static Global = new WebsocketSubscriber();
 
-    static HEARTBEAT_MESSAGE = "-heartbeat-city-";
+    streamHandlers = new Map();
+    attemptedConnect = false;
+    connectionStatus = WebsocketSubscriber.ConnectionStatus.NONE;
+    websocket = null;
+    failedReconnectAttempts = 0;
+    numConnectionAttempts = 0;
+    retryDefaultTimeout = 3000;
+    retryMaxTimeout = 30000;
+    heartbeatMessage = DEFAULT_HEARTBEAT_MESSAGE;
 
     constructor(urls=self.WEBSOCKET_URL) {
         super();
         this.urls = toArray(urls);
-        this.streamHandlers = new Map();
-        this.attemptedConnect = false;
-        this.connectionStatus = WebsocketSubscriber.ConnectionStatus.NONE;
-        this.websocket = null;
-        this.failedReconnectAttempts = 0;
-        this.numConnectionAttempts = 0;
         //TODO: should probably try to connect right now?
     }
 
@@ -66,10 +69,12 @@ export class WebsocketSubscriber extends Dispatchable {
         }
     }
 
-    tryReconnect() {
-        let reconnectWait = Math.min(WebsocketSubscriber.CONNECT_RETRY_TIMEOUT * this.failedReconnectAttempts,
-                                     WebsocketSubscriber.CONNECT_RETRY_MAX_TIMEOUT);
+    calcRetryTimeout(numFailedAttempts) {
+        return Math.min(this.retryDefaultTimeout * numFailedAttempts, this.retryMaxTimeout);
+    }
 
+    tryReconnect() {
+        const reconnectWait = this.calcRetryTimeout(this.failedReconnectAttempts);
         this.failedReconnectAttempts++;
 
         if (!this.reconnectTimeout) {
@@ -195,7 +200,7 @@ export class WebsocketSubscriber extends Dispatchable {
 
     onWebsocketMessage(event) {
         const {data} = event;
-        if (data === WebsocketSubscriber.HEARTBEAT_MESSAGE) {
+        if (data === this.heartbeatMessage) {
             // TODO: keep track of the last heartbeat timestamp
             return;
         }
@@ -269,6 +274,3 @@ export class WebsocketSubscriber extends Dispatchable {
         return this.Global.addStreamListener(streamName, callback);
     };
 }
-
-// TODO sync globally cleaner
-WebsocketSubscriber.Global = new WebsocketSubscriber();
