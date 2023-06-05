@@ -269,3 +269,6 @@ export class WebsocketSubscriber extends Dispatchable {
         return this.Global.addStreamListener(streamName, callback);
     };
 }
+
+// TODO sync globally cleaner
+WebsocketSubscriber.Global = new WebsocketSubscriber();
