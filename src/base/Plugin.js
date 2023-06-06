@@ -1,7 +1,7 @@
 // Plugins should be used to extends on runtime the functionality of a class, to easily split functionality
 import {Dispatchable} from "./Dispatcher";
 
-class Plugin extends Dispatchable {
+export class Plugin extends Dispatchable {
     constructor(parent) {
         super();
         this.linkToParent(parent);
@@ -21,7 +21,7 @@ class Plugin extends Dispatchable {
 }
 
 // TODO: rename this to use Mixin in title
-var Pluginable = function (BaseClass) {
+export const Pluginable = function (BaseClass) {
     return class Pluginable extends BaseClass {
         // TODO: this should probably take in a plugin instance also
         registerPlugin(PluginClass) {
@@ -61,5 +61,3 @@ var Pluginable = function (BaseClass) {
         }
     }
 };
-
-export {Plugin, Pluginable};
