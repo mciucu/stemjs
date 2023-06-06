@@ -437,6 +437,15 @@ export function base64Decode(value, {jsonFormat = true} = {}) {
     return value;
 }
 
+// Erase the first instance of the value from the given array. In-place, returns the array
+export function eraseFirst(arr, value) {
+    const index = arr.index(value);
+    if (index >= 0) {
+        arr.splice(index, 1);
+    }
+    return arr;
+}
+
 export const UNICODE_BOM_CHARACTER = 0xFEFF;
 export const NOOP_FUNCTION = () => undefined;
 
