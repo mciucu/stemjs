@@ -1,4 +1,5 @@
 import {Dispatchable} from "./Dispatcher";
+import {toArray} from "./Utils.js";
 
 class ScriptResolver extends Dispatchable {
     constructor(scriptPath) {
@@ -45,15 +46,13 @@ async function ensureSingle(script) {
 }
 
 async function ensure(scripts, callback) {
-    if (!Array.isArray(scripts)) {
-        scripts = [scripts];
-    }
+    scripts = toArray(scripts);
     let promises = scripts.map(script => ensureSingle(script));
     return Promise.all(promises).then(function () {
         if (callback) {
             callback(...arguments);
         }
-    })
+    });
 }
 
 export {ensure};

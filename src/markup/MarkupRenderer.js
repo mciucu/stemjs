@@ -1,7 +1,7 @@
-import {UI} from "../ui/UI";
-import {MarkupParser} from "./MarkupParser";
-import {Panel, Link, Image} from "../ui/UIPrimitives";
-import {StaticCodeHighlighter} from "../ui/CodeEditor"; // TODO: should not be by default
+import {UI} from "../ui/UIBase.js";
+import {MarkupParser} from "./MarkupParser.js";
+import {Panel, Link, Image} from "../ui/UIPrimitives.jsx";
+import {StaticCodeHighlighter} from "../ui/CodeEditor.jsx";
 
 // Class that for every markup tag returns the UI class to instantiate for that element
 class MarkupClassMap {
@@ -19,7 +19,7 @@ class MarkupClassMap {
 
     registerDependencies(dependencies) {
         for (let dependency of dependencies) {
-            if (dependency && dependency.registerMarkup) {
+            if (dependency?.registerMarkup) {
                 dependency.registerMarkup(this);
             }
         }
