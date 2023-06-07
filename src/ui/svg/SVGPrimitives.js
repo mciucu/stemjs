@@ -1,6 +1,6 @@
-import {SVG} from "./SVGBase";
-export * from "./SVGBase";
-import * as math from "../../math";
+import {SVG} from "./SVGBase.js";
+export * from "./SVGBase.js";
+import * as math from "../../math.js";
 
 SVG.SVGRoot = class SVGRoot extends SVG.Element {
     getNodeType() {
