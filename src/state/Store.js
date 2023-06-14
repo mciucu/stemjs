@@ -88,18 +88,24 @@ export class BaseStore extends Dispatchable {
         this.state?.addStore(this);
     }
 
-    // For a response obj with a state field, return the objects that we have in store
-    loadFromResponse(response) {
-        const responseState = response?.state || {};
+    loadRaw(responseOrState) {
+        const state = responseOrState?.state || responseOrState || {};
 
         // Since the backend might have a different lettering case, need a more complex search here
-        for (const [key, value] of Object.entries(responseState)) {
+        for (const [key, value] of Object.entries(state)) {
             if (String(key).toLowerCase() === this.objectType) {
-                return value.map(obj => this.get(obj.id));
+                return value || [];
             }
         }
 
         return [];
+    }
+
+    // TODO rename to load and loadSingle
+    // For a response obj with a state field, return the objects that we have in store
+    loadFromResponse(response) {
+        const rawObjects = this.loadRaw(response);
+        return rawObjects.map(obj => this.get(obj.id));
     }
 
     loadObjectFromResponse(response, index = 0) {
