@@ -402,6 +402,11 @@ class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
     }
 
     @enqueueIfNotLoaded
+    addChangeListener(callback) {
+        this.getAce().getSession().addEventListener("change", callback);
+    }
+
+    @enqueueIfNotLoaded
     addAceEventListener() {
         this.getAce().addEventListener(...arguments);
     }
