@@ -1,82 +1,53 @@
+const SINGLE_CLICK_EVENT = "SingleClick";
+const DOUBLE_CLICK_EVENT = "DoubleClick";
+
 export const DoubleClickable = (BaseClass) => class DoubleClickable extends BaseClass {
-    singleClickCallbacks = new Map();
+    uniqueClickListener = null;
+    singleClickTimeout = null;
+    singleClickedAt = null;
 
-    doubleClickCallbacks = new Map();
-
-    addClickListener(callback) {
-        if (this.singleClickCallbacks.has(callback)) {
-            return;
-        }
-
-        let callbackWrapper = () => {
-            let now = Date.now();
-
-            if (!this.hasOwnProperty("_singleClickTime") || now - this._singleClickTime >= this.getSingleClickTimeout()) {
-                // It's a single click
-                // TODO: why is this wrapped in a setTimeout?
-                setTimeout(() => {
-                    this._singleClickTime = now;
-                });
-                setTimeout(() => {
-                    if (this.hasOwnProperty("_singleClickTime") && this._singleClickTime === now) {
-                        callback();
-                    }
-                }, this.getSingleClickTimeout());
-            } else {
-                // It's a double click
-                setTimeout(() => {
-                    delete this._singleClickTime;
-                });
-            }
-        };
-        this.singleClickCallbacks.set(callback, callbackWrapper);
-        super.addClickListener(callbackWrapper);
+    clearSingleClickTimeout() {
+        clearTimeout(this.singleClickTimeout);
+        this.singleClickTimeout = null;
+        this.singleClickedAt = null;
     }
 
-    getSingleClickTimeout() {
-        return 250;
+    ensureClickListener() {
+        this.uniqueClickListener = this.uniqueClickListener || super.addClickListener((...args) => {
+            const haveDoubleClickListeners = this.getDispatcher(DOUBLE_CLICK_EVENT, false)?.listeners?.length > 0;
+            const doubleClickTimeout = haveDoubleClickListeners ? (this.options.doubleClickTimeout || 250) : 0;
+            const currentTime = Date.now();
+
+            if (this.singleClickTimeout && (currentTime - this.singleClickedAt < doubleClickTimeout)) {
+                this.clearSingleClickTimeout();
+                this.dispatch(DOUBLE_CLICK_EVENT, ...args);
+                return;
+            }
+
+            this.clearSingleClickTimeout(); // Could it actually happen that a timeout would have remained unexecuted?
+
+            this.singleClickedAt = Date.now();
+            this.singleClickTimeout = setTimeout(() => {
+                this.clearSingleClickTimeout();
+                this.dispatch(SINGLE_CLICK_EVENT, ...args);
+            }, doubleClickTimeout);
+        });
+    }
+
+    addClickListener(callback) {
+        this.ensureClickListener();
+        return this.addListener(SINGLE_CLICK_EVENT, callback);
     }
 
     removeClickListener(callback) {
-        let callbackWrapper = this.singleClickCallbacks.get(callback);
-        if (callbackWrapper) {
-            this.singleClickCallbacks.delete(callback);
-            super.removeClickListener(callbackWrapper);
-        }
+        this.removeListener(SINGLE_CLICK_EVENT, callback);
     }
 
     addDoubleClickListener(callback) {
-        if (this.doubleClickCallbacks.has(callback)) {
-            return;
-        }
-
-        let callbackWrapper = () => {
-
-            let now = new Date().getTime();
-
-            if (!this.hasOwnProperty("_singleClickTime") ||
-                now - this._singleClickTime >= this.getSingleClickTimeout()) {
-                // It's a single click
-                setTimeout(() => {
-                    this._singleClickTime = now;
-                });
-            } else {
-                // It's a double click
-                setTimeout(() => {
-                    delete this._singleClickTime;
-                });
-                callback();
-            }
-        };
-        this.doubleClickCallbacks.set(callback, callbackWrapper);
-        super.addClickListener(callbackWrapper);
+        this.addListener(DOUBLE_CLICK_EVENT, callback);
     }
 
     removeDoubleClickListener(callback) {
-        let callbackWrapper = this.doubleClickCallbacks.get(callback);
-        if (callbackWrapper) {
-            this.doubleClickCallbacks.delete(callback);
-            super.removeClickListener(callbackWrapper);
-        }
+        this.removeListener(DOUBLE_CLICK_EVENT, callback);
     }
 };
