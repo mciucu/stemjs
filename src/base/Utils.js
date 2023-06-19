@@ -450,7 +450,7 @@ export const UNICODE_BOM_CHARACTER = 0xFEFF;
 export const NOOP_FUNCTION = () => undefined;
 
 export function isFirefox() {
-    return navigator && navigator.userAgent && (navigator.userAgent.indexOf("Firefox") !== -1
+    return (navigator.userAgent.indexOf("Firefox") !== -1
         || navigator.userAgent.indexOf("FxiOS") !== -1) && navigator.userAgent.indexOf("Chrome") === -1;
 }
 
