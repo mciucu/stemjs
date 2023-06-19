@@ -438,12 +438,12 @@ export function base64Decode(value, {jsonFormat = true} = {}) {
 }
 
 // Erase the first instance of the value from the given array. In-place, returns the array
-export function eraseFirst(arr, value) {
-    const index = arr.index(value);
+export function eraseFirst(array, value) {
+    const index = array.indexOf(value);
     if (index >= 0) {
-        arr.splice(index, 1);
+        array.splice(index, 1);
     }
-    return arr;
+    return array;
 }
 
 export const UNICODE_BOM_CHARACTER = 0xFEFF;
