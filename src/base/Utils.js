@@ -382,6 +382,17 @@ export function uniqueId(obj) {
     return objectWeakMap.get(obj);
 }
 
+// args[0] is a string where the "%[number]" block will be replaced by the args[number]
+export function evaluateSprintf(...args) {
+    let str = translationMap?.get(args[0]) || args[0];
+
+    for (let index = 1; index < args.length; index += 1) {
+        str = str.replaceAll("%" + index, args[index]);
+    }
+
+    return str;
+}
+
 // TODO: should be done with String.padLeft
 export function padNumber(num, minLength) {
     let strNum = String(num);
