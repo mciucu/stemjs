@@ -1,5 +1,5 @@
 import {UI} from "./UIBase";
-import {isString} from "../base/Utils";
+import {evaluateSprintf, isString} from "../base/Utils";
 
 // This is the object that will be used to translate text
 let translationMap = null;
@@ -42,23 +42,10 @@ UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement 
         }
     }
 
-    // args[0] is a string where the "%[number]" block will be replaced by the args[number]
-    evaluateSprintf(...args) {
-        let str = translationMap && translationMap.get(args[0]);
-        if (!str) {
-            return "";
-        }
-
-        for (let index = 1; index < args.length; index += 1) {
-            str = str.replaceAll("%" + index, args[index]);
-        }
-
-        return str;
-    }
-
     evaluate(strings, ...values) {
         if (!Array.isArray(strings)) {
-            return this.evaluateSprintf(...arguments);
+            strings = translationMap?.get(strings) || strings;
+            return evaluateSprintf(strings, ...values);
             // This means strings is a string with the sprintf pattern
         } else {
             // Using template literals https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Template_literals
