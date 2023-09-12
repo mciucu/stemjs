@@ -99,6 +99,16 @@ export class State extends Dispatchable {
         }
     }
 
+    // Loads both the state and the events
+    load({state, events}, disableStateImport, disableEventsImport) {
+        if (state && !disableStateImport) {
+            this.importState(state);
+        }
+        if (events && !disableEventsImport) {
+            this.applyEvent(events);
+        }
+    }
+
     clear() {
         for (const store of this.stores.values()) {
             store.clear && store.clear();

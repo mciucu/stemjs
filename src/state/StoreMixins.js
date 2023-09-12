@@ -41,7 +41,7 @@ const AjaxFetchMixin = (BaseStoreClass) => class AjaxFetchMixin extends BaseStor
             data: requestData,
             cache: false,
             success: (data) => {
-                GlobalState.importState(data.state || {});
+                GlobalState.load(data);
                 for (let fetchJob of fetchJobs) {
                     let obj = this.get(fetchJob.id);
                     if (obj) {
