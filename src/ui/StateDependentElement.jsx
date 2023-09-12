@@ -16,7 +16,7 @@ import {Level} from "./Constants";
 
 export let StateDependentElement = (BaseClass) => class StateDependentElementClass extends DelayedElement(BaseClass) {
     importState(data) {
-        GlobalState.importState(data.state || {});
+        GlobalState.load(data);
         for (let key of Object.keys(data)) {
             if (key !== "state") {
                 this.options[key] = data[key];
