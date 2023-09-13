@@ -42,6 +42,7 @@ export const defaultToPixelsAttributes = new Set([
     "top",
     "width",
     "word-spacing",
+    "gap",
 ]);
 
 // Used to map from option key to a DOM attribute name.
