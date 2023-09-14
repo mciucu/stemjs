@@ -47,6 +47,7 @@ export class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
         verticalAlign: "middle",
         touchAction: "manipulation",
         userSelect: "none",
+        cursor: "pointer",
         ":disabled": {
             opacity: 0.7,
             cursor: "not-allowed",

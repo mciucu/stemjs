@@ -39,7 +39,7 @@ Theme.setProperties({
     BASE_BORDER_STYLE: "solid",
     BASE_BORDER_COLOR: "#ddd",
 
-    BUTTON_BORDER_RADIUS: 2,
+    BUTTON_BORDER_RADIUS: props => props.BASE_BORDER_RADIUS,
     BUTTON_COLOR: props => props.COLOR_BACKGROUND,
 
     CARD_HEADER_BACKGROUND_COLOR: "#ccc",
