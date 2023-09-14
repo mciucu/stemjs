@@ -8,6 +8,7 @@ class InputStyle extends StyleSheet {
         background: this.themeProps.INPUT_BACKGROUND,
         border: () => "1px solid " + this.themeProps.INPUT_BORDER_COLOR,
         borderRadius: this.themeProps.INPUT_BORDER_RADIUS,
+        height: this.themeProps.INPUT_DEFAULT_HEIGHT,
         ":focus": {
             outline: "0",
             borderColor: "#66afe9",
