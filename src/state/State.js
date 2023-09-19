@@ -87,6 +87,12 @@ export class State extends Dispatchable {
             }
             return;
         }
+        if (state.state) {
+            // Must have been a recursive object
+            // TODO Technically not correct since we need to respect disableState/Event import
+            this.load(state.state);
+            return;
+        }
         // Import everything in a map and then do an implicit topological sort by dependencies
         const stateMap = new Map();
         for (const [objectType, objects] of Object.entries(state)) {
