@@ -343,7 +343,6 @@ export function registerStore(objectType, options={dependencies: []}) {
         const store = MakeStore(objectType, Cls, options);
 
         Cls.store = store;
-        Cls.objectType = objectType;
 
         const proxy = new Proxy(Cls, {
             get(target, key) {

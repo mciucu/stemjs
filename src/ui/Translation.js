@@ -9,6 +9,7 @@ let translationMap = null;
 // That's why we must make sure to remove all nodes from the set when destroying them
 UI.TranslationElements = new Set();
 
+// TODO These Polyfills shouldn't live here
 if (!String.prototype.replaceAll) {
     String.prototype.replaceAll = function(pattern, replacement) {
         if (isString(pattern)) {
@@ -19,6 +20,10 @@ if (!String.prototype.replaceAll) {
         }
         return this;
     };
+}
+
+if (!document.startViewTransition) {
+    document.startViewTransition = (callback) => callback();
 }
 
 UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement {
