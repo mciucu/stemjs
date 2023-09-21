@@ -224,6 +224,17 @@ export function isString(obj) {
     return (typeof obj === "string") || (obj instanceof String);
 }
 
+export function isNumericString(str, acceptPadding = false) {
+    if (!isString(str)) {
+        return false;
+    }
+    if (!acceptPadding && str.trim() !== str) {
+        return false;
+    }
+    // Both of these are needed to cover all cases
+    return !isNaN(str) && !isNaN(parseFloat(str));
+}
+
 export function isPlainObject(obj) {
     if (!obj || typeof obj !== "object") {
         return false;
