@@ -60,10 +60,12 @@ export class IconableInterface extends SimpleStyledElement {
 
     getIcon() {
         const {icon} = this.options;
+        //console.warn(MakeIcon(icon));
         return icon && MakeIcon(icon);
     }
 
     beforeChildren() {
+        console.warn(this.getIcon());
         return this.getIcon();
     }
 }
