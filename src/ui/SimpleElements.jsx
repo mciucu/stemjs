@@ -1,5 +1,5 @@
 // TODO: this file should be broken down
-import {UI} from "./UIBase";
+import {BaseUIElement, UI} from "./UIBase";
 import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";
@@ -20,6 +20,22 @@ export function SetMakeIcon(func) {
 
 export function MakeIcon() {
     return MakeIconFunc(...arguments);
+}
+
+// Same as for icons, but for text
+let MakeTextFunc = (text, options) => {
+    if (text instanceof BaseUIElement) {
+        return text;
+    }
+    return new UI.TextElement(text);
+}
+
+export function SetMakeText(func) {
+    MakeTextFunc = func;
+}
+
+export function MakeText() {
+    return MakeTextFunc(...arguments);
 }
 
 export class SimpleStyledElement extends UI.Element {
