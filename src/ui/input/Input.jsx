@@ -248,7 +248,7 @@ export class FileInput extends Input {
 }
 
 
-export class CheckboxInput extends Input {
+export class RawCheckboxInput extends Input {
     static domAttributesMap = new DOMAttributesMap(Input.domAttributesMap, [
         ["checked", {noValue: true}]
     ]);
@@ -296,8 +296,8 @@ export class CheckboxInput extends Input {
 }
 
 
-export class RadioInput extends CheckboxInput {
-    static domAttributesMap = new DOMAttributesMap(CheckboxInput.domAttributesMap, [
+export class RadioInput extends RawCheckboxInput {
+    static domAttributesMap = new DOMAttributesMap(RawCheckboxInput.domAttributesMap, [
         ["name"],
     ]);
 
