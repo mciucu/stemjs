@@ -4,6 +4,7 @@ import {enhance} from "./Color";
 import {Device} from "../base/Device";
 import {Orientation, Level, Size} from "./Constants";
 import {Theme} from "./style/Theme";
+import {FloatType} from "./style/ThemeTypes.js";
 
 // TODO: export these properly, don't use a namespace here
 
@@ -32,6 +33,10 @@ Theme.setProperties({
     FONT_SIZE_DEFAULT: 14,
     FONT_SIZE_LARGE: 17,
     FONT_SIZE_EXTRA_LARGE: 21,
+
+    GENERAL_LINE_HEIGHT: "1.5",
+
+    BASE_DISABLED_OPACITY: FloatType(0.6),
 
     BASE_BORDER_RADIUS: 0,
     BASE_BOX_SHADOW: "0px 0px 10px rgb(160, 162, 168)",
