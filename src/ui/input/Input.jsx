@@ -63,7 +63,22 @@ export class InputableElement extends UI.Element {
 }
 
 
-class Input extends UI.Primitive(InputableElement, "input") {
+export class Input extends UI.Primitive(InputableElement, "input") {
+    static domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
+        ["autocomplete"],
+        ["autofocus", {noValue: true}],
+        ["formaction"],
+        ["maxLength", {domName: "maxlength"}],
+        ["minLength", {domName: "minlength"}],
+        ["name"],
+        ["placeholder"],
+        ["readonly"],
+        ["required"],
+        ["value"],
+        ["pattern"],
+        ["type"],
+    ]);
+
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
         attr.setAttribute("type", this.getInputType() || this.options.type);
@@ -112,42 +127,34 @@ class Input extends UI.Primitive(InputableElement, "input") {
     }
 }
 
-Input.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
-    ["autocomplete"],
-    ["autofocus", {noValue: true}],
-    ["formaction"],
-    ["maxLength", {domName: "maxlength"}],
-    ["minLength", {domName: "minlength"}],
-    ["name"],
-    ["placeholder"],
-    ["readonly"],
-    ["required"],
-    ["value"],
-    ["pattern"],
-    ["type"],
-]);
+export class SubmitInput extends Input {
+    static domAttributesMap = new DOMAttributesMap(Input.domAttributesMap, [
+        ["formenctype"],
+        ["formmethod"],
+        ["formnovalidate"],
+        ["formtarget"]
+    ]);
 
-
-class SubmitInput extends Input {
     getInputType() {
         return "submit";
     }
 }
-SubmitInput.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
-    ["formenctype"],
-    ["formmethod"],
-    ["formnovalidate"],
-    ["formtarget"]
-]);
 
 
-class TextInput extends Input {
+export class TextInput extends Input {
     getInputType() {
         return "text";
     }
 }
 
-class NumberInput extends Input {
+export class NumberInput extends Input {
+    static domAttributesMap = new DOMAttributesMap(Input.domAttributesMap, [
+        ["min"],
+        ["max"],
+        ["step"],
+    ]);
+
+
     getInputType() {
         return "number";
     }
@@ -158,14 +165,8 @@ class NumberInput extends Input {
     }
 }
 
-NumberInput.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
-    ["min"],
-    ["max"],
-    ["step"],
-]);
 
-
-class TelInput extends Input {
+export class TelInput extends Input {
     getInputType() {
         return "tel";
     }
@@ -192,21 +193,26 @@ export class TimeInput extends Input {
 }
 
 
-class EmailInput extends Input {
+export class EmailInput extends Input {
     getInputType() {
         return "email";
     }
 }
 
 
-class PasswordInput extends Input {
+export class PasswordInput extends Input {
     getInputType() {
         return "password";
     }
 }
 
 
-class FileInput extends Input {
+export class FileInput extends Input {
+    static domAttributesMap = new DOMAttributesMap(Input.domAttributesMap, [
+        ["multipleFiles", {domName: "multiple", noValue: true}],
+        ["fileTypes", {domName: "accept"}],
+    ]);
+
     getInputType() {
         return "file";
     }
@@ -241,13 +247,12 @@ class FileInput extends Input {
     }
 }
 
-FileInput.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
-    ["multipleFiles", {domName: "multiple", noValue: true}],
-    ["fileTypes", {domName: "accept"}],
-]);
 
+export class RawCheckboxInput extends Input {
+    static domAttributesMap = new DOMAttributesMap(Input.domAttributesMap, [
+        ["checked", {noValue: true}]
+    ]);
 
-class CheckboxInput extends Input {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
         attr.addClass(this.styleSheet.checkboxInput);
@@ -290,12 +295,12 @@ class CheckboxInput extends Input {
     }
 }
 
-CheckboxInput.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
-    ["checked", {noValue: true}]
-]);
 
+export class RadioInput extends RawCheckboxInput {
+    static domAttributesMap = new DOMAttributesMap(RawCheckboxInput.domAttributesMap, [
+        ["name"],
+    ]);
 
-class RadioInput extends CheckboxInput {
     getInputType() {
         return "radio";
     }
@@ -309,12 +314,8 @@ class RadioInput extends CheckboxInput {
     }
 }
 
-RadioInput.domAttributesMap = new DOMAttributesMap(CheckboxInput.domAttributesMap, [
-    ["name"]
-]);
 
-
-class TextArea extends UI.Primitive(InputableElement, "textarea") {
+export class TextArea extends UI.Primitive(InputableElement, "textarea") {
     applyNodeAttributes() {
         super.applyNodeAttributes();
         this.node.readOnly = this.options.readOnly || false;
@@ -348,7 +349,7 @@ class TextArea extends UI.Primitive(InputableElement, "textarea") {
 
 
 // TODO this element is inconsistent with the rest. Properly fix the initialValue pattern
-class Select extends UI.Primitive(InputableElement, "select") {
+export class Select extends UI.Primitive(InputableElement, "select") {
     render() {
         this.givenOptions = this.options.options || [];
         let selectOptions = [];
@@ -419,6 +420,3 @@ class Select extends UI.Primitive(InputableElement, "select") {
         }
     }
 }
-
-export {InputStyle, Input, SubmitInput, TextInput, NumberInput, TelInput, EmailInput, PasswordInput, FileInput,
-        CheckboxInput, RadioInput, TextArea, Select};
