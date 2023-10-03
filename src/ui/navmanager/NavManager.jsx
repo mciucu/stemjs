@@ -145,7 +145,12 @@ class NavManager extends UI.Primitive("nav") {
     }
 
     initRightSidePanel() {
-        this.rightSidePanel = <SidePanel anchor={Direction.RIGHT} name="right" persistent={this.options.persistentRightSidePanel}>
+        this.rightSidePanel = <SidePanel
+            className="no-print"
+            anchor={Direction.RIGHT}
+            name="right"
+            persistent={this.options.persistentRightSidePanel}
+        >
             {this.getRightSidePanelChildren()}
         </SidePanel>;
     }
