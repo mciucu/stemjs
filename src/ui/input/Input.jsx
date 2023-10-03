@@ -84,8 +84,12 @@ export class Input extends UI.Primitive(InputableElement, "input") {
         attr.setAttribute("type", this.getInputType() || this.options.type);
     }
 
-    getValue() {
+    getRawValue() {
         return this.node.value;
+    }
+
+    getValue() {
+        return this.getRawValue().trim();
     }
 
     setValue(newValue) {
@@ -196,6 +200,13 @@ export class TimeInput extends Input {
 export class EmailInput extends Input {
     getInputType() {
         return "email";
+    }
+
+    isValid() {
+        const value = this.getValue();
+        // Default regex pattern is RFC 5322 Format
+        const regex = new RegExp(this.options.pattern || "([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])");
+        return regex.test(value);
     }
 }
 
