@@ -39,9 +39,11 @@ export class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
     container = {
         outline: 0,
         border: "1px solid",
-        padding: "6px 12px",
+        padding: "6px 32px",
         borderRadius: this.themeProps.BUTTON_BORDER_RADIUS,
+        fontFamily: "inherit",
         fontSize: this.themeProps.FONT_SIZE_DEFAULT,
+        fontWeight: this.themeProps.BUTTON_FONT_WEIGHT,
         textAlign: "center",
         whiteSpace: "nowrap",
         verticalAlign: "middle",
