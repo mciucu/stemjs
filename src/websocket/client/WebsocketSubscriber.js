@@ -25,7 +25,7 @@ export class WebsocketSubscriber extends Dispatchable {
     };
 
     // TODO sync globally cleaner
-    static Global = new WebsocketSubscriber();
+    static Global = self.WEBSOCKET_URL ? new WebsocketSubscriber(self.WEBSOCKET_URL) : null;
 
     streamHandlers = new Map();
     attemptedConnect = false;
@@ -37,7 +37,7 @@ export class WebsocketSubscriber extends Dispatchable {
     retryMaxTimeout = 30000;
     heartbeatMessage = DEFAULT_HEARTBEAT_MESSAGE;
 
-    constructor(urls=self.WEBSOCKET_URL) {
+    constructor(urls) {
         super();
         this.urls = toArray(urls);
         //TODO: should probably try to connect right now?

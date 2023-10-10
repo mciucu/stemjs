@@ -177,6 +177,11 @@ export class WebsocketServer {
         // TODO put this in 5 try loop
         this.extraConfig = await this.rpcCaller.query("config");
 
+        if (this.extraConfig == null) {
+            console.error("Failed to get a config response, shutting down!");
+            process.exit(1);
+        }
+
         await this.startServer();
 
         await this.connectToRedis();

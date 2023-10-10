@@ -7,6 +7,8 @@ const FETCH_ARGS = {
     }
 }
 
+export let IDENTITY_COOKIE = ["sessionId", "crossSessionId"];
+
 function GetAnyCookie(request, cookieNames) {
     const cookies = (request.getHeader("cookie") || "").split(";");
     for (const cookieName of cookieNames) {
@@ -22,7 +24,7 @@ function GetAnyCookie(request, cookieNames) {
 
 
 export function LoadSessionId(req) {
-    return GetAnyCookie(req, ["sessionId", "crossSessionId"]);
+    return GetAnyCookie(req, IDENTITY_COOKIE);
 }
 
 
