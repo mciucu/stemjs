@@ -90,7 +90,7 @@ export class State extends Dispatchable {
         if (state.state) {
             // Must have been a recursive object
             // TODO Technically not correct since we need to respect disableState/Event import
-            this.load(state.state);
+            this.load(state);
             return;
         }
         // Import everything in a map and then do an implicit topological sort by dependencies
