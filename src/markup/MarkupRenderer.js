@@ -139,8 +139,8 @@ MarkupClassMap.addClass("CodeSnippet", StaticCodeHighlighter);
 
 const SafeUriEnhancer = (BaseClass, attribute) => class SafeUriClass extends BaseClass {
     setOptions(options) {
-        if (options.hasOwnProperty(attribute) && !this.constructor.isSafeUri(options[attribute])) {
-            return super.setOptions(Object.assign({}, options, {[attribute]: undefined}));
+        if (options[attribute] && !this.constructor.isSafeUri(options[attribute])) {
+            options = Object.assign({}, options, {[attribute]: undefined});
         }
         return super.setOptions(options);
     }
