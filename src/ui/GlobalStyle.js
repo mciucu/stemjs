@@ -47,6 +47,7 @@ Theme.setProperties({
     BASE_BORDER_STYLE: "solid",
     BASE_BORDER_COLOR: "#ddd",
 
+    BUTTON_PADDING: "6px 12px",
     BUTTON_BORDER_RADIUS: props => props.BASE_BORDER_RADIUS,
     BUTTON_COLOR: props => props.COLOR_BACKGROUND,
     BUTTON_FONT_WEIGHT: props => props.FONT_WEIGHT_DEFAULT,
