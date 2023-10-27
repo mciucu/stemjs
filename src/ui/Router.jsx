@@ -361,7 +361,7 @@ export class TerminalRoute extends Route {
         // TODO: why is this in a setTimeout?
         clearTimeout(this.timeout);
         this.timeout = setTimeout(() => {
-            if (page && page.setURL) {
+            if (page?.setURL) {
                 page.setURL(urlParts);
             }
         });
