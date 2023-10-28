@@ -13,6 +13,7 @@ export class ColumnHandler {
         if (index != null) {
             this.index = index;
         }
+        this.name = this.name || this.headerName;
     }
 
     // If an entry already as a ColumnHandler, it's left as-is
@@ -24,9 +25,5 @@ export class ColumnHandler {
             }
             return new ColumnHandler(column, index);
         });
-    }
-
-    get name() {
-        return this.headerName;
     }
 }
