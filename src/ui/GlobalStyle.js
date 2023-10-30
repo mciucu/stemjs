@@ -41,6 +41,9 @@ Theme.setProperties({
 
     BASE_DISABLED_OPACITY: FloatType(0.6),
 
+    DEFAULT_TRANSITION_DURATION_MS: 250,
+    DEFAULT_TRANSITION: props => props.DEFAULT_TRANSITION_DURATION_MS + "ms ease",
+
     BASE_BORDER_RADIUS: 0,
     BASE_BOX_SHADOW: "0px 0px 10px rgb(160, 162, 168)",
     BASE_BORDER_WIDTH: 0,
@@ -51,6 +54,12 @@ Theme.setProperties({
     BUTTON_BORDER_RADIUS: props => props.BASE_BORDER_RADIUS,
     BUTTON_COLOR: props => props.COLOR_BACKGROUND,
     BUTTON_FONT_WEIGHT: props => props.FONT_WEIGHT_DEFAULT,
+
+    TOGGLE_COLOR: "#086472",
+    TOGGLE_BACKGROUND: "#D2E2E5",
+    TOGGLE_PILL_SIZE: 20,
+    TOGGLE_DISABLED_BACKGROUND: "#78AAB2",
+    TOGGLE_SHADOW: "0 1px 1px 0 rgba(0,0,0,.14), 0 2px 1px -1px rgba(0,0,0,.12), 0 1px 3px 0 rgba(0,0,0,.2)",
 
     CARD_HEADER_BACKGROUND_COLOR: "#ccc",
     CARD_HEADER_TEXT_COLOR: "#222",

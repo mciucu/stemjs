@@ -32,7 +32,7 @@ export class TemporaryMessageArea extends UI.Primitive("span") {
         this.clear();
         this.setValue(message);
         if (displayDuration) {
-            this.clearValueTimeout = setTimeout(() => this.clear(), displayDuration);
+            this.clearValueTimeout = this.attachTimeout(() => this.clear(), displayDuration);
         }
     }
 
