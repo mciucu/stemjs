@@ -99,12 +99,12 @@ export class WebsocketServer {
                 // TODO throttle this per IP as well
                 message = new TextDecoder().decode(message);
                 if (message.length > 4096) {
-                    // Ban this idiot
+                    // TODO Ban this asshole
                 }
                 let [command, streamName, secondArg] = message.split(" ", 3);
                 if (command === "r") {
                     command = "s";
-                    streamName = secondArg; // The second argument is the index
+                    streamName = secondArg; // TODO The second argument is the index, we should resend those messages if we have them
                 }
 
                 if (command === "s") {
@@ -197,6 +197,7 @@ export class WebsocketServer {
 
     // Broadcast to anyone that should listen to this
     broadcast(streamName, message) {
+        // TODO If we want to support reconnection, we need to keep ~5 min or 100 MB of messages in a rolling buffer
         const formattedMessage = `m ${streamName} ${message}`;
         this.rawServer.publish(streamName, formattedMessage);
     }
