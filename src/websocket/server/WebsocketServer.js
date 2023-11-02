@@ -98,10 +98,17 @@ export class WebsocketServer {
                 this.stats.numMessagesReceived += 1;
                 // TODO throttle this per IP as well
                 message = new TextDecoder().decode(message);
-                const [first, last] = message.split(" ", 2);
-                if (first === "s") {
+                if (message.length > 4096) {
+                    // Ban this idiot
+                }
+                let [command, streamName, secondArg] = message.split(" ", 3);
+                if (command === "r") {
+                    command = "s";
+                    streamName = secondArg; // The second argument is the index
+                }
+
+                if (command === "s") {
                     const {userId} = wsConnection.getUserData();
-                    const streamName = last;
                     const allowed = await CheckStreamPermission(rpcCaller, userId, streamName);
 
                     if (wsConnection.isClosed) {
@@ -112,7 +119,7 @@ export class WebsocketServer {
                     try {
                         if (allowed[0]) {
                             wsConnection.subscribe(streamName);
-                            wsConnection.send(message);
+                            wsConnection.send("s " + streamName);
                         } else {
                             wsConnection.send(`Failed to subscribe to stream ${streamName}: ${allowed[1]}`);
                         }
@@ -158,8 +165,9 @@ export class WebsocketServer {
     async connectToRedis() {
         this.redisClient = redisCreateClient(this.appConfig.redisEndpoint);
 
-        // Having an error handler is required to have redis autoconnect
-        this.redisClient.on("error", error => console.log("Redis error", error));
+        // It seems like redisClient will do the reconnection itself, we just need to know when that happens
+        this.redisClient.on("error", error => console.error("Redis error", error));
+        this.redisClient.on("reconnecting", message => console.error("Redis reconnecting", message));
 
         await this.redisClient.connect();
         await this.redisClient.pSubscribe("*", (message, streamName) => {
