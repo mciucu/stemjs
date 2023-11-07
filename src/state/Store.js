@@ -6,7 +6,7 @@ export const StoreSymbol = Symbol("Store");
 export const EventDispatcherSymbol = Symbol("EventDispatcher");
 
 export class StoreObject extends Dispatchable {
-    constructor(obj, event) {
+    constructor(obj, event = null) {
         super();
         Object.assign(this, obj);
     }
