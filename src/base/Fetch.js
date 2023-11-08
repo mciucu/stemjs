@@ -103,6 +103,16 @@ class XHRPromise {
 
             xhr.open(request.method, request.url, true);
 
+            const {onUploadProgress, onDownloadProgress} = this.options;
+
+            if (onUploadProgress) {
+               xhr.upload.onprogress = onUploadProgress;
+            }
+
+            if (onDownloadProgress) {
+                xhr.onprogress = onDownloadProgress;
+            }
+
             if (request.credentials === "include") {
                 xhr.withCredentials = true;
             }
