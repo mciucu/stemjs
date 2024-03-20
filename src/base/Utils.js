@@ -76,6 +76,12 @@ export function areSetsEqual(a, b) {
     return true;
 }
 
+export function haveSameElements(a, b) {
+    a = new Set(toArray(a));
+    b = new Set(toArray(b));
+    return areSetsEqual(a, b);
+}
+
 export function isLocalUrl(url, host=self.location.host, origin=self.location.origin) {
     // Empty url is considered local
     if (!url) {
