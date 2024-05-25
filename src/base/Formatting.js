@@ -39,3 +39,13 @@ export function formatBytes(bytes) {
     const decimalDigits = (amountInUnits < 10) ? 2 : 1;
     return amountInUnits.toFixed(decimalDigits) + " " + UNIT_SYMBOL[unitIndex];
 }
+
+export function formatError(error) {
+    if (error.error) {
+        return formatError(error.error);
+    }
+    if (error.message) {
+        return formatError(error.message);
+    }
+    return String(error);
+}
