@@ -1,17 +1,24 @@
-// TODO: this file should be broken down
 import {BaseUIElement, UI} from "./UIBase";
 import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";
 import {styleRule} from "../decorators/Style";
+import {isFunction} from "../base/Utils.js";
 
-// TODO handle is instance of UI.Element or if UI class
-let MakeIconFunc = (icon, options) => {
+export function DefaultMakeIcon(icon, options = {}) {
+    if (isFunction(icon)) {
+        return icon(options);
+    }
     if (icon instanceof UI.Element) {
         return icon;
     }
-    return <span className={"fa fa-" + icon} {...options} />;
+    const iconOptions = {...options};
+    iconOptions.className = (iconOptions.className || "") + " fa fa-" + icon;
+    return <span {...iconOptions} />;
 }
+
+
+let MakeIconFunc = DefaultMakeIcon;
 
 // Change the icon function
 export function SetMakeIcon(func) {
