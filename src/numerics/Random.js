@@ -36,7 +36,7 @@ export class RandGen {
         return this.nextInt() % N;
     }
 
-    hex(count=8) {
+    hex(count = 8) {
         let result = "";
         while (count > 0) {
             const charAvailable = 8;
@@ -45,6 +45,7 @@ export class RandGen {
             count -= charTaken;
             result += hexStr.substring(0, charTaken);
         }
+        return result;
     }
 
     pick(elements) {

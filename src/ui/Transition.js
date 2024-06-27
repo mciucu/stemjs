@@ -1,4 +1,4 @@
-import {equal} from "../math";
+import {equal} from "../numerics/math.js";
 
 class Transition {
     constructor(options) {
