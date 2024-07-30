@@ -25,8 +25,6 @@ The architecture isn't optimized for cool one-liners, but for maintenance and fl
 Check out the docs at https://stemjs.org/docs/.
 This framework is being used for about a year at https://csacademy.com/, and it really works a lot better than any other solution out there.
 
-This is the initial open-sourcing effort, it'll get more cleaned-up and documented in the next few weeks/months, with some concrete examples.
-
 ## Recommended parts
 There's a lot of functionality implemented in Stem. The closer to the core code you go, the better is gets and will probably be clean-up and more commented in the future.
 You can check out UIBase for the basics of the UI framework. It's an OOP based architecture that piggybacks on the jsx synthax (although you can use it with plain JS).
