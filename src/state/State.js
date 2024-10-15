@@ -87,9 +87,9 @@ export class State extends Dispatchable {
             }
             return;
         }
-        if (state.state) {
-            // Must have been a recursive object
-            // TODO Technically not correct since we need to respect disableState/Event import
+        if (state.state || state.events) {
+            // Must be a recursive object
+            // TODO Technically not correct since we need to respect disableState/Event import for the request itself
             this.load(state);
             return;
         }
