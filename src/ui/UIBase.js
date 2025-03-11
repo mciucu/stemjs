@@ -5,7 +5,7 @@ import {
     isPlainObject,
     unwrapElementWithFunc
 } from "../base/Utils";
-import {Dispatchable, OncePerTickRunner} from "../base/Dispatcher";
+import {CleanupJobs, Dispatchable, OncePerTickRunner} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
 import {applyDebugFlags} from "./Debug";
 import {Theme} from "./style/Theme.js";
@@ -219,7 +219,7 @@ export class UIElement extends BaseUIElement {
 
     render() {
         return this.options.children;
-    };
+    }
 
     createNode() {
         this.node = document.createElement(this.getNodeType());
@@ -244,7 +244,7 @@ export class UIElement extends BaseUIElement {
 
     getElementKeyMap(elements) {
         if (!elements || !elements.length) {
-            return;
+            return null;
         }
         let childrenKeyMap = new Map();
 
@@ -447,11 +447,20 @@ export class UIElement extends BaseUIElement {
                 const eventType = key.substring(2);
 
                 const addListenerMethodName = "add" + eventType + "Listener";
-                const handlerMethodName = "on" + eventType + "Handler";
+                const handlerMethodName = "on" + eventType + "AutoHandler";
 
+                // We create a wrapper handler, to not worry about updates changing the callback.
                 // The handlerMethod might have been previously added
                 // by a previous call to this function or manually by the user
-                if (typeof this[addListenerMethodName] === "function" && !this.hasOwnProperty(handlerMethodName)) {
+                if (this[handlerMethodName]) {
+                    // Don't double add
+                    continue;
+                }
+
+                const haveListenerMethod = (typeof this[addListenerMethodName] === "function");
+                const nodeEvent = this.constructor.nodeEventsMap.getKeyFromDOMName(eventType.toLowerCase());
+
+                if (haveListenerMethod || nodeEvent) {
                     this[handlerMethodName] = (...args) => {
                         if (this.options[key]) {
                             this.options[key](...args, this);
@@ -459,7 +468,11 @@ export class UIElement extends BaseUIElement {
                     };
 
                     // Actually add the listener
-                    this[addListenerMethodName](this[handlerMethodName]);
+                    if (haveListenerMethod) {
+                        this[addListenerMethodName](this[handlerMethodName]);
+                    } else {
+                        this.addNodeListener(eventType.toLowerCase(), this[handlerMethodName]);
+                    }
                 }
             }
         }
@@ -542,10 +555,10 @@ export class UIElement extends BaseUIElement {
         return this.eraseChildAtIndex(index, destroy);
     }
 
-    eraseChildAtIndex(index, destroy=true) {
+    eraseChildAtIndex(index, destroy = true) {
         if (index < 0 || index >= this.options.children.length) {
             console.error("Erasing child at invalid index ", index, this.options.children.length);
-            return;
+            return null;
         }
         if (this.children !== this.options.children) {
             throw "Can't properly handle eraseChild, you need to implement it for " + this.constructor;
@@ -594,7 +607,7 @@ export class UIElement extends BaseUIElement {
 
     getHeight() {
         return this.getWidthOrHeight("height");
-    };
+    }
 
     getWidth() {
         return this.getWidthOrHeight("width");
@@ -603,7 +616,7 @@ export class UIElement extends BaseUIElement {
     setHeight(value) {
         this.setStyle("height", suffixNumber(value, "px"));
         this.dispatch("resize");
-    };
+    }
 
     setWidth(value) {
         this.setStyle("width", suffixNumber(value, "px"));
@@ -634,6 +647,30 @@ export class UIElement extends BaseUIElement {
         this.removeNodeListener("click", callback);
     }
 
+    addPressStartListener(callback) {
+        return new CleanupJobs([
+            this.addNodeListener("mousedown", callback),
+            this.addNodeListener("touchstart", callback)
+        ]);
+    }
+
+    removePressStartListener(callback) {
+        this.removeNodeListener("mousedown", callback)
+        this.removeNodeListener("touchstart", callback);
+    }
+
+    addPressStopListener(callback) {
+        return new CleanupJobs([
+            this.addNodeListener("mouseup", callback),
+            this.addNodeListener("touchend", callback)
+        ]);
+    }
+
+    removePressStopListener(callback) {
+        this.removeNodeListener("mouseup", callback)
+        this.removeNodeListener("touchend", callback);
+    }
+
     addDoubleClickListener(callback) {
         return this.addNodeListener("dblclick", callback);
     }
@@ -646,7 +683,7 @@ export class UIElement extends BaseUIElement {
 UI.createElement = function (tag, options, ...children) {
     if (!tag) {
         console.error("Create element needs a valid object tag, did you mistype a class name?");
-        return;
+        return null;
     }
 
     options = options || {};
@@ -686,13 +723,14 @@ UI.createElement = function (tag, options, ...children) {
 };
 
 UIElement.domAttributesMap = NodeAttributes.defaultAttributesMap;
+UIElement.nodeEventsMap = NodeAttributes.defaultEventsMap;
 
 UI.Element = UIElement;
 
 UI.str = (value) => new UI.TextElement(value);
 
 // Keep a map for every base class, and for each base class keep a map for each nodeType, to cache classes
-let primitiveMap = new WeakMap();
+const primitiveMap = new WeakMap();
 
 UI.Primitive = (BaseClass, nodeType) => {
     if (!nodeType) {

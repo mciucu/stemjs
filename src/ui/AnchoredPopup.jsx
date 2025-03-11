@@ -28,6 +28,7 @@ export class AnchoredPopupStyle extends StyleSheet {
         position: "fixed",
         transform: "scale(1) translateY(0)",
         opacity: 1,
+        padding: 6,
     }
 
     @styleRule
@@ -120,6 +121,10 @@ export class AnchoredPopup extends UI.Element {
         this.destroyed = true;
 
         setTimeout(() => this.destroyNode(), this.styleSheet.transitionTime);
+    }
+
+    isVisible() {
+        return !this.hidden && !this.destroyed;
     }
 
     addAnchorListeners() {
