@@ -370,3 +370,10 @@ NodeAttributes.defaultAttributesMap = new DOMAttributesMap(null, [
     "data-",
     "aria-",
 ]);
+
+NodeAttributes.defaultEventsMap = new DOMAttributesMap(null, [
+    ["click"],
+    ["mouseenter"],
+    ["mouseleave"],
+    ["doubleClick", {domName: "dblclick"}],
+]);
