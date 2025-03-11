@@ -42,7 +42,12 @@ export class Money {
 
     static optionally(obj, currency) {
         if (obj != null) {
-            return new this(obj, currency);
+            try {
+                return new this(obj, currency);
+            } catch (e) {
+                return undefined; // just to make it different?
+            }
+
         }
         return null;
     }
