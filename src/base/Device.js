@@ -18,9 +18,12 @@ export function isMobileDevice() {
 }
 
 export function isLandscape() {
-    if (window.orientation && (window.orientation === -90 || window.orientation === 90)) {
+    const {orientation} = window.screen;
+
+    if (orientation === -90 || orientation === 90) {
         return true;
     }
+
     if (!isMobileDevice()) {
         return window.innerWidth > window.innerHeight;
     }
@@ -53,6 +56,7 @@ export function getEventCoord(event, axis, reference="client") {
     }
 
     console.warn("Couldn't find coordinates for event. Maybe wrong reference point? (client/page/screen)");
+    return undefined;
 }
 
 export function getEventX(event, reference="client") {
@@ -89,9 +93,9 @@ export function getBrowser() {
 const supportsEventCache = new Map();
 export function supportsEvent(eventName) {
     if (!supportsEventCache.has(eventName)) {
-        var element = document.createElement("div");
+        let element = document.createElement("div");
         let onEventName = "on" + eventName;
-        var isSupported = (onEventName in element);
+        let isSupported = (onEventName in element);
         if (!isSupported) {
             element.setAttribute(onEventName, "return;");
             isSupported = typeof element[onEventName] === "function";
@@ -102,7 +106,7 @@ export function supportsEvent(eventName) {
     return supportsEventCache.get(eventName);
 }
 
-// This object is deprecated, use the functions in this file directly instead.
+// TODO This object is deprecated, use the functions in this file directly instead.
 export const Device = {
     isTouchDevice,
     isMobileDevice,

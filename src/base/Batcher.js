@@ -4,7 +4,7 @@ export class Batcher extends Dispatchable {
     queue = [];
     timeoutHandler = null;
 
-    constructor(processBatch, {timeout=20, maxBatchSize=64} = {}) {
+    constructor(processBatch, {timeout = 20, maxBatchSize = 64} = {}) {
         super();
         this.processBatch = processBatch;
         this.timeout = timeout;
@@ -21,7 +21,7 @@ export class Batcher extends Dispatchable {
 
     // TODO make this async, and have processBatch be an async [] => []
     process(value) {
-        this.queue.push(value)
+        this.queue.push(value);
         if (this.queue.length === this.maxBatchSize) {
             this.handleBatch().then();
         } else {
