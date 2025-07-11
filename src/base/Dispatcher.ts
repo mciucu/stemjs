@@ -1,31 +1,39 @@
+type Callback = (...args: any[]) => void;
+
 class DispatcherHandle {
-    constructor(dispatcher, callback) {
+    dispatcher: Dispatcher | undefined;
+    callback: Callback | undefined;
+
+    constructor(dispatcher: Dispatcher, callback: Callback) {
         this.dispatcher = dispatcher;
         this.callback = callback;
     }
 
-    remove() {
+    remove(): void {
         if (!this.dispatcher) {
             console.warn("Removing a dispatcher twice");
             return;
         }
-        this.dispatcher.removeListener(this.callback);
+        this.dispatcher.removeListener(this.callback!);
         this.dispatcher = undefined;
         this.callback = undefined;
     }
 
-    cleanup() {
+    cleanup(): void {
         this.remove();
     }
 }
 
 class Dispatcher {
-    constructor(options = {}) {
+    options: any;
+    listeners: Callback[];
+
+    constructor(options: any = {}) {
         this.options = options;
         this.listeners = [];
     }
 
-    callbackExists(callback) {
+    callbackExists(callback: Callback): boolean {
         for (let i = 0; i < this.listeners.length; i += 1) {
             if (this.listeners[i] === callback) {
                 return true;
@@ -34,7 +42,7 @@ class Dispatcher {
         return false;
     }
 
-    addListener(callback) {
+    addListener(callback: Callback): DispatcherHandle | undefined {
         if (!(typeof callback === "function")) {
             console.error("The listener needs to be a function: ", callback);
             return;
@@ -48,19 +56,19 @@ class Dispatcher {
         return new DispatcherHandle(this, callback);
     };
 
-    addListenerOnce(callback) {
+    addListenerOnce(callback: Callback): DispatcherHandle | undefined {
         let handler = this.addListener(function () {
             callback(...arguments);
-            handler.remove();
+            handler!.remove();
         });
         return handler;
     }
 
-    async awaitOnce() {
-        return new Promise((resolve) => this.addListenerOnce((...args) => resolve(...args)));
+    async awaitOnce(): Promise<any> {
+        return new Promise((resolve) => this.addListenerOnce((...args: any[]) => resolve(...args)));
     }
 
-    removeListener(callback) {
+    removeListener(callback: Callback): Callback | undefined {
         for (let i = 0; i < this.listeners.length; i += 1) {
             if (this.listeners[i] === callback) {
                 // Erase and return
@@ -69,11 +77,11 @@ class Dispatcher {
         }
     };
 
-    removeAllListeners() {
+    removeAllListeners(): void {
         this.listeners = [];
     }
 
-    dispatch(payload) {
+    dispatch(payload?: any): void {
         for (let i = 0; i < this.listeners.length; ) {
             let listener = this.listeners[i];
             listener(...arguments);
@@ -89,11 +97,14 @@ class Dispatcher {
 export const DispatchersSymbol = Symbol("Dispatchers");
 
 class Dispatchable {
-    get dispatchers() {
+    private [DispatchersSymbol]?: Map<string, Dispatcher>;
+    private _cleanupJobs?: CleanupJobs;
+
+    get dispatchers(): Map<string, Dispatcher> {
         return this[DispatchersSymbol] || (this[DispatchersSymbol] = new Map());
     }
 
-    getDispatcher(name, addIfMissing = true) {
+    getDispatcher(name: string, addIfMissing: boolean = true): Dispatcher | undefined {
         let dispatcher = this.dispatchers.get(name);
         if (!dispatcher && addIfMissing) {
             dispatcher = new Dispatcher();
@@ -102,7 +113,7 @@ class Dispatchable {
         return dispatcher;
     }
 
-    dispatch(name, payload) {
+    dispatch(name: string, payload?: any): void {
         let dispatcher = this.getDispatcher(name, false);
         if (dispatcher) {
             // Optimize the average case
@@ -115,39 +126,39 @@ class Dispatchable {
         }
     }
 
-    addListenerGeneric(methodName, name, callback) {
+    addListenerGeneric(methodName: string, name: string | string[], callback: Callback): DispatcherHandle | CleanupJobs | undefined {
         if (Array.isArray(name)) {
             return new CleanupJobs(name.map(x => this[methodName](x, callback)));
         }
-        return this.getDispatcher(name)[methodName](callback);
+        return this.getDispatcher(name)?.[methodName](callback);
     }
 
-    addListener(name, callback) {
+    addListener(name: string | string[], callback: Callback): DispatcherHandle | CleanupJobs | undefined {
         return this.addListenerGeneric("addListener", name, callback);
     }
 
-    addListenerOnce(name, callback) {
+    addListenerOnce(name: string | string[], callback: Callback): DispatcherHandle | CleanupJobs | undefined {
         return this.addListenerGeneric("addListenerOnce", name, callback);
     }
 
-    removeListener(name, callback) {
+    removeListener(name: string, callback: Callback): void {
         const dispatcher = this.getDispatcher(name, false);
         dispatcher?.removeListener(callback);
     }
 
-    removeAllListeners(name) {
+    removeAllListeners(name: string): void {
         const dispatcher = this.getDispatcher(name, false);
         dispatcher?.removeAllListeners();
     }
 
-    cleanup() {
+    cleanup(): void {
         this.runCleanupJobs();
         delete this[DispatchersSymbol];
     }
 
     // These function don't really belong here, but they don't really hurt here and I don't want a long proto chain
     // Add anything that needs to be called on cleanup here (dispatchers, etc)
-    addCleanupJob(cleanupJob) {
+    addCleanupJob(cleanupJob: any): any {
         if (!this.hasOwnProperty("_cleanupJobs")) {
             this._cleanupJobs = new CleanupJobs();
         }
@@ -155,13 +166,13 @@ class Dispatchable {
         return cleanupJob;
     }
 
-    runCleanupJobs() {
+    runCleanupJobs(): void {
         if (this._cleanupJobs) {
             this._cleanupJobs.cleanup();
         }
     }
 
-    detachListener(dispatcherHandle) {
+    detachListener(dispatcherHandle: DispatcherHandle): void {
         if (this._cleanupJobs) {
             this._cleanupJobs.remove(dispatcherHandle);
         } else {
@@ -169,40 +180,39 @@ class Dispatchable {
         }
     }
 
-    attachTimeout(callback, timeout) {
+    attachTimeout(callback: () => void, timeout: number): number {
         // TODO when the timeout executes, it doesn't get cleared from the cleanup jobs and would leak
         const timeoutId = setTimeout(callback, timeout);
         this.addCleanupJob(() => clearTimeout(timeoutId));
         return timeoutId;
     }
 
-    attachInterval(callback, timeout) {
+    attachInterval(callback: () => void, timeout: number): number {
         const intervalId = setInterval(callback, timeout);
         this.addCleanupJob(() => clearInterval(intervalId));
         return intervalId;
     }
 
-    attachAnimationFrame(callback) {
+    attachAnimationFrame(callback: (time: number) => void): number {
         const animationId = requestAnimationFrame(callback);
         this.addCleanupJob(() => cancelAnimationFrame(animationId));
         return animationId;
     }
 
-    addChangeListener(callback) {
+    addChangeListener(callback: Callback): DispatcherHandle | CleanupJobs | undefined {
         return this.addListener("change", callback);
     }
 
-    dispatchChange(...args) {
+    dispatchChange(...args: any[]): void {
         this.dispatch("change", ...args, this);
     }
 }
 
 // Creates a method that calls the method methodName on obj, and adds the result as a cleanup task
-function getAttachCleanupJobMethod(methodName) {
+function getAttachCleanupJobMethod(methodName: string) {
     let addMethodName = "add" + methodName;
     let removeMethodName = "remove" + methodName;
-    return function (obj) {
-        let args = Array.prototype.slice.call(arguments, 1);
+    return function (this: Dispatchable, obj: any, ...args: any[]) {
         let handler = obj[addMethodName](...args);
         // TODO: This should be changed. It is bad to receive 2 different types of handlers.
         if (!handler) {
@@ -227,7 +237,9 @@ Dispatchable.prototype.attachListenerOnce       = getAttachCleanupJobMethod("Lis
 Dispatcher.Global = new Dispatchable();
 
 export class RunOnce {
-    run(callback, timeout = 0) {
+    private timeout?: number;
+
+    run(callback: () => void, timeout: number = 0): void {
         if (this.timeout) {
             return;
         }
@@ -239,12 +251,15 @@ export class RunOnce {
 }
 
 export class OncePerTickRunner {
-    constructor(callback) {
+    private callback: (obj: any, ...args: any[]) => void;
+    private throttle: WeakMap<object, any[]>;
+
+    constructor(callback: (obj: any, ...args: any[]) => void) {
         this.callback = callback;
         this.throttle = new WeakMap();
     }
 
-    maybeEnqueue(obj, ...args) {
+    maybeEnqueue(obj: object, ...args: any[]): boolean {
         const existingArgs = this.throttle.get(obj);
         this.throttle.set(obj, args);
 
@@ -266,21 +281,23 @@ export class OncePerTickRunner {
         return true;
     }
 
-    clear(obj) {
+    clear(obj: object): void {
         this.throttle.delete(obj);
     }
 }
 
 class CleanupJobs {
-    constructor(jobs = []) {
+    jobs: any[];
+
+    constructor(jobs: any[] = []) {
         this.jobs = jobs;
     }
 
-    add(job) {
+    add(job: any): void {
         this.jobs.push(job);
     }
 
-    cleanup() {
+    cleanup(): void {
         for (let job of this.jobs) {
             if (typeof job.cleanup === "function") {
                 job.cleanup();
@@ -293,7 +310,7 @@ class CleanupJobs {
         this.jobs = [];
     }
 
-    remove(job) {
+    remove(job?: any): void {
         if (job) {
             const index = this.jobs.indexOf(job);
             if (index >= 0) {
@@ -310,31 +327,33 @@ class CleanupJobs {
 // Class for events that should only happen once. Any listener added after the first firing will be automatically called with those arguments.
 // Useful for caching initializations for instance.
 export class OnceDispatcher extends Dispatcher {
-    dispatch(...args) {
+    private dispatchArgs?: any[];
+
+    dispatch(...args: any[]): void {
         this.dispatchArgs = args; // Save the arguments
         super.dispatch(...args);
     }
 
-    haveDispatched() {
+    haveDispatched(): any[] | undefined {
         return this.dispatchArgs;
     }
 
-    addListener(callback) {
+    addListener(callback: Callback): CleanupJobs | DispatcherHandle | undefined {
         if (this.haveDispatched()) {
             // Just pass the existing arguments
-            callback(...this.dispatchArgs);
+            callback(...this.dispatchArgs!);
             return new CleanupJobs();
         }
 
         const handler = super.addListener(function () {
             callback(...arguments);
-            handler.remove();
+            handler!.remove();
         });
         return handler;
     }
 
     // Either of these methods do the same thing
-    addListenerOnce(callback) {
+    addListenerOnce(callback: Callback): CleanupJobs | DispatcherHandle | undefined {
         return this.addListener(callback);
     }
 }
@@ -342,8 +361,10 @@ export class OnceDispatcher extends Dispatcher {
 // Class that can be used to pass around ownership of a resource.
 // It informs the previous owner of the change (once) and dispatches the new element for all listeners
 // TODO: a better name
-export class SingleActiveElementDispatcher extends Dispatcher {
-    setActive(element, addChangeListener, forceDispatch) {
+export class SingleActiveElementDispatcher<T = any> extends Dispatcher {
+    private _active?: T;
+
+    setActive(element: T, addChangeListener?: (newElement: T) => void, forceDispatch?: boolean): void {
         if (!forceDispatch && element === this._active) {
             return;
         }
@@ -358,7 +379,7 @@ export class SingleActiveElementDispatcher extends Dispatcher {
         }
     }
 
-    getActive() {
+    getActive(): T | undefined {
         return this._active;
     }
 }

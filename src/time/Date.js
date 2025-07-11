@@ -1,6 +1,6 @@
 import {padNumber, suffixWithOrdinal, isNumber, isString} from "../base/Utils";
 import {TimeUnit, Duration} from "./Duration";
-import {TokenFormatter} from "./Formatter.js";
+import {TokenFormatter} from "./Formatter.ts";
 
 // By default, StemDate will guess if the value is in milliseconds or seconds.
 // Any value less than this is interpreted as a unix time in seconds

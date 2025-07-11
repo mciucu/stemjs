@@ -1,5 +1,5 @@
 import {isPlainObject, isNumber, capitalize, isString, padNumber} from "../base/Utils.js";
-import {TokenFormatter} from "./Formatter.js";
+import {TokenFormatter} from "./Formatter.ts";
 
 export class TimeUnit {
     static CANONICAL = {};
