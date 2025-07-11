@@ -1,5 +1,6 @@
 import {Dispatchable} from "../../base/Dispatcher";
-import {CallThrottler, isFunction, resolveFuncValue} from "../../base/Utils";
+import {resolveFuncValue} from "../../base/Utils";
+import {CallThrottler} from "../../base/CallModifier.js";
 import {ThemeType} from "./ThemeTypes.js";
 
 
