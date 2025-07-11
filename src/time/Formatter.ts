@@ -1,4 +1,6 @@
-type TokenFormatterFunction = (value: any) => string;
+import {isString} from "../base/Utils";
+
+type TokenFormatterFunction = (value: any) => string | number;
 type TokenEntry = [string, TokenFormatterFunction];
 
 export class TokenFormatter {
@@ -55,7 +57,11 @@ export class TokenFormatter {
         if (!func) {
             return token;
         }
-        return func(value);
+        const result = func(value);
+        if (!isString(result)) {
+            return String(result);
+        }
+        return result;
     }
 
     format(value: any, str: string): string {
