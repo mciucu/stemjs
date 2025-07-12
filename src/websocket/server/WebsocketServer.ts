@@ -5,7 +5,6 @@ import {DEFAULT_HEARTBEAT_MESSAGE} from "../Shared";
 import {AppConfig} from "./AppConfig";
 
 declare global {
-    var gc: (() => void) | undefined;
     namespace NodeJS {
         interface Process {
             exit(code?: number): never;
@@ -14,7 +13,7 @@ declare global {
 }
 
 export function MaybeGetGC(): (() => void) | undefined {
-    // In Node.js, global.gc is available when running with --expose-gc flag
+    // In Node.js, global.gc is available when running with the --expose-gc flag
     if (globalThis.global) {
         const nodeGlobal = globalThis.global;
         if (nodeGlobal && typeof nodeGlobal.gc === 'function') {
