@@ -1,14 +1,14 @@
 export const NON_BREAKING_SPACE = String.fromCharCode(160); // Looks like a space, but never breaks when wrapping lines
 
 // Format a number between 0.0 and 100.0 as a percent string
-export function formatPercent(percent, numDigits = 2) {
+export function formatPercent(percent: number, numDigits: number = 2): string {
     // TODO: when localizing, we might want the percent sign in front:
     //  https://en.wikipedia.org/wiki/Percent_sign#Form_and_spacing
     return percent.toFixed(numDigits) + NON_BREAKING_SPACE + "%";
 }
 
 // Will always return a number
-export function ratioToPercent(a, b) {
+export function ratioToPercent(a: number | null | undefined, b: number): number {
     if (a == null || isNaN(a)) {
         a = 0;
     }
@@ -18,11 +18,11 @@ export function ratioToPercent(a, b) {
     return 100.0 * a / b;
 }
 
-export function formatPercentFromRatio(a, b, numDigits = 2) {
+export function formatPercentFromRatio(a: number | null | undefined, b: number, numDigits: number = 2): string {
     return formatPercent(ratioToPercent(a, b), numDigits);
 }
 
-export function formatBytes(bytes) {
+export function formatBytes(bytes: number | string | null | undefined): string {
     const UNIT_SYMBOL = ["B", "KB", "MB", "GB", "TB", "PB"];
     if (bytes == null) {
         return "-";
@@ -30,8 +30,8 @@ export function formatBytes(bytes) {
     if (bytes === 0) {
         return "0 " + UNIT_SYMBOL[0];
     }
-    bytes = parseInt(bytes, 10);
-    const unitIndex = Math.min(parseInt(Math.floor(Math.log(bytes) / Math.log(1024))), UNIT_SYMBOL.length - 1);
+    bytes = parseInt(bytes as string, 10);
+    const unitIndex = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), UNIT_SYMBOL.length - 1);
     if (unitIndex === 0) {
         return bytes + " " + UNIT_SYMBOL[unitIndex];
     }
@@ -40,7 +40,7 @@ export function formatBytes(bytes) {
     return amountInUnits.toFixed(decimalDigits) + " " + UNIT_SYMBOL[unitIndex];
 }
 
-export function formatError(error) {
+export function formatError(error: any): string {
     if (error.error) {
         return formatError(error.error);
     }
