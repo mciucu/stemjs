@@ -1,8 +1,11 @@
 import {Dispatchable} from "./Dispatcher";
-import {toArray} from "./Utils.js";
+import {toArray} from "./Utils";
 
 class ScriptResolver extends Dispatchable {
-    constructor(scriptPath) {
+    loaded: boolean;
+    jobs: Function[];
+
+    constructor(scriptPath: string) {
         super();
         this.loaded = false;
         this.jobs = [];
@@ -15,7 +18,7 @@ class ScriptResolver extends Dispatchable {
         document.getElementsByTagName("head")[0].appendChild(scriptElement);
     }
 
-    onLoad() {
+    onLoad(): void {
         this.loaded = true;
         for (let i = 0; i < this.jobs.length; i += 1) {
             this.jobs[i](this);
@@ -23,7 +26,7 @@ class ScriptResolver extends Dispatchable {
         this.jobs = [];
     }
 
-    resolve(callback) {
+    resolve(callback: Function): void {
         if (this.loaded) {
             callback(this);
             return;
@@ -32,27 +35,26 @@ class ScriptResolver extends Dispatchable {
     }
 }
 
-let scriptResolveMap = new Map();
+const scriptResolveMap = new Map<string, ScriptResolver>();
 
-async function ensureSingle(script) {
+async function ensureSingle(script: string) {
     let scriptResolver = scriptResolveMap.get(script);
     if (!scriptResolver) {
         scriptResolver = new ScriptResolver(script);
         scriptResolveMap.set(script, scriptResolver);
     }
-    return new Promise(function(resolve, reject) {
-        scriptResolver.resolve(resolve, reject);
+    return new Promise<ScriptResolver>(function(resolve, reject) {
+        scriptResolver!.resolve(resolve);
     });
 }
 
-async function ensure(scripts, callback) {
+export async function ensure(scripts: string | string[], callback?: Function) {
     scripts = toArray(scripts);
-    let promises = scripts.map(script => ensureSingle(script));
-    return Promise.all(promises).then(function () {
+    const promises = scripts.map(script => ensureSingle(script));
+    return Promise.all(promises).then(function (results) {
         if (callback) {
-            callback(...arguments);
+            callback(...results);
         }
+        return results;
     });
 }
-
-export {ensure};

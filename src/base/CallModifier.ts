@@ -1,31 +1,16 @@
-import {NOOP_FUNCTION} from "./Utils.js";
+import {NOOP_FUNCTION} from "./Utils";
 
 export class CallModifier {
-    wrap(func) {
-        throw Error("Implement wrap method");
+    wrap(func: Function): Function {
+        throw new Error("Implement wrap method");
     }
 
-    call(func) {
+    call(func: Function): any {
         return this.wrap(func)();
     }
 
-    toFunction() {
-        return (func) => this.wrap(func);
-    }
-}
-
-export class UnorderedCallDropper extends CallModifier {
-    index = 1;
-    lastExecuted = 0;
-
-    wrap(callback) {
-        const currentIndex = this.index++;
-        return (...args) => {
-            if (currentIndex > this.lastExecuted) {
-                this.lastExecuted = currentIndex;
-                return callback(...args);
-            }
-        }
+    toFunction(): Function {
+        return (func: Function) => this.wrap(func);
     }
 }
 
@@ -43,45 +28,49 @@ export class CallThrottler extends CallModifier {
     static AUTOMATIC = Symbol();
 
     lastCallTime = 0;
-    pendingCall = null;
-    pendingCallArgs = [];
+    pendingCall: any = null;
+    pendingCallArgs: any[] = [];
     pendingCallExpectedTime = 0;
     numCalls = 0;
     totalCallDuration = 0;
+    
+    debounce?: number;
+    throttle?: number | symbol;
+    dropThrottled?: boolean;
 
-    constructor(options={}) {
+    constructor(options: any = {}) {
         super();
         Object.assign(this, options);
     }
 
-    isThrottleOnAnimationFrame() {
-        return this.throttle === this.constructor.ON_ANIMATION_FRAME;
+    isThrottleOnAnimationFrame(): boolean {
+        return this.throttle === (this.constructor as any).ON_ANIMATION_FRAME;
     }
 
-    clearPendingCall() {
+    clearPendingCall(): void {
         this.pendingCall = null;
         this.pendingCallArgs = [];
         this.pendingCallExpectedTime = 0;
     }
 
-    cancel() {
+    cancel(): void {
         this.pendingCall && this.pendingCall.cancel();
         this.clearPendingCall();
     }
 
-    flush() {
+    flush(): void {
         this.pendingCall && this.pendingCall.flush();
         this.clearPendingCall();
     }
 
     // API compatibility with cleanup jobs
-    cleanup() {
+    cleanup(): void {
         this.cancel();
     }
 
-    computeExecutionDelay(timeNow) {
-        let executionDelay = null;
-        if (this.throttle != null) {
+    computeExecutionDelay(timeNow: number): number | null {
+        let executionDelay: number | null = null;
+        if (this.throttle != null && typeof this.throttle === 'number') {
             executionDelay = Math.max(this.lastCallTime + this.throttle - timeNow, 0);
         }
         if (this.debounce != null) {
@@ -90,29 +79,29 @@ export class CallThrottler extends CallModifier {
         return executionDelay;
     }
 
-    replacePendingCall(wrappedFunc, funcCall, funcCallArgs) {
+    replacePendingCall(wrappedFunc: any, funcCall: Function, funcCallArgs: any[]): void {
         this.cancel();
         if (this.isThrottleOnAnimationFrame()) {
-            const cancelHandler = requestAnimationFrame(funcCall);
+            const cancelHandler = requestAnimationFrame(funcCall as FrameRequestCallback);
             wrappedFunc.cancel = () => cancelAnimationFrame(cancelHandler);
             return;
         }
 
         const timeNow = Date.now();
-        let executionDelay = this.computeExecutionDelay(timeNow);
+        const executionDelay = this.computeExecutionDelay(timeNow);
 
         if (this.dropThrottled) {
-            return executionDelay == 0 && funcCall();
+            return executionDelay === 0 && funcCall();
         }
 
-        const cancelHandler = setTimeout(funcCall, executionDelay);
+        const cancelHandler = setTimeout(funcCall, executionDelay || 0);
         wrappedFunc.cancel = () => clearTimeout(cancelHandler);
         this.pendingCall = wrappedFunc;
         this.pendingCallArgs = funcCallArgs;
         this.pendingCallExpectedTime = timeNow + executionDelay;
     }
 
-    updatePendingCall(args) {
+    updatePendingCall(args: any[]): void {
         this.pendingCallArgs = args;
         if (!this.isThrottleOnAnimationFrame()) {
             const timeNow = Date.now();
@@ -120,7 +109,7 @@ export class CallThrottler extends CallModifier {
         }
     }
 
-    wrap(func) {
+    wrap(func: Function): Function {
         const funcCall = () => {
             const timeNow = Date.now();
             // The expected time when the function should be executed next might have been changed
@@ -135,7 +124,7 @@ export class CallThrottler extends CallModifier {
             }
         };
 
-        const wrappedFunc = (...args) => {
+        const wrappedFunc = (...args: any[]) => {
             // Check if it's our function, and update the arguments and next execution time only
             if (this.pendingCall && func === this.pendingCall.originalFunc) {
                 // We only need to update the arguments, and maybe mark that we want to executed later than scheduled
