@@ -235,6 +235,14 @@ export function setObjectPrototype<T>(obj: any, Class: new (...args: any[]) => T
     return obj;
 }
 
+export function isNotNull<T>(obj: T | null | undefined): obj is T {
+    return obj != null;
+}
+
+export function isNotNullOrFalse<T>(obj: T | null | false): obj is T {
+    return obj !== null && obj !== false;
+}
+
 export function isFunction(obj: any): obj is Function {
     return typeof obj === "function";
 }
