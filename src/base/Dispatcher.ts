@@ -95,13 +95,18 @@ class Dispatcher {
 }
 
 export const DispatchersSymbol = Symbol("Dispatchers");
+export const CleanupJobsSymbol = Symbol("CleanupJobs");
 
 class Dispatchable {
     private [DispatchersSymbol]?: Map<string, Dispatcher>;
-    private _cleanupJobs?: CleanupJobs;
+    private [CleanupJobsSymbol]?: CleanupJobs;
 
     get dispatchers(): Map<string, Dispatcher> {
         return this[DispatchersSymbol] || (this[DispatchersSymbol] = new Map());
+    }
+
+    get cleanupJobs(): CleanupJobs {
+        return this[CleanupJobsSymbol] || (this[CleanupJobsSymbol] = new CleanupJobs());
     }
 
     getDispatcher(name: string, addIfMissing: boolean = true): Dispatcher | undefined {
@@ -159,22 +164,17 @@ class Dispatchable {
     // These function don't really belong here, but they don't really hurt here and I don't want a long proto chain
     // Add anything that needs to be called on cleanup here (dispatchers, etc)
     addCleanupJob(cleanupJob: any): any {
-        if (!this.hasOwnProperty("_cleanupJobs")) {
-            this._cleanupJobs = new CleanupJobs();
-        }
-        this._cleanupJobs.add(cleanupJob);
+        this.cleanupJobs.add(cleanupJob);
         return cleanupJob;
     }
 
     runCleanupJobs(): void {
-        if (this._cleanupJobs) {
-            this._cleanupJobs.cleanup();
-        }
+        this.cleanupJobs?.cleanup();
     }
 
     detachListener(dispatcherHandle: DispatcherHandle): void {
-        if (this._cleanupJobs) {
-            this._cleanupJobs.remove(dispatcherHandle);
+        if (this[CleanupJobsSymbol]) {
+            this[CleanupJobsSymbol].remove(dispatcherHandle);
         } else {
             dispatcherHandle.remove();
         }

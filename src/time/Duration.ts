@@ -3,6 +3,7 @@ import {TokenFormatter} from "./Formatter";
 
 interface TimeUnitOptions {
     variableMultiplier?: boolean;
+    dateMethodSuffix?: string;
 }
 
 type DurationInput = number | Duration | TimeUnit | Date | Record<string, number> | undefined;
@@ -15,11 +16,6 @@ interface DateFormatOptions {
 }
 
 export class TimeUnit {
-    static CANONICAL: Record<string, TimeUnit> = {};
-    static ALL: TimeUnit[] = [];
-    static FIXED_DURATION: TimeUnit[] = [];
-    static VARIABLE_DURATION: TimeUnit[] = [];
-
     name: string;
     pluralName: string;
     baseUnit: TimeUnit | null;
@@ -31,17 +27,22 @@ export class TimeUnit {
     setterName: string;
     dateMethodSuffix?: string;
 
-    static MILLISECOND: TimeUnit;
-    static SECOND: TimeUnit;
-    static MINUTE: TimeUnit;
-    static HOUR: TimeUnit;
-    static DAY: TimeUnit;
-    static WEEK: TimeUnit;
-    static MONTH: TimeUnit;
-    static QUARTER: TimeUnit;
-    static TRIMESTER: TimeUnit;
-    static SEMESTER: TimeUnit;
-    static YEAR: TimeUnit;
+    static CANONICAL: Record<string, TimeUnit> = {};
+    static ALL: TimeUnit[] = [];
+    static FIXED_DURATION: TimeUnit[] = [];
+    static VARIABLE_DURATION: TimeUnit[] = [];
+
+    static MILLISECOND = new TimeUnit("millisecond", null, 1);
+    static SECOND = new TimeUnit("second", TimeUnit.MILLISECOND, 1000);
+    static MINUTE = new TimeUnit("minute", TimeUnit.SECOND, 60);
+    static HOUR = new TimeUnit("hour", TimeUnit.MINUTE, 60);
+    static DAY = new TimeUnit("day", TimeUnit.HOUR, 24, {variableMultiplier: true, dateMethodSuffix: "Date"});
+    static WEEK = new TimeUnit("week", TimeUnit.DAY, 7);
+    static MONTH = new TimeUnit("month", TimeUnit.DAY, 30, {variableMultiplier: true, dateMethodSuffix: "Month"});
+    static QUARTER = new TimeUnit("quarter", TimeUnit.MONTH, 3);
+    static TRIMESTER = new TimeUnit("trimester", TimeUnit.MONTH, 4);
+    static SEMESTER = new TimeUnit("semester", TimeUnit.MONTH, 6);
+    static YEAR = new TimeUnit("year", TimeUnit.DAY, 365, {variableMultiplier: true, dateMethodSuffix: "FullYear"});
 
     constructor(name: string, baseUnit: TimeUnit | null, multiplier: number, options: TimeUnitOptions = {}) {
         this.name = name;
@@ -58,6 +59,10 @@ export class TimeUnit {
         if (!(Date.prototype as any)[this.getterName] && (Date.prototype as any)[this.getterName + "s"]) {
             this.getterName += "s";
             this.setterName += "s";
+        }
+
+        if (options.dateMethodSuffix) {
+            this.dateMethodSuffix = options.dateMethodSuffix;
         }
     }
 
@@ -119,22 +124,6 @@ export class TimeUnit {
         return (date as any)[this.setterName](value);
     }
 }
-
-TimeUnit.MILLISECOND = new TimeUnit("millisecond", null, 1);
-TimeUnit.SECOND = new TimeUnit("second", TimeUnit.MILLISECOND, 1000);
-TimeUnit.MINUTE = new TimeUnit("minute", TimeUnit.SECOND, 60);
-TimeUnit.HOUR = new TimeUnit("hour", TimeUnit.MINUTE, 60);
-TimeUnit.DAY = new TimeUnit("day", TimeUnit.HOUR, 24, {variableMultiplier: true});
-TimeUnit.WEEK = new TimeUnit("week", TimeUnit.DAY, 7);
-TimeUnit.MONTH =  new TimeUnit("month", TimeUnit.DAY, 30, {variableMultiplier: true});
-TimeUnit.QUARTER = new TimeUnit("quarter", TimeUnit.MONTH, 3);
-TimeUnit.TRIMESTER = new TimeUnit("trimester", TimeUnit.MONTH, 4);
-TimeUnit.SEMESTER = new TimeUnit("semester", TimeUnit.MONTH, 6);
-TimeUnit.YEAR = new TimeUnit("year", TimeUnit.DAY, 365, {variableMultiplier: true});
-
-TimeUnit.DAY.dateMethodSuffix = "Date";
-TimeUnit.MONTH.dateMethodSuffix = "Month";
-TimeUnit.YEAR.dateMethodSuffix = "FullYear";
 
 export class Duration {
     milliseconds?: number;
