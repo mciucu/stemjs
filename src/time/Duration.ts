@@ -1,4 +1,4 @@
-import {isPlainObject, isNumber, capitalize, isString, padNumber} from "../base/Utils.js";
+import {isPlainObject, isNumber, capitalize, isString, padNumber} from "../base/Utils";
 import {TokenFormatter} from "./Formatter";
 
 type TimeUnitName = "millisecond" | "second" | "minute" | "hour" | "day" | "week" | "month" | "quarter" | "trimester" | "semester" | "year";
@@ -366,7 +366,7 @@ export class Duration {
     ]);
 }
 
-export function addCanonicalTimeUnit(key: string, timeUnit: TimeUnit): void {
+export function addCanonicalTimeUnit(timeUnit: TimeUnit): void {
     TimeUnit.ALL.push(timeUnit);
     if (timeUnit.isVariable()) {
         TimeUnit.VARIABLE_DURATION.push(timeUnit);
@@ -378,20 +378,13 @@ export function addCanonicalTimeUnit(key: string, timeUnit: TimeUnit): void {
     if (timeUnit.pluralName) {
         TimeUnit.CANONICAL[timeUnit.pluralName] = timeUnit;
     }
-
-    const timeUnitsName = timeUnit.pluralName;
-
-    // TODO: not sure about this anymore
-    (Duration as any)[key] = new Duration({
-        [timeUnitsName]: 1,
-    });
 }
 
 export function addCanonicalTimeUnits(): void {
     for (const key in TimeUnit) {
         const timeUnit = (TimeUnit as any)[key];
         if (timeUnit instanceof TimeUnit) {
-            addCanonicalTimeUnit(key, timeUnit);
+            addCanonicalTimeUnit(timeUnit);
         }
     }
 }
