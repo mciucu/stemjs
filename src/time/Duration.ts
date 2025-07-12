@@ -10,7 +10,7 @@ interface TimeUnitOptions {
     dateMethodSuffix?: string;
 }
 
-type DurationInput = number | Duration | TimeUnit | Date | Record<string, number> | undefined;
+type DurationInput = number | Duration | TimeUnit | Date | Record<TimeUnitKey, number> | undefined;
 
 interface DateFormatOptions {
     maxEntries?: number;
@@ -65,12 +65,13 @@ export class TimeUnit {
             this.setterName += "s";
         }
 
+        // TODO Should dateMethodSuffix be deprecated? Looks like the getter and setter names are good enough
         if (options.dateMethodSuffix) {
             this.dateMethodSuffix = options.dateMethodSuffix;
         }
     }
 
-    static toTimeUnit(timeUnit: TimeUnit | string): TimeUnit | undefined {
+    static toTimeUnit(timeUnit: TimeUnit | TimeUnitKey): TimeUnit {
         if (timeUnit instanceof TimeUnit) {
             return timeUnit;
         }
