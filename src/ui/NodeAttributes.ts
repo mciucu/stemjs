@@ -48,10 +48,12 @@ export const defaultToPixelsAttributes = new Set([
 // Used to map from option key to a DOM attribute name.
 // Can recursively fall back to a base mapping, to allow extending of a parent class
 export class DOMAttributesMap {
-    allowedAttributesMap = new Map();
-    reverseNameMap = new Map();
+    allowedAttributesMap = new Map<string, any>();
+    reverseNameMap = new Map<string, string>();
+    fallbackMapping: DOMAttributesMap | null;
+    allowedPrefixes: string[];
 
-    constructor(fallbackMapping, allowedAttributesArray = [], allowedPrefixes = []) {
+    constructor(fallbackMapping: DOMAttributesMap | null, allowedAttributesArray: any[] = [], allowedPrefixes: string[] = []) {
         this.fallbackMapping = fallbackMapping;
 
         for (let attribute of allowedAttributesArray) {
@@ -65,7 +67,7 @@ export class DOMAttributesMap {
         this.allowedPrefixes = allowedPrefixes;
     }
 
-    setAttribute(key, value) {
+    setAttribute(key: string, value?: any): void {
         value = value || {};
         value.domName = value.domName || key;
 
@@ -73,12 +75,12 @@ export class DOMAttributesMap {
         this.reverseNameMap.set(value.domName, key);
     }
 
-    get(key) {
+    get(key: string): any {
         for (const prefix of this.allowedPrefixes) {
             if (key.startsWith(prefix)) {
                 return {
                     domName: key,
-                }
+                };
             }
         }
         let value = this.allowedAttributesMap.get(key);
@@ -88,11 +90,11 @@ export class DOMAttributesMap {
         return value;
     }
 
-    has(key) {
+    has(key: string): boolean {
         return this.allowedAttributesMap.has(key) || (this.fallbackMapping && this.fallbackMapping.has(key));
     }
 
-    getKeyFromDOMName(key) {
+    getKeyFromDOMName(key: string): string | undefined {
         let value = this.reverseNameMap.get(key);
         if (!value && this.fallbackMapping) {
             value = this.fallbackMapping.getKeyFromDOMName(key);
@@ -107,18 +109,26 @@ export class DOMAttributesMap {
 export class ClassNameSet extends Set {
     // Can't use classic super in constructor since Set is build-in type and will throw an error
     // TODO: see if could still be made to have this as constructor
-    static create(className) {
-        let value = new Set(String(className || "").split(" "));
+    static create(className?: string): ClassNameSet {
+        const value = new Set(String(className || "").split(" "));
         return setObjectPrototype(value, this);
     }
 
-    toString() {
+    toString(): string {
         return Array.from(this).join(" ");
     }
 }
 
 export class NodeAttributes {
-    constructor(obj) {
+    [key: string]: any;
+    className?: string | ClassNameSet;
+    style?: Record<string, any> | string;
+    styleString?: string;
+    whitelistedAttributes?: Record<string, boolean>;
+    static defaultAttributesMap: DOMAttributesMap;
+    static defaultEventsMap: DOMAttributesMap;
+
+    constructor(obj?: any) {
         Object.assign(this, obj);
         // className and style should be deep copied to be modifiable, the others shallow copied
         if (this.className instanceof ClassNameSet) {
@@ -132,7 +142,7 @@ export class NodeAttributes {
 
     // Change the attribute & apply it, regardless if it exists in the attribute map (in that case it's whitelisted)
     // TODO: should this use the domName or the reverseName? Still needs work
-    setAttribute(key, value, node, attributesMap=this.constructor.defaultAttributesMap) {
+    setAttribute(key: string, value: any, node?: HTMLElement, attributesMap: DOMAttributesMap = (this.constructor as any).defaultAttributesMap): void {
         // TODO: might want to find a better way than whitelistAttributes field to do this
         if (!attributesMap.has(key)) {
             this.whitelistedAttributes = this.whitelistedAttributes || {}; // TODO: reconsider the whitelisted attributes
@@ -144,27 +154,27 @@ export class NodeAttributes {
         }
     }
 
-    applyStyleToNode(key, value, node) {
+    applyStyleToNode(key: string, value: any, node?: HTMLElement): void {
         if (typeof value === "function") {
             value = value();
         }
         if (isNumber(value) && value != 0 && defaultToPixelsAttributes.has(dashCase(key))) {
             value = value + "px";
         }
-        if (node && node.style[key] !== value) {
-            node.style[key] = value;
+        if (node && (node.style as any)[key] !== value) {
+            (node.style as any)[key] = value;
         }
     }
 
     // Should the style property have been passed in as a string, save it to the variable that will be applied before the string object.
-    ensureNoStringStyle() {
+    ensureNoStringStyle(): void {
         if (isString(this.style)) {
             this.styleString = this.style; // Keep in a temp value
             delete this.style;
         }
     }
 
-    setStyle(key, value, node) {
+    setStyle(key: string | Record<string, any>, value?: any, node?: HTMLElement): void {
         value = resolveFuncValue(value);
         if (!isString(key)) {
             // If the key is not a string, it should be a plain object
@@ -183,16 +193,16 @@ export class NodeAttributes {
         this.applyStyleToNode(key, value, node);
     }
 
-    removeStyle(key, node) {
+    removeStyle(key: string, node?: HTMLElement): void {
         if (this.style) {
             delete this.style[key];
         }
-        if (node && node.style[key]) {
+        if (node?.style[key]) {
             delete node.style[key];
         }
     }
 
-    static getClassArray(classes) {
+    static getClassArray(classes: any): string[] {
         if (!classes) {
             return [];
         }
@@ -203,17 +213,17 @@ export class NodeAttributes {
         }
     }
 
-    getClassNameSet() {
+    getClassNameSet(): ClassNameSet {
         if (!(this.className instanceof ClassNameSet)) {
-            this.className = ClassNameSet.create(this.className || "");
+            this.className = ClassNameSet.create(this.className as string || "");
         }
-        return this.className;
+        return this.className as ClassNameSet;
     }
 
-    addClass(classes, node) {
-        classes = this.constructor.getClassArray(classes);
+    addClass(classes: any, node?: HTMLElement): void {
+        classes = (this.constructor as typeof NodeAttributes).getClassArray(classes);
 
-        for (let cls of classes) {
+        for (const cls of classes) {
             this.getClassNameSet().add(cls);
             if (node) {
                 node.classList.add(cls);
@@ -221,10 +231,10 @@ export class NodeAttributes {
         }
     }
 
-    removeClass(classes, node) {
-        classes = this.constructor.getClassArray(classes);
+    removeClass(classes: any, node?: HTMLElement): void {
+        classes = (this.constructor as typeof NodeAttributes).getClassArray(classes);
 
-        for (let cls of classes) {
+        for (const cls of classes) {
             this.getClassNameSet().delete(cls);
             if (node) {
                 node.classList.remove(cls);
@@ -232,18 +242,18 @@ export class NodeAttributes {
         }
     }
 
-    hasClass(className) {
+    hasClass(className: string | any): boolean {
         return this.getClassNameSet().has(isString(className) ? className : className.className);
     }
 
     // Apply the attribute only if it's in the attributesMap
-    applyAttribute(key, node, attributesMap) {
+    applyAttribute(key: string, node: HTMLElement, attributesMap: DOMAttributesMap): void {
         let attributeOptions = attributesMap.get(key);
         if (!attributeOptions) {
             if (this.whitelistedAttributes && (key in this.whitelistedAttributes)) {
                 attributeOptions = {
                     domName: key,
-                }
+                };
             } else {
                 return;
             }
@@ -266,10 +276,10 @@ export class NodeAttributes {
         }
     }
 
-    applyClassName(node) {
+    applyClassName(node: HTMLElement): void {
         if (this.className) {
             const className = String(this.className);
-            if (node.className != className) {
+            if (node.className !== className) {
                 node.className = className;
             }
         } else {
@@ -279,27 +289,27 @@ export class NodeAttributes {
         }
     }
 
-    apply(node, attributesMap) {
-        let addedAttributes = {};
-        let whitelistedAttributes = this.whitelistedAttributes || {};
+    apply(node: HTMLElement, attributesMap: DOMAttributesMap): void {
+        const addedAttributes: Record<string, boolean> = {};
+        const whitelistedAttributes = this.whitelistedAttributes || {};
 
         // First update existing node attributes and delete old ones
         // TODO: optimize to not run this if the node was freshly created
-        let nodeAttributes = node.attributes;
+        const nodeAttributes = node.attributes;
         for (let i = nodeAttributes.length - 1; i >= 0; i--) {
-            let attr = nodeAttributes[i];
-            let attributeName = attr.name;
+            const attr = nodeAttributes[i];
+            const attributeName = attr.name;
             if (attributeName === "style" || attributeName === "class") {
                 // TODO: maybe should do work here?
                 continue;
             }
 
-            let key = attributesMap.getKeyFromDOMName(attributeName);
+            const key = attributesMap.getKeyFromDOMName(attributeName);
 
-            if (this.hasOwnProperty(key)) {
+            if (key && this.hasOwnProperty(key)) {
                 let value = this[key];
-                let attributeOptions = attributesMap.get(key);
-                if (attributeOptions && attributeOptions.noValue) {
+                const attributeOptions = attributesMap.get(key);
+                if (attributeOptions?.noValue) {
                     if (value) {
                         value = "";
                     } else {
@@ -317,7 +327,7 @@ export class NodeAttributes {
             }
         }
         // Add new attributes
-        for (let key in this) {
+        for (const key in this) {
             if (addedAttributes[key]) {
                 continue;
             }
@@ -329,6 +339,7 @@ export class NodeAttributes {
         node.removeAttribute("style");
         this.ensureNoStringStyle();
         if (this.styleString) {
+            // @ts-ignore
             node.style = this.styleString;
         }
         if (this.style) {

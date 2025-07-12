@@ -8,7 +8,7 @@ import {
 import {CleanupJobs, Dispatchable, OncePerTickRunner} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
 import {applyDebugFlags} from "./Debug";
-import {Theme} from "./style/Theme.js";
+import {Theme} from "./style/Theme";
 
 export const RenderStack = []; //keeps track of objects that are redrawing, to know where to assign refs automatically
 export const redrawPerTickRunner = new OncePerTickRunner((obj, event) => obj.node && obj.redraw(event));

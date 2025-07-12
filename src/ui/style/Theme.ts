@@ -1,39 +1,47 @@
 import {Dispatchable} from "../../base/Dispatcher";
 import {resolveFuncValue} from "../../base/Utils";
-import {CallThrottler} from "../../base/CallModifier.js";
-import {ThemeType} from "./ThemeTypes.js";
+import {CallThrottler} from "../../base/CallModifier";
+import {ThemeType} from "./ThemeTypes";
+
+export type RawThemeProps = Record<string, any>;
 
 
 export class Theme extends Dispatchable {
     static Global = new this(null, "Global");
 
-    classSet = new Set();
-    styleSheetInstances = new Map(); // map from StyleSheet class to instance
-    updateThrottled = (new CallThrottler({throttle: 50})).wrap(() => this.updateStyleSheets()); // TODO @cleanup CallThrottler syntax is really ugly
+    classSet = new Set<any>();
+    styleSheetInstances = new Map<any, any>(); // map from StyleSheet class to instance
+    updateThrottled: Function = (new CallThrottler({throttle: 50})).wrap(() => this.updateStyleSheets()); // TODO @cleanup CallThrottler syntax is really ugly
+    name: string;
+    baseTheme: Theme | null;
+    properties: RawThemeProps;
+    propTypes: Record<string, ThemeType>;
+    props: any;
+    styleSheetSymbol: symbol;
 
-    constructor(baseTheme, name, props) {
+    constructor(baseTheme: Theme | null, name: string, props?: RawThemeProps) {
         super();
         this.name = name;
         this.baseTheme = baseTheme;
         this.properties = {
             theme: this,
             ...props,
-        }
+        };
 
         this.propTypes = {};
 
         this.props = new Proxy(this.properties, {
-            get: (properties, key, receiver) => {
+            get: (properties, key: string, receiver) => {
                 const rawValue = this.getProperty(key);
                 const value = resolveFuncValue(rawValue, {args: [this.props]});
 
-                if (self.STEM_DEBUG && value === undefined) {
+                if (globalThis.STEM_DEBUG && value === undefined) {
                     console.warn("Failed to find theme prop", key);
                 }
 
                 return value;
             },
-            set: (properties, key, value) => {
+            set: (properties, key: string, value) => {
                 this.setProperties({[key]: value});
                 // TODO this should also update all themes that inherit from us
                 return true;
@@ -46,21 +54,21 @@ export class Theme extends Dispatchable {
     }
 
     // Create a new Theme, based on the current one
-    fork(name, extraProps) {
+    fork(name: string, extraProps?: RawThemeProps): Theme {
         return new Theme(this, name, extraProps);
     }
 
-    register(cls, styleSheet) {
+    register(cls: any, styleSheet: any): void {
         cls.theme = this;
         cls[this.styleSheetSymbol] = styleSheet;
         this.classSet.add(cls);
     }
 
-    getStyleSheet(cls) {
+    getStyleSheet(cls: any): any {
         return cls[this.styleSheetSymbol] || this.baseTheme?.getStyleSheet(cls);
     }
 
-    getProperty(key) {
+    getProperty(key: string): any {
         if (this.properties.hasOwnProperty(key)) {
             // Return nulls as well
             return this.properties[key];
@@ -68,7 +76,7 @@ export class Theme extends Dispatchable {
         return this.baseTheme?.getProperty(key);
     }
 
-    setProperties(properties, update=true) {
+    setProperties(properties: RawThemeProps, update: boolean = true): void {
         for (const [key, value] of Object.entries(properties)) {
             if (value instanceof ThemeType) {
                 this.properties[key] = value.value;
@@ -82,15 +90,15 @@ export class Theme extends Dispatchable {
         }
     }
 
-    getAllStyleSheets() {
-        let styleSheetSet = new Set(this.styleSheetInstances.values());
+    getAllStyleSheets(): any[] {
+        const styleSheetSet = new Set(this.styleSheetInstances.values());
         for (const cls of this.classSet.values()) {
             styleSheetSet.add(this.getStyleSheet(cls));
         }
         return Array.from(styleSheetSet).map(styleSheet => styleSheet.getInstance(this));
     }
 
-    getStyleSheetInstance(Cls) {
+    getStyleSheetInstance(Cls: any): any {
         let instance = this.styleSheetInstances.get(Cls);
         if (!instance) {
             instance = new Cls({theme: this});
@@ -99,7 +107,7 @@ export class Theme extends Dispatchable {
         return instance;
     }
 
-    updateStyleSheets() {
+    updateStyleSheets(): void {
         this.dispatch("beforeUpdateStyleSheets");
         for (const styleSheet of this.getAllStyleSheets()) {
             styleSheet.update();
@@ -107,12 +115,13 @@ export class Theme extends Dispatchable {
         this.dispatch("afterUpdateStyleSheets");
     }
 
-    static register(cls, styleSheet) {
-        return this.Global.register(...arguments);
+    // TODO @branch styleSheet should have a type
+    static register(cls: any, styleSheet: any): void {
+        return this.Global.register(cls, styleSheet);
     }
 
-    static setProperties(properties) {
-        this.Global.setProperties(...arguments);
+    static setProperties(properties: RawThemeProps): void {
+        this.Global.setProperties(properties);
     }
 
     static get props() {
@@ -120,6 +129,6 @@ export class Theme extends Dispatchable {
     }
 }
 
-export function registerStyle(styleClass, theme=Theme.Global) {
-    return (target) => theme.register(target, styleClass);
+export function registerStyle(styleClass: any, theme: Theme = Theme.Global): (target: any) => void {
+    return (target: any) => theme.register(target, styleClass);
 }
