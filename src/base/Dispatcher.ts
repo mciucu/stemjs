@@ -57,15 +57,20 @@ class Dispatcher {
     };
 
     addListenerOnce(callback: Callback): DispatcherHandle | undefined {
-        let handler = this.addListener(function () {
-            callback(...arguments);
+        let handler = this.addListener(function (...args: any[]) {
+            callback(...args);
             handler!.remove();
         });
         return handler;
     }
 
     async awaitOnce(): Promise<any> {
-        return new Promise((resolve) => this.addListenerOnce((...args: any[]) => resolve(...args)));
+        return new Promise((resolve) => {
+            this.addListenerOnce((...args: any[]) => {
+                // @ts-ignore
+                resolve(...args);
+            });
+        });
     }
 
     removeListener(callback: Callback): Callback | undefined {
@@ -81,10 +86,10 @@ class Dispatcher {
         this.listeners = [];
     }
 
-    dispatch(payload?: any): void {
+    dispatch(...args: any[]): void {
         for (let i = 0; i < this.listeners.length; ) {
             let listener = this.listeners[i];
-            listener(...arguments);
+            listener(...args);
             // In case the current listener deleted itself, keep the loop counter the same
             // If it deleted listeners that were executed before it, that's just wrong and there are no guaranteed about
             if (listener === this.listeners[i]) {
@@ -118,24 +123,18 @@ class Dispatchable {
         return dispatcher;
     }
 
-    dispatch(name: string, payload?: any): void {
+    dispatch(name: string, ...args: any[]): void {
         let dispatcher = this.getDispatcher(name, false);
         if (dispatcher) {
-            // Optimize the average case
-            if (arguments.length <= 2) {
-                dispatcher.dispatch(payload);
-            } else {
-                let args = Array.prototype.slice.call(arguments, 1);
-                dispatcher.dispatch(...args);
-            }
+            dispatcher.dispatch(...args);
         }
     }
 
-    addListenerGeneric(methodName: string, name: string | string[], callback: Callback): DispatcherHandle | CleanupJobs | undefined {
+    addListenerGeneric(methodName: keyof Dispatcher, name: string | string[], callback: Callback): DispatcherHandle | CleanupJobs | undefined {
         if (Array.isArray(name)) {
-            return new CleanupJobs(name.map(x => this[methodName](x, callback)));
+            return new CleanupJobs(name.map(x => (this as any)[methodName](x, callback)));
         }
-        return this.getDispatcher(name)?.[methodName](callback);
+        return (this.getDispatcher(name) as any)?.[methodName](callback);
     }
 
     addListener(name: string | string[], callback: Callback): DispatcherHandle | CleanupJobs | undefined {
@@ -227,14 +226,14 @@ function getAttachCleanupJobMethod(methodName: string) {
 
 // TODO maybe this can be handle better through a Proxy?
 // Not sure if these should be added like this, but meh
-Dispatchable.prototype.attachListener           = getAttachCleanupJobMethod("Listener");
-Dispatchable.prototype.attachEventListener      = getAttachCleanupJobMethod("EventListener");
-Dispatchable.prototype.attachCreateListener     = getAttachCleanupJobMethod("CreateListener");
-Dispatchable.prototype.attachDeleteListener     = getAttachCleanupJobMethod("DeleteListener");
-Dispatchable.prototype.attachChangeListener     = getAttachCleanupJobMethod("ChangeListener");
-Dispatchable.prototype.attachListenerOnce       = getAttachCleanupJobMethod("ListenerOnce");
+(Dispatchable.prototype as any).attachListener           = getAttachCleanupJobMethod("Listener");
+(Dispatchable.prototype as any).attachEventListener      = getAttachCleanupJobMethod("EventListener");
+(Dispatchable.prototype as any).attachCreateListener     = getAttachCleanupJobMethod("CreateListener");
+(Dispatchable.prototype as any).attachDeleteListener     = getAttachCleanupJobMethod("DeleteListener");
+(Dispatchable.prototype as any).attachChangeListener     = getAttachCleanupJobMethod("ChangeListener");
+(Dispatchable.prototype as any).attachListenerOnce       = getAttachCleanupJobMethod("ListenerOnce");
 
-Dispatcher.Global = new Dispatchable();
+(Dispatcher as any).Global = new Dispatchable();
 
 export class RunOnce {
     private timeout?: number;
@@ -338,22 +337,22 @@ export class OnceDispatcher extends Dispatcher {
         return this.dispatchArgs;
     }
 
-    addListener(callback: Callback): CleanupJobs | DispatcherHandle | undefined {
+    addListener(callback: Callback): DispatcherHandle | undefined {
         if (this.haveDispatched()) {
             // Just pass the existing arguments
             callback(...this.dispatchArgs!);
-            return new CleanupJobs();
+            return undefined;
         }
 
-        const handler = super.addListener(function () {
-            callback(...arguments);
+        const handler = super.addListener(function (...args: any[]) {
+            callback(...args);
             handler!.remove();
         });
         return handler;
     }
 
     // Either of these methods do the same thing
-    addListenerOnce(callback: Callback): CleanupJobs | DispatcherHandle | undefined {
+    addListenerOnce(callback: Callback): DispatcherHandle | undefined {
         return this.addListener(callback);
     }
 }
