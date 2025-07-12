@@ -19,12 +19,17 @@ export function SetDefaultDateFormat(dateFormat: DateFormatter): void {
 
 const BaseDate = globalThis.Date;
 
+// @ts-ignore It bitches about overriding now()
 export class StemDate extends BaseDate {
-    // This is only to let the IDE know that this class can receive arguments.
+    // Fucking Typescript, forces me to be explicit for all the constructors
+    constructor();
+    constructor(value: DateInput);
+    constructor(year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number);
+
     constructor(...args: any[]) {
-        super(...args);
-        if (args.length === 1 && isNumber(args[0]) && this.valueOf() < MAX_AUTO_UNIX_TIME) {
-            this.setTime(this.valueOf() * 1000);
+        super(...(args as ConstructorParameters<typeof Date>));
+        if (args.length === 1 && isNumber(args[0]) && (+this) < MAX_AUTO_UNIX_TIME) {
+            this.setTime((+this) * 1000);
         }
     }
 
@@ -85,13 +90,13 @@ export class StemDate extends BaseDate {
     }
 
     set(date: DateInput) {
-        date = this.constructor.toDate(date);
+        date = (this.constructor as typeof StemDate).toDate(date);
         this.setTime(date.getTime());
         return this;
     }
 
     clone(): StemDate {
-        return new this.constructor(this.getTime());
+        return new (this.constructor as typeof StemDate)(this.getTime());
     }
 
     toUnix(): number {
@@ -121,9 +126,9 @@ export class StemDate extends BaseDate {
         }
 
         timeUnit = TimeUnit.toTimeUnit(timeUnit);
-        const stemDate = this.constructor.toDate(date);
+        const stemDate = (this.constructor as typeof StemDate).toDate(date);
         let diff = this.diff(stemDate);
-        if (diff >= 2 * timeUnit) {
+        if (diff.valueOf() >= 2 * timeUnit.valueOf()) {
             // If the distance between the two dates is more than 2 standard lengths of the time unit
             // This would be wrong if you would have time unit that can sometimes last more than twice their canonical duration
             // Works correctly for all implemented time units
@@ -154,7 +159,6 @@ export class StemDate extends BaseDate {
 
     addUnit(timeUnit: TimeUnit, count: number = 1) {
         timeUnit = TimeUnit.toTimeUnit(timeUnit);
-        count = parseInt(count);
 
         if (!timeUnit.isVariable()) {
             this.setTime(this.getTime() + timeUnit.getMilliseconds() * count);
@@ -173,11 +177,11 @@ export class StemDate extends BaseDate {
         return this;
     }
 
-    static min() {
+    static min(...dates: DateInput[]): StemDate {
         // TODO: simplify and remove code duplication
-        let result = this.constructor.toDate(arguments[0]);
-        for (let index = 1; index < arguments.length; index++) {
-            let candidate = this.constructor.toDate(arguments[index]);
+        let result = this.toDate(dates[0]);
+        for (let index = 1; index < dates.length; index++) {
+            let candidate = this.toDate(dates[index]);
             if (candidate.isBefore(result)) {
                 result = candidate;
             }
@@ -185,10 +189,10 @@ export class StemDate extends BaseDate {
         return result;
     }
 
-    static max() {
-        let result = this.constructor.toDate(arguments[0]);
-        for (let index = 1; index < arguments.length; index++) {
-            let candidate = this.constructor.toDate(arguments[index]);
+    static max(...dates: DateInput[]): StemDate {
+        let result = this.toDate(dates[0]);
+        for (let index = 1; index < dates.length; index++) {
+            let candidate = this.toDate(dates[index]);
             if (candidate.isAfter(result)) {
                 result = candidate;
             }
@@ -198,7 +202,7 @@ export class StemDate extends BaseDate {
 
     // Assign the given date if current value if greater than it
     capUp(date: DateInput) {
-        date = this.constructor.toDate(date);
+        date = (this.constructor as typeof StemDate).toDate(date);
         if (this.isAfter(date)) {
             this.set(date);
         }
@@ -206,7 +210,7 @@ export class StemDate extends BaseDate {
 
     // Assign the given date if current value if less than it
     capDown(date: DateInput) {
-        date = this.constructor.toDate(date);
+        date = (this.constructor as typeof StemDate).toDate(date);
         if (this.isBefore(date)) {
             this.set(date);
         }
@@ -258,7 +262,7 @@ export class StemDate extends BaseDate {
         return this;
     }
 
-    subtract(duration: Duration) {
+    subtract(duration: DurationInput) {
         duration = Duration.toDuration(duration).negate();
         return this.add(duration);
     }
@@ -270,8 +274,8 @@ export class StemDate extends BaseDate {
 
     // The different in absolute value
     diff(date: DateInput, inAbsolute: boolean = true) {
-        date = this.constructor.toDate(date);
-        let diffMilliseconds = +this - date;
+        date = StemDate.toDate(date);
+        let diffMilliseconds = (+this) - (+date);
         if (inAbsolute) {
             diffMilliseconds = Math.abs(diffMilliseconds);
         }
@@ -279,15 +283,15 @@ export class StemDate extends BaseDate {
     }
 
     // Just to keep moment compatibility, until we actually implement locales
-    locale(loc) {
+    locale(loc: any) {
         return this;
     }
 
-    format(str = DEFAULT_DATE_FORMAT) {
-        return this.constructor.formatter.format(this, str);
+    format(str: string = "ISO") {
+        return StemDate.formatter.format(this, str);
     }
 
-    static format(date, str) {
+    static format(date: DateInput, str: string) {
         return StemDate.toDate(date).format(str);
     }
 
@@ -297,7 +301,7 @@ export class StemDate extends BaseDate {
 
     utc(): StemDate {
         // Temp hack
-        return this.constructor.fromUnixMilliseconds(+this + this.getTimezoneOffset() * 60 * 1000);
+        return StemDate.fromUnixMilliseconds(+this + this.getTimezoneOffset() * 60 * 1000);
     }
 
     isLeapYear() {
@@ -312,7 +316,7 @@ export class StemDate extends BaseDate {
     }
 
     getDaysCountPerMonth(index: number) {
-        const months = [31, 28 + this.isLeapYear(), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        const months = [31, 28 + (this.isLeapYear() ? 1 : 0), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
         return months[index];
     }
 
