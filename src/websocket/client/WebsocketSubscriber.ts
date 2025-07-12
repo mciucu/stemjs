@@ -1,9 +1,17 @@
 import {Dispatchable} from "../../base/Dispatcher";
-import {WebsocketStreamHandler} from "./WebsocketStreamHandler.js";
+import {WebsocketStreamHandler} from "./WebsocketStreamHandler";
 import {toArray} from "../../base/Utils";
 import {DEFAULT_HEARTBEAT_MESSAGE} from "../Shared";
 
-function splitPayload(str) {
+type Callback = (...args: any[]) => void;
+
+interface WebsocketSubscriberInterface {
+    sendResubscribe(streamName: string, index: number): void;
+    sendSubscribe(streamName: string): void;
+    calcRetryTimeout(attempts: number): number;
+}
+
+function splitPayload(str: string): [string, string | null] {
     const delimitedIndex = str.indexOf(" ");
     if (delimitedIndex <= 0) {
         return [str, null];
@@ -11,49 +19,52 @@ function splitPayload(str) {
     return [
         str.substring(0, delimitedIndex),
         str.substring(delimitedIndex + 1).trim(),
-    ]
+    ];
 }
 
 
 // TODO cleanup & simplify
-export class WebsocketSubscriber extends Dispatchable {
+export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscriberInterface {
     static ConnectionStatus = {
         NONE: 0,
         CONNECTING: 1,
         CONNECTED: 2,
         DISCONNECTED: 3
-    };
+    } as const;
 
     // TODO sync globally cleaner
-    static Global = self.WEBSOCKET_URL ? new WebsocketSubscriber(self.WEBSOCKET_URL) : null;
+    static Global = (self as any).WEBSOCKET_URL ? new WebsocketSubscriber((self as any).WEBSOCKET_URL) : null;
 
-    streamHandlers = new Map();
-    attemptedConnect = false;
-    connectionStatus = WebsocketSubscriber.ConnectionStatus.NONE;
-    websocket = null;
-    failedReconnectAttempts = 0;
-    numConnectionAttempts = 0;
-    retryDefaultTimeout = 3000;
-    retryMaxTimeout = 30000;
-    heartbeatMessage = DEFAULT_HEARTBEAT_MESSAGE;
+    streamHandlers: Map<string, WebsocketStreamHandler> = new Map();
+    attemptedConnect: boolean = false;
+    connectionStatus: number = WebsocketSubscriber.ConnectionStatus.NONE;
+    websocket: WebSocket | null = null;
+    failedReconnectAttempts: number = 0;
+    numConnectionAttempts: number = 0;
+    retryDefaultTimeout: number = 3000;
+    retryMaxTimeout: number = 30000;
+    heartbeatMessage: string = DEFAULT_HEARTBEAT_MESSAGE;
+    urls: string[];
+    reconnectTimeout?: number;
+    previousFailedReconnectAttempts?: number;
 
-    constructor(urls) {
+    constructor(urls: string | string[]) {
         super();
         this.urls = toArray(urls);
         //TODO: should probably try to connect right now?
     }
 
-    setConnectionStatus(connectionStatus) {
+    setConnectionStatus(connectionStatus: number): void {
         this.connectionStatus = connectionStatus;
         this.dispatch("connectionStatus", connectionStatus);
     }
 
-    getNextUrl() {
+    getNextUrl(): string {
         const currentURLIndex = (this.numConnectionAttempts++) % this.urls.length;
         return this.urls[currentURLIndex];
     }
 
-    connect() {
+    connect(): void {
         const url = this.getNextUrl();
         this.setConnectionStatus(WebsocketSubscriber.ConnectionStatus.CONNECTING);
         try {
@@ -63,30 +74,30 @@ export class WebsocketSubscriber extends Dispatchable {
             this.websocket.onmessage = (event) => this.onWebsocketMessage(event);
             this.websocket.onerror = (event) => this.onWebsocketError(event);
             this.websocket.onclose = (event) => this.onWebsocketClose(event);
-        } catch (e) {
+        } catch (e: any) {
             this.tryReconnect();
             console.error("WebsocketSubscriber: Failed to connect to ", url, "\nError: ", e.message);
         }
     }
 
-    calcRetryTimeout(numFailedAttempts) {
+    calcRetryTimeout(numFailedAttempts: number): number {
         return Math.min(this.retryDefaultTimeout * numFailedAttempts, this.retryMaxTimeout);
     }
 
-    tryReconnect() {
+    tryReconnect(): void {
         const reconnectWait = this.calcRetryTimeout(this.failedReconnectAttempts);
         this.failedReconnectAttempts++;
 
         if (!this.reconnectTimeout) {
             this.reconnectTimeout = setTimeout(() => {
-                this.reconnectTimeout = null;
+                this.reconnectTimeout = undefined;
                 console.log("WebsocketSubscriber: Trying to reconnect websocket connection");
                 this.connect();
             }, reconnectWait);
         }
     }
 
-    subscribe(streamName) {
+    subscribe(streamName: string): WebsocketStreamHandler {
         // TODO: make sure to not explicitly support streams with spaces in the name
         console.log("WebsocketSubscriber: Subscribing to stream ", streamName);
 
@@ -96,8 +107,8 @@ export class WebsocketSubscriber extends Dispatchable {
         }
 
         if (this.streamHandlers.has(streamName)) {
-            console.warning("WebsocketSubscriber: Already subscribed to stream ", streamName);
-            return;
+            console.warn("WebsocketSubscriber: Already subscribed to stream ", streamName);
+            return this.streamHandlers.get(streamName)!;
         }
 
         let streamHandler = new WebsocketStreamHandler(this, streamName);
@@ -111,30 +122,30 @@ export class WebsocketSubscriber extends Dispatchable {
         return streamHandler;
     }
 
-    isOpen() {
+    isOpen(): boolean {
         return this.websocket?.readyState === 1;
     }
 
-    sendSubscribe(streamName) {
+    sendSubscribe(streamName: string): void {
         if (this.isOpen()) {
             this.send("s " + streamName);
         }
     }
 
-    sendResubscribe(streamName, index) {
-        if (this.isOpen(streamName)) {
+    sendResubscribe(streamName: string, index: number): void {
+        if (this.isOpen()) {
             this.send("r " + index + " " + streamName);
         }
     }
 
-    resubscribe() {
+    resubscribe(): void {
         // Iterate over all streams and resubscribe to them
         for (let streamHandler of this.streamHandlers.values()) {
             streamHandler.sendSubscribe();
         }
     }
 
-    onStreamSubscribe(streamName) {
+    onStreamSubscribe(streamName: string): void {
         const streamHandler = this.getStreamHandler(streamName);
         if (!streamHandler) {
             console.error("WebsocketSubscriber: received subscribe success response for unrequested stream ", streamName);
@@ -144,7 +155,7 @@ export class WebsocketSubscriber extends Dispatchable {
         streamHandler.setStatusSubscribed();
     }
 
-    onWebsocketOpen() {
+    onWebsocketOpen(): void {
         this.previousFailedReconnectAttempts = this.failedReconnectAttempts;
         this.failedReconnectAttempts = 0;
         console.log("WebsocketSubscriber: Websocket connection established!");
@@ -154,27 +165,25 @@ export class WebsocketSubscriber extends Dispatchable {
         this.resubscribe();
     }
 
-    handleMessageWithoutListeners(streamName, message) {
+    handleMessageWithoutListeners(streamName: string, message: string): void {
         console.error("No handler for websocket stream", streamName);
     }
 
-    handleServerError(payload) {
+    handleServerError(payload: string): void {
         console.error("Websocket error:", payload);
         const [errorType, details] = splitPayload(payload);
 
         if (errorType === "invalidSubscription") {
             // Stop trying to resubscribe to a stream that's been rejected by the server
-            const streamName = details;
-            const streamHandler = this.getStreamHandler(streamName);
+            const streamHandler = this.getStreamHandler(details);
             if (streamHandler) {
                 // TODO: set permission denied explicitly?
                 streamHandler.clearResubscribeTimeout();
             }
         }
-
     }
 
-    handleStreamMessage(payload) {
+    handleStreamMessage(payload: string): void {
         const [streamName, message] = splitPayload(payload);
 
         if (message == null) {
@@ -192,13 +201,13 @@ export class WebsocketSubscriber extends Dispatchable {
         streamHandler.processPacket(message);
     }
 
-    handleServerClose(payload) {
-        this.failedReconnectAttempts = this.previousFailedReconnectAttempts;
+    handleServerClose(payload: string): void {
+        this.failedReconnectAttempts = this.previousFailedReconnectAttempts || 0;
         console.error("WebsocketSubscriber: server fatal error close: ", payload);
         this.onWebsocketError(payload);
     }
 
-    onWebsocketMessage(event) {
+    onWebsocketMessage(event: MessageEvent): void {
         const {data} = event;
         if (data === this.heartbeatMessage) {
             // TODO: keep track of the last heartbeat timestamp
@@ -208,69 +217,72 @@ export class WebsocketSubscriber extends Dispatchable {
         const [type, payload] = splitPayload(data);
 
         if (type === "e" || type === "error") { // error
-            this.handleServerError(payload)
+            this.handleServerError(payload!)
         } else if (type === "s") { // subscribed
-            this.onStreamSubscribe(payload);
+            this.onStreamSubscribe(payload!);
         } else if (type === "m") { // stream message
-            this.handleStreamMessage(payload);
+            this.handleStreamMessage(payload!);
         } else if (type  === "c") { // command
             this.dispatch("serverCommand", payload);
         } else if (type == "close") {
-            this.handleServerClose(payload);
+            this.handleServerClose(payload!);
         } else {
             console.error("WebsocketSubscriber: Can't process " + event.data);
         }
     }
 
-    reset() {
+    reset(): void {
         this.setConnectionStatus(WebsocketSubscriber.ConnectionStatus.DISCONNECTED);
         for (const streamHandler of this.streamHandlers.values()) {
             streamHandler.resetStatus();
         }
     }
 
-    onWebsocketError(event) {
+    onWebsocketError(event: Event | string): void {
         console.error("WebsocketSubscriber: Websocket connection is broken!");
         this.reset();
         this.tryReconnect();
     }
 
-    onWebsocketClose(event) {
+    onWebsocketClose(event: CloseEvent): void {
         console.log("WebsocketSubscriber: Connection closed!");
         this.reset();
         this.tryReconnect();
     }
 
-    send(message) {
+    send(message: string): void {
         // TODO: if the websocket is not open, enqueue WebsocketSubscriber message to be sent on open or just fail?
-        this.websocket.send(message);
+        this.websocket!.send(message);
     }
 
-    getStreamHandler(streamName) {
-        let streamHandler = this.streamHandlers.get(streamName);
+    getStreamHandler(streamName: string): WebsocketStreamHandler | null {
+        const streamHandler = this.streamHandlers.get(streamName);
         if (!streamHandler) {
-            streamHandler = this.subscribe(streamName);
+            return null;
         }
         return streamHandler;
     }
 
     // this should be pretty much the only external function
-    addStreamListener(streamName, callback) {
+    addStreamListener(streamName: string, callback: Callback): void {
         let streamHandler = this.getStreamHandler(streamName);
+        if (!streamHandler) {
+            streamHandler = this.subscribe(streamName);
+        }
         if (streamHandler.callbackExists(callback)) {
             return;
         }
         streamHandler.addListener(callback);
     }
 
-    removeStreamListener(streamName, callback) {
-        let streamHandler = this.streamHandlers.get(streamName);
+    removeStreamListener(streamName: string, callback: Callback): void {
+        const streamHandler = this.streamHandlers.get(streamName);
         if (streamHandler) {
             streamHandler.removeListener(callback);
         }
     }
 
-    static addListener(streamName, callback) {
-        return this.Global.addStreamListener(streamName, callback);
-    };
+    static addListener(streamName: string, callback: Callback): void {
+        return this.Global!.addStreamListener(streamName, callback);
+    }
 }
