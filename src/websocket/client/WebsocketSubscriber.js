@@ -1,7 +1,7 @@
-import {Dispatchable} from "../../base/Dispatcher.js";
+import {Dispatchable} from "../../base/Dispatcher";
 import {WebsocketStreamHandler} from "./WebsocketStreamHandler.js";
-import {toArray} from "../../base/Utils.js";
-import {DEFAULT_HEARTBEAT_MESSAGE} from "../Shared.js";
+import {toArray} from "../../base/Utils";
+import {DEFAULT_HEARTBEAT_MESSAGE} from "../Shared";
 
 function splitPayload(str) {
     const delimitedIndex = str.indexOf(" ");

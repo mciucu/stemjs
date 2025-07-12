@@ -1,6 +1,16 @@
 // TODO @Mihai this was written originally in 2016, pretty old and crappy
-import {Dispatcher} from "../../base/Dispatcher.js";
+import {Dispatcher} from "../../base/Dispatcher";
 
+interface WebsocketSubscriber {
+    sendResubscribe(streamName: string, index: number): void;
+    sendSubscribe(streamName: string): void;
+    calcRetryTimeout(attempts: number): number;
+}
+
+interface StreamHandlerOptions {
+    rawMessage?: boolean;
+    parseMayFail?: boolean;
+}
 
 export class WebsocketStreamHandler extends Dispatcher {
     static NONE = Symbol();
@@ -10,7 +20,19 @@ export class WebsocketStreamHandler extends Dispatcher {
 
     static MISSING_MESSAGE = "INVALID_MESSAGE_MISSING_FROM_ROLLING_WINDOW";
 
-    constructor(websocketSubscriber, streamName, options={}) {
+    websocketSubscriber: WebsocketSubscriber;
+    streamName: string;
+    declare options: StreamHandlerOptions;
+    bytesReceived: number;
+    isIndexed: boolean;
+    lastMessageIndex: number;
+    messageBuffer: Map<number, string>;
+    missedPackets: number;
+    status: symbol;
+    subscribeTryCount: number;
+    resendSubscribeTimeout?: number;
+
+    constructor(websocketSubscriber: WebsocketSubscriber, streamName: string, options: StreamHandlerOptions = {}) {
         super();
         this.websocketSubscriber = websocketSubscriber;
         this.streamName = streamName;
@@ -20,14 +42,15 @@ export class WebsocketStreamHandler extends Dispatcher {
         this.lastMessageIndex = -1;
         this.messageBuffer = new Map();
         this.missedPackets = 0;
+        this.subscribeTryCount = 0;
         this.resetStatus();
     }
 
-    sendSubscribe() {
+    sendSubscribe(): void {
         const websocketSubscriber = this.websocketSubscriber;
 
         this.clearResubscribeTimeout();
-        this.status = this.constructor.SUBSCRIBING;
+        this.status = WebsocketStreamHandler.SUBSCRIBING;
 
         if (this.isIndexed) {
             websocketSubscriber.sendResubscribe(this.streamName, this.getLastIndex());
@@ -44,52 +67,52 @@ export class WebsocketStreamHandler extends Dispatcher {
         }, timeoutDuration);
     }
 
-    clearResubscribeTimeout() {
+    clearResubscribeTimeout(): void {
         if (this.resendSubscribeTimeout) {
             clearTimeout(this.resendSubscribeTimeout);
             this.resendSubscribeTimeout = undefined;
         }
     }
 
-    setStatusSubscribed() {
+    setStatusSubscribed(): void {
         this.clearResubscribeTimeout();
-        this.status = this.constructor.SUBSCRIBED;
+        this.status = WebsocketStreamHandler.SUBSCRIBED;
     }
 
-    resetStatus() {
+    resetStatus(): void {
         this.clearResubscribeTimeout();
-        this.status = this.constructor.NONE;
+        this.status = WebsocketStreamHandler.NONE;
         this.subscribeTryCount = 0;
     }
 
-    processPacket(packet) {
+    processPacket(packet: string): void {
         this.bytesReceived += packet.length;
 
-        let type, payload;
+        let payloadType: string, payload: string;
         if (packet[0] === "{") {
-            type = "v";
+            payloadType = "v";
             payload = packet;
         } else {
             let firstSpace = packet.indexOf(" ");
             if (firstSpace > 0) {
-                type = packet.substr(0, firstSpace).trim();
-                payload = packet.substr(firstSpace + 1).trim();
+                payloadType = packet.substring(0, firstSpace).trim();
+                payload = packet.substring(firstSpace + 1).trim();
             } else {
                 console.error("WebsocketStreamHandler: Could not process stream packet: " + packet);
                 return;
             }
         }
 
-        if (type === "i") {
+        if (payloadType === "i") {
             this.processIndexedPacket(payload);
-        } else if (type === "v") {
+        } else if (payloadType === "v") {
             this.processVanillaPacket(payload);
         } else {
-            console.error("WebsocketStreamHandler: invalid packet type " + type);
+            console.error("WebsocketStreamHandler: invalid packet type " + payloadType);
         }
     }
 
-    processIndexedMessage(index, message) {
+    processIndexedMessage(index: number, message: string) {
         this.isIndexed = true;
         if (this.lastMessageIndex === -1) {
             this.lastMessageIndex = index;
@@ -99,7 +122,7 @@ export class WebsocketStreamHandler extends Dispatcher {
             this.processVanillaPacket(message);
             ++index;
             while (this.messageBuffer.has(index)) {
-                message = this.messageBuffer.get(index);
+                message = this.messageBuffer.get(index)!;
                 this.messageBuffer.delete(index);
                 this.lastMessageIndex = index;
                 this.processVanillaPacket(message);
@@ -110,11 +133,11 @@ export class WebsocketStreamHandler extends Dispatcher {
         }
     }
 
-    processMissedPacket(packet) {
+    processMissedPacket(packet: string) {
         this.processIndexedMessage(parseInt(packet), WebsocketStreamHandler.MISSING_MESSAGE);
     }
 
-    processVanillaPacket(packet) {
+    processVanillaPacket(packet: string) {
         if (packet == WebsocketStreamHandler.MISSING_MESSAGE) {
             this.missedPackets++;
         }
@@ -122,7 +145,7 @@ export class WebsocketStreamHandler extends Dispatcher {
         if (!this.options.rawMessage) {
             try {
                 packet = JSON.parse(packet);
-            } catch (exception) {
+            } catch (exception: any) {
                 if (!this.options.parseMayFail) {
                     console.error("WebsocketStreamHandler: Failed to parse ", packet, " on stream ", this.streamName,
                                   " Exception:", exception.message);
@@ -133,12 +156,12 @@ export class WebsocketStreamHandler extends Dispatcher {
         this.dispatch(packet);
     }
 
-    processIndexedPacket(packet) {
+    processIndexedPacket(packet: string) {
         let firstSpace = packet.indexOf(" ");
-        let message, index;
+        let message: string, index: number;
         if (firstSpace > 0) {
-            index = parseInt(packet.substr(0, firstSpace).trim());
-            message = packet.substr(firstSpace + 1).trim();
+            index = parseInt(packet.substring(0, firstSpace).trim());
+            message = packet.substring(firstSpace + 1).trim();
         } else {
             console.error("WebsocketStreamHandler: Could not process indexed stream packet: " + packet);
             return;
@@ -147,11 +170,11 @@ export class WebsocketStreamHandler extends Dispatcher {
         this.processIndexedMessage(index, message);
     }
 
-    haveIndex() {
+    haveIndex(): boolean {
         return this.isIndexed;
     }
 
-    getLastIndex() {
+    getLastIndex(): number {
         return this.lastMessageIndex;
     }
 }

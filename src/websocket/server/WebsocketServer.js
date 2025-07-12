@@ -1,7 +1,7 @@
 import {createClient as redisCreateClient} from "redis";
 import {App as WSApp} from "uWebSockets.js";
 import {CheckStreamPermission, IdentifySessionId, LoadSessionId, RPCCaller} from "./PermissionChecking.js";
-import {DEFAULT_HEARTBEAT_MESSAGE} from "../Shared.js";
+import {DEFAULT_HEARTBEAT_MESSAGE} from "../Shared";
 
 const CONNECTION_KEYS = ["ipAddress", "userId", "sessionId"];
 
