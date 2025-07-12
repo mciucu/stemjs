@@ -1,6 +1,10 @@
 import {isPlainObject, isNumber, capitalize, isString, padNumber} from "../base/Utils.js";
 import {TokenFormatter} from "./Formatter";
 
+type TimeUnitName = "millisecond" | "second" | "minute" | "hour" | "day" | "week" | "month" | "quarter" | "trimester" | "semester" | "year";
+type TimeUnitPluralName = "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "quarters" | "trimesters" | "semesters" | "years";
+type TimeUnitKey = TimeUnitName | TimeUnitPluralName;
+
 interface TimeUnitOptions {
     variableMultiplier?: boolean;
     dateMethodSuffix?: string;
@@ -16,8 +20,8 @@ interface DateFormatOptions {
 }
 
 export class TimeUnit {
-    name: string;
-    pluralName: string;
+    name: TimeUnitName;
+    pluralName: TimeUnitPluralName;
     baseUnit: TimeUnit | null;
     multiplier: number;
     milliseconds: number;
@@ -27,7 +31,7 @@ export class TimeUnit {
     setterName: string;
     dateMethodSuffix?: string;
 
-    static CANONICAL: Record<string, TimeUnit> = {};
+    static CANONICAL: Partial<Record<TimeUnitKey, TimeUnit>> = {};
     static ALL: TimeUnit[] = [];
     static FIXED_DURATION: TimeUnit[] = [];
     static VARIABLE_DURATION: TimeUnit[] = [];
@@ -44,9 +48,9 @@ export class TimeUnit {
     static SEMESTER = new TimeUnit("semester", TimeUnit.MONTH, 6);
     static YEAR = new TimeUnit("year", TimeUnit.DAY, 365, {variableMultiplier: true, dateMethodSuffix: "FullYear"});
 
-    constructor(name: string, baseUnit: TimeUnit | null, multiplier: number, options: TimeUnitOptions = {}) {
+    constructor(name: TimeUnitName, baseUnit: TimeUnit | null, multiplier: number, options: TimeUnitOptions = {}) {
         this.name = name;
-        this.pluralName = name + "s";
+        this.pluralName = (name + "s") as TimeUnitPluralName;
         this.baseUnit = baseUnit;
         this.multiplier = multiplier;
         this.milliseconds = (baseUnit?.getMilliseconds() || 1) * multiplier;
