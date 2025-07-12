@@ -3,9 +3,10 @@
 
 import {isNotNullOrFalse} from "./Utils";
 
-type ColumnMapper = (obj: any) => any;
+export type ColumnMapper = (obj: any) => any;
 
-type ColumnOptions = {
+// TODO @Mihai this might make sense to templatized, depending on the object type for ColumnMapper
+export type ColumnOptions = {
     headerName?: string;
     value?: ColumnMapper;
     name?: string;
@@ -13,7 +14,7 @@ type ColumnOptions = {
     [key: string]: any;
 };
 
-type ColumnInput = ColumnOptions | [string, ColumnMapper, ColumnOptions?];
+export type ColumnInput = ColumnOptions | [string, ColumnMapper, ColumnOptions?];
 
 export class ColumnHandler implements ColumnOptions {
     [key: string]: any;
