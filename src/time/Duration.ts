@@ -10,7 +10,8 @@ interface TimeUnitOptions {
     dateMethodSuffix?: string;
 }
 
-type DurationInput = number | Duration | TimeUnit | Date | Record<TimeUnitKey, number> | undefined;
+export type DurationInput = number | Duration | TimeUnit | Date | Record<TimeUnitKey, number>;
+export type TimeUnitInput = TimeUnit | TimeUnitKey;
 
 interface DateFormatOptions {
     maxEntries?: number;
@@ -71,7 +72,7 @@ export class TimeUnit {
         }
     }
 
-    static toTimeUnit(timeUnit: TimeUnit | TimeUnitKey): TimeUnit {
+    static toTimeUnit(timeUnit: TimeUnitInput): TimeUnit {
         if (timeUnit instanceof TimeUnit) {
             return timeUnit;
         }

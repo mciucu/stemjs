@@ -1,5 +1,5 @@
 import {padNumber, suffixWithOrdinal, isNumber, isString} from "../base/Utils";
-import {TimeUnit, Duration} from "./Duration";
+import {TimeUnit, Duration, DurationInput} from "./Duration";
 import {TokenFormatter} from "./Formatter";
 
 // By default, StemDate will guess if the value is in milliseconds or seconds.
@@ -243,7 +243,7 @@ export class StemDate extends BaseDate {
     }
 
     // TODO @branch have all of these return a new objects and have dates immutable
-    add(duration: Duration) {
+    add(duration: DurationInput) {
         duration = Duration.toDuration(duration);
         if (duration.isAbsolute()) {
             this.setTime(this.getTime() + duration.toMilliseconds());
