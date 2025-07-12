@@ -1,3 +1,5 @@
+import {NOOP_FUNCTION} from "./Utils.js";
+
 export class CallModifier {
     wrap(func) {
         throw Error("Implement wrap method");
