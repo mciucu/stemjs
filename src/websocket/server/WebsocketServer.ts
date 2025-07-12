@@ -15,8 +15,8 @@ declare global {
 
 export function MaybeGetGC(): (() => void) | undefined {
     // In Node.js, global.gc is available when running with --expose-gc flag
-    if (typeof globalThis !== 'undefined' && 'global' in globalThis) {
-        const nodeGlobal = (globalThis as any).global;
+    if (globalThis.global) {
+        const nodeGlobal = globalThis.global;
         if (nodeGlobal && typeof nodeGlobal.gc === 'function') {
             return nodeGlobal.gc;
         }
