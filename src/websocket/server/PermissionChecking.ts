@@ -1,8 +1,5 @@
 import {Dispatchable} from "../../base/Dispatcher";
-
-interface AppConfig {
-    rpcEndpoint: string;
-}
+import {AppConfig} from "./AppConfig";
 
 interface HttpRequest {
     getHeader(name: string): string | undefined;
