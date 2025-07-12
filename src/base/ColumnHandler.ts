@@ -15,11 +15,7 @@ type ColumnOptions = {
 
 type ColumnInput = ColumnOptions | [string, ColumnMapper, ColumnOptions?];
 
-export class ColumnHandler {
-    headerName?: string;
-    value?: ColumnMapper;
-    name?: string;
-    index?: number;
+export class ColumnHandler implements ColumnOptions {
     [key: string]: any;
 
     constructor(options: ColumnInput, index?: number) {
