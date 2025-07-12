@@ -6,7 +6,7 @@ import {TokenFormatter} from "./Formatter";
 // Any value less than this is interpreted as a unix time in seconds
 // If you want to go around this behavior, you can use the static method .fromUnixMilliseconds()
 // To disable, set this value to 0
-export let MAX_AUTO_UNIX_TIME = Math.pow(2, 32); // Either ~Feb 2106 in unix seconds or ~Feb 1970 in unix milliseconds
+export let MAX_AUTO_UNIX_TIME: number = Math.pow(2, 32); // Either ~Feb 2106 in unix seconds or ~Feb 1970 in unix milliseconds
 
 type DateFormatter = string | ((date: StemDate) => string);
 type DateInput = number | string | Date | StemDate;
