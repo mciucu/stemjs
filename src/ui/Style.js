@@ -159,6 +159,7 @@ class ExclusiveClassSet {
         this.element = element;
     }
 
+    // TODO @typing deprecate this?
     static fromObject(obj, element) {
         let classList = [];
         for (let key in obj) {
@@ -202,8 +203,6 @@ function focus(style) {
     return wrapCSS(":focus", style);
 }
 
-let styleMap = new WeakMap(); // TODO Delete this?
-
-export {StyleSheet, ExclusiveClassSet, styleMap, wrapCSS, hover, focus, active};
+export {StyleSheet, ExclusiveClassSet, wrapCSS, hover, focus, active};
 
 export * from "../decorators/Style";

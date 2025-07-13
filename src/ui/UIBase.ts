@@ -3,7 +3,9 @@ import {
     setObjectPrototype,
     suffixNumber,
     isPlainObject,
-    unwrapElementWithFunc, isString
+    unwrapElementWithFunc,
+    isString,
+    Nullable
 } from "../base/Utils";
 import {CleanupJobs, Dispatchable, OncePerTickRunner, RemoveHandle} from "../base/Dispatcher";
 import {DOMAttributesMap, NodeAttributes} from "./NodeAttributes";
@@ -92,7 +94,7 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
 
     abstract getNodeType(): string | number;
 
-    abstract mount(parent: BaseUIElement<SVGElement | HTMLElement>, nextSibling?: Node | null): void;
+    abstract mount(parent: BaseUIElement<SVGElement | HTMLElement> | HTMLElement, nextSibling?: Node | null): void;
 
     abstract redraw(event?: any): void;
 
@@ -255,8 +257,7 @@ export class UIElement extends BaseUIElement<HTMLElement> {
 
     static create(parentNode: UIElement | HTMLElement, options?: UIElementOptions): UIElement {
         const uiElement = new this(options);
-        const parentElement = (parentNode instanceof HTMLElement) ? new UIElement().bindToNode(parentNode) : parentNode;
-        uiElement.mount(parentElement, null);
+        uiElement.mount(parentNode, null);
         uiElement.dispatch("mount", uiElement);
         return uiElement;
     }
@@ -478,7 +479,7 @@ export class UIElement extends BaseUIElement<HTMLElement> {
         return this.options?.theme || this.context?.theme || Theme.Global;
     }
 
-    get styleSheet(): StyleSheet {
+    get styleSheet(): Nullable<StyleSheet> {
         let {styleSheet} = this.options || {};
         const theme = this.getTheme();
 
@@ -549,7 +550,8 @@ export class UIElement extends BaseUIElement<HTMLElement> {
         return this;
     }
 
-    mount(parent: UIElement, nextSiblingNode?: Node | null): void {
+    mount(parentNode: UIElement | HTMLElement, nextSiblingNode?: Node | null): void {
+        const parent = (parentNode instanceof HTMLElement) ? new UIElement().bindToNode(parentNode) : parentNode;
         this.parent = parent;
         if (this.node) {
             parent.insertChildNodeBefore(this, nextSiblingNode);
