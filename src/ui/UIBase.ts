@@ -3,13 +3,15 @@ import {
     setObjectPrototype,
     suffixNumber,
     isPlainObject,
-    unwrapElementWithFunc
+    unwrapElementWithFunc, isString
 } from "../base/Utils";
 import {CleanupJobs, Dispatchable, OncePerTickRunner, RemoveHandle} from "../base/Dispatcher";
-import {NodeAttributes} from "./NodeAttributes";
-import {applyDebugFlags} from "./Debug";
+import {DOMAttributesMap, NodeAttributes} from "./NodeAttributes";
 import {Theme, ThemeProps} from "./style/Theme";
 import {StyleSheet} from "./Style";
+
+export type UIElementChild = Iterable<UIElementChild> | BaseUIElement | string | number | null | undefined | false;
+
 
 // Type definitions
 export interface UIElementOptions {
@@ -18,6 +20,7 @@ export interface UIElementOptions {
         name?: string;
         key?: string;
     };
+    children?: UIElementChild[];
     [key: string]: any;
 }
 
@@ -35,12 +38,13 @@ export interface UINamespace {
 
 export const UI: UINamespace = {} as UINamespace;
 
-export function cleanChildren(children: any): any[] {
+// TODO @types type this
+export function cleanChildren(children: UIElementChild): any[] {
     return unwrapArray(children, unwrapElementWithFunc);
 }
 
-export abstract class BaseUIElement extends Dispatchable {
-    declare node?: HTMLElement | Text;
+export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HTMLElement | Text> extends Dispatchable {
+    declare node?: NodeType;
     declare parent?: BaseUIElement;
     declare options?: UIElementOptions;
     declare context?: any;
@@ -88,9 +92,13 @@ export abstract class BaseUIElement extends Dispatchable {
 
     abstract getNodeType(): string | number;
 
-    abstract mount(parent: BaseUIElement, nextSibling?: Node | null): void;
+    abstract mount(parent: BaseUIElement<SVGElement | HTMLElement>, nextSibling?: Node | null): void;
 
     abstract redraw(event?: any): void;
+
+    abstract createNode(): NodeType;
+
+    abstract copyState(element: BaseUIElement): void;
 
     destroyNode(): void {
         this.dispatch("unmount", this);
@@ -102,9 +110,8 @@ export abstract class BaseUIElement extends Dispatchable {
     }
 }
 
-class TextUIElement extends BaseUIElement {
+class TextUIElement extends BaseUIElement<Text> {
     value: string;
-    declare node?: Text;
 
     constructor(value: string | UIElementOptions = "") {
         super();
@@ -116,7 +123,7 @@ class TextUIElement extends BaseUIElement {
         }
     }
 
-    mount(parent: BaseUIElement, nextSibling?: Node | null): void {
+    mount(parent: BaseUIElement<SVGElement | HTMLElement>, nextSibling?: Node | null): void {
         this.parent = parent;
         if (!this.node) {
             this.createNode();
@@ -168,15 +175,16 @@ class TextUIElement extends BaseUIElement {
         }
         this.applyRef();
     }
-};
+}
 
 UI.TextElement = TextUIElement;
 
-export class UIElement extends BaseUIElement {
+export class UIElement extends BaseUIElement<HTMLElement> {
+    static domAttributesMap: DOMAttributesMap = NodeAttributes.defaultAttributesMap;
+    static nodeEventsMap: DOMAttributesMap = NodeAttributes.defaultEventsMap;
+
     children: BaseUIElement[] = [];
-    state: any;
-    static domAttributesMap: any;
-    static nodeEventsMap: any;
+    declare state: any;
 
     constructor(options: UIElementOptions = {}) {
         super();
@@ -190,7 +198,7 @@ export class UIElement extends BaseUIElement {
 
     // Return our options without the UI specific fields, so they can be passed along
     getCleanedOptions(): UIElementOptions {
-        let options = {
+        const options = {
             ...this.options,
         };
 
@@ -206,10 +214,12 @@ export class UIElement extends BaseUIElement {
         return {};
     }
 
-    getPreservedOptions(): UIElementOptions | undefined { return undefined; }
+    getPreservedOptions(): UIElementOptions | undefined {
+        return undefined;
+    }
 
     setOptions(options: UIElementOptions): void {
-        let defaultOptions = this.getDefaultOptions(options);
+        const defaultOptions = this.getDefaultOptions(options);
         if (defaultOptions) {
             options = Object.assign(defaultOptions, options);
         }
@@ -243,19 +253,20 @@ export class UIElement extends BaseUIElement {
         return this.options?.nodeType || "div";
     }
 
-    static create(parentNode: UIElement, options?: UIElementOptions): UIElement {
+    static create(parentNode: UIElement | HTMLElement, options?: UIElementOptions): UIElement {
         const uiElement = new this(options);
-        uiElement.mount(parentNode, null);
+        const parentElement = (parentNode instanceof HTMLElement) ? new UIElement().bindToNode(parentNode) : parentNode;
+        uiElement.mount(parentElement, null);
         uiElement.dispatch("mount", uiElement);
         return uiElement;
     }
 
     // TODO: should be renamed to renderContent
-    getGivenChildren(): any[] {
+    getGivenChildren(): UIElementChild {
         return this.options?.children || [];
     }
 
-    render(): any {
+    render(): UIElementChild {
         return this.options?.children;
     }
 
@@ -275,7 +286,7 @@ export class UIElement extends BaseUIElement {
         super.cleanup();
     }
 
-    overwriteChild(existingChild: UIElement, newChild: UIElement): UIElement {
+    overwriteChild(existingChild: BaseUIElement, newChild: BaseUIElement): BaseUIElement {
         existingChild.copyState(newChild);
         return existingChild;
     }
@@ -295,8 +306,7 @@ export class UIElement extends BaseUIElement {
         return childrenKeyMap;
     }
 
-    // TODO @types type this
-    getChildrenToRender(): any {
+    getChildrenToRender(): UIElementChild {
         return this.render();
     }
 
@@ -314,9 +324,10 @@ export class UIElement extends BaseUIElement {
         this.context = extraContext ? {...context, ...extraContext} : context;
     }
 
+    // TODO @types these children are clean
     getChildrenForRedraw(): any[] {
         RenderStack.push(this);
-        let children = cleanChildren(this.getChildrenToRender());
+        const children = cleanChildren(this.getChildrenToRender());
         RenderStack.pop();
         return children;
     }
@@ -342,8 +353,8 @@ export class UIElement extends BaseUIElement {
             return true;
         }
 
-        let domNode = this.node;
-        let childrenKeyMap = this.getElementKeyMap(this.children);
+        const domNode = this.node;
+        const childrenKeyMap = this.getElementKeyMap(this.children);
 
         for (let i = 0; i < newChildren.length; i++) {
             let newChild = newChildren[i];
@@ -360,8 +371,8 @@ export class UIElement extends BaseUIElement {
                 newChildren[i] = newChild;
             }
 
-            let newChildKey = newChild.options?.key || ("autokey" + i);
-            let existingChild = childrenKeyMap?.get(newChildKey);
+            const newChildKey = newChild.options?.key || ("autokey" + i);
+            const existingChild = childrenKeyMap?.get(newChildKey);
 
             if (existingChild && newChildren[i].canOverwrite(existingChild)) {
                 // We're replacing an existing child element, it might be the very same object
@@ -498,7 +509,7 @@ export class UIElement extends BaseUIElement {
                 }
 
                 const haveListenerMethod = (typeof this[addListenerMethodName] === "function");
-                const nodeEvent = this.constructor.nodeEventsMap.getKeyFromDOMName(eventType.toLowerCase());
+                const nodeEvent = (this.constructor as typeof UIElement).nodeEventsMap.getKeyFromDOMName(eventType.toLowerCase());
 
                 if (haveListenerMethod || nodeEvent) {
                     this[handlerMethodName] = (...args) => {
@@ -523,10 +534,10 @@ export class UIElement extends BaseUIElement {
     }
 
     refLinkArray(arrayName: string, index: number): { parent: any[]; name: number } {
-        if (!(this as any)[arrayName]) {
-            (this as any)[arrayName] = [];
+        if (!this[arrayName]) {
+            this[arrayName] = [];
         }
-        return {parent: (this as any)[arrayName], name: index};
+        return {parent: this[arrayName], name: index};
     }
 
     bindToNode(node: HTMLElement, doRedraw?: boolean): UIElement {
@@ -538,10 +549,7 @@ export class UIElement extends BaseUIElement {
         return this;
     }
 
-    mount(parent: UIElement | HTMLElement, nextSiblingNode?: Node | null): void {
-        if (parent instanceof HTMLElement || !parent.node) {
-            parent = new UIElement().bindToNode(parent as HTMLElement);
-        }
+    mount(parent: UIElement, nextSiblingNode?: Node | null): void {
         this.parent = parent;
         if (this.node) {
             parent.insertChildNodeBefore(this, nextSiblingNode);
@@ -565,8 +573,8 @@ export class UIElement extends BaseUIElement {
         if (this.children !== this.options?.children) {
             throw "Can't properly handle appendChild, you need to implement it for " + this.constructor;
         }
-        this.options!.children = this.options!.children || [];
-        this.options!.children.push(child);
+        this.options.children = this.options.children || [];
+        this.options.children.push(child);
         child.mount(this, null);
         return child;
     }
@@ -606,11 +614,11 @@ export class UIElement extends BaseUIElement {
         if (this.children !== this.options.children) {
             throw "Can't properly handle eraseChild, you need to implement it for " + this.constructor;
         }
-        let erasedChild = this.options.children.splice(index, 1)[0];
+        let erasedChild = this.options.children.splice(index, 1)[0] as BaseUIElement;
         if (destroy) {
             erasedChild.destroyNode();
         } else {
-            (this.node as HTMLElement).removeChild(erasedChild.node!);
+            this.node.removeChild(erasedChild.node);
         }
         return erasedChild;
     }
@@ -629,7 +637,7 @@ export class UIElement extends BaseUIElement {
 
     // TODO: should be renamed emptyNode()
     clearNode(): void {
-        while (this.node && this.node.lastChild) {
+        while (this.node?.lastChild) {
             this.node.removeChild(this.node.lastChild);
         }
     }
@@ -723,7 +731,7 @@ export class UIElement extends BaseUIElement {
     }
 }
 
-UI.createElement = function (tag: any, options?: UIElementOptions | null, ...children: any[]): BaseUIElement | null {
+UI.createElement = function (tag: typeof BaseUIElement<any> | string, options?: UIElementOptions | null, ...children: any[]): BaseUIElement | null {
     if (!tag) {
         console.error("Create element needs a valid object tag, did you mistype a class name?");
         return null;
@@ -757,16 +765,13 @@ UI.createElement = function (tag: any, options?: UIElementOptions | null, ...chi
         console.error("Invalid UI Element attribute: class. Did you mean className?");
     }
 
-    if (typeof tag === "string") {
+    if (isString(tag)) {
         options.nodeType = tag;
         tag = UIElement;
     }
 
     return new tag(options);
 };
-
-UIElement.domAttributesMap = NodeAttributes.defaultAttributesMap;
-UIElement.nodeEventsMap = NodeAttributes.defaultEventsMap;
 
 UI.Element = UIElement;
 
@@ -793,3 +798,9 @@ UI.Primitive = (nodeType: string, BaseClass: typeof UIElement = UIElement): type
     baseClassPrimitiveMap.set(nodeType, resultClass);
     return resultClass;
 };
+
+export function applyDebugFlags(element: BaseUIElement): void {
+    if (globalThis.STEM_DEBUG && element.node) {
+        element.node.stemElement = element;
+    }
+}
