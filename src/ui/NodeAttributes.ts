@@ -121,12 +121,14 @@ export class ClassNameSet extends Set {
 
 export class NodeAttributes {
     [key: string]: any;
-    className?: string | ClassNameSet;
-    style?: Record<string, any> | string;
-    styleString?: string;
-    whitelistedAttributes?: Record<string, boolean>;
     static defaultAttributesMap: DOMAttributesMap;
     static defaultEventsMap: DOMAttributesMap;
+    
+    // Type hint for style property when it exists (not automatically created)
+    declare style?: Record<string, any> | string;
+    declare className?: string | ClassNameSet;
+    declare styleString?: string;
+    declare whitelistedAttributes?: Record<string, boolean>;
 
     constructor(obj?: any) {
         Object.assign(this, obj);

@@ -2,8 +2,9 @@ import {Dispatchable} from "../../base/Dispatcher";
 import {resolveFuncValue} from "../../base/Utils";
 import {CallThrottler} from "../../base/CallModifier";
 import {ThemeType} from "./ThemeTypes";
+import {StyleSheet} from "../Style";
 
-export type RawThemeProps = Record<string, any>;
+export type ThemeProps = Record<string, any>;
 
 
 export class Theme extends Dispatchable {
@@ -14,12 +15,12 @@ export class Theme extends Dispatchable {
     updateThrottled: Function = (new CallThrottler({throttle: 50})).wrap(() => this.updateStyleSheets()); // TODO @cleanup CallThrottler syntax is really ugly
     name: string;
     baseTheme: Theme | null;
-    properties: RawThemeProps;
+    properties: ThemeProps;
     propTypes: Record<string, ThemeType>;
     props: any;
     styleSheetSymbol: symbol;
 
-    constructor(baseTheme: Theme | null, name: string, props?: RawThemeProps) {
+    constructor(baseTheme: Theme | null, name: string, props?: ThemeProps) {
         super();
         this.name = name;
         this.baseTheme = baseTheme;
@@ -54,7 +55,7 @@ export class Theme extends Dispatchable {
     }
 
     // Create a new Theme, based on the current one
-    fork(name: string, extraProps?: RawThemeProps): Theme {
+    fork(name: string, extraProps?: ThemeProps): Theme {
         return new Theme(this, name, extraProps);
     }
 
@@ -64,7 +65,7 @@ export class Theme extends Dispatchable {
         this.classSet.add(cls);
     }
 
-    getStyleSheet(cls: any): any {
+    getStyleSheet(cls: any): StyleSheet {
         return cls[this.styleSheetSymbol] || this.baseTheme?.getStyleSheet(cls);
     }
 
@@ -76,7 +77,7 @@ export class Theme extends Dispatchable {
         return this.baseTheme?.getProperty(key);
     }
 
-    setProperties(properties: RawThemeProps, update: boolean = true): void {
+    setProperties(properties: ThemeProps, update: boolean = true): void {
         for (const [key, value] of Object.entries(properties)) {
             if (value instanceof ThemeType) {
                 this.properties[key] = value.value;
@@ -120,7 +121,7 @@ export class Theme extends Dispatchable {
         return this.Global.register(cls, styleSheet);
     }
 
-    static setProperties(properties: RawThemeProps): void {
+    static setProperties(properties: ThemeProps): void {
         this.Global.setProperties(properties);
     }
 

@@ -63,7 +63,7 @@ export class InputableElement extends UI.Element {
 }
 
 
-export class Input extends UI.Primitive(InputableElement, "input") {
+export class Input extends UI.Primitive("input", InputableElement) {
     static domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
         ["autocomplete"],
         ["autofocus", {noValue: true}],
@@ -326,7 +326,7 @@ export class RadioInput extends RawCheckboxInput {
 }
 
 
-export class TextArea extends UI.Primitive(InputableElement, "textarea") {
+export class TextArea extends UI.Primitive("textarea", InputableElement) {
     applyNodeAttributes() {
         super.applyNodeAttributes();
         this.node.readOnly = this.options.readOnly || false;
@@ -360,7 +360,7 @@ export class TextArea extends UI.Primitive(InputableElement, "textarea") {
 
 
 // TODO this element is inconsistent with the rest. Properly fix the initialValue pattern
-export class Select extends UI.Primitive(InputableElement, "select") {
+export class Select extends UI.Primitive("select", InputableElement) {
     render() {
         this.givenOptions = this.options.options || [];
         let selectOptions = [];

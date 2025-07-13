@@ -162,7 +162,7 @@ export class LabelStyle extends BasicLevelStyleSheet(labelColorToStyle) {
 
 
 @registerStyle(LabelStyle)
-export class Label extends UI.Primitive(IconableInterface, "span") {
+export class Label extends UI.Primitive("span", IconableInterface) {
     extraNodeAttributes(attr) {
         attr.addClass(this.styleSheet.Size(this.getSize()));
         attr.addClass(this.styleSheet.Level(this.getLevel()));
@@ -223,7 +223,7 @@ export class BadgeStyle extends BasicLevelStyleSheet(badgeColorToStyle) {
 
 
 @registerStyle(BadgeStyle)
-export class Badge extends UI.Primitive(IconableInterface, "span") {
+export class Badge extends UI.Primitive("span", IconableInterface) {
     extraNodeAttributes(attr) {
         attr.addClass(this.styleSheet.Size(this.getSize()));
         attr.addClass(this.styleSheet.Level(this.getLevel()));

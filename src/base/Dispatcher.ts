@@ -1,6 +1,26 @@
+import {isFunction} from "./Utils";
+
 type Callback = (...args: any[]) => void;
 
-class DispatcherHandle {
+export interface RemoveHandle {
+    remove: () => void;
+}
+
+export interface CleanupHandle {
+    cleanup: () => void;
+}
+
+export type CleanupJob = RemoveHandle | CleanupHandle | Function;
+
+function implementsRemoveHandle(job: CleanupJob): job is RemoveHandle {
+    return "remove" in job && isFunction(job.remove);
+}
+
+function implementsCleanupHandle(job: CleanupJob): job is CleanupHandle {
+    return "cleanup" in job && isFunction(job.cleanup);
+}
+
+class DispatcherHandle implements RemoveHandle {
     dispatcher: Dispatcher | undefined;
     callback: Callback | undefined;
 
@@ -162,7 +182,7 @@ class Dispatchable {
 
     // These function don't really belong here, but they don't really hurt here and I don't want a long proto chain
     // Add anything that needs to be called on cleanup here (dispatchers, etc)
-    addCleanupJob(cleanupJob: any): any {
+    addCleanupJob(cleanupJob: CleanupJob): CleanupJob {
         this.cleanupJobs.add(cleanupJob);
         return cleanupJob;
     }
@@ -286,21 +306,21 @@ export class OncePerTickRunner {
 }
 
 class CleanupJobs {
-    jobs: any[];
+    jobs: CleanupJob[];
 
-    constructor(jobs: any[] = []) {
+    constructor(jobs: CleanupJob[] = []) {
         this.jobs = jobs;
     }
 
-    add(job: any): void {
+    add(job: CleanupJob): void {
         this.jobs.push(job);
     }
 
     cleanup(): void {
         for (let job of this.jobs) {
-            if (typeof job.cleanup === "function") {
+            if (implementsCleanupHandle(job)) {
                 job.cleanup();
-            } else if (typeof job.remove === "function" ) {
+            } else if (implementsRemoveHandle(job)) {
                 job.remove();
             } else {
                 job();
@@ -309,7 +329,7 @@ class CleanupJobs {
         this.jobs = [];
     }
 
-    remove(job?: any): void {
+    remove(job?: RemoveHandle): void {
         if (job) {
             const index = this.jobs.indexOf(job);
             if (index >= 0) {

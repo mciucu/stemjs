@@ -235,6 +235,8 @@ export function setObjectPrototype<T>(obj: any, Class: new (...args: any[]) => T
     return obj;
 }
 
+export type Nullable<T> = T | null | undefined;
+
 export function isNotNull<T>(obj: T | null | undefined): obj is T {
     return obj != null;
 }

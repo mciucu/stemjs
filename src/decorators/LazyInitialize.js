@@ -1,4 +1,4 @@
-import {decorate, createDefaultSetter} from './Utils';
+import {decorate, createDefaultSetter} from "./Utils";
 
 function handleDescriptor(target, key, descriptor) {
     const { configurable, enumerable, initializer, value } = descriptor;

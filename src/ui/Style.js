@@ -1,7 +1,7 @@
 import {StyleElement, KeyframeElement, DynamicStyleElement} from "./StyleElement";
 import {Dispatchable} from "../base/Dispatcher";
 import {PREFERRED_CLASS_NAME_KEY} from "../decorators/Style.js";
-import {Theme} from "./style/Theme.js";
+import {Theme} from "./style/Theme";
 
 // Class meant to group multiple classes inside a single <style> element, for convenience
 // TODO: pattern should be more robust, to be able to only update classes

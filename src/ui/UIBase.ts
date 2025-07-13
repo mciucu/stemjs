@@ -5,31 +5,55 @@ import {
     isPlainObject,
     unwrapElementWithFunc
 } from "../base/Utils";
-import {CleanupJobs, Dispatchable, OncePerTickRunner} from "../base/Dispatcher";
+import {CleanupJobs, Dispatchable, OncePerTickRunner, RemoveHandle} from "../base/Dispatcher";
 import {NodeAttributes} from "./NodeAttributes";
 import {applyDebugFlags} from "./Debug";
-import {Theme} from "./style/Theme";
+import {Theme, ThemeProps} from "./style/Theme";
+import {StyleSheet} from "./Style";
 
-export const RenderStack = []; //keeps track of objects that are redrawing, to know where to assign refs automatically
-export const redrawPerTickRunner = new OncePerTickRunner((obj, event) => obj.node && obj.redraw(event));
+// Type definitions
+export interface UIElementOptions {
+    ref?: {
+        parent: any;
+        name?: string;
+        key?: string;
+    };
+    [key: string]: any;
+}
+
+export const RenderStack: BaseUIElement[] = []; //keeps track of objects that are redrawing, to know where to assign refs automatically
+export const redrawPerTickRunner = new OncePerTickRunner((obj: BaseUIElement, event: any) => obj.node && obj.redraw(event));
 
 // TODO Maybe get rid of the UI namespace
-export const UI = {};
+export interface UINamespace {
+    TextElement: typeof TextUIElement;
+    Element: typeof UIElement;
+    createElement: (tag: any, options?: UIElementOptions | null, ...children: any[]) => BaseUIElement | null;
+    str: (value: any) => any;
+    Primitive: (nodeType: string, BaseClass: typeof UIElement) => typeof UIElement;
+}
 
-export function cleanChildren(children) {
+export const UI: UINamespace = {} as UINamespace;
+
+export function cleanChildren(children: any): any[] {
     return unwrapArray(children, unwrapElementWithFunc);
 }
 
-export class BaseUIElement extends Dispatchable {
-    canOverwrite(existingChild) {
+export abstract class BaseUIElement extends Dispatchable {
+    declare node?: HTMLElement | Text;
+    declare parent?: BaseUIElement;
+    declare options?: UIElementOptions;
+    declare context?: any;
+
+    canOverwrite(existingChild: BaseUIElement): boolean {
         return this.constructor === existingChild.constructor &&
                this.getNodeType() === existingChild.getNodeType();
     }
 
-    applyRef() {
+    applyRef(): void {
         if (this.options?.ref) {
-            let obj = this.options.ref.parent;
-            let name = this.options.ref.name ?? this.options.ref.key; // TODO: should be key
+            const obj = this.options.ref.parent;
+            const name = this.options.ref.name ?? this.options.ref.key; // TODO: should be key
             obj[name] = this;
         }
 
@@ -37,10 +61,10 @@ export class BaseUIElement extends Dispatchable {
         this.cancelEnqueuedRedraw();
     }
 
-    removeRef() {
+    removeRef(): void {
         if (this.options?.ref) {
-            let obj = this.options.ref.parent;
-            let name = this.options.ref.name;
+            const obj = this.options.ref.parent;
+            const name = this.options.ref.name;
             if (obj[name] === this) {
                 obj[name] = undefined;
             }
@@ -49,20 +73,26 @@ export class BaseUIElement extends Dispatchable {
 
     // Calls a queueMicrotask(() => this.redraw()), but only if one isn't already enqueued
     // The enqueued task will be canceled if a redraw is manually called in the meantime
-    enqueueRedraw(event) {
+    enqueueRedraw(event?: any): void {
         redrawPerTickRunner.maybeEnqueue(this, event);
     }
 
-    cancelEnqueuedRedraw() {
+    cancelEnqueuedRedraw(): void {
         redrawPerTickRunner.clear(this);
     }
 
     // Lifecycle methods, called when the element was first inserted in the DOM, and before it's removed
-    onMount() {}
+    onMount(): void {}
 
-    onUnmount() {}
+    onUnmount(): void {}
 
-    destroyNode() {
+    abstract getNodeType(): string | number;
+
+    abstract mount(parent: BaseUIElement, nextSibling?: Node | null): void;
+
+    abstract redraw(event?: any): void;
+
+    destroyNode(): void {
         this.dispatch("unmount", this);
         this.onUnmount();
         this.cleanup();
@@ -72,19 +102,21 @@ export class BaseUIElement extends Dispatchable {
     }
 }
 
+class TextUIElement extends BaseUIElement {
+    value: string;
+    declare node?: Text;
 
-UI.TextElement = class UITextElement extends BaseUIElement {
-    constructor(value="") {
+    constructor(value: string | UIElementOptions = "") {
         super();
-        if (value && value.hasOwnProperty("value") && isPlainObject(value)) {
+        if (value?.hasOwnProperty("value") && isPlainObject(value)) {
             this.value = value.value;
             this.options = value;
         } else {
-            this.value = value ?? "";
+            this.value = (value as string) ?? "";
         }
     }
 
-    mount(parent, nextSibling) {
+    mount(parent: BaseUIElement, nextSibling?: Node | null): void {
         this.parent = parent;
         if (!this.node) {
             this.createNode();
@@ -92,41 +124,41 @@ UI.TextElement = class UITextElement extends BaseUIElement {
         } else {
             this.redraw();
         }
-        parent.node.insertBefore(this.node, nextSibling);
+        parent.node!.insertBefore(this.node!, nextSibling);
         this.onMount();
     }
 
-    getNodeType() {
+    getNodeType(): number {
         return Node.TEXT_NODE;
     }
 
-    copyState(element) {
+    copyState(element: TextUIElement): void {
         this.value = element.value;
         this.options = element.options;
     }
 
-    createNode() {
+    createNode(): Text {
         this.node = document.createTextNode(this.getValue());
         applyDebugFlags(this);
         return this.node;
     }
 
-    setValue(value) {
+    setValue(value: any): void {
         this.value = (value != null) ? value : "";
         if (this.node) {
             this.redraw();
         }
     }
 
-    getValue() {
+    getValue(): string {
         return String(this.value);
     }
 
-    toString() {
+    toString(): string {
         return this.getValue();
     }
 
-    redraw() {
+    redraw(): void {
         if (this.node) {
             let newValue = this.getValue();
             // TODO: check if this is best for performance
@@ -138,20 +170,26 @@ UI.TextElement = class UITextElement extends BaseUIElement {
     }
 };
 
-// TODO: rename to Element
+UI.TextElement = TextUIElement;
+
 export class UIElement extends BaseUIElement {
-    constructor(options={}) {
+    children: BaseUIElement[] = [];
+    state: any;
+    static domAttributesMap: any;
+    static nodeEventsMap: any;
+
+    constructor(options: UIElementOptions = {}) {
         super();
         this.children = [];  // These are the rendered children
         this.options = options; // TODO: this is a hack, to not break all the code that references this.options in setOptions
         this.state = this.getDefaultState();  // TODO @cleanup implement a simpler state pattern, that allows custom state types
         this.setOptions(options); // TODO maybe this actually needs to be removed, since on a copy we don't want the default options of the other object
-    };
+    }
 
-    getDefaultOptions(options) {}
+    getDefaultOptions(options?: UIElementOptions): UIElementOptions | undefined { return undefined; }
 
     // Return our options without the UI specific fields, so they can be passed along
-    getCleanedOptions() {
+    getCleanedOptions(): UIElementOptions {
         let options = {
             ...this.options,
         };
@@ -164,13 +202,13 @@ export class UIElement extends BaseUIElement {
         return options;
     }
 
-    getDefaultState() {
+    getDefaultState(): any {
         return {};
     }
 
-    getPreservedOptions() {}
+    getPreservedOptions(): UIElementOptions | undefined { return undefined; }
 
-    setOptions(options) {
+    setOptions(options: UIElementOptions): void {
         let defaultOptions = this.getDefaultOptions(options);
         if (defaultOptions) {
             options = Object.assign(defaultOptions, options);
@@ -179,33 +217,33 @@ export class UIElement extends BaseUIElement {
     }
 
     // TODO: should probably add a second arg, doRedraw=true - same for setOptions
-    updateOptions(options) {
-        this.setOptions(Object.assign(this.options, options));
+    updateOptions(options: UIElementOptions): void {
+        this.setOptions(Object.assign(this.options || {}, options));
         // TODO: if the old options and the new options are deep equal, we can skip this redraw, right?
         this.redraw();
     }
 
-    setChildren(...args) {
-        this.updateOptions({children: cleanChildren(args)})
+    setChildren(...args: any[]): void {
+        this.updateOptions({children: cleanChildren(args)});
     }
 
     // Used when we want to reuse the current element, with the options from the passed in argument
     // Is only called when element.canOverwrite(this) is true
-    copyState(element) {
+    copyState(element: UIElement): void {
         let options = element.options;
         let preservedOptions = this.getPreservedOptions();
         if (preservedOptions) {
             options = Object.assign({}, options, preservedOptions);
         }
-        this.setOptions(options);
+        this.setOptions(options || {});
         this.addListenersFromOptions();
     }
 
-    getNodeType() {
-        return this.options.nodeType || "div";
+    getNodeType(): string {
+        return this.options?.nodeType || "div";
     }
 
-    static create(parentNode, options) {
+    static create(parentNode: UIElement, options?: UIElementOptions): UIElement {
         const uiElement = new this(options);
         uiElement.mount(parentNode, null);
         uiElement.dispatch("mount", uiElement);
@@ -213,22 +251,22 @@ export class UIElement extends BaseUIElement {
     }
 
     // TODO: should be renamed to renderContent
-    getGivenChildren() {
-        return this.options.children || [];
+    getGivenChildren(): any[] {
+        return this.options?.children || [];
     }
 
-    render() {
-        return this.options.children;
+    render(): any {
+        return this.options?.children;
     }
 
-    createNode() {
+    createNode(): HTMLElement {
         this.node = document.createElement(this.getNodeType());
         applyDebugFlags(this);
         return this.node;
     }
 
     // Abstract, gets called when removing DOM node associated with the
-    cleanup() {
+    cleanup(): void {
         this.runCleanupJobs();
         for (const child of this.children) {
             child.destroyNode();
@@ -237,19 +275,19 @@ export class UIElement extends BaseUIElement {
         super.cleanup();
     }
 
-    overwriteChild(existingChild, newChild) {
+    overwriteChild(existingChild: UIElement, newChild: UIElement): UIElement {
         existingChild.copyState(newChild);
         return existingChild;
     }
 
-    getElementKeyMap(elements) {
-        if (!elements || !elements.length) {
+    getElementKeyMap(elements: BaseUIElement[]): Map<string, BaseUIElement> | null {
+        if (!Array.isArray(elements)) {
             return null;
         }
-        let childrenKeyMap = new Map();
+        const childrenKeyMap = new Map<string, BaseUIElement>();
 
         for (let i = 0; i < elements.length; i += 1) {
-            let childKey = (elements[i].options && elements[i].options.key) || ("autokey" + i);
+            const childKey = (elements[i].options && elements[i].options.key) || ("autokey" + i);
 
             childrenKeyMap.set(childKey, elements[i]);
         }
@@ -257,31 +295,33 @@ export class UIElement extends BaseUIElement {
         return childrenKeyMap;
     }
 
-    getChildrenToRender() {
+    // TODO @types type this
+    getChildrenToRender(): any {
         return this.render();
     }
 
-    getExtraContext() {
-        const {theme} = this.options;
+    // TODO @types type this
+    getExtraContext(): any {
+        const theme = this.options?.theme;
         if (theme) {
             return {theme};
         }
         return null;  // cleanObject({theme}, {emptyAsNull: true});
     }
 
-    updateContext(context = this.parent?.context) {
+    updateContext(context: any = this.parent?.context): void {
         const extraContext = this.getExtraContext();
         this.context = extraContext ? {...context, ...extraContext} : context;
     }
 
-    getChildrenForRedraw() {
+    getChildrenForRedraw(): any[] {
         RenderStack.push(this);
         let children = cleanChildren(this.getChildrenToRender());
         RenderStack.pop();
         return children;
     }
 
-    redraw() {
+    redraw(): boolean {
         if (!this.node) {
             console.error("Element not yet mounted. Redraw aborted!", this);
             return false;
@@ -321,7 +361,7 @@ export class UIElement extends BaseUIElement {
             }
 
             let newChildKey = newChild.options?.key || ("autokey" + i);
-            let existingChild = childrenKeyMap && childrenKeyMap.get(newChildKey);
+            let existingChild = childrenKeyMap?.get(newChildKey);
 
             if (existingChild && newChildren[i].canOverwrite(existingChild)) {
                 // We're replacing an existing child element, it might be the very same object
@@ -330,7 +370,7 @@ export class UIElement extends BaseUIElement {
                 }
                 newChildren[i].redraw();
                 if (newChildren[i].node !== currentChildNode) {
-                    domNode.insertBefore(newChildren[i].node, currentChildNode);
+                    domNode.insertBefore(newChildren[i].node!, currentChildNode);
                 }
             } else {
                 // Getting here means we are not replacing anything, should just render
@@ -359,15 +399,15 @@ export class UIElement extends BaseUIElement {
     }
 
     // TODO This is actually slightly wrong, since we need to reuse the attr object we previously created
-    getOptionsAsNodeAttributes() {
-        return setObjectPrototype(this.options, NodeAttributes);
+    getOptionsAsNodeAttributes(): NodeAttributes {
+        return setObjectPrototype(this.options || {}, NodeAttributes);
     }
 
-    instantiateNodeAttributes() {
+    instantiateNodeAttributes(): NodeAttributes {
         return new NodeAttributes(this.options);
     }
 
-    getNodeAttributes() {
+    getNodeAttributes(): NodeAttributes {
         const attr = this.instantiateNodeAttributes();
         // Add the default class "container" from our style sheet (if there is one)
         const containerClassName = this.styleSheet?.container;
@@ -377,45 +417,45 @@ export class UIElement extends BaseUIElement {
         return attr;
     }
 
-    extraNodeAttributes(attr) {}
+    extraNodeAttributes(attr: NodeAttributes): void {}
 
-    applyNodeAttributes() {
+    applyNodeAttributes(): void {
         const attr = this.getNodeAttributes();
         this.extraNodeAttributes(attr);
-        attr.apply(this.node, this.constructor.domAttributesMap);
+        attr.apply(this.node as HTMLElement, (this.constructor as typeof UIElement).domAttributesMap);
     }
 
-    setAttribute(key, value) {
-        this.getOptionsAsNodeAttributes().setAttribute(key, value, this.node, this.constructor.domAttributesMap);
+    setAttribute(key: string, value: any): void {
+        this.getOptionsAsNodeAttributes().setAttribute(key, value, this.node as HTMLElement, (this.constructor as any).domAttributesMap);
     }
 
-    setStyle(key, value) {
+    setStyle(key: string | Record<string, any>, value?: any): void {
         if (typeof key === "object") {
             for (const [styleKey, styleValue] of Array.from(Object.entries(key))) {
                 this.setStyle(styleKey, styleValue);
             }
             return;
         }
-        this.getOptionsAsNodeAttributes().setStyle(key, value, this.node);
+        this.getOptionsAsNodeAttributes().setStyle(key, value, this.node as HTMLElement);
     }
 
-    removeStyle(key) {
-        this.getOptionsAsNodeAttributes().removeStyle(key, this.node);
+    removeStyle(key: string): void {
+        this.getOptionsAsNodeAttributes().removeStyle(key, this.node as HTMLElement);
     }
 
-    addClass(className) {
-        this.getOptionsAsNodeAttributes().addClass(className, this.node);
+    addClass(className: string): void {
+        this.getOptionsAsNodeAttributes().addClass(className, this.node as HTMLElement);
     }
 
-    removeClass(className) {
-        this.getOptionsAsNodeAttributes().removeClass(className, this.node);
+    removeClass(className: string): void {
+        this.getOptionsAsNodeAttributes().removeClass(className, this.node as HTMLElement);
     }
 
-    hasClass(className) {
+    hasClass(className: string): boolean {
         return this.getOptionsAsNodeAttributes().hasClass(className);
     }
 
-    toggleClass(className) {
+    toggleClass(className: string): void {
         if (!this.hasClass(className)) {
             this.addClass(className);
         } else {
@@ -423,12 +463,12 @@ export class UIElement extends BaseUIElement {
         }
     }
 
-    getTheme() {
-        return this.options.theme || this.context?.theme || Theme.Global;
+    getTheme(): Theme {
+        return this.options?.theme || this.context?.theme || Theme.Global;
     }
 
-    get styleSheet() {
-        let {styleSheet} = this.options;
+    get styleSheet(): StyleSheet {
+        let {styleSheet} = this.options || {};
         const theme = this.getTheme();
 
         if (!styleSheet) {
@@ -437,8 +477,8 @@ export class UIElement extends BaseUIElement {
         return styleSheet?.getInstance(theme);
     }
 
-    get themeProps() {
-        return this.options.styleSheet?.themeProps || this.getTheme().props;
+    get themeProps(): ThemeProps {
+        return this.options?.styleSheet?.themeProps || this.getTheme().props;
     }
 
     addListenersFromOptions() {
@@ -478,18 +518,18 @@ export class UIElement extends BaseUIElement {
         }
     }
 
-    refLink(name) {
+    refLink(name: string): { parent: UIElement; name: string } {
         return {parent: this, name: name};
     }
 
-    refLinkArray(arrayName, index) {
-        if (!this[arrayName]) {
-            this[arrayName] = [];
+    refLinkArray(arrayName: string, index: number): { parent: any[]; name: number } {
+        if (!(this as any)[arrayName]) {
+            (this as any)[arrayName] = [];
         }
-        return {parent: this[arrayName], name: index};
+        return {parent: (this as any)[arrayName], name: index};
     }
 
-    bindToNode(node, doRedraw) {
+    bindToNode(node: HTMLElement, doRedraw?: boolean): UIElement {
         this.node = node;
         if (doRedraw) {
             this.clearNode();
@@ -498,9 +538,9 @@ export class UIElement extends BaseUIElement {
         return this;
     }
 
-    mount(parent, nextSiblingNode) {
-        if (!parent.node) {
-            parent = new UI.Element().bindToNode(parent);
+    mount(parent: UIElement | HTMLElement, nextSiblingNode?: Node | null): void {
+        if (parent instanceof HTMLElement || !parent.node) {
+            parent = new UIElement().bindToNode(parent as HTMLElement);
         }
         this.parent = parent;
         if (this.node) {
@@ -512,7 +552,7 @@ export class UIElement extends BaseUIElement {
         this.createNode();
         this.redraw();
 
-        parent.insertChildNodeBefore(this, nextSiblingNode);
+        parent.insertChildNodeBefore(this, nextSiblingNode || null);
 
         this.addListenersFromOptions();
 
@@ -520,32 +560,35 @@ export class UIElement extends BaseUIElement {
     }
 
     // You need to overwrite the next child manipulation routines if this.options.children !== this.children
-    appendChild(child) {
+    appendChild(child: BaseUIElement): BaseUIElement {
         // TODO: the next check should be done with a decorator
-        if (this.children !== this.options.children) {
+        if (this.children !== this.options?.children) {
             throw "Can't properly handle appendChild, you need to implement it for " + this.constructor;
         }
-        this.options.children.push(child);
+        this.options!.children = this.options!.children || [];
+        this.options!.children.push(child);
         child.mount(this, null);
         return child;
     }
 
-    insertChild(child, position) {
-        if (this.children !== this.options.children) {
+    insertChild(child: BaseUIElement, position?: number): BaseUIElement {
+        if (this.children !== this.options?.children) {
             throw "Can't properly handle insertChild, you need to implement it for " + this.constructor;
         }
         position = position || 0;
 
-        this.options.children.splice(position, 0, child);
+        this.options!.children = this.options!.children || [];
+        this.options!.children.splice(position, 0, child);
 
-        const nextChildNode = position + 1 < this.options.children.length ? this.children[position + 1].node : null;
+        const nextChildNode = position + 1 < this.options!.children.length ? this.children[position + 1].node : null;
 
-        child.mount(this, nextChildNode);
+        (child as UIElement).mount(this, nextChildNode);
 
         return child;
     }
 
-    eraseChild(child, destroy = true) {
+    eraseChild(child: BaseUIElement, destroy: boolean = true): BaseUIElement | null {
+        if (!this.options?.children) return null;
         let index = this.options.children.indexOf(child);
 
         if (index < 0) {
@@ -555,9 +598,9 @@ export class UIElement extends BaseUIElement {
         return this.eraseChildAtIndex(index, destroy);
     }
 
-    eraseChildAtIndex(index, destroy = true) {
-        if (index < 0 || index >= this.options.children.length) {
-            console.error("Erasing child at invalid index ", index, this.options.children.length);
+    eraseChildAtIndex(index: number, destroy: boolean = true): BaseUIElement | null {
+        if (!this.options?.children || index < 0 || index >= this.options.children.length) {
+            console.error("Erasing child at invalid index ", index, this.options.children?.length || 0);
             return null;
         }
         if (this.children !== this.options.children) {
@@ -567,120 +610,120 @@ export class UIElement extends BaseUIElement {
         if (destroy) {
             erasedChild.destroyNode();
         } else {
-            this.node.removeChild(erasedChild.node);
+            (this.node as HTMLElement).removeChild(erasedChild.node!);
         }
         return erasedChild;
     }
 
-    show() {
+    show(): void {
         this.removeClass("hidden");
     }
 
-    hide() {
+    hide(): void {
         this.addClass("hidden");
     }
 
-    insertChildNodeBefore(childElement, nextSiblingNode) {
-        this.node.insertBefore(childElement.node, nextSiblingNode);
+    insertChildNodeBefore(childElement: BaseUIElement, nextSiblingNode: Node | null): void {
+        this.node!.insertBefore(childElement.node!, nextSiblingNode);
     }
 
     // TODO: should be renamed emptyNode()
-    clearNode() {
+    clearNode(): void {
         while (this.node && this.node.lastChild) {
             this.node.removeChild(this.node.lastChild);
         }
     }
 
-    isInDocument() {
-        return document.body.contains(this.node);
+    isInDocument(): boolean {
+        return document.body.contains(this.node!);
     }
 
     // TODO: this method also doesn't belong here
-    getWidthOrHeight(parameter) {
-        let node = this.node;
+    getWidthOrHeight(parameter: "width" | "height"): number {
+        let node = this.node as HTMLElement;
         if (!node) {
             return 0;
         }
-        let value = parseFloat(parameter === "width" ? node.offsetWidth : node.offsetHeight);
+        let value = parseFloat(parameter === "width" ? String(node.offsetWidth) : String(node.offsetHeight));
         return value || 0;
     }
 
-    getHeight() {
+    getHeight(): number {
         return this.getWidthOrHeight("height");
     }
 
-    getWidth() {
+    getWidth(): number {
         return this.getWidthOrHeight("width");
     }
 
-    setHeight(value) {
+    setHeight(value: number | string): void {
         this.setStyle("height", suffixNumber(value, "px"));
         this.dispatch("resize");
     }
 
-    setWidth(value) {
+    setWidth(value: number | string): void {
         this.setStyle("width", suffixNumber(value, "px"));
         this.dispatch("resize");
     }
 
-    addNodeListener(name, callback, ...args) {
-        this.node.addEventListener(name, callback, ...args);
+    addNodeListener(name: string, callback: EventListener, ...args: any[]): RemoveHandle {
+        (this.node as HTMLElement).addEventListener(name, callback, ...(args as []));
         const handler = {
             remove: () => {
-                this.removeNodeListener(name, callback, ...args);
+                this.removeNodeListener(name, callback);
             }
         };
         this.addCleanupJob(handler);
         return handler;
     }
 
-    removeNodeListener(name, callback) {
-        this.node.removeEventListener(name, callback);
+    removeNodeListener(name: string, callback: EventListener): void {
+        (this.node as HTMLElement).removeEventListener(name, callback);
     }
 
     // TODO: methods can be automatically generated by addNodeListener(UI.Element, "dblclick", "DoubleClick") for instance
-    addClickListener(callback) {
+    addClickListener(callback: EventListener): RemoveHandle {
         return this.addNodeListener("click", callback);
     }
 
-    removeClickListener(callback) {
+    removeClickListener(callback: EventListener): void {
         this.removeNodeListener("click", callback);
     }
 
-    addPressStartListener(callback) {
+    addPressStartListener(callback: EventListener): CleanupJobs {
         return new CleanupJobs([
             this.addNodeListener("mousedown", callback),
             this.addNodeListener("touchstart", callback)
         ]);
     }
 
-    removePressStartListener(callback) {
-        this.removeNodeListener("mousedown", callback)
+    removePressStartListener(callback: EventListener): void {
+        this.removeNodeListener("mousedown", callback);
         this.removeNodeListener("touchstart", callback);
     }
 
-    addPressStopListener(callback) {
+    addPressStopListener(callback: EventListener): CleanupJobs {
         return new CleanupJobs([
             this.addNodeListener("mouseup", callback),
             this.addNodeListener("touchend", callback)
         ]);
     }
 
-    removePressStopListener(callback) {
-        this.removeNodeListener("mouseup", callback)
+    removePressStopListener(callback: EventListener): void {
+        this.removeNodeListener("mouseup", callback);
         this.removeNodeListener("touchend", callback);
     }
 
-    addDoubleClickListener(callback) {
+    addDoubleClickListener(callback: EventListener): RemoveHandle {
         return this.addNodeListener("dblclick", callback);
     }
 
-    removeDoubleClickListener(callback) {
+    removeDoubleClickListener(callback: EventListener): void {
         this.removeNodeListener("dblclick", callback);
     }
 }
 
-UI.createElement = function (tag, options, ...children) {
+UI.createElement = function (tag: any, options?: UIElementOptions | null, ...children: any[]): BaseUIElement | null {
     if (!tag) {
         console.error("Create element needs a valid object tag, did you mistype a class name?");
         return null;
@@ -727,16 +770,12 @@ UIElement.nodeEventsMap = NodeAttributes.defaultEventsMap;
 
 UI.Element = UIElement;
 
-UI.str = (value) => new UI.TextElement(value);
+UI.str = (value: string) => new TextUIElement(value);
 
 // Keep a map for every base class, and for each base class keep a map for each nodeType, to cache classes
 const primitiveMap = new WeakMap();
 
-UI.Primitive = (BaseClass, nodeType) => {
-    if (!nodeType) {
-        nodeType = BaseClass;
-        BaseClass = UI.Element;
-    }
+UI.Primitive = (nodeType: string, BaseClass: typeof UIElement = UIElement): typeof UIElement => {
     let baseClassPrimitiveMap = primitiveMap.get(BaseClass);
     if (!baseClassPrimitiveMap) {
         baseClassPrimitiveMap = new Map();
@@ -747,7 +786,7 @@ UI.Primitive = (BaseClass, nodeType) => {
         return resultClass;
     }
     resultClass = class Primitive extends BaseClass {
-        getNodeType() {
+        getNodeType(): string {
             return nodeType;
         }
     };

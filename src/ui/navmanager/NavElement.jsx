@@ -185,7 +185,7 @@ const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
     }
 };
 
-const NavElement = NavElementInterface(UI.Primitive(BasicOrientedElement, "li"));
+const NavElement = NavElementInterface(UI.Primitive("li", BasicOrientedElement));
 class NavLinkElement extends NavElementInterface(BasicOrientedLinkElement) {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
