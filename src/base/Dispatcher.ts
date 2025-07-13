@@ -1,6 +1,6 @@
 import {isFunction} from "./Utils";
 
-type Callback = (...args: any[]) => void;
+type Callback = Function;
 
 export interface RemoveHandle {
     remove: () => void;

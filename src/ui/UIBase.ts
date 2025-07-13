@@ -35,7 +35,7 @@ export interface UINamespace {
     Element: typeof UIElement;
     createElement: (tag: any, options?: UIElementOptions | null, ...children: any[]) => BaseUIElement | null;
     str: (value: any) => any;
-    Primitive: (nodeType: string, BaseClass: typeof UIElement) => typeof UIElement;
+    Primitive: (nodeType: string, BaseClass?: typeof UIElement) => typeof UIElement;
 }
 
 export const UI: UINamespace = {} as UINamespace;

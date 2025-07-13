@@ -1,16 +1,41 @@
-import {UI} from "./UIBase";
+import {UI, UIElementOptions, UIElementChild} from "./UIBase";
 import {dashCase, isFunction, isNumber, isString} from "../base/Utils";
 import {NodeAttributes, defaultToPixelsAttributes} from "./NodeAttributes";
+
+interface StyleInstanceOptions extends UIElementOptions {
+    selector?: string;
+    attributes?: Record<string, any>;
+}
+
+interface StyleAttributes {
+    [key: string]: string | number | Function | Array<string | number> | null | undefined;
+}
+
+interface StyleElementOptions extends UIElementOptions {
+    name?: string;
+}
+
+interface DynamicStyleElementOptions extends StyleElementOptions {
+    style?: StyleAttributes | (() => StyleAttributes);
+    selectorName?: string;
+}
+
+interface KeyframeElementOptions extends StyleElementOptions {
+    keyframe?: Record<string, StyleAttributes>;
+}
 
 // TODO: should this be actually better done throught the dynamic CSS API, without doing through the DOM?
 // So far it's actually better like this, since we want to edit the classes inline
 class StyleInstance extends UI.TextElement {
-    constructor(options) {
+    declare options: StyleInstanceOptions;
+    attributes: Map<string, any>;
+
+    constructor(options: StyleInstanceOptions) {
         super(options);
         this.setOptions(options);
     }
 
-    setOptions(options) {
+    setOptions(options: StyleInstanceOptions): void {
         this.options = options;
         this.options.attributes = this.options.attributes || {};
         this.attributes = new Map();
@@ -19,7 +44,7 @@ class StyleInstance extends UI.TextElement {
         }
     }
 
-    getValue() {
+    getValue(): string {
         let str = this.options.selector + "{";
         for (let [key, value] of this.attributes) {
             if (typeof value === "function") {
@@ -38,7 +63,7 @@ class StyleInstance extends UI.TextElement {
             }
 
             // TODO: if key starts with vendor-, replace it with the browser specific one (and the plain one)
-            const buildKeyValue = (key, value) => key + ":" + value + ";";
+            const buildKeyValue = (key: string, value: any): string => key + ":" + value + ";";
 
             if (Array.isArray(value)) {
                 for (const v of value) {
@@ -51,23 +76,25 @@ class StyleInstance extends UI.TextElement {
         return str + "}";
     }
 
-    copyState(element) {
+    copyState(element: StyleInstance): void {
         this.setOptions(element.options);
     }
 
-    setAttribute(name, value) {
+    setAttribute(name: string, value: any): void {
         this.attributes.set(name, value);
         this.redraw();
     }
 
-    deleteAttribute(name) {
+    deleteAttribute(name: string): void {
         this.attributes.delete(name);
         this.redraw();
     }
 }
 
 class StyleElement extends UI.Primitive("style") {
-    getNodeAttributes() {
+    declare options: StyleElementOptions;
+
+    getNodeAttributes(): NodeAttributes {
         // TODO: allow custom style attributes (media, scoped, etc)
         const attr = new NodeAttributes({});
         if (this.options.name) {
@@ -81,32 +108,36 @@ const ALLOWED_SELECTOR_STARTS = new Set([":", ">", " ", "+", "~", "[", "."]);
 
 // TODO: figure out how to work with animation frames, this only creates a wrapper class
 class DynamicStyleElement extends StyleElement {
-    toString() {
+    declare options: DynamicStyleElementOptions;
+    className?: string;
+
+    toString(): string {
         return this.getClassName();
     }
 
     // Overwrite valueOf, so when using the + operator should seamlessly concatenate to create a valid className
-    valueOf() {
+    valueOf(): string {
         return " " + this.getClassName() + " ";
     }
 
     // TODO: use a cached decorator here
-    getClassName() {
+    getClassName(): string {
         if (this.className) {
             return this.className;
         }
-        self.styleInstanceCounter = (self.styleInstanceCounter || 0) + 1;
-        this.className = (this.options.name ||  "autocls") + "-" + self.styleInstanceCounter;
+        (self as any).styleInstanceCounter = ((self as any).styleInstanceCounter || 0) + 1;
+        this.className = (this.options.name ||  "autocls") + "-" + (self as any).styleInstanceCounter;
         return this.className;
     }
 
-    getSelector() {
+    getSelector(): string {
         return this.options.selectorName || "." + this.getClassName();
     }
 
     // A cyclic dependency in the style object will cause an infinite loop here
-    getStyleInstances(selector, style) {
-        const result = [], ownStyle = {};
+    getStyleInstances(selector: string, style: StyleAttributes): StyleInstance[] {
+        const result: StyleInstance[] = [];
+        const ownStyle: StyleAttributes = {};
         let haveOwnStyle = false;
         for (const key in style) {
             const value = style[key];
@@ -125,7 +156,7 @@ class DynamicStyleElement extends StyleElement {
                     continue;
                 }
                 // TODO: maybe optimize for waste here?
-                const subStyle = this.getStyleInstances(selector + key, value);
+                const subStyle = this.getStyleInstances(selector + key, value as StyleAttributes);
                 result.push(...subStyle);
             }
         }
@@ -136,47 +167,52 @@ class DynamicStyleElement extends StyleElement {
         return result;
     }
 
-    render() {
+    render(): UIElementChild {
         let style = this.options.style || {};
         if (typeof style === "function") {
             style = style();
         }
-        if (style.selectorName) {
-            this.options.selectorName = style.selectorName;
-            delete style.selectorName;
+        if ((style as any).selectorName) {
+            this.options.selectorName = (style as any).selectorName;
+            delete (style as any).selectorName;
         }
         return this.getStyleInstances(this.getSelector(), style);
     }
 
-    setStyle(key, value) {
-        this.options.style[key] = value;
-        this.children[0].setAttribute(key, value);
+    setStyle(key: string, value: any): void {
+        if (this.options.style && typeof this.options.style === 'object') {
+            (this.options.style as StyleAttributes)[key] = value;
+            (this.children[0] as StyleInstance).setAttribute(key, value);
+        }
     }
 
-    setSubStyle(selector, key, value) {
+    setSubStyle(selector: string, key: string, value: any): void {
         throw Error("Implement me!");
     }
 
-    getStyleObject() {
+    getStyleObject(): StyleAttributes | (() => StyleAttributes) | undefined {
         return this.options.style;
     }
 }
 
 class KeyframeElement extends StyleElement {
-    toString() {
+    declare options: KeyframeElementOptions;
+    keyframeName?: string;
+
+    toString(): string {
         return this.getKeyframeName();
     }
 
-    getKeyframeName() {
+    getKeyframeName(): string {
         if (this.keyframeName) {
             return this.keyframeName;
         }
-        self.styleInstanceCounter = (self.styleInstanceCounter || 0) + 1;
-        this.keyframeName = (this.options.name || "autokeyframe") + "-" + self.styleInstanceCounter;
+        (self as any).styleInstanceCounter = ((self as any).styleInstanceCounter || 0) + 1;
+        this.keyframeName = (this.options.name || "autokeyframe") + "-" + (self as any).styleInstanceCounter;
         return this.keyframeName;
     }
 
-    getValue(style) {
+    getValue(style: StyleAttributes): string {
         let str = "{";
         for (let key in style) {
             let value = style[key];
@@ -191,7 +227,7 @@ class KeyframeElement extends StyleElement {
         return str + "}";
     }
 
-    getKeyframeInstance(keyframe) {
+    getKeyframeInstance(keyframe: Record<string, StyleAttributes>): string {
         let result = "{";
         for (let key in keyframe) {
             let value = keyframe[key];
@@ -200,7 +236,7 @@ class KeyframeElement extends StyleElement {
         return result + "}";
     }
 
-    render() {
+    render(): UIElementChild {
         return "@keyframes " + this.getKeyframeName() + this.getKeyframeInstance(this.options.keyframe || {});
     }
 }
