@@ -1,4 +1,4 @@
-import {StoreObject, Store} from "../state/Store.js";
+import {StoreObject, Store} from "../state/Store";
 
 export class Currency extends StoreObject {
     getDecimalDigitsCount() {
