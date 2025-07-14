@@ -1,19 +1,45 @@
 import {Dispatchable} from "../base/Dispatcher";
+import {isString} from "../base/Utils";
+
+// Type definitions for State management
+interface StateEvent {
+    objectType?: string;
+    store?: string;
+    state?: any;
+    [key: string]: any;
+}
+
+interface Store {
+    objectType: string;
+    dependencies: string[];
+    applyEvent(event: StateEvent): any;
+    get(...args: any[]): any;
+    importState(state: any): void;
+    clear?(): void;
+    toJSON(): any;
+}
+
+interface StateLoadOptions {
+    state?: any;
+    events?: StateEvent | StateEvent[];
+}
+
+type StateData = Record<string, any> | StateLoadOptions | any[];
 
 export class State extends Dispatchable {
-    stores = new Map();
+    stores = new Map<string, Store>();
 
-    getStore(objectType) {
-        objectType = objectType?.objectType || objectType?.toLowerCase();
-        return this.stores.get(objectType);
+    getStore(objectType: string | { objectType?: string } | null | undefined): Store | undefined {
+        const objectName = isString(objectType) ? objectType?.toLowerCase() : objectType?.objectType;
+        return this.stores.get(objectName);
     }
 
-    getStoreForEvent(event) {
+    getStoreForEvent(event: StateEvent): Store | undefined {
         const objectType = event.objectType || event.store;
         return this.getStore(objectType);
     }
 
-    addStore(store) {
+    addStore(store: Store): void {
         const objectType = store.objectType;
         if (!this.stores.has(objectType)) {
             this.stores.set(objectType, store);
@@ -22,7 +48,7 @@ export class State extends Dispatchable {
         }
     }
 
-    applyEvent(event) {
+    applyEvent(event: StateEvent | StateEvent[] | null | undefined): any {
         if (event == null) {
             return;
         }
@@ -47,10 +73,9 @@ export class State extends Dispatchable {
         }
     }
 
-    get(objectType, objectId) {
+    get(objectType: string, ...args: any[]): any {
         const store = this.getStore(objectType);
         if (store) {
-            let args = Array.prototype.slice.call(arguments, 1);
             return store.get(...args);
         } else {
             console.error("GlobalState: Can't find store ", objectType);
@@ -59,7 +84,7 @@ export class State extends Dispatchable {
     }
 
     // Import the store for objectType and remove it from stateMap
-    importStateFromTempMap(objectType, stateMap) {
+    importStateFromTempMap(objectType: string, stateMap: Map<string, any>): void {
         const storeState = stateMap.get(objectType);
         stateMap.delete(objectType);
         if (storeState == null) {
@@ -80,7 +105,7 @@ export class State extends Dispatchable {
     }
 
     // Imports the state information from a plain object
-    importState(state) {
+    importState(state: StateData): void {
         if (Array.isArray(state)) {
             for (const obj of state) {
                 this.importState(obj);
@@ -106,7 +131,7 @@ export class State extends Dispatchable {
     }
 
     // Loads both the state and the events
-    load({state, events}, disableStateImport, disableEventsImport) {
+    load({state, events}: StateLoadOptions, disableStateImport?: boolean, disableEventsImport?: boolean): void {
         if (state && !disableStateImport) {
             this.importState(state);
         }
@@ -115,13 +140,13 @@ export class State extends Dispatchable {
         }
     }
 
-    clear() {
+    clear(): void {
         for (const store of this.stores.values()) {
             store.clear && store.clear();
         }
     }
 
-    toJSON() {
+    toJSON(): Record<string, any> {
         const state = {};
         for (const store of this.stores.values()) {
             state[store.objectType] = store.toJSON();
