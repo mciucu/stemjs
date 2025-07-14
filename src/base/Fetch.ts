@@ -280,8 +280,8 @@ export class XHRPromise {
         this.getXHR().addEventListener(name, callback, ...args);
     }
 
-    addProgressListener(callback: EventListener): void {
-        this.addXHRListener("progress", ...arguments);
+    addProgressListener(callback: EventListener, ...args: any[]): void {
+        this.addXHRListener("progress", callback, ...args);
     }
 }
 
@@ -291,11 +291,12 @@ export function jQueryCompatibilityPreprocessor(options: FetchOptions): FetchOpt
         options.method = options.type.toUpperCase();
     }
 
-    if (options.contentType) {
-        options.headers.set("Content-Type", options.contentType);
-    }
+    const headers = options.headers as Headers;
+    headers.set("X-Requested-With", "XMLHttpRequest");
 
-    options.headers.set("X-Requested-With", "XMLHttpRequest");
+    if (options.contentType) {
+        headers.set("Content-Type", options.contentType);
+    }
 
     if (isPlainObject(options.data)) {
         let method = options.method.toUpperCase();
