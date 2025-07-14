@@ -1,7 +1,7 @@
 import {UI} from "../ui/UIBase.js";
 import {Router} from "../ui/Router.jsx";
 import {GlobalContainer} from "../ui/global-container/GlobalContainer.jsx";
-import {Dispatcher} from "../base/Dispatcher.js";
+import {Dispatcher} from "../base/Dispatcher";
 import {GlobalState} from "../state/State.js";
 
 export class StemApp extends UI.Element {

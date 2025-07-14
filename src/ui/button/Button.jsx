@@ -1,7 +1,7 @@
-import {UI} from "../UIBase.js";
+import {UI} from "../UIBase";
 import {IconableInterface} from "../SimpleElements.jsx";
-import {registerStyle} from "../style/Theme.js";
-import {ButtonStyle} from "./ButtonStyle.js";
+import {registerStyle} from "../style/Theme";
+import {ButtonStyle} from "./ButtonStyle";
 
 @registerStyle(ButtonStyle)
 export class Button extends UI.Primitive("button", IconableInterface) {

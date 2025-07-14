@@ -1,7 +1,7 @@
 import {UI} from "../../UIBase.js";
-import {StyleSheet} from "../../Style.js";
-import {styleRule} from "../../../decorators/Style.js";
-import {registerStyle} from "../../style/Theme.js";
+import {StyleSheet} from "../../Style";
+import {styleRule} from "../../../decorators/Style";
+import {registerStyle} from "../../style/Theme";
 import {Device} from "../../../base/Device";
 import {BaseInputElement} from "../BaseInputElement.js";
 import {MakeIcon, MakeText} from "../../SimpleElements.jsx";

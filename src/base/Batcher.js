@@ -1,4 +1,4 @@
-import {Dispatchable} from "./Dispatcher.js";
+import {Dispatchable} from "./Dispatcher";
 
 export class Batcher extends Dispatchable {
     queue = [];

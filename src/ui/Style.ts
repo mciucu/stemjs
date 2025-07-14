@@ -1,6 +1,6 @@
 import {StyleElement, KeyframeElement, DynamicStyleElement} from "./StyleElement";
 import {Dispatchable} from "../base/Dispatcher";
-import {PREFERRED_CLASS_NAME_KEY} from "../decorators/Style.js";
+import {PREFERRED_CLASS_NAME_KEY} from "../decorators/Style";
 import {Theme, ThemeProps} from "./style/Theme";
 
 interface StyleSheetOptions {

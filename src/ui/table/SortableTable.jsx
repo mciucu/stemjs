@@ -2,7 +2,7 @@ import {UI} from "../UIBase";
 import {Table} from "./Table";
 import {defaultComparator} from "../../base/Utils";
 import {MakeIcon} from "../SimpleElements.jsx";
-import {styleRule, StyleSheet} from "../Style.js";
+import {styleRule, StyleSheet} from "../Style";
 
 
 export class SortableTableStyle extends StyleSheet {

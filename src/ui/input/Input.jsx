@@ -3,7 +3,7 @@ import {DOMAttributesMap} from "../NodeAttributes";
 import {InputStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
 import {StemDate} from "../../time/Date";
-import {CleanupJobs} from "../../base/Dispatcher.js";
+import {CleanupJobs} from "../../base/Dispatcher";
 
 
 // TODO rename to BaseInputElement
