@@ -1,7 +1,7 @@
 import {mapIterator} from "../base/Utils";
 
 // A map that supports multiple values to the same key
-class MultiMap {
+export class MultiMap {
     constructor() {
         this.map = new Map();
     }
@@ -85,5 +85,3 @@ class MultiMap {
         return this.entries();
     }
 }
-
-export {MultiMap};

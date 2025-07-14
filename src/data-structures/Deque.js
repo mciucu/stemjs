@@ -1,4 +1,4 @@
-class Deque {
+export class Deque {
     constructor() {
         this._values = new Array(8);
         this._length = 0;
@@ -132,5 +132,3 @@ Deque.prototype.pop     = Deque.prototype.popBack;
 Deque.prototype.push    = Deque.prototype.pushBack;
 Deque.prototype.shift   = Deque.prototype.popFront;
 Deque.prototype.unshift = Deque.prototype.pushFront;
-
-export {Deque};

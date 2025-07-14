@@ -2,7 +2,7 @@ import {Dispatchable} from "../base/Dispatcher";
 import {Deque} from "./Deque";
 import {StemDate} from "../time/Date";
 
-class MaxLengthDeque extends Deque {
+export class MaxLengthDeque extends Deque {
     constructor(maxLength) {
         super();
         this.maxLength = maxLength;
