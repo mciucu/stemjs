@@ -123,8 +123,8 @@ export const DispatchersSymbol = Symbol("Dispatchers");
 export const CleanupJobsSymbol = Symbol("CleanupJobs");
 
 class Dispatchable {
-    private [DispatchersSymbol]?: Map<string, Dispatcher>;
-    private [CleanupJobsSymbol]?: CleanupJobs;
+    declare private [DispatchersSymbol]?: Map<string, Dispatcher>;
+    declare private [CleanupJobsSymbol]?: CleanupJobs;
 
     get dispatchers(): Map<string, Dispatcher> {
         return this[DispatchersSymbol] || (this[DispatchersSymbol] = new Map());

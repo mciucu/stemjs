@@ -4,7 +4,7 @@
 import {isPlainObject} from "./Utils";
 
 // Parse the headers from an xhr object, to return a native Headers object
-function parseHeaders(xhr) {
+export function parseHeaders(xhr) {
     const rawHeader = xhr.getAllResponseHeaders() || "";
     const rawHeaderLines = rawHeader.split(/\r?\n/);
     let headers = new Headers();
@@ -22,7 +22,7 @@ function parseHeaders(xhr) {
 
 // Creates a new URLSearchParams object from a plain object
 // Fields that are arrays are spread
-function getURLSearchParams(data, arrayKeySuffix = "[]") {
+export function getURLSearchParams(data, arrayKeySuffix = "[]") {
     if (!isPlainObject(data)) {
         return data;
     }
@@ -42,7 +42,7 @@ function getURLSearchParams(data, arrayKeySuffix = "[]") {
 }
 
 // Appends search parameters from an object to a given URL or Request, and returns the new URL
-function composeURL(url, urlSearchParams) {
+export function composeURL(url, urlSearchParams) {
     if (url.url) {
         url = url.url;
     }
@@ -53,7 +53,7 @@ function composeURL(url, urlSearchParams) {
     return url;
 }
 
-class XHRPromise {
+export class XHRPromise {
     constructor(request, options = {}) {
         request = new Request(request, options);
         let xhr = new XMLHttpRequest();
@@ -244,7 +244,7 @@ class XHRPromise {
 }
 
 // TODO: this offers only partial compatibility with $.ajax, remove
-function jQueryCompatibilityPreprocessor(options) {
+export function jQueryCompatibilityPreprocessor(options) {
     if (options.type) {
         options.method = options.type.toUpperCase();
     }
@@ -283,10 +283,11 @@ function jQueryCompatibilityPreprocessor(options) {
     }
     return options;
 }
+
 // Can either be called with
 // - 1 argument: (Request)
 // - 2 arguments: (url/Request, options)
-function fetch(input, ...args) {
+export function fetch(input, ...args) {
     // In case we're being passed in a single plain object (not Request), assume it has a url field
     if (isPlainObject(input)) {
         return fetch(input.url, ...arguments);
@@ -334,5 +335,3 @@ fetch.defaultPostprocessors = [];
 fetch.defaultErrorPostprocessors = [];
 
 fetch.polyfill = true;
-
-export {XHRPromise, fetch, composeURL, parseHeaders, getURLSearchParams, jQueryCompatibilityPreprocessor};

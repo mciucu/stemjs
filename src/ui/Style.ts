@@ -11,6 +11,7 @@ interface StyleSheetOptions {
 }
 
 interface StyleObject {
+    [PREFERRED_CLASS_NAME_KEY]?: string;
     [key: string]: any;
 }
 
@@ -31,7 +32,7 @@ class StyleSheet extends Dispatchable {
     declare _firstUpdate?: boolean;
     declare container?: StyleElement; // The default for most style sheets
 
-    constructor(options: StyleSheetOptions = {}) {
+    constructor(options: Partial<StyleSheetOptions> = {}) {
         super();
         this.options = {
             ...this.getDefaultOptions(options),
@@ -46,7 +47,7 @@ class StyleSheet extends Dispatchable {
         this.themeProps = this.options.theme.props;
     }
 
-    getDefaultOptions(options: StyleSheetOptions): StyleSheetOptions {
+    getDefaultOptions(options: Partial<StyleSheetOptions>): StyleSheetOptions {
         const theme = options.theme || Theme.Global;
         return {
             parent: document.head,

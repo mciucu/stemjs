@@ -255,7 +255,7 @@ export class UIElement extends BaseUIElement<HTMLElement> {
         return this.options?.nodeType || "div";
     }
 
-    static create(parentNode: UIElement | HTMLElement, options?: UIElementOptions): UIElement {
+    static create<T extends UIElement>(this: new (options?: UIElementOptions) => T, parentNode: UIElement | HTMLElement, options?: UIElementOptions): T {
         const uiElement = new this(options);
         uiElement.mount(parentNode, null);
         uiElement.dispatch("mount", uiElement);
