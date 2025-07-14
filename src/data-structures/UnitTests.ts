@@ -2,7 +2,7 @@ import {SortedSet} from "./SortedSet";
 import {suffixWithOrdinal} from "../base/Utils";
 
 export class SortedSetUnitTests {
-    static tests = [
+    static tests: string[] = [
         "emptySet",
         "add10Delete1",
         "add1Delete1",
@@ -11,16 +11,17 @@ export class SortedSetUnitTests {
         "valueQuery"
     ];
 
-    static int() {
-        return parseInt(Math.random() * 10000000);
+    static int(): number {
+        return parseInt((Math.random() * 10000000).toString());
     }
 
-    static checkSanity(set) {
-        const dfs = (node) => {
+    static checkSanity(set: SortedSet<number>): boolean {
+        const dfs = (node: any): boolean => {
             if (!node) {
                 return true;
             }
-            if ((node.left && set.comparator(node.key, node.left.key) === -1) || (node.right && set.comparator(node.key, node.right.key) === 1)) {
+            const comparator = set.getComparator();
+            if ((node.left && comparator(node.key, node.left.key) === -1) || (node.right && comparator(node.key, node.right.key) === 1)) {
                 console.error("BST property not maintained for node", node);
                 return false;
             }
@@ -34,19 +35,19 @@ export class SortedSetUnitTests {
             }
             return (!node.left || dfs(node.left)) && (!node.right || dfs(node.right));
         };
-        return dfs(set.rootNode);
+        return dfs((set as any).rootNode);
     }
 
-    static emptySet() {
-        let set = new SortedSet();
+    static emptySet(): boolean {
+        let set = new SortedSet<number>();
         return this.checkSanity(set);
     }
 
-    static add10Delete1() {
-        let set = new SortedSet();
+    static add10Delete1(): boolean {
+        let set = new SortedSet<number>();
         let ok = true;
         for (let i = 0; i < 100; i += 1) {
-            let x;
+            let x: number;
             for (let j = 0; j < 10; j += 1) {
                 if (j === 4) {
                     x = this.int();
@@ -56,14 +57,14 @@ export class SortedSetUnitTests {
                 }
                 ok = ok && this.checkSanity(set);
             }
-            set.delete(x);
+            set.delete(x!);
             ok = ok && this.checkSanity(set);
         }
         return ok;
     }
 
-    static add1Delete1() {
-        let set = new SortedSet();
+    static add1Delete1(): boolean {
+        let set = new SortedSet<number>();
         let ok = true;
         for (let i = 0; i < 100; i += 1) {
             let x = this.int();
@@ -75,8 +76,8 @@ export class SortedSetUnitTests {
         return ok;
     }
 
-    static add10Clear() {
-        let set = new SortedSet();
+    static add10Clear(): boolean {
+        let set = new SortedSet<number>();
         let ok = true;
         for (let i = 0; i < 100; i += 1) {
             for (let j = 0; j < 10; j += 1) {
@@ -89,18 +90,18 @@ export class SortedSetUnitTests {
         return ok;
     }
 
-    static indexQuery() {
-        let set = new SortedSet();
+    static indexQuery(): boolean {
+        let set = new SortedSet<number>();
         let ok = true;
         let n = 500;
-        let a = [];
+        let a: number[] = [];
         for (let i = 0; i < n; i += 1) {
             a.push(this.int());
             set.add(a[a.length - 1]);
         }
-        a.sort();
+        a.sort((a, b) => a - b);
         for (let i = 0; i < 100; i += 1) {
-            let index = parseInt(Math.random() * n);
+            let index = parseInt((Math.random() * n).toString());
             if (set.get(index) !== a[index]) {
                 console.error("Wrong index query", index, set);
                 ok = false;
@@ -110,18 +111,18 @@ export class SortedSetUnitTests {
         return ok;
     }
 
-    static valueQuery() {
-        let set = new SortedSet();
+    static valueQuery(): boolean {
+        let set = new SortedSet<number>();
         let ok = true;
         let n = 500;
-        let a = [];
+        let a: number[] = [];
         for (let i = 0; i < n; i += 1) {
             a.push(this.int());
             set.add(a[a.length - 1]);
         }
-        a.sort();
+        a.sort((a, b) => a - b);
         for (let i = 0; i < 100; i += 1) {
-            let index = parseInt(Math.random() * n);
+            let index = parseInt((Math.random() * n).toString());
             if (set.getIndex(a[index]) !== index) {
                 console.error("Wrong value query", index, set);
                 ok = false;
@@ -131,12 +132,12 @@ export class SortedSetUnitTests {
         return ok;
     }
 
-    static runAllTests(numRuns=100) {
+    static runAllTests(numRuns: number = 100): void {
         let ok = true;
         for (let i = 1; i <= numRuns; i += 1) {
             console.log("Running tests " + suffixWithOrdinal(i) + " time out of " + numRuns);
             for (let test of this.tests) {
-                ok = ok && this[test]();
+                ok = ok && (this as any)[test]();
             }
         }
         if (ok) {
@@ -145,10 +146,10 @@ export class SortedSetUnitTests {
     }
 }
 export class SortedSetProfiler {
-    static NUM_OPERATIONS = 100000;
+    static NUM_OPERATIONS: number = 100000;
 
-    static runProfiler(steps=this.NUM_OPERATIONS) {
-        let s = new SortedSet();
+    static runProfiler(steps: number = this.NUM_OPERATIONS): void {
+        let s = new SortedSet<number>();
         let startTime = performance.now();
         let existing = 0;
         for (let j = 0; j < 10; j += 1) {

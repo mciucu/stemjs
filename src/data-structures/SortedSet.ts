@@ -6,31 +6,39 @@ import {mapIterator} from "../base/Utils";
 // TODO: should probably also support keeping track of a range with dispatchers?
 
 
-class BinarySearchTreeNode {
-    constructor(key, parent=null) {
+type ComparatorFunction<K> = (a: K, b: K) => number;
+
+class BinarySearchTreeNode<T, K> {
+    weight: number;
+    parent: BinarySearchTreeNode<T, K> | null;
+    left: BinarySearchTreeNode<T, K> | null;
+    right: BinarySearchTreeNode<T, K> | null;
+    key: K;
+
+    constructor(key: K, parent: BinarySearchTreeNode<T, K> | null = null) {
         this.weight = Math.random();
         this.parent = parent;
         this.left = this.right = null;
         this.key = key;
     }
 
-    leftWeight() {
+    leftWeight(): number {
         return (this.left && this.left.weight) || -1;
     }
 
-    rightWeight() {
+    rightWeight(): number {
         return (this.right && this.right.weight) || -1;
     }
 
-    min() {
+    min(): BinarySearchTreeNode<T, K> {
         return (this.left && this.left.min()) || this;
     }
 
-    max() {
+    max(): BinarySearchTreeNode<T, K> {
         return (this.right && this.right.max()) || this;
     }
 
-    replaceParentRef(newNode) {
+    replaceParentRef(newNode: BinarySearchTreeNode<T, K> | null): void {
         if (!this.parent) {
             return;
         }
@@ -42,8 +50,8 @@ class BinarySearchTreeNode {
         }
     }
 
-    rotateLeft() {
-        const a = this, b = this.right;
+    rotateLeft(): BinarySearchTreeNode<T, K> {
+        const a = this, b = this.right!;
         const c = b.left;
 
         a.replaceParentRef(b);
@@ -58,8 +66,8 @@ class BinarySearchTreeNode {
         return b;
     }
 
-    rotateRight() {
-        const a = this.left, b = this;
+    rotateRight(): BinarySearchTreeNode<T, K> {
+        const a = this.left!, b = this;
         const c = a.right;
 
         b.replaceParentRef(a);
@@ -74,8 +82,8 @@ class BinarySearchTreeNode {
         return a;
     }
 
-    balance(nodeToReturn) {
-        let newRoot = this;
+    balance(nodeToReturn: BinarySearchTreeNode<T, K> | null): [BinarySearchTreeNode<T, K> | null, BinarySearchTreeNode<T, K>] {
+        let newRoot: BinarySearchTreeNode<T, K> = this;
 
         if (this.rightWeight() > this.weight) {
             newRoot = this.rotateLeft();
@@ -88,12 +96,12 @@ class BinarySearchTreeNode {
         return [nodeToReturn, newRoot];
     }
 
-    add(value, key, comparator) {
+    add(value: T, key: K, comparator: ComparatorFunction<K>): [BinarySearchTreeNode<T, K> | null, BinarySearchTreeNode<T, K>] {
         const comp = comparator(key, this.key);
-        let addedNode, newRoot;
+        let addedNode: BinarySearchTreeNode<T, K> | null = null, newRoot: BinarySearchTreeNode<T, K>;
         if (comp < 0) {
             if (this.left == null) {
-                this.left = new this.constructor(value, key, this);
+                this.left = new (this.constructor as any)(value, key, this);
                 addedNode = this.left;
             } else {
                 [addedNode, newRoot] = this.left.add(value, key, comparator);
@@ -101,7 +109,7 @@ class BinarySearchTreeNode {
             }
         } else if (comp > 0) {
             if (this.right == null) {
-                this.right = new this.constructor(value, key, this);
+                this.right = new (this.constructor as any)(value, key, this);
                 addedNode = this.right;
             } else {
                 [addedNode, newRoot] = this.right.add(value, key, comparator);
@@ -111,12 +119,12 @@ class BinarySearchTreeNode {
         return this.balance(addedNode);
     }
 
-    delete(value, key, comparator) {
+    delete(value: T, key: K, comparator: ComparatorFunction<K>): [BinarySearchTreeNode<T, K> | null, BinarySearchTreeNode<T, K> | null] {
         const comp = comparator(key, this.key);
-        let removedNode, newRoot;
+        let removedNode: BinarySearchTreeNode<T, K> | null = null, newRoot: BinarySearchTreeNode<T, K> | null;
         if (comp === 0) {
             if (!this.left && !this.right) {
-                return [this, undefined];
+                return [this, null];
             }
             if (this.leftWeight() > this.rightWeight()) {
                 return this.rotateRight().delete(value, key, comparator);
@@ -125,16 +133,16 @@ class BinarySearchTreeNode {
             }
         }
         if (comp === -1) {
-            [removedNode, newRoot] = this.left.delete(value, key, comparator);
+            [removedNode, newRoot] = this.left!.delete(value, key, comparator);
             this.left = newRoot;
         } else if (comp === 1) {
-            [removedNode, newRoot] = this.right.delete(value, key, comparator);
+            [removedNode, newRoot] = this.right!.delete(value, key, comparator);
             this.right = newRoot;
         }
         return this.balance(removedNode);
     }
 
-    next() {
+    next(): BinarySearchTreeNode<T, K> | null {
         if (this.right) {
             let node = this.right;
             while (node.left) {
@@ -142,14 +150,14 @@ class BinarySearchTreeNode {
             }
             return node;
         }
-        let node = this;
+        let node: BinarySearchTreeNode<T, K> = this;
         while (node.parent && node.parent.right === node) {
             node = node.parent;
         }
         return node.parent;
     }
 
-    update() {
+    update(): void {
         // This method is called whenever a change that occurs in the tree influences this node.
         // This is the only method from this class that should be overwritten.
     }
@@ -157,118 +165,134 @@ class BinarySearchTreeNode {
 }
 
 
-class SortedSetNode extends BinarySearchTreeNode {
-    constructor(value, key, parent=null) {
+class SortedSetNode<T, K> extends BinarySearchTreeNode<T, K> {
+    value: T;
+    size: number;
+
+    constructor(value: T, key: K, parent: SortedSetNode<T, K> | null = null) {
         super(key, parent);
         this.value = value;
         this.size = 1;
     }
 
-    leftSize() {
-        return (this.left && this.left.size) || 0;
+    leftSize(): number {
+        return (this.left && (this.left as SortedSetNode<T, K>).size) || 0;
     }
 
-    rightSize() {
-        return (this.right && this.right.size) || 0;
+    rightSize(): number {
+        return (this.right && (this.right as SortedSetNode<T, K>).size) || 0;
     }
 
-    recalcSize() {
+    recalcSize(): void {
         this.size = this.leftSize() + this.rightSize() + 1;
     }
 
-    update() {
-        this.left && this.left.recalcSize();
-        this.right && this.right.recalcSize();
+    update(): void {
+        this.left && (this.left as SortedSetNode<T, K>).recalcSize();
+        this.right && (this.right as SortedSetNode<T, K>).recalcSize();
         this.recalcSize();
     }
 
-    getIndex(value, key, comparator) {
+    getIndex(value: T, key: K, comparator: ComparatorFunction<K>): number {
         const comp = comparator(key, this.key);
         if (comp === 0) {
             return this.leftSize();
         }
         if (comp === -1) {
-            return this.left.getIndex(value, key, comparator);
+            return (this.left as SortedSetNode<T, K>).getIndex(value, key, comparator);
         }
-        return this.leftSize() + 1 + this.right.getIndex(value, key, comparator);
+        return this.leftSize() + 1 + (this.right as SortedSetNode<T, K>).getIndex(value, key, comparator);
     }
 
-    get(index) {
+    get(index: number): T {
         const leftSize = this.leftSize();
         if (leftSize === index) {
             return this.value;
         }
         if (leftSize > index) {
-            return this.left.get(index);
+            return (this.left as SortedSetNode<T, K>).get(index);
         }
-        return this.right.get(index - leftSize - 1);
+        return (this.right as SortedSetNode<T, K>).get(index - leftSize - 1);
     }
 
-    toJSON() {
-        let json = {
+    toJSON(): any {
+        let json: any = {
             value: this.value,
             key: this.key,
             weight: this.weight,
             size: this.size
         };
         if (this.left) {
-            json.left = this.left.toJSON();
+            json.left = (this.left as SortedSetNode<T, K>).toJSON();
         }
         if (this.right) {
-            json.right = this.right.toJSON();
+            json.right = (this.right as SortedSetNode<T, K>).toJSON();
         }
         return json;
     }
 }
 
 
-export class SortedSet {
-    constructor(values=[], options={}) {
+interface SortedSetOptions<K> {
+    cmp?: ComparatorFunction<K>;
+    comparator?: ComparatorFunction<K>;
+}
+
+export class SortedSet<T, K = T> {
+    private comparator: ComparatorFunction<K>;
+    private nodeMap: Map<T, SortedSetNode<T, K>>;
+    private rootNode: SortedSetNode<T, K> | null;
+
+    constructor(values: (T | [T, K])[] = [], options: SortedSetOptions<K> = {}) {
         if (!Array.isArray(values)) {
-            options = values;
+            options = values as SortedSetOptions<K>;
             values = [];
         }
-        this.comparator = options.cmp || options.comparator || this.constructor.defaultComparator;
+        this.comparator = options.cmp || options.comparator || SortedSet.defaultComparator;
         this.init(values);
     }
 
-    init(values) {
+    init(values: (T | [T, K])[]): void {
         // Map to store the link between an object and their node in the tree.
         this.nodeMap = new Map();
         this.rootNode = null;
         for (let value of values) {
-            let key;
+            let key: K;
             if (Array.isArray(value)) {
                 key = value[1];
                 value = value[0];
             } else {
-                key = value;
+                key = value as any;
             }
             this.add(value, key);
         }
     }
 
-    getNodeByIndex(index) {
-        return this.nodeMap.get(this.get(index));
+    getNodeByIndex(index: number): SortedSetNode<T, K> | undefined {
+        return this.nodeMap.get(this.get(index)!);
     }
 
-    getNodeByValue(value) {
+    getNodeByValue(value: T): SortedSetNode<T, K> | undefined {
         return this.nodeMap.get(value);
     }
 
-    setComparator(cmp) {
+    setComparator(cmp: ComparatorFunction<K>): void {
         this.comparator = cmp;
         this.init(this.toArray());
     }
 
-    static defaultComparator(a, b) {
+    getComparator(): ComparatorFunction<K> {
+        return this.comparator;
+    }
+
+    static defaultComparator<K>(a: K, b: K): number {
         if (a == b) {
             return 0;
         }
         return (a < b) ? -1 : 1;
     }
 
-    add(value, key=value) {
+    add(value: T, key: K = value as any): SortedSetNode<T, K> | null {
         if (this.has(value)) {
             return null;
         }
@@ -280,15 +304,15 @@ export class SortedSet {
         }
         const [node, newRoot] = this.rootNode.add(value, key, this.comparator);
         this.nodeMap.set(value, node);
-        this.rootNode = newRoot;
-        return node;
+        this.rootNode = newRoot as SortedSetNode<T, K>;
+        return node as SortedSetNode<T, K>;
     }
 
-    has(value) {
+    has(value: T): boolean {
         return this.nodeMap.has(value);
     }
 
-    size() {
+    size(): number {
         if (!this.rootNode) {
             return 0;
         }
@@ -296,81 +320,86 @@ export class SortedSet {
     }
 
     // Remove the passed value from the SortedSet
-    delete(value, key=value) {
+    delete(value: T, key: K = value as any): SortedSetNode<T, K> | null {
         if (!this.has(value)) {
             return null;
         }
-        const [node, newRoot] = this.rootNode.delete(value, key, this.comparator);
-        this.rootNode = newRoot;
+        const [node, newRoot] = this.rootNode!.delete(value, key, this.comparator);
+        this.rootNode = newRoot as SortedSetNode<T, K>;
         this.nodeMap.delete(value);
-        return node;
+        return node as SortedSetNode<T, K>;
     }
 
-    clear() {
+    clear(): void {
         this.init([]);
     }
 
-    getIndex(value, key=value) {
+    getIndex(value: T, key: K = value as any): number {
         if (!this.has(value)) {
             return -1;
         }
-        return this.rootNode.getIndex(value, key, this.comparator);
+        return this.rootNode!.getIndex(value, key, this.comparator);
     }
 
     // Return the index-th value in order by priority
-    get(index) {
-        if (this.size() < index) {
+    get(index: number): T | null {
+        if (this.size() <= index) {
             return null;
         }
-        return this.rootNode.get(index);
+        return this.rootNode!.get(index);
     }
 
-    min() {
+    min(): T | null {
         if (!this.size()) {
             return null;
         }
-        return this.rootNode.min().value;
+        return (this.rootNode!.min() as SortedSetNode<T, K>).value;
     }
 
-    max() {
+    max(): T | null {
         if (!this.size()) {
             return null;
         }
-        return this.rootNode.max().value;
+        return (this.rootNode!.max() as SortedSetNode<T, K>).value;
     }
 
     // Return iterator over [key, value]
-    * entries(startIndex=0, endIndex=this.size()) {
+    *entries(startIndex: number = 0, endIndex: number = this.size()): IterableIterator<[K, T]> {
         if (startIndex < endIndex) {
             let node = this.getNodeByIndex(startIndex);
             let position = startIndex;
             while (node && position < endIndex) {
                 yield [node.key, node.value];
-                node = node.next();
+                node = node.next() as SortedSetNode<T, K> | null;
                 position += 1;
             }
         }
     }
 
-    values(startIndex=0, endIndex=this.size()) {
+    values(startIndex: number = 0, endIndex: number = this.size()): IterableIterator<T> {
         return mapIterator(this.entries(startIndex, endIndex), it => it[1]);
     }
 
-    toArray(startIndex=0, endIndex=this.size()) {
+    toArray(startIndex: number = 0, endIndex: number = this.size()): T[] {
         return Array.from(this.values(startIndex, endIndex));
     }
 
-    toJSON() {
+    toJSON(): any {
         if (!this.rootNode) {
             return {};
         }
         return this.rootNode.toJSON();
     }
 
-    toString() {
+    toString(): string {
         return this.toArray().toString();
     }
-}
 
-SortedSet.prototype.remove = SortedSet.prototype.delete;
-SortedSet.prototype[Symbol.iterator] = SortedSet.prototype.values;
+    remove(value: T, key: K = value as any): SortedSetNode<T, K> | null {
+        return this.delete(value, key);
+    }
+
+    [Symbol.iterator](): IterableIterator<T> {
+        return this.values();
+    }
+}
