@@ -4,7 +4,7 @@
 import {isPlainObject} from "./Utils";
 
 // Parse the headers from an xhr object, to return a native Headers object
-export function parseHeaders(xhr) {
+export function parseHeaders(xhr: XMLHttpRequest): Headers {
     const rawHeader = xhr.getAllResponseHeaders() || "";
     const rawHeaderLines = rawHeader.split(/\r?\n/);
     let headers = new Headers();
@@ -22,7 +22,7 @@ export function parseHeaders(xhr) {
 
 // Creates a new URLSearchParams object from a plain object
 // Fields that are arrays are spread
-export function getURLSearchParams(data, arrayKeySuffix = "[]") {
+export function getURLSearchParams(data: any, arrayKeySuffix: string = "[]"): URLSearchParams | any {
     if (!isPlainObject(data)) {
         return data;
     }
@@ -42,19 +42,61 @@ export function getURLSearchParams(data, arrayKeySuffix = "[]") {
 }
 
 // Appends search parameters from an object to a given URL or Request, and returns the new URL
-export function composeURL(url, urlSearchParams) {
-    if (url.url) {
-        url = url.url;
+export function composeURL(url: string | Request, urlSearchParams?: URLSearchParams): string {
+    let urlString: string;
+    if (typeof url === 'object' && 'url' in url) {
+        urlString = url.url;
+    } else {
+        urlString = url as string;
     }
     // TODO: also extract the preexisting arguments in the url
     if (urlSearchParams) {
-        url += "?" + urlSearchParams;
+        urlString += "?" + urlSearchParams;
     }
-    return url;
+    return urlString;
+}
+
+type DataType = "arrayBuffer" | "blob" | "formData" | "json" | "text";
+
+type Postprocessor = (payload: any, xhrPromise?: XHRPromise) => any;
+type ErrorPostprocessor = (error: any) => any;
+type Preprocessor = (options: FetchOptions, input?: RequestInfo) => FetchOptions;
+
+interface FetchOptions extends RequestInit {
+    dataType?: DataType;
+    onUploadProgress?: (event: ProgressEvent) => void;
+    onDownloadProgress?: (event: ProgressEvent) => void;
+    onSuccess?: (...args: any[]) => void;
+    onError?: (...args: any[]) => void;
+    onComplete?: () => void;
+    success?: (...args: any[]) => void;
+    error?: (...args: any[]) => void;
+    complete?: () => void;
+    errorHandler?: (...args: any[]) => void;
+    postprocessors?: Postprocessor[];
+    errorPostprocessors?: ErrorPostprocessor[];
+    preprocessors?: Preprocessor[];
+    urlParams?: any;
+    urlSearchParams?: URLSearchParams;
+    arraySearchParamSuffix?: string;
+    
+    // jQuery compatibility
+    type?: string;
+    contentType?: string;
+    data?: any;
+    cache?: boolean | string;
 }
 
 export class XHRPromise {
-    constructor(request, options = {}) {
+    options: FetchOptions;
+    request: Request;
+    xhr: XMLHttpRequest;
+    promise: Promise<any>;
+    promiseResolve: (value?: any) => void;
+    promiseReject: (reason?: any) => void;
+    _chained?: boolean;
+
+    constructor(request: RequestInfo, options: FetchOptions = {}) {
         request = new Request(request, options);
         let xhr = new XMLHttpRequest();
         this.options = options;
@@ -151,19 +193,19 @@ export class XHRPromise {
         return parseHeaders(this.xhr);
     }
 
-    send(body) {
+    send(body: any): void {
         this.getXHR().send(body);
     }
 
-    getPostprocessors() {
+    getPostprocessors(): Postprocessor[] {
         return this.options.postprocessors || fetch.defaultPostprocessors;
     }
 
-    getErrorPostprocessors() {
+    getErrorPostprocessors(): ErrorPostprocessor[] {
         return this.options.errorPostprocessors || fetch.defaultErrorPostprocessors;
     }
 
-    resolve(payload) {
+    resolve(payload: any): void {
         for (const postprocessor of this.getPostprocessors()) {
             try {
                 payload = postprocessor(payload, this) || payload;
@@ -183,21 +225,21 @@ export class XHRPromise {
         }
     }
 
-    reject(error) {
+    reject(error: any): void {
         for (const postprocessor of this.getErrorPostprocessors()) {
             error = postprocessor(error) || error;
         }
 
         if (this.options.onError) {
-            this.options.onError(...arguments);
+            this.options.onError(error);
         } else {
             if (this._chained) {
-                this.promiseReject(...arguments);
+                this.promiseReject(error);
             } else {
                 if (this.options.errorHandler) {
-                    this.options.errorHandler(...arguments);
+                    this.options.errorHandler(error);
                 } else {
-                    console.error("Unhandled fetch error", ...arguments);
+                    console.error("Unhandled fetch error", error);
                 }
             }
         }
@@ -207,44 +249,44 @@ export class XHRPromise {
     }
 
     // TODO: next 2 functions should throw an exception if you have onSuccess/onError
-    then(onResolve, onReject) {
+    then(onResolve?: (value: any) => any, onReject?: (reason: any) => any): Promise<any> {
         this._chained = true;
         onReject = onReject || this.options.errorHandler;
         return this.getPromise().then(onResolve, onReject);
     }
 
-    catch() {
+    catch(onReject?: (reason: any) => any): Promise<any> {
         this._chained = true;
-        return this.getPromise().catch(...arguments);
+        return this.getPromise().catch(onReject);
     }
 
-    getXHR() {
+    getXHR(): XMLHttpRequest {
         return this.xhr;
     }
 
-    getPromise() {
+    getPromise(): Promise<any> {
         return this.promise;
     }
 
-    getRequest() {
+    getRequest(): Request {
         return this.request;
     }
 
-    abort() {
+    abort(): void {
         this.getXHR().abort();
     }
 
-    addXHRListener(name, callback) {
-        this.getXHR().addEventListener(...arguments);
+    addXHRListener(name: string, callback: EventListener, ...args: any[]): void {
+        this.getXHR().addEventListener(name, callback, ...args);
     }
 
-    addProgressListener(callback) {
+    addProgressListener(callback: EventListener): void {
         this.addXHRListener("progress", ...arguments);
     }
 }
 
 // TODO: this offers only partial compatibility with $.ajax, remove
-export function jQueryCompatibilityPreprocessor(options) {
+export function jQueryCompatibilityPreprocessor(options: FetchOptions): FetchOptions {
     if (options.type) {
         options.method = options.type.toUpperCase();
     }
@@ -287,10 +329,10 @@ export function jQueryCompatibilityPreprocessor(options) {
 // Can either be called with
 // - 1 argument: (Request)
 // - 2 arguments: (url/Request, options)
-export function fetch(input, ...args) {
+export function fetch(input: RequestInfo | any, ...args: FetchOptions[]): XHRPromise {
     // In case we're being passed in a single plain object (not Request), assume it has a url field
     if (isPlainObject(input)) {
-        return fetch(input.url, ...arguments);
+        return fetch(input.url, ...args);
     }
 
     let options = Object.assign({}, ...args);
@@ -330,8 +372,8 @@ export function fetch(input, ...args) {
     return new XHRPromise(input, options);
 }
 
-fetch.defaultPreprocessors = [];
-fetch.defaultPostprocessors = [];
-fetch.defaultErrorPostprocessors = [];
+fetch.defaultPreprocessors = [] as Preprocessor[];
+fetch.defaultPostprocessors = [] as Postprocessor[];
+fetch.defaultErrorPostprocessors = [] as ErrorPostprocessor[];
 
 fetch.polyfill = true;
