@@ -1,30 +1,39 @@
 import {Dispatchable} from "../base/Dispatcher";
 import {isString} from "../base/Utils";
 
-// Type definitions for State management
-interface StateEvent {
-    objectType?: string;
-    store?: string;
-    state?: any;
+export type StoreId = string | number | null | undefined;
+
+export interface StoreEvent {
+    type: string;
+    objectId?: StoreId;
+    data?: any;
+    isFake?: boolean;
     [key: string]: any;
+}
+
+interface StateEvent extends StoreEvent {
+    objectType?: string;
+    state?: RawStateData; // events may have an extra state that is applied before the object
 }
 
 interface Store {
     objectType: string;
     dependencies: string[];
     applyEvent(event: StateEvent): any;
-    get(...args: any[]): any;
-    importState(state: any): void;
+    get(id: StoreId): any;
+    importState(objects: any[]): void;
     clear?(): void;
     toJSON(): any;
 }
 
+export type RawStateData = Record<string, any[]>;
+
 interface StateLoadOptions {
-    state?: any;
+    state?: RawStateData;
     events?: StateEvent | StateEvent[];
 }
 
-type StateData = Record<string, any> | StateLoadOptions | any[];
+export type StateData = RawStateData | StateLoadOptions;
 
 export class State extends Dispatchable {
     stores = new Map<string, Store>();
@@ -35,7 +44,7 @@ export class State extends Dispatchable {
     }
 
     getStoreForEvent(event: StateEvent): Store | undefined {
-        const objectType = event.objectType || event.store;
+        const objectType = event.objectType;
         return this.getStore(objectType);
     }
 
@@ -44,16 +53,16 @@ export class State extends Dispatchable {
         if (!this.stores.has(objectType)) {
             this.stores.set(objectType, store);
         } else {
-            throw Error("GlobalState: Adding a store for an existing object type: " + store.objectType);
+            throw new Error("GlobalState: Adding a store for an existing object type: " + store.objectType);
         }
     }
 
-    applyEvent(event: StateEvent | StateEvent[] | null | undefined): any {
+    applyEvent(event: StateEvent | StateEvent[] | null | undefined): void {
         if (event == null) {
             return;
         }
         if (Array.isArray(event)) {
-            for (let individualEvent of event) {
+            for (const individualEvent of event) {
                 this.applyEvent(individualEvent);
             }
             return;
@@ -67,16 +76,16 @@ export class State extends Dispatchable {
         }
         const store = this.getStoreForEvent(event);
         if (store) {
-            return store.applyEvent(event);
+            store.applyEvent(event);
         } else {
             console.log("GlobalState: Missing store for event: ", event);
         }
     }
 
-    get(objectType: string, ...args: any[]): any {
+    get(objectType: string, id: StoreId): any {
         const store = this.getStore(objectType);
         if (store) {
-            return store.get(...args);
+            return store.get(id);
         } else {
             console.error("GlobalState: Can't find store ", objectType);
             return null;
@@ -84,7 +93,7 @@ export class State extends Dispatchable {
     }
 
     // Import the store for objectType and remove it from stateMap
-    importStateFromTempMap(objectType: string, stateMap: Map<string, any>): void {
+    importStateFromTempMap(objectType: string, stateMap: Map<string, any[]>): void {
         const storeState = stateMap.get(objectType);
         stateMap.delete(objectType);
         if (storeState == null) {
@@ -105,7 +114,7 @@ export class State extends Dispatchable {
     }
 
     // Imports the state information from a plain object
-    importState(state: StateData): void {
+    importState(state: StateData | StateData[]): void {
         if (Array.isArray(state)) {
             for (const obj of state) {
                 this.importState(obj);
@@ -119,7 +128,7 @@ export class State extends Dispatchable {
             return;
         }
         // Import everything in a map and then do an implicit topological sort by dependencies
-        const stateMap = new Map();
+        const stateMap = new Map<string, any[]>();
         for (const [objectType, objects] of Object.entries(state)) {
             stateMap.set(objectType.toLowerCase(), objects);
         }

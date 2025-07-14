@@ -1,16 +1,6 @@
 import {Dispatchable, CleanupJobs} from "../base/Dispatcher";
-import {GlobalState} from "./State";
+import {GlobalState, RawStateData, State, StateData, StoreEvent, StoreId} from "./State";
 import {toArray} from "../base/Utils";
-
-// Type definitions for Store system
-interface StoreEvent {
-    type: string;
-    objectType?: string;
-    objectId?: string | number;
-    data?: any;
-    isFake?: boolean;
-    [key: string]: any;
-}
 
 interface FieldDescriptor {
     cacheField?: boolean;
@@ -18,11 +8,11 @@ interface FieldDescriptor {
     [key: string]: any;
 }
 
-type ObjectClass<T = any> = new (...args: any[]) => T;
+type StoreObjectClass<T extends StoreObject = StoreObject> = new (...args: any[]) => T;
 
 interface StoreOptions {
-    state?: any;
-    dependencies?: string[];
+    state?: State;
+    dependencies?: string[]; // Other stores that should have their objects loaded before this
     [key: string]: any;
 }
 
@@ -104,14 +94,14 @@ export class StoreObject extends Dispatchable {
     }
 }
 
-export class BaseStore extends Dispatchable {
+export abstract class BaseStore<T extends StoreObject = StoreObject> extends Dispatchable {
     objectType: string;
-    ObjectClass: ObjectClass;
-    state: any;
+    ObjectClass: StoreObjectClass<T>;
+    state: State;
     dependencies: string[];
     [key: string]: any;
 
-    constructor(objectType: string, ObjectClass: ObjectClass = StoreObject, options: StoreOptions = {}) {
+    constructor(objectType: string, ObjectClass: StoreObjectClass<T> = StoreObject as unknown as StoreObjectClass<T>, options: StoreOptions = {}) {
         super();
         this.objectType = objectType.toLowerCase();
         this.ObjectClass = ObjectClass;
@@ -123,8 +113,8 @@ export class BaseStore extends Dispatchable {
         this.state?.addStore(this);
     }
 
-    loadRaw(responseOrState: any): any[] {
-        const state = responseOrState?.state || responseOrState || {};
+    loadRaw(responseOrState: StateData): any[] {
+        const state = (responseOrState?.state || responseOrState || {}) as RawStateData;
 
         // Since the backend might have a different lettering case, need a more complex search here
         for (const [key, value] of Object.entries(state)) {
@@ -137,13 +127,13 @@ export class BaseStore extends Dispatchable {
     }
 
     // For a response/state raw object, return the objects that we have in store
-    load(responseOrState: any): any[] {
+    load(responseOrState: StateData): T[] {
         const rawObjects = this.loadRaw(responseOrState);
         return rawObjects.map(obj => this.get(obj.id));
     }
 
-    loadObject(responseOrState: any, index: number = 0): any {
-        return this.load(responseOrState)?.[index];
+    loadObject(responseOrState: StateData): T | undefined {
+        return this.load(responseOrState)?.[0];
     }
 
     getState(): any {
@@ -151,36 +141,25 @@ export class BaseStore extends Dispatchable {
     }
 
     // Abstract methods that subclasses should implement
-    get(id: any): any {
-        throw new Error("get method must be implemented by subclass");
-    }
-
-    applyEvent(event: StoreEvent): any {
-        throw new Error("applyEvent method must be implemented by subclass");
-    }
-
-    importState(state: any): void {
-        throw new Error("importState method must be implemented by subclass");
-    }
-
-    toJSON(): any {
-        throw new Error("toJSON method must be implemented by subclass");
-    }
+    abstract get(id: StoreId): T | undefined;
+    abstract applyEvent(event: StoreEvent): any;
+    abstract importState(state: any): void;
+    abstract toJSON(): any;
 }
 
 // Store type primarily intended to store objects that come from a server DB, and have a unique numeric .id field
 // TODO: do we ever decouple this from BaseStore? Maybe merge.
-export class GenericObjectStore extends BaseStore {
-    objects = new Map<string, any>();
+export class GenericObjectStore<T extends StoreObject = StoreObject> extends BaseStore<T> {
+    objects = new Map<string, T>();
 
-    get(id: any): any {
+    get(id: StoreId): T | undefined {
         if (id == null) {
-            return null;
+            return;
         }
         return this.objects.get(String(id));
     }
 
-    addObject(id: any, obj: any): void {
+    addObject(id: NonNullable<StoreId>, obj: T): void {
         this.objects.set(String(id), obj);
     }
 
@@ -190,15 +169,16 @@ export class GenericObjectStore extends BaseStore {
     }
 
     getObjectIdForEvent(event: StoreEvent): string {
-        return String(event.objectId || event.data.id);
+        const id = event.objectId || (event.data as any)?.id;
+        return String(id);
     }
 
-    getObjectForEvent(event: StoreEvent): any {
+    getObjectForEvent(event: StoreEvent): T | null {
         let objectId = this.getObjectIdForEvent(event);
         return this.get(objectId);
     }
 
-    all(asIterable?: boolean): any[] | IterableIterator<any> {
+    all(asIterable?: boolean): T[] | IterableIterator<T> {
         let values = this.objects.values();
         if (!asIterable) {
             return Array.from(values);
@@ -206,21 +186,21 @@ export class GenericObjectStore extends BaseStore {
         return values;
     }
 
-    find(callback: (value: any) => boolean): any {
-        return (this.all() as any[]).find(callback);
+    find(callback: (value: T) => boolean): T | undefined {
+        return (this.all() as T[]).find(callback);
     }
 
-    filter(callback: (value: any) => boolean): any[] {
-        return (this.all() as any[]).filter(callback);
+    filter(callback: (value: T) => boolean): T[] {
+        return (this.all() as T[]).filter(callback);
     }
 
     // TODO Stores should have configurable indexes from FK ids, for quick filtering
-    filterBy(filter: Record<string, any>): any[] {
+    filterBy(filter: Record<string, any>): T[] {
         const entries = Object.entries(filter); // Some minimal caching
 
-        return this.filter((obj: any) => {
+        return this.filter((obj: T) => {
             for (const [key, value] of entries) {
-                const objectValue = obj[key];
+                const objectValue = (obj as any)[key];
                 // Can match by array (any value) or otherwise exact match
                 if (Array.isArray(value)) {
                     if (!value.includes(objectValue)) {
@@ -236,16 +216,16 @@ export class GenericObjectStore extends BaseStore {
         });
     }
 
-    findBy(filter: Record<string, any>): any {
+    findBy(filter: Record<string, any>): T | undefined {
         // TODO - need a better implementation with rapid termination
         return this.filterBy(filter)[0];
     }
 
     toJSON(): any[] {
-        return (this.all() as any[]).map((entry: any) => entry.toJSON());
+        return (this.all() as T[]).map((entry: T) => entry.toJSON());
     }
 
-    applyCreateOrUpdateEvent(event: StoreEvent, sendDispatch: boolean = true): any {
+    applyCreateOrUpdateEvent(event: StoreEvent, sendDispatch: boolean = true): T {
         let obj = this.getObjectForEvent(event);
 
         if (obj) {
@@ -264,7 +244,7 @@ export class GenericObjectStore extends BaseStore {
         return obj;
     }
 
-    applyDeleteEvent(event: StoreEvent): any {
+    applyDeleteEvent(event: StoreEvent): T | null {
         const obj = this.getObjectForEvent(event);
         if (obj) {
             this.objects.delete(this.getObjectIdForEvent(event));
@@ -275,7 +255,7 @@ export class GenericObjectStore extends BaseStore {
         return obj;
     }
 
-    applyEvent(event: StoreEvent): any {
+    applyEvent(event: StoreEvent): T | null {
         event.data = event.data || {};
 
         if (event.type === "create" || event.type === "createOrUpdate") {
@@ -318,7 +298,7 @@ export class GenericObjectStore extends BaseStore {
     }
 
     // Create a fake creation event, to insert the raw object
-    create(obj: any, eventExtra: any = null, dispatchEvent: boolean = true): any {
+    create(obj: any, eventExtra: any = null, dispatchEvent: boolean = true): T | undefined {
         if (!obj) {
             return;
         }
@@ -329,7 +309,7 @@ export class GenericObjectStore extends BaseStore {
 
     // Add a listener on all object creation events
     // If fakeExisting, will also pass existing objects to your callback
-    addCreateListener(callback: (...args: any[]) => void, fakeExisting?: boolean): any {
+    addCreateListener(callback: (...args: any[]) => void, fakeExisting?: boolean) {
         if (fakeExisting) {
             for (const obj of this.objects.values()) {
                 const event = this.makeEventFromObject(obj);
@@ -341,22 +321,22 @@ export class GenericObjectStore extends BaseStore {
     }
 
     // Add a listener for any object deletions
-    addDeleteListener(callback: (...args: any[]) => void): any {
+    addDeleteListener(callback: (...args: any[]) => void) {
         return this.addListener("delete", callback);
     }
 }
 
-export class SingletonStore extends BaseStore {
+export class SingletonStore<T extends SingletonStore<T> = any> extends BaseStore<any> {
     constructor(objectType: string, options: StoreOptions = {}) {
         super(objectType, SingletonStore as any, options);
     }
 
-    get(): this {
-        return this;
+    get(): T {
+        return this as unknown as T;
     }
 
-    all(): this[] {
-        return [this];
+    all(): T[] {
+        return [this as unknown as T];
     }
 
     toJSON(): string {
@@ -377,13 +357,13 @@ export class SingletonStore extends BaseStore {
     addEventListener = StoreObject.prototype.addEventListener.bind(this);
 }
 
-export const Store = (objectType: string, ObjectClass: ObjectClass, options: StoreOptions = {}) => class Store extends GenericObjectStore {
+export const Store = <T extends StoreObject = StoreObject>(objectType: string, ObjectClass: StoreObjectClass<T>, options: StoreOptions = {}) => class Store extends GenericObjectStore<T> {
     constructor() {
         super(objectType, ObjectClass, options);
     }
 };
 
-export function MakeStore(objectType: string, ObjectClass: ObjectClass, options?: StoreOptions): GenericObjectStore {
+export function MakeStore<T extends StoreObject = StoreObject>(objectType: string, ObjectClass: StoreObjectClass<T>, options?: StoreOptions): GenericObjectStore<T> {
     const Cls = Store(objectType, ObjectClass, options);
     return new Cls();
 }
@@ -391,15 +371,15 @@ export function MakeStore(objectType: string, ObjectClass: ObjectClass, options?
 
 // Experimental, to allow the store to also have the store methods be available on the object class
 export function registerStore(objectType: string, options: StoreOptions = {dependencies: []}) {
-    return (Cls: ObjectClass) => {
+    return <T extends StoreObject = StoreObject>(Cls: StoreObjectClass<T>) => {
         const store = MakeStore(objectType, Cls, options);
 
         (Cls as any).store = store;
 
         const proxy = new Proxy(Cls, {
-            get(target: ObjectClass, key: string | symbol) {
+            get(target: StoreObjectClass<T>, key: string | symbol) {
                 if (key in target) {
-                    return target[key as keyof ObjectClass];
+                    return target[key as keyof StoreObjectClass<T>];
                 } else {
                     return (store as any)[key];
                 }
