@@ -1,8 +1,14 @@
 import {isString} from "../base/Utils.js";
 
 export class RandGen {
-    constructor(seed = Date.now() ^ Math.floor(100000 * Math.random()), y = 0xf23151df, z = 0xcafe0dee) {
-        this.x = seed | 0;
+    static readonly instance= new RandGen();
+
+    private x: number;
+    private y: number;
+    private z: number;
+
+    constructor(seed: number | string = Date.now() ^ Math.floor(100000 * Math.random()), y: number = 0xf23151df, z: number = 0xcafe0dee) {
+        this.x = (typeof seed === 'number' ? seed : 0) | 0;
         this.y = y | 0;
         this.z = z | 0;
 
@@ -20,7 +26,7 @@ export class RandGen {
         }
     }
 
-    nextInt() {
+    nextInt(): number {
         const t = this.x ^ (this.x << 11);
         this.x = this.y;
         this.y = this.z;
@@ -28,15 +34,15 @@ export class RandGen {
         return this.z;
     }
 
-    random() {
+    random(): number {
         return (this.nextInt() >>> 0) / (2 ** 31);
     }
 
-    rand(N) {
+    rand(N: number): number {
         return this.nextInt() % N;
     }
 
-    hex(count = 8) {
+    hex(count: number = 8): string {
         let result = "";
         while (count > 0) {
             const charAvailable = 8;
@@ -48,23 +54,21 @@ export class RandGen {
         return result;
     }
 
-    pick(elements) {
+    pick<T>(elements: T[]): T {
         const poz = this.rand(elements.length);
         return elements[poz];
     }
 
     // TODO Should probably have a decorator that creates an instance and adds all static methods
-    static random() {
+    static random(): number {
         return this.instance.random();
     }
 
-    static nextInt() {
+    static nextInt(): number {
         return this.instance.nextInt();
     }
 
-    static rand(N) {
+    static rand(N: number): number {
         return this.instance.rand(N);
     }
 }
-
-RandGen.instance = new RandGen();
