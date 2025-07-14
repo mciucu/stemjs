@@ -47,7 +47,7 @@ export function cleanChildren(children: UIElementChild): any[] {
 
 export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HTMLElement | Text> extends Dispatchable {
     declare node?: NodeType;
-    declare parent?: BaseUIElement;
+    declare parent?: UIElement;
     declare options?: UIElementOptions;
     declare context?: any;
 
@@ -94,7 +94,7 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
 
     abstract getNodeType(): string | number;
 
-    abstract mount(parent: BaseUIElement<SVGElement | HTMLElement> | HTMLElement, nextSibling?: Node | null): void;
+    abstract mount(parent: UIElement | HTMLElement, nextSibling?: Node | null): void;
 
     abstract redraw(event?: any): void;
 
@@ -125,7 +125,7 @@ class TextUIElement extends BaseUIElement<Text> {
         }
     }
 
-    mount(parent: BaseUIElement<SVGElement | HTMLElement>, nextSibling?: Node | null): void {
+    mount(parent: UIElement, nextSibling?: Node | null): void {
         this.parent = parent;
         if (!this.node) {
             this.createNode();
@@ -772,7 +772,7 @@ UI.createElement = function (tag: typeof BaseUIElement<any> | string, options?: 
         tag = UIElement;
     }
 
-    return new tag(options);
+    return new (tag as typeof UIElement)(options);
 };
 
 UI.Element = UIElement;
@@ -803,6 +803,6 @@ UI.Primitive = (nodeType: string, BaseClass: typeof UIElement = UIElement): type
 
 export function applyDebugFlags(element: BaseUIElement): void {
     if (globalThis.STEM_DEBUG && element.node) {
-        element.node.stemElement = element;
+        (element.node as any).stemElement = element;
     }
 }

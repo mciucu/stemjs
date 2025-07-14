@@ -1,4 +1,4 @@
-export const COLORS_BY_NAME = {
+export const COLORS_BY_NAME: {[key: string]: string} = {
     aliceblue: "#f0f8ff",
     antiquewhite: "#faebd7",
     aqua: "#00ffff",
@@ -142,22 +142,27 @@ export const COLORS_BY_NAME = {
 };
 
 
+type ColorInput = string | Color | number[];
+type RGBAArray = [number, number, number, number];
+
 /*
  * This class contains methods for operating with colors. Its objects are kept in hsva format with normalized
  * attributes (each attribute has value between 0 and 1 inclusive), and can be converted from/to rgba.
  */
 export class Color {
-    constructor(color) {
+    color: RGBAArray;
+
+    constructor(color?: ColorInput) {
         if (color) {
             this.setColor(color);
         }
     }
 
-    setColor(color) {
-        this.color = this.constructor.parseColor(color);
+    setColor(color: ColorInput): void {
+        this.color = (this.constructor as typeof Color).parseColor(color);
     }
 
-    getColor() {
+    getColor(): string {
         let rgba = Color.parseColor(this);
         return `rgba(${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${rgba[3]})`;
     }
@@ -166,7 +171,7 @@ export class Color {
      * @param color A color string of the types: native name, hex3, hex6, rgb, rgba, hsl, hsla
      *              or a Color object, or a hsla color array
      */
-    static parseColor(color) {
+    static parseColor(color: ColorInput): RGBAArray {
         if (color instanceof Color) {
             return color.color;
         } else if (color instanceof Array) {
@@ -174,17 +179,17 @@ export class Color {
             if (color.length === 3) {
                 color.push(1);
             }
-            return color;
+            return color as RGBAArray;
         }
 
-        color = color.trim().toLowerCase();
+        color = (color as string).trim().toLowerCase();
 
         // Check if color is given by name
         if (COLORS_BY_NAME.hasOwnProperty(color)) {
             color = COLORS_BY_NAME[color];
         }
 
-        let values = [];
+        let values: RGBAArray = [0, 0, 0, 1];
 
         // Check for hex3 (e.g. "#f00")
         let hex3 = color.match(/^#([0-9a-f]{3})$/i);
@@ -194,7 +199,7 @@ export class Color {
                 parseInt(hex3[1].charAt(1), 16) * 0x11,
                 parseInt(hex3[1].charAt(2), 16) * 0x11,
                 1
-            ];
+            ] as RGBAArray;
         }
 
         // Check for hex6 (e.g. "#ff0000")
@@ -205,7 +210,7 @@ export class Color {
                 parseInt(hex6[1].substr(2, 2), 16),
                 parseInt(hex6[1].substr(4, 2), 16),
                 1
-            ];
+            ] as RGBAArray;
         }
 
         // Check for rgba (e.g. "rgba(255, 0, 0, 0.5)")
@@ -216,7 +221,7 @@ export class Color {
                 parseInt(rgba[2]),
                 parseInt(rgba[3]),
                 parseFloat(rgba[4])
-            ];
+            ] as RGBAArray;
         }
 
         // Check for rgb (e.g. "rgb(255, 0, 0)")
@@ -227,56 +232,56 @@ export class Color {
                 parseInt(rgb[2]),
                 parseInt(rgb[3]),
                 1
-            ];
+            ] as RGBAArray;
         }
         return values;
     }
 
     // TODO: this should be implemented as a factory that generates an interpolator object, that just takes in a t
-    static interpolate(firstColor, secondColor, t = 0.5) {
+    static interpolate(firstColor: ColorInput, secondColor: ColorInput, t: number = 0.5): string {
         let firstColorArray = Color.parseColor(firstColor);
         let secondColorArray = Color.parseColor(secondColor);
 
         return Color.convertToRgba([
-            parseInt(firstColorArray[0] * (1 - t) + secondColorArray[0] * t),
-            parseInt(firstColorArray[1] * (1 - t) + secondColorArray[1] * t),
-            parseInt(firstColorArray[2] * (1 - t) + secondColorArray[2] * t),
-            parseFloat(firstColorArray[3] * (1 - t) + secondColorArray[3] * t)
-        ]);
+            parseInt(firstColorArray[0] * (1 - t) + secondColorArray[0] * t + ""),
+            parseInt(firstColorArray[1] * (1 - t) + secondColorArray[1] * t + ""),
+            parseInt(firstColorArray[2] * (1 - t) + secondColorArray[2] * t + ""),
+            parseFloat(firstColorArray[3] * (1 - t) + secondColorArray[3] * t + "")
+        ] as RGBAArray);
     }
 
-    static addOpacity(color, opacity) {
+    static addOpacity(color: ColorInput, opacity: number): string {
         let colorArray = Color.parseColor(color);
         return Color.convertToRgba([
-            parseInt(colorArray[0]),
-            parseInt(colorArray[1]),
-            parseInt(colorArray[2]),
+            parseInt(colorArray[0] + ""),
+            parseInt(colorArray[1] + ""),
+            parseInt(colorArray[2] + ""),
             opacity
-        ]);
+        ] as RGBAArray);
     }
 
-    static convertToRgba(rgba) {
+    static convertToRgba(rgba: RGBAArray): string {
         return `rgba(${rgba[0]}, ${rgba[1]}, ${rgba[2]}, ${rgba[3]})`;
     }
 
-    static isLight(color) {
+    static isLight(color: ColorInput): boolean {
         let values = Color.parseColor(color);
         return values[0] * 0.3 + values[1] * 0.59 + values[2] * 0.11 > 188;
     }
 
-    static isWhite(color) {
+    static isWhite(color: ColorInput): boolean {
         let values = Color.parseColor(color);
         return values[0] === 255 && values[1] === 255 && values[2] === 255 && values[3] === 1;
     }
 
-    static isBlack(color) {
+    static isBlack(color: ColorInput): boolean {
         let values = Color.parseColor(color);
         return values[0] === 0 && values[1] === 0 && values[2] === 0 && values[3] === 1;
     }
 }
 
 
-export function lighten(color, amount) {
+export function lighten(color: ColorInput, amount: number): string {
     if (amount >= 0) {
         return Color.interpolate(color, "#fff", amount);
     } else {
@@ -285,12 +290,12 @@ export function lighten(color, amount) {
 }
 
 
-export function darken(color, amount) {
+export function darken(color: ColorInput, amount: number): string {
     if (amount >= 0) {
         let rgba = Color.parseColor(Color.interpolate(color, "#000", amount));
         for (let i = 0; i < 3; i += 1) {
             let root = Math.pow(255 - rgba[i], 0.7);
-            rgba[i] = parseInt(rgba[i] - root * amount);
+            rgba[i] = parseInt((rgba[i] - root * amount) + "");
             if (rgba[i] < 0) {
                 rgba[i] = 0;
             }
@@ -304,7 +309,7 @@ export function darken(color, amount) {
 
 const COLOR_MATCHER_REGEXP = new RegExp(`(#[0-9a-f]{6}|#[0-9a-f]{3}|rgba\\s*\\(\\s*\\d+\\s*,\\s*\\d+\\s*,\\s*\\d+\\s*,\\s*\\d*\\.?\\d*\\s*\\)|rgb\\s*\\(\\s*\\d+\\s*,\\s*\\d+\\s*,\\s*\\d+\\s*\\))|${Object.keys(COLORS_BY_NAME).sort((a,b) => b.length - a.length).join("|")}`, "gi");
 
-function saturateColor(color, saturate) {
+function saturateColor(color: ColorInput, saturate: number): string {
     const rgba = Color.parseColor(color);
     const rgb = rgba.slice(0, 3);
     const maxValueIndex = rgb.findIndex(x => x === Math.max(...rgb));
@@ -328,11 +333,13 @@ function saturateColor(color, saturate) {
     rgb[minValueIndex] -= saturateSign * changeAmount;
     rgb[maxValueIndex] += saturateSign * changeAmount;
     rgb[midValueIndex] = (grayValue + (rgb[maxValueIndex] - grayValue) * midValueRatio);
+    const newRGBA = rgb.map(x => Math.min(255, Math.max(0, Math.round(x))));
+    newRGBA.push(rgba[3]);
 
-    return Color.convertToRgba([...rgb.map(x => Math.min(255, Math.max(0, Math.round(x)))), rgba[3]]);
+    return Color.convertToRgba(newRGBA as RGBAArray);
 }
 
-function enhanceColor(color, amount, saturate) {
+function enhanceColor(color: ColorInput, amount: number, saturate: number): string {
     let enhancedColor;
     if (Color.isLight(color)) {
         enhancedColor = darken(color, amount);
@@ -343,20 +350,20 @@ function enhanceColor(color, amount, saturate) {
 }
 
 // gamma: [-1,1], saturate: [-1,1] (you can also try bigger values, seems to be working fine, heh)
-export function enhance(colorContainingString, gamma, saturate=0) {
+export function enhance(colorContainingString: string, gamma: number, saturate: number = 0): string {
     return colorContainingString.replace(COLOR_MATCHER_REGEXP, color => enhanceColor(color, gamma, saturate));
 }
 
-export function autoenhance(color){
+export function autoenhance(color: ColorInput): string {
     const enhanceToDark = Color.isLight(color) || Color.isBlack(color);
     const gammaEnhance = enhanceToDark ? 0.03 : -0.15;
     const saturationEnhance = enhanceToDark ? 0.1 : 0.2;
-    return enhance(color, gammaEnhance, saturationEnhance);
+    return enhance(color as string, gammaEnhance, saturationEnhance);
 }
 
-export function buildColors(color, dark=true) {
-    let colors = [];
-    let darkenPercents;
+export function buildColors(color: ColorInput, dark: boolean = true): string[] {
+    let colors: string[] = [];
+    let darkenPercents: number[];
     if (!dark) {
         darkenPercents = [0.1, 0, -0.2, -0.3, -0.35, -0.2, -1];
     } else if (Color.isLight(color)) {
@@ -372,24 +379,24 @@ export function buildColors(color, dark=true) {
 
 
 export class ColorGenerator {
-    static FIRST_COLORS = ["#337ab7", "#5cb85c",  "#f0ad4e", "#5bc0de", "#d9534f"];
-    static cache = new Map();
+    static FIRST_COLORS: string[] = ["#337ab7", "#5cb85c",  "#f0ad4e", "#5bc0de", "#d9534f"];
+    static cache = new Map<any, string>();
 
-    static getPersistentColor(uniqueId) {
+    static getPersistentColor(uniqueId: any): string {
         if (uniqueId < this.FIRST_COLORS.length) {
             return this.FIRST_COLORS[uniqueId];
         }
         if (!this.cache.has(uniqueId)) {
             this.cache.set(uniqueId, this.getRandomColor());
         }
-        return this.cache.get(uniqueId);
+        return this.cache.get(uniqueId)!;
     }
 
-    static getRandomColor() {
+    static getRandomColor(): string {
         const allowed = "3456789ABC";
         let color = "#";
         for (let i = 0; i < 6; i += 1) {
-            color += allowed.charAt(parseInt(Math.random() * allowed.length));
+            color += allowed.charAt(parseInt((Math.random() * allowed.length) + ""));
         }
         return color;
     }

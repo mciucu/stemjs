@@ -15,18 +15,18 @@ export function getOffset(element: NodeLike): Offset {
     if (!element) {
         return {left: 0, top: 0};
     }
-    const node = getNode(element);
-    let nodePosition = node.style?.position;
+    let node = getNode(element);
+    const nodePosition = node.style?.position;
     let left = 0;
     let top = 0;
     while (node) {
-        let nodeStyle = node.style || {};
-        if (nodePosition === "absolute" && nodeStyle.position === "relative") {
+        const nodeStyle = node.style || {};
+        if (nodePosition === "absolute" && (nodeStyle as any).position === "relative") {
             return {left, top};
         }
         left += node.offsetLeft;
         top += node.offsetTop;
-        node = node.offsetParent;
+        node = node.offsetParent as HTMLElement;
     }
     return {left, top};
 }
@@ -39,7 +39,7 @@ export function getComputedStyle(node: NodeLike, attribute?: string): string | C
 
 export function changeParent(element: UIElement, newParent: UIElement): void {
     const currentParent = element.parent;
-    currentParent.eraseChild(element, false);
+    currentParent?.eraseChild(element, false);
     newParent.appendChild(element);
 }
 
@@ -47,6 +47,7 @@ export function isElementInView(element: NodeLike): boolean {
     const node = getNode(element);
 
     const {top, bottom} = node.getBoundingClientRect();
+    // @ts-ignore
     for (let pathNode = node; pathNode && pathNode !== document; pathNode = pathNode.parentNode) {
         if (window.getComputedStyle(pathNode).overflowY === "auto" && pathNode.scrollHeight !== pathNode.offsetHeight) {
             const rect = pathNode.getBoundingClientRect();
