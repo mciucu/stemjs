@@ -58,11 +58,11 @@ export function composeURL(url: string | Request, urlSearchParams?: URLSearchPar
 
 type DataType = "arrayBuffer" | "blob" | "formData" | "json" | "text";
 
-type Postprocessor = (payload: any, xhrPromise?: XHRPromise) => any;
-type ErrorPostprocessor = (error: any) => any;
-type Preprocessor = (options: FetchOptions, input?: RequestInfo) => FetchOptions;
+export type FetchPostprocessor = (payload: any, xhrPromise?: XHRPromise) => any;
+export type FetchErrorPostprocessor = (error: any) => any;
+export type FetchPreprocessor = (options: FetchOptions, input?: RequestInfo) => FetchOptions;
 
-interface FetchOptions extends RequestInit {
+export interface FetchOptions extends RequestInit {
     dataType?: DataType;
     onUploadProgress?: (event: ProgressEvent) => void;
     onDownloadProgress?: (event: ProgressEvent) => void;
@@ -73,9 +73,9 @@ interface FetchOptions extends RequestInit {
     error?: (...args: any[]) => void;
     complete?: () => void;
     errorHandler?: (...args: any[]) => void;
-    postprocessors?: Postprocessor[];
-    errorPostprocessors?: ErrorPostprocessor[];
-    preprocessors?: Preprocessor[];
+    postprocessors?: FetchPostprocessor[];
+    errorPostprocessors?: FetchErrorPostprocessor[];
+    preprocessors?: FetchPreprocessor[];
     urlParams?: any;
     urlSearchParams?: URLSearchParams;
     arraySearchParamSuffix?: string;
@@ -84,7 +84,6 @@ interface FetchOptions extends RequestInit {
     type?: string;
     contentType?: string;
     data?: any;
-    cache?: boolean | string;
 }
 
 export class XHRPromise {
@@ -121,9 +120,9 @@ export class XHRPromise {
                 // In case dataType is "arrayBuffer", "blob", "formData", "json", "text"
                 // Response has methods to return these as promises
                 if (typeof response[options.dataType] === "function") {
-                    response = response[options.dataType]();
+                    const responsePromise = response[options.dataType]() as Promise<any>;
                     // TODO: should whitelist dataType to json, blob
-                    response.then((data) => {
+                    responsePromise.then((data) => {
                         this.resolve(data);
                     }, (err) => {
                         this.reject(err);
@@ -197,11 +196,11 @@ export class XHRPromise {
         this.getXHR().send(body);
     }
 
-    getPostprocessors(): Postprocessor[] {
+    getPostprocessors(): FetchPostprocessor[] {
         return this.options.postprocessors || fetch.defaultPostprocessors;
     }
 
-    getErrorPostprocessors(): ErrorPostprocessor[] {
+    getErrorPostprocessors(): FetchErrorPostprocessor[] {
         return this.options.errorPostprocessors || fetch.defaultErrorPostprocessors;
     }
 
@@ -302,7 +301,8 @@ export function jQueryCompatibilityPreprocessor(options: FetchOptions): FetchOpt
         let method = options.method.toUpperCase();
         if (method === "GET" || method === "HEAD") {
             options.urlParams = options.urlParams || options.data;
-            if (options.cache === false) {
+            // TODO @types at the end we shouldn't need this anymore
+            if ((options.cache as unknown as boolean) === false) {
                 options.urlParams = getURLSearchParams(options.urlParams, options.arraySearchParamSuffix);
                 options.urlParams.set("_", Date.now());
             }
@@ -373,8 +373,8 @@ export function fetch(input: RequestInfo | any, ...args: FetchOptions[]): XHRPro
     return new XHRPromise(input, options);
 }
 
-fetch.defaultPreprocessors = [] as Preprocessor[];
-fetch.defaultPostprocessors = [] as Postprocessor[];
-fetch.defaultErrorPostprocessors = [] as ErrorPostprocessor[];
+fetch.defaultPreprocessors = [] as FetchPreprocessor[];
+fetch.defaultPostprocessors = [] as FetchPostprocessor[];
+fetch.defaultErrorPostprocessors = [] as FetchErrorPostprocessor[];
 
 fetch.polyfill = true;
