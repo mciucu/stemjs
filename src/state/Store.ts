@@ -44,7 +44,7 @@ export class StoreObject extends Dispatchable {
         this[StoreSymbol] = store;
     }
 
-    getStore(storeName?: string): any {
+    getStore(storeName?: string): BaseStore {
         const ownStore = this[StoreSymbol];
         if (storeName) {
             return ownStore.getState().getStore(storeName);
@@ -178,12 +178,13 @@ export class GenericObjectStore<T extends StoreObject = StoreObject> extends Bas
         return this.get(objectId);
     }
 
-    all(asIterable?: boolean): T[] | IterableIterator<T> {
-        let values = this.objects.values();
-        if (!asIterable) {
-            return Array.from(values);
-        }
-        return values;
+    values(): IterableIterator<T> {
+        return this.objects.values();
+    }
+
+    all(): T[] {
+        const values = this.objects.values();
+        return Array.from(values);
     }
 
     find(callback: (value: T) => boolean): T | undefined {
