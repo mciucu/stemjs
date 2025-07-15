@@ -1,55 +1,29 @@
 // TODO: this file should be called StoreExtenders
 import {unwrapArray, splitInChunks, isString} from "../base/Utils";
 import {Ajax} from "../base/Ajax";
-import {GlobalState} from "./State";
+import {GlobalState, StoreId} from "./State";
+import {FetchOptions, URLFetchOptions} from "../base/Fetch";
 
 // Type definitions for StoreMixins
 interface FetchJob {
-    id: any;
+    id: StoreId;
     success: (obj: any) => void;
     error?: (error?: any) => void;
 }
 
 interface FetchRequestData {
-    ids: any[];
+    ids: StoreId[];
     [key: string]: any;
-}
-
-interface FetchRequestObject {
-    url: string;
-    type?: string;
-    dataType: string;
-    data: FetchRequestData;
-    cache: boolean;
-    success: (data: any) => void;
-    error: (error: any) => void;
 }
 
 type StoreClass = new (...args: any[]) => any;
 type StoreObjectClass = new (...args: any[]) => any;
 
-interface AjaxFetchable {
-    fetchJobs?: FetchJob[];
-    fetchTimeout?: number;
-    fetchTimeoutDuration: number;
-    fetchURL: string;
-    fetchType?: string;
-    maxFetchObjectCount?: number;
-    objectType: string;
-    get(id: any): any;
-}
-
 interface VirtualObject {
-    id: any;
+    id: StoreId;
     hasTemporaryId(): boolean;
-    updateId(newId: any): void;
+    updateId(newId: StoreId): void;
     dispatch(event: string, data?: any): void;
-}
-
-interface VirtualStore {
-    objects: Map<string, any>;
-    addObject(id: any, obj: any): void;
-    dispatch(event: string, ...args: any[]): void;
 }
 
 // TODO This should be an async method
@@ -62,7 +36,7 @@ export const AjaxFetchMixin = <T extends StoreClass>(BaseStoreClass: T) => class
     declare maxFetchObjectCount?: number;
     declare objectType: string;
 
-    fetch(id: any, successCallback: (obj: any) => void, errorCallback?: (error?: any) => void, forceFetch: boolean = false): void {
+    fetch(id: StoreId, successCallback: (obj: any) => void, errorCallback?: (error?: any) => void, forceFetch: boolean = false): void {
         if (!forceFetch) {
             let obj = this.get(id);
             if (obj) {
@@ -81,14 +55,15 @@ export const AjaxFetchMixin = <T extends StoreClass>(BaseStoreClass: T) => class
         }
     };
 
-    getFetchRequestData(ids: any[], fetchJobs: FetchJob[]): FetchRequestData {
+    getFetchRequestData(entries: [StoreId, FetchJob[]][]): FetchRequestData {
         return {
-            ids,
+            ids: entries.map(entry => entry[0])
         };
     }
 
-    getFetchRequestObject(ids: any[], fetchJobs: FetchJob[]): FetchRequestObject {
-        let requestData = this.getFetchRequestData(ids, fetchJobs);
+    getFetchRequestObject(entries: [StoreId, FetchJob[]][]): URLFetchOptions {
+        const requestData = this.getFetchRequestData(entries);
+        const fetchJobs: FetchJob[] = unwrapArray(entries.map(entry => entry[1]));
 
         // TODO: options.fetchURL should also support a function(ids, fetchJobs), do it when needed
         return {
@@ -96,7 +71,7 @@ export const AjaxFetchMixin = <T extends StoreClass>(BaseStoreClass: T) => class
             type: this.fetchType || "GET",
             dataType: "json",
             data: requestData,
-            cache: false,
+            cache: "no-cache",
             success: (data: any) => {
                 GlobalState.load(data);
                 for (let fetchJob of fetchJobs) {
@@ -123,10 +98,10 @@ export const AjaxFetchMixin = <T extends StoreClass>(BaseStoreClass: T) => class
     }
 
     //returns an array of ajax requests that have to be executed
-    getFetchRequests(fetchJobs: FetchJob[]): FetchRequestObject[] {
-        let idFetchJobs = new Map<any, FetchJob[]>();
+    getFetchRequests(fetchJobs: FetchJob[]): URLFetchOptions[] {
+        const idFetchJobs = new Map<StoreId, FetchJob[]>();
 
-        for (let fetchJob of fetchJobs) {
+        for (const fetchJob of fetchJobs) {
             let objectId = fetchJob.id;
             if (!idFetchJobs.has(objectId)) {
                 idFetchJobs.set(objectId, []);
@@ -134,27 +109,21 @@ export const AjaxFetchMixin = <T extends StoreClass>(BaseStoreClass: T) => class
             idFetchJobs.get(objectId)!.push(fetchJob);
         }
 
-        let maxChunkSize = this.maxFetchObjectCount || 256;
+        const maxChunkSize = this.maxFetchObjectCount || 256;
 
-        let idChunks = splitInChunks(Array.from(idFetchJobs.keys()), maxChunkSize);
-        let fetchJobsChunks = splitInChunks(Array.from(idFetchJobs.values()), maxChunkSize);
+        const fetchChunks = splitInChunks(Array.from(idFetchJobs.entries()), maxChunkSize);
 
-        let requests: FetchRequestObject[] = [];
-        for (let i = 0; i < idChunks.length; i += 1) {
-            requests.push(this.getFetchRequestObject(idChunks[i], unwrapArray(fetchJobsChunks[i])));
-        }
-
-        return requests;
+        return fetchChunks.map((chunkEntries) => this.getFetchRequestObject(chunkEntries));
     }
 
     executeAjaxFetch(): void {
-        let fetchJobs = this.fetchJobs;
-        this.fetchJobs = undefined;
+        const fetchJobs = this.fetchJobs;
+        delete this.fetchJobs;
 
-        let requests = this.getFetchRequests(fetchJobs!);
+        const requests = this.getFetchRequests(fetchJobs!);
 
-        for (let requestObject of requests) {
-            Ajax.fetch(requestObject as any);
+        for (const requestObject of requests) {
+            Ajax.fetch(requestObject);
         }
 
         clearTimeout(this.fetchTimeout);
@@ -164,14 +133,14 @@ export const AjaxFetchMixin = <T extends StoreClass>(BaseStoreClass: T) => class
 };
 
 export const VirtualStoreObjectMixin = <T extends StoreObjectClass>(BaseStoreObjectClass: T) => class VirtualStoreObjectMixin extends BaseStoreObjectClass {
-    declare id: any;
+    declare id: StoreId;
 
     hasTemporaryId(): boolean {
         return isString(this.id) && this.id.startsWith("temp-");
     }
 
     // Meant for updating temporary objects that need to exist before being properly created
-    updateId(newId: any): void {
+    updateId(newId: StoreId): void {
         if (this.id == newId) {
             return;
         }
@@ -188,6 +157,7 @@ export const VirtualStoreObjectMixin = <T extends StoreObjectClass>(BaseStoreObj
 export const VirtualStoreMixin = <T extends StoreClass>(BaseStoreClass: T) => class VirtualStoreMixin extends BaseStoreClass {
     declare objects: Map<string, any>;
     static virtualIdCounter: number;
+
     static generateVirtualId(): number {
         if (!this.virtualIdCounter) {
             this.virtualIdCounter = 0;
@@ -205,11 +175,11 @@ export const VirtualStoreMixin = <T extends StoreClass>(BaseStoreClass: T) => cl
         return this.objects.get("temp-" + event.virtualId);
     }
 
-    applyUpdateObjectId(object: VirtualObject, id: any): void {
+    applyUpdateObjectId(object: VirtualObject, id: string): void {
         if (object.id === id) {
             return;
         }
-        let oldId = object.id;
+        const oldId = String(object.id);
         object.updateId(id);
         this.objects.delete(oldId);
         this.addObject(object.id, object);

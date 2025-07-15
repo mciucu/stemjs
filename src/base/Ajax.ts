@@ -1,4 +1,4 @@
-import {fetch, XHRPromise, FetchPreprocessor, FetchPostprocessor, FetchErrorPostprocessor, FetchOptions} from "./Fetch";
+import {fetch, XHRPromise, FetchPreprocessor, FetchPostprocessor, FetchErrorPostprocessor, FetchOptions, URLFetchOptions} from "./Fetch";
 
 export class AjaxHandler {
     static _baseAjax: AjaxHandler | null = null;
@@ -21,7 +21,7 @@ export class AjaxHandler {
         this.errorHandler = errorHandler;
     }
 
-    fetch(request: RequestInfo, ...args: FetchOptions[]): XHRPromise | undefined {
+    fetch(request: RequestInfo | URLFetchOptions, ...args: FetchOptions[]): XHRPromise | undefined {
         if (!request) {
             console.error("Missing request for fetch");
             return;

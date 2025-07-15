@@ -63,6 +63,7 @@ export type FetchErrorPostprocessor = (error: any) => any;
 export type FetchPreprocessor = (options: FetchOptions, input?: RequestInfo) => FetchOptions;
 
 export interface FetchOptions extends RequestInit {
+    url?: string;
     dataType?: DataType;
     onUploadProgress?: (event: ProgressEvent) => void;
     onDownloadProgress?: (event: ProgressEvent) => void;
@@ -84,6 +85,10 @@ export interface FetchOptions extends RequestInit {
     type?: string;
     contentType?: string;
     data?: any;
+}
+
+export interface URLFetchOptions extends FetchOptions {
+    url: string;
 }
 
 export class XHRPromise {
@@ -330,10 +335,10 @@ export function jQueryCompatibilityPreprocessor(options: FetchOptions): FetchOpt
 // Can either be called with
 // - 1 argument: (Request)
 // - 2 arguments: (url/Request, options)
-export function fetch(input: RequestInfo | any, ...args: FetchOptions[]): XHRPromise {
+export function fetch(input: RequestInfo | URLFetchOptions, ...args: FetchOptions[]): XHRPromise {
     // In case we're being passed in a single plain object (not Request), assume it has a url field
     if (isPlainObject(input)) {
-        return fetch(input.url, ...args);
+        return fetch(input.url, input, ...args);
     }
 
     let options = Object.assign({}, ...args);
