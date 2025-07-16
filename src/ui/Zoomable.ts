@@ -1,7 +1,35 @@
 import {Device} from "../base/Device";
 import {CleanupJobs} from "../base/Dispatcher";
 
-function generateZoomEvent(rawEvent, delta, unit=200) {
+interface ZoomEvent {
+    x: number;
+    y: number;
+    zoomFactor: number;
+    rawEvent: Event;
+}
+
+interface ZoomListener {
+    handler: CleanupJobs;
+    callback: (event: ZoomEvent) => void;
+}
+
+interface TouchCentroid {
+    x: number;
+    y: number;
+}
+
+interface CentroidData {
+    centroid: TouchCentroid;
+    averageDist: number;
+}
+
+type ZoomEventHandler = new (uiElement: any, callback: (event: Event, delta: number) => void) => {
+    cleanup(): void;
+};
+
+type ZoomEventCallback = (event: Event, delta: number) => void;
+
+function generateZoomEvent(rawEvent: Event, delta: number, unit: number = 200): ZoomEvent {
     return {
         x: Device.getEventX(rawEvent),
         y: Device.getEventY(rawEvent),
@@ -11,8 +39,10 @@ function generateZoomEvent(rawEvent, delta, unit=200) {
 }
 
 class WheelZoomEventHandler {
-    constructor(uiElement, callback) {
-        this.eventHandler = uiElement.addNodeListener("wheel", (event) => {
+    private eventHandler: any;
+
+    constructor(uiElement: any, callback: ZoomEventCallback) {
+        this.eventHandler = uiElement.addNodeListener("wheel", (event: WheelEvent) => {
             // TODO: see if both of these are needed
             event.preventDefault();
             event.stopPropagation();
@@ -20,35 +50,43 @@ class WheelZoomEventHandler {
         });
     }
 
-    cleanup() {
+    cleanup(): void {
         this.eventHandler.remove();
     }
 }
 
 class PinchZoomEventHandler {
-    constructor(uiElement, callback) {
+    private pinchActive: boolean;
+    private touchStartHandler: any;
+    private touchEndHandler: any;
+    private touchCancelHandler: any;
+    private touchMoveHandler: any;
+    private centroid?: TouchCentroid;
+    private averageDist?: number;
+
+    constructor(uiElement: any, callback: ZoomEventCallback) {
         this.pinchActive = false;
-        this.touchStartHandler = uiElement.addNodeListener("touchstart", (event) => {
+        this.touchStartHandler = uiElement.addNodeListener("touchstart", (event: TouchEvent) => {
             this.recalculateCentroid(event);
         });
-        this.touchEndHandler = uiElement.addNodeListener("touchend", (event) => {
+        this.touchEndHandler = uiElement.addNodeListener("touchend", (event: TouchEvent) => {
             this.recalculateCentroid(event);
         });
-        this.touchCancelHandler = uiElement.addNodeListener("touchcancel", (event) => {
+        this.touchCancelHandler = uiElement.addNodeListener("touchcancel", (event: TouchEvent) => {
             this.recalculateCentroid(event);
         });
-        this.touchMoveHandler = uiElement.addNodeListener("touchmove", (event) => {
+        this.touchMoveHandler = uiElement.addNodeListener("touchmove", (event: TouchEvent) => {
 
             if (this.pinchActive && event.touches && event.touches.length > 1) {
                 const {centroid, averageDist} = this.calculateCentroid(event.touches);
-                callback(event, this.averageDist - averageDist);
+                callback(event, this.averageDist! - averageDist);
                 Object.assign(this, {centroid, averageDist});
             }
         });
     }
 
-    calculateCentroid(touches) {
-        let centroid = {x: 0, y: 0};
+    calculateCentroid(touches: TouchList): CentroidData {
+        let centroid: TouchCentroid = {x: 0, y: 0};
         for (const touch of touches) {
             centroid.x += Device.getEventX(touch);
             centroid.y += Device.getEventY(touch);
@@ -67,7 +105,7 @@ class PinchZoomEventHandler {
         return {centroid, averageDist};
     }
 
-    recalculateCentroid(event) {
+    recalculateCentroid(event: TouchEvent): void {
         const touches = event.touches || [];
         if (touches.length < 2) {
             this.pinchActive = false;
@@ -77,7 +115,7 @@ class PinchZoomEventHandler {
         Object.assign(this, this.calculateCentroid(touches));
     }
 
-    cleanup() {
+    cleanup(): void {
         this.touchStartHandler.remove();
         this.touchMoveHandler.remove();
         this.touchEndHandler.remove();
@@ -85,24 +123,30 @@ class PinchZoomEventHandler {
     }
 }
 
-export const Zoomable = (BaseClass) => class Zoomable extends BaseClass {
-    static EVENT_HANDLERS = [WheelZoomEventHandler, PinchZoomEventHandler];
+export const Zoomable = <T extends new (...args: any[]) => any>(BaseClass: T) => class Zoomable extends BaseClass {
+    static EVENT_HANDLERS: ZoomEventHandler[] = [WheelZoomEventHandler, PinchZoomEventHandler];
 
-    _zoomListeners = [];
+    private _zoomListeners: ZoomListener[] = [];
+    declare options: {
+        zoomLevel?: number;
+        minZoomLevel?: number;
+        maxZoomLevel?: number;
+        [key: string]: any;
+    };
 
-    getZoomLevel() {
+    getZoomLevel(): number {
         return this.options.zoomLevel || 1;
     }
 
-    getMinZoomLevel() {
+    getMinZoomLevel(): number {
         return this.options.minZoomLevel || 0.02;
     }
 
-    getMaxZoomLevel() {
+    getMaxZoomLevel(): number {
         return this.options.maxZoomLevel || 50;
     }
 
-    setZoomLevel(zoomLevel) {
+    setZoomLevel(zoomLevel: number): void {
         zoomLevel = Math.max(this.getMinZoomLevel(), zoomLevel);
         zoomLevel = Math.min(this.getMaxZoomLevel(), zoomLevel);
         if (this.getZoomLevel() === zoomLevel) {
@@ -112,18 +156,18 @@ export const Zoomable = (BaseClass) => class Zoomable extends BaseClass {
         this.dispatch("setZoomLevel", zoomLevel);
     }
 
-    addZoomListener(callback, unit=200) {
+    addZoomListener(callback: (event: ZoomEvent) => void, unit: number = 200): CleanupJobs {
         if (this._zoomListeners.find(listener => listener.callback === callback)) {
             console.warn("Trying to add a listener twice!", callback);
-            return;
+            return new CleanupJobs([]);
         }
-        let eventHandlers = [];
-        for (const EventHandlerClass of this.constructor.EVENT_HANDLERS) {
+        let eventHandlers: any[] = [];
+        for (const EventHandlerClass of (this.constructor as any).EVENT_HANDLERS) {
             eventHandlers.push(new EventHandlerClass(this,
-                (event, delta) => callback(generateZoomEvent(event, delta, unit))
+                (event: Event, delta: number) => callback(generateZoomEvent(event, delta, unit))
             ));
         }
-        const listener = {
+        const listener: ZoomListener = {
             handler: new CleanupJobs(eventHandlers),
             callback
         };
@@ -131,7 +175,7 @@ export const Zoomable = (BaseClass) => class Zoomable extends BaseClass {
         return listener.handler;
     }
 
-    removeZoomListener(callback) {
+    removeZoomListener(callback: (event: ZoomEvent) => void): void {
         const listener = this._zoomListeners.find(listener => listener.callback === callback);
         if (!listener) {
             return;
