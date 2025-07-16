@@ -1,42 +1,44 @@
-import {UI} from "./UIBase";
+import {TextUIElement, UI} from "./UIBase";
 import {evaluateSprintf, isString} from "../base/Utils";
 
+// Type definitions for translation functionality
+interface TranslationMap {
+    get(key: string): string | undefined;
+}
+
+// TODO @types use the proper LanguageStoreClass and other proper types
+interface LanguageStore {
+    getLocale(): Locale | null;
+    addListener(event: string, callback: (language: Locale) => void): void;
+}
+
+interface Locale {
+    buildTranslation(callback: (translationMap: TranslationMap) => void): void;
+}
+
+
 // This is the object that will be used to translate text
-let translationMap = null;
+let translationMap: TranslationMap | null = null;
 
 // Keep a set of all UI Element that need to be updated when the language changes
 // Can't use a weak set here unfortunately because we need iteration
 // That's why we must make sure to remove all nodes from the set when destroying them
-UI.TranslationElements = new Set();
+export const TranslationElements = new Set<TranslationTextElement>();
 
-// TODO These Polyfills shouldn't live here
-if (!String.prototype.replaceAll) {
-    String.prototype.replaceAll = function(pattern, replacement) {
-        if (isString(pattern)) {
-            pattern = new RegExp(pattern, "g");
-        }
-        if (this?.replace) {
-            return this.replace(pattern, replacement);
-        }
-        return this;
-    };
-}
 
-if (!document.startViewTransition) {
-    document.startViewTransition = (callback) => callback();
-}
+export class TranslationTextElement extends TextUIElement {
+    value: string | any[];
 
-UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement {
-    constructor(value) {
+    constructor(value: string | any[]) {
         if (arguments.length === 1) {
-            super(value);
+            super(value as string);
         } else {
             super("");
             this.setValue(...arguments);
         }
     }
 
-    setValue(value) {
+    setValue(value: string | any[]): void {
         if (arguments.length > 1) {
             this.value = Array.from(arguments);
         } else {
@@ -47,7 +49,7 @@ UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement 
         }
     }
 
-    evaluate(strings, ...values) {
+    evaluate(strings: string | string[], ...values: any[]): string {
         if (!Array.isArray(strings)) {
             strings = translationMap?.get(strings) || strings;
             return evaluateSprintf(strings, ...values);
@@ -66,8 +68,8 @@ UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement 
         }
     }
 
-    getValue() {
-        let value = this.value;
+    getValue(): string {
+        let value: string;
         if (Array.isArray(this.value)) {
             value = this.evaluate(...value);
         } else {
@@ -76,52 +78,52 @@ UI.TranslationTextElement = class TranslationTextElement extends UI.TextElement 
         return value;
     }
 
-    toString() {
+    toString(): string {
         return this.getValue();
     }
 
-    redraw() {
+    redraw(): void {
         if (!this.node) {
             this.node = this.createNode();
         }
         super.redraw();
     }
 
-    onMount() {
-        UI.TranslationElements.add(this);
+    onMount(): void {
+        TranslationElements.add(this);
     }
 
-    onUnmount() {
-        UI.TranslationElements.delete(this);
+    onUnmount(): void {
+        TranslationElements.delete(this);
     }
-};
+}
 
 // This method is a shorthand notation to create a new translatable text element
 // TODO: should also support being used as a string template
-UI.T = (str) => {
-    return new UI.TranslationTextElement(str);
+UI.T = (str: string): TranslationTextElement => {
+    return new TranslationTextElement(str);
 };
 
 // TODO @mciucu this should be wrapped in a way that previous requests that arrive later don't get processed
 // TODO: should this be done with promises?
 // Function to be called with a translation map
 // The translationMap object needs to implement .get(value) to return the translation for value
-function setTranslationMap(_translationMap) {
+function setTranslationMap(_translationMap: TranslationMap): void {
     if (translationMap === _translationMap) {
         return;
     }
     translationMap = _translationMap;
-    for (let textElement of UI.TranslationElements.values()) {
+    for (let textElement of TranslationElements.values()) {
         textElement.redraw();
     }
 }
 
-let languageStore = null;
+let languageStore: LanguageStore | null = null;
 
 // This function should be called to set the language store to watch for changes
 // The languageStore argumenent needs to implement .getLocale(), addListener("localChange", (language) =>{})
 // The language objects need to implement .buildTranslation(callback), where callback should be called with a translationMap
-function setLanguageStore(_languageStore) {
+export function setLanguageStore(_languageStore: LanguageStore): void {
     languageStore = _languageStore;
 
     let currentLocale = languageStore.getLocale();
@@ -131,13 +133,23 @@ function setLanguageStore(_languageStore) {
     }
 
     // Add a listener for whenever the language changes
-    languageStore.addListener("localeChange", (language) => {
+    languageStore.addListener("localeChange", (language: Locale) => {
         language.buildTranslation(setTranslationMap);
     });
 }
 
-function getTranslationMap() {
+export function getTranslationMap(): TranslationMap | null {
     return translationMap;
 }
 
-export {setLanguageStore, setTranslationMap, getTranslationMap};
+// TODO @types move this from there
+declare global {
+    interface Document {
+        startViewTransition(callback: () => void): void;
+    }
+}
+
+if (!document.startViewTransition) {
+    document.startViewTransition = (callback: () => void) => callback();
+}
+
