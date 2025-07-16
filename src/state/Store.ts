@@ -232,7 +232,11 @@ export class GenericObjectStore<T extends StoreObject = StoreObject> extends Bas
         if (obj) {
             obj.applyEventAndDispatch(event);
         } else {
-            obj = new this.ObjectClass(event.data, event, this);
+            const objectData = {
+                ...event.data,
+                [StoreSymbol]: this,
+            }
+            obj = new this.ObjectClass(objectData, event, this);
             obj.setStore(this);
             this.addObject(this.getObjectIdForEvent(event), obj);
             if (sendDispatch) {

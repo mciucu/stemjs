@@ -1,58 +1,65 @@
 import {StoreObject, Store} from "../state/Store";
+import {StoreId} from "../state/State";
 
 export class Currency extends StoreObject {
-    getDecimalDigitsCount() {
+    declare decimalDigits: number;
+    declare symbol: string;
+    declare subdivisionSymbol: string;
+    declare subdivisionDecimalDigits: number;
+    declare isoCode: string;
+
+    getDecimalDigitsCount(): number {
         return this.decimalDigits;
     }
 
-    getMainUnitSymbol() {
+    getMainUnitSymbol(): string {
         return this.symbol;
     }
 
-    getSubunitSymbol() {
+    getSubunitSymbol(): string {
         return this.subdivisionSymbol;
     }
 
     // TODO: this should be static
-    amountToMainUnits(amount) {
+    amountToMainUnits(amount: number): number {
         return amount / 10 ** this.decimalDigits;
     }
 
-    amountToSubunits(amount) {
+    amountToSubunits(amount: number): number {
         return amount / 10 ** (this.decimalDigits - this.subdivisionDecimalDigits);
     }
 
-    subunitsToAmount(subunits) {
+    subunitsToAmount(subunits: number): number {
         return subunits * 10 ** (this.decimalDigits - this.subdivisionDecimalDigits);
     }
 
-    mainUnitsToAmount(mainUnits) {
+    mainUnitsToAmount(mainUnits: number): number {
         return mainUnits * 10 ** this.decimalDigits;
     }
 
-    isMainUnitAmount(amount) {
+    isMainUnitAmount(amount: number): boolean {
         return amount >= 10 ** this.decimalDigits;
     }
 
     // Returns as an integer the number main units (ex. dollars)
-    getMainUnitsAmount(amount) {
+    getMainUnitsAmount(amount: number): number {
         return Math.floor(this.amountToMainUnits(amount));
     }
 
-    getDecimalAmount(amount) {
+    getDecimalAmount(amount: number): number {
         return this.amountToMainUnits(amount) % 1;
     }
 
     // Returns as an integer the rounded number of subdivisions outside of whole amount (eg. $3.71 -> 71)
-    getSubunitAmount(amount) {
+    getSubunitAmount(amount: number): number {
         return Math.floor(this.amountToSubunits(amount));
     }
 
-    getIsoCode() {
+    getIsoCode(): string {
         return this.isoCode.toLowerCase();
     }
 
-    getFormatter() {
+    getFormatter(): Intl.NumberFormat {
         return new Intl.NumberFormat("en-US", {
             style: "currency",
             currency: this.isoCode.toUpperCase(),
@@ -60,18 +67,18 @@ export class Currency extends StoreObject {
         });
     }
 
-    toString() {
+    toString(): string {
         return this.getIsoCode().toUpperCase();
     }
 }
 
 class CurrencyStoreClass extends Store("Currency", Currency) {
-    getByIsoCode(isoCode="") {
-        isoCode = String(isoCode).toLowerCase();
-        return this.find(currency => currency.getIsoCode() === isoCode);
+    getByIsoCode(isoCode: string | number = ""): Currency | undefined {
+        const isoCodeStr = String(isoCode).toLowerCase();
+        return this.find((currency: Currency) => currency.getIsoCode() === isoCodeStr);
     }
 
-    get(id) {
+    get(id: StoreId): Currency | undefined {
         return super.get(id) || this.getByIsoCode(id);
     }
 }

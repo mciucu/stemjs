@@ -1,6 +1,7 @@
 import {padNumber, suffixWithOrdinal, isNumber, isString} from "../base/Utils";
 import {TimeUnit, Duration, DurationInput} from "./Duration";
 import {TokenFormatter} from "./Formatter";
+import {Timezone} from "../localization/Timezone";
 
 // By default, StemDate will guess if the value is in milliseconds or seconds.
 // Any value less than this is interpreted as a unix time in seconds
@@ -21,6 +22,8 @@ const BaseDate = globalThis.Date;
 
 // @ts-ignore It bitches about overriding now()
 export class StemDate extends BaseDate {
+    declare timezone?: Timezone;
+
     // Fucking Typescript, forces me to be explicit for all the constructors
     constructor();
     constructor(value: DateInput);

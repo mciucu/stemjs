@@ -4,7 +4,7 @@ import {GlobalContainerStyle} from "./Style";
 import {Device} from "../../base/Device";
 
 @registerStyle(GlobalContainerStyle)
-class GlobalContainer extends UI.Element {
+export class GlobalContainer extends UI.Element {
     onMount() {
         if (!Device.isTouchDevice() || !Device.isMobileDevice()) {
             Object.assign(document.body.style, {
@@ -14,5 +14,3 @@ class GlobalContainer extends UI.Element {
         GlobalContainer.Global = GlobalContainer.Global || this;
     }
 }
-
-export {GlobalContainer};
