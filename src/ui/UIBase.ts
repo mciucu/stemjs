@@ -112,7 +112,7 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
     }
 }
 
-class TextUIElement extends BaseUIElement<Text> {
+export class TextUIElement extends BaseUIElement<Text> {
     value: string;
 
     constructor(value: string | UIElementOptions = "") {

@@ -25,6 +25,7 @@ SVG.AnimatedSVG = class AnimatedSVG extends SVG.SVGRoot {
     }
 };
 
+// TODO @types this should be a function
 SVG.Element.prototype.blinkTransition = function (options) {
     let config = {
         duration: 2000,

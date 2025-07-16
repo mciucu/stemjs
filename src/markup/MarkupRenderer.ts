@@ -23,7 +23,7 @@ type MarkupDependency = {
 };
 
 // Class that for every markup tag returns the UI class to instantiate for that element
-class MarkupClassMap {
+export class MarkupClassMap {
     static GLOBAL: MarkupClassMap = new MarkupClassMap();
 
     private classMap: Map<string, UIClass>;
@@ -70,7 +70,7 @@ class MarkupClassMap {
     }
 }
 
-class MarkupRenderer extends Panel {
+export class MarkupRenderer extends Panel {
     declare options: MarkupRendererOptions;
     private classMap: MarkupClassMap;
 
@@ -180,5 +180,3 @@ const SafeUriEnhancer = <T extends UIClass>(BaseClass: T, attribute: string) => 
 
 MarkupClassMap.addClass("Link", SafeUriEnhancer(Link, "href"));
 MarkupClassMap.addClass("Image", SafeUriEnhancer(Image, "src"));
-
-export {MarkupClassMap, MarkupRenderer};

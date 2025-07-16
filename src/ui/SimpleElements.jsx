@@ -3,7 +3,7 @@ import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";
 import {styleRule} from "../decorators/Style";
-import {isFunction} from "../base/Utils.js";
+import {isFunction} from "../base/Utils";
 
 export function DefaultMakeIcon(icon, options = {}) {
     if (isFunction(icon)) {

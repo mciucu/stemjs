@@ -14,7 +14,7 @@ import {Level} from "./Constants";
 // StateDependentElement.renderLoading = () => <MyCustomLoadingAnimation />
 // StateDependentElement.renderError = (error) => <MyCustomErrorMessageClass error={error} />
 
-export let StateDependentElement = (BaseClass) => class StateDependentElementClass extends DelayedElement(BaseClass) {
+export const StateDependentElement = (BaseClass) => class StateDependentElementClass extends DelayedElement(BaseClass) {
     importState(data) {
         GlobalState.load(data);
         for (let key of Object.keys(data)) {

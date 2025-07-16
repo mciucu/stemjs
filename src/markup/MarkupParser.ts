@@ -112,7 +112,7 @@ export class StringStream {
             return sign === "+" ? Infinity : -Infinity;
         }
 
-        let isDigit = (char) => {
+        let isDigit = (char: string) => {
             return (char >= "0" || char <= "9");
         };
 
@@ -120,7 +120,7 @@ export class StringStream {
             // hexadecimal number
             this.advance(2);
 
-            let isHexDigit = (char) => {
+            let isHexDigit = (char: string) => {
                 return isDigit(char) || (char >= "A" && char <= "F") ||(char >= "a" && char <= "f");
             };
 
@@ -135,7 +135,7 @@ export class StringStream {
         let numberStart = this.pointer;
         while (!this.done() && isDigit(this.at(1))) {
             this.pointer += 1;
-            if (this.peek === ".") {
+            if (this.peek() === ".") {
                 this.advance(1);
                 while (!this.done() && isDigit(this.at(1))) {
                     this.pointer += 1;
@@ -250,8 +250,16 @@ function kmp(input: string): number[] {
 }
 
 class ModifierAutomation {
+    options: ModifierOptions;
+    steps: number;
+    startNode: AutomatonNode;
+    node: AutomatonNode;
+    patternStep?: number;
+    endPatternStep?: number;
+    capture?: any[];
+
     // build automaton from string
-    constructor(options) {
+    constructor(options: ModifierOptions) {
         this.options = options;
         this.steps = 0;
         this.startNode = {
@@ -277,16 +285,16 @@ class ModifierAutomation {
                 value: " ",
                 whitespaceNode: true,
             };
-            whitespaceNode.next = (input) => {
+            whitespaceNode.next = (input: string) => {
                 if (input === char) return startPatternNode;
                 return (/\s/).test(input) ? whitespaceNode : this.startNode;
             };
-            lastNode.next = (input) => {
+            lastNode.next = (input: string) => {
                 return (/\s/).test(input) ? whitespaceNode : this.startNode;
             };
             this.node = whitespaceNode;
         } else {
-            lastNode.next = (input) => {
+            lastNode.next = (input: string) => {
                 return input === char ? startPatternNode : this.startNode;
             }
         }
@@ -301,12 +309,12 @@ class ModifierAutomation {
 
             let backNode = (patternPrefix[i - 1] === 0) ? this.startNode : patternNode[patternPrefix[i - 1] - 1];
 
-            lastNode.next = (input) => {
+            lastNode.next = (input: string) => {
                 if (input === char) {
                     return newNode;
                 }
 
-                return backNode.next(input);
+                return backNode.next!(input);
             };
             lastNode = newNode;
         }
@@ -328,7 +336,7 @@ class ModifierAutomation {
             let endPatternPrefix = kmp(options.endPattern);
             let endPatternNodes = [endCaptureNode];
 
-            lastNode.next = captureNode.next = (input) => {
+            lastNode.next = captureNode.next = (input: string) => {
                 return input === char ? endCaptureNode : captureNode;
             };
 
@@ -342,11 +350,11 @@ class ModifierAutomation {
 
                 let backNode = (endPatternPrefix[i - 1] === 0) ? captureNode : endPatternNodes[endPatternPrefix[i - 1] - 1];
 
-                lastNode.next = (input) => {
+                lastNode.next = (input: string) => {
                     if (input === char) {
                         return newNode;
                     }
-                    return backNode.next(input);
+                    return backNode.next!(input);
                 };
                 lastNode = newNode;
             }
@@ -355,15 +363,15 @@ class ModifierAutomation {
         }
 
         lastNode.endNode = true;
-        lastNode.next = (input) => {
-            return this.startNode.next(input);
+        lastNode.next = (input: string) => {
+            return this.startNode.next!(input);
         };
     }
 
-    nextState(input) {
+    nextState(input: string): AutomatonNode {
         this.steps += 1;
 
-        this.node = this.node.next(input);
+        this.node = this.node.next!(input);
 
         if (this.node.startNode) {
             this.steps = 0;
@@ -372,26 +380,36 @@ class ModifierAutomation {
         }
 
         if (this.node.patternLastNode) {
-            this.patternStep = this.steps - this.options.pattern.length + 1;
+            this.patternStep = this.steps - this.options.pattern!.length + 1;
         }
         if (this.node.endPatternLastNode) {
             // TODO(@all): Shouldn't it be this.options.endPattern.length instead of this.options.pattern.length?
-            this.endPatternStep = this.steps - this.options.pattern.length + 1;
+            this.endPatternStep = this.steps - this.options.pattern!.length + 1;
         }
 
         return this.node;
     }
 
-    done() {
-        return this.node.endNode;
+    done(): boolean {
+        return !!this.node.endNode;
     }
 }
 
 class Modifier {
-    constructor(options) {
+    pattern?: string;
+    endPattern?: string;
+    captureContent?: boolean;
+    leftWhitespace?: boolean;
+    tag?: string;
+    itemTag?: string;
+    groupConsecutive?: boolean;
+    codeOptions?: any;
+
+    constructor(options?: ModifierOptions) {
+        Object.assign(this, options);
     }
 
-    modify(currentArray, originalString) {
+    modify(currentArray: ParsedElement[], originalString: string): ParsedElement[] {
         let matcher = new ModifierAutomation({
             pattern: this.pattern,
             captureContent: this.captureContent, // TODO: some elements should not wrap
@@ -401,7 +419,7 @@ class Modifier {
 
         let arrayLocation = 0;
         let currentElement = currentArray[arrayLocation];
-        let newArray = [];
+        let newArray: ParsedElement[] = [];
 
         for (let i = 0; i < originalString.length; i += 1) {
             let char = originalString[i];
@@ -424,7 +442,7 @@ class Modifier {
                 let modifierStart = i - (matcher.steps - matcher.patternStep);
                 let modifierEnd = i - (matcher.steps - matcher.endPatternStep) + this.endPattern.length;
 
-                let modifierCapture = [];
+                let modifierCapture: ParsedElement[] = [];
 
                 while (newArray.length > 0 && modifierStart <= newArray[newArray.length - 1].start) {
                     let element = newArray.pop();
@@ -484,32 +502,32 @@ class Modifier {
         return newArray;
     }
 
-    processChildren(capture, originalString) {
+    processChildren(capture: ParsedElement[], originalString: string): (string | MarkupElement)[] {
         return capture.map((element) => {
             return this.processChild(element, originalString);
         });
     }
 
-    processChild(element, originalString) {
+    processChild(element: ParsedElement, originalString: string): string | MarkupElement {
         if (element.isDummy) {
             return "";
         } if (element.isString) {
             return originalString.substring(element.start, element.end);
         } else {
-            return element.content;
+            return element.content!;
         }
     }
 }
 
-function InlineModifierMixin(BaseModifierClass) {
+function InlineModifierMixin<T extends new (...args: any[]) => Modifier>(BaseModifierClass: T) {
     return class InlineModifier extends BaseModifierClass {
-        constructor(options) {
+        constructor(options: ModifierOptions) {
             super(options);
 
             this.captureContent = true;
         }
 
-        wrap(content) {
+        wrap(content: (string | MarkupElement)[]): MarkupElement {
             if (content.length > 0) {
                 content[0] = content[0].substring(content[0].indexOf(this.pattern) + this.pattern.length);
 
@@ -526,15 +544,15 @@ function InlineModifierMixin(BaseModifierClass) {
     }
 }
 
-function LineStartModifierMixin(BaseModifierClass) {
+function LineStartModifierMixin<T extends new (...args: any[]) => Modifier>(BaseModifierClass: T) {
     return class LineStartModifier extends BaseModifierClass {
-        constructor(options) {
+        constructor(options: ModifierOptions) {
             super(options);
 
             this.groupConsecutive = false;
         }
 
-        isValidElement(element) {
+        isValidElement(element: ParsedElement): boolean {
             return element.content &&
                 element.content.tag === "p" &&
                 element.content.children.length > 0 &&
@@ -542,8 +560,8 @@ function LineStartModifierMixin(BaseModifierClass) {
                 element.content.children[0].startsWith(this.pattern);
         }
 
-        modify(currentArray, originalString) {
-            let newArray = [];
+        modify(currentArray: ParsedElement[], originalString: string): ParsedElement[] {
+            let newArray: ParsedElement[] = [];
 
             for (let i = 0; i < currentArray.length; i += 1) {
                 let element = currentArray[i];
@@ -583,32 +601,32 @@ function LineStartModifierMixin(BaseModifierClass) {
             return newArray;
         }
 
-        wrapItem(content) {
-            let firstChild = content[0];
+        wrapItem(content: (string | MarkupElement)[]): MarkupElement {
+            let firstChild = content[0] as string;
 
-            let patternIndex = firstChild.indexOf(this.pattern);
-            let patternEnd = patternIndex + this.pattern.length;
+            let patternIndex = firstChild.indexOf(this.pattern!);
+            let patternEnd = patternIndex + this.pattern!.length;
 
             content[0] = firstChild.substring(patternEnd);
 
             return {
-                tag: this.itemTag,
+                tag: this.itemTag!,
                 children: content,
             }
         }
 
-        wrap(content) {
+        wrap(content: MarkupElement[]): MarkupElement {
             return {
-                tag: this.tag,
+                tag: this.tag!,
                 children: content,
             }
         }
     }
 }
 
-function RawContentModifierMixin(BaseModifierClass) {
+function RawContentModifierMixin<T extends new (...args: any[]) => Modifier>(BaseModifierClass: T) {
     return class RawContentModifier extends BaseModifierClass {
-        processChildren(children, originalString) {
+        processChildren(children: ParsedElement[], originalString: string): string[] {
             if (children.length === 0) {
                 return [];
             }
@@ -619,7 +637,7 @@ function RawContentModifierMixin(BaseModifierClass) {
 }
 
 export class BlockCodeModifier extends Modifier {
-    constructor(options) {
+    constructor(options?: ModifierOptions) {
         super(options);
 
         this.pattern = "```";
@@ -628,7 +646,7 @@ export class BlockCodeModifier extends Modifier {
         this.captureContent = true;
     }
 
-    processChildren(capture, originalString) {
+    processChildren(capture: ParsedElement[], originalString: string): string {
         this.codeOptions = null;
         if (capture.length > 0) {
             let codeBlock = originalString.substring(capture[0].start, capture[capture.length - 1].end);
@@ -653,14 +671,14 @@ export class BlockCodeModifier extends Modifier {
         return "";
     }
 
-    getElement(content) {
+    getElement(content: string): MarkupElement {
         return {
-            tag: this.constructor.tag || "pre",
+            tag: (this.constructor as any).tag || "pre",
             children: [content],
         }
     }
 
-    wrap(content, options) {
+    wrap(content: string, options?: any): MarkupElement {
         let codeHighlighter = this.getElement(content);
 
         // TODO: this code should not be here
@@ -680,13 +698,13 @@ export class BlockCodeModifier extends Modifier {
 }
 
 class HeaderModifier extends LineStartModifierMixin(Modifier) {
-    constructor(options) {
+    constructor(options?: ModifierOptions) {
         super(options);
 
         this.pattern = "#";
     }
 
-    wrap(content) {
+    wrap(content: (string | MarkupElement)[]): MarkupElement {
         let firstChild = content[0];
 
         let hashtagIndex = firstChild.indexOf("#");
@@ -713,13 +731,13 @@ class HeaderModifier extends LineStartModifierMixin(Modifier) {
 }
 
 class HorizontalRuleModifier extends LineStartModifierMixin(Modifier) {
-    constructor(options) {
+    constructor(options?: ModifierOptions) {
         super(options);
 
         this.pattern = "---";
     }
 
-    wrap(content) {
+    wrap(content: (string | MarkupElement)[]): MarkupElement {
         return {
             tag: "hr"
         };
@@ -727,7 +745,7 @@ class HorizontalRuleModifier extends LineStartModifierMixin(Modifier) {
 }
 
 class UnorderedListModifier extends LineStartModifierMixin(Modifier) {
-    constructor(options) {
+    constructor(options?: ModifierOptions) {
         super(options);
 
         this.tag = "ul";
@@ -738,7 +756,7 @@ class UnorderedListModifier extends LineStartModifierMixin(Modifier) {
 }
 
 class OrderedListModifier extends LineStartModifierMixin(Modifier) {
-    constructor(options) {
+    constructor(options?: ModifierOptions) {
         super(options);
 
         this.tag = "ol";
@@ -749,9 +767,9 @@ class OrderedListModifier extends LineStartModifierMixin(Modifier) {
 }
 
 class ParagraphModifier extends Modifier {
-    modify(currentArray, originalString) {
-        let newArray = [];
-        let capturedContent = [];
+    modify(currentArray: ParsedElement[], originalString: string): ParsedElement[] {
+        let newArray: ParsedElement[] = [];
+        let capturedContent: ParsedElement[] = [];
         let arrayLocation = 0;
         let currentElement = currentArray[arrayLocation];
         let lineStart = 0;
@@ -832,7 +850,7 @@ class ParagraphModifier extends Modifier {
         return newArray;
     }
 
-    wrap(capture) {
+    wrap(capture: (string | MarkupElement)[]): MarkupElement {
         return {
             tag: "p",
             children: capture,
@@ -841,7 +859,7 @@ class ParagraphModifier extends Modifier {
 }
 
 class StrongModifier extends InlineModifierMixin(Modifier) {
-    constructor(options) {
+    constructor(options?: ModifierOptions) {
         super(options);
 
         this.leftWhitespace = true;
@@ -852,7 +870,7 @@ class StrongModifier extends InlineModifierMixin(Modifier) {
 }
 
 class ItalicModifier extends InlineModifierMixin(Modifier) {
-    constructor(options) {
+    constructor(options?: ModifierOptions) {
         super(options);
 
         this.leftWhitespace = true;
@@ -863,7 +881,7 @@ class ItalicModifier extends InlineModifierMixin(Modifier) {
 }
 
 class InlineCodeModifier extends RawContentModifierMixin(InlineModifierMixin(Modifier)) {
-    constructor(options) {
+    constructor(options?: ModifierOptions) {
         super(options);
 
         this.pattern = "`";
@@ -871,7 +889,7 @@ class InlineCodeModifier extends RawContentModifierMixin(InlineModifierMixin(Mod
         this.tag = "code";
     }
 
-    processChildren(children, originalString) {
+    processChildren(children: ParsedElement[], originalString: string): string[] {
         if (children.length === 0) {
             return [];
         }
@@ -881,7 +899,7 @@ class InlineCodeModifier extends RawContentModifierMixin(InlineModifierMixin(Mod
 }
 
 class InlineVarModifier extends RawContentModifierMixin(InlineModifierMixin(Modifier)) {
-    constructor(options) {
+    constructor(options?: ModifierOptions) {
         super(options);
 
         this.pattern = "$";
@@ -891,7 +909,7 @@ class InlineVarModifier extends RawContentModifierMixin(InlineModifierMixin(Modi
 }
 
 class InlineLatexModifier extends RawContentModifierMixin(InlineModifierMixin(Modifier)) {
-    constructor(options) {
+    constructor(options?: ModifierOptions) {
         super(options);
 
         this.pattern = "$$";
@@ -902,27 +920,28 @@ class InlineLatexModifier extends RawContentModifierMixin(InlineModifierMixin(Mo
 
 class LinkModifier extends Modifier {
 
-    static isCorrectUrl(str) {
+    static isCorrectUrl(str: string): boolean {
         if (str.startsWith("http://") || str.startsWith("https://")) {
             return true;
         }
+        return false;
     }
-    static trimProtocol(str) {
+    static trimProtocol(str: string): string {
         if (str[4] === 's') {
             return str.substring(8, str.length);
         }
         return str.substring(7, str.length);
     }
 
-    modify(currentArray, originalString) {
-        let newArray = [];
+    modify(currentArray: ParsedElement[], originalString: string): ParsedElement[] {
+        let newArray: ParsedElement[] = [];
         let arrayLocation = 0;
         let currentElement = currentArray[arrayLocation];
         let lineStart = 0;
 
-        let checkAndAddUrl = (start, end) => {
+        let checkAndAddUrl = (start: number, end: number) => {
             let substr = originalString.substring(start, end);
-            if (this.constructor.isCorrectUrl(substr)) {
+            if ((this.constructor as typeof LinkModifier).isCorrectUrl(substr)) {
                 if (currentElement.start < start) {
                     newArray.push({
                         isString: true,
@@ -936,7 +955,7 @@ class LinkModifier extends Modifier {
                     content: {
                         tag: "a",
                         href: substr,
-                        children: [this.constructor.trimProtocol(substr)],
+                        children: [(this.constructor as typeof LinkModifier).trimProtocol(substr)],
                         target: "_blank"
                     },
                     start: start,
@@ -982,17 +1001,23 @@ let MarkupModifier = Modifier;
 export {MarkupModifier, HeaderModifier, ParagraphModifier, InlineCodeModifier, InlineLatexModifier, StrongModifier, LinkModifier, HorizontalRuleModifier, UnorderedListModifier, OrderedListModifier, InlineVarModifier, ItalicModifier};
 
 class MarkupParser {
-    constructor(options) {
+    static modifiers: Modifier[];
+    static parseJSON5: (json: string) => any;
+    
+    modifiers: Modifier[];
+    uiElements: any;
+    
+    constructor(options?: MarkupParserOptions) {
         options = options || {};
 
-        this.modifiers = options.modifiers || this.constructor.modifiers;
+        this.modifiers = options.modifiers || (this.constructor as any).modifiers;
         this.uiElements = options.uiElements || new Map();
     }
 
-    parse(content) {
+    parse(content: string): (string | MarkupElement)[] {
         if (!content) return [];
 
-        let result = [];
+        let result: (string | MarkupElement)[] = [];
 
         let arr = this.parseUIElements(content);
 
@@ -1014,10 +1039,10 @@ class MarkupParser {
         return result;
     }
 
-    parseUIElements(content) {
+    parseUIElements(content: string): ParsedElement[] {
         let stream = new StringStream(content);
 
-        let result = [];
+        let result: ParsedElement[] = [];
         let textStart = 0;
 
         while (!stream.done()) {
@@ -1063,7 +1088,7 @@ class MarkupParser {
         return result;
     }
 
-    parseUIElement(stream, delimiter=(/\/?>/)) {
+    parseUIElement(stream: StringStream, delimiter: RegExp = (/\/?>/)): MarkupElement | null {
         // content should be of type <ClassName option1="string" option2={{jsonObject: true}} />
         // TODO: support nested elements like <ClassName><NestedClass /></ClassName>
 
@@ -1076,7 +1101,7 @@ class MarkupParser {
             throw Error("Invalid UIElement declaration.");
         }
 
-        let result = {};
+        let result: any = {};
 
         stream.char(); // skip the '<'
 
@@ -1089,13 +1114,13 @@ class MarkupParser {
         return result;
     }
 
-    parseOptions(stream, optionsEnd) {
-        return this.constructor.parseOptions(stream, optionsEnd);
+    parseOptions(stream: StringStream, optionsEnd?: RegExp): any {
+        return (this.constructor as any).parseOptions(stream, optionsEnd);
     }
 
     // optionsEnd cannot include whitespace or start with '='
-    static parseOptions(stream, optionsEnd) {
-        let options = {};
+    static parseOptions(stream: StringStream, optionsEnd?: RegExp): any {
+        let options: any = {};
 
         stream.whitespace();
 
@@ -1164,7 +1189,7 @@ class MarkupParser {
                                 bracketCount -= 1;
                             } else {
                                 // JSON ends here
-                                options[optionName] = jsonString.length > 0 ? this.parseJSON5(jsonString) : undefined;
+                                options[optionName] = jsonString.length > 0 ? (this as any).parseJSON5(jsonString) : undefined;
                                 validJSON = true;
                                 break;
                             }
@@ -1186,10 +1211,10 @@ class MarkupParser {
         return options;
     }
 
-    parseTextLine(stream) {
+    parseTextLine(stream: StringStream): any[] {
         let lastModifier = new Map();
 
-        let capturedContent = [];
+        let capturedContent: any[] = [];
 
         // This will always be set to the last closed modifier
         let capturedEnd = -1;
