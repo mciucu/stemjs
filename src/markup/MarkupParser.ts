@@ -1,25 +1,72 @@
 // TODO: this file is in dire need of a rewrite
+
+interface MarkupElement {
+    tag: string;
+    children?: (MarkupElement | string)[];
+    [key: string]: any;
+}
+
+interface ParsedElement {
+    content?: MarkupElement | string;
+    start: number;
+    end: number;
+    isString?: boolean;
+    isJSX?: boolean;
+    isDummy?: boolean;
+}
+
+interface StringStreamOptions {
+    [key: string]: any;
+}
+
+interface ModifierOptions {
+    pattern?: string;
+    captureContent?: boolean;
+    endPattern?: string;
+    leftWhitespace?: boolean;
+    [key: string]: any;
+}
+
+interface MarkupParserOptions {
+    modifiers?: Modifier[];
+    uiElements?: any;
+}
+
+interface AutomatonNode {
+    value: string | null;
+    startNode?: boolean;
+    patternLastNode?: boolean;
+    endPatternLastNode?: boolean;
+    endNode?: boolean;
+    whitespaceNode?: boolean;
+    captureNode?: boolean;
+    next?: (input: string) => AutomatonNode;
+}
+
 export class StringStream {
-    constructor(string, options) {
+    string: string;
+    pointer: number;
+
+    constructor(string: string, options?: StringStreamOptions) {
         this.string = string;
         this.pointer = 0;
     }
 
-    done() {
+    done(): boolean {
         return this.pointer >= this.string.length;
     }
 
-    advance(steps=1) {
+    advance(steps: number = 1): void {
         this.pointer += steps;
     }
 
-    char() {
+    char(): string {
         let ch = this.string.charAt(this.pointer);
         this.pointer += 1;
         return ch;
     }
 
-    whitespace(whitespaceChar=/\s/) {
+    whitespace(whitespaceChar: RegExp = /\s/): string {
         let whitespaceStart = this.pointer;
 
         while (!this.done() && whitespaceChar.test(this.at(0))) {
@@ -31,7 +78,7 @@ export class StringStream {
     }
 
     // Gets first encountered non-whitespace substring
-    word(validChars=/\S/, skipWhitespace=true) {
+    word(validChars: RegExp = /\S/, skipWhitespace: boolean = true): string {
         if (skipWhitespace) {
             this.whitespace();
         }
@@ -43,7 +90,7 @@ export class StringStream {
         return this.string.substring(wordStart, this.pointer);
     }
 
-    number(skipWhitespace=true) {
+    number(skipWhitespace: boolean = true): number {
         if (skipWhitespace) {
             this.whitespace();
         }
@@ -100,7 +147,7 @@ export class StringStream {
     }
 
     // Gets everything up to delimiter, usually end of line, limited to maxLength
-    line(delimiter=/\r*\n/, maxLength=Infinity) {
+    line(delimiter: RegExp | string = /\r*\n/, maxLength: number = Infinity): string {
         if (delimiter instanceof RegExp) {
             // Treat regex differently. It will probably be slower.
             let str = this.string.substring(this.pointer);
@@ -145,26 +192,26 @@ export class StringStream {
     // The following methods have no side effects
 
     // Access char at offset position, relative to current pointer
-    at(index) {
+    at(index: number): string {
         return this.string.charAt(this.pointer + index);
     }
 
-    peek(length=1) {
+    peek(length: number = 1): string {
         return this.string.substring(this.pointer, this.pointer + length);
     }
 
-    startsWith(prefix) {
+    startsWith(prefix: string | RegExp): boolean {
         if (prefix instanceof RegExp) {
             // we modify the regex to only check for the beginning of the string
-            prefix = new RegExp("^" + prefix.toString().slice(1, -1));
-            return prefix.test(this.string.substring(this.pointer));
+            let regexPrefix = new RegExp("^" + prefix.toString().slice(1, -1));
+            return regexPrefix.test(this.string.substring(this.pointer));
         }
         return this.peek(prefix.length) === prefix;
     }
 
     // Returns first position of match
-    search(pattern) {
-        let position;
+    search(pattern: string | RegExp): number {
+        let position: number;
         if (pattern instanceof RegExp) {
             position = this.string.substring(this.pointer).search(pattern);
         } else {
@@ -173,14 +220,14 @@ export class StringStream {
         return position < 0 ? -1 : position;
     }
 
-    clone() {
-        let newStream = new this.constructor(this.string);
+    clone(): StringStream {
+        let newStream = new StringStream(this.string);
         newStream.pointer = this.pointer;
         return newStream;
     }
 }
 
-function kmp(input) {
+function kmp(input: string): number[] {
     if (input.length === 0) {
         return [];
     }

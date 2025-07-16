@@ -1,6 +1,10 @@
 import {decorate, createDefaultSetter} from "./Utils";
 
-function handleDescriptor(target, key, descriptor) {
+interface LazyDescriptor extends PropertyDescriptor {
+    initializer?: () => any;
+}
+
+function handleDescriptor(target: any, key: string | symbol, descriptor: LazyDescriptor, args: any[]): PropertyDescriptor {
     const { configurable, enumerable, initializer, value } = descriptor;
     // The "key" property is constructed with accessor descriptor (getter / setter),
     // but the first time the getter is used, the property is reconstructed with data descriptor.
@@ -8,7 +12,7 @@ function handleDescriptor(target, key, descriptor) {
         configurable,
         enumerable,
 
-        get() {
+        get(this: any): any {
             // This happens if someone accesses the property directly on the prototype
             if (this === target) {
                 return;
@@ -31,6 +35,6 @@ function handleDescriptor(target, key, descriptor) {
     };
 }
 
-export function lazyInit(...args) {
+export function lazyInit(...args: any[]): any {
     return decorate(handleDescriptor, args);
 }

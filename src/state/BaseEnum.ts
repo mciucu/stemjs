@@ -86,20 +86,21 @@ export class BaseEnum {
 }
 
 // Experimental enum maker method
-export function makeEnum<T extends BaseEnum>(cls: EnumConstructor<T> & Record<string, any>): Readonly<EnumConstructor<T> & Record<string, any>> {
+export function makeEnum<T extends BaseEnum>(cls: new (...args: any[]) => T & Record<string, any>): EnumConstructor<T> {
     // TODO: have it working so that if cls doesn't manually inherit BaseEnum, everything still works.
     //  Object.setPrototypeOf(cls, BaseEnum);
     //  cls.prototype.__proto__ = BaseEnum.prototype;
+    const enumCls = cls as any as EnumConstructor<T>;
     const allEntries: T[] = [];
-    for (const key in cls) {
+    for (const key in enumCls) {
         const uppercaseKey = key.toUpperCase();
         if (key === uppercaseKey) {
-            cls[key] = cls.init(key, cls[key]);
-            allEntries.push(cls[key]);
+            enumCls[key] = enumCls.init(key, enumCls[key]);
+            allEntries.push(enumCls[key]);
         }
     }
 
-    cls.allEntries = allEntries;
+    enumCls.allEntries = allEntries;
 
-    return Object.freeze(cls);
+    return Object.freeze(enumCls);
 }
