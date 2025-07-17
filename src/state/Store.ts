@@ -23,6 +23,7 @@ export const EventDispatcherSymbol = Symbol("EventDispatcher");
 export class StoreObject extends Dispatchable {
     declare [StoreSymbol]?: any;
     declare [EventDispatcherSymbol]?: Dispatchable;
+    declare id: StoreId;
     [key: string]: any;
 
     constructor(obj: any, event?: StoreEvent) {
