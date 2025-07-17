@@ -27,7 +27,7 @@ export const TranslationElements = new Set<TranslationTextElement>();
 
 
 export class TranslationTextElement extends TextUIElement {
-    value: string | any[];
+    declare value: string | any[]; // Typescript is idiotic in overriding fields
 
     constructor(value: string | any[]) {
         if (arguments.length === 1) {
@@ -69,8 +69,8 @@ export class TranslationTextElement extends TextUIElement {
     }
 
     getValue(): string {
-        let value: string;
-        if (Array.isArray(this.value)) {
+        let {value} = this;
+        if (Array.isArray(value)) {
             value = this.evaluate(...value);
         } else {
             value = (translationMap && translationMap.get(value)) ?? value;
@@ -101,6 +101,7 @@ export class TranslationTextElement extends TextUIElement {
 // This method is a shorthand notation to create a new translatable text element
 // TODO: should also support being used as a string template
 UI.T = (str: string): TranslationTextElement => {
+    debugger;
     return new TranslationTextElement(str);
 };
 
