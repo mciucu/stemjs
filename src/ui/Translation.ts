@@ -101,7 +101,6 @@ export class TranslationTextElement extends TextUIElement {
 // This method is a shorthand notation to create a new translatable text element
 // TODO: should also support being used as a string template
 UI.T = (str: string): TranslationTextElement => {
-    debugger;
     return new TranslationTextElement(str);
 };
 

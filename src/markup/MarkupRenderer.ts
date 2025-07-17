@@ -72,7 +72,7 @@ export class MarkupClassMap {
 
 export class MarkupRenderer extends Panel {
     declare options: MarkupRendererOptions;
-    private classMap: MarkupClassMap;
+    private declare classMap: MarkupClassMap;
 
     setOptions(options: MarkupRendererOptions): void {
         if (!options.classMap) {
@@ -86,9 +86,7 @@ export class MarkupRenderer extends Panel {
         super.setOptions(options);
 
         this.setValue(this.options.value || "");
-        if (this.options.classMap) {
-            this.classMap = this.options.classMap;
-        }
+        this.classMap = this.options.classMap;
     }
 
     setValue(value: string | MarkupElement): void {
