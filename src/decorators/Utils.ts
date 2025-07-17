@@ -5,7 +5,7 @@ export function isDescriptor(desc: any): desc is PropertyDescriptor {
         return false;
     }
 
-    const keys: (keyof PropertyDescriptor)[] = ["value", "get", "set"];
+    const keys: (keyof PropertyDescriptor)[] = ["value", "initializer", "get", "set"];
 
     for (let key of keys) {
         if (desc.hasOwnProperty(key)) {
