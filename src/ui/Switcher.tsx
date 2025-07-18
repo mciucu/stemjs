@@ -1,14 +1,28 @@
-import {RenderStack, UI} from "./UIBase";
+import {RenderStack, UIElement} from "./UIBase";
 import {GlobalStyle} from "./GlobalStyle";
+import {NodeAttributes} from "./NodeAttributes";
 
-class Switcher extends UI.Element {
-    constructor(options) {
-        super(options);
-        this.childMap = new WeakMap();
-        this.numRedraws = 0;
-    }
+interface SwitcherOptions {
+    fullHeight?: boolean;
+    preserveScroll?: boolean;
+    lazyRender?: boolean;
+    children?: UIElement[];
+}
 
-    getPreferredActive() {
+interface ChildProperties {
+    isMounted: boolean;
+    redrawIndex: number;
+    isUpToDate?: boolean;
+    scrollTop?: number;
+}
+
+export class Switcher extends UIElement {
+    declare options: SwitcherOptions;
+    numRedraws: number = 0;
+    private childMap: WeakMap<UIElement, ChildProperties> = new WeakMap();
+    private activeChild?: UIElement;
+
+    getPreferredActive(): UIElement | undefined {
         const {children} = this.options;
         for (const child of children) {
             if (child.options.active) {
@@ -18,22 +32,22 @@ class Switcher extends UI.Element {
         return children[0] || this.activeChild;
     }
 
-    getDefaultOptions() {
+    getDefaultOptions(): SwitcherOptions {
         return {
             fullHeight: false,
             preserveScroll: true,
         };
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes): void {
         if (this.options.fullHeight) {
-            attr.addClass(GlobalStyle.Utils.fullHeight);
+            attr.addClass(GlobalStyle.fullHeight);
         }
     }
 
-    copyState(element) {
+    copyState(element: Switcher): void {
         let options = Object.assign({}, element.options, {
-            children: this.overwriteChildren(this.options.children || [], element.options.children || []),
+            children: this.overwriteChildren(this.options.children || [], (element.options.children || []) as UIElement[]),
         });
 
         // TODO @Mihai use the logic from UIElement.copyState
@@ -42,11 +56,11 @@ class Switcher extends UI.Element {
         this.activeChild = this.getPreferredActive();
     }
 
-    render() {
-        return this.activeChild || this.options.children[0];
+    render(): UIElement | undefined {
+        return this.activeChild || (this.options.children && this.options.children[0]);
     }
 
-    overwriteChildren(existingChildren, newChildren) {
+    overwriteChildren(existingChildren: UIElement[], newChildren: UIElement[]): UIElement[] {
         let keyMap = this.getElementKeyMap(existingChildren) || new Map();
         for (let i = 0; i < newChildren.length; i += 1) {
             let newChild = newChildren[i];
@@ -66,7 +80,7 @@ class Switcher extends UI.Element {
         return newChildren;
     }
 
-    redraw() {
+    redraw(): boolean {
         this.numRedraws += 1;
 
         //basic things for our current node
@@ -78,8 +92,8 @@ class Switcher extends UI.Element {
         this.render();
         RenderStack.pop();
 
-        if (this.options.children.length == 0) {
-            return;
+        if (!this.options.children || this.options.children.length === 0) {
+            return false;
         }
 
         const activeChild = this.activeChild || this.options.children[0];
@@ -97,22 +111,23 @@ class Switcher extends UI.Element {
         }
 
         this.updateActiveChild(activeChild);
+        return true;
     }
 
-    getChildProperties(child) {
+    getChildProperties(child: UIElement): ChildProperties {
         if (!this.childMap.has(child)) {
             this.childMap.set(child, {
                 isMounted: !!child.node,
                 redrawIndex: -1,
             });
         }
-        return this.childMap.get(child);
+        return this.childMap.get(child)!;
     }
 
-    updateChild(child) {
+    updateChild(child: UIElement): void {
         if (this.getChildProperties(child).redrawIndex < this.numRedraws) {
             if (!child.node) {
-                child.mount(this);
+                child.mount(this as any);
             } else {
                 child.redraw();
             }
@@ -120,28 +135,31 @@ class Switcher extends UI.Element {
         }
     }
 
-    appendChild(child, doMount=false) {
+    appendChild(child: UIElement, doMount: boolean = false): UIElement {
+        if (!this.options.children) {
+            this.options.children = [];
+        }
         this.options.children.push(child);
         if (doMount) {
-            child.mount(this);
+            child.mount(this as any);
         }
-        if (this.options.children.length == 1) {
+        if (this.options.children.length === 1) {
             this.setActive(child);
         }
         return child;
     }
 
-    getActive() {
+    getActive(): UIElement | undefined {
         return this.activeChild;
     }
 
-    insertChildNodeBefore(child, nextSibling) {
+    insertChildNodeBefore(child: UIElement, nextSibling: Node): void {
         let childProperties = this.getChildProperties(child);
         childProperties.isMounted = true;
         childProperties.redrawIndex = this.numRedraws;
     }
 
-    updateActiveChild(element) {
+    updateActiveChild(element?: UIElement): void {
         // Removing and reinserting the same node is inefficient, so
         // just update the internal state of the switcher instead.
         if (element && element.node === this.node.firstChild) {
@@ -156,7 +174,7 @@ class Switcher extends UI.Element {
         }
 
         if (!element) {
-            this.activeChild = null;
+            this.activeChild = undefined;
             return;
         }
 
@@ -166,7 +184,7 @@ class Switcher extends UI.Element {
         this.children[0] = this.activeChild = element;
     }
 
-    deactivateChild(child) {
+    deactivateChild(child: UIElement): void {
         child.dispatch("hide");
         child.dispatch("setActive", false);
         if (this.options.preserveScroll) {
@@ -174,7 +192,7 @@ class Switcher extends UI.Element {
         }
     }
 
-    activateChild(child) {
+    activateChild(child: UIElement): void {
         child.dispatch("setActive", true);
         child.dispatch("show");
         if (this.options.preserveScroll) {
@@ -182,7 +200,7 @@ class Switcher extends UI.Element {
         }
     }
 
-    setActive(element) {
+    setActive(element?: UIElement): void {
         if (this.activeChild === element) {
             return;
         }
@@ -195,12 +213,12 @@ class Switcher extends UI.Element {
         }
     }
 
-    hasChild(element) {
+    hasChild(element: UIElement): boolean {
         return this.childMap.has(element);
     }
 
-    onMount() {
-        this.addListener("shouldRedrawChild", (event) => {
+    onMount(): void {
+        this.addListener("shouldRedrawChild", (event: any) => {
             if (event.child.isInDocument()) {
                 event.child.redraw();
             } else {
@@ -209,5 +227,3 @@ class Switcher extends UI.Element {
         });
     }
 }
-
-export {Switcher};
