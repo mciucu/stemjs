@@ -22,7 +22,7 @@ export class WebsocketStreamHandler extends Dispatcher {
 
     websocketSubscriber: WebsocketSubscriber;
     streamName: string;
-    options: StreamHandlerOptions;
+    declare options: StreamHandlerOptions;
     bytesReceived: number;
     isIndexed: boolean;
     lastMessageIndex: number;
