@@ -13,18 +13,26 @@ import {Theme, ThemeProps} from "./style/Theme";
 import {StyleSheet} from "./Style";
 
 export type HTMLTagType = keyof HTMLElementTagNameMap;
-export type UIElementChild = Iterable<UIElementChild> | BaseUIElement | string | number | null | undefined | false;
+export type UIElementCleanChild = BaseUIElement | string | number;
+export type UIElementChild = Iterable<UIElementChild> | UIElementCleanChild | null | undefined | false;
+type RefLinkOptions = {
+    parent: UIElement<any>;
+    name?: string;
+    key?: string;
+};
 
 
 // Type definitions
 export interface UIElementOptions {
-    ref?: {
-        parent: any;
-        name?: string;
-        key?: string;
-    };
-    children?: UIElementChild[];
-    [key: string]: any;
+    children: UIElementCleanChild[];
+    ref?: RefLinkOptions;
+    key?: string;
+    nodeType?: HTMLTagType;
+    className?: string;
+    style?: string | CSSStyleDeclaration;
+    theme?: Theme;
+    styleSheet?: StyleSheet;
+    //[key: string]: any;
 }
 
 export const RenderStack: BaseUIElement[] = []; //keeps track of objects that are redrawing, to know where to assign refs automatically
@@ -34,15 +42,14 @@ export const redrawPerTickRunner = new OncePerTickRunner((obj: BaseUIElement, ev
 export interface UINamespace {
     TextElement: typeof TextUIElement;
     Element: typeof UIElement;
-    createElement: (tag: any, options?: UIElementOptions | null, ...children: any[]) => BaseUIElement | null;
+    createElement: (tag: typeof BaseUIElement<any> | HTMLTagType, options?: UIElementOptions | null, ...children: any[]) => BaseUIElement | null;
     str: (value: any) => any;
-    Primitive: (nodeType: keyof HTMLElementTagNameMap, BaseClass?: typeof UIElement) => typeof UIElement;
+    Primitive: <ExtraOptions = void, T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap>(nodeType: T, BaseClass?: typeof UIElement) => typeof UIElement<ExtraOptions, HTMLElementTagNameMap[T]>;
 }
 
 export const UI: UINamespace = {} as UINamespace;
 
-// TODO @types type this
-export function cleanChildren(children: UIElementChild): any[] {
+export function cleanChildren(children: UIElementChild): UIElementCleanChild[] {
     return unwrapArray(children, unwrapElementWithFunc);
 }
 
@@ -113,14 +120,18 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
     }
 }
 
+type TextElementOptions = {value: string};
+
 export class TextUIElement extends BaseUIElement<Text> {
     value: string;
+    // @ts-ignore
+    declare options?: TextElementOptions & UIElementOptions;
 
-    constructor(value: string | UIElementOptions = "") {
+    constructor(value: string | TextElementOptions = "") {
         super();
-        if (value?.hasOwnProperty("value") && isPlainObject(value)) {
+        if (isPlainObject(value) && value?.value) {
             this.value = value.value;
-            this.options = value;
+            this.options = value as TextElementOptions & UIElementOptions;
         } else {
             this.value = (value as string) ?? "";
         }
@@ -182,14 +193,15 @@ export class TextUIElement extends BaseUIElement<Text> {
 
 UI.TextElement = TextUIElement;
 
-export class UIElement extends BaseUIElement<HTMLElement> {
+export class UIElement<ExtraOptions = void, NodeType extends HTMLElement = HTMLElement> extends BaseUIElement<NodeType> {
     static domAttributesMap: DOMAttributesMap = NodeAttributes.defaultAttributesMap;
     static nodeEventsMap: DOMAttributesMap = NodeAttributes.defaultEventsMap;
 
     children: BaseUIElement[] = [];
     declare state: any;
+    declare options: UIElementOptions & ExtraOptions;
 
-    constructor(options: UIElementOptions = {}) {
+    constructor(options: UIElementOptions & ExtraOptions = {} as UIElementOptions & ExtraOptions) {
         super();
         this.children = [];  // These are the rendered children
         this.options = options; // TODO: this is a hack, to not break all the code that references this.options in setOptions
@@ -197,10 +209,12 @@ export class UIElement extends BaseUIElement<HTMLElement> {
         this.setOptions(options); // TODO maybe this actually needs to be removed, since on a copy we don't want the default options of the other object
     }
 
-    getDefaultOptions(options?: UIElementOptions): UIElementOptions | undefined { return undefined; }
+    getDefaultOptions(options?: UIElementOptions & ExtraOptions): Partial<UIElementOptions & ExtraOptions> | undefined {
+        return undefined;
+    }
 
     // Return our options without the UI specific fields, so they can be passed along
-    getCleanedOptions(): UIElementOptions {
+    getCleanedOptions(): Partial<UIElementOptions & ExtraOptions> {
         const options = {
             ...this.options,
         };
@@ -217,11 +231,11 @@ export class UIElement extends BaseUIElement<HTMLElement> {
         return {};
     }
 
-    getPreservedOptions(): UIElementOptions | undefined {
+    getPreservedOptions(): Partial<UIElementOptions & ExtraOptions> | undefined {
         return undefined;
     }
 
-    setOptions(options: UIElementOptions): void {
+    setOptions(options: UIElementOptions & ExtraOptions): void {
         const defaultOptions = this.getDefaultOptions(options);
         if (defaultOptions) {
             options = Object.assign(defaultOptions, options);
@@ -230,13 +244,13 @@ export class UIElement extends BaseUIElement<HTMLElement> {
     }
 
     // TODO: should probably add a second arg, doRedraw=true - same for setOptions
-    updateOptions(options: UIElementOptions): void {
-        this.setOptions(Object.assign(this.options || {}, options));
+    updateOptions(options: Partial<UIElementOptions & ExtraOptions>): void {
+        this.setOptions(Object.assign(this.options, options));
         // TODO: if the old options and the new options are deep equal, we can skip this redraw, right?
         this.redraw();
     }
 
-    setChildren(...args: any[]): void {
+    setChildren(...args: UIElementChild[]): void {
         this.updateOptions({children: cleanChildren(args)});
     }
 
@@ -246,13 +260,13 @@ export class UIElement extends BaseUIElement<HTMLElement> {
         let options = element.options;
         let preservedOptions = this.getPreservedOptions();
         if (preservedOptions) {
-            options = Object.assign({}, options, preservedOptions);
+            options = {...options, ...preservedOptions};
         }
-        this.setOptions(options || {});
+        this.setOptions(options || {} as UIElementOptions & ExtraOptions);
         this.addListenersFromOptions();
     }
 
-    getNodeType(): string {
+    getNodeType(): HTMLTagType {
         return this.options?.nodeType || "div";
     }
 
@@ -272,8 +286,8 @@ export class UIElement extends BaseUIElement<HTMLElement> {
         return this.options?.children;
     }
 
-    createNode(): HTMLElement {
-        this.node = document.createElement(this.getNodeType());
+    createNode(): NodeType {
+        this.node = document.createElement(this.getNodeType()) as NodeType;
         applyDebugFlags(this);
         return this.node;
     }
@@ -368,7 +382,7 @@ export class UIElement extends BaseUIElement<HTMLElement> {
                 if (newChild.toUI) {
                     newChild = newChild.toUI(this); // TODO move this inside the unwrap logic
                 } else {
-                    newChild = new UI.TextElement({value: String(newChild)});
+                    newChild = new UI.TextElement(String(newChild));
                 }
                 newChildren[i] = newChild;
             }
@@ -481,7 +495,7 @@ export class UIElement extends BaseUIElement<HTMLElement> {
     }
 
     get styleSheet(): Nullable<StyleSheet> {
-        let {styleSheet} = this.options || {};
+        let {styleSheet} = (this.options as any) || {};
         const theme = this.getTheme();
 
         if (!styleSheet) {
@@ -531,7 +545,7 @@ export class UIElement extends BaseUIElement<HTMLElement> {
         }
     }
 
-    refLink(name: string): { parent: UIElement; name: string } {
+    refLink(name: string): RefLinkOptions {
         return {parent: this, name: name};
     }
 
@@ -542,8 +556,8 @@ export class UIElement extends BaseUIElement<HTMLElement> {
         return {parent: this[arrayName], name: index};
     }
 
-    bindToNode(node: HTMLElement, doRedraw?: boolean): UIElement {
-        this.node = node;
+    bindToNode(node: HTMLElement, doRedraw?: boolean): this {
+        this.node = node as NodeType;
         if (doRedraw) {
             this.clearNode();
             this.redraw();
@@ -551,7 +565,7 @@ export class UIElement extends BaseUIElement<HTMLElement> {
         return this;
     }
 
-    mount(parentNode: UIElement | HTMLElement, nextSiblingNode?: Node | null): void {
+    mount(parentNode: UIElement<any> | HTMLElement, nextSiblingNode?: Node | null): void {
         const parent = (parentNode instanceof HTMLElement) ? new UIElement().bindToNode(parentNode) : parentNode;
         this.parent = parent;
         if (this.node) {
@@ -734,13 +748,13 @@ export class UIElement extends BaseUIElement<HTMLElement> {
     }
 }
 
-UI.createElement = function (tag: typeof BaseUIElement<any> | string, options?: UIElementOptions | null, ...children: any[]): BaseUIElement | null {
+UI.createElement = function (tag: typeof BaseUIElement<any> | HTMLTagType, options?: UIElementOptions | null, ...children: any[]): BaseUIElement | null {
     if (!tag) {
         console.error("Create element needs a valid object tag, did you mistype a class name?");
         return null;
     }
 
-    options = options || {};
+    options = options || {} as UIElementOptions;
 
     options.children = cleanChildren(children);
 
@@ -748,7 +762,7 @@ UI.createElement = function (tag: typeof BaseUIElement<any> | string, options?: 
         if (typeof options.ref === "string") {
             if (RenderStack.length > 0) {
                 options.ref = {
-                    parent: RenderStack[RenderStack.length - 1],
+                    parent: RenderStack[RenderStack.length - 1] as UIElement<any>,
                     name: options.ref
                 };
             } else {
@@ -770,7 +784,7 @@ UI.createElement = function (tag: typeof BaseUIElement<any> | string, options?: 
 
     if (isString(tag)) {
         options.nodeType = tag;
-        tag = UIElement;
+        return new UIElement<void, HTMLElementTagNameMap[typeof tag]>(options);
     }
 
     return new (tag as typeof UIElement)(options);
@@ -781,9 +795,9 @@ UI.Element = UIElement;
 UI.str = (value: string) => new TextUIElement(value);
 
 // Keep a map for every base class, and for each base class keep a map for each nodeType, to cache classes
-const primitiveMap = new WeakMap();
+const primitiveMap: WeakMap<typeof UIElement, Map<string, typeof UIElement<any>>> = new WeakMap();
 
-UI.Primitive = (nodeType: keyof HTMLElementTagNameMap, BaseClass: typeof UIElement = UIElement): typeof UIElement => {
+UI.Primitive = <ExtraOptions = void, T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap>(nodeType: T, BaseClass: typeof UIElement = UIElement): typeof UIElement<ExtraOptions, HTMLElementTagNameMap[T]> => {
     let baseClassPrimitiveMap = primitiveMap.get(BaseClass);
     if (!baseClassPrimitiveMap) {
         baseClassPrimitiveMap = new Map();
@@ -791,15 +805,23 @@ UI.Primitive = (nodeType: keyof HTMLElementTagNameMap, BaseClass: typeof UIEleme
     }
     let resultClass = baseClassPrimitiveMap.get(nodeType);
     if (resultClass) {
-        return resultClass;
+        return resultClass as any;
     }
-    resultClass = class Primitive extends BaseClass {
-        getNodeType(): string {
+    resultClass = class Primitive extends BaseClass<ExtraOptions, HTMLElementTagNameMap[T]> {
+        declare node?: HTMLElementTagNameMap[T];
+        
+        getNodeType(): T {
             return nodeType;
+        }
+        
+        createNode(): HTMLElementTagNameMap[T] {
+            this.node = document.createElement(nodeType);
+            applyDebugFlags(this);
+            return this.node;
         }
     };
     baseClassPrimitiveMap.set(nodeType, resultClass);
-    return resultClass;
+    return resultClass as any;
 };
 
 export function applyDebugFlags(element: BaseUIElement): void {

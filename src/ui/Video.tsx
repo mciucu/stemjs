@@ -1,8 +1,11 @@
 import {UI, UIElementChild} from "./UIBase";
 import {DOMAttributesMap} from "./NodeAttributes";
 
+export interface VideoOptions {
+    source?: string;
+}
 
-export class Video extends UI.Primitive("video") {
+export class Video extends UI.Primitive<VideoOptions, "video">("video") {
     play() {
         return this.node.play();
     }
