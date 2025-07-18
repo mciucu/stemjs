@@ -4,7 +4,7 @@ import {Dispatchable} from "./Dispatcher";
 // All keys are prefixed with our custom name, so we don't have to worry about polluting the global storage namespace
 // Keys must be strings, and values are modified by the serialize/deserialize methods,
 // which by default involve JSON conversion
-class StorageMap extends Dispatchable {
+export class StorageMap extends Dispatchable {
     static SEPARATOR = "-@#%-";
     
     storage: Storage;

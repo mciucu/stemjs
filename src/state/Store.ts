@@ -235,7 +235,7 @@ export class GenericObjectStore<T extends StoreObject = StoreObject> extends Bas
         } else {
             const objectData = {
                 ...event.data,
-                [StoreSymbol]: this,
+                [StoreSymbol]: this,  // We'll need to have to access loaders in the constructor
             }
             obj = new this.ObjectClass(objectData, event, this);
             obj.setStore(this);

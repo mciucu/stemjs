@@ -60,7 +60,7 @@ type DataType = "arrayBuffer" | "blob" | "formData" | "json" | "text";
 
 export type FetchPostprocessor = (payload: any, xhrPromise?: XHRPromise) => any;
 export type FetchErrorPostprocessor = (error: any) => any;
-export type FetchPreprocessor = (options: FetchOptions, input?: RequestInfo) => FetchOptions;
+export type FetchPreprocessor = (options: FetchOptions, input?: RequestInfo) => FetchOptions | void;
 
 export interface FetchOptions extends RequestInit {
     url?: string;
@@ -80,11 +80,14 @@ export interface FetchOptions extends RequestInit {
     urlParams?: any;
     urlSearchParams?: URLSearchParams;
     arraySearchParamSuffix?: string;
+    disableStateImport?: boolean;
+    disableEventsImport?: boolean;
     
     // jQuery compatibility
     type?: string;
     contentType?: string;
     data?: any;
+
 }
 
 export interface URLFetchOptions extends FetchOptions {

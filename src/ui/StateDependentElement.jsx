@@ -76,6 +76,7 @@ export const StateDependentElement = (BaseClass) => class StateDependentElementC
                 this.setLoaded();
             },
             (error) => {
+                console.error("Request error", error);
                 this.setError(error);
                 this.setLoaded();
             }

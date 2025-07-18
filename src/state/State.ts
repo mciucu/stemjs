@@ -28,7 +28,7 @@ interface Store {
 
 export type RawStateData = Record<string, any[]>;
 
-interface StateLoadOptions {
+export interface StateLoadOptions {
     state?: RawStateData;
     events?: StateEvent | StateEvent[];
 }
