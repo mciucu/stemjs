@@ -12,6 +12,7 @@ import {DOMAttributesMap, NodeAttributes} from "./NodeAttributes";
 import {Theme, ThemeProps} from "./style/Theme";
 import {StyleSheet} from "./Style";
 
+export type HTMLTagType = keyof HTMLElementTagNameMap;
 export type UIElementChild = Iterable<UIElementChild> | BaseUIElement | string | number | null | undefined | false;
 
 
@@ -35,7 +36,7 @@ export interface UINamespace {
     Element: typeof UIElement;
     createElement: (tag: any, options?: UIElementOptions | null, ...children: any[]) => BaseUIElement | null;
     str: (value: any) => any;
-    Primitive: (nodeType: string, BaseClass?: typeof UIElement) => typeof UIElement;
+    Primitive: (nodeType: keyof HTMLElementTagNameMap, BaseClass?: typeof UIElement) => typeof UIElement;
 }
 
 export const UI: UINamespace = {} as UINamespace;
@@ -241,7 +242,7 @@ export class UIElement extends BaseUIElement<HTMLElement> {
 
     // Used when we want to reuse the current element, with the options from the passed in argument
     // Is only called when element.canOverwrite(this) is true
-    copyState(element: UIElement): void {
+    copyState(element: typeof this): void {
         let options = element.options;
         let preservedOptions = this.getPreservedOptions();
         if (preservedOptions) {
@@ -287,7 +288,7 @@ export class UIElement extends BaseUIElement<HTMLElement> {
         super.cleanup();
     }
 
-    overwriteChild(existingChild: BaseUIElement, newChild: BaseUIElement): BaseUIElement {
+    overwriteChild<ChildType extends BaseUIElement>(existingChild: ChildType, newChild: ChildType): ChildType {
         existingChild.copyState(newChild);
         return existingChild;
     }
@@ -782,7 +783,7 @@ UI.str = (value: string) => new TextUIElement(value);
 // Keep a map for every base class, and for each base class keep a map for each nodeType, to cache classes
 const primitiveMap = new WeakMap();
 
-UI.Primitive = (nodeType: string, BaseClass: typeof UIElement = UIElement): typeof UIElement => {
+UI.Primitive = (nodeType: keyof HTMLElementTagNameMap, BaseClass: typeof UIElement = UIElement): typeof UIElement => {
     let baseClassPrimitiveMap = primitiveMap.get(BaseClass);
     if (!baseClassPrimitiveMap) {
         baseClassPrimitiveMap = new Map();

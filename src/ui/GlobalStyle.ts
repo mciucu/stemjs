@@ -233,6 +233,11 @@ class ContainerStyle extends StyleSheet {
 
 
 class StyleUtils extends StyleSheet {
+    // TODO @types
+    static Utils = StyleUtils.getInstance();
+    static Container = ContainerStyle.getInstance();
+    static FlexContainer = FlexContainerStyle.getInstance();
+
     extraTop = (): number => this.themeProps[Device.isMobileDevice() ? "MAIN_CONTAINER_EXTRA_PADDING_TOP_MOBILE" :
         "MAIN_CONTAINER_EXTRA_PADDING_TOP_DESKTOP"];
 
@@ -256,8 +261,4 @@ class StyleUtils extends StyleSheet {
 }
 
 // TODO simplify this
-export const GlobalStyle = StyleUtils.getInstance();
-
-GlobalStyle.FlexContainer = FlexContainerStyle.getInstance();
-GlobalStyle.Container = ContainerStyle.getInstance();
-GlobalStyle.Utils = StyleUtils.getInstance();
+export const GlobalStyle = StyleUtils.getInstance() as StyleUtils; // TODO @types no cast needed
