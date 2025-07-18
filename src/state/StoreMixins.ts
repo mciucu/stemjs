@@ -5,14 +5,13 @@ import {GlobalState, StoreId} from "./State";
 import {FetchOptions, URLFetchOptions} from "../base/Fetch";
 
 // Type definitions for StoreMixins
-interface FetchJob {
+export interface FetchJob {
     id: StoreId;
     success: (obj: any) => void;
     error?: (error?: any) => void;
 }
 
-interface FetchRequestData {
-    ids: StoreId[];
+export interface FetchRequestData {
     [key: string]: any;
 }
 
