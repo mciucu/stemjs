@@ -12,11 +12,12 @@ import {DOMAttributesMap, NodeAttributes} from "./NodeAttributes";
 import {Theme, ThemeProps} from "./style/Theme";
 import {StyleSheet} from "./Style";
 
+export type SVGTagType = keyof SVGElementTagNameMap;
 export type HTMLTagType = keyof HTMLElementTagNameMap;
 export type UIElementCleanChild = BaseUIElement | string | number;
 export type UIElementChild = Iterable<UIElementChild> | UIElementCleanChild | null | undefined | false;
 type RefLinkOptions = {
-    parent: UIElement<any>;
+    parent: UIElement<any, any>;
     name?: string;
     key?: string;
 };
@@ -103,7 +104,7 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
 
     abstract getNodeType(): string | number;
 
-    abstract mount(parent: UIElement<any> | HTMLElement, nextSibling?: Node | null): void;
+    abstract mount(parent: UIElement<any, any> | HTMLElement, nextSibling?: Node | null): void;
 
     abstract redraw(event?: any): void;
 
@@ -196,7 +197,7 @@ UI.TextElement = TextUIElement;
 
 export class UIElement<
     ExtraOptions = void,
-    NodeType extends HTMLElement = HTMLElement,
+    NodeType extends (HTMLElement | SVGElement) = HTMLElement,
     OptionsType extends UIElementOptions = Partial<Omit<NodeType, "children">> & UIElementOptions & ExtraOptions
 > extends BaseUIElement<NodeType> {
     static domAttributesMap: DOMAttributesMap = NodeAttributes.defaultAttributesMap;
@@ -570,7 +571,7 @@ export class UIElement<
         return this;
     }
 
-    mount(parentNode: UIElement<any> | HTMLElement, nextSiblingNode?: Node | null): void {
+    mount(parentNode: UIElement<any, any> | HTMLElement, nextSiblingNode?: Node | null): void {
         const parent = (parentNode instanceof HTMLElement) ? new UIElement().bindToNode(parentNode) : parentNode;
         this.parent = parent;
         if (this.node) {

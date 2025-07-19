@@ -1,5 +1,4 @@
 import {SVG} from "./SVGBase.js";
-export * from "./SVGBase.js";
 import * as math from "../../numerics/math.js";
 
 SVG.SVGRoot = class SVGRoot extends SVG.Element {

@@ -1,25 +1,47 @@
-import {UI} from "../UIBase";
+import {HTMLTagType, UI, UIElement} from "../UIBase";
 import {DOMAttributesMap} from "../NodeAttributes";
 import {setObjectPrototype} from "../../base/Utils";
 import {SVGNodeAttributes} from "./SVGNodeAttributes";
 import {Device} from "../../base/Device";
 import {applyDebugFlags} from "../UIBase";
 
+interface Point {
+    x: number;
+    y: number;
+}
 
-export const SVG = {};
+interface BoundingRect {
+    top: number;
+    left: number;
+    width: number;
+    bottom: number;
+    height: number;
+    right: number;
+}
+
+interface DefaultSVGOptions {
+
+}
 
 // TODO Simplify this class
-SVG.Element = class SVGElement extends UI.Element {
-    createNode() {
-        this.node = document.createElementNS("http://www.w3.org/2000/svg", this.getNodeType());
+export class SVGUIElement<
+    ExtraOptions = DefaultSVGOptions,
+    SVGNodeType extends SVGElement = SVGElement
+> extends UIElement<ExtraOptions, SVGNodeType> {
+    createNode(): SVGNodeType {
+        this.node = document.createElementNS("http://www.w3.org/2000/svg", this.getNodeType()) as SVGNodeType;
         applyDebugFlags(this);
         return this.node;
     }
 
-    getScreenCoordinatedForPoint(point) {
-        const node = this.node;
+    getNodeType(): HTMLTagType {
+        return this.options?.nodeType || "div";
+    }
+
+    getScreenCoordinatedForPoint(point: Point): Point {
+        const {node} = this;
         // TODO: this is a good argument to always keep a reference to the Stem element in the nodes
-        const svgNode = node.ownerSVGElement || node;
+        const svgNode = node.ownerSVGElement || node as SVGSVGElement;
 
         if (svgNode.createSVGPoint) {
             // Using native SVG transformations
@@ -37,7 +59,7 @@ SVG.Element = class SVGElement extends UI.Element {
         };
     }
 
-    getMouseCoordinatesForEvent(event=window.event) {
+    getMouseCoordinatesForEvent(event: Event = window.event): Point {
         return this.getScreenCoordinatedForPoint({x: Device.getEventX(event), y: Device.getEventY(event)});
     }
 
@@ -47,29 +69,30 @@ SVG.Element = class SVGElement extends UI.Element {
         return state;
     }
 
-    setState(state) {
+    setState(state: any): void {
+        debugger;
         this.setOptions(state.options);
     }
 
     // TODO @cleanup deprecate
-    getOptionsAsNodeAttributes() {
+    getOptionsAsNodeAttributes(): SVGNodeAttributes {
         return setObjectPrototype(this.options, SVGNodeAttributes);
     }
 
-    instantiateNodeAttributes() {
+    instantiateNodeAttributes(): SVGNodeAttributes {
         return new SVGNodeAttributes(this.options);
     }
 
-    translate(x=0, y=0) {
+    translate(x: number = 0, y: number = 0): void {
         this.options.translate = "translate(" + x + "," + y + ")";
     }
 
     //TODO(@all) : getBoundingClientRect is unreliable, reimplement it.
-    getBoundingClientRect() {
+    getBoundingClientRect(): BoundingRect {
         let element = this.node;
         let x = 0;
         let y = 0;
-        while(element && element !== document.body) {
+        while (element && element !== document.body) {
             x -= element.scrollLeft;
             y -= element.scrollTop;
             element = element.offsetParent || element.parentNode;
@@ -89,19 +112,19 @@ SVG.Element = class SVGElement extends UI.Element {
         };
     }
 
-    getBBox() {
+    getBBox(): DOMRect {
         return this.node.getBBox();
     }
 
-    getHeight() {
+    getHeight(): number {
         return this.getBoundingClientRect().height;
     }
 
-    getWidth() {
+    getWidth(): number {
         return this.getBoundingClientRect().width;
     }
 
-    toFront() {
+    toFront(): void {
         const parentNode = this.node && this.node.parentElement;
         if (parentNode) {
             parentNode.removeChild(this.node);
@@ -109,17 +132,17 @@ SVG.Element = class SVGElement extends UI.Element {
         }
     }
 
-    toBack() {
+    toBack(): void {
     }
 
-    setOpacity(newOpacity) {
+    setOpacity(newOpacity: number): void {
         this.options.opacity = newOpacity;
         if (this.node) {
             this.node.setAttribute("opacity", newOpacity);
         }
     }
 
-    setColor(color) {
+    setColor(color: string): void {
         this.options.color = color;
         if (this.node) {
             this.node.setAttribute("stroke", color);
@@ -127,15 +150,15 @@ SVG.Element = class SVGElement extends UI.Element {
         }
     }
 
-    remove() {
+    remove(): void {
     }
 
-    getSvg() {
+    getSvg(): any {
         return this.parent.getSvg();
     }
-};
+}
 
-SVG.Element.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
+SVGUIElement.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
     ["fill"],
     ["height"],
     ["opacity"],
@@ -160,3 +183,7 @@ SVG.Element.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap,
     ["strokeLinecap", {domName: "stroke-linecap"}],
     ["viewBox", {domName: "viewBox"}],
 ]);
+
+export const SVG = {
+    Element: SVGUIElement,
+};

@@ -1,6 +1,6 @@
 import {StyleSheet, styleRule} from "./Style";
 
-class FullScreenStyle extends StyleSheet {
+export class FullScreenStyle extends StyleSheet {
     @styleRule
     fullScreen = {
         width: "100%",
@@ -8,5 +8,3 @@ class FullScreenStyle extends StyleSheet {
         backgroundColor: "#FFFFFF",
     };
 }
-
-export {FullScreenStyle};
