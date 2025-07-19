@@ -2,7 +2,7 @@ import {Draggable} from "../Draggable.js";
 import {UI} from "../UIBase.js";
 import {ProgressBar} from "../ProgressBar.jsx";
 import {Orientation} from "../Constants.js";
-import {Device} from "../../base/Device.js";
+import {Device} from "../../base/Device";
 import {getOffset} from "../Utils.js";
 
 // TODO This should extend an input

@@ -84,7 +84,7 @@ class EntriesManager extends Dispatchable {
 // A wrapper for tables which optimizes rendering when many entries / updates are involved. It currently has hardcoded
 // row height for functionality reasons.
 function RangeTableInterface(TableClass) {
-    class RangeTable extends UI.Primitive(TableClass, "div") {
+    class RangeTable extends UI.Primitive("div", TableClass) {
         constructor(options) {
             super(options);
             this.lowIndex = 0;

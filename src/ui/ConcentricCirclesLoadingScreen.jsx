@@ -52,7 +52,7 @@ class RotatingHelperStyle extends StyleSheet {
 }
 
 @registerStyle(RotatingHelperStyle)
-class ConcentricCirclesLoadingScreen extends UI.Element {
+export class ConcentricCirclesLoadingScreen extends UI.Element {
     render() {
         let centerConstant = 100;
         return <div style={{
@@ -70,5 +70,3 @@ class ConcentricCirclesLoadingScreen extends UI.Element {
         </div>;
     }
 }
-
-export {ConcentricCirclesLoadingScreen}

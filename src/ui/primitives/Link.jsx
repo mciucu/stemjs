@@ -1,6 +1,6 @@
 import {UI} from "../UIBase.js";
-import {styleRule, StyleSheet} from "../Style.js";
-import {registerStyle} from "../style/Theme.js";
+import {styleRule, StyleSheet} from "../Style";
+import {registerStyle} from "../style/Theme";
 import {isLocalUrl, trimLocalUrl} from "../../base/Utils.js";
 import {Router} from "../Router.jsx";
 

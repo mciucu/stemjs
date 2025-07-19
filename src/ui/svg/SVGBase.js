@@ -3,10 +3,10 @@ import {DOMAttributesMap} from "../NodeAttributes";
 import {setObjectPrototype} from "../../base/Utils";
 import {SVGNodeAttributes} from "./SVGNodeAttributes";
 import {Device} from "../../base/Device";
-import {applyDebugFlags} from "../Debug";
+import {applyDebugFlags} from "../UIBase";
 
 
-let SVG = {};
+export const SVG = {};
 
 // TODO Simplify this class
 SVG.Element = class SVGElement extends UI.Element {
@@ -160,5 +160,3 @@ SVG.Element.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap,
     ["strokeLinecap", {domName: "stroke-linecap"}],
     ["viewBox", {domName: "viewBox"}],
 ]);
-
-export {SVG};
