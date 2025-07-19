@@ -27,6 +27,7 @@ export interface UIElementOptions {
     children: UIElementCleanChild[];
     ref?: RefLinkOptions;
     key?: string;
+    active?: boolean; // Tabs or switchers can put this on children
     nodeType?: HTMLTagType;
     className?: string;
     style?: string | CSSStyleDeclaration;
@@ -196,7 +197,7 @@ UI.TextElement = TextUIElement;
 export class UIElement<
     ExtraOptions = void,
     NodeType extends HTMLElement = HTMLElement,
-    OptionsType extends UIElementOptions = Partial<NodeType> & UIElementOptions & ExtraOptions
+    OptionsType extends UIElementOptions = Partial<Omit<NodeType, "children">> & UIElementOptions & ExtraOptions
 > extends BaseUIElement<NodeType> {
     static domAttributesMap: DOMAttributesMap = NodeAttributes.defaultAttributesMap;
     static nodeEventsMap: DOMAttributesMap = NodeAttributes.defaultEventsMap;

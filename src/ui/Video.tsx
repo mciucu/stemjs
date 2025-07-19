@@ -10,7 +10,7 @@ export class Video extends UI.Primitive<VideoOptions, "video">("video") {
         return this.node.play();
     }
 
-    render() {
+    render(): UIElementChild {
         if (this.options.source) {
             return <source src={this.options.source} type="video/mp4" />
         }

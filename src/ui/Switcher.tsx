@@ -16,8 +16,7 @@ interface ChildProperties {
     scrollTop?: number;
 }
 
-export class Switcher extends UIElement {
-    declare options: SwitcherOptions;
+export class Switcher extends UIElement<SwitcherOptions> {
     numRedraws: number = 0;
     private childMap: WeakMap<UIElement, ChildProperties> = new WeakMap();
     private activeChild?: UIElement;
@@ -32,7 +31,7 @@ export class Switcher extends UIElement {
         return children[0] || this.activeChild;
     }
 
-    getDefaultOptions(): SwitcherOptions {
+    getDefaultOptions() {
         return {
             fullHeight: false,
             preserveScroll: true,
@@ -46,9 +45,10 @@ export class Switcher extends UIElement {
     }
 
     copyState(element: Switcher): void {
-        let options = Object.assign({}, element.options, {
-            children: this.overwriteChildren(this.options.children || [], (element.options.children || []) as UIElement[]),
-        });
+        const options = {
+            ...element.options,
+            children: this.overwriteChildren(this.options.children || [], element.options.children || []),
+        };
 
         // TODO @Mihai use the logic from UIElement.copyState
         this.setOptions(options);
@@ -64,7 +64,7 @@ export class Switcher extends UIElement {
         let keyMap = this.getElementKeyMap(existingChildren) || new Map();
         for (let i = 0; i < newChildren.length; i += 1) {
             let newChild = newChildren[i];
-            let newChildKey = (newChild.options && newChild.options.key) || ("autokey" + i);
+            let newChildKey = (newChild.options?.key) || ("autokey" + i);
             let existingChild = keyMap.get(newChildKey);
             if (existingChild === newChild) {
                 continue;
