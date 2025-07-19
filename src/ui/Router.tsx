@@ -1,16 +1,58 @@
-import {UI} from "./UIBase";
+import {UI, UIElement} from "./UIBase";
 import {Switcher} from "./Switcher";
 import {Dispatcher} from "../base/Dispatcher";
 import {PageTitleManager} from "../base/PageTitleManager";
 import {unwrapArray, isString} from "../base/Utils";
 
+interface RouterOptions {
+    routes: Route;
+}
+
+interface ChangeURLOptions {
+    queryParams?: Record<string, string>;
+    state?: Record<string, any>;
+    replaceHistory?: boolean;
+    forceElementUpdate?: boolean;
+    keepSearchParams?: boolean;
+}
+
+interface RouteMatch {
+    args: string[];
+    urlParts: string[];
+}
+
+interface RouteOptions {
+    title?: string;
+    beforeEnter?: (snapshot: RouteSnapshot) => UIElement | string[] | null;
+    cachePage?: boolean;
+    doNotCache?: boolean;
+}
+
+interface RouteSnapshot {
+    expr: string[];
+    url: string;
+    path: string;
+    params: URLSearchParams;
+}
+
+interface GeneratorArgs {
+    args: any[];
+    argsArray: any[];
+    doNotCache?: boolean;
+}
+
+type PageGenerator = new (args: GeneratorArgs) => UIElement | ((args: GeneratorArgs) => UIElement);
+
 export class Router extends Switcher {
+    static Global: Router;
+    static globalSetURL: (urlParts: string[]) => void;
+    
     // TODO: This works bad with query params. Fix it!
-    static localHistory = []; // If we want the router to not alter the window history, use this instead.
+    static localHistory: string[] = []; // If we want the router to not alter the window history, use this instead.
     static useLocalHistory = false;
 
     // Return a historic page, depth = 0 current, depth = 1 previous, etc
-    static getHistoricPath(depth) {
+    static getHistoricPath(depth: number): string | null {
         depth = Math.abs(depth); // So negatives also work
         const index = this.localHistory.length - 1 - depth;
         if (index < 0) {
@@ -22,7 +64,7 @@ export class Router extends Switcher {
         return url.split("?")[0].split("#")[0];
     }
 
-    static getCurrentPath() {
+    static getCurrentPath(): string {
         let path = "";
         if (this.useLocalHistory && this.localHistory.length) {
             // We do this to get rid of query params or hash params
@@ -33,19 +75,19 @@ export class Router extends Switcher {
         return path;
     }
 
-    static parseURL(path=location.pathname) {
+    static parseURL(path: string | string[] = location.pathname): string[] {
         if (!Array.isArray(path)) {
             path = path.split("/");
         }
         return path.filter(str => str != "");
     }
 
-    static joinQueryParams(queryParams = {}) {
+    static joinQueryParams(queryParams: Record<string, string> = {}): string {
         return Object.keys(queryParams)
             .map((param) => `${encodeURIComponent(param)}=${encodeURIComponent(queryParams[param])}`).join("&");
     }
 
-    static formatURL(url) {
+    static formatURL(url: string | string[]): string {
         if (Array.isArray(url)) {
             url = url.length ? ("/" + url.join("/")) : "/";
         }
@@ -57,13 +99,13 @@ export class Router extends Switcher {
         return url;
     }
 
-    static changeURL(url, options = {
+    static changeURL(url: string | string[], options: ChangeURLOptions = {
         queryParams: {},
         state: {},
         replaceHistory: false,
         forceElementUpdate: false,
         keepSearchParams: false,
-    }) {
+    }): void {
         url = this.formatURL(url);
 
         if (options.queryParams && Object.keys(options.queryParams).length > 0) {
@@ -98,13 +140,13 @@ export class Router extends Switcher {
         this.updateURL();
     }
 
-    static onPopState() {
+    static onPopState(): void {
         this.changeURL(this.parseURL(this.getCurrentPath()), {replaceHistory: true, forceElementUpdate: true,
             keepSearchParams: true});
         Dispatcher.Global.dispatch("externalURLChange");
     }
 
-    static back() {
+    static back(): void {
         if (this.useLocalHistory) {
             this.localHistory.pop();
             this.onPopState();
@@ -113,11 +155,11 @@ export class Router extends Switcher {
         }
     }
 
-    static updateURL() {
+    static updateURL(): void {
         this.Global.setURL(this.parseURL(this.getCurrentPath()));
     }
 
-    static setGlobalRouter(router) {
+    static setGlobalRouter(router: Router): void {
         this.Global = router;
         window.onpopstate = () => {
             this.onPopState();
@@ -130,22 +172,22 @@ export class Router extends Switcher {
         this.updateURL();
     }
 
-    clearCache() {
+    clearCache(): void {
         this.getRoutes().clearCache();
     }
 
     // TODO: should be named getRootRoute() :)
-    getRoutes() {
+    getRoutes(): Route {
         return this.options.routes;
     }
 
-    getPageNotFound() {
+    getPageNotFound(): UIElement {
         const element = UI.createElement("h1", {children: ["Can't find url, make sure you typed it correctly"]});
         element.pageTitle = "Page not found";
         return element;
     }
 
-    getPageToRender(urlParts) {
+    getPageToRender(urlParts: string[]): UIElement | null {
         const result = this.getRoutes().getPage(urlParts);
         if (result === false) {
             return this.getPageNotFound();
@@ -159,14 +201,14 @@ export class Router extends Switcher {
         return result;
     }
 
-    deactivateChild(child) {
+    deactivateChild(child: UIElement): void {
         super.deactivateChild(child);
         if (child.options.doNotCache) {
             child.destroyNode();
         }
     }
 
-    setURL(urlParts) {
+    setURL(urlParts: string[] | string): void {
         urlParts = unwrapArray(urlParts);
         const page = this.getPageToRender(urlParts);
 
@@ -189,7 +231,7 @@ export class Router extends Switcher {
         this.dispatchChange(urlParts, page, activePage);
     }
 
-    onMount() {
+    onMount(): void {
         if (!Router.Global) {
             this.constructor.setGlobalRouter(this);
         }
@@ -198,16 +240,20 @@ export class Router extends Switcher {
 
 export class Route {
     static ARG_KEY = "%s";
-    cachedPages = new Map();
+    expr: string[];
+    pageGenerator: PageGenerator;
+    subroutes: Route[];
+    options: RouteOptions;
+    cachedPages = new Map<string, UIElement>();
 
-    getDefaultOptions() {
+    getDefaultOptions(): RouteOptions {
         return {
             beforeEnter: null,
             cachePage: true,
         };
     }
 
-    constructor(expr, pageGenerator, subroutes = [], options = {}) {
+    constructor(expr: string | string[], pageGenerator: PageGenerator, subroutes: Route[] = [], options: RouteOptions | string = {}) {
         this.expr = (expr instanceof Array) ? expr : [expr];
         this.pageGenerator = pageGenerator;
         this.subroutes = unwrapArray(subroutes);
@@ -221,7 +267,7 @@ export class Route {
         this.cachedPages = new Map();
     }
 
-    clearCache() {
+    clearCache(): void {
         this.cachedPages.clear();
         for (const subroute of this.subroutes) {
             if (subroute.clearCache) {
@@ -230,7 +276,7 @@ export class Route {
         }
     }
 
-    matches(urlParts) {
+    matches(urlParts: string[]): RouteMatch | null {
         if (urlParts.length < this.expr.length) {
             return null;
         }
@@ -250,15 +296,15 @@ export class Route {
         }
     }
 
-    getPageTitle() {
+    getPageTitle(): string | undefined {
         return this.options.title;
     }
 
-    getPageGuard() {
+    getPageGuard(): ((snapshot: RouteSnapshot) => UIElement | string[] | null) | undefined {
         return this.options.beforeEnter;
     }
 
-    generatePage(pageGenerator, ...argsArray) {
+    generatePage(pageGenerator: PageGenerator, ...argsArray: any[]): UIElement | null {
         if (!pageGenerator) {
             return null;
         }
@@ -286,11 +332,11 @@ export class Route {
         return this.cachedPages.get(serializedArgs);
     }
 
-    matchesOwnNode(urlParts) {
+    matchesOwnNode(urlParts: string[]): boolean {
         return urlParts.length === 0;
     }
 
-    executeGuard() {
+    executeGuard(): UIElement | string[] | null {
         const pageGuard = this.getPageGuard();
         if (!pageGuard) {
             return null;
@@ -299,9 +345,9 @@ export class Route {
         return pageGuard(this.getSnapshot());
     }
 
-    getPage(urlParts, router, ...argsArray) {
+    getPage(urlParts: string[], router?: Router, ...argsArray: any[]): UIElement | string[] | false {
         let match;
-        let matchingRoute = this.matchesOwnNode(urlParts) ? this : null;
+        let matchingRoute: Route | null = this.matchesOwnNode(urlParts) ? this : null;
 
         if (!matchingRoute) {
             for (const subroute of this.subroutes) {
@@ -335,7 +381,7 @@ export class Route {
         return this.generatePage(guardResult, ...argsArray);
     }
 
-    getSnapshot() {
+    getSnapshot(): RouteSnapshot {
         return {
             expr: this.expr,
             url: window.location.href,
@@ -346,17 +392,17 @@ export class Route {
 }
 
 export class TerminalRoute extends Route {
-    timeout = null;
+    timeout: number | null = null;
 
-    constructor(expr, pageGenerator, options = {}) {
+    constructor(expr: string | string[], pageGenerator: PageGenerator, options: RouteOptions | string = {}) {
         super(expr, pageGenerator, [], options);
     }
 
-    matchesOwnNode(urlParts) {
+    matchesOwnNode(urlParts: string[]): boolean {
         return true;
     }
 
-    getPage(urlParts, router) {
+    getPage(urlParts: string[], router?: Router): UIElement | string[] | false {
         const page = super.getPage(...arguments);
         // TODO: why is this in a setTimeout?
         clearTimeout(this.timeout);
