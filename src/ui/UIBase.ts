@@ -193,15 +193,19 @@ export class TextUIElement extends BaseUIElement<Text> {
 
 UI.TextElement = TextUIElement;
 
-export class UIElement<ExtraOptions = void, NodeType extends HTMLElement = HTMLElement> extends BaseUIElement<NodeType> {
+export class UIElement<
+    ExtraOptions = void,
+    NodeType extends HTMLElement = HTMLElement,
+    OptionsType extends UIElementOptions = Partial<NodeType> & UIElementOptions & ExtraOptions
+> extends BaseUIElement<NodeType> {
     static domAttributesMap: DOMAttributesMap = NodeAttributes.defaultAttributesMap;
     static nodeEventsMap: DOMAttributesMap = NodeAttributes.defaultEventsMap;
 
     children: BaseUIElement[] = [];
     declare state: any;
-    declare options: UIElementOptions & ExtraOptions;
+    declare options: OptionsType;
 
-    constructor(options: UIElementOptions & ExtraOptions = {} as UIElementOptions & ExtraOptions) {
+    constructor(options: OptionsType = {} as OptionsType) {
         super();
         this.children = [];  // These are the rendered children
         this.options = options; // TODO: this is a hack, to not break all the code that references this.options in setOptions
@@ -209,12 +213,12 @@ export class UIElement<ExtraOptions = void, NodeType extends HTMLElement = HTMLE
         this.setOptions(options); // TODO maybe this actually needs to be removed, since on a copy we don't want the default options of the other object
     }
 
-    getDefaultOptions(options?: UIElementOptions & ExtraOptions): Partial<UIElementOptions & ExtraOptions> | undefined {
+    getDefaultOptions(options?: OptionsType): Partial<OptionsType> | undefined {
         return undefined;
     }
 
     // Return our options without the UI specific fields, so they can be passed along
-    getCleanedOptions(): Partial<UIElementOptions & ExtraOptions> {
+    getCleanedOptions(): Partial<OptionsType> {
         const options = {
             ...this.options,
         };
@@ -231,11 +235,11 @@ export class UIElement<ExtraOptions = void, NodeType extends HTMLElement = HTMLE
         return {};
     }
 
-    getPreservedOptions(): Partial<UIElementOptions & ExtraOptions> | undefined {
+    getPreservedOptions(): Partial<OptionsType> | undefined {
         return undefined;
     }
 
-    setOptions(options: UIElementOptions & ExtraOptions): void {
+    setOptions(options: OptionsType): void {
         const defaultOptions = this.getDefaultOptions(options);
         if (defaultOptions) {
             options = Object.assign(defaultOptions, options);
@@ -244,14 +248,14 @@ export class UIElement<ExtraOptions = void, NodeType extends HTMLElement = HTMLE
     }
 
     // TODO: should probably add a second arg, doRedraw=true - same for setOptions
-    updateOptions(options: Partial<UIElementOptions & ExtraOptions>): void {
+    updateOptions(options: Partial<OptionsType>): void {
         this.setOptions(Object.assign(this.options, options));
         // TODO: if the old options and the new options are deep equal, we can skip this redraw, right?
         this.redraw();
     }
 
     setChildren(...args: UIElementChild[]): void {
-        this.updateOptions({children: cleanChildren(args)} as Partial<UIElementOptions & ExtraOptions>);
+        this.updateOptions({children: cleanChildren(args)} as Partial<OptionsType>);
     }
 
     // Used when we want to reuse the current element, with the options from the passed in argument
@@ -262,7 +266,7 @@ export class UIElement<ExtraOptions = void, NodeType extends HTMLElement = HTMLE
         if (preservedOptions) {
             options = {...options, ...preservedOptions};
         }
-        this.setOptions(options || {} as UIElementOptions & ExtraOptions);
+        this.setOptions(options || {} as OptionsType);
         this.addListenersFromOptions();
     }
 
