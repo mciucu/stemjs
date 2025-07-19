@@ -1,8 +1,9 @@
 import {SVG} from "./SVGBase";
 import {Transition} from "../Transition";
 import {Color} from "../Color";
+import {SVGRoot} from "./SVGPrimitives.js";
 
-SVG.AnimatedSVG = class AnimatedSVG extends SVG.SVGRoot {
+export class AnimatedSVG extends SVGRoot {
     onMount() {
         if (this.options.transition) {
             this.options.transition.setStartTime(Date.now());
@@ -23,7 +24,7 @@ SVG.AnimatedSVG = class AnimatedSVG extends SVG.SVGRoot {
             requestAnimationFrame(animationWrapper);
         }
     }
-};
+}
 
 // TODO @types this should be a function
 SVG.Element.prototype.blinkTransition = function (options) {
@@ -56,6 +57,7 @@ SVG.Element.prototype.blinkTransition = function (options) {
         dependsOn: config.dependsOn
     });
 };
+
 SVG.Element.prototype.changeOpacityTransition = function(opacity, duration, dependsOn=[], startTime=0) {
     if (!this.options.hasOwnProperty("opacity")) {
         this.options.opacity = 1;

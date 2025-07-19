@@ -234,9 +234,17 @@ class ContainerStyle extends StyleSheet {
 
 class StyleUtils extends StyleSheet {
     // TODO @types
-    static Utils = StyleUtils.getInstance();
-    static Container = ContainerStyle.getInstance();
-    static FlexContainer = FlexContainerStyle.getInstance();
+    get Utils() {
+        return StyleUtils.getInstance();
+    }
+
+    get Container() {
+        return ContainerStyle.getInstance();
+    }
+
+    get FlexContainer() {
+        return FlexContainerStyle.getInstance();
+    }
 
     extraTop = (): number => this.themeProps[Device.isMobileDevice() ? "MAIN_CONTAINER_EXTRA_PADDING_TOP_MOBILE" :
         "MAIN_CONTAINER_EXTRA_PADDING_TOP_DESKTOP"];

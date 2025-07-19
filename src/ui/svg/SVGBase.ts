@@ -1,4 +1,4 @@
-import {HTMLTagType, UI, UIElement} from "../UIBase";
+import {SVGTagType, UI, UIElement} from "../UIBase";
 import {DOMAttributesMap} from "../NodeAttributes";
 import {setObjectPrototype} from "../../base/Utils";
 import {SVGNodeAttributes} from "./SVGNodeAttributes";
@@ -34,7 +34,7 @@ export class SVGUIElement<
         return this.node;
     }
 
-    getNodeType(): HTMLTagType {
+    getNodeType(): SVGTagType {
         return this.options?.nodeType || "div";
     }
 
@@ -153,8 +153,11 @@ export class SVGUIElement<
     remove(): void {
     }
 
-    getSvg(): any {
-        return this.parent.getSvg();
+    getSvg(): SVGUIElement {
+        if (this.getNodeType() == "svg") {
+            return this;
+        }
+        return (this.parent as SVGUIElement).getSvg();
     }
 }
 
@@ -187,3 +190,5 @@ SVGUIElement.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap
 export const SVG = {
     Element: SVGUIElement,
 };
+
+UI.SVGElement = SVGUIElement;

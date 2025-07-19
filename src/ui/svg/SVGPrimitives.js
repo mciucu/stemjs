@@ -1,24 +1,20 @@
-import {SVG} from "./SVGBase.js";
+import {SVG, SVGUIElement} from "./SVGBase.js";
 import * as math from "../../numerics/math.js";
 
-SVG.SVGRoot = class SVGRoot extends SVG.Element {
+export class SVGRoot extends SVGUIElement {
     getNodeType() {
         return "svg";
     }
+}
 
-    getSvg() {
-        return this;
-    }
-};
-
-SVG.RawSVG = class RawSVG extends SVG.SVGRoot {
+export class RawSVG extends SVGRoot {
     redraw() {
         super.redraw();
         this.node.innerHTML = this.options.innerHTML;
     }
-};
+}
 
-SVG.Group = class SVGGroup extends SVG.Element {
+export class SVGGroup extends SVGUIElement {
     getNodeType() {
         return "g";
     }
@@ -28,21 +24,9 @@ SVG.Group = class SVGGroup extends SVG.Element {
             this.children[i].setColor(color);
         }
     }
-};
+}
 
-SVG.Defs = class SVGDefs extends SVG.Element {
-    getNodeType() {
-        return "defs";
-    }
-};
-
-SVG.ClipPath = class ClipPath extends SVG.Element {
-    getNodeType() {
-        return "clipPath";
-    }
-};
-
-SVG.Path = class SVGPath extends SVG.Element {
+export class SVGPath extends SVG.Element {
     getNodeType() {
         return "path";
     }
@@ -93,9 +77,9 @@ SVG.Path = class SVGPath extends SVG.Element {
             alpha: 180 * Math.atan2(p3.y - p2.y, p3.x - p2.x) / Math.PI
         };
     }
-};
+}
 
-SVG.Circle = class SVGCircle extends SVG.Element {
+export class SVGCircle extends SVGUIElement {
     getNodeType() {
         return "circle";
     }
@@ -146,36 +130,11 @@ SVG.Circle = class SVGCircle extends SVG.Element {
                 "a" + r + " " + r + " 0 0 1 " + r + " " + r +       // Move to E
                 "a" + r + " " + r + " 0 0 1 " + (-r) + " " + r +    // Move to S
                 "a" + r + " " + r + " 0 0 1 " + (-r) + " " + (-r);  // Finally, move back to W
-        return new SVG.Path({d: pathString});
+        return new SVGPath({d: pathString});
     }
-};
+}
 
-SVG.Stop = class SVGStop extends SVG.Element {
-    getNodeType() {
-        return "stop";
-    }
-};
-
-SVG.RadialGradient = class SVGRadialGradient extends SVG.Element {
-    getNodeType() {
-        return "radialGradient";
-    }
-};
-
-SVG.LinearGradient = class SVGLinearGradient extends SVG.Element {
-    getNodeType() {
-        return "linearGradient";
-    }
-};
-
-//TODO Complete this class
-SVG.Ellipse = class SVGEllipse extends SVG.Element {
-    getNodeType() {
-        return "ellipse";
-    }
-};
-
-SVG.CircleArc = class SVGCircleArc extends SVG.Path {
+export class SVGCircleArc extends SVGPath {
     getPath() {
         let startAngle = this.options.startAngle;
         let endAngle = this.options.endAngle;
@@ -209,9 +168,9 @@ SVG.CircleArc = class SVGCircleArc extends SVG.Path {
             " A " + radius + " " + radius + " 0 " + largeArcFlag + " " + sweepFlag + " " +
             endPoint.x + " " + endPoint.y;
     }
-};
+}
 
-SVG.Rect = class SVGRect extends SVG.Element {
+export class SVGRect extends SVGUIElement {
     getNodeType() {
         return "rect";
     }
@@ -251,9 +210,9 @@ SVG.Rect = class SVGRect extends SVG.Element {
         this.options.height = height;
         this.node.setAttribute("height", this.options.height);
     }
-};
+}
 
-SVG.Line = class SVGLine extends SVG.Element {
+export class SVGLine extends SVGUIElement {
     getNodeType() {
         return "line";
     }
@@ -278,9 +237,9 @@ SVG.Line = class SVGLine extends SVG.Element {
         this.setAttribute("x2", x2);
         this.setAttribute("y2", y2);
     }
-};
+}
 
-SVG.Polygon = class Polygon extends SVG.Path {
+export class Polygon extends SVGPath {
     getDefaultOptions() {
         return {
             points: []
@@ -307,9 +266,11 @@ SVG.Polygon = class Polygon extends SVG.Path {
         pathString += "Z";
         return pathString;
     }
+}
 
-    setPoints(points) {
-        this.options.points = points;
-        this.setPath(this.getPolygonPath());
-    }
-};
+SVG.Circle = SVGCircle;
+SVG.Path = SVGPath;
+SVG.Group = SVGGroup;
+SVG.Defs = SVGDefs;
+SVG.Line = SVGLine;
+SVG.Rect = SVGRect;

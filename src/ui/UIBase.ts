@@ -44,6 +44,7 @@ export const redrawPerTickRunner = new OncePerTickRunner((obj: BaseUIElement, ev
 export interface UINamespace {
     TextElement: typeof TextUIElement;
     Element: typeof UIElement;
+    SVGElement: typeof UIElement;
     createElement: (tag: typeof BaseUIElement<any> | HTMLTagType, options?: UIElementOptions | null, ...children: any[]) => BaseUIElement | null;
     str: (value: any) => any;
     Primitive: <ExtraOptions = void, T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap>(nodeType: T, BaseClass?: typeof UIElement) => typeof UIElement<ExtraOptions, HTMLElementTagNameMap[T]>;
@@ -754,7 +755,13 @@ export class UIElement<
     }
 }
 
-UI.createElement = function (tag: typeof BaseUIElement<any> | HTMLTagType, options?: UIElementOptions | null, ...children: any[]): BaseUIElement | null {
+const SVG_TAGS = new Set(["svg", "g", "defs", "radialGradient", "stop", "ellipse", "clipPath", "ellipse", "path", "text"]); // TODO @types full set
+
+function isSVGTag(tag: string): tag is SVGTagType {
+    return SVG_TAGS.has(tag);
+}
+
+UI.createElement = function (tag: typeof BaseUIElement<any> | HTMLTagType | SVGTagType, options?: UIElementOptions | null, ...children: any[]): BaseUIElement | null {
     if (!tag) {
         console.error("Create element needs a valid object tag, did you mistype a class name?");
         return null;
@@ -789,7 +796,10 @@ UI.createElement = function (tag: typeof BaseUIElement<any> | HTMLTagType, optio
     }
 
     if (isString(tag)) {
-        options.nodeType = tag;
+        options.nodeType = tag as HTMLTagType; // TODO @types just shutting down the types
+        if (isSVGTag(tag)) {
+            return new UI.SVGElement<void, SVGElementTagNameMap[typeof tag]>(options);
+        }
         return new UIElement<void, HTMLElementTagNameMap[typeof tag]>(options);
     }
 
