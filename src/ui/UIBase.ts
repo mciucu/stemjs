@@ -102,7 +102,7 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
 
     abstract getNodeType(): string | number;
 
-    abstract mount(parent: UIElement | HTMLElement, nextSibling?: Node | null): void;
+    abstract mount(parent: UIElement<any> | HTMLElement, nextSibling?: Node | null): void;
 
     abstract redraw(event?: any): void;
 
@@ -251,7 +251,7 @@ export class UIElement<ExtraOptions = void, NodeType extends HTMLElement = HTMLE
     }
 
     setChildren(...args: UIElementChild[]): void {
-        this.updateOptions({children: cleanChildren(args)});
+        this.updateOptions({children: cleanChildren(args)} as Partial<UIElementOptions & ExtraOptions>);
     }
 
     // Used when we want to reuse the current element, with the options from the passed in argument
