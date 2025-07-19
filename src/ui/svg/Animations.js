@@ -26,8 +26,7 @@ export class AnimatedSVG extends SVGRoot {
     }
 }
 
-// TODO @types this should be a function
-SVG.Element.prototype.blinkTransition = function (options) {
+export function blinkTransition(svgElement, options) {
     let config = {
         duration: 2000,
         times: 2,
@@ -41,9 +40,9 @@ SVG.Element.prototype.blinkTransition = function (options) {
     return new Transition({
         func: (t, context) => {
             if (t > 1 - context.interval && !context.executeLastStep) {
-                this.setColor(context.firstColor);
+                svgElement.setColor(context.firstColor);
             } else {
-                this.setColor(Math.floor((1 - t) / context.interval) % 2 === 1 ? context.firstColor : context.secondColor);
+                svgElement.setColor(Math.floor((1 - t) / context.interval) % 2 === 1 ? context.firstColor : context.secondColor);
             }
         },
         context: {
@@ -56,8 +55,9 @@ SVG.Element.prototype.blinkTransition = function (options) {
         startTime: config.startTime,
         dependsOn: config.dependsOn
     });
-};
+}
 
+// TODO @types this should be a function
 SVG.Element.prototype.changeOpacityTransition = function(opacity, duration, dependsOn=[], startTime=0) {
     if (!this.options.hasOwnProperty("opacity")) {
         this.options.opacity = 1;
@@ -74,6 +74,7 @@ SVG.Element.prototype.changeOpacityTransition = function(opacity, duration, depe
         dependsOn: dependsOn
     });
 };
+
 SVG.Element.prototype.changeColorTransition = function(color, duration, dependsOn=[], startTime=0) {
         return new Transition({
             func: (t, context) => {
@@ -105,16 +106,17 @@ SVG.Text.prototype.moveTransition = function(coords, duration, dependsOn=[], sta
             dependsOn: dependsOn
         });
     };
-SVG.Text.prototype.changeFillTransition = function(color, duration, dependsOn=[], startTime=0) {
+
+export function changeTextFillTransition(svgTextElement, color, duration, dependsOn=[], startTime=0) {
     return new Transition({
         func: (t, context) => {
-            this.setColor(Color.interpolate(context.color, color, t), true);
+            svgTextElement.setColor(Color.interpolate(context.color, color, t), true);
         },
         context: {
-            color: this.getColor()
+            color: svgTextElement.getColor()
         },
         duration: duration,
         startTime: startTime,
         dependsOn: dependsOn
     });
-};
+}
