@@ -125,10 +125,10 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
 
 type TextElementOptions = {value: string};
 
-export class TextUIElement extends BaseUIElement<Text> {
+export class TextUIElement<ExtraOptions extends TextElementOptions= TextElementOptions> extends BaseUIElement<Text> {
     value: string;
     // @ts-ignore
-    declare options?: TextElementOptions & UIElementOptions;
+    declare options?: ExtraOptions & UIElementOptions;
 
     constructor(value: string | TextElementOptions = "") {
         super();

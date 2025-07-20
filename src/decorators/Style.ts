@@ -10,6 +10,7 @@ interface StyleRuleOptions {
 
 interface StyleDescriptor extends PropertyDescriptor {
     objInitializer?: () => any;
+    initializer: (() => any) | undefined;
 }
 
 type StyleRuleFunction = () => any;
@@ -48,8 +49,11 @@ function getPreferredClassName(cls: any, key: string | symbol, descriptor: Prope
     return className + "-container";
 }
 
+// TODO @types faking it for Typescript, we're actually using old decorators
+type FakedDecoratorType = (target: any, key: string | symbol) => any;
+
 // TODO: this function can be made a lot more generic, to wrap plain object initializer with inheritance support
-function styleRuleWithOptions(...optionsArgs: StyleRuleOptions[]): (target: any, key: string | symbol, descriptor: StyleDescriptor) => PropertyDescriptor {
+function styleRuleWithOptions(...optionsArgs: StyleRuleOptions[]): FakedDecoratorType {
     let options: StyleRuleOptions = Object.assign({}, ...optionsArgs);
     // TODO: Remove this if you don't think it's appropiate, I thought a warning would do no harm
     if (!options.targetMethodName) {
@@ -95,7 +99,7 @@ function styleRuleWithOptions(...optionsArgs: StyleRuleOptions[]): (target: any,
         return lazyInit(target, key, descriptor);
     }
 
-    return styleRuleDecorator;
+    return styleRuleDecorator as FakedDecoratorType;
 }
 
 // TODO: Second argument is mostly useless (implied from targetMethodName)

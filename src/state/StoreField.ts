@@ -19,6 +19,7 @@ export type FieldType = string | { makeFieldLoader?: (descriptor: FieldDescripto
 
 // Legacy decorator signature for JavaScript compatibility
 export type LegacyDecorator = (target: any, propertyKey: string, descriptor?: PropertyDescriptor) => PropertyDescriptor;
+export type FakedDecorated = (target: any, propertyKey: string) => void;
 
 class FieldDescriptor {
     type: FieldType;
@@ -127,13 +128,13 @@ class FieldDescriptor {
 
 
 // TODO Implement a way to say @field(Array, "StoreObject") for instance
-export function field(type: FieldType, arg: FieldOptions = {}): LegacyDecorator {
+export function field(type: FieldType, arg: FieldOptions = {}): FakedDecorated {
     // The actual descriptor - supports both legacy JS decorators and can be gradually migrated to TS
     return (targetProto: any, name: string, rawDescriptor?: PropertyDescriptor): PropertyDescriptor => {
         const fieldDescriptor = new FieldDescriptor(type, arg);
         fieldDescriptor.setTarget(targetProto, name, rawDescriptor);
         return fieldDescriptor.makeDescriptor();
-    }
+    };
 }
 
 // Default handling of objects

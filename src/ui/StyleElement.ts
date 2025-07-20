@@ -4,6 +4,7 @@ import {NodeAttributes, defaultToPixelsAttributes} from "./NodeAttributes";
 
 interface StyleInstanceOptions extends UIElementOptions {
     selector?: string;
+    key?: string;
     attributes?: Record<string, any>;
 }
 
@@ -11,7 +12,7 @@ interface StyleAttributes {
     [key: string]: string | number | Function | Array<string | number> | null | undefined;
 }
 
-interface StyleElementOptions extends UIElementOptions {
+interface StyleElementOptions {
     name?: string;
 }
 
@@ -26,7 +27,7 @@ interface KeyframeElementOptions extends StyleElementOptions {
 
 // TODO: should this be actually better done throught the dynamic CSS API, without doing through the DOM?
 // So far it's actually better like this, since we want to edit the classes inline
-class StyleInstance extends UI.TextElement {
+export class StyleInstance extends UI.TextElement {
     declare options: StyleInstanceOptions;
     attributes: Map<string, any>;
 
@@ -91,9 +92,7 @@ class StyleInstance extends UI.TextElement {
     }
 }
 
-class StyleElement extends UI.Primitive("style") {
-    declare options: StyleElementOptions;
-
+export class StyleElement<ExtraOptions = StyleElementOptions> extends UI.Primitive<ExtraOptions>("style") {
     getNodeAttributes(): NodeAttributes {
         // TODO: allow custom style attributes (media, scoped, etc)
         const attr = new NodeAttributes({});
@@ -107,8 +106,7 @@ class StyleElement extends UI.Primitive("style") {
 const ALLOWED_SELECTOR_STARTS = new Set([":", ">", " ", "+", "~", "[", "."]);
 
 // TODO: figure out how to work with animation frames, this only creates a wrapper class
-class DynamicStyleElement extends StyleElement {
-    declare options: DynamicStyleElementOptions;
+export class DynamicStyleElement extends StyleElement<DynamicStyleElementOptions> {
     className?: string;
 
     toString(): string {
@@ -195,8 +193,7 @@ class DynamicStyleElement extends StyleElement {
     }
 }
 
-class KeyframeElement extends StyleElement {
-    declare options: KeyframeElementOptions;
+export class KeyframeElement extends StyleElement<KeyframeElementOptions> {
     keyframeName?: string;
 
     toString(): string {
@@ -240,5 +237,3 @@ class KeyframeElement extends StyleElement {
         return "@keyframes " + this.getKeyframeName() + this.getKeyframeInstance(this.options.keyframe || {});
     }
 }
-
-export {StyleInstance, StyleElement, KeyframeElement, DynamicStyleElement}
