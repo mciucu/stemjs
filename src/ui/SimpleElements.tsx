@@ -4,10 +4,23 @@ import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";
 import {styleRule} from "../decorators/Style";
 import {isFunction} from "../base/Utils";
+import {NodeAttributes} from "./NodeAttributes";
 
-export function DefaultMakeIcon(icon, options = {}) {
+// Type definitions
+export type IconType = string | UIElement | ((options: any) => UIElement);
+export type MakeIconFunction = (icon: IconType, options?: any) => UIElement | null;
+export type MakeTextFunction = (text: string | BaseUIElement, options?: any) => BaseUIElement;
+
+export interface SimpleStyledElementOptions {
+    icon?: IconType;
+    label?: string | BaseUIElement;
+    level?: string;
+    size?: string;
+}
+
+export function DefaultMakeIcon(icon: IconType, options: any = {}): UIElement | null {
     if (isFunction(icon)) {
-        return icon(options);
+        return (icon as (options: any) => UIElement)(options);
     }
     if (icon instanceof UIElement) {
         return icon;
@@ -17,82 +30,81 @@ export function DefaultMakeIcon(icon, options = {}) {
     return <span {...iconOptions} />;
 }
 
-
-let MakeIconFunc = DefaultMakeIcon;
+let MakeIconFunc: MakeIconFunction = DefaultMakeIcon;
 
 // Change the icon function
-export function SetMakeIcon(func) {
+export function SetMakeIcon(func: MakeIconFunction): void {
     MakeIconFunc = func;
 }
 
-export function MakeIcon() {
-    return MakeIconFunc(...arguments);
+export function MakeIcon(icon: IconType, options?: any): UIElement | null {
+    return MakeIconFunc(icon, options);
 }
 
 // Same as for icons, but for text
-let MakeTextFunc = (text, options) => {
+let MakeTextFunc: MakeTextFunction = (text: string | BaseUIElement, _options?: any): BaseUIElement => {
     if (text instanceof BaseUIElement) {
         return text;
     }
-    return new UI.TextElement(text);
+    return new UI.TextElement(String(text));
 }
 
-export function SetMakeText(func) {
+export function SetMakeText(func: MakeTextFunction): void {
     MakeTextFunc = func;
 }
 
-export function MakeText() {
-    return MakeTextFunc(...arguments);
+export function MakeText(text: string | BaseUIElement, options?: any): BaseUIElement {
+    return MakeTextFunc(text, options);
 }
 
-export class SimpleStyledElement extends UI.Element {
-    getLevel() {
-        return this.options.level || (this.parent && this.parent.getLevel && this.parent.getLevel());
+export class SimpleStyledElement<T extends SimpleStyledElementOptions = SimpleStyledElementOptions> extends UIElement<T> {
+    getLevel(): string | undefined {
+        return (this.options as any).level || (this.parent && (this.parent as any).getLevel && (this.parent as any).getLevel());
     }
 
-    setLevel(level) {
-        this.updateOptions({level});
+    setLevel(level: string): void {
+        this.updateOptions({level} as Partial<T>);
     }
 
-    getSize() {
-        return this.options.size || (this.parent && this.parent.getSize && this.parent.getSize());
+    getSize(): string | undefined {
+        return (this.options as any).size || (this.parent && (this.parent as any).getSize && (this.parent as any).getSize());
     }
 
-    setSize(size) {
-        this.updateOptions({size});
+    setSize(size: string): void {
+        this.updateOptions({size} as Partial<T>);
     }
 }
 
 
-export class IconableInterface extends SimpleStyledElement {
-    render() {
+export class IconableInterface<T = void> extends SimpleStyledElement<T & SimpleStyledElementOptions> {
+    render(): any[] {
         return [this.beforeChildren(), this.getLabel(), super.render()];
-    };
+    }
 
-    getLabel() {
+    getLabel(): string | BaseUIElement | undefined {
         return this.options.label;
     }
 
-    setLabel(label) {
-        this.updateOptions({label});
+    setLabel(label: string | BaseUIElement): void {
+        this.updateOptions({label} as any);
     }
 
-    setIcon(icon) {
-        this.updateOptions({icon});
+    setIcon(icon: IconType): void {
+        this.updateOptions({icon} as any);
     }
 
-    getIcon() {
-        const {icon} = this.options;
-        return icon && MakeIcon(icon);
+    getIcon(): UIElement | null {
+        const icon = (this.options as any).icon;
+        return icon ? MakeIcon(icon) : null;
     }
 
-    beforeChildren() {
+    beforeChildren(): UIElement | null {
         return this.getIcon();
     }
 }
 
 // TODO: move this to another file
-let labelColorToStyle = (color) => {
+let labelColorToStyle = (color: string): any => {
     const colors = buildColors(color);
     let darker = {
         backgroundColor: colors[2],
@@ -161,15 +173,20 @@ export class LabelStyle extends BasicLevelStyleSheet(labelColorToStyle) {
 }
 
 
+// Interface declaration for proper typing
+export interface Label {
+    get styleSheet(): LabelStyle;
+}
+
 @registerStyle(LabelStyle)
 export class Label extends UI.Primitive("span", IconableInterface) {
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes): void {
         attr.addClass(this.styleSheet.Size(this.getSize()));
         attr.addClass(this.styleSheet.Level(this.getLevel()));
     }
 }
 
-let badgeColorToStyle = (color) => {
+let badgeColorToStyle = (color: string): any => {
     const colors = buildColors(color);
     return {
         backgroundColor: colors[1],
@@ -222,10 +239,15 @@ export class BadgeStyle extends BasicLevelStyleSheet(badgeColorToStyle) {
 }
 
 
+// Interface declaration for proper typing
+export interface Badge {
+    get styleSheet(): BadgeStyle;
+}
+
 @registerStyle(BadgeStyle)
-export class Badge extends UI.Primitive("span", IconableInterface) {
-    extraNodeAttributes(attr) {
-        attr.addClass(this.styleSheet.Size(this.getSize()));
-        attr.addClass(this.styleSheet.Level(this.getLevel()));
+export class Badge extends UI.Primitive("span", IconableInterface as any) {
+    extraNodeAttributes(attr: NodeAttributes): void {
+        attr.addClass((this.styleSheet as any).Size(this.getSize()));
+        attr.addClass((this.styleSheet as any).Level(this.getLevel()));
     }
 }

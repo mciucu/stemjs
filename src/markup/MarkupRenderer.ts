@@ -1,7 +1,7 @@
 import {BaseUIElement, UI} from "../ui/UIBase.js";
 import {MarkupParser} from "./MarkupParser.js";
 import {Panel, Link, Image} from "../ui/UIPrimitives.jsx";
-import {StaticCodeHighlighter} from "../ui/CodeEditor.jsx";
+import {StaticCodeHighlighter} from "../ui/CodeEditor";
 
 interface MarkupElement {
     tag: string;

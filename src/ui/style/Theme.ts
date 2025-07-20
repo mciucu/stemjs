@@ -3,6 +3,7 @@ import {resolveFuncValue} from "../../base/Utils";
 import {CallThrottler} from "../../base/CallModifier";
 import {ThemeType} from "./ThemeTypes";
 import {StyleSheet} from "../Style";
+import {UIElement} from "../UIBase";
 
 export type ThemeProps = Record<string, any>;
 
@@ -10,8 +11,8 @@ export type ThemeProps = Record<string, any>;
 export class Theme extends Dispatchable {
     static Global = new this(null, "Global");
 
-    classSet = new Set<any>();
-    styleSheetInstances = new Map<any, any>(); // map from StyleSheet class to instance
+    classSet = new Set<typeof UIElement>();
+    styleSheetInstances = new Map<typeof StyleSheet, StyleSheet>(); // map from StyleSheet class to instance
     updateThrottled: Function = (new CallThrottler({throttle: 50})).wrap(() => this.updateStyleSheets()); // TODO @cleanup CallThrottler syntax is really ugly
     name: string;
     baseTheme: Theme | null;
@@ -59,7 +60,7 @@ export class Theme extends Dispatchable {
         return new Theme(this, name, extraProps);
     }
 
-    register(cls: any, styleSheet: any): void {
+    register(cls: typeof UIElement, styleSheet: typeof StyleSheet): void {
         cls.theme = this;
         cls[this.styleSheetSymbol] = styleSheet;
         this.classSet.add(cls);
@@ -99,13 +100,13 @@ export class Theme extends Dispatchable {
         return Array.from(styleSheetSet).map(styleSheet => styleSheet.getInstance(this));
     }
 
-    getStyleSheetInstance(Cls: any): any {
+    getStyleSheetInstance<T extends typeof StyleSheet>(Cls: T): InstanceType<T> {
         let instance = this.styleSheetInstances.get(Cls);
         if (!instance) {
             instance = new Cls({theme: this});
             this.styleSheetInstances.set(Cls, instance);
         }
-        return instance;
+        return instance as InstanceType<T>;
     }
 
     updateStyleSheets(): void {
@@ -133,8 +134,8 @@ export class Theme extends Dispatchable {
 // TODO @types move this to Style.ts, makes more sense to be there
 // There's a fucking Typescript proposal from 10 years ago that developers are bullshitting against: https://github.com/Microsoft/TypeScript/issues/4881
 // It needs to be implemented before the new type is properly recognized
-export function registerStyle<T extends new (...args: any[]) => StyleSheet>(styleClass: T, theme: Theme = Theme.Global) {
-    return function<TBase = any> (target: TBase): (TBase & {styleSheet: InstanceType<T>})  {
+export function registerStyle<T extends typeof StyleSheet>(styleClass: T, theme: Theme = Theme.Global) {
+    return function<TBase extends typeof UIElement<any, any>> (target: TBase): (TBase & {styleSheet: InstanceType<T>})  {
         theme.register(target, styleClass);
         return target as any;
     };

@@ -25,7 +25,7 @@ type RefLinkOptions = {
 
 // Type definitions
 export interface UIElementOptions {
-    children: UIElementCleanChild[];
+    children?: UIElementCleanChild[];
     ref?: RefLinkOptions;
     key?: string;
     active?: boolean; // Tabs or switchers can put this on children
@@ -203,6 +203,7 @@ export class UIElement<
 > extends BaseUIElement<NodeType> {
     static domAttributesMap: DOMAttributesMap = NodeAttributes.defaultAttributesMap;
     static nodeEventsMap: DOMAttributesMap = NodeAttributes.defaultEventsMap;
+    static theme?: Theme;
 
     children: BaseUIElement[] = [];
     declare state: any;

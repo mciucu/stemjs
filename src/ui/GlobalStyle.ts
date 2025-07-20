@@ -111,7 +111,7 @@ Theme.setProperties({
 });
 
 export class BasicLevelSizeStyleSheet extends StyleSheet {
-    Level(level: LevelType): CSSStyleObject | null {
+    Level(level: LevelType): string | null {
         if (!level) {
             return null;
         }
@@ -125,7 +125,7 @@ export class BasicLevelSizeStyleSheet extends StyleSheet {
         }
     }
 
-    Size(size: SizeType): CSSStyleObject | null {
+    Size(size: SizeType): string | null {
         if (!size) {
             return null;
         }
@@ -269,4 +269,4 @@ class StyleUtils extends StyleSheet {
 }
 
 // TODO simplify this
-export const GlobalStyle = StyleUtils.getInstance() as StyleUtils; // TODO @types no cast needed
+export const GlobalStyle = StyleUtils.getInstance();

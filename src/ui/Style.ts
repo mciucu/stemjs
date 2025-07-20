@@ -67,12 +67,13 @@ class StyleSheet extends Dispatchable {
         this.styleElement = StyleElement.create(this.options.parent, styleElementOptions);
     }
 
-    static getInstance(theme = (this.theme || Theme.Global)): StyleSheet {
+
+    static getInstance<T extends typeof StyleSheet>(this: T, theme = (this.theme || Theme.Global)): InstanceType<T> {
         return theme.getStyleSheetInstance(this);
     }
 
     // Just to have the same pattern as objects or not
-    getInstance(): StyleSheet {
+    getInstance(theme?: Theme): StyleSheet {
         return this;
     }
 
