@@ -131,6 +131,11 @@ export class Theme extends Dispatchable {
 }
 
 // TODO @types move this to Style.ts, makes more sense to be there
-export function registerStyle(styleClass: any, theme: Theme = Theme.Global): (target: any) => void {
-    return (target: any) => theme.register(target, styleClass);
+// There's a fucking Typescript proposal from 10 years ago that developers are bullshitting against: https://github.com/Microsoft/TypeScript/issues/4881
+// It needs to be implemented before the new type is properly recognized
+export function registerStyle<T extends new (...args: any[]) => StyleSheet>(styleClass: T, theme: Theme = Theme.Global) {
+    return function<TBase = any> (target: TBase): (TBase & {styleSheet: InstanceType<T>})  {
+        theme.register(target, styleClass);
+        return target as any;
+    };
 }

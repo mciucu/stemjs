@@ -1,4 +1,4 @@
-import {UI} from "../UIBase";
+import {UI, UIElement} from "../UIBase";
 import {DOMAttributesMap} from "../NodeAttributes";
 import {InputStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
@@ -9,7 +9,7 @@ import {CleanupJobs} from "../../base/Dispatcher";
 // TODO rename to BaseInputElement
 // TODO handle the setOptions - initialValue lifecycle
 @registerStyle(InputStyle)
-export class InputableElement extends UI.Element {
+export class InputableElement extends UIElement {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
         attr.addClass(this.styleSheet.inputElement);

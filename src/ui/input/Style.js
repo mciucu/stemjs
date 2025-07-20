@@ -1,6 +1,6 @@
 import {StyleSheet, styleRule} from "../Style";
 
-class InputStyle extends StyleSheet {
+export class InputStyle extends StyleSheet {
     @styleRule
     inputElement = {
         transition: "border-color ease-in-out .15s, box-shadow ease-in-out .15s",
@@ -24,5 +24,3 @@ class InputStyle extends StyleSheet {
     select = {
     };
 }
-
-export {InputStyle};

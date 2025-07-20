@@ -1,7 +1,7 @@
 import {UI} from "../../UIBase.js";
 import {styleRule, StyleSheet} from "../../Style";
 import {registerStyle} from "../../style/Theme";
-import {BaseInputElement} from "../BaseInputElement.js";
+import {BaseInputElement} from "../BaseInputElement";
 
 
 export class ToggleInputStyle extends StyleSheet {

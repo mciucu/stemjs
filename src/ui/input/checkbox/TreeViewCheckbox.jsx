@@ -1,7 +1,7 @@
 import {UI} from "../../UIBase.js";
 import {toArray, unwrapArray} from "../../../base/Utils.js";
 import {CollapsibleControllerInput} from "../../collapsible/CollapsibleMixin.jsx";
-import {CheckboxInput} from "./CheckboxInput.jsx";
+import {CheckboxInput} from "./CheckboxInput";
 
 
 // TODO this seems to be a good function to decorate with @unarray

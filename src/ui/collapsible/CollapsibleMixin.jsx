@@ -4,7 +4,7 @@ import {GlobalStyle} from "../GlobalStyle";
 import {MakeIcon} from "../SimpleElements";
 import {registerStyle} from "../style/Theme";
 import {isFunction} from "../../base/Utils.js";
-import {BaseInputElement} from "../input/BaseInputElement.js";
+import {BaseInputElement} from "../input/BaseInputElement";
 import {styleRule, StyleSheet} from "../Style";
 
 

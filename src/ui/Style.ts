@@ -30,7 +30,7 @@ class StyleSheet extends Dispatchable {
     declare styleElement?: StyleElement;
     declare themeProps?: ThemeProps;
     declare _firstUpdate?: boolean;
-    declare container?: StyleElement; // The default for most style sheets
+    declare container?: any; // The default for most style sheets
 
     constructor(options: Partial<StyleSheetOptions> = {}) {
         super();

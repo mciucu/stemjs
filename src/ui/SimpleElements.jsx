@@ -1,4 +1,4 @@
-import {BaseUIElement, UI} from "./UIBase";
+import {BaseUIElement, UI, UIElement} from "./UIBase";
 import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";
@@ -9,7 +9,7 @@ export function DefaultMakeIcon(icon, options = {}) {
     if (isFunction(icon)) {
         return icon(options);
     }
-    if (icon instanceof UI.Element) {
+    if (icon instanceof UIElement) {
         return icon;
     }
     const iconOptions = {...options};
