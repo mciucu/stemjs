@@ -1,7 +1,7 @@
 import {StyleElement, KeyframeElement, DynamicStyleElement} from "./StyleElement";
 import {Dispatchable} from "../base/Dispatcher";
 import {PREFERRED_CLASS_NAME_KEY} from "../decorators/Style";
-import {Theme, ThemeProps} from "./style/Theme";
+import {registerStyle, Theme, ThemeProps} from "./style/Theme";
 
 interface StyleSheetOptions {
     parent: HTMLElement;
@@ -235,3 +235,4 @@ function focus(style: StyleObject): StyleObject {
 export {StyleSheet, ExclusiveClassSet, wrapCSS, hover, focus, active};
 
 export * from "../decorators/Style";
+export {registerStyle}

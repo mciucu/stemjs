@@ -130,6 +130,7 @@ export class Theme extends Dispatchable {
     }
 }
 
+// TODO @types move this to Style.ts, makes more sense to be there
 export function registerStyle(styleClass: any, theme: Theme = Theme.Global): (target: any) => void {
     return (target: any) => theme.register(target, styleClass);
 }
