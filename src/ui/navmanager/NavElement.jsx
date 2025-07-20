@@ -1,4 +1,4 @@
-import {UI} from "../UI";
+import {UI} from "../UIBase";
 import {Switcher} from "../Switcher";
 import {Link} from "../UIPrimitives";
 import {FACollapseIcon} from "../FontAwesome"; //TODO: more flexibility, do not require FAIcons in NavElements

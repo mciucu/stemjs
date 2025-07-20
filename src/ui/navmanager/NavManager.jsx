@@ -1,4 +1,6 @@
-import {UI, changeParent, registerStyle} from "../UI";
+import {UI} from "../UIBase.js";
+import {changeParent} from "../Utils.js";
+import {registerStyle} from "../style/Theme.js";
 import {NavStyle} from "./NavStyle";
 import {Carousel, CarouselStyle} from "../Carousel";
 import {LeftSideNavIcon, RightSideNavIcon, WrappedNavIcon} from "./NavIcon";
