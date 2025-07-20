@@ -100,7 +100,7 @@ export function enableStemInReactApp(ReactDOM, React, reactComponentDecorators) 
         if (RenderStack.length > 0) {
             return UI.createElement(...args);
         }
-        if (firstArg && firstArg.prototype && firstArg.prototype instanceof BaseUIElement) {
+        if (firstArg?.prototype && firstArg.prototype instanceof BaseUIElement) {
             args[0] = wrapStemInReact(React, firstArg);
         }
         return oldReactCreateElement(...args);

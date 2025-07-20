@@ -1,6 +1,6 @@
-import {UI} from "./UIBase.js";
-import {styleRule, StyleSheet} from "./Style.js";
-import {registerStyle} from "./style/Theme.js";
+import {UI} from "./UIBase";
+import {styleRule, StyleSheet} from "./Style";
+import {registerStyle} from "./style/Theme";
 import {Router} from "./Router.jsx";
 import {Direction} from "./Constants.js";
 import {unwrapArray} from "../base/Utils.js";

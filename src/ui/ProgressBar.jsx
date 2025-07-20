@@ -126,6 +126,7 @@ export class ProgressBar extends SimpleStyledElement {
     }
 
     set(value) {
+        // TODO @cleanup clamp
         if (value < 0)
             value = 0;
         else if (value > 1)

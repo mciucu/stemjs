@@ -1,5 +1,5 @@
 import {UI} from "../UIBase.js";
-import {Dispatchable} from "../../base/Dispatcher.js";
+import {Dispatchable} from "../../base/Dispatcher";
 
 export class TimePassedSpan extends UI.Primitive("span") {
     render() {
