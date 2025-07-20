@@ -1,8 +1,20 @@
-import {SVG, SVGUIElement} from "./SVGBase";
-import {DOMAttributesMap} from "../NodeAttributes";
-import {UI} from "../UIBase";
+import {SVG, SVGPrimitive, SVGUIElement} from "./SVGBase";
+import {DOMAttributesMap, NodeAttributes} from "../NodeAttributes";
+import {UI, TextUIElement} from "../UIBase";
 
-export class SVGText extends SVGUIElement {
+interface SVGTextOptions {
+    text?: string;
+    fontSize?: string;
+    color?: string;
+    dy?: string;
+    textAnchor?: string;
+    selectable?: boolean;
+    x?: number;
+    y?: number;
+}
+
+export class SVGText extends SVGPrimitive<SVGTextOptions>("text") {
+    declare textElement: TextUIElement;
     static domAttributesMap = new DOMAttributesMap(SVG.Element.domAttributesMap, [
         ["dx"],
         ["dy"],
@@ -11,11 +23,7 @@ export class SVGText extends SVGUIElement {
         ["textAnchor", {domName: "text-anchor"}]
     ]);
 
-    getNodeType() {
-        return "text";
-    }
-
-    getDefaultOptions() {
+    getDefaultOptions(options?: any): Partial<any> {
         return {
             text: "",
             fontSize: "15px",
@@ -26,7 +34,7 @@ export class SVGText extends SVGUIElement {
         };
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes): void {
         // TODO: For some reason, still selectable in mozilla...
         if (!this.options.selectable) {
             attr.setStyle("-webkit-user-select", "none");
@@ -38,46 +46,46 @@ export class SVGText extends SVGUIElement {
     }
 
     render() {
-        return [<UI.TextElement ref="textElement" value={this.options.text + ""} />];
+        return [UI.createElement(UI.TextElement, {ref: "textElement", value: this.options.text + ""})];
     }
 
-    getX() {
+    getX(): number | undefined {
         return this.options.x;
     }
 
-    setX(x) {
+    setX(x: number): void {
         this.options.x = x;
-        this.node.setAttribute("x", this.options.x);
+        this.node.setAttribute("x", String(this.options.x));
     }
 
-    getY() {
+    getY(): number | undefined {
         return this.options.y;
     }
 
-    setY(y) {
+    setY(y: number): void {
         this.options.y = y;
-        this.node.setAttribute("y", this.options.y);
+        this.node.setAttribute("y", String(this.options.y));
     }
 
-    setText(text) {
+    setText(text: string): void {
         this.options.text = text;
         this.textElement.setValue(text + "");
     }
 
-    getText() {
+    getText(): string | undefined {
         return this.options.text;
     }
 
-    setPosition(x, y) {
+    setPosition(x: number, y: number): void {
         this.setX(x);
         this.setY(y);
     }
 
-    getColor() {
+    getColor(): string | undefined {
         return this.options.color;
     }
 
-    setColor(color, fillOnly=false) {
+    setColor(color: string, fillOnly: boolean = false): void {
         this.options.color = color;
         if (this.node) {
             this.node.setAttribute("fill", color);

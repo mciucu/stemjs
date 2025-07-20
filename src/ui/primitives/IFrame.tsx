@@ -1,7 +1,7 @@
-import {UI} from "../UIBase.js";
-import {DOMAttributesMap} from "../NodeAttributes.js";
+import {UI} from "../UIBase";
+import {DOMAttributesMap} from "../NodeAttributes";
 
-export class IFrame extends UI.Primitive("iframe") {
+export class IFrame extends UI.Primitive<void, "iframe">("iframe") {
     static domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
         ["allow"],
         ["allowfullscreen", {noValue: true}],

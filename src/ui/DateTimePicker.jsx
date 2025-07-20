@@ -123,7 +123,7 @@ class DateTimeWindow extends VolatileFloatingWindow {
     }
 }
 
-class DateTimePicker extends UI.Element {
+export class DateTimePicker extends UI.Element {
     setOptions(options) {
         options.format = options.format || "DD/MM/YYYY HH:mm:ss";
         super.setOptions(options);
@@ -208,5 +208,3 @@ class DateTimePicker extends UI.Element {
     //     });
     // }
 }
-
-export {DateTimePicker};

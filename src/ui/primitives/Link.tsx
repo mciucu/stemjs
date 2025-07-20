@@ -1,10 +1,18 @@
-import {UI} from "../UIBase.js";
+import {UI} from "../UIBase";
 import {styleRule, StyleSheet} from "../Style";
 import {registerStyle} from "../style/Theme";
-import {isLocalUrl, trimLocalUrl} from "../../base/Utils.js";
-import {Router} from "../Router.jsx";
+import {isLocalUrl, isString, trimLocalUrl} from "../../base/Utils";
+import {Router} from "../Router";
 
-export function sanitizeUrlFromOptions(options, key) {
+interface LinkOptions {
+    // Custom properties not on HTMLAnchorElement
+    newTab?: boolean;  // Custom property to automatically set target="_blank"
+    value?: string;    // Custom property for link text content
+    label?: string;    // Custom property for link text content
+    // Note: href, target, etc. are inherited from Partial<HTMLAnchorElement>
+}
+
+export function sanitizeUrlFromOptions<T extends LinkOptions>(options: T, key: string): T {
     const rawURL = options[key];
 
     if (!rawURL || !rawURL.includes(":")) {
@@ -38,14 +46,14 @@ export class LinkStyle extends StyleSheet {
 }
 
 @registerStyle(LinkStyle)
-export class Link extends UI.Primitive("a") {
-    getDefaultOptions() {
+export class Link extends UI.Primitive<LinkOptions, "a">("a") {
+    getDefaultOptions(options?: any): Partial<any> {
         return {
             newTab: false,
         }
     }
 
-    setOptions(options) {
+    setOptions(options: any): any {
         options = sanitizeUrlFromOptions(options, "href");
 
         super.setOptions(options);
@@ -63,13 +71,13 @@ export class Link extends UI.Primitive("a") {
         return value || label || super.render();
     }
 
-    changeRouteInternal() {
+    changeRouteInternal(): void {
         // TODO Only if Router.Global exists?
         Router.changeURL(trimLocalUrl(this.options.href));
     }
 
-    onMount() {
-        this.addClickListener((event) => {
+    onMount(): void {
+        this.addClickListener((event: MouseEvent) => {
             const {href, newTab, target} = this.options;
 
             const specialKeyPressed = event.shiftKey || event.ctrlKey || event.metaKey;

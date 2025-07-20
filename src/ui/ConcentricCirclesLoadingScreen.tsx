@@ -3,7 +3,7 @@ import {keyframesRule} from "../decorators/Style";
 import {registerStyle} from "./style/Theme";
 import {StyleSheet} from "./Style";
 
-function getCircleStyle(size, borderSize, color, animationName, animationDuration) {
+function getCircleStyle(size: number, borderSize: number, color: string, animationName: string, animationDuration: string) {
     return {
         position: "absolute",
 
@@ -25,7 +25,7 @@ function getCircleStyle(size, borderSize, color, animationName, animationDuratio
     };
 }
 
-function createCircle(size, borderSize, color, animationName, animationDuration) {
+function createCircle(size: number, borderSize: number, color: string, animationName: string, animationDuration: string) {
     return <div style={getCircleStyle(size, borderSize, color, animationName, animationDuration)} />;
 }
 
