@@ -1,8 +1,16 @@
-import {SVG} from "./SVGBase";
+import {SVG, SVGUIElement} from "./SVGBase";
 import {DOMAttributesMap} from "../NodeAttributes";
 import {UI} from "../UIBase";
 
-SVG.Text = class SVGText extends SVG.Element {
+export class SVGText extends SVGUIElement {
+    static domAttributesMap = new DOMAttributesMap(SVG.Element.domAttributesMap, [
+        ["dx"],
+        ["dy"],
+        ["fontFamily", {domName: "font-family"}],
+        ["fontSize", {domName: "font-size"}],
+        ["textAnchor", {domName: "text-anchor"}]
+    ]);
+
     getNodeType() {
         return "text";
     }
@@ -78,12 +86,6 @@ SVG.Text = class SVGText extends SVG.Element {
             }
         }
     }
-};
+}
 
-SVG.Text.domAttributesMap = new DOMAttributesMap(SVG.Element.domAttributesMap, [
-    ["dx"],
-    ["dy"],
-    ["fontFamily", {domName: "font-family"}],
-    ["fontSize", {domName: "font-size"}],
-    ["textAnchor", {domName: "text-anchor"}]
-]);
+SVG.Text = SVGText;

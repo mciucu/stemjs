@@ -1,34 +1,22 @@
-import {SVG} from "./SVGBase";
 import {Transition} from "../Transition";
 import {Color} from "../Color";
-import {SVGRoot} from "./SVGPrimitives.js";
+import {SVGUIElement} from "./SVGBase";
+import {SVGText} from "./SVGText";
+import {Point} from "../../numerics/math";
 
-export class AnimatedSVG extends SVGRoot {
-    onMount() {
-        if (this.options.transition) {
-            this.options.transition.setStartTime(Date.now());
-            let animationWrapper = () => {
-                if (this.options.transition.isStopped()) {
-                    if (this.options.repeat) {
-                        this.options.transition.setStartTime(Date.now());
-                        this.options.transition.restart();
-                        requestAnimationFrame(animationWrapper);
-                    }
-                    return;
-                }
-                if (!this.options.transition.pauseTime) {
-                    this.options.transition.nextStep();
-                }
-                requestAnimationFrame(animationWrapper);
-            };
-            requestAnimationFrame(animationWrapper);
-        }
-    }
+
+interface BlinkTransitionOptions {
+    duration?: number;
+    times?: number;
+    firstColor?: string;
+    secondColor?: string;
+    executeLastStep?: boolean;
+    startTime?: number;
+    dependsOn?: Transition[];
 }
 
-// TODO Should be rename to make..
-export function blinkTransition(svgElement, options) {
-    let config = {
+export function makeBlinkTransition(svgElement: SVGUIElement, options?: BlinkTransitionOptions): Transition {
+    let config: Required<BlinkTransitionOptions> = {
         duration: 2000,
         times: 2,
         firstColor: "grey",
@@ -39,7 +27,7 @@ export function blinkTransition(svgElement, options) {
     };
     Object.assign(config, options);
     return new Transition({
-        func: (t, context) => {
+        func: (t: number, context: any) => {
             if (t > 1 - context.interval && !context.executeLastStep) {
                 svgElement.setColor(context.firstColor);
             } else {
@@ -58,12 +46,12 @@ export function blinkTransition(svgElement, options) {
     });
 }
 
-export function changeOpacityTransition(svgElement, opacity, duration, dependsOn = [], startTime = 0) {
+export function makeOpacityTransition(svgElement: SVGUIElement, opacity: number, duration: number, dependsOn: Transition[] = [], startTime: number = 0): Transition {
     if (!svgElement.options.hasOwnProperty("opacity")) {
         svgElement.options.opacity = 1;
     }
     return new Transition({
-        func: (t, context) => {
+        func: (t: number, context: any) => {
             svgElement.setOpacity((1 - t) * context.opacity + t * opacity);
         },
         context: {
@@ -75,9 +63,9 @@ export function changeOpacityTransition(svgElement, opacity, duration, dependsOn
     });
 }
 
-export function changeColorTransition(svgElement, color, duration, dependsOn = [], startTime = 0) {
+export function makeColorTransition(svgElement: SVGUIElement, color: string, duration: number, dependsOn: Transition[] = [], startTime: number = 0): Transition {
     return new Transition({
-        func: (t, context) => {
+        func: (t: number, context: any) => {
             svgElement.setColor(Color.interpolate(context.color, color, t));
         },
         context: {
@@ -89,9 +77,9 @@ export function changeColorTransition(svgElement, color, duration, dependsOn = [
     });
 }
 
-export function moveTransition(svgElement, coords, duration, dependsOn = [], startTime = 0) {
+export function makeMoveTransition(svgElement: SVGUIElement, coords: Point, duration: number, dependsOn: Transition[] = [], startTime: number = 0): Transition {
     return new Transition({
-        func: (t, context) => {
+        func: (t: number, context: any) => {
             svgElement.setPosition(
                 (1 - t) * context.x + t * coords.x,
                 (1 - t) * context.y + t * coords.y
@@ -107,16 +95,16 @@ export function moveTransition(svgElement, coords, duration, dependsOn = [], sta
     });
 }
 
-export function changeTextFillTransition(svgTextElement, color, duration, dependsOn = [], startTime = 0) {
+export function makeTextFillColorTransition(svgTextElement: SVGText, color: string, duration: number, dependsOn: Transition[] = [], startTime: number = 0): Transition {
     return new Transition({
-        func: (t, context) => {
+        func: (t: number, context: any) => {
             svgTextElement.setColor(Color.interpolate(context.color, color, t), true);
         },
         context: {
             color: svgTextElement.getColor()
         },
-        duration: duration,
-        startTime: startTime,
-        dependsOn: dependsOn
+        duration,
+        startTime,
+        dependsOn
     });
 }

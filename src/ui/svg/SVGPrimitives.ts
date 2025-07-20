@@ -1,37 +1,37 @@
-import {SVG, SVGUIElement} from "./SVGBase.js";
-import * as math from "../../numerics/math.js";
+import {SVG, SVGUIElement} from "./SVGBase";
+import * as math from "../../numerics/math";
 
 export class SVGRoot extends SVGUIElement {
-    getNodeType() {
+    getNodeType(): string {
         return "svg";
     }
 }
 
 export class RawSVG extends SVGRoot {
-    redraw() {
+    redraw(): void {
         super.redraw();
         this.node.innerHTML = this.options.innerHTML;
     }
 }
 
 export class SVGGroup extends SVGUIElement {
-    getNodeType() {
+    getNodeType(): string {
         return "g";
     }
 
-    setColor(color) {
+    setColor(color: string): void {
         for (let i = 0; i < this.children.length; i += 1) {
             this.children[i].setColor(color);
         }
     }
 }
 
-export class SVGPath extends SVG.Element {
-    getNodeType() {
+export class SVGPath extends SVGUIElement {
+    getNodeType(): string {
         return "path";
     }
 
-    getDefaultOptions() {
+    getDefaultOptions(options?: any): Partial<any> {
         return {
             d: ""
         }
@@ -43,26 +43,26 @@ export class SVGPath extends SVG.Element {
         return attr;
     }
 
-    getPath() {
+    getPath(): string {
         return this.options.d;
     }
 
-    setPath(newPath) {
+    setPath(newPath: string): void {
         this.options.d = newPath;
         this.node.setAttribute("d", this.options.d);
     }
 
-    getLength() {
-        return this.node.getTotalLength();
+    getLength(): number {
+        return (this.node as SVGPathElement).getTotalLength();
     }
 
-    getPointAtLength(len) {
-        return this.node.getPointAtLength(len);
+    getPointAtLength(len: number): DOMPoint {
+        return (this.node as SVGPathElement).getPointAtLength(len);
     }
 
-    getPointAtLengthWithAngle(len) {
+    getPointAtLengthWithAngle(len: number): {x: number, y: number, alpha: number} {
         let totalLength = this.getLength();
-        let epsilon;
+        let epsilon: number;
         if (totalLength <= 1) {
             epsilon = totalLength / 1000;
         } else {
@@ -80,11 +80,11 @@ export class SVGPath extends SVG.Element {
 }
 
 export class SVGCircle extends SVGUIElement {
-    getNodeType() {
+    getNodeType(): string {
         return "circle";
     }
 
-    getDefaultOptions() {
+    getDefaultOptions(options?: any): Partial<any> {
         return {
             radius: 0,
             center: {x: 0, y: 0}
@@ -99,17 +99,17 @@ export class SVGCircle extends SVGUIElement {
         return attr;
     }
 
-    getRadius() {
+    getRadius(): number {
         return this.options.radius;
     }
 
-    setRadius(radius) {
+    setRadius(radius: number): void {
         this.options.radius = radius;
 
         this.setAttribute("r", radius);
     }
 
-    setCenter(x, y) {
+    setCenter(x: number, y: number): void {
         this.options.center.x = x;
         this.options.center.y = y;
 
@@ -117,11 +117,11 @@ export class SVGCircle extends SVGUIElement {
         this.setAttribute("cy", y);
     }
 
-    getCenter() {
+    getCenter(): math.Point {
         return this.options.center;
     }
 
-    toPath() {
+    toPath(): SVGPath {
         let r = this.options.radius;
         let cx = this.options.center.x;
         let cy = this.options.center.y;
@@ -135,7 +135,7 @@ export class SVGCircle extends SVGUIElement {
 }
 
 export class SVGCircleArc extends SVGPath {
-    getPath() {
+    getPath(): string {
         let startAngle = this.options.startAngle;
         let endAngle = this.options.endAngle;
         let radius = this.options.radius;
@@ -144,8 +144,8 @@ export class SVGCircleArc extends SVGPath {
         var angleDiff = endAngle - startAngle + (endAngle < startAngle ? (2 * Math.PI) : 0);
         var startPoint = math.polarToCartesian(startAngle, radius, center);
         var endPoint = math.polarToCartesian(endAngle, radius, center);
-        var sweepFlag;
-        var largeArcFlag;
+        var sweepFlag: number;
+        var largeArcFlag: number;
 
         // Set largeArcFlag and sweepFlag
         if (angleDiff <= Math.PI) {
@@ -171,53 +171,53 @@ export class SVGCircleArc extends SVGPath {
 }
 
 export class SVGRect extends SVGUIElement {
-    getNodeType() {
+    getNodeType(): string {
         return "rect";
     }
 
-    getX() {
+    getX(): number {
         return this.options.x;
     }
 
-    setX(x) {
+    setX(x: number): void {
         this.options.x = x;
         this.node.setAttribute("x", this.options.x);
     }
 
-    getY() {
+    getY(): number {
         return this.options.y;
     }
 
-    setY(y) {
+    setY(y: number): void {
         this.options.y = y;
         this.node.setAttribute("y", this.options.y);
     }
 
-    getWidth() {
+    getWidth(): number {
         return this.options.width;
     }
 
-    setWidth(width) {
+    setWidth(width: number): void {
         this.options.width = width;
         this.node.setAttribute("width", this.options.width);
     }
 
-    getHeight() {
+    getHeight(): number {
         return this.options.height;
     }
 
-    setHeight(height) {
+    setHeight(height: number): void {
         this.options.height = height;
         this.node.setAttribute("height", this.options.height);
     }
 }
 
 export class SVGLine extends SVGUIElement {
-    getNodeType() {
+    getNodeType(): string {
         return "line";
     }
 
-    getDefaultOptions() {
+    getDefaultOptions(options?: any): Partial<any> {
         return {
             fill: "black",
             stroke: "black"
@@ -226,7 +226,7 @@ export class SVGLine extends SVGUIElement {
 
     //TODO(@all): Make the getters for x1, y1, x2, y2
 
-    setLine(x1, y1, x2, y2) {
+    setLine(x1: number, y1: number, x2: number, y2: number): void {
         this.options.x1 = x1;
         this.options.y1 = y1;
         this.options.x2 = x2;
@@ -240,7 +240,7 @@ export class SVGLine extends SVGUIElement {
 }
 
 export class Polygon extends SVGPath {
-    getDefaultOptions() {
+    getDefaultOptions(options?: any): Partial<any> {
         return {
             points: []
         };
@@ -252,7 +252,7 @@ export class Polygon extends SVGPath {
         return attr;
     }
 
-    getPolygonPath() {
+    getPolygonPath(): string {
         let pathString = "";
         for (let i = 0; i < this.options.points.length; ++i) {
             if (i == 0) {
@@ -271,6 +271,5 @@ export class Polygon extends SVGPath {
 SVG.Circle = SVGCircle;
 SVG.Path = SVGPath;
 SVG.Group = SVGGroup;
-SVG.Defs = SVGDefs;
 SVG.Line = SVGLine;
 SVG.Rect = SVGRect;

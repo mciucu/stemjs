@@ -119,6 +119,8 @@ export class ClassNameSet extends Set {
     }
 }
 
+type NodeElement = HTMLElement | SVGElement;
+
 export class NodeAttributes {
     [key: string]: any;
     static defaultAttributesMap: DOMAttributesMap;
@@ -144,7 +146,7 @@ export class NodeAttributes {
 
     // Change the attribute & apply it, regardless if it exists in the attribute map (in that case it's whitelisted)
     // TODO: should this use the domName or the reverseName? Still needs work
-    setAttribute(key: string, value: any, node?: HTMLElement, attributesMap: DOMAttributesMap = (this.constructor as any).defaultAttributesMap): void {
+    setAttribute(key: string, value: any, node?: NodeElement, attributesMap: DOMAttributesMap = (this.constructor as any).defaultAttributesMap): void {
         // TODO: might want to find a better way than whitelistAttributes field to do this
         if (!attributesMap.has(key)) {
             this.whitelistedAttributes = this.whitelistedAttributes || {}; // TODO: reconsider the whitelisted attributes
@@ -156,7 +158,7 @@ export class NodeAttributes {
         }
     }
 
-    applyStyleToNode(key: string, value: any, node?: HTMLElement): void {
+    applyStyleToNode(key: string, value: any, node?: NodeElement): void {
         if (typeof value === "function") {
             value = value();
         }
@@ -176,7 +178,7 @@ export class NodeAttributes {
         }
     }
 
-    setStyle(key: string | Record<string, any>, value?: any, node?: HTMLElement): void {
+    setStyle(key: string | Record<string, any>, value?: any, node?: NodeElement): void {
         value = resolveFuncValue(value);
         if (!isString(key)) {
             // If the key is not a string, it should be a plain object
@@ -195,7 +197,7 @@ export class NodeAttributes {
         this.applyStyleToNode(key, value, node);
     }
 
-    removeStyle(key: string, node?: HTMLElement): void {
+    removeStyle(key: string, node?: NodeElement): void {
         if (this.style) {
             delete this.style[key];
         }
@@ -222,7 +224,7 @@ export class NodeAttributes {
         return this.className as ClassNameSet;
     }
 
-    addClass(classes: any, node?: HTMLElement): void {
+    addClass(classes: any, node?: NodeElement): void {
         classes = (this.constructor as typeof NodeAttributes).getClassArray(classes);
 
         for (const cls of classes) {
@@ -233,7 +235,7 @@ export class NodeAttributes {
         }
     }
 
-    removeClass(classes: any, node?: HTMLElement): void {
+    removeClass(classes: any, node?: NodeElement): void {
         classes = (this.constructor as typeof NodeAttributes).getClassArray(classes);
 
         for (const cls of classes) {
@@ -249,7 +251,7 @@ export class NodeAttributes {
     }
 
     // Apply the attribute only if it's in the attributesMap
-    applyAttribute(key: string, node: HTMLElement, attributesMap: DOMAttributesMap): void {
+    applyAttribute(key: string, node: NodeElement, attributesMap: DOMAttributesMap): void {
         let attributeOptions = attributesMap.get(key);
         if (!attributeOptions) {
             if (this.whitelistedAttributes && (key in this.whitelistedAttributes)) {
@@ -278,11 +280,11 @@ export class NodeAttributes {
         }
     }
 
-    applyClassName(node: HTMLElement): void {
+    applyClassName(node: NodeElement): void {
         if (this.className) {
             const className = String(this.className);
             if (node.className !== className) {
-                node.className = className;
+                (node as Element).className = className;
             }
         } else {
             if (node.className) {
@@ -291,7 +293,7 @@ export class NodeAttributes {
         }
     }
 
-    apply(node: HTMLElement, attributesMap: DOMAttributesMap): void {
+    apply(node: NodeElement, attributesMap: DOMAttributesMap): void {
         const addedAttributes: Record<string, boolean> = {};
         const whitelistedAttributes = this.whitelistedAttributes || {};
 
