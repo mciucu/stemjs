@@ -371,14 +371,15 @@ export function fetch(input: RequestInfo | URLFetchOptions, ...args: FetchOption
     if (urlParams) {
         // Change the URL of the request to add a query
         const urlSearchParams = getURLSearchParams(urlParams, options.arraySearchParamSuffix);
-        if (input instanceof Request) {
-            input = new Request(composeURL(input.url, urlSearchParams), input);
+        if ((input as any) instanceof Request) {
+            input = new Request(composeURL((input as unknown as Request).url, urlSearchParams), input as RequestInit);
         } else {
             input = new Request(composeURL(input, urlSearchParams), {});
         }
     }
 
-    return new XHRPromise(input, options);
+    // TODO @types is this that safe?
+    return new XHRPromise(input as RequestInfo, options);
 }
 
 fetch.defaultPreprocessors = [] as FetchPreprocessor[];
