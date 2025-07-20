@@ -5,7 +5,7 @@ import {
     isPlainObject,
     unwrapElementWithFunc,
     isString,
-    Nullable
+    Nullable, isFunction
 } from "../base/Utils";
 import {CleanupJobs, Dispatchable, OncePerTickRunner, RemoveHandle} from "../base/Dispatcher";
 import {DOMAttributesMap, NodeAttributes} from "./NodeAttributes";
@@ -536,7 +536,7 @@ export class UIElement<
 
                 if (haveListenerMethod || nodeEvent) {
                     this[handlerMethodName] = (...args) => {
-                        if (this.options[key]) {
+                        if (isFunction(this.options[key])) {
                             this.options[key](...args, this);
                         }
                     };
@@ -798,9 +798,9 @@ UI.createElement = function (tag: typeof BaseUIElement<any> | HTMLTagType | SVGT
     if (isString(tag)) {
         options.nodeType = tag as HTMLTagType; // TODO @types just shutting down the types
         if (isSVGTag(tag)) {
-            return new UI.SVGElement<void, SVGElementTagNameMap[typeof tag]>(options);
+            return new UI.SVGElement<void, SVGElementTagNameMap[typeof tag]>(options as any);
         }
-        return new UIElement<void, HTMLElementTagNameMap[typeof tag]>(options);
+        return new UIElement<void, HTMLElementTagNameMap[typeof tag]>(options as any);
     }
 
     return new (tag as typeof UIElement)(options);
