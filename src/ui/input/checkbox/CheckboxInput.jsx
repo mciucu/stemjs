@@ -1,4 +1,4 @@
-import {UI} from "../../UIBase.js";
+import {UI} from "../../UIBase";
 import {StyleSheet} from "../../Style";
 import {styleRule} from "../../../decorators/Style";
 import {registerStyle} from "../../style/Theme";

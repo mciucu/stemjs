@@ -132,9 +132,9 @@ export class TextUIElement extends BaseUIElement<Text> {
 
     constructor(value: string | TextElementOptions = "") {
         super();
-        if (isPlainObject(value) && value?.value) {
+        if (value?.hasOwnProperty("value") && isPlainObject(value)) {
             this.value = value.value;
-            this.options = value as TextElementOptions & UIElementOptions;
+            this.options = value as any;
         } else {
             this.value = (value as string) ?? "";
         }
