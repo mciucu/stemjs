@@ -1,24 +1,18 @@
-import {SVG, SVGUIElement} from "./SVGBase";
+import {SVG, SVGPrimitive, SVGUIElement} from "./SVGBase";
 import * as math from "../../numerics/math";
 
-export class SVGRoot extends SVGUIElement {
-    getNodeType(): string {
-        return "svg";
-    }
+export class SVGRoot extends SVGPrimitive("svg") {
 }
 
 export class RawSVG extends SVGRoot {
-    redraw(): void {
+    redraw(): boolean {
         super.redraw();
         this.node.innerHTML = this.options.innerHTML;
+        return true;
     }
 }
 
-export class SVGGroup extends SVGUIElement {
-    getNodeType(): string {
-        return "g";
-    }
-
+export class SVGGroup extends SVGPrimitive("g") {
     setColor(color: string): void {
         for (let i = 0; i < this.children.length; i += 1) {
             this.children[i].setColor(color);
@@ -26,11 +20,7 @@ export class SVGGroup extends SVGUIElement {
     }
 }
 
-export class SVGPath extends SVGUIElement {
-    getNodeType(): string {
-        return "path";
-    }
-
+export class SVGPath extends SVGPrimitive("path") {
     getDefaultOptions(options?: any): Partial<any> {
         return {
             d: ""
@@ -79,11 +69,7 @@ export class SVGPath extends SVGUIElement {
     }
 }
 
-export class SVGCircle extends SVGUIElement {
-    getNodeType(): string {
-        return "circle";
-    }
-
+export class SVGCircle extends SVGPrimitive("circle") {
     getDefaultOptions(options?: any): Partial<any> {
         return {
             radius: 0,
@@ -170,11 +156,7 @@ export class SVGCircleArc extends SVGPath {
     }
 }
 
-export class SVGRect extends SVGUIElement {
-    getNodeType(): string {
-        return "rect";
-    }
-
+export class SVGRect extends SVGPrimitive("rect") {
     getX(): number {
         return this.options.x;
     }
@@ -212,11 +194,7 @@ export class SVGRect extends SVGUIElement {
     }
 }
 
-export class SVGLine extends SVGUIElement {
-    getNodeType(): string {
-        return "line";
-    }
-
+export class SVGLine extends SVGPrimitive("line") {
     getDefaultOptions(options?: any): Partial<any> {
         return {
             fill: "black",

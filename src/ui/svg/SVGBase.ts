@@ -28,6 +28,8 @@ export class SVGUIElement<
     ExtraOptions = DefaultSVGOptions,
     SVGNodeType extends SVGElement = SVGElement
 > extends UIElement<ExtraOptions, SVGNodeType> {
+    declare children?: SVGUIElement<any, any>[];
+
     createNode(): SVGNodeType {
         this.node = document.createElementNS("http://www.w3.org/2000/svg", this.getNodeType()) as SVGNodeType;
         applyDebugFlags(this);
@@ -187,8 +189,39 @@ SVGUIElement.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap
     ["viewBox", {domName: "viewBox"}],
 ]);
 
+// Keep a map for every base class, and for each base class keep a map for each nodeType, to cache classes
+const svgPrimitiveMap: WeakMap<typeof SVGUIElement, Map<string, typeof SVGUIElement<any>>> = new WeakMap();
+
+export function SVGPrimitive<ExtraOptions = void, T extends keyof SVGElementTagNameMap = keyof SVGElementTagNameMap>(nodeType: T, BaseClass: typeof SVGUIElement = SVGUIElement): typeof SVGUIElement<ExtraOptions, SVGElementTagNameMap[T]> {
+    let baseClassPrimitiveMap = svgPrimitiveMap.get(BaseClass);
+    if (!baseClassPrimitiveMap) {
+        baseClassPrimitiveMap = new Map();
+        svgPrimitiveMap.set(BaseClass, baseClassPrimitiveMap);
+    }
+    let resultClass = baseClassPrimitiveMap.get(nodeType);
+    if (resultClass) {
+        return resultClass as any;
+    }
+    resultClass = class SVGPrimitive extends BaseClass<ExtraOptions, SVGElementTagNameMap[T]> {
+        declare node?: SVGElementTagNameMap[T];
+        
+        getNodeType(): T {
+            return nodeType;
+        }
+        
+        createNode(): SVGElementTagNameMap[T] {
+            this.node = document.createElementNS("http://www.w3.org/2000/svg", nodeType) as SVGElementTagNameMap[T];
+            applyDebugFlags(this);
+            return this.node;
+        }
+    };
+    baseClassPrimitiveMap.set(nodeType, resultClass);
+    return resultClass as any;
+}
+
 export const SVG = {
     Element: SVGUIElement,
+    Primitive: SVGPrimitive,
 };
 
 UI.SVGElement = SVGUIElement;
