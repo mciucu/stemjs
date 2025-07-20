@@ -17,6 +17,7 @@ interface MarkupRendererOptions {
     [key: string]: any;
 }
 
+// TODO @types shouldn't this be in UIBase?
 type UIClass = new (...args: any[]) => BaseUIElement;
 type MarkupDependency = {
     registerMarkup?: (classMap: MarkupClassMap) => void;
