@@ -7,7 +7,7 @@ import {EnqueueableMethodMixin, enqueueIfNotLoaded} from "../base/EnqueueableMet
 import {ensure} from "../base/Require";
 
 
-class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
+export class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
     static langToolsSrc = null;
 
     static requireAce(callback) {
@@ -490,7 +490,7 @@ class StaticCodeHighlighterStyle extends StyleSheet {
 
 
 @registerStyle(StaticCodeHighlighterStyle)
-class StaticCodeHighlighter extends CodeEditor {
+export class StaticCodeHighlighter extends CodeEditor {
     setOptions(options) {
         options = Object.assign({
             fontSize: 13,
@@ -504,5 +504,3 @@ class StaticCodeHighlighter extends CodeEditor {
         attr.addClass(this.styleSheet.hideActive);
     }
 }
-
-export {CodeEditor, StaticCodeHighlighter};
