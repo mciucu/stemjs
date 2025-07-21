@@ -1,5 +1,5 @@
 import {UI} from "../UIBase";
-import {IconableInterface} from "../SimpleElements.jsx";
+import {IconableInterface} from "../SimpleElements";
 import {registerStyle} from "../style/Theme";
 import {ButtonStyle} from "./ButtonStyle";
 

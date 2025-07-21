@@ -1,7 +1,7 @@
 import {UI} from "../UIBase";
 import {Table} from "./Table";
 import {defaultComparator} from "../../base/Utils";
-import {MakeIcon} from "../SimpleElements.jsx";
+import {MakeIcon} from "../SimpleElements";
 import {styleRule, StyleSheet} from "../Style";
 
 
