@@ -69,7 +69,7 @@ function cardPanelHeaderColorToStyle(color){
 export const CardPanelHeaderStyle = BasicLevelStyleSheet(cardPanelHeaderColorToStyle);
 
 @registerStyle(CardPanelStyle)
-class CardPanel extends SimpleStyledElement {
+export class CardPanel extends SimpleStyledElement {
     getTitle() {
         return this.options.title;
     }
@@ -134,5 +134,3 @@ class CardPanel extends SimpleStyledElement {
         ];
     }
 }
-
-export {CardPanel};

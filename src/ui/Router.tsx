@@ -16,7 +16,7 @@ interface ChangeURLOptions {
     keepSearchParams?: boolean;
 }
 
-interface RouteMatch {
+export interface RouteMatch {
     args: string[];
     urlParts: string[];
 }

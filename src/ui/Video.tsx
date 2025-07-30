@@ -29,4 +29,5 @@ Video.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
     ["playsinline"],
     ["poster"],
     ["preload"],
+    ["srcObject"],
 ]);
