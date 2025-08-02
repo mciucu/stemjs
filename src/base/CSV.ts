@@ -5,7 +5,6 @@ import {ColumnHandler, ColumnInput} from "./ColumnHandler";
 const DEFAULT_FILE_NAME = "data.csv";
 
 // Type definitions
-type CSVEntry = Record<string, any>;
 type CSVRow = string[];
 
 interface CSVReaderOptions {
@@ -28,14 +27,14 @@ interface CSVColumn {
 type CSVColumnInput = [string | string[], Record<string, any>?];
 
 // TODO: this should be a CSV writer, right?
-export class CSVBuilder {
-    private columns: ColumnHandler[];
+export class CSVBuilder<BaseType> {
+    private columns: ColumnHandler<BaseType>[];
 
-    constructor(columns: (ColumnInput | ColumnHandler | null | false)[]) {
+    constructor(columns: (ColumnInput<BaseType> | ColumnHandler<BaseType> | null | false)[]) {
         this.setColumns(columns);
     }
 
-    setColumns(columns: (ColumnInput | ColumnHandler | null | false)[]): void {
+    setColumns(columns: (ColumnInput<BaseType> | ColumnHandler<BaseType> | null | false)[]): void {
         this.columns = ColumnHandler.mapColumns(columns);
     }
 
@@ -60,7 +59,7 @@ export class CSVBuilder {
         return str;
     }
 
-    getEntryLine(entry: CSVEntry): string {
+    getEntryLine(entry: BaseType): string {
         let str = "";
         for (let index = 0; index < this.columns.length; index++) {
             const column = this.columns[index];
@@ -72,7 +71,7 @@ export class CSVBuilder {
         return str;
     }
 
-    getText(entries: CSVEntry[]): string {
+    getText(entries: BaseType[]): string {
         let text = this.getHeaderLine();
         for (const entry of entries) {
             text += "\n" + this.getEntryLine(entry);
@@ -80,12 +79,12 @@ export class CSVBuilder {
         return text;
     }
 
-    saveFile(entries: CSVEntry[], fileName: string = DEFAULT_FILE_NAME): FileSaver {
+    saveFile(entries: BaseType[], fileName: string = DEFAULT_FILE_NAME): FileSaver {
         const text = this.getText(entries);
         return FileSaver.saveAs(text, fileName);
     }
 
-    static saveFile(columns: (ColumnInput | ColumnHandler | null | false)[], entries: CSVEntry[], fileName: string = DEFAULT_FILE_NAME): FileSaver {
+    static saveFile<BaseType>(columns: (ColumnInput<BaseType> | ColumnHandler<BaseType> | null | false)[], entries: BaseType[], fileName: string = DEFAULT_FILE_NAME): FileSaver {
         let builder = new this(columns);
         return builder.saveFile(entries, fileName);
     }

@@ -3,23 +3,23 @@
 
 import {isNotNullOrFalse} from "./Utils";
 
-export type ColumnMapper = (obj: any) => any;
+export type ColumnMapper<BaseType, ResultType> = (obj: BaseType) => ResultType;
 
 // TODO @Mihai this might make sense to templatized, depending on the object type for ColumnMapper
-export type ColumnOptions = {
+export interface ColumnOptions<BaseType, ResultType> {
     headerName?: string;
-    value?: ColumnMapper;
+    value?: ColumnMapper<BaseType, ResultType>;
     name?: string;
     index?: number;
     [key: string]: any;
-};
+}
 
-export type ColumnInput = ColumnOptions | [string, ColumnMapper, ColumnOptions?];
+export type ColumnInput<BaseType, ResultType = any> = ColumnOptions<BaseType, ResultType> | [string, ColumnMapper<BaseType, ResultType>, ColumnOptions<BaseType, ResultType>?];
 
-export class ColumnHandler implements ColumnOptions {
+export class ColumnHandler<BaseType, ResultType = any> implements ColumnOptions<BaseType, ResultType> {
     [key: string]: any;
 
-    constructor(options: ColumnInput, index?: number) {
+    constructor(options: ColumnInput<BaseType, ResultType>, index?: number) {
         if (Array.isArray(options)) {
             const [headerName, value, additionalOptions] = options;
             options = {
@@ -36,7 +36,7 @@ export class ColumnHandler implements ColumnOptions {
     }
 
     // If an entry already as a ColumnHandler, it's left as-is
-    static mapColumns(columns: (ColumnInput | ColumnHandler | null | false)[]): ColumnHandler[] {
+    static mapColumns<BaseType>(columns: (ColumnInput<BaseType, any> | ColumnHandler<BaseType, any> | null | false)[]): ColumnHandler<BaseType, any>[] {
         const filteredColumns = columns.filter(isNotNullOrFalse);
         return filteredColumns.map((column, index) => {
             if (column instanceof ColumnHandler) {
