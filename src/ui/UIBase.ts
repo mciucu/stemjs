@@ -206,14 +206,12 @@ export class UIElement<
     static theme?: Theme;
 
     children: BaseUIElement[] = [];
-    declare state: any;
     declare options: OptionsType;
 
     constructor(options: OptionsType = {} as OptionsType) {
         super();
         this.children = [];  // These are the rendered children
         this.options = options; // TODO: this is a hack, to not break all the code that references this.options in setOptions
-        this.state = this.getDefaultState();  // TODO @cleanup implement a simpler state pattern, that allows custom state types
         this.setOptions(options); // TODO maybe this actually needs to be removed, since on a copy we don't want the default options of the other object
     }
 
@@ -233,10 +231,6 @@ export class UIElement<
         delete options.nodeType;
 
         return options;
-    }
-
-    getDefaultState(): any {
-        return {};
     }
 
     getPreservedOptions(): Partial<OptionsType> | undefined {
