@@ -47,7 +47,7 @@ export interface UINamespace {
     SVGElement: typeof UIElement;
     createElement: (tag: typeof BaseUIElement<any> | HTMLTagType, options?: UIElementOptions | null, ...children: any[]) => BaseUIElement | null;
     str: (value: any) => any;
-    Primitive: <ExtraOptions = void, T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap>(nodeType: T, BaseClass?: typeof UIElement) => typeof UIElement<ExtraOptions, HTMLElementTagNameMap[T]>;
+    Primitive: <ExtraOptions = void, T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap, BaseClassType extends typeof UIElement = typeof UIElement>(nodeType: T, BaseClass?: BaseClassType) => BaseClassType;
 }
 
 export const UI: UINamespace = {} as UINamespace;
@@ -808,7 +808,7 @@ UI.str = (value: string) => new TextUIElement(value);
 // Keep a map for every base class, and for each base class keep a map for each nodeType, to cache classes
 const primitiveMap: WeakMap<typeof UIElement, Map<string, typeof UIElement<any>>> = new WeakMap();
 
-UI.Primitive = <ExtraOptions = void, T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap>(nodeType: T, BaseClass: typeof UIElement = UIElement): typeof UIElement<ExtraOptions, HTMLElementTagNameMap[T]> => {
+UI.Primitive = <ExtraOptions = void, T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap, BaseClassType extends typeof UIElement = typeof UIElement>(nodeType: T, BaseClass: BaseClassType = UIElement as BaseClassType): BaseClassType => {
     let baseClassPrimitiveMap = primitiveMap.get(BaseClass);
     if (!baseClassPrimitiveMap) {
         baseClassPrimitiveMap = new Map();
@@ -818,6 +818,7 @@ UI.Primitive = <ExtraOptions = void, T extends keyof HTMLElementTagNameMap = key
     if (resultClass) {
         return resultClass as any;
     }
+    // @ts-ignore
     resultClass = class Primitive extends BaseClass<ExtraOptions, HTMLElementTagNameMap[T]> {
         declare node?: HTMLElementTagNameMap[T];
         
