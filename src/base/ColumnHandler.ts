@@ -15,6 +15,7 @@ export interface ColumnOptions<BaseType, ResultType> {
 }
 
 export type ColumnInput<BaseType, ResultType = any> = ColumnOptions<BaseType, ResultType> | [string, ColumnMapper<BaseType, ResultType>, ColumnOptions<BaseType, ResultType>?];
+export type ColumnLike<BaseType, ResultType = any> = ColumnHandler<BaseType, any> | ColumnInput<BaseType, any> | null | undefined | false;
 
 export class ColumnHandler<BaseType, ResultType = any> implements ColumnOptions<BaseType, ResultType> {
     [key: string]: any;
@@ -36,7 +37,7 @@ export class ColumnHandler<BaseType, ResultType = any> implements ColumnOptions<
     }
 
     // If an entry already as a ColumnHandler, it's left as-is
-    static mapColumns<BaseType>(columns: (ColumnInput<BaseType, any> | ColumnHandler<BaseType, any> | null | false)[]): ColumnHandler<BaseType, any>[] {
+    static mapColumns<BaseType>(columns: ColumnLike<BaseType>[]): ColumnHandler<BaseType>[] {
         const filteredColumns = columns.filter(isNotNullOrFalse);
         return filteredColumns.map((column, index) => {
             if (column instanceof ColumnHandler) {

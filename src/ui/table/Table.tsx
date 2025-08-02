@@ -1,7 +1,7 @@
 import {UI, UIElement, UIElementOptions, UIElementChild, HTMLTagType} from "../UIBase";
 import {TableStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
-import {ColumnHandler} from "../../base/ColumnHandler.js";
+import {ColumnHandler, ColumnLike} from "../../base/ColumnHandler.js";
 
 export interface TableRowOptions<BaseType> extends UIElementOptions {
     columns?: ColumnHandler<BaseType>[];
@@ -9,7 +9,6 @@ export interface TableRowOptions<BaseType> extends UIElementOptions {
     rowIndex?: number;
 }
 
-// TODO: the whole table architecture probably needs a rethinking
 export class TableRow<BaseType> extends UIElement<TableRowOptions<BaseType>, HTMLTableRowElement> {
     getNodeType(): HTMLTagType {
         return "tr";
@@ -32,7 +31,7 @@ export class TableRow<BaseType> extends UIElement<TableRowOptions<BaseType>, HTM
 
 export interface TableOptions<BaseType> extends UIElementOptions {
     entries?: BaseType[];
-    columns?: ColumnHandler<BaseType>[];
+    columns?: ColumnLike<BaseType>[];
     rowClass?: typeof TableRow<BaseType>;
     noHeader?: boolean;
 }
@@ -66,7 +65,8 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
     }
 
     getDefaultColumns(options?: typeof this.options, entries?: BaseType[]): ColumnHandler<BaseType>[] {
-        return options?.columns || [];
+        // We know these must have been converted already
+        return options?.columns as ColumnHandler<BaseType>[] || [] ;
     }
 
     setOptions(options: typeof this.options): void {
@@ -100,7 +100,7 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
         };
     }
 
-    getRowByEntry(entry: any): UIElement | null {
+    getRowByEntry(entry: BaseType): UIElement | null {
         // TODO not nice that this is O(N)
         if (!this.rows) return null;
         for (const row of this.rows) {
