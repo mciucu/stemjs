@@ -1,4 +1,4 @@
-import {UI, UIElement, UIElementOptions, UIElementChild} from "../UIBase";
+import {UI, UIElement, UIElementOptions, UIElementChild, HTMLTagType} from "../UIBase";
 import {DOMAttributesMap, NodeAttributes} from "../NodeAttributes";
 import {InputStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
@@ -40,9 +40,9 @@ export interface SelectOptions<ValueType> extends InputableElementOptions<ValueT
 }
 
 // TODO @types fucking Typescript not implementing decorators properly
-export interface InputableElement<ValueType, ExtraOptions extends InputableElementOptions<ValueType> = InputableElementOptions<ValueType>> {
+export interface InputableElement<ValueType, ExtraOptions extends InputableElementOptions<ValueType> = InputableElementOptions<ValueType>, NodeType extends (HTMLElement | SVGElement) = HTMLElement> {
     // @ts-ignore
-    declare styleSheet: InputStyle;
+    styleSheet: InputStyle;
 }
 
 // TODO rename to BaseInputElement
@@ -51,7 +51,7 @@ export interface InputableElement<ValueType, ExtraOptions extends InputableEleme
 export class InputableElement<
     ValueType,
     ExtraOptions extends InputableElementOptions<ValueType> = InputableElementOptions<ValueType>,
-    NodeType extends (HTMLElement | SVGElement) = HTMLElement,
+    NodeType extends (HTMLElement | SVGElement) = HTMLElement
 > extends UIElement<ExtraOptions, NodeType> {
     extraNodeAttributes(attr: NodeAttributes): void {
         super.extraNodeAttributes(attr);
@@ -105,15 +105,20 @@ export class InputableElement<
     }
 
     // You need to implement these
-    declare getValue: () => any;
-    declare setValue: (value: any) => void;
+    getValue(): ValueType | null {
+        throw new Error("Not implemented");
+    };
+
+    setValue(value: ValueType): void {
+        throw new Error("Not implemented");
+    }
 }
 
 
 export class Input<
     ValueType = string,
     ExtraOptions extends InputOptions<ValueType> = InputOptions<ValueType>
-> extends UI.Primitive<ExtraOptions, "input">("input", InputableElement<ValueType, ExtraOptions, HTMLInputElement>) {
+> extends InputableElement<ValueType, ExtraOptions, HTMLInputElement> {
     static domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
         ["autocomplete"],
         ["autofocus", {noValue: true}],
@@ -129,6 +134,10 @@ export class Input<
         ["type"],
     ]);
 
+    getNodeType(): HTMLTagType {
+        return "input";
+    }
+
     extraNodeAttributes(attr: NodeAttributes): void {
         super.extraNodeAttributes(attr);
         attr.setAttribute("type", this.getInputType() || this.options.type);
@@ -138,19 +147,19 @@ export class Input<
         return this.node.value;
     }
 
-    getValue(): string | ValueType {
-        return this.getRawValue().trim();
+    getValue(): ValueType {
+        return this.getRawValue().trim() as ValueType;
     }
 
     setValue(newValue?: ValueType | string): void {
         if (newValue != null) {
-            this.node.value = newValue;
+            this.node.value = newValue as string;
         } else {
             this.node.removeAttribute("value");
         }
     }
 
-    setOptions(options: ExtraOptions): void {
+    setOptions(options: typeof this.options): void {
         const oldInitialValue = this.options.initialValue;
         const oldValue = this.options.value;
         super.setOptions(options);
@@ -213,8 +222,7 @@ export class NumberInput extends Input<number, NumberInputOptions> {
     }
 
     getValue(): number | null {
-        const value = super.getValue();
-        return value ? parseFloat(value) : null;
+        return this.node.valueAsNumber;
     }
 }
 
@@ -317,12 +325,10 @@ export class FileInput extends Input<FileInputOptions> {
 }
 
 
-export class RawCheckboxInput extends Input<CheckboxInputOptions> {
+export class RawCheckboxInput extends Input<boolean, CheckboxInputOptions> {
     static domAttributesMap = new DOMAttributesMap(Input.domAttributesMap, [
         ["checked", {noValue: true}]
     ]);
-
-    declare node: HTMLInputElement;
 
     extraNodeAttributes(attr: NodeAttributes): void {
         super.extraNodeAttributes(attr);
@@ -386,8 +392,10 @@ export class RadioInput extends RawCheckboxInput {
 }
 
 
-export class TextArea extends UI.Primitive<InputableElementOptions, "textarea">("textarea", InputableElement) {
-    declare node: HTMLTextAreaElement;
+export class TextArea extends InputableElement<string, InputableElementOptions<string>, HTMLTextAreaElement> {
+    getNodeType(): HTMLTagType {
+        return "textarea";
+    }
 
     applyNodeAttributes(): void {
         super.applyNodeAttributes();
@@ -423,9 +431,13 @@ export class TextArea extends UI.Primitive<InputableElementOptions, "textarea">(
 
 
 // TODO this element is inconsistent with the rest. Properly fix the initialValue pattern
-export class Select extends UI.Primitive<SelectOptions, "select">("select", InputableElement) {
-    declare node: HTMLSelectElement;
-    givenOptions: any[] = [];
+export class Select<ValueType, ExtraOptions = void> extends InputableElement<ValueType, SelectOptions<ValueType> & ExtraOptions, HTMLSelectElement> {
+    givenOptions: ValueType[] = [];
+
+    getNodeType(): HTMLTagType {
+        return "select"
+    }
+
     render(): UIElementChild {
         this.givenOptions = this.options.options || [];
         let selectOptions: any[] = [];
@@ -443,7 +455,7 @@ export class Select extends UI.Primitive<SelectOptions, "select">("select", Inpu
         return selectOptions;
     }
 
-    serializeEntry(obj: any): string {
+    serializeEntry(obj: ValueType): string {
         const formatter = this.options.formatter || this.options.serializer;
         if (formatter) {
             return formatter(obj);
@@ -457,16 +469,16 @@ export class Select extends UI.Primitive<SelectOptions, "select">("select", Inpu
         attr.addClass(this.styleSheet.select || "");
     }
 
-    get(): any {
+    get(): ValueType {
         let selectedIndex = this.getIndex();
         return this.givenOptions[selectedIndex];
     }
 
-    getValue(): any {
+    getValue(): ValueType {
         return this.get();
     }
 
-    set(value: any): void {
+    set(value: ValueType): void {
         for (let i = 0; i < this.givenOptions.length; i++) {
             if (this.givenOptions[i] === value) {
                 this.setIndex(i);
@@ -476,7 +488,7 @@ export class Select extends UI.Primitive<SelectOptions, "select">("select", Inpu
         console.error("Can't set the select option ", value, "\nAvailable options: ", this.givenOptions);
     }
 
-    setValue(value: any): void {
+    setValue(value: ValueType): void {
         this.set(value);
     }
 
