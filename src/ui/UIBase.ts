@@ -27,7 +27,7 @@ type RefLinkOptions = {
 export interface UIElementOptions {
     children?: UIElementCleanChild[];
     ref?: RefLinkOptions;
-    key?: string;
+    key?: string | number;
     active?: boolean; // Tabs or switchers can put this on children
     nodeType?: HTMLTagType;
     className?: string;
@@ -309,11 +309,11 @@ export class UIElement<
         return existingChild;
     }
 
-    getElementKeyMap(elements: BaseUIElement[]): Map<string, BaseUIElement> | null {
+    getElementKeyMap(elements: BaseUIElement[]): Map<string | number, BaseUIElement> | null {
         if (!Array.isArray(elements)) {
             return null;
         }
-        const childrenKeyMap = new Map<string, BaseUIElement>();
+        const childrenKeyMap = new Map<string | number, BaseUIElement>();
 
         for (let i = 0; i < elements.length; i += 1) {
             const childKey = (elements[i].options && elements[i].options.key) || ("autokey" + i);
