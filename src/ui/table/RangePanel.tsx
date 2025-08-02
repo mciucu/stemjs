@@ -1,54 +1,58 @@
-import {UI} from "./UIBase";
-import {Button} from "./button/Button";
-import {NumberInput} from "./input/Input";
+import {UI, UIElement, UIElementOptions, UIElementChild} from "../UIBase";
+import {Button} from "../button/Button";
+import {NumberInput} from "../input/Input";
 import {RangePanelStyle} from "./RangePanelStyle";
-import {Dispatchable} from "../base/Dispatcher";
-import {Size} from "./Constants";
+import {Dispatchable} from "../../base/Dispatcher";
+import {Size} from "../Constants";
+import {NodeAttributes} from "../NodeAttributes";
+import { Table } from "./Table";
 
-function RangePanelInterface(PanelClass) {
-    class RangePanel extends PanelClass {
-    }
-    return RangePanel;
+export interface EntriesManagerOptions<T = any> {
+    comparator?: (a: T, b: T) => number;
+    filter?: (entry: T) => boolean;
 }
 
+export class EntriesManager<T = any> extends Dispatchable {
+    private rawEntries: T[];
+    private cachedEntries: T[];
+    private options: EntriesManagerOptions<T>;
 
-class EntriesManager extends Dispatchable {
-    constructor(entries, options={}) {
+    constructor(entries: T[], options: EntriesManagerOptions<T> = {}) {
         super();
         this.rawEntries = entries;
         this.options = options;
         this.cacheEntries();
     }
 
-    getRawEntries() {
+    getRawEntries(): T[] {
         return this.rawEntries;
     }
 
-    cacheEntries() {
+    cacheEntries(): void {
         let entries = this.getRawEntries();
         entries = this.filterEntries(entries);
         this.cachedEntries = this.sortEntries(entries);
         this.dispatchChange();
     }
 
-    getEntries() {
+    getEntries(): T[] {
         return this.cachedEntries;
     }
 
-    getEntriesCount() {
+    getEntriesCount(): number {
         return this.cachedEntries.length;
     }
 
-    getEntriesRange(low, high) {
+    getEntriesRange(low: number, high: number): T[] {
         return this.cachedEntries.slice(low, high);
     }
 
-    updateEntries(entries) {
+    updateEntries(entries: T[]): void {
         this.rawEntries = entries;
         this.cacheEntries();
     }
 
-    sortEntries(entries) {
+    sortEntries(entries: T[]): T[] {
         const comparator = this.getComparator();
         if (comparator) {
             entries = entries.sort(comparator);
@@ -56,68 +60,90 @@ class EntriesManager extends Dispatchable {
         return entries;
     }
 
-    filterEntries(entries) {
+    filterEntries(entries: T[]): T[] {
         const filter = this.getFilter();
         return filter ? entries.filter(filter) : entries;
     }
 
-    getComparator() {
+    getComparator(): ((a: T, b: T) => number) | undefined {
         return this.options.comparator;
     }
 
-    setComparator(comparator) {
+    setComparator(comparator: (a: T, b: T) => number): void {
         this.options.comparator = comparator;
         this.cacheEntries();
     }
 
-    getFilter() {
+    getFilter(): ((entry: T) => boolean) | undefined {
         return this.options.filter;
     }
 
-    setFilter(filter) {
+    setFilter(filter: (entry: T) => boolean): void {
         this.options.filter = filter;
         this.cacheEntries();
     }
 }
 
 
+export interface RangeTableOptions extends UIElementOptions {
+    rowHeight?: number;
+}
+
 // A wrapper for tables which optimizes rendering when many entries / updates are involved. It currently has hardcoded
 // row height for functionality reasons.
-function RangeTableInterface(TableClass) {
-    class RangeTable extends UI.Primitive("div", TableClass) {
-        constructor(options) {
-            super(options);
-            this.lowIndex = 0;
-            this.highIndex = 0;
+export function RangeTableInterface<BaseType, BaseTable extends typeof Table<BaseType>>(TableClass: BaseTable) {
+    class RangeTable<BaseType> extends TableClass {
+        declare node?: HTMLElement;
+
+        lowIndex: number = 0;
+        highIndex: number = 0;
+        entriesManager?: EntriesManager<BaseType>;
+        scrollState?: number;
+        inSetScroll?: boolean;
+        rows?: BaseType[];
+        
+        // Component refs
+        declare tableContainer?: UIElement<any, HTMLTableElement>;
+        declare scrollablePanel?: UIElement<any, HTMLDivElement>;
+        declare fakePanel?: UIElement;
+        declare container?: UIElement;
+        declare thead?: UIElement;
+        declare containerBody?: UIElement;
+        declare footer?: UIElement;
+        declare tableFooterText?: UIElement;
+        declare jumpToInput?: NumberInput;
+
+        getNodeType() {
+            return "div"
         }
 
-        getRangePanelStyleSheet() {
+        getRangePanelStyleSheet(): RangePanelStyle {
             return RangePanelStyle.getInstance();
         }
 
-        getRowHeight() {
+        getRowHeight(): number {
             return this.options.rowHeight || this.getRangePanelStyleSheet().rowHeight;
         }
 
-        getEntriesManager() {
+        getEntriesManager(): EntriesManager {
             if (!this.entriesManager) {
-                this.entriesManager = new EntriesManager(super.getEntries());
+                this.entriesManager = new EntriesManager<T>(this.getEntries());
             }
             return this.entriesManager;
         }
 
-        extraNodeAttributes(attr) {
+        extraNodeAttributes(attr: NodeAttributes): void {
             attr.addClass(this.getRangePanelStyleSheet().default);
         }
 
-        render() {
+        render(): UIElementChild {
             const rangePanelStyleSheet = this.getRangePanelStyleSheet();
             const fakePanelHeight = (this.getRowHeight() * this.getEntriesManager().getEntriesCount() + 1) + "px";
             const headHeight = this.thead?.getHeight() || 0;
             this.computeIndices();
 
             // Margin is added at redraw for the case when the scoreboard has horizontal scrolling during a redraw.
-            const margin = (this.node &&  this.node.scrollLeft) || 0;
+            const margin = (this.node?.scrollLeft) || 0;
 
             return [
                 <div ref="tableContainer" className={rangePanelStyleSheet.tableContainer}
@@ -137,8 +163,10 @@ function RangeTableInterface(TableClass) {
                     <span ref="tableFooterText">
                         {this.getFooterContent()}
                     </span>
-                    <NumberInput ref="jumpToInput" placeholder="jump to..." style={{textAlign: "center",}}/>
-                    <Button ref="jumpToButton" size={Size.SMALL} className={rangePanelStyleSheet.jumpToButton}>Go</Button>
+                    <NumberInput ref="jumpToInput" placeholder="jump to..." style={{textAlign: "center"}} />
+                    <Button onClick={() => {
+                        this.jumpToIndex(this.jumpToInput.getValue());
+                    }} size={Size.SMALL} className={rangePanelStyleSheet.jumpToButton}>Go</Button>
                 </div>
             ];
         }
@@ -167,36 +195,39 @@ function RangeTableInterface(TableClass) {
             return this.rows;
         }
 
-        getFooterContent() {
+        getFooterContent(): string {
             if (this.lowIndex + 1 > this.highIndex) {
                 return `No results. Jump to `;
             }
             return `${this.lowIndex + 1} ➞ ${this.highIndex} of ${this.getEntriesManager().getEntriesCount()}. `;
         }
 
-        jumpToIndex(index) {
+        jumpToIndex(index: number | null): void {
+            if (index == null) {
+                return;
+            }
             // Set the scroll so that the requested position is in the center.
-            const lowIndex = parseInt(index - (this.highIndex - this.lowIndex) / 2 + 1);
+            const lowIndex = (index - (this.highIndex - this.lowIndex) / 2 + 1);
             const scrollRatio = lowIndex / (this.getEntriesManager().getEntriesCount() + 0.5);
             this.scrollablePanel.node.scrollTop = scrollRatio * this.scrollablePanel.node.scrollHeight;
         }
 
-        computeIndices() {
+        computeIndices(): void {
             if (!this.tableContainer || !this.thead || !this.footer) {
                 return;
             }
             const scrollRatio = this.scrollablePanel.node.scrollTop / this.scrollablePanel.node.scrollHeight;
             const entriesCount = this.getEntriesManager().getEntriesCount();
             // Computing of entries range is made using the physical scroll on the fake panel.
-            this.lowIndex = parseInt(scrollRatio * (entriesCount + 0.5));
+            this.lowIndex = (scrollRatio * (entriesCount + 0.5));
             if (isNaN(this.lowIndex)) {
                 this.lowIndex = 0;
             }
-            this.highIndex = Math.min(this.lowIndex + parseInt((this.getHeight() - this.thead.getHeight()
+            this.highIndex = Math.min(this.lowIndex + ((this.getHeight() - this.thead.getHeight()
                     - this.footer.getHeight()) / this.getRowHeight()), entriesCount);
         }
 
-        setScroll() {
+        setScroll(): void {
             // This is the main logic for rendering the right entries. Right now, it best works with a fixed row height,
             // for other cases no good results are guaranteed. For now, that row height is hardcoded in the class'
             // stylesheet.
@@ -227,13 +258,13 @@ function RangeTableInterface(TableClass) {
             this.inSetScroll = false;
         }
 
-        addCompatibilityListeners() {
+        addCompatibilityListeners(): void {
             // The physical table has z-index -1 so it does not respond to mouse events, as it is "behind" fake panel.
             // The following listeners repair that.
             this.addNodeListener("mousedown", () => {
                 this.container.setStyle("pointerEvents", "all");
             });
-            this.container.addNodeListener("mouseup", (event) => {
+            this.container.addNodeListener("mouseup", (event: MouseEvent) => {
                 const mouseDownEvent = new MouseEvent("click", event);
                 const domElement = document.elementFromPoint(parseFloat(event.clientX), parseFloat(event.clientY));
                 setTimeout(() => {
@@ -254,15 +285,15 @@ function RangeTableInterface(TableClass) {
             });
         }
 
-        addTableAPIListeners() {
+        addTableAPIListeners(): void {
             // This event isn't used anywhere but this is how range updates should be made.
-            this.addListener("entriesChange", (event) => {
+            this.addListener("entriesChange", (event: any) => {
                 if (!(event.leftIndex >= this.highIndex || event.rightIndex < this.lowIndex)) {
                     this.setScroll();
                 }
             });
             this.addListener("showCurrentUser", () => {
-                const index = this.getEntriesManager().getEntries().map(entry => entry.userId).indexOf(USER.id) + 1;
+                const index = this.getEntriesManager().getEntries().map((entry) => entry.userId).indexOf((globalThis as any).USER?.id) + 1;
                 this.jumpToIndex(index);
             });
             // Delay is added for smoother experience of scrolling.
@@ -271,7 +302,7 @@ function RangeTableInterface(TableClass) {
             });
         }
 
-        addSelfListeners() {
+        addSelfListeners(): void {
             this.scrollablePanel.addNodeListener("scroll", () => {
                 this.setScroll();
             });
@@ -285,17 +316,14 @@ function RangeTableInterface(TableClass) {
                 this.footer.setStyle("marginLeft", 0);
                 this.container.setStyle("marginLeft", 0);
             });
-            this.jumpToInput.addNodeListener("keyup", (event) => {
+            this.jumpToInput.addNodeListener("keyup", (event: KeyboardEvent) => {
                 if (event.code === "Enter") {
-                    this.jumpToIndex(parseInt(this.jumpToInput.getValue()));
+                    this.jumpToIndex(this.jumpToInput.getValue());
                 }
-            });
-            this.jumpToButton.addClickListener(() => {
-                this.jumpToIndex(parseInt(this.jumpToInput.getValue()));
             });
         }
 
-        onMount() {
+        onMount(): void {
             super.onMount();
 
             this.addCompatibilityListeners();
@@ -311,5 +339,3 @@ function RangeTableInterface(TableClass) {
     }
     return RangeTable;
 }
-
-export {RangePanelInterface, RangeTableInterface, EntriesManager};

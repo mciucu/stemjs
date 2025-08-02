@@ -1,5 +1,5 @@
-import {UI} from "../UIBase";
-import {Table, TableRow} from "./Table";
+import {UI, UIElement, UIElementOptions, UIElementChild, HTMLTagType} from "../UIBase";
+import {Table, TableRow, TableOptions, TableRowOptions} from "./Table";
 import {CollapsibleMixin} from "../collapsible/CollapsibleMixin";
 import {StyleSheet} from "../Style";
 import {styleRule} from "../../decorators/Style";
@@ -7,12 +7,12 @@ import {registerStyle} from "../style/Theme";
 import {GlobalStyle} from "../GlobalStyle";
 import {ColumnHandler} from "../../base/ColumnHandler.js";
 
-export class TableRowInCollapsibleTable extends TableRow {
-    getNodeType() {
+export class TableRowInCollapsibleTable<BaseType> extends TableRow<BaseType> {
+    getNodeType(): HTMLTagType {
         return "tbody";
     }
 
-    render() {
+    render(): UIElementChild {
         return <tr>{super.render()}</tr>;
     }
 }
@@ -25,26 +25,36 @@ class CollapsibleTableStyle extends StyleSheet {
     };
 }
 
+export interface CollapsibleTableRowOptions<BaseType> extends TableRowOptions<BaseType> {
+    collapsed?: boolean;
+    renderCollapsible?: (entry: BaseType, row: CollapsibleTableRow<BaseType>) => UIElementChild;
+}
+
+// TODO @types
+export interface CollapsibleTableRow<BaseType> {
+    styleSheet: CollapsibleTableStyle;
+}
+
 // TODO: refactor this to support redraw and render override
 @registerStyle(CollapsibleTableStyle)
-export class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
-    getNodeType() {
+export class CollapsibleTableRow<BaseType> extends CollapsibleMixin(TableRow<BaseType>) {
+    getNodeType(): HTMLTagType {
         return "tbody";
     }
 
-    getDefaultOptions(options) {
+    getDefaultOptions(options?: CollapsibleTableRowOptions<BaseType>): Partial<CollapsibleTableRowOptions<BaseType>> {
         return {
             collapsed: true,
         }
     }
 
-    getPreservedOptions() {
+    getPreservedOptions(): Partial<CollapsibleTableRowOptions<BaseType>> {
         return {
             collapsed: this.options.collapsed
         }
     }
 
-    renderEntryCell(column, columnIndex) {
+    renderEntryCell(column: ColumnHandler<BaseType>, columnIndex: number): UIElement {
         if (columnIndex === 0) {
             return <td
                 onClick={() => this.toggle()}
@@ -57,7 +67,7 @@ export class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
         return super.renderEntryCell(column, columnIndex);
     }
 
-    toggle() {
+    toggle(): void {
         if (!this.options.collapsed) {
             this.collapse();
         } else {
@@ -65,7 +75,7 @@ export class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
         }
     }
 
-    getInitialCollapsedContent() {
+    getInitialCollapsedContent(): UIElementChild {
         const {renderCollapsible, entry} = this.options;
         if (renderCollapsible) {
             return renderCollapsible(entry, this);
@@ -73,22 +83,22 @@ export class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
         return this.renderCollapsible(this.options.entry, this);
     }
 
-    renderCollapsible() {
+    renderCollapsible(entry: BaseType, row: CollapsibleTableRow<BaseType>): UIElementChild {
         return [];
     }
 
-    getMainRowContent() {
+    getMainRowContent(): UIElementChild {
         return super.render();
     }
 
-    getMainRow() {
+    getMainRow(): UIElement {
         return <tr className={this.styleSheet.heading}>{this.getMainRowContent()}</tr>;
     }
 
-    getCollapsibleRow() {
+    getCollapsibleRow(): UIElement {
         const {collapsed} = this.options;
         return <tr>
-            <td style={{padding: 0, overflow: "hidden", height: "auto"}} colspan={this.options.columns.length}>
+            <td style={{padding: 0, overflow: "hidden", height: "auto"}} colspan={this.options.columns?.length}>
                 <div ref="contentArea" className={collapsed ? GlobalStyle.hidden : null}>
                     {this.getInitialCollapsedContent()}
                 </div>
@@ -96,7 +106,7 @@ export class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
         </tr>
     }
 
-    render() {
+    render(): UIElementChild {
         return [
             this.getMainRow(),
             this.getCollapsibleRow(),
@@ -104,23 +114,27 @@ export class CollapsibleTableRow extends CollapsibleMixin(TableRow) {
     }
 }
 
-export function CollapsibleTableInterface(BaseTableClass) {
+export interface CollapsibleTableOptions<BaseType> extends TableOptions<BaseType> {
+    renderCollapsible?: (entry: BaseType, row: CollapsibleTableRow<BaseType>) => UIElementChild;
+}
+
+export function CollapsibleTableInterface<BaseType, T extends typeof Table<BaseType>>(BaseTableClass: T) {
     return class CollapsibleTable extends BaseTableClass {
-        getDefaultOptions(options) {
+        getDefaultOptions(options?: CollapsibleTableOptions<BaseType>): Partial<CollapsibleTableOptions<BaseType>> {
             return {
                 ...super.getDefaultOptions(options),
                 rowClass: CollapsibleTableRow,
             }
         }
 
-        setOptions(options) {
+        setOptions(options: CollapsibleTableOptions<BaseType>): void {
             super.setOptions(options);
-            if (!this.options.columns[0]?.isToggleColumn) {
-                this.options.columns = [this.getToggleColumn(), ...this.options.columns];
+            if (!(this.options.columns?.[0] as any)?.isToggleColumn) {
+                this.options.columns = [this.getToggleColumn(), ...(this.options.columns || [])];
             }
         }
 
-        getRowOptions(entry, rowIndex) {
+        getRowOptions(entry: BaseType, rowIndex: number): CollapsibleTableRowOptions<BaseType> {
             const {renderCollapsible} = this.options;
             return {
                 ...super.getRowOptions(entry, rowIndex),
@@ -128,11 +142,11 @@ export function CollapsibleTableInterface(BaseTableClass) {
             }
         }
 
-        renderTableBody() {
+        renderTableBody(): UIElement[] {
             return this.renderRows();
         }
 
-        getToggleColumn() {
+        getToggleColumn(): ColumnHandler<BaseType> {
             return new ColumnHandler({
                 isToggleColumn: true,
                 value: () => null,

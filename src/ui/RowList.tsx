@@ -1,4 +1,4 @@
-import {UI} from "./UIBase";
+import {UI, UIElementChild} from "./UIBase";
 import {styleRule} from "./Style";
 import {registerStyle} from "./style/Theme"
 import {SimpleStyledElement} from "./SimpleElements";
@@ -45,17 +45,30 @@ class RowListStyle extends BasicLevelSizeStyleSheet {
 }
 
 
+export interface RowListOptions<ValueType = any> {
+    alternateColors?: boolean;
+    rows: ValueType[];
+    rowParser: (row: ValueType) => UIElementChild;
+    level?: string;
+    size?: string;
+}
+
+// TODO @types
+export interface RowList {
+    styleSheet: RowListStyle;
+}
+
 //TODO @cleanup just delete this?
 @registerStyle(RowListStyle)
-export class RowList extends SimpleStyledElement {
-    getDefaultOptions(options) {
+export class RowList extends SimpleStyledElement<RowListOptions> {
+    getDefaultOptions(): Partial<RowListOptions> {
         return {
             alternateColors: true,
         }
     }
 
-    getRowClasses(index) {
-        let rowClasses = this.styleSheet.rowListEntry;
+    getRowClasses(index: number): string {
+        let rowClasses = String(this.styleSheet.rowListEntry);
         if (this.getSize()) {
             rowClasses = rowClasses + this.styleSheet.Size(this.getSize());
         }
@@ -71,7 +84,7 @@ export class RowList extends SimpleStyledElement {
         return rowClasses;
     }
 
-    render() {
+    render(): UIElementChild {
         const {rows, rowParser} = this.options;
 
         return rows.map((row, index) => {
