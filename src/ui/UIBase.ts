@@ -37,6 +37,8 @@ export interface UIElementOptions {
     //[key: string]: any;
 }
 
+export type UIOptions<NodeType extends (SVGElement | HTMLElement), ExtraOptions = {}> = Partial<Omit<NodeType, "children">> & UIElementOptions & ExtraOptions;
+
 export const RenderStack: BaseUIElement[] = []; //keeps track of objects that are redrawing, to know where to assign refs automatically
 export const redrawPerTickRunner = new OncePerTickRunner((obj: BaseUIElement, event: any) => obj.node && obj.redraw(event));
 

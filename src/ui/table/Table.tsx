@@ -5,7 +5,7 @@ import {ColumnHandler, ColumnLike} from "../../base/ColumnHandler.js";
 
 export interface TableRowOptions<BaseType> extends UIElementOptions {
     columns?: ColumnHandler<BaseType>[];
-    entry?: any;
+    entry?: BaseType;
     rowIndex?: number;
 }
 
@@ -23,7 +23,7 @@ export class TableRow<BaseType> extends UIElement<TableRowOptions<BaseType>, HTM
         return columns.map((column, index) => this.renderEntryCell(column, index));
     }
 
-    renderEntryCell(column: ColumnHandler<BaseType>, columnIndex: number): UIElement<any, HTMLTableCellElement> {
+    renderEntryCell(column: ColumnHandler<BaseType>, columnIndex: number): UIElement<{}, HTMLTableCellElement> {
         // TODO support more complex style options and {...columns.extraOptions(entry)}
         return <td style={column.cellStyle} key={columnIndex}>{column.value(this.options.entry, this.options.rowIndex, columnIndex, this)}</td>;
     }
@@ -100,7 +100,7 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
         };
     }
 
-    getRowByEntry(entry: BaseType): UIElement | null {
+    getRowByEntry(entry: BaseType): TableRow<BaseType> | null {
         // TODO not nice that this is O(N)
         if (!this.rows) return null;
         for (const row of this.rows) {
