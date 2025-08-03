@@ -1,13 +1,25 @@
-import {UI} from "./UIBase";
+import {UI, UIElementChild} from "./UIBase";
 import {buildColors} from "./Color";
 import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {styleRule} from "../decorators/Style";
 import {registerStyle} from "./style/Theme";
-import {Orientation} from "./Constants";
-import {SimpleStyledElement} from "./SimpleElements";
+import {Orientation, OrientationType} from "./Constants";
+import {SimpleStyledElement, SimpleStyledElementOptions} from "./SimpleElements";
+import {BaseUIElement} from "./UIBase";
 
-let progressBarColorToStyle = (color) => {
-    let colors = buildColors(color);
+export interface ProgressBarOptions extends SimpleStyledElementOptions {
+    value?: number;
+    orientation?: OrientationType;
+    height?: number;
+    disableTransition?: boolean;
+    striped?: boolean;
+    active?: boolean;
+    color?: string;
+    label?: string | BaseUIElement;
+}
+
+const progressBarColorToStyle = (color: string): any => {
+    const colors = buildColors(color);
     return {
         backgroundColor: colors[1],
     };
@@ -76,28 +88,36 @@ export class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToSty
     };
 }
 
+// Interface declaration for proper typing
+export interface ProgressBar {
+    // @ts-ignore
+    styleSheet: ProgressBarStyle;
+}
+
 @registerStyle(ProgressBarStyle)
-export class ProgressBar extends SimpleStyledElement {
-    render() {
-        let valueInPercent = (this.options.value || 0) * 100;
-        let orientation = Orientation.HORIZONTAL;
+export class ProgressBar extends SimpleStyledElement<ProgressBarOptions> {
+    render(): UIElementChild {
+        const valueInPercent = (this.options.value || 0) * 100;
+        let orientation: OrientationType = Orientation.HORIZONTAL;
         if (this.options.hasOwnProperty("orientation")) {
-            orientation = this.options.orientation;
+            orientation = this.options.orientation!;
         }
-        let barStyle;
+        
+        let barStyle: any;
         if (orientation === Orientation.HORIZONTAL) {
             barStyle = {
                 width: valueInPercent + "%",
-                height: this.options.height + "px",
+                height: this.options.height,
             };
         } else {
             barStyle = {
                 height: valueInPercent + "%",
                 width: "5px",
-            }
+            };
         }
-        let barOptions = {
-            className: this.styleSheet.bar,
+        
+        const barOptions = {
+            className: String(this.styleSheet.bar),
             style: barStyle,
         };
 
@@ -125,12 +145,13 @@ export class ProgressBar extends SimpleStyledElement {
         </div>;
     }
 
-    set(value) {
+    set(value: number): void {
         // TODO @cleanup clamp
-        if (value < 0)
+        if (value < 0) {
             value = 0;
-        else if (value > 1)
+        } else if (value > 1) {
             value = 1;
+        }
         this.options.value = value;
         this.redraw();
     }
