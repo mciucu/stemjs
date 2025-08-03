@@ -47,7 +47,10 @@ export interface UINamespace {
     TextElement: typeof TextUIElement;
     Element: typeof UIElement;
     SVGElement: typeof UIElement;
-    createElement: (tag: typeof BaseUIElement<any> | HTMLTagType, options?: UIElementOptions | null, ...children: any[]) => BaseUIElement | null;
+    createElement<K extends HTMLTagType>(tag: K, options?: UIElementOptions | null, ...children: any[]): UIElement<{}, HTMLElementTagNameMap[K]>;
+    createElement<K extends SVGTagType>(tag: K, options?: UIElementOptions | null, ...children: any[]): UIElement<{}, SVGElementTagNameMap[K]>;
+    createElement<UIClass extends BaseUIElement<any>>(tag: new (options: any) => UIClass, options?: UIElementOptions | null, ...children: any[]): UIClass;
+    createElement(tag: any, options?: UIElementOptions | null, ...children: any[]): BaseUIElement | null;
     str: (value: any) => any;
     Primitive: <ExtraOptions = void, T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap, BaseClassType extends typeof UIElement = typeof UIElement>(nodeType: T, BaseClass?: BaseClassType) => BaseClassType;
 }

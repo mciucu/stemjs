@@ -23,7 +23,7 @@ export class TableRow<BaseType> extends UIElement<TableRowOptions<BaseType>, HTM
         return columns.map((column, index) => this.renderEntryCell(column, index));
     }
 
-    renderEntryCell(column: ColumnHandler<BaseType>, columnIndex: number): UIElement<{}, HTMLTableCellElement> {
+    renderEntryCell(column: ColumnHandler<BaseType>, columnIndex: number) {
         // TODO support more complex style options and {...columns.extraOptions(entry)}
         return <td style={column.cellStyle} key={columnIndex}>{column.value(this.options.entry, this.options.rowIndex, columnIndex, this)}</td>;
     }
@@ -76,7 +76,7 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
         }
     }
 
-    getRowClass(entry?: BaseType, rowIndex?: number): typeof TableRow {
+    getRowClass(entry?: BaseType, rowIndex?: number): typeof TableRow<BaseType> {
         return this.options.rowClass || TableRow;
     }
 
@@ -118,7 +118,7 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
         ];
     }
 
-    renderTableHead(): UIElement | false {
+    renderTableHead() {
         const {noHeader, columns} = this.options;
 
         return !noHeader && <thead ref="thead" className={this.styleSheet.thead}>
@@ -138,12 +138,12 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
         return this.rows;
     }
 
-    renderTableBody(): UIElement {
+    renderTableBody() {
         return <tbody>{this.renderRows()}</tbody>;
     }
 
     // Renders the whole header cell based on a column
-    renderHeaderCell(column: ColumnHandler<BaseType>, index: number): UIElement {
+    renderHeaderCell(column: ColumnHandler<BaseType>, index: number) {
         return <th style={column.headerStyle} ref={"columnHeader" + index}>
                 {this.renderColumnHeader(column)}
             </th>;
