@@ -2,9 +2,9 @@ import {buildColors} from "../Color";
 import {BasicLevelStyleSheet} from "../GlobalStyle";
 import {styleRule} from "../../decorators/Style";
 import {StyleSheet} from "../Style";
-import {Orientation} from "../Constants";
+import {Orientation, OrientationType} from "../Constants";
 
-export const buttonColorToStyle = (color) => {
+export const buttonColorToStyle = (color: string) => {
     const colors = buildColors(color);
     const darker1 = {
         backgroundColor: colors[2],
@@ -57,10 +57,6 @@ export class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
         ...this.colorStyleRule(this.themeProps.BUTTON_COLOR)
     };
 
-    getLevel(level) {
-        return super.getLevel(level) || this.INFO;
-    }
-
     @styleRule
     EXTRA_SMALL = {
         fontSize: this.themeProps.FONT_SIZE_EXTRA_SMALL,
@@ -112,7 +108,7 @@ export class ButtonGroupStyle extends StyleSheet {
         },
     };
 
-    Orientation(orientation) {
+    Orientation(orientation: OrientationType) {
         for (let type of Object.keys(Orientation)) {
             if (orientation === Orientation[type]) {
                 return this[type];

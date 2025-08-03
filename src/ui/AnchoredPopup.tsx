@@ -2,7 +2,7 @@ import {UI, UIElementOptions, UIElementChild, UIElement} from "./UIBase";
 import {styleRule, StyleSheet} from "./Style";
 import {registerStyle} from "./style/Theme";
 import {Router} from "./Router.jsx";
-import {Direction} from "./Constants.js";
+import {DirectionType} from "./Constants.js";
 import {NodeAttributes} from "./NodeAttributes";
 
 export interface AnchoredPopupOptions extends UIElementOptions {
@@ -10,7 +10,7 @@ export interface AnchoredPopupOptions extends UIElementOptions {
     offset?: number;
     toggleOnSameAnchor?: boolean;
     hideOnMouseLeave?: boolean;
-    direction?: typeof Direction[keyof typeof Direction];
+    direction?: DirectionType;
     content?: UIElementChild;
 }
 

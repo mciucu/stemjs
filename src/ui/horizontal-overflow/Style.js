@@ -3,7 +3,6 @@ import {enhance} from "../Color";
 import {Device} from "../../base/Device";
 
 
-
 export class HorizontalOverflowStyle extends StyleSheet {
     baseColor = () =>  this.themeProps.COLOR_PRIMARY;
     arrowColor = () => enhance(this.baseColor(), .8);

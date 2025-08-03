@@ -1,14 +1,15 @@
-import {BaseUIElement, UI, UIElement} from "./UIBase";
+import {BaseUIElement, UI, UIElement, UIElementChild} from "./UIBase";
 import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";
 import {styleRule} from "../decorators/Style";
 import {isFunction} from "../base/Utils";
 import {NodeAttributes} from "./NodeAttributes";
+import {LevelType, SizeType} from "./Constants";
 
 // Type definitions
-export type IconType = string | UIElement | ((options: any) => UIElement);
-export type MakeIconFunction = (icon: IconType, options?: any) => UIElement | null;
+export type IconType = string | BaseUIElement | ((options: any) => BaseUIElement);
+export type MakeIconFunction = (icon: IconType, options?: any) => BaseUIElement | null;
 export type MakeTextFunction = (text: string | BaseUIElement, options?: any) => BaseUIElement;
 
 export interface SimpleStyledElementOptions {
@@ -18,7 +19,7 @@ export interface SimpleStyledElementOptions {
     size?: string;
 }
 
-export function DefaultMakeIcon(icon: IconType, options: any = {}): UIElement | null {
+export function DefaultMakeIcon(icon: IconType, options: any = {}): BaseUIElement | null {
     if (isFunction(icon)) {
         return (icon as (options: any) => UIElement)(options);
     }
@@ -58,26 +59,26 @@ export function MakeText(text: string | BaseUIElement, options?: any): BaseUIEle
 }
 
 export class SimpleStyledElement<T extends SimpleStyledElementOptions = SimpleStyledElementOptions> extends UIElement<T> {
-    getLevel(): string | undefined {
+    getLevel(): LevelType | undefined {
         return (this.options as any).level || (this.parent && (this.parent as any).getLevel && (this.parent as any).getLevel());
     }
 
-    setLevel(level: string): void {
+    setLevel(level: LevelType): void {
         this.updateOptions({level} as Partial<T>);
     }
 
-    getSize(): string | undefined {
+    getSize(): SizeType | undefined {
         return (this.options as any).size || (this.parent && (this.parent as any).getSize && (this.parent as any).getSize());
     }
 
-    setSize(size: string): void {
+    setSize(size: SizeType): void {
         this.updateOptions({size} as Partial<T>);
     }
 }
 
 
 export class IconableInterface<T = void> extends SimpleStyledElement<T & SimpleStyledElementOptions> {
-    render(): any[] {
+    render(): UIElementChild {
         return [this.beforeChildren(), this.getLabel(), super.render()];
     }
 
