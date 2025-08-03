@@ -23,7 +23,7 @@ export class TableRow<BaseType> extends UIElement<TableRowOptions<BaseType>, HTM
         return columns.map((column, index) => this.renderEntryCell(column, index));
     }
 
-    renderEntryCell(column: ColumnHandler<BaseType>, columnIndex: number): UIElement {
+    renderEntryCell(column: ColumnHandler<BaseType>, columnIndex: number): UIElement<any, HTMLTableCellElement> {
         // TODO support more complex style options and {...columns.extraOptions(entry)}
         return <td style={column.cellStyle} key={columnIndex}>{column.value(this.options.entry, this.options.rowIndex, columnIndex, this)}</td>;
     }

@@ -207,7 +207,7 @@ export function RangeTableInterface<BaseType, BaseTable extends typeof Table<Bas
                 return;
             }
             // Set the scroll so that the requested position is in the center.
-            const lowIndex = (index - (this.highIndex - this.lowIndex) / 2 + 1);
+            const lowIndex = Math.floor(index - (this.highIndex - this.lowIndex) / 2 + 1);
             const scrollRatio = lowIndex / (this.getEntriesManager().getEntriesCount() + 0.5);
             this.scrollablePanel.node.scrollTop = scrollRatio * this.scrollablePanel.node.scrollHeight;
         }
@@ -219,12 +219,12 @@ export function RangeTableInterface<BaseType, BaseTable extends typeof Table<Bas
             const scrollRatio = this.scrollablePanel.node.scrollTop / this.scrollablePanel.node.scrollHeight;
             const entriesCount = this.getEntriesManager().getEntriesCount();
             // Computing of entries range is made using the physical scroll on the fake panel.
-            this.lowIndex = (scrollRatio * (entriesCount + 0.5));
+            this.lowIndex = Math.floor(scrollRatio * (entriesCount + 0.5));
             if (isNaN(this.lowIndex)) {
                 this.lowIndex = 0;
             }
-            this.highIndex = Math.min(this.lowIndex + ((this.getHeight() - this.thead.getHeight()
-                    - this.footer.getHeight()) / this.getRowHeight()), entriesCount);
+            const numFittingEntries = Math.floor((this.getHeight() - this.thead.getHeight() - this.footer.getHeight()) / this.getRowHeight());
+            this.highIndex = Math.min(this.lowIndex + numFittingEntries, entriesCount);
         }
 
         setScroll(): void {
