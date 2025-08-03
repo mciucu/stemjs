@@ -1,10 +1,25 @@
 import {BaseUIElement, HTMLTagType, SVGTagType, UIElementOptions} from "./UIBase";
 
+// Completely override React's JSX namespace
 declare global {
     namespace JSX {
+        // Make Element type mirror our jsx function overloads
+        type ElementType = string | typeof BaseUIElement<any>;
+        type Element = BaseUIElement;
+
         interface IntrinsicElements {
-            [Key in HTMLTagType]: Partial<Omit<HTMLElementTagNameMap[Key], "children">> & UIElementOptions;
-            [Key in SVGTagType]: Partial<Omit<SVGElementTagNameMap[Key], "children">> & UIElementOptions;
+            tr: UIOptions<HTMLTableRowElement>;
+            [Key in HTMLTagType]: UIOptions<HTMLElementTagNameMap[Key]>;
+            [Key in SVGTagType]: UIOptions<SVGElementTagNameMap[Key]>;
+        }
+
+        type IntrinsicClassAttributes<BaseClass extends UIElement<ExtraOptions, NodeType>> = UIOptions<NodeType, ExtraOptions>;
+
+        // Allow class constructors that extend BaseUIElement
+        interface ElementClass extends BaseUIElement<any> {}
+
+        interface ElementAttributesProperty {
+            options: {};
         }
 
         interface ElementChildrenAttribute {

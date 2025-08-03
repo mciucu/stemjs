@@ -1,4 +1,4 @@
-import {UI, UIElement, UIElementOptions, UIElementChild} from "../UIBase";
+import {UI, UIElement, UIElementOptions, UIElementChild, HTMLTagType} from "../UIBase";
 import {Button} from "../button/Button";
 import {NumberInput} from "../input/Input";
 import {RangePanelStyle} from "./RangePanelStyle";
@@ -93,6 +93,7 @@ export interface RangeTableOptions extends UIElementOptions {
 // row height for functionality reasons.
 export function RangeTableInterface<BaseType, BaseTable extends typeof Table<BaseType>>(TableClass: BaseTable) {
     class RangeTable<BaseType> extends TableClass {
+        // @ts-ignore
         declare node?: HTMLElement;
 
         lowIndex: number = 0;
@@ -100,6 +101,7 @@ export function RangeTableInterface<BaseType, BaseTable extends typeof Table<Bas
         entriesManager?: EntriesManager<BaseType>;
         scrollState?: number;
         inSetScroll?: boolean;
+        // @ts-ignore
         rows?: BaseType[];
         
         // Component refs
@@ -113,7 +115,7 @@ export function RangeTableInterface<BaseType, BaseTable extends typeof Table<Bas
         declare tableFooterText?: UIElement;
         declare jumpToInput?: NumberInput;
 
-        getNodeType() {
+        getNodeType(): HTMLTagType {
             return "div"
         }
 

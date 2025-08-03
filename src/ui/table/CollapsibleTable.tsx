@@ -1,4 +1,4 @@
-import {UI, UIElement, UIElementOptions, UIElementChild, HTMLTagType} from "../UIBase";
+import {UI, UIElement, UIElementChild, HTMLTagType} from "../UIBase";
 import {Table, TableRow, TableOptions, TableRowOptions} from "./Table";
 import {CollapsibleMixin} from "../collapsible/CollapsibleMixin";
 import {StyleSheet} from "../Style";
@@ -12,7 +12,7 @@ export class TableRowInCollapsibleTable<BaseType> extends TableRow<BaseType> {
         return "tbody";
     }
 
-    render(): UIElementChild {
+    render() {
         return <tr>{super.render()}</tr>;
     }
 }
@@ -54,7 +54,7 @@ export class CollapsibleTableRow<BaseType> extends CollapsibleMixin(TableRow<Bas
         }
     }
 
-    renderEntryCell(column: ColumnHandler<BaseType>, columnIndex: number): UIElement {
+    renderEntryCell(column: ColumnHandler<BaseType>, columnIndex: number) {
         if (columnIndex === 0) {
             return <td
                 onClick={() => this.toggle()}
@@ -91,11 +91,11 @@ export class CollapsibleTableRow<BaseType> extends CollapsibleMixin(TableRow<Bas
         return super.render();
     }
 
-    getMainRow(): UIElement {
+    getMainRow() {
         return <tr className={this.styleSheet.heading}>{this.getMainRowContent()}</tr>;
     }
 
-    getCollapsibleRow(): UIElement {
+    getCollapsibleRow() {
         const {collapsed} = this.options;
         return <tr>
             <td style={{padding: 0, overflow: "hidden", height: "auto"}} colspan={this.options.columns?.length}>
@@ -142,7 +142,7 @@ export function CollapsibleTableInterface<BaseType, T extends typeof Table<BaseT
             }
         }
 
-        renderTableBody(): UIElement[] {
+        renderTableBody() {
             return this.renderRows();
         }
 

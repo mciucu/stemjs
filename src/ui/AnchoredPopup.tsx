@@ -1,9 +1,18 @@
-import {UI} from "./UIBase";
+import {UI, UIElementOptions, UIElementChild, UIElement} from "./UIBase";
 import {styleRule, StyleSheet} from "./Style";
 import {registerStyle} from "./style/Theme";
 import {Router} from "./Router.jsx";
 import {Direction} from "./Constants.js";
-import {unwrapArray} from "../base/Utils.js";
+import {NodeAttributes} from "./NodeAttributes";
+
+export interface AnchoredPopupOptions extends UIElementOptions {
+    anchor: UIElement;
+    offset?: number;
+    toggleOnSameAnchor?: boolean;
+    hideOnMouseLeave?: boolean;
+    direction?: typeof Direction[keyof typeof Direction];
+    content?: UIElementChild;
+}
 
 export class AnchoredPopupStyle extends StyleSheet {
     transitionTime = 200;
@@ -39,17 +48,25 @@ export class AnchoredPopupStyle extends StyleSheet {
     };
 }
 
+// TODO @types
+export interface AnchoredPopup {
+    // @ts-ignore
+    styleSheet: AnchoredPopupStyle;
+}
+
 // TODO: Fix when it doesn't fit the body. (see the popup in the Reports chart)
 @registerStyle(AnchoredPopupStyle)
-export class AnchoredPopup extends UI.Element {
-    hidden = true;
-    destroyed = false;
-    interval = null;
-    maxHeight = null;
+export class AnchoredPopup extends UIElement<AnchoredPopupOptions> {
+    static lastShownModal?: AnchoredPopup;
+
+    hidden: boolean = true;
+    destroyed: boolean = false;
+    interval: number | null = null;
+    maxHeight: number | null = null;
     anchorRect = this.options.anchor.node.getBoundingClientRect();
     bodyRect = document.body.getBoundingClientRect();
 
-    static show(options) {
+    static show(options: AnchoredPopupOptions): AnchoredPopup | null {
         const {anchor, toggleOnSameAnchor} = options;
         if (!anchor) {
             console.error("An anchor is required for a popup");
@@ -79,7 +96,7 @@ export class AnchoredPopup extends UI.Element {
         };
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         super.extraNodeAttributes(attr);
         attr.addClass(this.styleSheet.popup);
         if (this.hidden) {
@@ -110,9 +127,9 @@ export class AnchoredPopup extends UI.Element {
         }
     }
 
-    hide() {
-        if (this.constructor.lastShownModal === this) {
-            this.constructor.lastShownModal = undefined;
+    hide(): void {
+        if ((this.constructor as typeof AnchoredPopup).lastShownModal === this) {
+            (this.constructor as typeof AnchoredPopup).lastShownModal = undefined;
         }
 
         clearInterval(this.interval);
@@ -123,11 +140,11 @@ export class AnchoredPopup extends UI.Element {
         setTimeout(() => this.destroyNode(), this.styleSheet.transitionTime);
     }
 
-    isVisible() {
+    isVisible(): boolean {
         return !this.hidden && !this.destroyed;
     }
 
-    addAnchorListeners() {
+    addAnchorListeners(): void {
         const {anchor} = this.options;
 
         const {top, left} = this.anchorRect;
@@ -143,7 +160,7 @@ export class AnchoredPopup extends UI.Element {
         }, 300);
     }
 
-    showPopup() {
+    showPopup(): void {
         this.hidden = false;
         this.redraw();
         this.addAnchorListeners();
@@ -151,13 +168,10 @@ export class AnchoredPopup extends UI.Element {
 
     render() {
         let {content} = this.options;
-        if (content) {
-            return unwrapArray([content]);
-        }
-        return super.render();
+        return content || super.render();
     }
 
-    onMount() {
+    onMount(): void {
         this.redraw(); // This will position it correctly after height is determined but before it is shown.
 
         this.showPopup();

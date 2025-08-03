@@ -16,7 +16,7 @@ export type SVGTagType = keyof SVGElementTagNameMap;
 export type HTMLTagType = keyof HTMLElementTagNameMap;
 export type UIElementCleanChild = BaseUIElement | string | number;
 export type UIElementChild = Iterable<UIElementChild> | UIElementCleanChild | null | undefined | false;
-type RefLinkOptions = {
+export type RefLinkOptions = {
     parent: UIElement<any, any>;
     name?: string;
     key?: string;

@@ -1,7 +1,4 @@
-/*
-* Implements a Class Factory, to be able to create element that can be easily set to full screen
-*/
-
+// Implements a Class Factory, to be able to create element that can be easily set to full screen
 import {FullScreenStyle} from "./FullScreenStyle";
 import {GlobalStyle} from "./GlobalStyle";
 

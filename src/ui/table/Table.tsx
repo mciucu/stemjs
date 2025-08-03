@@ -5,6 +5,7 @@ import {ColumnHandler, ColumnLike} from "../../base/ColumnHandler.js";
 
 export interface TableRowOptions<BaseType> extends UIElementOptions {
     columns?: ColumnHandler<BaseType>[];
+    parent?: UIElement<any>;
     entry?: BaseType;
     rowIndex?: number;
 }
@@ -38,12 +39,15 @@ export interface TableOptions<BaseType> extends UIElementOptions {
 
 // TODO @types
 export interface Table<BaseType> {
+    // @ts-ignore
     styleSheet: TableStyle;
 }
 
+type RowLikeElement = UIElement<any, HTMLTableRowElement | HTMLTableSectionElement>;
+
 @registerStyle(TableStyle)
 export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTableElement> {
-    rows?: TableRow<BaseType>[];
+    rows?: RowLikeElement[];
 
     getNodeType(): HTMLTagType {
         return "table";
@@ -57,7 +61,7 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
             columns,
             entries,
             rowClass: TableRow,
-        }
+        };
     }
 
     getDefaultEntries(options?: typeof this.options): BaseType[] {
@@ -80,19 +84,19 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
         return this.options.rowClass || TableRow;
     }
 
-    makeRow(entry: BaseType, rowIndex: number): UIElement<any, HTMLTableRowElement | HTMLTableSectionElement> {
+    makeRow(entry: BaseType, rowIndex: number) {
         if (entry instanceof UIElement && (entry.getNodeType() === "tr" || entry.getNodeType() === "tbody")) {
             return entry;
         }
         const RowClass = this.getRowClass(entry, rowIndex);
-        return <RowClass {...this.getRowOptions(entry, rowIndex)} />
+        return <RowClass {...this.getRowOptions(entry, rowIndex)} />;
     }
 
     getRowOptions(entry: BaseType, rowIndex: number): TableRowOptions<BaseType> {
         const {columns} = this.options;
         return {
             entry,
-            columns,
+            columns: columns as ColumnHandler<BaseType>[],
             rowIndex,
             parent: this,
             className: this.styleSheet.tableRow as string,
@@ -100,7 +104,7 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
         };
     }
 
-    getRowByEntry(entry: BaseType): TableRow<BaseType> | null {
+    getRowByEntry(entry: BaseType): RowLikeElement | null {
         // TODO not nice that this is O(N)
         if (!this.rows) return null;
         for (const row of this.rows) {
@@ -118,8 +122,9 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
         ];
     }
 
-    renderTableHead() {
-        const {noHeader, columns} = this.options;
+    renderTableHead(): UIElementChild {
+        const {noHeader} = this.options;
+        const columns = this.getDefaultColumns();
 
         return !noHeader && <thead ref="thead" className={this.styleSheet.thead}>
             <tr>
@@ -134,11 +139,11 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
 
     renderRows(): UIElementChild {
         const entries = this.getEntries();
-        this.rows = entries.map((entry, index) => this.makeRow(entry, index));
+        this.rows = entries.map((entry, index) => this.makeRow(entry, index)) as any;
         return this.rows;
     }
 
-    renderTableBody() {
+    renderTableBody(): UIElementChild {
         return <tbody>{this.renderRows()}</tbody>;
     }
 
