@@ -132,7 +132,7 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
         return (entry as any)?.id ?? index;
     }
 
-    renderRows(): UIElement[] {
+    renderRows(): UIElementChild {
         const entries = this.getEntries();
         this.rows = entries.map((entry, index) => this.makeRow(entry, index));
         return this.rows;
