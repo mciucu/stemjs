@@ -26,12 +26,12 @@ export class StoreObject extends Dispatchable {
         Object.assign(this, obj);
     }
 
-    getStore(storeName?: string): typeof StoreObject {
+    getStore(storeName?: string): (typeof StoreObject) & Dispatchable {
         const ownStore = this.constructor as typeof StoreObject;
         if (storeName) {
-            return ownStore.getState().getStore(storeName) as typeof StoreObject;
+            return ownStore.getState().getStore(storeName) as any;
         }
-        return ownStore;
+        return ownStore as any;
     }
 
     // By default, applying an event just shallow copies the fields from event.data
@@ -305,9 +305,22 @@ export function MakeCoolStore(objectType: string, options: StoreOptions = {}): (
         static dependencies = options.dependencies || [];
         static objects = new Map<string, Store>();
     }
-    Object.assign(Store, new Dispatchable());
-
-    state.addStore(Store);
+    
+    // Copy Dispatchable instance properties and methods to the Store class
+    const dispatchableInstance = new Dispatchable();
+    Object.assign(Store, dispatchableInstance);
+    
+    // Copy Dispatchable prototype methods and getters/setters to Store
+    const dispatchableProto = Dispatchable.prototype;
+    Object.getOwnPropertyNames(dispatchableProto).forEach(name => {
+        if (name === "constructor") {
+            return;
+        }
+        const descriptor = Object.getOwnPropertyDescriptor(dispatchableProto, name);
+        if (descriptor) {
+            Object.defineProperty(Store, name, descriptor);
+        }
+    });
 
     return Store as any;
 }
