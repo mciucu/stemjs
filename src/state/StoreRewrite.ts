@@ -28,7 +28,7 @@ export class StoreObject extends Dispatchable {
         Object.assign(this, obj);
     }
 
-    getStore(storeName?: string): (typeof StoreObject) & Dispatchable {
+    getStore(storeName?: string): StoreClass<any> {
         const ownStore = this.constructor as typeof StoreObject;
         if (storeName) {
             return ownStore.getState().getStore(storeName) as any;
@@ -107,13 +107,13 @@ export class StoreObject extends Dispatchable {
     }
 
     // For a response/state raw object, return the objects that we have in store
-    static load<BaseType extends StoreObject>(this: typeof StoreObject & {new (...args: any[]): BaseType}, responseOrState: StateData): BaseType[] {
+    static load<T extends StoreObject>(this: StoreClass<T>, responseOrState: StateData): T[] {
         const rawObjects = this.loadRaw(responseOrState);
-        return rawObjects.map(obj => this.get<BaseType>(obj.id)).filter(isNotNull);
+        return rawObjects.map(obj => this.get<T>(obj.id)).filter(isNotNull);
     }
 
-    static loadObject<BaseType extends StoreObject>(this: typeof StoreObject & {new (...args: any[]): BaseType}, responseOrState: StateData): BaseType | undefined {
-        return this.load<BaseType>(responseOrState)?.[0];
+    static loadObject<T extends StoreObject>(this: StoreClass<T>, responseOrState: StateData): T | undefined {
+        return this.load<T>(responseOrState)?.[0];
     }
 
     static getState(): State {
