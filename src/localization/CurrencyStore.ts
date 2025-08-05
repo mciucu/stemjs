@@ -1,7 +1,9 @@
-import {StoreObject, Store} from "../state/Store";
+import {coolStore, BaseStore, StoreClass, StoreObject} from "../state/StoreRewrite";
 import {StoreId} from "../state/State";
 
-export class Currency extends StoreObject {
+@coolStore
+export class Currency extends BaseStore("Currency") {
+    declare id: number;
     declare decimalDigits: number;
     declare symbol: string;
     declare subdivisionSymbol: string;
@@ -70,18 +72,17 @@ export class Currency extends StoreObject {
     toString(): string {
         return this.getIsoCode().toUpperCase();
     }
-}
 
-class CurrencyStoreClass extends Store("Currency", Currency) {
-    getByIsoCode(isoCode: string | number = ""): Currency | undefined {
+    static getByIsoCode(isoCode: string | number = ""): Currency | undefined {
         const isoCodeStr = String(isoCode).toLowerCase();
         return this.find((currency: Currency) => currency.getIsoCode() === isoCodeStr);
     }
 
-    get(id: StoreId): Currency | undefined {
-        return super.get(id) || this.getByIsoCode(id);
+    static get<T extends StoreObject>(this: StoreClass<T>, id: StoreId): T | undefined {
+        const self = this as any as typeof Currency;
+        return super.get(id) || (self.getByIsoCode(id) as any);
     }
 }
 
-export const CurrencyStore = new CurrencyStoreClass();
+export const CurrencyStore = Currency;
 
