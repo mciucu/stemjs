@@ -13,8 +13,7 @@ export interface StoreOptions {
     dependencies?: string[]; // Other stores that should have their objects loaded before this
 }
 
-// The store information is kept in a symbol, to not interfere with serialization/deserialization
-export const StoreSymbol = Symbol("Store");
+// A symbol to dispatch state events by type, since Dispatchable owns generic dispatchers
 export const EventDispatcherSymbol = Symbol("EventDispatcher");
 
 export class StoreObject extends Dispatchable {
@@ -86,7 +85,7 @@ export class StoreObject extends Dispatchable {
         fieldDescriptor.rawField = fieldDescriptor.rawField || (key => key + "Id");
 
         return (value: any, obj: any) => {
-            const store = obj.getStore(this[StoreSymbol].objectType);
+            const store = obj.getStore((this.constructor as typeof StoreObject).objectType);
             return store.get(value);
         };
     }
@@ -198,11 +197,7 @@ export class StoreObject extends Dispatchable {
         if (obj) {
             obj.applyEventAndDispatch(event);
         } else {
-            const objectData = {
-                ...event.data,
-                [StoreSymbol]: this,  // We'll need to have to access loaders in the constructor
-            }
-            obj = new this(objectData, event) as T;
+            obj = new this(event.data, event) as T;
             this.addObject<T>(this.getObjectIdForEvent(event), obj);
             if (sendDispatch) {
                 (this as unknown as Dispatchable).dispatch("create", obj, event);
@@ -296,7 +291,13 @@ export class StoreObject extends Dispatchable {
     }
 }
 
-export function MakeCoolStore(objectType: string, options: StoreOptions = {}): (typeof StoreObject) & Dispatchable {
+export function coolStore<T extends new (...args: any[]) => any>(constructor: T): T {
+    // Register the store with GlobalState immediately
+    GlobalState.addStore(constructor as any);
+    return constructor;
+}
+
+export function BaseStore(objectType: string, options: StoreOptions = {}): (typeof StoreObject) & Dispatchable {
     const state = options.state || GlobalState
 
     class Store extends StoreObject {
