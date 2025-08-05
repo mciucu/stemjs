@@ -14,7 +14,7 @@ export interface StoreOptions {
 }
 
 // Shorthand type for static method this parameter
-type StoreClass<T extends StoreObject> = {new (...args: any[]): T} & typeof StoreObject;
+export type StoreClass<T extends StoreObject> = {new (...args: any[]): T} & typeof StoreObject;
 
 // A symbol to dispatch state events by type, since Dispatchable owns generic dispatchers
 export const EventDispatcherSymbol = Symbol("EventDispatcher");
