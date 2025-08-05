@@ -1,4 +1,4 @@
-import {Dispatchable, CleanupJobs} from "../base/Dispatcher";
+import {CleanupJobs, Dispatchable} from "../base/Dispatcher";
 import {GlobalState, RawStateData, State, StateData, StoreEvent, StoreId} from "./State";
 import {toArray} from "../base/Utils";
 
@@ -10,7 +10,7 @@ interface FieldDescriptor {
 
 type StoreObjectClass<T extends StoreObject = StoreObject> = new (...args: any[]) => T;
 
-interface StoreOptions {
+export interface StoreOptions {
     state?: State;
     dependencies?: string[]; // Other stores that should have their objects loaded before this
     [key: string]: any;
@@ -21,7 +21,7 @@ export const StoreSymbol = Symbol("Store");
 export const EventDispatcherSymbol = Symbol("EventDispatcher");
 
 export class StoreObject extends Dispatchable {
-    declare [StoreSymbol]?: any;
+    declare [StoreSymbol]: BaseStore;
     declare [EventDispatcherSymbol]?: Dispatchable;
     declare id: StoreId;
     [key: string]: any;
@@ -36,7 +36,7 @@ export class StoreObject extends Dispatchable {
         fieldDescriptor.rawField = fieldDescriptor.rawField || (key => key + "Id");
 
         return (value: any, obj: any) => {
-            const store = obj.getStore((this as any)[StoreSymbol].objectType);
+            const store = obj.getStore(this[StoreSymbol].objectType);
             return store.get(value);
         };
     }
@@ -330,37 +330,6 @@ export class GenericObjectStore<T extends StoreObject = StoreObject> extends Bas
     addDeleteListener(callback: (...args: any[]) => void) {
         return this.addListener("delete", callback);
     }
-}
-
-export class SingletonStore<T extends SingletonStore<T> = any> extends BaseStore<any> {
-    constructor(objectType: string, options: StoreOptions = {}) {
-        super(objectType, SingletonStore as any, options);
-    }
-
-    get(): T {
-        return this as unknown as T;
-    }
-
-    all(): T[] {
-        return [this as unknown as T];
-    }
-
-    toJSON(): string {
-        return JSON.stringify([this]);
-    }
-
-    applyEvent(event: StoreEvent): void {
-        Object.assign(this, event.data);
-        this.dispatchChange(event);
-    }
-
-    importState(obj: any): void {
-        Object.assign(this, obj);
-        this.dispatchChange(obj);
-    }
-
-    // Use the same logic as StoreObject when listening to events
-    addEventListener = StoreObject.prototype.addEventListener.bind(this);
 }
 
 export const Store = <T extends StoreObject = StoreObject>(objectType: string, ObjectClass: StoreObjectClass<T>, options: StoreOptions = {}) => class Store extends GenericObjectStore<T> {
