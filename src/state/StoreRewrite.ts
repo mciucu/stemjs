@@ -28,8 +28,8 @@ export class StoreObject extends Dispatchable {
         Object.assign(this, obj);
     }
 
-    getStore(storeName?: string): StoreClass<any> {
-        const ownStore = this.constructor as typeof StoreObject;
+    getStore(storeName?: string): StoreClass<any> & Dispatchable {
+        const ownStore = this.constructor as StoreClass<any>;
         if (storeName) {
             return ownStore.getState().getStore(storeName) as any;
         }
@@ -77,11 +77,11 @@ export class StoreObject extends Dispatchable {
         return obj;
     }
 
-// STATIC BEGIN
+// Static store logic
     static objectType: string;
     static state: State = GlobalState;
     static dependencies: string[] = [];
-    static objects = new Map<string, StoreObject>();
+    static objects = new Map<string, InstanceType<typeof this>>();
 
     static makeFieldLoader(fieldDescriptor: FieldDescriptor): (value: any, obj: any) => any {
         fieldDescriptor.cacheField = false;
@@ -133,7 +133,7 @@ export class StoreObject extends Dispatchable {
 
     static clear(): void {
         this.objects.clear();
-        (this as unknown as Dispatchable).dispatchChange();
+        (this as any as Dispatchable).dispatchChange();
     }
 
     static getObjectIdForEvent(event: StoreEvent): string {
@@ -203,11 +203,11 @@ export class StoreObject extends Dispatchable {
             obj = new this(event.data, event) as T;
             this.addObject<T>(this.getObjectIdForEvent(event), obj);
             if (sendDispatch) {
-                (this as unknown as Dispatchable).dispatch("create", obj, event);
+                (this as any as Dispatchable).dispatch("create", obj, event);
             }
         }
         if (sendDispatch) {
-            (this as unknown as Dispatchable).dispatchChange(obj, event);
+            (this as any as Dispatchable).dispatchChange(obj, event);
         }
         return obj;
     }
@@ -217,8 +217,8 @@ export class StoreObject extends Dispatchable {
         if (obj) {
             this.objects.delete(this.getObjectIdForEvent(event));
             obj.dispatch("delete", event, obj);
-            (this as unknown as Dispatchable).dispatch("delete", obj, event);
-            (this as unknown as Dispatchable).dispatch("change", obj, event);
+            (this as any as Dispatchable).dispatch("delete", obj, event);
+            (this as any as Dispatchable).dispatch("change", obj, event);
         }
         return obj;
     }
@@ -243,7 +243,7 @@ export class StoreObject extends Dispatchable {
 
         obj.applyEventAndDispatch(event);
 
-        (this as unknown as Dispatchable).dispatchChange(obj, event); // TODO this is not a store event, but how can we still register for all of these?
+        (this as any as Dispatchable).dispatchChange(obj, event); // TODO this is not a store event, but how can we still register for all of these?
 
         return obj;
     }
@@ -285,12 +285,12 @@ export class StoreObject extends Dispatchable {
             }
         }
 
-        return (this as unknown as Dispatchable).addListener("create", callback);
+        return (this as any as Dispatchable).addListener("create", callback);
     }
 
     // Add a listener for any object deletions
     static addDeleteListener(callback: (...args: any[]) => void) {
-        return (this as unknown as Dispatchable).addListener("delete", callback);
+        return (this as any as Dispatchable).addListener("delete", callback);
     }
 }
 

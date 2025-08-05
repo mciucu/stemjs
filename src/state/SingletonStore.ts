@@ -1,17 +1,24 @@
-import {StoreEvent} from "./State";
-import {BaseStore, StoreObject, StoreOptions} from "./Store";
+import {State, StoreEvent} from "./State";
+import {StoreObject, StoreOptions} from "./StoreRewrite";
 
-export class SingletonStore<T extends SingletonStore<T> = any> extends BaseStore<any> {
+export class SingletonStore<T extends SingletonStore<T> = any> extends StoreObject {
+    objectType: string;
+    state?: State;
+    dependencies: string[];
+
     constructor(objectType: string, options: StoreOptions = {}) {
-        super(objectType, SingletonStore as any, options);
+        super({});
+        this.objectType = objectType.toLowerCase();
+        this.state = options.state;
+        this.dependencies = options.dependencies;
     }
 
     get(): T {
-        return this as unknown as T;
+        return this as any as T;
     }
 
     all(): T[] {
-        return [this as unknown as T];
+        return [this as any as T];
     }
 
     toJSON(): string {
@@ -27,7 +34,4 @@ export class SingletonStore<T extends SingletonStore<T> = any> extends BaseStore
         Object.assign(this, obj);
         this.dispatchChange(obj);
     }
-
-    // Use the same logic as StoreObject when listening to events
-    addEventListener = StoreObject.prototype.addEventListener.bind(this);
 }
