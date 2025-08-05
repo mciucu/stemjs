@@ -17,15 +17,17 @@ export interface RadioButtonGroupOptions extends SimpleStyledElementOptions {
 
 // Interface declarations for proper typing
 export interface ButtonGroup {
+    // @ts-ignore
     styleSheet: ButtonGroupStyle;
 }
 
 export interface RadioButtonGroup {
+    // @ts-ignore
     styleSheet: RadioButtonGroupStyle;
 }
 
 @registerStyle(ButtonGroupStyle)
-class ButtonGroup extends SimpleStyledElement<ButtonGroupOptions> {
+export class ButtonGroup extends SimpleStyledElement<ButtonGroupOptions> {
     getDefaultOptions(): Partial<ButtonGroupOptions> {
         return {
             orientation: Orientation.HORIZONTAL,
@@ -38,7 +40,7 @@ class ButtonGroup extends SimpleStyledElement<ButtonGroupOptions> {
 }
 
 @registerStyle(RadioButtonGroupStyle)
-class RadioButtonGroup extends SimpleStyledElement<RadioButtonGroupOptions> {
+export class RadioButtonGroup extends SimpleStyledElement<RadioButtonGroupOptions> {
     private index: number = 0;
     private buttons: Button[] = [];
 
@@ -76,4 +78,4 @@ class RadioButtonGroup extends SimpleStyledElement<RadioButtonGroupOptions> {
     }
 }
 
-export {ButtonGroup, RadioButtonGroup};
+
