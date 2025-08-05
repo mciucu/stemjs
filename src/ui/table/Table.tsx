@@ -124,7 +124,7 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
 
     renderTableHead(): UIElementChild {
         const {noHeader} = this.options;
-        const columns = this.getDefaultColumns();
+        const columns = this.getDefaultColumns(this.options, this.options.entries);
 
         return !noHeader && <thead ref="thead" className={this.styleSheet.thead}>
             <tr>
