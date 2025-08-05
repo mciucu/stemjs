@@ -98,7 +98,7 @@ export class StoreObject extends Dispatchable {
 
         // Since the backend might have a different lettering case, need a more complex search here
         for (const [key, value] of Object.entries(state)) {
-            if (String(key).toLowerCase() === this.objectType.toLowerCase()) {
+            if (String(key).toLowerCase() === this.objectType) {
                 return toArray(value);
             }
         }
