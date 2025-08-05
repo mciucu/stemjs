@@ -13,6 +13,9 @@ export interface StoreOptions {
     dependencies?: string[]; // Other stores that should have their objects loaded before this
 }
 
+// Shorthand type for static method this parameter
+type StoreClass<T extends StoreObject> = {new (...args: any[]): T} & typeof StoreObject;
+
 // A symbol to dispatch state events by type, since Dispatchable owns generic dispatchers
 export const EventDispatcherSymbol = Symbol("EventDispatcher");
 
@@ -117,7 +120,7 @@ export class StoreObject extends Dispatchable {
         return this.state;
     }
 
-    static get<T extends StoreObject>(this: {new (...args: any[]): T} & typeof StoreObject, id: StoreId): T | undefined {
+    static get<T extends StoreObject>(this: StoreClass<T>, id: StoreId): T | undefined {
         if (id == null) {
             return;
         }
@@ -138,30 +141,30 @@ export class StoreObject extends Dispatchable {
         return String(id);
     }
 
-    static getObjectForEvent<T extends StoreObject>(this: {new (...args: any[]): T} & typeof StoreObject, event: StoreEvent): T | undefined {
+    static getObjectForEvent<T extends StoreObject>(this: StoreClass<T>, event: StoreEvent): T | undefined {
         let objectId = this.getObjectIdForEvent(event);
         return this.get(objectId);
     }
 
-    static values<T extends StoreObject>(this: {new (...args: any[]): T} & typeof StoreObject): IterableIterator<T> {
+    static values<T extends StoreObject>(this: StoreClass<T>): IterableIterator<T> {
         return this.objects.values() as IterableIterator<T>;
     }
 
-    static all<T extends StoreObject>(this: {new (...args: any[]): T} & typeof StoreObject): T[] {
+    static all<T extends StoreObject>(this: StoreClass<T>): T[] {
         const values = this.objects.values();
         return Array.from(values) as T[];
     }
 
-    static find<T extends StoreObject>(this: {new (...args: any[]): T} & typeof StoreObject, callback: (value: T) => boolean): T | undefined {
+    static find<T extends StoreObject>(this: StoreClass<T>, callback: (value: T) => boolean): T | undefined {
         return this.all<T>().find(callback);
     }
 
-    static filter<T extends StoreObject>(this: {new (...args: any[]): T} & typeof StoreObject, callback: (value: T) => boolean): T[] {
+    static filter<T extends StoreObject>(this: StoreClass<T>, callback: (value: T) => boolean): T[] {
         return this.all<T>().filter(callback);
     }
 
     // TODO Stores should have configurable indexes from FK ids, for quick filtering
-    static filterBy<T extends StoreObject>(this: {new (...args: any[]): T} & typeof StoreObject, filter: Record<string, any>): T[] {
+    static filterBy<T extends StoreObject>(this: StoreClass<T>, filter: Record<string, any>): T[] {
         const entries = Object.entries(filter); // Some minimal caching
 
         return this.filter<T>((obj: T) => {
@@ -182,16 +185,16 @@ export class StoreObject extends Dispatchable {
         });
     }
 
-    static findBy<T extends StoreObject>(this: {new (...args: any[]): T} & typeof StoreObject, filter: Record<string, any>): T | undefined {
+    static findBy<T extends StoreObject>(this: StoreClass<T>, filter: Record<string, any>): T | undefined {
         // TODO - need a better implementation with rapid termination
         return this.filterBy<T>(filter)[0];
     }
 
-    static toJSON<T extends StoreObject>(this: {new (...args: any[]): T} & typeof StoreObject): any[] {
+    static toJSON<T extends StoreObject>(this: StoreClass<T>): any[] {
         return this.all<T>().map((entry: T) => entry.toJSON());
     }
 
-    static applyCreateOrUpdateEvent<T extends StoreObject>(this: {new (...args: any[]): T} & typeof StoreObject, event: StoreEvent, sendDispatch: boolean = true): T {
+    static applyCreateOrUpdateEvent<T extends StoreObject>(this: StoreClass<T>, event: StoreEvent, sendDispatch: boolean = true): T {
         let obj = this.getObjectForEvent<T>(event);
 
         if (obj) {
@@ -209,7 +212,7 @@ export class StoreObject extends Dispatchable {
         return obj;
     }
 
-    static applyDeleteEvent<T extends StoreObject>(this: {new (...args: any[]): T} & typeof StoreObject, event: StoreEvent): T | null {
+    static applyDeleteEvent<T extends StoreObject>(this: StoreClass<T>, event: StoreEvent): T | null {
         const obj = this.getObjectForEvent<T>(event);
         if (obj) {
             this.objects.delete(this.getObjectIdForEvent(event));
@@ -220,7 +223,7 @@ export class StoreObject extends Dispatchable {
         return obj;
     }
 
-    static applyEvent<T extends StoreObject>(this: {new (...args: any[]): T} & typeof StoreObject, event: StoreEvent): T | null {
+    static applyEvent<T extends StoreObject>(this: StoreClass<T>, event: StoreEvent): T | null {
         event.data = event.data || {};
 
         if (event.type === "create" || event.type === "createOrUpdate") {
@@ -263,7 +266,7 @@ export class StoreObject extends Dispatchable {
     }
 
     // Create a fake creation event, to insert the raw object
-    static create<T extends StoreObject>(this: {new (...args: any[]): T} & typeof StoreObject, obj: any, eventExtra: any = null, dispatchEvent: boolean = true): T | undefined {
+    static create<T extends StoreObject>(this: StoreClass<T>, obj: any, eventExtra: any = null, dispatchEvent: boolean = true): T | undefined {
         if (!obj) {
             return;
         }
