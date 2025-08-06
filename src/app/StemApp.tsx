@@ -23,7 +23,7 @@ declare global {
     }
 }
 
-export class StemApp extends UI.Element {
+export class StemApp extends UI.Element<StemAppOptions> {
     declare options: StemAppOptions;
 
     static init(): StemApp {
