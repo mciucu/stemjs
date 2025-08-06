@@ -1,5 +1,5 @@
 import {State, StoreEvent} from "./State";
-import {StoreObject, StoreOptions} from "./StoreRewrite";
+import {StoreObject, StoreOptions} from "./Store";
 
 export class SingletonStore<T extends SingletonStore<T> = any> extends StoreObject {
     objectType: string;

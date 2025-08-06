@@ -1,4 +1,4 @@
-import {coolStore, BaseStore, StoreClass, StoreObject} from "../state/StoreRewrite";
+import {coolStore, BaseStore, StoreClass, StoreObject} from "../state/Store";
 import {StoreId} from "../state/State";
 
 @coolStore
