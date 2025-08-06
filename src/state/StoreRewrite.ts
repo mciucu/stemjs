@@ -302,7 +302,7 @@ export function coolStore<T extends new (...args: any[]) => any>(constructor: T)
 }
 
 export function BaseStore(objectType: string, options: StoreOptions = {}): (typeof StoreObject) & Dispatchable {
-    const state = options.state || GlobalState
+    const state = options.state || GlobalState;
 
     class Store extends StoreObject {
         static objectType = objectType.toLowerCase();
