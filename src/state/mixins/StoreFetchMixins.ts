@@ -1,8 +1,8 @@
-import {unwrapArray, splitInChunks, isString} from "../base/Utils";
-import {Ajax} from "../base/Ajax";
-import {GlobalState, StoreId} from "./State";
-import {URLFetchOptions} from "../base/Fetch";
-import {BaseStore, StoreOptions, StoreObject, StoreClass} from "./Store";
+import {unwrapArray, splitInChunks, isString} from "../../base/Utils";
+import {Ajax} from "../../base/Ajax";
+import {GlobalState, StoreId} from "../State";
+import {URLFetchOptions} from "../../base/Fetch";
+import {BaseStore, StoreOptions, StoreObject, StoreClass} from "../Store";
 
 // Type definitions for StoreMixins
 export interface FetchJob {
