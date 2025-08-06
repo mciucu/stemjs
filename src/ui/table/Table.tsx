@@ -3,6 +3,9 @@ import {TableStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
 import {ColumnHandler, ColumnLike} from "../../base/ColumnHandler.js";
 
+// TODO @types
+UI.Element;
+
 export interface TableRowOptions<BaseType> extends UIElementOptions {
     columns?: ColumnHandler<BaseType>[];
     parent?: UIElement<any>;
