@@ -1,5 +1,5 @@
 import {Currency, CurrencyStore} from "./CurrencyStore";
-import {StoreObject} from "../state/OldStore";
+import {StoreObject} from "../state/Store";
 import {isString} from "../base/Utils";
 
 const MoneyErrors = {
@@ -194,7 +194,6 @@ export class Money {
     }
 }
 
-// TODO: go through our objects and extend this class for all that have an amount
 // A generic store object that has a currency and an amount
 export class MoneyObject extends StoreObject {
     declare currencyId: string | number;
