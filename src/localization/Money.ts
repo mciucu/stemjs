@@ -1,5 +1,5 @@
 import {Currency, CurrencyStore} from "./CurrencyStore";
-import {StoreObject} from "../state/Store";
+import {StoreObject} from "../state/OldStore";
 import {isString} from "../base/Utils";
 
 const MoneyErrors = {

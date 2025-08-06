@@ -1,4 +1,4 @@
-import {StoreObject} from "../state/Store";
+import {StoreObject} from "../state/OldStore";
 import {PropertyCache} from "../data-structures/PropertyCache";
 import {BaseUIElement} from "../ui/UIBase";
 

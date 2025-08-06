@@ -1,7 +1,7 @@
 import {StemDate} from "../time/Date.js";
 import {isFunction, isString} from "../base/Utils.js";
 import {GlobalState} from "./State.js";
-import {StoreObject} from "./Store";
+import {StoreObject} from "./OldStore";
 
 export interface FieldOptions {
     rawField?: string | symbol | ((key: string, descriptor?: FieldDescriptor) => string | symbol);
