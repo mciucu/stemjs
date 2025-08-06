@@ -22,7 +22,12 @@ export interface FetchOptions extends StoreOptions {
     fetchTimeoutDuration?: number;
 }
 
-export const FetchStoreMixin = <T extends StoreObject = StoreObject>(objectType: string, fetchOptions: FetchOptions = {}, BaseClass?: StoreClass<T>) => class AjaxFetchStore extends BaseStore(objectType, fetchOptions, BaseClass) {
+export const FetchStoreMixin = <T extends StoreObject = StoreObject>(
+    objectType: string,
+    fetchOptions: FetchOptions = {},
+    BaseClass?: StoreClass<T>
+) => // @ts-ignore
+class AjaxFetchStore extends BaseStore(objectType, fetchOptions, BaseClass) {
     static fetchJobs?: FetchJob[];
     static fetchTimeout?: number;
     static fetchTimeoutDuration: number = fetchOptions.fetchTimeoutDuration || 50;
