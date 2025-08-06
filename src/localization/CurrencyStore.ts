@@ -3,7 +3,6 @@ import {StoreId} from "../state/State";
 
 @coolStore
 export class Currency extends BaseStore("Currency") {
-    declare id: number;
     declare decimalDigits: number;
     declare symbol: string;
     declare subdivisionSymbol: string;

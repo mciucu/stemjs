@@ -1,8 +1,8 @@
-// TODO: this file should be called StoreExtenders
 import {unwrapArray, splitInChunks, isString} from "../base/Utils";
 import {Ajax} from "../base/Ajax";
 import {GlobalState, StoreId} from "./State";
-import {FetchOptions, URLFetchOptions} from "../base/Fetch";
+import {URLFetchOptions} from "../base/Fetch";
+import {BaseStore, StoreOptions} from "./Store";
 
 // Type definitions for StoreMixins
 export interface FetchJob {
@@ -15,27 +15,23 @@ export interface FetchRequestData {
     [key: string]: any;
 }
 
-type StoreClass = new (...args: any[]) => any;
-type StoreObjectClass = new (...args: any[]) => any;
-
-interface VirtualObject {
-    id: StoreId;
-    hasTemporaryId(): boolean;
-    updateId(newId: StoreId): void;
-    dispatch(event: string, data?: any): void;
+export interface FetchOptions extends StoreOptions {
+    fetchURL?: string;
+    fetchType?: string;
+    maxFetchObjectCount?: number;
+    fetchTimeoutDuration?: number;
 }
 
-// TODO This should be an async method
-export const AjaxFetchMixin = <T extends StoreClass>(BaseStoreClass: T) => class AjaxFetchMixin extends BaseStoreClass {
-    declare fetchJobs?: FetchJob[];
-    declare fetchTimeout?: number;
-    declare fetchTimeoutDuration: number;
-    declare fetchURL: string;
-    declare fetchType?: string;
-    declare maxFetchObjectCount?: number;
-    declare objectType: string;
+export const AjaxFetchMixin = (objectType: string, fetchOptions: FetchOptions = {}) => class AjaxFetchStore extends BaseStore(objectType, fetchOptions) {
+    static fetchJobs?: FetchJob[];
+    static fetchTimeout?: number;
+    static fetchTimeoutDuration: number = fetchOptions.fetchTimeoutDuration || 50;
+    static fetchURL: string = fetchOptions.fetchURL || "";
+    static fetchType: string = fetchOptions.fetchType || "GET";
+    static maxFetchObjectCount: number = fetchOptions.maxFetchObjectCount || 256;
 
-    fetch(id: StoreId, successCallback: (obj: any) => void, errorCallback?: (error?: any) => void, forceFetch: boolean = false): void {
+    // TODO This should be an async method
+    static fetch(id: StoreId, successCallback: (obj: any) => void, errorCallback?: (error?: any) => void, forceFetch: boolean = false): void {
         if (!forceFetch) {
             let obj = this.get(id);
             if (obj) {
@@ -54,20 +50,20 @@ export const AjaxFetchMixin = <T extends StoreClass>(BaseStoreClass: T) => class
         }
     };
 
-    getFetchRequestData(entries: [StoreId, FetchJob[]][]): FetchRequestData {
+    static getFetchRequestData(entries: [StoreId, FetchJob[]][]): FetchRequestData {
         return {
             ids: entries.map(entry => entry[0])
         };
     }
 
-    getFetchRequestObject(entries: [StoreId, FetchJob[]][]): URLFetchOptions {
+    static getFetchRequestObject(entries: [StoreId, FetchJob[]][]): URLFetchOptions {
         const requestData = this.getFetchRequestData(entries);
         const fetchJobs: FetchJob[] = unwrapArray(entries.map(entry => entry[1]));
 
         // TODO: options.fetchURL should also support a function(ids, fetchJobs), do it when needed
         return {
             url: this.fetchURL,
-            type: this.fetchType || "GET",
+            type: this.fetchType,
             dataType: "json",
             data: requestData,
             cache: "no-cache",
@@ -97,7 +93,7 @@ export const AjaxFetchMixin = <T extends StoreClass>(BaseStoreClass: T) => class
     }
 
     //returns an array of ajax requests that have to be executed
-    getFetchRequests(fetchJobs: FetchJob[]): URLFetchOptions[] {
+    static getFetchRequests(fetchJobs: FetchJob[]): URLFetchOptions[] {
         const idFetchJobs = new Map<StoreId, FetchJob[]>();
 
         for (const fetchJob of fetchJobs) {
@@ -108,14 +104,14 @@ export const AjaxFetchMixin = <T extends StoreClass>(BaseStoreClass: T) => class
             idFetchJobs.get(objectId)!.push(fetchJob);
         }
 
-        const maxChunkSize = this.maxFetchObjectCount || 256;
+        const maxChunkSize = this.maxFetchObjectCount;
 
         const fetchChunks = splitInChunks(Array.from(idFetchJobs.entries()), maxChunkSize);
 
         return fetchChunks.map((chunkEntries) => this.getFetchRequestObject(chunkEntries));
     }
 
-    executeAjaxFetch(): void {
+    static executeAjaxFetch(): void {
         const fetchJobs = this.fetchJobs;
         delete this.fetchJobs;
 
@@ -127,72 +123,5 @@ export const AjaxFetchMixin = <T extends StoreClass>(BaseStoreClass: T) => class
 
         clearTimeout(this.fetchTimeout);
         this.fetchTimeout = undefined;
-    }
-
-};
-
-export const VirtualStoreObjectMixin = <T extends StoreObjectClass>(BaseStoreObjectClass: T) => class VirtualStoreObjectMixin extends BaseStoreObjectClass {
-    declare id: StoreId;
-
-    hasTemporaryId(): boolean {
-        return isString(this.id) && this.id.startsWith("temp-");
-    }
-
-    // Meant for updating temporary objects that need to exist before being properly created
-    updateId(newId: StoreId): void {
-        if (this.id == newId) {
-            return;
-        }
-        let oldId = this.id;
-        if (!this.hasTemporaryId()) {
-            console.error("This is only meant to replace temporary ids!");
-        }
-        this.id = newId;
-        this.dispatch("updateId", {oldId: oldId});
-    }
-};
-
-// TODO: there's still a bug in this class when not properly matching virtual obj sometimes I think
-export const VirtualStoreMixin = <T extends StoreClass>(BaseStoreClass: T) => class VirtualStoreMixin extends BaseStoreClass {
-    declare objects: Map<string, any>;
-    static virtualIdCounter: number;
-
-    static generateVirtualId(): number {
-        if (!this.virtualIdCounter) {
-            this.virtualIdCounter = 0;
-        }
-        this.virtualIdCounter += 1;
-        return this.virtualIdCounter;
-    }
-
-    generateVirtualId(): number {
-        return (this.constructor as typeof VirtualStoreMixin).generateVirtualId();
-    }
-
-    // TODO: we probably shouldn't have getVirtualObject take in an event
-    getVirtualObject(event: any): any {
-        return this.objects.get("temp-" + event.virtualId);
-    }
-
-    applyUpdateObjectId(object: VirtualObject, id: string): void {
-        if (object.id === id) {
-            return;
-        }
-        const oldId = String(object.id);
-        object.updateId(id);
-        this.objects.delete(oldId);
-        this.addObject(object.id, object);
-        this.dispatch("updateObjectId", object, oldId);
-    }
-
-    applyCreateOrUpdateEvent(event: any, sendDispatch: boolean = true): any {
-        if (event.virtualId) {
-            let existingVirtualObject = this.getVirtualObject(event);
-            if (existingVirtualObject) {
-                this.applyUpdateObjectId(existingVirtualObject, event.objectId);
-            }
-        }
-
-        return super.applyCreateOrUpdateEvent(event, sendDispatch);
     }
 };

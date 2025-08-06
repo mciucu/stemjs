@@ -12,6 +12,7 @@ interface FieldDescriptor {
 export interface StoreOptions {
     state?: State;
     dependencies?: string[]; // Other stores that should have their objects loaded before this
+    baseClass?: typeof StoreObject; // Optional base class that inherits from StoreObject
 }
 
 // Shorthand type for static method this parameter
@@ -303,8 +304,9 @@ export function coolStore<T extends new (...args: any[]) => any>(constructor: T)
 
 export function BaseStore(objectType: string, options: StoreOptions = {}): (typeof StoreObject) & Dispatchable {
     const state = options.state || GlobalState;
+    const BaseClass = options.baseClass || StoreObject;
 
-    class Store extends StoreObject {
+    class Store extends BaseClass {
         static objectType = objectType.toLowerCase();
         static state = state;
         static dependencies = options.dependencies || [];
