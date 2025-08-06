@@ -2,7 +2,7 @@ import {unwrapArray, splitInChunks, isString} from "../base/Utils";
 import {Ajax} from "../base/Ajax";
 import {GlobalState, StoreId} from "./State";
 import {URLFetchOptions} from "../base/Fetch";
-import {BaseStore, StoreOptions} from "./Store";
+import {BaseStore, StoreOptions, StoreObject, StoreClass} from "./Store";
 
 // Type definitions for StoreMixins
 export interface FetchJob {
@@ -22,7 +22,7 @@ export interface FetchOptions extends StoreOptions {
     fetchTimeoutDuration?: number;
 }
 
-export const AjaxFetchMixin = (objectType: string, fetchOptions: FetchOptions = {}) => class AjaxFetchStore extends BaseStore(objectType, fetchOptions) {
+export const AjaxFetchMixin = <T extends StoreObject = StoreObject>(objectType: string, fetchOptions: FetchOptions = {}, BaseClass?: StoreClass<T>) => class AjaxFetchStore extends BaseStore(objectType, fetchOptions, BaseClass) {
     static fetchJobs?: FetchJob[];
     static fetchTimeout?: number;
     static fetchTimeoutDuration: number = fetchOptions.fetchTimeoutDuration || 50;

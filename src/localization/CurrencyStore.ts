@@ -1,7 +1,7 @@
-import {coolStore, BaseStore, StoreClass, StoreObject} from "../state/Store";
+import {globalStore, BaseStore, StoreClass, StoreObject} from "../state/Store";
 import {StoreId} from "../state/State";
 
-@coolStore
+@globalStore
 export class Currency extends BaseStore("Currency") {
     declare decimalDigits: number;
     declare symbol: string;

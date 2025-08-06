@@ -12,7 +12,6 @@ interface FieldDescriptor {
 export interface StoreOptions {
     state?: State;
     dependencies?: string[]; // Other stores that should have their objects loaded before this
-    baseClass?: typeof StoreObject; // Optional base class that inherits from StoreObject
 }
 
 // Shorthand type for static method this parameter
@@ -296,21 +295,21 @@ export class StoreObject extends Dispatchable {
     }
 }
 
-export function coolStore<T extends new (...args: any[]) => any>(constructor: T): T {
+export function globalStore<T extends new (...args: any[]) => any>(constructor: T): T {
     // Register the store with GlobalState immediately
     GlobalState.addStore(constructor as any);
     return constructor;
 }
 
-export function BaseStore(objectType: string, options: StoreOptions = {}): (typeof StoreObject) & Dispatchable {
+export function BaseStore<T extends StoreObject = StoreObject>(objectType: string, options: StoreOptions = {}, BaseClass?: StoreClass<T>): StoreClass<T> & Dispatchable {
     const state = options.state || GlobalState;
-    const BaseClass = options.baseClass || StoreObject;
+    BaseClass = BaseClass || (StoreObject as StoreClass<T>);
 
     class Store extends BaseClass {
         static objectType = objectType.toLowerCase();
         static state = state;
         static dependencies = options.dependencies || [];
-        static objects = new Map<string, Store>();
+        static objects = new Map<string, T>();
     }
 
     // Copy Dispatchable instance properties and methods to the Store class
