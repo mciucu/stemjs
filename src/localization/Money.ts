@@ -1,4 +1,4 @@
-import {Currency, CurrencyStore} from "./CurrencyStore";
+import {Currency} from "./CurrencyStore";
 import {StoreObject} from "../state/Store";
 import {isString} from "../base/Utils";
 
@@ -42,7 +42,7 @@ export class Money {
             currency = moneyLike.currency || moneyLike.currencyId || moneyLike.getCurrency?.(); // Will fail if none of these exist
         }
         // The currency argument can be represented by a currency id or an instance of the Currency class
-        const currencyInstance = currency instanceof Currency ? currency : CurrencyStore.get(currency as string | number);
+        const currencyInstance = currency instanceof Currency ? currency : Currency.get(currency as string | number);
         if (!currencyInstance) {
             throw MoneyErrors.INVALID_CURRENCY_PROVIDED;
         }
@@ -200,7 +200,7 @@ export class MoneyObject extends StoreObject {
     declare amount: number;
 
     getCurrency(): Currency | undefined {
-        return CurrencyStore.get(this.currencyId);
+        return Currency.get(this.currencyId);
     }
 
     getAmount(): Money {

@@ -82,6 +82,3 @@ export class Currency extends BaseStore("Currency") {
         return super.get(id) || (self.getByIsoCode(id) as any);
     }
 }
-
-export const CurrencyStore = Currency;
-
