@@ -4,50 +4,60 @@ import {GlobalState, StoreId} from "../State";
 import {URLFetchOptions} from "../../base/Fetch";
 import {BaseStore, StoreOptions, StoreObject, StoreClass} from "../Store";
 
-// Type definitions for StoreMixins
-export interface FetchJob {
-    id: StoreId;
-    success: (obj: any) => void;
-    error?: (error?: any) => void;
+// Options a fetch can be called with, might be overridden
+export interface BaseFetchOptions {
+    force?: boolean;
 }
+
+export type FetchJob<T extends StoreObject, ExtraOptions = {}> = {
+    id: StoreId;
+    success: (obj: T) => void;
+    error?: (error?: any) => void;
+} & ExtraOptions;
 
 export interface FetchRequestData {
     [key: string]: any;
 }
 
-export interface FetchOptions extends StoreOptions {
+export interface FetchMixinOptions extends StoreOptions {
     fetchURL?: string;
     fetchType?: string;
     maxFetchObjectCount?: number;
     fetchTimeoutDuration?: number;
 }
 
-export const FetchStoreMixin = <T extends StoreObject = StoreObject>(
+export const FetchStoreMixin = <
+    T extends StoreObject = StoreObject,
+    FetchOptions extends BaseFetchOptions = BaseFetchOptions
+>(
     objectType: string,
-    fetchOptions: FetchOptions = {},
+    storeOptions: FetchMixinOptions = {},
     BaseClass?: StoreClass<T>
 ) => // @ts-ignore
-class AjaxFetchStore extends BaseStore(objectType, fetchOptions, BaseClass) {
-    static fetchJobs?: FetchJob[];
+class AjaxFetchStore extends BaseStore(objectType, storeOptions, BaseClass) {
+    static fetchJobs: FetchJob<T, FetchOptions>[] = [];
     static fetchTimeout?: number;
-    static fetchTimeoutDuration: number = fetchOptions.fetchTimeoutDuration || 50;
-    static fetchURL: string = fetchOptions.fetchURL || "";
-    static fetchType: string = fetchOptions.fetchType || "GET";
-    static maxFetchObjectCount: number = fetchOptions.maxFetchObjectCount || 256;
+    static fetchTimeoutDuration: number = storeOptions.fetchTimeoutDuration || 50;
+    static fetchURL: string = storeOptions.fetchURL || "";
+    static fetchType: string = storeOptions.fetchType || "GET";
+    static maxFetchObjectCount: number = storeOptions.maxFetchObjectCount || 256;
 
-    // TODO This should be an async method
-    static fetch(id: StoreId, successCallback: (obj: any) => void, errorCallback?: (error?: any) => void, forceFetch: boolean = false): void {
-        if (!forceFetch) {
+    static async fetch<T extends StoreObject & AjaxFetchStore>(this: StoreClass<T> & typeof AjaxFetchStore, id: StoreId, fetchOptions: Partial<FetchOptions> = {}): Promise<T> {
+        return new Promise((resolve, reject) => {
+            this.fetchSync<T>(id, resolve, reject, fetchOptions);
+        });
+    }
+
+    // TODO Deprecate this and move to only fetch
+    static fetchSync<T extends StoreObject & AjaxFetchStore>(this: StoreClass<T> & typeof AjaxFetchStore, id: StoreId, successCallback: (obj: T) => void, errorCallback?: (error?: any) => void, fetchOptions: Partial<FetchOptions> = {}): void {
+        if (!fetchOptions.force) {
             let obj = this.get(id);
             if (obj) {
                 successCallback(obj);
                 return;
             }
         }
-        if (!this.fetchJobs) {
-            this.fetchJobs = [];
-        }
-        this.fetchJobs.push({id: id, success: successCallback, error: errorCallback});
+        this.fetchJobs.push({id: id, success: successCallback, error: errorCallback, ...fetchOptions} as any);
         if (!this.fetchTimeout) {
             this.fetchTimeout = setTimeout(() => {
                 this.executeAjaxFetch();
@@ -55,17 +65,16 @@ class AjaxFetchStore extends BaseStore(objectType, fetchOptions, BaseClass) {
         }
     };
 
-    static getFetchRequestData(entries: [StoreId, FetchJob[]][]): FetchRequestData {
+    static getFetchRequestData(entries: [StoreId, FetchJob<any>[]][]): FetchRequestData {
         return {
             ids: entries.map(entry => entry[0])
         };
     }
 
-    static getFetchRequestObject(entries: [StoreId, FetchJob[]][]): URLFetchOptions {
+    static getFetchRequestObject(entries: [StoreId, FetchJob<any>[]][]): URLFetchOptions {
         const requestData = this.getFetchRequestData(entries);
-        const fetchJobs: FetchJob[] = unwrapArray(entries.map(entry => entry[1]));
+        const fetchJobs: FetchJob<any>[] = unwrapArray(entries.map(entry => entry[1]));
 
-        // TODO: options.fetchURL should also support a function(ids, fetchJobs), do it when needed
         return {
             url: this.fetchURL,
             type: this.fetchType,
@@ -98,8 +107,8 @@ class AjaxFetchStore extends BaseStore(objectType, fetchOptions, BaseClass) {
     }
 
     //returns an array of ajax requests that have to be executed
-    static getFetchRequests(fetchJobs: FetchJob[]): URLFetchOptions[] {
-        const idFetchJobs = new Map<StoreId, FetchJob[]>();
+    static getFetchRequests(fetchJobs: FetchJob<any>[]): URLFetchOptions[] {
+        const idFetchJobs = new Map<StoreId, FetchJob<any>[]>();
 
         for (const fetchJob of fetchJobs) {
             let objectId = fetchJob.id;
@@ -118,7 +127,7 @@ class AjaxFetchStore extends BaseStore(objectType, fetchOptions, BaseClass) {
 
     static executeAjaxFetch(): void {
         const fetchJobs = this.fetchJobs;
-        delete this.fetchJobs;
+        this.fetchJobs = [];
 
         const requests = this.getFetchRequests(fetchJobs!);
 
