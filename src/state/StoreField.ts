@@ -1,7 +1,6 @@
 import {StemDate} from "../time/Date.js";
 import {isFunction, isString} from "../base/Utils.js";
-import {GlobalState} from "./State.js";
-import {StoreObject} from "./OldStore";
+import {StoreObject} from "./Store";
 
 export interface FieldOptions {
     rawField?: string | symbol | ((key: string, descriptor?: FieldDescriptor) => string | symbol);
@@ -65,7 +64,7 @@ class FieldDescriptor {
 
             this.loader = (value: any, obj: StoreObjectWithFields) => {
                 // TODO Instead of calling GlobalState, the object should implement .getState()
-                const store = obj.getStore ? obj.getStore(storeName) : GlobalState.getStore(storeName);
+                const store = obj.getStore(storeName);
                 return store.get(value);
             }
         }
