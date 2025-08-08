@@ -337,32 +337,3 @@ export const Store = <T extends StoreObject = StoreObject>(objectType: string, O
         super(objectType, ObjectClass, options);
     }
 };
-
-export function MakeStore<T extends StoreObject = StoreObject>(objectType: string, ObjectClass: StoreObjectClass<T>, options?: StoreOptions): GenericObjectStore<T> {
-    const Cls = Store(objectType, ObjectClass, options);
-    return new Cls();
-}
-
-
-// Experimental, to allow the store to also have the store methods be available on the object class
-export function registerStore(objectType: string, options: StoreOptions = {dependencies: []}) {
-    return <T extends StoreObject = StoreObject>(Cls: StoreObjectClass<T>) => {
-        const store = MakeStore(objectType, Cls, options);
-
-        (Cls as any).store = store;
-
-        const proxy = new Proxy(Cls, {
-            get(target: StoreObjectClass<T>, key: string | symbol) {
-                if (key in target) {
-                    return target[key as keyof StoreObjectClass<T>];
-                } else {
-                    return (store as any)[key];
-                }
-            }
-        });
-
-        store.ObjectClass = proxy;
-
-        return proxy;
-    }
-}

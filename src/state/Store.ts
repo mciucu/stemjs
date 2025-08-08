@@ -304,11 +304,12 @@ export function globalStore<T extends new (...args: any[]) => any>(constructor: 
 export function BaseStore<T extends StoreObject = StoreObject>(objectType: string, options: StoreOptions = {}, BaseClass?: StoreClass<T>): StoreClass<T> & Dispatchable {
     const state = options.state || GlobalState;
     BaseClass = BaseClass || (StoreObject as StoreClass<T>);
+    const dependencies = [...(options.dependencies || []), ...(BaseClass.dependencies || [])];
 
     class Store extends BaseClass {
         static objectType = objectType.toLowerCase();
         static state = state;
-        static dependencies = options.dependencies || [];
+        static dependencies = dependencies;
         static objects = new Map<string, T>();
     }
 
