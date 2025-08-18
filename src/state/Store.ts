@@ -2,12 +2,7 @@
 import {CleanupJobs, Dispatchable} from "../base/Dispatcher";
 import {GlobalState, RawStateData, State, StateData, StoreEvent, StoreId} from "./State";
 import {isNotNull, toArray} from "../base/Utils";
-
-interface FieldDescriptor {
-    cacheField?: boolean;
-    rawField?: string | ((key: string) => string);
-    [key: string]: any;
-}
+import {FieldDescriptor} from "./StoreField";
 
 export interface StoreOptions {
     state?: State;
@@ -29,8 +24,15 @@ export class StoreObject extends Dispatchable {
         Object.assign(this, obj);
     }
 
+    getOwnStore<T extends this>(): T['constructor'] & StoreClass<this> & Dispatchable {
+        return this.constructor as any;
+    }
+
+    // Overloaded signatures for better typing
+    getStore(): typeof this.constructor & StoreClass<this> & Dispatchable;
+    getStore(storeName: string): StoreClass<any> & Dispatchable;
     getStore(storeName?: string): StoreClass<any> & Dispatchable {
-        const ownStore = this.constructor as StoreClass<any>;
+        const ownStore = this.getOwnStore();
         if (storeName) {
             return ownStore.getState().getStore(storeName) as any;
         }
@@ -84,13 +86,13 @@ export class StoreObject extends Dispatchable {
     static dependencies: string[] = [];
     static objects = new Map<string, InstanceType<typeof this>>();
 
-    static makeFieldLoader(fieldDescriptor: FieldDescriptor): (value: any, obj: any) => any {
+    static makeFieldLoader<T extends StoreObject>(this: StoreClass<T>, fieldDescriptor: FieldDescriptor): (value: any, obj: any) => T {
         fieldDescriptor.cacheField = false;
         fieldDescriptor.rawField = fieldDescriptor.rawField || (key => key + "Id");
 
         return (value: any, obj: any) => {
-            const store = obj.getStore((this.constructor as typeof StoreObject).objectType);
-            return store.get(value);
+            //const store = obj.getStore(this.objectType);
+            return this.get(value);
         };
     }
 

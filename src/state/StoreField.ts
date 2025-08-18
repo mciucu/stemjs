@@ -20,7 +20,7 @@ export type FieldType = string | { makeFieldLoader?: (descriptor: FieldDescripto
 export type LegacyDecorator = (target: any, propertyKey: string, descriptor?: PropertyDescriptor) => PropertyDescriptor;
 export type FakedDecorated = (target: any, propertyKey: string) => void;
 
-class FieldDescriptor {
+export class FieldDescriptor {
     type: FieldType;
     targetProto?: any;
     key?: string;
