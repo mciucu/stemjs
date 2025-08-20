@@ -1,5 +1,5 @@
 import {StoreObject} from "../state/Store";
-import {PropertyCache} from "../../data-structures/PropertyCache";
+import {PropertyCache} from "../data-structures/PropertyCache";
 import {BaseUIElement} from "../ui/UIBase";
 
 type Constructor<T = {}> = new (...args: any[]) => T;

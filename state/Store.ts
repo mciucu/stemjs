@@ -1,7 +1,7 @@
 // TODO @Mihai this should become the new Store
-import {CleanupJobs, Dispatchable} from "../../base/Dispatcher";
+import {CleanupJobs, Dispatchable} from "../base/Dispatcher";
 import {GlobalState, RawStateData, State, StateData, StoreEvent, StoreId} from "./State";
-import {isNotNull, toArray} from "../../base/Utils";
+import {isNotNull, toArray} from "../base/Utils";
 import {FieldDescriptor} from "./StoreField";
 
 export interface StoreOptions {

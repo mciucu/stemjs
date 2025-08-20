@@ -1,6 +1,6 @@
 import {Currency} from "./CurrencyStore";
 import {StoreObject} from "../state/Store";
-import {isString} from "../../base/Utils";
+import {isString} from "../base/Utils";
 import {field} from "../state/StoreField";
 import {StoreId} from "../state/State";
 

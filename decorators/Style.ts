@@ -1,4 +1,4 @@
-import {deepCopy} from "../../base/Utils";
+import {deepCopy} from "../base/Utils";
 import {lazyInit} from "./LazyInitialize";
 
 interface StyleRuleOptions {

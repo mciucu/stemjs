@@ -1,4 +1,4 @@
-import {toArray} from "../../base/Utils";
+import {toArray} from "../base/Utils";
 
 // TODO: rename to arrayable or something better?
 // When passed in a function, it will normalize the first argument to an array

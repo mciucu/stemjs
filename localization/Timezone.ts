@@ -1,5 +1,5 @@
 import {BaseEnum, makeEnum} from "../state/BaseEnum";
-import {StemDate} from "../../time/Date";
+import {StemDate} from "../time/Date";
 
 interface TimezoneConfig {
     value: string;
