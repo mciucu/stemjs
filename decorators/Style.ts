@@ -1,0 +1,140 @@
+import {deepCopy} from "../../base/Utils";
+import {lazyInit} from "./LazyInitialize";
+
+interface StyleRuleOptions {
+    targetMethodName?: string;
+    getKey?: (key: string | symbol) => string;
+    inherit?: boolean;
+    selector?: string;
+}
+
+interface StyleDescriptor extends PropertyDescriptor {
+    objInitializer?: () => any;
+    initializer: (() => any) | undefined;
+}
+
+type StyleRuleFunction = () => any;
+type StyleRuleValue = any | StyleRuleFunction | any[];
+
+function evaluateStyleRuleObject(target: any, initializer: (() => any) | undefined, value: StyleRuleValue, options: StyleRuleOptions): any {
+    let result = initializer ? initializer.call(target) : value;
+    if (typeof result === "function") {
+        result = result();
+    }
+    if (Array.isArray(result)) {
+        result = Object.assign({}, ...result);
+    }
+    return result;
+}
+
+function getStyleRuleKey(key: string | symbol): string {
+    return "__style__" + String(key);
+}
+
+function getKeyframesRuleKey(key: string | symbol): string {
+    return "__keyframes__" + String(key);
+}
+
+export const PREFERRED_CLASS_NAME_KEY = Symbol("PreferredClassName");
+
+function getPreferredClassName(cls: any, key: string | symbol, descriptor: PropertyDescriptor): string {
+    if (key !== "container") {
+        return String(key);
+    }
+    let className = cls.constructor.name;
+    if (className.endsWith("Style")) {
+        className = className.substr(0, className.length - 5);
+    }
+    className = className.replaceAll("$", ""); // Fix minify mangling
+    return className + "-container";
+}
+
+// TODO @types faking it for Typescript, we're actually using old decorators
+type FakedDecoratorType = (target: any, key: string | symbol) => any;
+
+// TODO: this function can be made a lot more generic, to wrap plain object initializer with inheritance support
+function styleRuleWithOptions(...optionsArgs: StyleRuleOptions[]): FakedDecoratorType {
+    let options: StyleRuleOptions = Object.assign({}, ...optionsArgs);
+    // TODO: Remove this if you don't think it's appropiate, I thought a warning would do no harm
+    if (!options.targetMethodName) {
+        console.error("WARNING: targetMethodName not specified in the options (default is \"css\")");
+    }
+    let targetMethodName = options.targetMethodName || "css";
+
+    function styleRuleDecorator(target: any, key: string | symbol, descriptor: StyleDescriptor): PropertyDescriptor {
+        const {initializer, value} = descriptor;
+
+        descriptor.objInitializer = function (this: any) {
+            let style = evaluateStyleRuleObject(this, initializer, value, options);
+
+            if (options.selector) {
+                style["selectorName"] = options.selector;
+            }
+
+            if (options.inherit) {
+                // Get the value we set in the prototype of the parent class
+                let parentDesc = Object.getPrototypeOf(target)[options.getKey!(key)];
+                if (!parentDesc) {
+                    console.error("You're trying to inherit a rule that isn't implemented in the parent: " + String(key));
+                }
+                let parentStyle = evaluateStyleRuleObject(this, parentDesc.objInitializer, parentDesc.value, options);
+                style = deepCopy({}, parentStyle, style);
+            }
+
+            style[PREFERRED_CLASS_NAME_KEY] = getPreferredClassName(target, key, descriptor);
+
+            return style;
+        };
+
+        // Change the prototype of this object to be able to access the old descriptor/value
+        (target as any)[options.getKey!(key)] = Object.assign({}, descriptor);
+
+        descriptor.initializer = function (this: any) {
+            let style = descriptor.objInitializer!.call(this);
+            return (this as any)[targetMethodName](style);
+        };
+
+        delete descriptor.value;
+
+        return lazyInit(target, key, descriptor);
+    }
+
+    return styleRuleDecorator as FakedDecoratorType;
+}
+
+// TODO: Second argument is mostly useless (implied from targetMethodName)
+const styleRule = styleRuleWithOptions({
+    targetMethodName: "css",
+    getKey: getStyleRuleKey,
+    inherit: false,
+});
+
+const styleRuleInherit = styleRuleWithOptions({
+    targetMethodName: "css",
+    getKey: getStyleRuleKey,
+    inherit: true,
+});
+
+export function styleRuleCustom(options: StyleRuleOptions): (target: any, key: string | symbol, descriptor: StyleDescriptor) => PropertyDescriptor {
+    return styleRuleWithOptions(Object.assign({
+        targetMethodName: "css",
+        getKey: getStyleRuleKey,
+        inherit: false,
+    }, options));
+}
+
+const keyframesRule = styleRuleWithOptions({
+    targetMethodName: "keyframes",
+    getKey: getKeyframesRuleKey,
+    inherit: false,
+});
+
+// TODO: This is currently not working (I think)
+const keyframesRuleInherit = styleRuleWithOptions({
+    targetMethodName: "keyframes",
+    getKey: getKeyframesRuleKey,
+    inherit: true,
+});
+
+export {styleRule, styleRuleInherit, keyframesRule, keyframesRuleInherit, styleRuleWithOptions};
+
