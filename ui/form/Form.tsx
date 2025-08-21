@@ -1,10 +1,11 @@
 import {FormStyle} from "./Style";
-import {UI} from "../UIBase";
+import {TextUIElement, UI} from "../UIBase";
 import {registerStyle} from "../style/Theme";
+import {NodeAttributes} from "../NodeAttributes";
 
 @registerStyle(FormStyle)
 export class Form extends UI.Primitive("form") {
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         attr.addClass(this.styleSheet.form);
     }
 
@@ -15,12 +16,14 @@ export class Form extends UI.Primitive("form") {
 }
 
 @registerStyle(FormStyle)
-class FormGroup extends UI.Element {
-    extraNodeAttributes(attr) {
+export class FormGroup extends UI.Element {
+    declare errorField?: TextUIElement;
+
+    extraNodeAttributes(attr: NodeAttributes) {
         attr.addClass(this.styleSheet.formGroup);
     }
 
-    setError(errorMessage) {
+    setError(errorMessage: string) {
         this.errorField.node.textContent = errorMessage;
         this.addClass(this.styleSheet.hasError);
     }
@@ -40,7 +43,7 @@ class FormGroup extends UI.Element {
 }
 
 
-class FormField extends FormGroup {
+export class FormField extends FormGroup {
     inline() {
         return !(this.options.inline === false ||
                  (this.parent && this.parent.options && this.parent.options.inline === false));
@@ -70,5 +73,3 @@ class FormField extends FormGroup {
         }
     }
 }
-
-export {Form, FormGroup, FormField};

@@ -35,7 +35,7 @@ export class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
 }
 
 
-class DelayedCollapsiblePanel extends CollapsiblePanel {
+export class DelayedCollapsiblePanel extends CollapsiblePanel {
     toggle() {
         if (!this._haveExpanded) {
             this._haveExpanded = true;
@@ -55,5 +55,3 @@ class DelayedCollapsiblePanel extends CollapsiblePanel {
         return this.getDelayedChildren();
     }
 }
-
-export {CollapsiblePanel, DelayedCollapsiblePanel};
