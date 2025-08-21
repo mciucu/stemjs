@@ -1,6 +1,6 @@
-import {StyleSheet, styleRule} from "../Style.js";
-import {enhance} from "../Color.js";
-import {Device} from "../../base/Device.js";
+import {StyleSheet, styleRule} from "../Style";
+import {enhance} from "../Color";
+import {Device} from "../../base/Device";
 
 
 export class HorizontalOverflowStyle extends StyleSheet {
@@ -10,7 +10,7 @@ export class HorizontalOverflowStyle extends StyleSheet {
     arrowHoverColor = () => enhance(this.baseColor(), 1);
     arrowHoverBackground = () => enhance(this.baseColor(), -.3);
 
-    transitionTime = .15;
+    transitionTime = 0.15;
 
     arrow = {
         zIndex: "1",

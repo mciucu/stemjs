@@ -1,5 +1,5 @@
-import {styleRule, StyleSheet} from "../Style.js";
-import {Device} from "../../base/Device.js";
+import {styleRule, StyleSheet} from "../Style";
+import {Device} from "../../base/Device";
 
 // TODO @cleanup this seems to be too complicated
 class GlobalContainerStyle extends StyleSheet {

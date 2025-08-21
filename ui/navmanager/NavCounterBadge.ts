@@ -1,5 +1,6 @@
-import {NavManager} from "./NavManager.jsx";
-import {Badge} from "../SimpleElements.js";
+import {NavManager} from "./NavManager";
+import {Badge} from "../SimpleElements";
+import {NodeAttributes} from "../NodeAttributes";
 
 export class NavCounterBadge extends Badge {
     getDefaultOptions() {
@@ -14,7 +15,7 @@ export class NavCounterBadge extends Badge {
         };
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes): void {
         super.extraNodeAttributes(attr);
         if (this.options.counter === 0) {
             attr.addClass("hidden");
@@ -23,40 +24,40 @@ export class NavCounterBadge extends Badge {
         }
     }
 
-    render() {
+    render(): number {
         return this.options.counter;
     }
 
-    setValue(value) {
+    setValue(value: number): void {
         this.updateOptions({counter: value});
         NavManager.Global.checkForWrap();
     }
 
-    getValue() {
+    getValue(): number {
         return this.options.counter;
     }
 
-    increment() {
+    increment(): void {
         this.setValue(this.getValue() + 1);
     }
 
-    reset() {
+    reset(): void {
         this.setValue(0);
     }
 
-    attachListenerForAction(obj, eventName, action, condition) {
-        this.attachListener(obj, eventName, (...args) => {
+    attachListenerForAction(obj: any, eventName: string, action: (...args: any[]) => void, condition?: (...args: any[]) => boolean): void {
+        this.attachListener(obj, eventName, (...args: any[]) => {
             if (!condition || !(typeof condition === "function") || condition(...args)) {
                 action(...args);
             }
         });
     }
 
-    attachListenerForIncrement(obj, eventName, condition) {
+    attachListenerForIncrement(obj: any, eventName: string, condition?: (...args: any[]) => boolean): void {
         this.attachListenerForAction(obj, eventName, () => this.increment(), condition);
     }
 
-    attachListenerForReset(obj, eventName, condition) {
+    attachListenerForReset(obj: any, eventName: string, condition?: (...args: any[]) => boolean): void {
         this.attachListenerForAction(obj, eventName, () => this.reset(), condition);
     }
 }

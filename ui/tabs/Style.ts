@@ -1,7 +1,7 @@
-import {enhance} from "../Color.js";
-import {StyleSheet} from "../Style.js";
-import {styleRule, styleRuleInherit} from "../../decorators/Style.js";
-import {HorizontalOverflowStyle} from "../horizontal-overflow/Style.js";
+import {enhance} from "../Color";
+import {StyleSheet} from "../Style";
+import {styleRule, styleRuleInherit} from "../../decorators/Style";
+import {HorizontalOverflowStyle} from "../horizontal-overflow/Style";
 
 class BaseTabAreaStyle extends StyleSheet {
     @styleRule

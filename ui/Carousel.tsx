@@ -1,9 +1,9 @@
-import {UI} from "./UIBase.js";
-import {registerStyle} from "./style/Theme.js";
-import {StyleSheet} from "./Style.js";
-import {styleRule} from "../decorators/Style.js";
-import {FAIcon} from "./FontAwesome.js";
-import {Orientation} from "./Constants.js";
+import {UI} from "./UIBase";
+import {registerStyle} from "./style/Theme";
+import {StyleSheet} from "./Style";
+import {styleRule} from "../decorators/Style";
+import {FAIcon} from "./FontAwesome";
+import {Orientation} from "./Constants";
 
 // TODO Review CSS
 export class CarouselStyle extends StyleSheet {

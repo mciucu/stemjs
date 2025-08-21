@@ -1,7 +1,7 @@
-import {UI} from "../UIBase.js";
-import {FAIcon} from "../FontAwesome.js";
-import {registerStyle} from "../style/Theme.js";
-import {HorizontalOverflowStyle} from "./Style.js";
+import {UI} from "../UIBase";
+import {FAIcon} from "../FontAwesome";
+import {registerStyle} from "../style/Theme";
+import {HorizontalOverflowStyle} from "./Style";
 
 
 

@@ -1,9 +1,9 @@
 // TODO deprecate
-import {UI} from "./UIBase.js";
-import {TextInput} from "./input/Input.js";
-import {VolatileFloatingWindow} from "./modal/FloatingWindow.jsx";
-import {StemDate, TimeUnit} from "../time/Time.js";
-import {VerticalSlideBar} from "./input/SlideBar.jsx";
+import {UI} from "./UIBase";
+import {TextInput} from "./input/Input";
+import {VolatileFloatingWindow} from "./modal/FloatingWindow";
+import {StemDate, TimeUnit} from "../time/Time";
+import {VerticalSlideBar} from "./input/SlideBar";
 
 class DatePickerTable extends UI.Element {
 

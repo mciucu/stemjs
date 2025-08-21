@@ -1,6 +1,6 @@
-import {StyleSheet, styleRule, styleRuleInherit} from "../Style.js";
-import {CardPanelStyle} from "../CardPanel.jsx";
-import {enhance} from "../Color.js";
+import {StyleSheet, styleRule, styleRuleInherit} from "../Style";
+import {CardPanelStyle} from "../CardPanel";
+import {enhance} from "../Color";
 
 class CollapsibleStyle extends StyleSheet {
     transitionDuration = 0.4; // TODO @theme use this.themeProps.DEFAULT_TRANSITION_DURATION_MS

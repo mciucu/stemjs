@@ -1,6 +1,6 @@
-import {StyleSheet, styleRule, styleRuleInherit} from "../Style.js";
+import {StyleSheet, styleRule, styleRuleInherit} from "../Style";
 
-class DividerStyle extends StyleSheet {
+export class DividerStyle extends StyleSheet {
     @styleRule
     noTextSelection = {
         "-webkit-user-select": "none",
@@ -11,7 +11,7 @@ class DividerStyle extends StyleSheet {
     };
 }
 
-class AccordionStyle extends DividerStyle {
+export class AccordionStyle extends DividerStyle {
     @styleRule
     accordion = {
         display: "flex",
@@ -51,7 +51,7 @@ class AccordionStyle extends DividerStyle {
 }
 
 
-class SectionDividerStyle extends DividerStyle {
+export class SectionDividerStyle extends DividerStyle {
     barThickness = 2;
     barPadding = 3;
     dividerColor = () => "#DDD";
@@ -130,7 +130,7 @@ class SectionDividerStyle extends DividerStyle {
     };
 }
 
-class TitledDividerStyle extends SectionDividerStyle {
+export class TitledDividerStyle extends SectionDividerStyle {
     barThickness = 16;
     barPadding = 1;
     transitionTime = 0.3;
@@ -290,4 +290,3 @@ class TitledDividerStyle extends SectionDividerStyle {
     };
 }
 
-export {AccordionStyle, SectionDividerStyle, TitledDividerStyle};

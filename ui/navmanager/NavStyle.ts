@@ -1,8 +1,8 @@
-import {StyleSheet, styleRule} from "../Style.js";
-import {enhance} from "../Color.js";
+import {StyleSheet, styleRule} from "../Style";
+import {enhance} from "../Color";
 
 
-class NavStyle extends StyleSheet {
+export class NavStyle extends StyleSheet {
     // Custom variables
     getColors() {
         const themeProps = this.themeProps;
@@ -256,6 +256,3 @@ class NavStyle extends StyleSheet {
         overflow: "hidden",
     };
 }
-
-
-export {NavStyle};

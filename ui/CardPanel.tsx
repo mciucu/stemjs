@@ -1,12 +1,12 @@
-import {UI} from "./UIBase.js";
-import {SimpleStyledElement} from "./SimpleElements.js";
-import {BasicLevelStyleSheet} from "./GlobalStyle.js";
-import {registerStyle} from "./style/Theme.js";
-import {buildColors} from "./Color.js";
-import {styleRule} from "../decorators/Style.js";
-import {Level} from "./Constants.js";
+import {UI} from "./UIBase";
+import {SimpleStyledElement} from "./SimpleElements";
+import {BasicLevelStyleSheet} from "./GlobalStyle";
+import {registerStyle} from "./style/Theme";
+import {buildColors} from "./Color";
+import {styleRule} from "../decorators/Style";
+import {Level} from "./Constants";
 
-export function cardPanelColorToStyle(color) {
+export function cardPanelColorToStyle(color: string) {
     let colors = buildColors(color);
     return {
         borderColor: colors[4],
@@ -57,7 +57,7 @@ export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) 
     };
 }
 
-function cardPanelHeaderColorToStyle(color){
+function cardPanelHeaderColorToStyle(color: string) {
     let colors = buildColors(color);
     return {
         color: colors[6],

@@ -1,6 +1,6 @@
-import {StyleSheet, styleRule} from "../Style.js";
+import {StyleSheet, styleRule} from "../Style";
 
-class FloatingWindowStyle extends StyleSheet {
+export class FloatingWindowStyle extends StyleSheet {
     @styleRule
     hiddenAnimated = {
         visibility: "hidden",
@@ -17,7 +17,7 @@ class FloatingWindowStyle extends StyleSheet {
 }
 
 
-class ModalStyle extends FloatingWindowStyle {
+export class ModalStyle extends FloatingWindowStyle {
     @styleRule
     container = {
         position: "fixed",
@@ -58,4 +58,3 @@ class ModalStyle extends FloatingWindowStyle {
     };
 }
 
-export {FloatingWindowStyle, ModalStyle};

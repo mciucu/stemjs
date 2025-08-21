@@ -1,6 +1,10 @@
-import {UI} from "../UIBase.ts";
+import {UI} from "../UIBase";
+import {NodeAttributes} from "../NodeAttributes";
 
 export class TemporaryMessageArea extends UI.Primitive("span") {
+    clearValueTimeout?: number;
+    textElement: any;
+
     getDefaultOptions() {
         return {
             margin: 10
@@ -11,23 +15,23 @@ export class TemporaryMessageArea extends UI.Primitive("span") {
         return [<UI.TextElement ref="textElement" value={this.options.value || ""}/>];
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes): void {
         attr.setStyle({
             marginLeft: this.options.margin,
             marginRight: this.options.margin,
         });
     }
 
-    setValue(value) {
+    setValue(value: string): void {
         this.options.value = value;
         this.textElement.setValue(value);
     }
 
-    setColor(color) {
+    setColor(color: string): void {
         this.setStyle("color", color);
     }
 
-    showMessage(message, color = "black", displayDuration = 2000) {
+    showMessage(message: string, color: string = "black", displayDuration: number = 2000): void {
         this.setColor(color);
         this.clear();
         this.setValue(message);
@@ -36,11 +40,11 @@ export class TemporaryMessageArea extends UI.Primitive("span") {
         }
     }
 
-    clear() {
+    clear(): void {
         this.setValue("");
         if (this.clearValueTimeout) {
             clearTimeout(this.clearValueTimeout);
-            this.clearValueTimeout = null;
+            this.clearValueTimeout = undefined;
         }
     }
 }

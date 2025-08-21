@@ -1,6 +1,6 @@
-import {StyleSheet, styleRule} from "../Style.js";
+import {StyleSheet, styleRule} from "../Style";
 
-class FormStyle extends StyleSheet {
+export class FormStyle extends StyleSheet {
     @styleRule
     form = {
         margin: "0 auto",
@@ -74,4 +74,3 @@ class FormStyle extends StyleSheet {
     };
 }
 
-export {FormStyle};

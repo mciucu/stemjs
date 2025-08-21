@@ -1,6 +1,6 @@
-import {Ajax} from "../../base/Ajax.ts";
-import {ActionStatus} from "../Constants.ts";
-import {StateButton} from "./StateButton.tsx";
+import {Ajax} from "../../base/Ajax";
+import {ActionStatus} from "../Constants";
+import {StateButton} from "./StateButton";
 
 export class AjaxButton extends StateButton {
     getDefaultOptions() {
