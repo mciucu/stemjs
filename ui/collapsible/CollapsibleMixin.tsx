@@ -1,11 +1,11 @@
-import {UI} from "../UIBase.js";
-import {CollapsibleStyle} from "./Style.js";
-import {GlobalStyle} from "../GlobalStyle.js";
-import {MakeIcon} from "../SimpleElements.js";
-import {registerStyle} from "../style/Theme.js";
-import {isFunction} from "../../base/Utils.ts";
-import {BaseInputElement} from "../input/BaseInputElement.js";
-import {styleRule, StyleSheet} from "../Style.js";
+import {UI} from "../UIBase";
+import {CollapsibleStyle} from "./Style";
+import {GlobalStyle} from "../GlobalStyle";
+import {MakeIcon} from "../SimpleElements";
+import {registerStyle} from "../style/Theme";
+import {isFunction} from "../../base/Utils";
+import {BaseInputElement} from "../input/BaseInputElement";
+import {styleRule, StyleSheet} from "../Style";
 
 
 class SimpleCollapsibleStyle extends StyleSheet {

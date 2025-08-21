@@ -1,9 +1,9 @@
-import {Draggable} from "../Draggable.ts";
-import {UI, UIElement} from "../UIBase.ts";
-import {ProgressBar} from "../ProgressBar.tsx";
-import {Orientation} from "../Constants.ts";
-import {Device} from "../../base/Device.js";
-import {getOffset} from "../Utils.ts";
+import {Draggable} from "../Draggable";
+import {UI, UIElement} from "../UIBase";
+import {ProgressBar} from "../ProgressBar";
+import {Orientation} from "../Constants";
+import {Device} from "../../base/Device";
+import {getOffset} from "../Utils";
 
 // TODO This should extend an input
 export class SlideBar extends Draggable(UIElement) {

@@ -1,10 +1,10 @@
-import {UI} from "../UIBase.js";
-import {FlatTabAreaStyle, FlatTabAreaHorizontalOverflowStyle} from "./Style.js";
-import {registerStyle} from "../style/Theme.js";
-import {SingleActiveElementDispatcher} from "../../base/Dispatcher.js";
-import {TabTitleArea, BasicTabTitle, TabArea} from "./TabArea.jsx";
-import {HorizontalOverflow} from "../horizontal-overflow/HorizontalOverflow.jsx";
-import {unwrapArray} from "../../base/Utils.js";
+import {UI} from "../UIBase";
+import {FlatTabAreaStyle, FlatTabAreaHorizontalOverflowStyle} from "./Style";
+import {registerStyle} from "../style/Theme";
+import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
+import {TabTitleArea, BasicTabTitle, TabArea} from "./TabArea";
+import {HorizontalOverflow} from "../horizontal-overflow/HorizontalOverflow";
+import {unwrapArray} from "../../base/Utils";
 
 
 export class FlatTabTitle extends BasicTabTitle {

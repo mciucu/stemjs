@@ -1,11 +1,11 @@
-import {UI} from "../UIBase.js";
-import {registerStyle} from "../style/Theme.js";
-import {getComputedStyle} from "../Utils.js";
-import {unwrapArray} from "../../base/Utils.js";
-import {Device} from "../../base/Device.js";
-import {AccordionStyle} from "./Style.js";
-import {FACollapseIcon} from "../FontAwesome.js";
-import {Divider} from "./Divider.jsx";
+import {UI} from "../UIBase";
+import {registerStyle} from "../style/Theme";
+import {getComputedStyle} from "../Utils";
+import {unwrapArray} from "../../base/Utils";
+import {Device} from "../../base/Device";
+import {AccordionStyle} from "./Style";
+import {FACollapseIcon} from "../FontAwesome";
+import {Divider} from "./Divider";
 
 @registerStyle(AccordionStyle)
 class AccordionDivider extends Divider {

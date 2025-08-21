@@ -1,11 +1,11 @@
 // TODO: Too much "hidden"
-import {Device} from "../../base/Device.js";
-import {unwrapArray} from "../../base/Utils.js";
-import {Divider} from "./Divider.jsx";
-import {UI} from "../UIBase.js";
-import {registerStyle} from "../style/Theme.js";
-import {SectionDividerStyle} from "./Style.js";
-import {Orientation} from "../Constants.js";
+import {Device} from "../../base/Device";
+import {unwrapArray} from "../../base/Utils";
+import {Divider} from "./Divider";
+import {UI} from "../UIBase";
+import {registerStyle} from "../style/Theme";
+import {SectionDividerStyle} from "./Style";
+import {Orientation} from "../Constants";
 
 
 

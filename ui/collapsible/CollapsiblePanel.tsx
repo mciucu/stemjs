@@ -1,12 +1,12 @@
-import {RenderStack, UI} from "../UIBase.js";
-import {CollapsibleMixin} from "./CollapsibleMixin.jsx";
-import {CardPanel} from "../CardPanel.jsx";
-import {CollapsiblePanelStyle} from "./Style.js";
-import {registerStyle} from "../style/Theme.js";
-import {GlobalStyle} from "../GlobalStyle.js";
+import {RenderStack, UI} from "../UIBase";
+import {CollapsibleMixin} from "./CollapsibleMixin";
+import {CardPanel} from "../CardPanel";
+import {CollapsiblePanelStyle} from "./Style";
+import {registerStyle} from "../style/Theme";
+import {GlobalStyle} from "../GlobalStyle";
 
 @registerStyle(CollapsiblePanelStyle)
-class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
+export class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
     getPreservedOptions() {
         return {
             collapsed: this.options.collapsed, // TODO: rename to defaultCollapsed?

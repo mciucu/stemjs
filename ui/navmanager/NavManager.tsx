@@ -1,13 +1,13 @@
-import {UI} from "../UIBase.ts";
-import {changeParent} from "../Utils.ts";
-import {registerStyle} from "../style/Theme.ts";
-import {NavStyle} from "./NavStyle.js";
-import {Carousel, CarouselStyle} from "../Carousel.jsx";
-import {LeftSideNavIcon, RightSideNavIcon, WrappedNavIcon} from "./NavIcon.jsx";
-import {BasicOrientedElement, NavSection} from "./NavElement.jsx";
-import {initializeSwipeEvents} from "./NavSwipeDetection.js";
-import {SessionStorageMap} from "../../base/StorageMap.js";
-import {Orientation, Direction} from "../Constants.js";
+import {UI} from "../UIBase";
+import {changeParent} from "../Utils";
+import {registerStyle} from "../style/Theme";
+import {NavStyle} from "./NavStyle";
+import {Carousel, CarouselStyle} from "../Carousel";
+import {LeftSideNavIcon, RightSideNavIcon, WrappedNavIcon} from "./NavIcon";
+import {BasicOrientedElement, NavSection} from "./NavElement";
+import {initializeSwipeEvents} from "./NavSwipeDetection";
+import {SessionStorageMap} from "../../base/StorageMap";
+import {Orientation, Direction} from "../Constants";
 
 
 class SidePanelGroup extends UI.Element {

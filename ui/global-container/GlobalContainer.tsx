@@ -1,7 +1,7 @@
-import {UI} from "../UIBase.js";
-import {registerStyle} from "../style/Theme.js";
-import {GlobalContainerStyle} from "./Style.js";
-import {Device} from "../../base/Device.js";
+import {UI} from "../UIBase";
+import {registerStyle} from "../style/Theme";
+import {GlobalContainerStyle} from "./Style";
+import {Device} from "../../base/Device";
 
 @registerStyle(GlobalContainerStyle)
 export class GlobalContainer extends UI.Element {

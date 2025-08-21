@@ -1,9 +1,9 @@
-import {FormStyle} from "./Style.js";
-import {UI} from "../UIBase.js";
-import {registerStyle} from "../style/Theme.js";
+import {FormStyle} from "./Style";
+import {UI} from "../UIBase";
+import {registerStyle} from "../style/Theme";
 
 @registerStyle(FormStyle)
-class Form extends UI.Primitive("form") {
+export class Form extends UI.Primitive("form") {
     extraNodeAttributes(attr) {
         attr.addClass(this.styleSheet.form);
     }

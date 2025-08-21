@@ -1,16 +1,16 @@
-import {ButtonGroup} from "../button/ButtonGroup.js";
-import {Button} from "../button/Button.js";
-import {FloatingWindow} from "./FloatingWindow.jsx";
-import {ModalStyle} from "./Style.js";
-import {Panel} from "../UIPrimitives.js";
-import {UI} from "../UIBase.js";
-import {Dispatcher} from "../../base/Dispatcher.js";
-import {registerStyle} from "../style/Theme.js";
-import {Level, Size} from "../Constants.js";
-import {TemporaryMessageArea} from "../misc/TemporaryMessageArea.jsx";
+import {ButtonGroup} from "../button/ButtonGroup";
+import {Button} from "../button/Button";
+import {FloatingWindow} from "./FloatingWindow";
+import {ModalStyle} from "./Style";
+import {Panel} from "../UIPrimitives";
+import {UI} from "../UIBase";
+import {Dispatcher} from "../../base/Dispatcher";
+import {registerStyle} from "../style/Theme";
+import {Level, Size} from "../Constants";
+import {TemporaryMessageArea} from "../misc/TemporaryMessageArea";
 
 @registerStyle(ModalStyle)
-class Modal extends UI.Element {
+export class Modal extends UI.Element {
     getDefaultOptions() {
         return {
             closeButton: true,

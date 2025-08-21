@@ -1,10 +1,10 @@
-import {UI} from "../UIBase.js";
-import {Switcher} from "../Switcher.js";
-import {Link} from "../UIPrimitives.js";
-import {FACollapseIcon} from "../FontAwesome.js"; //TODO: more flexibility, do not require FAIcons in NavElements
-import {SessionStorageMap} from "../../base/StorageMap.js";
-import {unwrapArray} from "../../base/Utils.js";
-import {Orientation, Direction} from "../Constants.js";
+import {UI} from "../UIBase";
+import {Switcher} from "../Switcher";
+import {Link} from "../UIPrimitives";
+import {FACollapseIcon} from "../FontAwesome"; //TODO: more flexibility, do not require FAIcons in NavElements
+import {SessionStorageMap} from "../../base/StorageMap";
+import {unwrapArray} from "../../base/Utils";
+import {Orientation, Direction} from "../Constants";
 
 let navSessionManager = new SessionStorageMap("navManager");
 

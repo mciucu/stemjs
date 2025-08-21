@@ -1,10 +1,10 @@
-import {UI} from "../UIBase.js";
-import {Switcher} from "../Switcher.js";
-import {Link} from "../UIPrimitives.js";
-import {SingleActiveElementDispatcher} from "../../base/Dispatcher.js";
-import {registerStyle} from "../style/Theme.js";
-import {DefaultTabAreaStyle} from "./Style.js";
-import {unwrapArray} from "../../base/Utils.js";
+import {UI} from "../UIBase";
+import {Switcher} from "../Switcher";
+import {Link} from "../UIPrimitives";
+import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
+import {registerStyle} from "../style/Theme";
+import {DefaultTabAreaStyle} from "./Style";
+import {unwrapArray} from "../../base/Utils";
 
 
 class BasicTabTitle extends Link {

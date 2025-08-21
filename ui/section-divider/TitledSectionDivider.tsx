@@ -1,12 +1,12 @@
 // TODO: This class is incomplete for horizontal orientation and more than 2 panels.
 
-import {UI} from "../UIBase.js";
-import {registerStyle} from "../style/Theme.js";
-import {unwrapArray} from "../../base/Utils.js";
-import {DividerBar, SectionDivider} from "./SectionDivider.jsx";
-import {TitledDividerStyle} from "./Style.js";
-import {Orientation} from "../Constants.js";
-import {FAIcon} from "../FontAwesome.js";
+import {UI} from "../UIBase";
+import {registerStyle} from "../style/Theme";
+import {unwrapArray} from "../../base/Utils";
+import {DividerBar, SectionDivider} from "./SectionDivider";
+import {TitledDividerStyle} from "./Style";
+import {Orientation} from "../Constants";
+import {FAIcon} from "../FontAwesome";
 
 
 
