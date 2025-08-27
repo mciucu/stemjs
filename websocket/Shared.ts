@@ -1,0 +1,1 @@
+export const DEFAULT_HEARTBEAT_MESSAGE: string = "-heartbeat-city-";
