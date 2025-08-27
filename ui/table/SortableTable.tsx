@@ -1,8 +1,10 @@
-import {UI} from "../UIBase";
-import {Table} from "./Table";
+import {UI, UIElement, UIElementChild} from "../UIBase";
+import {Table, TableOptions} from "./Table";
 import {defaultComparator} from "../../base/Utils";
-import {MakeIcon} from "../SimpleElements.jsx";
-import {styleRule, StyleSheet} from "../Style.js";
+import {MakeIcon} from "../SimpleElements";
+import {styleRule, StyleSheet} from "../Style";
+import {NodeAttributes} from "../NodeAttributes";
+import {ColumnHandler} from "../../base/ColumnHandler.js";
 
 
 export class SortableTableStyle extends StyleSheet {
@@ -26,24 +28,31 @@ export class SortableTableStyle extends StyleSheet {
     };
 }
 
-export function SortableTableInterface(BaseTableClass) {
+export interface SortableTableOptions<BaseType> extends TableOptions<BaseType> {
+    columnSortingOrder?: ColumnHandler<BaseType>[];
+}
+
+export function SortableTableInterface<BaseType, T extends typeof Table<BaseType>>(BaseTableClass: T) {
     class SortableTable extends BaseTableClass {
-        getSortableStyleSheet() {
+        sortBy?: ColumnHandler<BaseType>;
+        sortDescending?: boolean;
+        columnSortingOrder: ColumnHandler<BaseType>[] = [];
+        getSortableStyleSheet(): SortableTableStyle {
             return SortableTableStyle.getInstance(this.getTheme()); // Make this optional maybe
         }
 
-        extraNodeAttributes(attr) {
+        extraNodeAttributes(attr: NodeAttributes): void {
             super.extraNodeAttributes(attr);
             attr.addClass(this.getSortableStyleSheet().container);
         }
 
-        setOptions(options) {
+        setOptions(options: SortableTableOptions<BaseType>): void {
             super.setOptions(options);
 
             this.columnSortingOrder = options.columnSortingOrder || [];
         }
 
-        renderColumnHeader(column) {
+        renderColumnHeader(column: ColumnHandler<BaseType>): UIElementChild {
             if (column.noSort) {
                 return super.renderColumnHeader(column);
             }
@@ -68,7 +77,7 @@ export function SortableTableInterface(BaseTableClass) {
             </div>;
         }
 
-        sortByColumn(column) {
+        sortByColumn(column: ColumnHandler<BaseType>): void {
             if (column === this.sortBy) {
                 this.sortDescending = (this.sortDescending != true);
             } else {
@@ -80,12 +89,12 @@ export function SortableTableInterface(BaseTableClass) {
             this.redraw();
         }
 
-        getComparator() {
+        getComparator(): ((a: BaseType, b: BaseType) => number) | null {
             if (!this.sortBy && this.columnSortingOrder.length === 0) {
                 return null;
             }
 
-            const colCmp = (a, b, column, sortDescending) => {
+            const colCmp = (a: BaseType, b: BaseType, column: ColumnHandler<BaseType>, sortDescending?: boolean): number => {
                 if (!column) {
                     return 0;
                 }
@@ -98,7 +107,7 @@ export function SortableTableInterface(BaseTableClass) {
                 return sortDescending ? -result : result;
             };
 
-            return (a, b) => {
+            return (a: BaseType, b: BaseType) => {
                 if (this.sortBy) {
                     const cmpRes = colCmp(a, b, this.sortBy, this.sortDescending);
                     if (cmpRes) {
@@ -107,7 +116,7 @@ export function SortableTableInterface(BaseTableClass) {
                 }
 
                 for (const column of this.columnSortingOrder) {
-                    const cmpRes = colCmp(a, b, column, column.sortDescending);
+                    const cmpRes = colCmp(a, b, column, (column as any).sortDescending);
 
                     if (cmpRes) {
                         return cmpRes;
@@ -117,7 +126,7 @@ export function SortableTableInterface(BaseTableClass) {
             }
         }
 
-        sortEntries(entries) {
+        sortEntries(entries: BaseType[]): BaseType[] {
             let sortedEntries = entries.slice();
 
             const comparator = this.getComparator();
@@ -128,7 +137,7 @@ export function SortableTableInterface(BaseTableClass) {
             return sortedEntries;
         }
 
-        getEntries() {
+        getEntries(): BaseType[] {
             return this.sortEntries(super.getEntries());
         }
     }

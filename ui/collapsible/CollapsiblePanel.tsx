@@ -6,7 +6,7 @@ import {registerStyle} from "../style/Theme";
 import {GlobalStyle} from "../GlobalStyle";
 
 @registerStyle(CollapsiblePanelStyle)
-class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
+export class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
     getPreservedOptions() {
         return {
             collapsed: this.options.collapsed, // TODO: rename to defaultCollapsed?
@@ -35,7 +35,7 @@ class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
 }
 
 
-class DelayedCollapsiblePanel extends CollapsiblePanel {
+export class DelayedCollapsiblePanel extends CollapsiblePanel {
     toggle() {
         if (!this._haveExpanded) {
             this._haveExpanded = true;
@@ -55,5 +55,3 @@ class DelayedCollapsiblePanel extends CollapsiblePanel {
         return this.getDelayedChildren();
     }
 }
-
-export {CollapsiblePanel, DelayedCollapsiblePanel};

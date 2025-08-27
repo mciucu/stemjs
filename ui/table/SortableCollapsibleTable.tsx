@@ -1,8 +1,11 @@
-import {SortableTableInterface} from "./SortableTable.jsx";
-import {CollapsibleTable} from "./CollapsibleTable.jsx";
+import {SortableTableInterface} from "./SortableTable";
+import {CollapsibleTable} from "./CollapsibleTable";
+import {UIElementChild} from "../UIBase";
+import {ColumnHandler} from "../../base/ColumnHandler.js";
+import {Table} from "./Table";
 
-export class SortableCollapsibleTable extends SortableTableInterface(CollapsibleTable) {
-    renderColumnHeader(column) {
+export class SortableCollapsibleTable<BaseType> extends SortableTableInterface<BaseType>(CollapsibleTable as Table<BaseType>) {
+    renderColumnHeader(column: ColumnHandler<BaseType>): UIElementChild {
         if (column.isToggleColumn) {
             column.noSort = true;
         }

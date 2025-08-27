@@ -1,13 +1,33 @@
 // Primitive utils for wrapping browser info
 
-export function isTouchDevice() {
+type BrowserName = "Opera" | "Firefox" | "Safari" | "Internet Explorer" | "Edge" | "Chrome" | "Unknown";
+type CoordinateReference = "client" | "page" | "screen";
+type CoordinateAxis = "X" | "Y";
+
+interface TouchEvent extends Event {
+    touches: TouchList;
+    originalEvent?: TouchEvent;
+}
+
+interface EventWithCoordinates extends Event {
+    clientX?: number;
+    clientY?: number;
+    pageX?: number;
+    pageY?: number;
+    screenX?: number;
+    screenY?: number;
+    touches?: TouchList;
+    originalEvent?: EventWithCoordinates;
+}
+
+export function isTouchDevice(): boolean {
     return !!(("createTouch" in window.document) ||
-        (navigator.MaxTouchPoints > 0) ||
-        (navigator.msMaxTouchPoints > 0) ||
+        ((navigator as any).maxTouchPoints > 0) ||
+        ((navigator as any).msMaxTouchPoints > 0) ||
         ("ontouchstart" in window));
 }
 
-export function isMobileDevice() {
+export function isMobileDevice(): boolean {
     const mobileDevices = ["Android", "webOS", "iPad", "iPhone", "iPod", "BlackBerry", "Windows Phone"];
     for (let device of mobileDevices) {
         if (navigator.userAgent.indexOf(device) !== -1) {
@@ -17,8 +37,8 @@ export function isMobileDevice() {
     return false;
 }
 
-export function isLandscape() {
-    const {orientation} = window.screen;
+export function isLandscape(): boolean {
+    const orientation = (window.screen as any).orientation;
 
     if (orientation === -90 || orientation === 90) {
         return true;
@@ -34,22 +54,23 @@ export function isLandscape() {
     return width > height || height < 380;
 }
 
-export function getEventTouchIdentifier(event) {
-    return Math.min(...[...event.touches].map(touch => touch.identifier));
+export function getEventTouchIdentifier(event: TouchEvent): number {
+    return Math.min(...Array.from(event.touches).map(touch => touch.identifier));
 }
 
-export function getEventTouch(event) {
+export function getEventTouch(event: TouchEvent): Touch | undefined {
     const identifier = getEventTouchIdentifier(event);
-    return [...event.touches].find(touch => touch.identifier === identifier);
+    return Array.from(event.touches).find(touch => touch.identifier === identifier);
 }
 
-export function getEventCoord(event, axis, reference="client") {
-    let coordName = reference + axis;
+export function getEventCoord(event: EventWithCoordinates, axis: CoordinateAxis, reference: CoordinateReference = "client"): number | undefined {
+    let coordName = reference + axis as keyof EventWithCoordinates;
     if (event[coordName]) {
-        return event[coordName];
+        return event[coordName] as number;
     }
     if (event.touches) {
-        return getEventTouch(event)[coordName];
+        const touch = getEventTouch(event as TouchEvent);
+        return touch ? (touch as any)[coordName] : undefined;
     }
     if (event.originalEvent) {
         return getEventCoord(event.originalEvent, axis, reference);
@@ -59,51 +80,50 @@ export function getEventCoord(event, axis, reference="client") {
     return undefined;
 }
 
-export function getEventX(event, reference="client") {
+export function getEventX(event: EventWithCoordinates, reference: CoordinateReference = "client"): number | undefined {
     return getEventCoord(event, "X", reference);
 }
 
-export function getEventY(event, reference="client") {
+export function getEventY(event: EventWithCoordinates, reference: CoordinateReference = "client"): number | undefined {
     return getEventCoord(event, "Y", reference);
 }
 
-export function getBrowser() {
+export function getBrowser(): BrowserName {
     // TODO: should try to use navigator
-    if ((!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0) {
+    if (((window as any).opr && (window as any).opr.addons) || !!(window as any).opera || navigator.userAgent.indexOf(' OPR/') >= 0) {
         return "Opera";
     }
-    if (typeof InstallTrigger !== 'undefined') {
+    if (typeof (window as any).InstallTrigger !== 'undefined') {
         return "Firefox";
     }
     if (Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0) {
         return "Safari";
     }
-    if (document.documentMode) {
+    if ((document as any).documentMode) {
         return "Internet Explorer";
     }
-    if (window.StyleMedia) {
+    if ((window as any).StyleMedia) {
         return "Edge";
     }
-    if (window.chrome && window.chrome.webstore) {
+    if ((window as any).chrome && (window as any).chrome.webstore) {
         return "Chrome";
     }
     return "Unknown";
 }
 
-const supportsEventCache = new Map();
-export function supportsEvent(eventName) {
+const supportsEventCache = new Map<string, boolean>();
+export function supportsEvent(eventName: string): boolean {
     if (!supportsEventCache.has(eventName)) {
-        let element = document.createElement("div");
-        let onEventName = "on" + eventName;
+        const element = document.createElement("div");
+        const onEventName = "on" + eventName;
         let isSupported = (onEventName in element);
         if (!isSupported) {
             element.setAttribute(onEventName, "return;");
             isSupported = typeof element[onEventName] === "function";
         }
-        element = null;
         supportsEventCache.set(eventName, isSupported);
     }
-    return supportsEventCache.get(eventName);
+    return supportsEventCache.get(eventName)!;
 }
 
 // TODO This object is deprecated, use the functions in this file directly instead.

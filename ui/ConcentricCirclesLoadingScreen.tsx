@@ -3,7 +3,7 @@ import {keyframesRule} from "../decorators/Style";
 import {registerStyle} from "./style/Theme";
 import {StyleSheet} from "./Style";
 
-function getCircleStyle(size, borderSize, color, animationName, animationDuration) {
+function getCircleStyle(size: number, borderSize: number, color: string, animationName: string, animationDuration: string) {
     return {
         position: "absolute",
 
@@ -25,7 +25,7 @@ function getCircleStyle(size, borderSize, color, animationName, animationDuratio
     };
 }
 
-function createCircle(size, borderSize, color, animationName, animationDuration) {
+function createCircle(size: number, borderSize: number, color: string, animationName: string, animationDuration: string) {
     return <div style={getCircleStyle(size, borderSize, color, animationName, animationDuration)} />;
 }
 
@@ -52,7 +52,7 @@ class RotatingHelperStyle extends StyleSheet {
 }
 
 @registerStyle(RotatingHelperStyle)
-class ConcentricCirclesLoadingScreen extends UI.Element {
+export class ConcentricCirclesLoadingScreen extends UI.Element {
     render() {
         let centerConstant = 100;
         return <div style={{
@@ -70,5 +70,3 @@ class ConcentricCirclesLoadingScreen extends UI.Element {
         </div>;
     }
 }
-
-export {ConcentricCirclesLoadingScreen}

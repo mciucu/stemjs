@@ -4,7 +4,7 @@
 import {isPlainObject} from "./Utils";
 
 // Parse the headers from an xhr object, to return a native Headers object
-function parseHeaders(xhr) {
+export function parseHeaders(xhr: XMLHttpRequest): Headers {
     const rawHeader = xhr.getAllResponseHeaders() || "";
     const rawHeaderLines = rawHeader.split(/\r?\n/);
     let headers = new Headers();
@@ -22,7 +22,7 @@ function parseHeaders(xhr) {
 
 // Creates a new URLSearchParams object from a plain object
 // Fields that are arrays are spread
-function getURLSearchParams(data, arrayKeySuffix = "[]") {
+export function getURLSearchParams(data: any, arrayKeySuffix: string = "[]"): URLSearchParams | any {
     if (!isPlainObject(data)) {
         return data;
     }
@@ -42,19 +42,68 @@ function getURLSearchParams(data, arrayKeySuffix = "[]") {
 }
 
 // Appends search parameters from an object to a given URL or Request, and returns the new URL
-function composeURL(url, urlSearchParams) {
-    if (url.url) {
-        url = url.url;
+export function composeURL(url: string | Request, urlSearchParams?: URLSearchParams): string {
+    let urlString: string;
+    if (typeof url === 'object' && 'url' in url) {
+        urlString = url.url;
+    } else {
+        urlString = url as string;
     }
     // TODO: also extract the preexisting arguments in the url
     if (urlSearchParams) {
-        url += "?" + urlSearchParams;
+        urlString += "?" + urlSearchParams;
     }
-    return url;
+    return urlString;
 }
 
-class XHRPromise {
-    constructor(request, options = {}) {
+type DataType = "arrayBuffer" | "blob" | "formData" | "json" | "text";
+
+export type FetchPostprocessor = (payload: any, xhrPromise?: XHRPromise) => any;
+export type FetchErrorPostprocessor = (error: any) => any;
+export type FetchPreprocessor = (options: FetchOptions, input?: RequestInfo) => FetchOptions | void;
+
+export interface FetchOptions extends RequestInit {
+    url?: string;
+    dataType?: DataType;
+    onUploadProgress?: (event: ProgressEvent) => void;
+    onDownloadProgress?: (event: ProgressEvent) => void;
+    onSuccess?: (...args: any[]) => void;
+    onError?: (...args: any[]) => void;
+    onComplete?: () => void;
+    success?: (...args: any[]) => void;
+    error?: (...args: any[]) => void;
+    complete?: () => void;
+    errorHandler?: (...args: any[]) => void;
+    postprocessors?: FetchPostprocessor[];
+    errorPostprocessors?: FetchErrorPostprocessor[];
+    preprocessors?: FetchPreprocessor[];
+    urlParams?: any;
+    urlSearchParams?: URLSearchParams;
+    arraySearchParamSuffix?: string;
+    disableStateImport?: boolean;
+    disableEventsImport?: boolean;
+    
+    // jQuery compatibility
+    type?: string;
+    contentType?: string;
+    data?: any;
+
+}
+
+export interface URLFetchOptions extends FetchOptions {
+    url: string;
+}
+
+export class XHRPromise {
+    options: FetchOptions;
+    request: Request;
+    xhr: XMLHttpRequest;
+    promise: Promise<any>;
+    promiseResolve: (value?: any) => void;
+    promiseReject: (reason?: any) => void;
+    _chained?: boolean;
+
+    constructor(request: RequestInfo, options: FetchOptions = {}) {
         request = new Request(request, options);
         let xhr = new XMLHttpRequest();
         this.options = options;
@@ -79,9 +128,9 @@ class XHRPromise {
                 // In case dataType is "arrayBuffer", "blob", "formData", "json", "text"
                 // Response has methods to return these as promises
                 if (typeof response[options.dataType] === "function") {
-                    response = response[options.dataType]();
+                    const responsePromise = response[options.dataType]() as Promise<any>;
                     // TODO: should whitelist dataType to json, blob
-                    response.then((data) => {
+                    responsePromise.then((data) => {
                         this.resolve(data);
                     }, (err) => {
                         this.reject(err);
@@ -151,19 +200,19 @@ class XHRPromise {
         return parseHeaders(this.xhr);
     }
 
-    send(body) {
+    send(body: any): void {
         this.getXHR().send(body);
     }
 
-    getPostprocessors() {
+    getPostprocessors(): FetchPostprocessor[] {
         return this.options.postprocessors || fetch.defaultPostprocessors;
     }
 
-    getErrorPostprocessors() {
+    getErrorPostprocessors(): FetchErrorPostprocessor[] {
         return this.options.errorPostprocessors || fetch.defaultErrorPostprocessors;
     }
 
-    resolve(payload) {
+    resolve(payload: any): void {
         for (const postprocessor of this.getPostprocessors()) {
             try {
                 payload = postprocessor(payload, this) || payload;
@@ -183,21 +232,21 @@ class XHRPromise {
         }
     }
 
-    reject(error) {
+    reject(error: any): void {
         for (const postprocessor of this.getErrorPostprocessors()) {
             error = postprocessor(error) || error;
         }
 
         if (this.options.onError) {
-            this.options.onError(...arguments);
+            this.options.onError(error);
         } else {
             if (this._chained) {
-                this.promiseReject(...arguments);
+                this.promiseReject(error);
             } else {
                 if (this.options.errorHandler) {
-                    this.options.errorHandler(...arguments);
+                    this.options.errorHandler(error);
                 } else {
-                    console.error("Unhandled fetch error", ...arguments);
+                    console.error("Unhandled fetch error", error);
                 }
             }
         }
@@ -207,59 +256,61 @@ class XHRPromise {
     }
 
     // TODO: next 2 functions should throw an exception if you have onSuccess/onError
-    then(onResolve, onReject) {
+    then(onResolve?: (value: any) => any, onReject?: (reason: any) => any): Promise<any> {
         this._chained = true;
         onReject = onReject || this.options.errorHandler;
         return this.getPromise().then(onResolve, onReject);
     }
 
-    catch() {
+    catch(onReject?: (reason: any) => any): Promise<any> {
         this._chained = true;
-        return this.getPromise().catch(...arguments);
+        return this.getPromise().catch(onReject);
     }
 
-    getXHR() {
+    getXHR(): XMLHttpRequest {
         return this.xhr;
     }
 
-    getPromise() {
+    getPromise(): Promise<any> {
         return this.promise;
     }
 
-    getRequest() {
+    getRequest(): Request {
         return this.request;
     }
 
-    abort() {
+    abort(): void {
         this.getXHR().abort();
     }
 
-    addXHRListener(name, callback) {
-        this.getXHR().addEventListener(...arguments);
+    addXHRListener(name: string, callback: EventListener, ...args: any[]): void {
+        this.getXHR().addEventListener(name, callback, ...args);
     }
 
-    addProgressListener(callback) {
-        this.addXHRListener("progress", ...arguments);
+    addProgressListener(callback: EventListener, ...args: any[]): void {
+        this.addXHRListener("progress", callback, ...args);
     }
 }
 
 // TODO: this offers only partial compatibility with $.ajax, remove
-function jQueryCompatibilityPreprocessor(options) {
+export function jQueryCompatibilityPreprocessor(options: FetchOptions): FetchOptions {
     if (options.type) {
         options.method = options.type.toUpperCase();
     }
 
-    if (options.contentType) {
-        options.headers.set("Content-Type", options.contentType);
-    }
+    const headers = options.headers as Headers;
+    headers.set("X-Requested-With", "XMLHttpRequest");
 
-    options.headers.set("X-Requested-With", "XMLHttpRequest");
+    if (options.contentType) {
+        headers.set("Content-Type", options.contentType);
+    }
 
     if (isPlainObject(options.data)) {
         let method = options.method.toUpperCase();
         if (method === "GET" || method === "HEAD") {
             options.urlParams = options.urlParams || options.data;
-            if (options.cache === false) {
+            // TODO @types at the end we shouldn't need this anymore
+            if ((options.cache as unknown as boolean) === false) {
                 options.urlParams = getURLSearchParams(options.urlParams, options.arraySearchParamSuffix);
                 options.urlParams.set("_", Date.now());
             }
@@ -283,13 +334,14 @@ function jQueryCompatibilityPreprocessor(options) {
     }
     return options;
 }
+
 // Can either be called with
 // - 1 argument: (Request)
 // - 2 arguments: (url/Request, options)
-function fetch(input, ...args) {
+export function fetch(input: RequestInfo | URLFetchOptions, ...args: FetchOptions[]): XHRPromise {
     // In case we're being passed in a single plain object (not Request), assume it has a url field
     if (isPlainObject(input)) {
-        return fetch(input.url, ...arguments);
+        return fetch(input.url, input, ...args);
     }
 
     let options = Object.assign({}, ...args);
@@ -319,20 +371,19 @@ function fetch(input, ...args) {
     if (urlParams) {
         // Change the URL of the request to add a query
         const urlSearchParams = getURLSearchParams(urlParams, options.arraySearchParamSuffix);
-        if (input instanceof Request) {
-            input = new Request(composeURL(input.url, urlSearchParams), input);
+        if ((input as any) instanceof Request) {
+            input = new Request(composeURL((input as unknown as Request).url, urlSearchParams), input as RequestInit);
         } else {
             input = new Request(composeURL(input, urlSearchParams), {});
         }
     }
 
-    return new XHRPromise(input, options);
+    // TODO @types is this that safe?
+    return new XHRPromise(input as RequestInfo, options);
 }
 
-fetch.defaultPreprocessors = [];
-fetch.defaultPostprocessors = [];
-fetch.defaultErrorPostprocessors = [];
+fetch.defaultPreprocessors = [] as FetchPreprocessor[];
+fetch.defaultPostprocessors = [] as FetchPostprocessor[];
+fetch.defaultErrorPostprocessors = [] as FetchErrorPostprocessor[];
 
 fetch.polyfill = true;
-
-export {XHRPromise, fetch, composeURL, parseHeaders, getURLSearchParams, jQueryCompatibilityPreprocessor};

@@ -1,10 +1,10 @@
-import {UI} from "../../UIBase.js";
-import {StyleSheet} from "../../Style.js";
-import {styleRule} from "../../../decorators/Style.js";
-import {registerStyle} from "../../style/Theme.js";
-import {Device} from "../../../base/Device.js";
-import {BaseInputElement} from "../BaseInputElement.js";
-import {MakeIcon, MakeText} from "../../SimpleElements.jsx";
+import {UI} from "../../UIBase";
+import {StyleSheet} from "../../Style";
+import {styleRule} from "../../../decorators/Style";
+import {registerStyle} from "../../style/Theme";
+import {Device} from "../../../base/Device";
+import {BaseInputElement} from "../BaseInputElement";
+import {MakeIcon, MakeText} from "../../SimpleElements";
 
 
 export class CheckboxInputStyle extends StyleSheet {
@@ -53,9 +53,20 @@ export class CheckboxInputStyle extends StyleSheet {
     };
 }
 
+export interface CheckboxInputOptions {
+    initialValue?: boolean | null;
+    label?: string;
+    disabled?: boolean;
+}
+
+// Fucking Typescript idiots
+export interface CheckboxInput {
+    get styleSheet(): CheckboxInputStyle;
+}
+
 @registerStyle(CheckboxInputStyle)
-export class CheckboxInput extends BaseInputElement {
-    getDefaultOptions(options) {
+export class CheckboxInput extends BaseInputElement<boolean | null> {
+    getDefaultOptions(options: CheckboxInputOptions): CheckboxInputOptions {
         return {
             ...super.getDefaultOptions(options),
             initialValue: false,
@@ -63,7 +74,7 @@ export class CheckboxInput extends BaseInputElement {
         };
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: any): void {
         super.extraNodeAttributes(attr);
         if (this.options.disabled) {
             // TODO actually implement disabled
@@ -71,7 +82,7 @@ export class CheckboxInput extends BaseInputElement {
         }
     }
 
-    getIcon() {
+    getIcon(): any {
         const iconOptions = {
             color: this.themeProps.CHECKBOX_CHECKMARK_COLOR,
             size: "100%",
@@ -88,7 +99,7 @@ export class CheckboxInput extends BaseInputElement {
         return null;
     }
 
-    render() {
+    render(): any[] {
         const {styleSheet} = this;
         const checkboxClass = styleSheet.checkbox + (this.getValue() !== false ? styleSheet.selected : "");
         return [
@@ -101,7 +112,7 @@ export class CheckboxInput extends BaseInputElement {
         ];
     }
 
-    onMount() {
+    onMount(): void {
         super.onMount();
 
         this.addClickListener((event) => {

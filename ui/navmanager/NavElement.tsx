@@ -1,4 +1,4 @@
-import {UI} from "../UI";
+import {UI} from "../UIBase";
 import {Switcher} from "../Switcher";
 import {Link} from "../UIPrimitives";
 import {FACollapseIcon} from "../FontAwesome"; //TODO: more flexibility, do not require FAIcons in NavElements
@@ -185,7 +185,7 @@ const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
     }
 };
 
-const NavElement = NavElementInterface(UI.Primitive(BasicOrientedElement, "li"));
+const NavElement = NavElementInterface(UI.Primitive("li", BasicOrientedElement));
 class NavLinkElement extends NavElementInterface(BasicOrientedLinkElement) {
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);

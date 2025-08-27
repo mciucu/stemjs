@@ -217,5 +217,5 @@ class TabArea extends UI.Element {
     }
 }
 
-export * from "./Style";
+export * from "./Style.js";
 export {TabTitleArea, BasicTabTitle, TabArea};

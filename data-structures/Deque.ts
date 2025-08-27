@@ -1,136 +1,149 @@
-class Deque {
+export class Deque<T> {
+    private values: (T | undefined)[];
+    private offset: number;
+    private _length: number;
+
     constructor() {
-        this._values = new Array(8);
+        this.values = new Array(8);
+        this.offset = (this.values.length / 2) | 0;
         this._length = 0;
-        this._offset = (this._values.length / 2) | 0;
     }
 
-    shouldShrink() {
-        return this._values.length > 4 * this._length + 8;
+    private shouldShrink(): boolean {
+        return this.values.length > 4 * this._length + 8;
     }
 
-    maybeShrink() {
+    private maybeShrink(): void {
         if (this.shouldShrink()) {
             this.rebalance(true);
         }
     }
 
-    rebalance(forceResize) {
-        let capacity = this._values.length;
-        let length = this._length;
-        let optimalCapacity = (length * 1.618 + 8) | 0;
-        let shouldResize = forceResize || (capacity < optimalCapacity);
+    private rebalance(forceResize?: boolean): void {
+        const capacity = this.values.length;
+        const length = this._length;
+        const optimalCapacity = (length * 1.618 + 8) | 0;
+        const shouldResize = forceResize || (capacity < optimalCapacity);
 
         if (shouldResize) {
             // Allocate a new array and balance objects around the middle
-            let values = new Array(optimalCapacity);
-            let optimalOffset = (optimalCapacity / 2 - length / 2) | 0;
+            const values: (T | undefined)[] = new Array(optimalCapacity);
+            const optimalOffset = (optimalCapacity / 2 - length / 2) | 0;
             for (let i = 0; i < length; i += 1) {
-                values[optimalOffset + i] = this._values[this._offset + i];
+                values[optimalOffset + i] = this.values[this.offset + i];
             }
-            this._values = values;
-            this._offset = optimalOffset;
+            this.values = values;
+            this.offset = optimalOffset;
         } else {
             //Just balance the elements in the middle of the array
-            let optimalOffset = (capacity / 2 - length / 2) | 0;
-            this._values.copyWithin(optimalOffset, this._offset, this._offset + this._length);
+            const optimalOffset = (capacity / 2 - length / 2) | 0;
+            this.values.copyWithin(optimalOffset, this.offset, this.offset + this._length);
             // Remove references, to not mess up gc
-            if (optimalOffset < this._offset) {
-                this._values.fill(undefined, optimalOffset + this._length, this._offset + this._length);
+            if (optimalOffset < this.offset) {
+                this.values.fill(undefined, optimalOffset + this._length, this.offset + this._length);
             } else {
-                this._values.fill(undefined, this._offset + this._length, optimalOffset + this._length);
+                this.values.fill(undefined, this.offset + this._length, optimalOffset + this._length);
             }
-            this._offset = optimalOffset;
+            this.offset = optimalOffset;
         }
     }
 
-    pushFront(value) {
-        if (this._offset == 0) {
+    pushFront(value: T): void {
+        if (this.offset == 0) {
             this.rebalance();
         }
-        this._values[--this._offset] = value;
+        this.values[--this.offset] = value;
         this._length += 1;
     }
 
-    popFront() {
-        let value = this.peekBack();
+    popFront(): T {
+        const value = this.peekFront();
 
-        this._values[this._offset++] = undefined;
+        this.values[this.offset++] = undefined;
         this._length -= 1;
         this.maybeShrink();
 
         return value;
     }
 
-    peekFront() {
+    peekFront(): T {
         if (this._length == 0) {
             throw Error("Invalid operation, empty deque");
         }
-        return this._values[this._offset];
+        return this.values[this.offset] as T;
     }
 
-    pushBack(value) {
-        if (this._offset + this._length === this._values.length) {
+    pushBack(value: T): void {
+        if (this.offset + this._length === this.values.length) {
             this.rebalance();
         }
-        this._values[this._offset + this._length] = value;
+        this.values[this.offset + this._length] = value;
         this._length += 1;
     }
 
-    popBack() {
-        let value = this.peekFront();
+    popBack(): T {
+        const value = this.peekBack();
 
         this._length -= 1;
-        this._values[this._offset + this._length] = undefined;
+        this.values[this.offset + this._length] = undefined;
         this.maybeShrink();
 
         return value;
     }
 
-    peekBack() {
+    peekBack(): T {
         if (this._length == 0) {
             throw Error("Invalid operation, empty deque");
         }
-        return this._values[this._offset + this._length - 1];
+        return this.values[this.offset + this._length - 1] as T;
     }
 
-    get(index) {
+    get(index: number): T {
         if (index < 0 || index >= this._length) {
-            throw Error("Invalid index", index);
+            throw Error("Invalid index " + index);
         }
-        return this._values[this._offset + index];
+        return this.values[this.offset + index] as T;
     }
 
-    get length() {
+    get length(): number {
         return this._length;
     }
 
-    set length(value) {
+    set length(value: number) {
         throw Error("Can't resize a deque");
     }
 
-    toArray() {
-        return this._values.slice(this._offset, this._offset + this._length);
+    toArray(): T[] {
+        return this.values.slice(this.offset, this.offset + this._length) as T[];
     }
 
-    toString() {
+    toString(): string {
         return this.toArray().toString();
     }
 
-    entries() {
+    entries(): IterableIterator<T> {
         // TODO: implement with yield?
-        return this.toArray()[Symbol.iterator];
+        return this.toArray()[Symbol.iterator]();
     }
 
-    [Symbol.iterator]() {
+    [Symbol.iterator](): IterableIterator<T> {
         return this.entries();
     }
+
+    // Also support the standard javascript method names
+    pop(): T {
+        return this.popBack();
+    }
+
+    push(value: T): void {
+        return this.pushBack(value);
+    }
+
+    shift(): T {
+        return this.popFront();
+    }
+
+    unshift(value: T): void {
+        return this.pushFront(value);
+    }
 }
-
-// Also support the standard javascript method names
-Deque.prototype.pop     = Deque.prototype.popBack;
-Deque.prototype.push    = Deque.prototype.pushBack;
-Deque.prototype.shift   = Deque.prototype.popFront;
-Deque.prototype.unshift = Deque.prototype.pushFront;
-
-export {Deque};

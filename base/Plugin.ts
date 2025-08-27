@@ -2,59 +2,66 @@
 import {Dispatchable} from "./Dispatcher";
 
 export class Plugin extends Dispatchable {
-    constructor(parent) {
+    parent: any;
+
+    constructor(parent: any) {
         super();
         this.linkToParent(parent);
     }
 
-    linkToParent(parent) {
+    linkToParent(parent: any): void {
         this.parent = parent;
     }
 
-    name() {
-        return this.constructor.pluginName();
+    name(): string {
+        return (this.constructor as typeof Plugin).pluginName();
     }
 
-    static pluginName() {
+    static pluginName(): string {
         return this.name;
     }
 }
 
 // TODO: rename this to use Mixin in title
-export const Pluginable = function (BaseClass) {
+export const Pluginable = function <T extends new (...args: any[]) => any>(BaseClass: T) {
     return class Pluginable extends BaseClass {
+        plugins?: Map<string, Plugin>;
+
         // TODO: this should probably take in a plugin instance also
-        registerPlugin(PluginClass) {
-            if (!this.hasOwnProperty("plugins")) {
-                this.plugins = new Map();
+        registerPlugin(PluginClass: typeof Plugin): void {
+            if (!this.plugins) {
+                this.plugins = new Map<string, Plugin>();
             }
             // TODO: figure out plugin dependencies
-            let plugin = new PluginClass(this);
-            let pluginName = plugin.name();
+            const plugin = new PluginClass(this);
+            const pluginName = plugin.name();
 
-            if (this.plugins.has(pluginName)) {
+            if (this.plugins!.has(pluginName)) {
                 console.error("You are overwriting an existing plugin: ", pluginName, " for object ", this);
             }
 
-            this.plugins.set(pluginName, plugin);
+            this.plugins!.set(pluginName, plugin);
         }
 
-        removePlugin(pluginName) {
-            let plugin = this.getPlugin(pluginName);
+        removePlugin(pluginName: string | { pluginName(): string }): void {
+            const plugin = this.getPlugin(pluginName);
             if (plugin) {
-                plugin.remove(this);
-                this.plugins.delete(plugin.name());
+                (plugin as any).remove(this);
+                this.plugins!.delete(plugin.name());
             } else {
                 console.error("Can't remove plugin ", pluginName);
             }
         }
 
-        getPlugin(pluginName) {
+        getPlugin(pluginName: string | { pluginName(): string }): Plugin | null {
+            let name: string;
             if (!(typeof pluginName === "string")) {
-                pluginName = pluginName.pluginName();
+                name = pluginName.pluginName();
+            } else {
+                name = pluginName;
             }
             if (this.plugins) {
-                return this.plugins.get(pluginName);
+                return this.plugins.get(name) || null;
             } else {
                 return null;
             }

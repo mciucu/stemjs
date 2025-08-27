@@ -1,26 +1,47 @@
+// TypeScript type definitions
+type UnwrapFunc<T = any> = (element: T) => T | undefined;
+type VersioningFunc = (str: string, index: number | string) => string;
+type FilterFunc = (key: string, value: any) => boolean;
+
+interface CleanObjectOptions {
+    skipEmptyString?: boolean;
+    filterFunc?: FilterFunc | null;
+    emptyAsNull?: boolean;
+}
+
+interface Base64Options {
+    jsonFormat?: boolean;
+}
+
+interface ResolveFuncValueOptions {
+    maxIter?: number;
+    args?: any[] | null;
+    allowUnresolved?: boolean;
+}
+
 // TODO @cleanup merge with unwrapArray
-export function toArray(objOrArray) {
+export function toArray<T>(objOrArray: T | T[] | null | undefined): T[] {
     if (objOrArray == null) {
         return [];
     }
     return Array.isArray(objOrArray) ? objOrArray : [objOrArray];
 }
 
-export function unwrapElementPlain(element) {
+export function unwrapElementPlain<T>(element: T): T | undefined {
     if (element == null || element === false) {
         return undefined;
     }
     return element;
 }
 
-export function unwrapElementWithFunc(element) {
+export function unwrapElementWithFunc<T>(element: T | (() => T)): T | undefined {
     while (isFunction(element)) {
-        element = element();
+        element = (element as () => T)();
     }
     return unwrapElementPlain(element);
 }
 
-export function unwrapArray(elements, unwrapFunc = unwrapElementPlain) {
+export function unwrapArray<T>(elements: any, unwrapFunc: UnwrapFunc<T> = unwrapElementPlain): T[] {
     if (elements == null || elements === false) {
         return [];
     }
@@ -34,7 +55,7 @@ export function unwrapArray(elements, unwrapFunc = unwrapElementPlain) {
         }
     }
 
-    let result = [];
+    let result: T[] = [];
     for (const rawElement of elements) {
         if (rawElement == null) {
             continue;
@@ -64,7 +85,7 @@ export function unwrapArray(elements, unwrapFunc = unwrapElementPlain) {
     return sameAsInput ? elements : result;
 }
 
-export function areSetsEqual(a, b) {
+export function areSetsEqual<T>(a: Set<T>, b: Set<T>): boolean {
     if (a.size !== b.size) {
         return false;
     }
@@ -76,13 +97,13 @@ export function areSetsEqual(a, b) {
     return true;
 }
 
-export function haveSameElements(a, b) {
-    a = new Set(toArray(a));
-    b = new Set(toArray(b));
-    return areSetsEqual(a, b);
+export function haveSameElements<T>(a: T | T[], b: T | T[]): boolean {
+    const setA = new Set(toArray(a));
+    const setB = new Set(toArray(b));
+    return areSetsEqual(setA, setB);
 }
 
-export function isLocalUrl(url, host=self.location.host, origin=self.location.origin) {
+export function isLocalUrl(url: string, host: string = self.location.host, origin: string = self.location.origin): boolean {
     // Empty url is considered local
     if (!url) {
         return true;
@@ -104,9 +125,9 @@ export function isLocalUrl(url, host=self.location.host, origin=self.location.or
 // If the url is protocol-relative, removes the starting "//"+host, transforming it in a root-relative url.
 // If the url is absolute, removes the origin, transforming it in a root-relative url.
 // If the url is root-relative or document-relative, leaves it as is.
-export function trimLocalUrl(url, host=self.location.host, origin=self.location.origin) {
+export function trimLocalUrl(url: string, host: string = self.location.host, origin: string = self.location.origin): string {
     if (!isLocalUrl(url, host, origin)) {
-        throw Error("Trying to trim non-local url!");
+        throw new Error("Trying to trim non-local url!");
     }
     if (!url) {
         return url;
@@ -121,22 +142,22 @@ export function trimLocalUrl(url, host=self.location.host, origin=self.location.
 }
 
 // Split the passed in array into arrays with at most maxChunkSize elements
-export function splitInChunks(array, maxChunkSize) {
-    let chunks = [];
+export function splitInChunks<T>(array: T[], maxChunkSize: number): T[][] {
+    let chunks: T[][] = [];
     while (array.length > 0) {
         chunks.push(array.splice(0, maxChunkSize));
     }
     return chunks;
 }
 
-export function isIterable(obj) {
+export function isIterable(obj: any): obj is Iterable<any> {
     if (obj == null) {
         return false;
     }
     return obj[Symbol.iterator] !== undefined;
 }
 
-export function defaultComparator(a, b) {
+export function defaultComparator(a: any, b: any): number {
     if (a == null && b == null) {
         return 0;
     }
@@ -163,7 +184,7 @@ export function defaultComparator(a, b) {
     return aStr < bStr ? -1 : 1;
 }
 
-export function slugify(string) {
+export function slugify(string: string): string {
     string = string.trim();
 
     string = string.replace((/[^a-zA-Z0-9-\s]/g), ""); // remove anything non-latin alphanumeric
@@ -175,30 +196,30 @@ export function slugify(string) {
 }
 
 // If the first argument is a number, it's returned concatenated with the suffix, otherwise it's returned unchanged
-export function suffixNumber(value, suffix) {
+export function suffixNumber(value: any, suffix: string): any {
     return isNumber(value) ? value + suffix : value;
 }
 
-export function capitalize(text) {
+export function capitalize(text: string): string {
     return text && (text.charAt(0).toUpperCase() + text.slice(1));
 }
 
-export function decapitalize(text) {
+export function decapitalize(text: string): string {
     return text && (text.charAt(0).toLowerCase() + text.slice(1));
 }
 
-export function pluralize(count, text) {
+export function pluralize(count: number, text: string): string {
     return `${count} ${text}${count > 1 ? "s" : ""}`;
 }
 
-export function titleCase(text) {
+export function titleCase(text: string): string {
      return text.toLowerCase().split(" ").map(word => capitalize(word)).join(" ");
 }
 
 // Cap a string (when sending to DB for instance), and also add a total length info
 // Don't use this in the frontend, use ellipsis css
 // Length is exceeded a bit by the extra description
-export function limitString(str, maxLength) {
+export function limitString(str: string, maxLength: number): string {
     if (str.length > maxLength) {
         const newStr = str.substring(0, maxLength) + `...[${str.length} initial chr.]`;
         // Even if we're a bit over the length limit, let's not be stupid and bloat the input
@@ -209,28 +230,38 @@ export function limitString(str, maxLength) {
     return str;
 }
 
-export function setObjectPrototype(obj, Class) {
-    obj.__proto__ = Class.prototype;
+export function setObjectPrototype<T>(obj: any, Class: new (...args: any[]) => T): T {
+    (obj as any).__proto__ = Class.prototype;
     return obj;
 }
 
-export function isFunction(obj) {
+export type Nullable<T> = T | null | undefined;
+
+export function isNotNull<T>(obj: T | null | undefined): obj is T {
+    return obj != null;
+}
+
+export function isNotNullOrFalse<T>(obj: T | null | false): obj is T {
+    return obj !== null && obj !== false;
+}
+
+export function isFunction(obj: any): obj is Function {
     return typeof obj === "function";
 }
 
-export function isBoolean(obj) {
+export function isBoolean(obj: any): obj is boolean {
     return obj === true || obj === false;
 }
 
-export function isNumber(obj) {
+export function isNumber(obj: any): obj is number {
     return (typeof obj === "number") || (obj instanceof Number);
 }
 
-export function isString(obj) {
+export function isString(obj: any): obj is string {
     return (typeof obj === "string") || (obj instanceof String);
 }
 
-export function isNumericString(str, acceptPadding = false) {
+export function isNumericString(str: any, acceptPadding: boolean = false): boolean {
     if (!isString(str)) {
         return false;
     }
@@ -238,10 +269,10 @@ export function isNumericString(str, acceptPadding = false) {
         return false;
     }
     // Both of these are needed to cover all cases
-    return !isNaN(str) && !isNaN(parseFloat(str));
+    return !isNaN(str as any) && !isNaN(parseFloat(str));
 }
 
-export function isPlainObject(obj) {
+export function isPlainObject(obj: any): obj is Record<string, any> {
     if (!obj || typeof obj !== "object") {
         return false;
     }
@@ -251,31 +282,31 @@ export function isPlainObject(obj) {
     return true;
 }
 
-function FILTER_NULLS(key, value) {
+function FILTER_NULLS(key: string, value: any): boolean {
     return value != null;
 }
 
-function FILTER_NULLS_AND_EMPTY_STR(key, value) {
+function FILTER_NULLS_AND_EMPTY_STR(key: string, value: any): boolean {
     return value != null && value !== "";
 }
 
-export function cleanObject(obj, {skipEmptyString = true, filterFunc = null, emptyAsNull = false} = {}) {
-    const cleanObject = {};
-    if (!filterFunc) {
-        filterFunc = skipEmptyString ? FILTER_NULLS_AND_EMPTY_STR : FILTER_NULLS;
-    }
+export function cleanObject(obj: Record<string, any>, options: CleanObjectOptions = {}): Record<string, any> | null {
+    const {skipEmptyString = true, filterFunc = null, emptyAsNull = false} = options;
+    const cleanedObject: Record<string, any> = {};
+    const filterFunction = filterFunc || (skipEmptyString ? FILTER_NULLS_AND_EMPTY_STR : FILTER_NULLS);
+    
     for (const [key, value] of Object.entries(obj)) {
-        if (filterFunc(key, value)) {
-            cleanObject[key] = value;
+        if (filterFunction(key, value)) {
+            cleanedObject[key] = value;
         }
     }
-    if (emptyAsNull && Object.keys(cleanObject).length === 0) {
+    if (emptyAsNull && Object.keys(cleanedObject).length === 0) {
         return null;
     }
-    return cleanObject;
+    return cleanedObject;
 }
 
-export function deepSetAttr(obj, keys, value) {
+export function deepSetAttr(obj: Record<string, any>, keys: string[], value: any): void {
     keys.forEach((key, index) => {
         if (index + 1 < keys.length) {
             if (!obj[key]) {
@@ -288,22 +319,22 @@ export function deepSetAttr(obj, keys, value) {
     });
 }
 
-export function deepGetAttr(obj, keys) {
+export function deepGetAttr(obj: any, keys: string[]): any {
     for (const key of keys) {
         obj = obj && obj[key];
     }
     return obj;
 }
 
-export function deepCopy() {
-	let target = arguments[0] || {};
+export function deepCopy<T = any>(...sources: any[]): T {
+	let target = sources[0] || {};
 	// Handle case when target is a string or something (possible in deep copy)
 	if (typeof target !== "object" && typeof target !== "function") {
 		target = {};
 	}
 
-	for (let i = 1; i < arguments.length; i += 1) {
-        let obj = arguments[i];
+	for (let i = 1; i < sources.length; i += 1) {
+        let obj = sources[i];
         if (obj == null) {
             continue;
         }
@@ -332,7 +363,7 @@ export function deepCopy() {
 	return target;
 }
 
-export function dashCase(str) {
+export function dashCase(str: string): string {
     let rez = "";
     for (let i = 0; i < str.length; i++) {
         if ("A" <= str[i] && str[i] <= "Z") {
@@ -348,7 +379,7 @@ export function dashCase(str) {
 }
 
 // TODO: have a Cookie helper file
-export function getCookie(name) {
+export function getCookie(name: string): string {
     let cookies = (document.cookie || "").split(";");
     for (let cookie of cookies) {
         cookie = cookie.trim();
@@ -359,7 +390,7 @@ export function getCookie(name) {
     return "";
 }
 
-export function setCookie(name, value, maxAge=60*60*4 /* 4 hours */, domain) {
+export function setCookie(name: string, value: string, maxAge: number = 60*60*4 /* 4 hours */, domain?: string): void {
     let cookie = `${name}=${value}; path=/; max-age=${maxAge}; ${window.location.protocol === "http:" ? "" : "SameSite=None; Secure; "}`;
     if (domain && domain.trim().length) {
         cookie += `domain=${domain};`
@@ -367,11 +398,11 @@ export function setCookie(name, value, maxAge=60*60*4 /* 4 hours */, domain) {
     document.cookie = cookie;
 }
 
-export function serializeCookie(name, value, maxAge=60*60*4) {
+export function serializeCookie(name: string, value: any, maxAge: number = 60*60*4): void {
     setCookie(name, encodeURIComponent(JSON.stringify(value)), maxAge);
 }
 
-export function deserializeCookie(name) {
+export function deserializeCookie(name: string): any {
     const value = getCookie(name);
     if (!value) {
         return value;
@@ -379,28 +410,28 @@ export function deserializeCookie(name) {
     return JSON.parse(decodeURIComponent(value));
 }
 
-export function uniqueId(obj) {
-    if (!uniqueId.objectWeakMap) {
-        uniqueId.objectWeakMap = new WeakMap();
-        uniqueId.constructorWeakMap = new WeakMap();
-        uniqueId.totalObjectCount = 0;
+export function uniqueId(obj: object): string {
+    if (!(uniqueId as any).objectWeakMap) {
+        (uniqueId as any).objectWeakMap = new WeakMap();
+        (uniqueId as any).constructorWeakMap = new WeakMap();
+        (uniqueId as any).totalObjectCount = 0;
     }
-    let objectWeakMap = uniqueId.objectWeakMap;
-    let constructorWeakMap = uniqueId.constructorWeakMap;
+    let objectWeakMap = (uniqueId as any).objectWeakMap;
+    let constructorWeakMap = (uniqueId as any).constructorWeakMap;
     if (!objectWeakMap.has(obj)) {
-        const objConstructor = obj.constructor || obj.__proto__ || Object;
+        const objConstructor = (obj as any).constructor || (obj as any).__proto__ || Object;
         // Increment the object count
         const objIndex = (constructorWeakMap.get(objConstructor) || 0) + 1;
         constructorWeakMap.set(objConstructor, objIndex);
 
-        const objUniqueId = objIndex + "-" + (++uniqueId.totalObjectCount);
+        const objUniqueId = objIndex + "-" + (++(uniqueId as any).totalObjectCount);
         objectWeakMap.set(obj, objUniqueId);
     }
     return objectWeakMap.get(obj);
 }
 
 // args[0] is a string where the "%[number]" block will be replaced by the args[number]
-export function evaluateSprintf(...args) {
+export function evaluateSprintf(...args: any[]): string {
     let str = args[0];
 
     for (let index = 1; index < args.length; index += 1) {
@@ -411,7 +442,7 @@ export function evaluateSprintf(...args) {
 }
 
 // TODO: should be done with String.padLeft
-export function padNumber(num, minLength) {
+export function padNumber(num: number, minLength: number): string {
     let strNum = String(num);
     while (strNum.length < minLength) {
         strNum = "0" + strNum;
@@ -420,18 +451,18 @@ export function padNumber(num, minLength) {
 }
 
 // Returns the english ordinal suffix of a number
-export function getOrdinalSuffix(num) {
+export function getOrdinalSuffix(num: number): string {
     let suffixes = ["th", "st", "nd", "rd"];
     let lastDigit = num % 10;
     let isTeen = Math.floor(num / 10) % 10 === 1;
     return (!isTeen && suffixes[lastDigit]) || suffixes[0];
 }
 
-export function suffixWithOrdinal(num) {
+export function suffixWithOrdinal(num: number): string {
     return num + getOrdinalSuffix(num);
 }
 
-function appendNumberInParanthesis(str, index) {
+function appendNumberInParanthesis(str: string, index: number | string): string {
     if (!index) {
         return str;
     }
@@ -439,7 +470,7 @@ function appendNumberInParanthesis(str, index) {
 }
 
 // Starting from the suggestion, tries a bunch of versioning values until one is free (passes checkFunc)
-export function findFirstFreeVersion(suggestion, checkFunc, versioning=appendNumberInParanthesis) {
+export function findFirstFreeVersion(suggestion: string, checkFunc: (str: string) => boolean, versioning: VersioningFunc = appendNumberInParanthesis): string {
     for (let index = 0; index < 100; index++) {
         const str = versioning(suggestion, index);
         if (!checkFunc(str)) {
@@ -450,23 +481,25 @@ export function findFirstFreeVersion(suggestion, checkFunc, versioning=appendNum
     return versioning(suggestion, Math.random().toString().substring(2));
 }
 
-export function base64Encode(value, {jsonFormat = true} = {}) {
+export function base64Encode(value: any, options: Base64Options = {}): string {
+    const {jsonFormat = true} = options;
     if (jsonFormat) {
         value = JSON.stringify(value);
     }
     return btoa(value);
 }
 
-export function base64Decode(value, {jsonFormat = true} = {}) {
-    value = atob(value);
+export function base64Decode(value: string, options: Base64Options = {}): any {
+    const {jsonFormat = true} = options;
+    let decoded = atob(value);
     if (jsonFormat) {
-        value = JSON.parse(value);
+        decoded = JSON.parse(decoded);
     }
-    return value;
+    return decoded;
 }
 
 // Erase the first instance of the value from the given array. In-place, returns the array
-export function eraseFirst(array, value) {
+export function eraseFirst<T>(array: T[], value: T): T[] {
     const index = array.indexOf(value);
     if (index >= 0) {
         array.splice(index, 1);
@@ -477,12 +510,12 @@ export function eraseFirst(array, value) {
 export const UNICODE_BOM_CHARACTER = 0xFEFF;
 export const NOOP_FUNCTION = () => undefined;
 
-export function isFirefox() {
+export function isFirefox(): boolean {
     return (navigator.userAgent.indexOf("Firefox") !== -1
         || navigator.userAgent.indexOf("FxiOS") !== -1) && navigator.userAgent.indexOf("Chrome") === -1;
 }
 
-export function isSafari() {
+export function isSafari(): boolean {
     let firefox = isFirefox();
     let safari = navigator.userAgent.indexOf("Safari") > -1;
     let chrome = navigator.userAgent.indexOf("Chrome") > -1;
@@ -493,13 +526,13 @@ export function isSafari() {
 }
 
 // Helpers to wrap iterators, to wrap all values in a function or to filter them
-export function* mapIterator(iter, func) {
+export function* mapIterator<T, U>(iter: Iterable<T>, func: (value: T) => U): Generator<U, void, unknown> {
     for (let value of iter) {
         yield func(value);
     }
 }
 
-export function* filterIterator(iter, func) {
+export function* filterIterator<T>(iter: Iterable<T>, func: (value: T) => boolean): Generator<T, void, unknown> {
     for (let value of iter) {
         if (func(value)) {
             yield value;
@@ -509,186 +542,17 @@ export function* filterIterator(iter, func) {
 
 // Used so that a value or a function can be used anywhere
 // If the value is a function, it will call it at most maxIter (default 32) times
-export function resolveFuncValue(value, {maxIter = 32, args = null, allowUnresolved = false} = {}) {
-    while (maxIter > 0 && isFunction(value)) {
-        value = value(...args);
-        maxIter -= 1;
+export function resolveFuncValue<T>(value: T | (() => T), options: ResolveFuncValueOptions = {}): T {
+    const {maxIter = 32, args = null, allowUnresolved = false} = options;
+    let currentValue = value;
+    let iterations = maxIter;
+    
+    while (iterations > 0 && isFunction(currentValue)) {
+        currentValue = (currentValue as any)(...(args || []));
+        iterations -= 1;
     }
-    if (!allowUnresolved && maxIter === 0) {
+    if (!allowUnresolved && iterations === 0) {
         console.error("Failed to resolve value to a non-function");
     }
-    return value;
+    return currentValue as T;
 }
-
-export class CallModifier {
-    wrap(func) {
-        throw Error("Implement wrap method");
-    }
-
-    call(func) {
-        return this.wrap(func)();
-    }
-
-    toFunction() {
-        return (func) => this.wrap(func);
-    }
-}
-
-export class UnorderedCallDropper extends CallModifier {
-    index = 1;
-    lastExecuted = 0;
-
-    wrap(callback) {
-        const currentIndex = this.index++;
-        return (...args) => {
-            if (currentIndex > this.lastExecuted) {
-                this.lastExecuted = currentIndex;
-                return callback(...args);
-            }
-        }
-    }
-}
-
-/*
-CallThrottler acts both as a throttler and a debouncer, allowing you to combine both types of functionality.
-Available options:
-    - debounce (ms): delays the function call by x ms, each call extending the delay
-    - throttle (ms): keeps calls from happening with at most x ms between them. If debounce is also set, will make sure to
-    fire a debounced even if over x ms have passed. If equal to CallTimer.ON_ANIMATION_FRAME, means that we want to use
-    requestAnimationFrame instead of setTimeout, to execute before next frame redraw()
-    - dropThrottled (boolean, default false): any throttled function call is not delayed, but dropped
- */
-export class CallThrottler extends CallModifier {
-    static ON_ANIMATION_FRAME = Symbol();
-    static AUTOMATIC = Symbol();
-
-    lastCallTime = 0;
-    pendingCall = null;
-    pendingCallArgs = [];
-    pendingCallExpectedTime = 0;
-    numCalls = 0;
-    totalCallDuration = 0;
-
-    constructor(options={}) {
-        super();
-        Object.assign(this, options);
-    }
-
-    isThrottleOnAnimationFrame() {
-        return this.throttle === this.constructor.ON_ANIMATION_FRAME;
-    }
-
-    clearPendingCall() {
-        this.pendingCall = null;
-        this.pendingCallArgs = [];
-        this.pendingCallExpectedTime = 0;
-    }
-
-    cancel() {
-        this.pendingCall && this.pendingCall.cancel();
-        this.clearPendingCall();
-    }
-
-    flush() {
-        this.pendingCall && this.pendingCall.flush();
-        this.clearPendingCall();
-    }
-
-    // API compatibility with cleanup jobs
-    cleanup() {
-        this.cancel();
-    }
-
-    computeExecutionDelay(timeNow) {
-        let executionDelay = null;
-        if (this.throttle != null) {
-            executionDelay = Math.max(this.lastCallTime + this.throttle - timeNow, 0);
-        }
-        if (this.debounce != null) {
-            executionDelay = Math.min(executionDelay != null ? executionDelay : this.debounce, this.debounce);
-        }
-        return executionDelay;
-    }
-
-    replacePendingCall(wrappedFunc, funcCall, funcCallArgs) {
-        this.cancel();
-        if (this.isThrottleOnAnimationFrame()) {
-            const cancelHandler = requestAnimationFrame(funcCall);
-            wrappedFunc.cancel = () => cancelAnimationFrame(cancelHandler);
-            return;
-        }
-
-        const timeNow = Date.now();
-        let executionDelay = this.computeExecutionDelay(timeNow);
-
-        if (this.dropThrottled) {
-            return executionDelay == 0 && funcCall();
-        }
-
-        const cancelHandler = setTimeout(funcCall, executionDelay);
-        wrappedFunc.cancel = () => clearTimeout(cancelHandler);
-        this.pendingCall = wrappedFunc;
-        this.pendingCallArgs = funcCallArgs;
-        this.pendingCallExpectedTime = timeNow + executionDelay;
-    }
-
-    updatePendingCall(args) {
-        this.pendingCallArgs = args;
-        if (!this.isThrottleOnAnimationFrame()) {
-            const timeNow = Date.now();
-            this.pendingCallExpectedTime = timeNow + this.computeExecutionDelay(timeNow);
-        }
-    }
-
-    wrap(func) {
-        const funcCall = () => {
-            const timeNow = Date.now();
-            // The expected time when the function should be executed next might have been changed
-            // Check if that's the case, while allowing a 1ms error for time measurement
-            if (!this.isThrottleOnAnimationFrame() &&
-                timeNow + 1 < this.pendingCallExpectedTime) {
-                this.replacePendingCall(wrappedFunc, funcCall, this.pendingCallArgs);
-            } else {
-                this.lastCallTime = timeNow;
-                this.clearPendingCall();
-                func(...this.pendingCallArgs);
-            }
-        };
-
-        const wrappedFunc = (...args) => {
-            // Check if it's our function, and update the arguments and next execution time only
-            if (this.pendingCall && func === this.pendingCall.originalFunc) {
-                // We only need to update the arguments, and maybe mark that we want to executed later than scheduled
-                // It's an optimization to not invoke too many setTimeout/clearTimeout pairs
-                return this.updatePendingCall(args);
-            }
-            return this.replacePendingCall(wrappedFunc, funcCall, args);
-        };
-
-        wrappedFunc.originalFunc = func;
-        wrappedFunc.cancel = NOOP_FUNCTION;
-        wrappedFunc.flush = () => {
-            if (wrappedFunc === this.pendingCall) {
-                this.cancel();
-                wrappedFunc();
-            }
-        };
-        return wrappedFunc;
-    }
-}
-
-// export function benchmarkThrottle(options={}) {
-//     const startTime = performance.now();
-//     const calls = options.calls || 100000;
-//
-//     const throttler = new CallThrottler({throttle: options.throttle || 300, debounce: options.debounce || 100});
-//
-//     const func = options.func || NOOP_FUNCTION;
-//
-//     const wrappedFunc = throttler.wrap(func);
-//
-//     for (let i = 0; i < calls; i += 1) {
-//         wrappedFunc();
-//     }
-//     console.warn("Throttle benchmark:", performance.now() - startTime, "for", calls, "calls");
-// }

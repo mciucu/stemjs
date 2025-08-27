@@ -1,7 +1,29 @@
-import {equal} from "../numerics/math.js";
+import {equal} from "../numerics/math";
 
-class Transition {
-    constructor(options) {
+interface TransitionOptions {
+    func: (t: number, context: any) => void;
+    context?: any;
+    duration?: number;
+    startTime?: number;
+    dependsOn?: Transition[];
+}
+
+interface ModifierOptions extends TransitionOptions {
+    reverseFunc: (context: any) => void;
+}
+
+export class Transition {
+    func: (t: number, context: any) => void;
+    context: any;
+    duration: number;
+    startTime: number;
+    dependsOn: Transition[];
+    speedFactor: number;
+    stopped?: boolean;
+    pauseTime?: number;
+    lastT?: number;
+
+    constructor(options: TransitionOptions) {
         this.func = options.func;
         this.context = options.context;
         this.duration = options.duration || 0;
@@ -10,7 +32,7 @@ class Transition {
         this.speedFactor = 1;
     }
 
-    toString() {
+    toString(): string {
         return  "{\n"+
                 "   context: " + this.context + "\n"+
                 "   duration: " + this.duration + "\n"+
@@ -20,7 +42,7 @@ class Transition {
                 "}\n";
     }
 
-    hasDependencyOn(t) {
+    hasDependencyOn(t: Transition): boolean {
         for (let transition of this.dependsOn) {
             if (transition === t) {
                 return true;
@@ -29,7 +51,7 @@ class Transition {
         return false;
     }
 
-    canAdvance() {
+    canAdvance(): boolean {
         for (let i = 0; i < this.dependsOn.length; i += 1) {
             if (!this.dependsOn[i].isStopped()) {
                 return false;
@@ -38,17 +60,17 @@ class Transition {
         return true;
     }
 
-    getFraction(now=Date.now()) {
+    getFraction(now: number = Date.now()): number {
         return Math.min((now - this.startTime) / this.getLength(), 1);
     }
 
-    start(now=Date.now()) {
+    start(now: number = Date.now()): this {
         if (this.stopped) {
             delete this.stopped;
         }
         this.setStartTime(now);
 
-        let functionWrapper = () => {
+        const functionWrapper = (): void => {
             if (this.stopped) {
                 return;
             }
@@ -61,17 +83,17 @@ class Transition {
         return this;
     }
 
-    getLength() {
+    getLength(): number {
         return this.getEndTime() - this.startTime;
     }
 
-    setStartTime(time) {
+    setStartTime(time: number): this {
         this.startTime = time;
         return this;
     }
 
-    setSpeedFactor(speedFactor, now=Date.now()) {
-        let ratio = speedFactor / this.speedFactor;
+    setSpeedFactor(speedFactor: number, now: number = Date.now()): this {
+        const ratio = speedFactor / this.speedFactor;
         this.startTime = (this.startTime - now) / ratio + now;
         if (this.pauseTime) {
             this.pauseTime = (this.pauseTime - now) / ratio + now;
@@ -80,14 +102,14 @@ class Transition {
         return this;
     }
 
-    pause(now=Date.now()) {
+    pause(now: number = Date.now()): this {
         if (!this.pauseTime) {
             this.pauseTime = now;
         }
         return this;
     }
 
-    resume(now=Date.now()) {
+    resume(now: number = Date.now()): this {
         if (this.pauseTime) {
             this.startTime += (now - this.pauseTime);
             this.pauseTime = 0;
@@ -95,32 +117,32 @@ class Transition {
         return this;
     }
 
-    forceStart() {
+    forceStart(): this {
         this.restart();
         this.func(0.0, this.context);
         return this;
     }
 
-    forceFinish() {
+    forceFinish(): this {
         this.func(1.0, this.context);
         this.stop();
         return this;
     }
 
-    stop() {
+    stop(): void {
         this.stopped = true;
     }
 
-    restart() {
+    restart(): this {
         delete this.stopped;
         return this;
     }
 
-    isStopped() {
+    isStopped(): boolean {
         return this.stopped === true;
     }
 
-    nextStep(now=Date.now()) {
+    nextStep(now: number = Date.now()): this {
         // Return if transition is stopped
         if (this.isStopped()) {
             return this;
@@ -139,20 +161,21 @@ class Transition {
         return this;
     }
 
-    getEndTime() {
+    getEndTime(): number {
         return this.startTime + this.duration / this.speedFactor;
     }
 }
 
-class Modifier extends Transition {
-    constructor(options) {
+export class Modifier extends Transition {
+    reverseFunc: (context: any) => void;
+
+    constructor(options: ModifierOptions) {
         super(options);
         this.reverseFunc = options.reverseFunc;
         this.context = options.context;
     }
 
-    // WTF, so basically JSON.stringify??
-    toString() {
+    toString(): string {
         return  "{\n"+
                 "   context: " + this.context + "\n"+
                 "   duration: " + this.duration + "\n"+
@@ -163,43 +186,55 @@ class Modifier extends Transition {
                 "}\n";
     }
 
-    forceStart() {
+    forceStart(): this {
         this.restart();
         this.reverseFunc(this.context);
         return this;
     }
 
-    forceFinish() {
-        this.func(this.context);
+    forceFinish(): this {
+        this.func(1.0, this.context);
         this.stop();
         return this;
     }
 
-    nextStep(now=Date.now()) {
+    nextStep(now: number = Date.now()): this {
         if (this.isStopped()) {
             return this;
         }
         if (now >= this.startTime) {
-            this.func(this.context);
+            const t = this.getFraction(now);
+            this.func(t, this.context);
             this.stop();
         }
         return this;
     }
 
-    getEndTime() {
+    getEndTime(): number {
         return this.startTime;
     }
 }
 
-class TransitionList {
-    constructor(startTime=0) {
+export class TransitionList {
+    startTime: number;
+    speedFactor: number;
+    transitions: Transition[];
+    dependsOn: Transition[];
+    stopped?: boolean;
+    pauseTime?: number;
+    onNewFrame?: (fraction: number) => void;
+    animationFrameId?: number;
+    context?: any;
+    duration?: number;
+
+    constructor(startTime: number = 0) {
         this.startTime = startTime;
         this.speedFactor = 1;
         this.transitions = [];
         this.dependsOn = [];
     }
 
-    toString() {
+    toString(): string {
         return  "{\n"+
                 "   context: " + this.context + "\n"+
                 "   duration: " + this.duration + "\n"+
@@ -209,7 +244,7 @@ class TransitionList {
                 "}\n";
     }
 
-    add(transition, forceFinish=true) {
+    add(transition: Transition, forceFinish: boolean = true): this {
         for (let i = 0; i < transition.dependsOn.length; i += 1) {
             if (transition.dependsOn[i].getEndTime() > transition.startTime) {
                 console.error(transition.toString() + "\ndepends on\n" + transition.dependsOn[i].toString() + "\n" + "which ends after its start!");
@@ -222,7 +257,7 @@ class TransitionList {
         return this;
     }
 
-    push(transition, forceFinish=true) {
+    push(transition: Transition, forceFinish: boolean = true): this {
         transition.setStartTime(this.getLength());
         for (let i = 0; i < transition.dependsOn.length; i += 1) {
             if (transition.dependsOn[i].getEndTime() > transition.startTime) {
@@ -236,25 +271,25 @@ class TransitionList {
         return this;
     }
 
-    getFraction(now=Date.now()) {
+    getFraction(now: number = Date.now()): number {
         return Math.min((now - this.startTime) / this.getLength(), 1);
     }
 
-    setStartTime(startTime) {
-        let timeDelta = startTime - this.startTime;
+    setStartTime(startTime: number): void {
+        const timeDelta = startTime - this.startTime;
         this.startTime = startTime;
         for (let i = 0; i < this.transitions.length; i += 1) {
-            let transition = this.transitions[i];
+            const transition = this.transitions[i];
             transition.setStartTime(transition.startTime + timeDelta);
         }
     }
 
-    start(now=Date.now()) {
+    start(now: number = Date.now()): this {
         if (this.stopped) {
             delete this.stopped;
         }
         this.setStartTime(now);
-        let functionWrapper = () => {
+        const functionWrapper = (): void => {
             if (this.stopped) {
                 return;
             }
@@ -267,19 +302,19 @@ class TransitionList {
         return this;
     }
 
-    stop() {
+    stop(): void {
         this.stopped = true;
         for (let i = 0; i < this.transitions.length; i += 1) {
-            let transition = this.transitions[i];
+            const transition = this.transitions[i];
             transition.stop();
         }
     }
 
-    isStopped() {
+    isStopped(): boolean {
         return this.stopped === true;
     }
 
-    pause(now=Date.now()) {
+    pause(now: number = Date.now()): this {
         if (!this.pauseTime) {
             this.pauseTime = now;
             for (let i = 0; i < this.transitions.length; i += 1) {
@@ -289,7 +324,7 @@ class TransitionList {
         return this;
     }
 
-    resume(now=Date.now()) {
+    resume(now: number = Date.now()): this {
         if (this.pauseTime) {
             this.startTime += now - this.pauseTime;
             for (let i = 0; i < this.transitions.length; i += 1) {
@@ -300,10 +335,10 @@ class TransitionList {
         return this;
     }
 
-    nextStep() {
+    nextStep(): this {
         // Return if transition list is stopped
         if (this.isStopped()) {
-            return;
+            return this;
         }
 
         if (this.onNewFrame) {
@@ -311,9 +346,9 @@ class TransitionList {
         }
 
         let finished = true;
-        let stk = [];
+        const stk: number[] = [];
         for (let i = 0; i < this.transitions.length; i += 1) {
-            let transition = this.transitions[i];
+            const transition = this.transitions[i];
             if (!transition.isStopped()) {
                 if (transition.canAdvance()) {
                     transition.nextStep();
@@ -333,8 +368,8 @@ class TransitionList {
         return this;
     }
 
-    setSpeedFactor(speedFactor, now=Date.now()) {
-        let ratio = speedFactor / this.speedFactor;
+    setSpeedFactor(speedFactor: number, now: number = Date.now()): this {
+        const ratio = speedFactor / this.speedFactor;
         this.startTime = (this.startTime - now) / ratio + now;
         if (this.pauseTime) {
             this.pauseTime = (this.pauseTime - now) / ratio + now;
@@ -346,24 +381,24 @@ class TransitionList {
         return this;
     }
 
-    restart() {
+    restart(): this {
         delete this.stopped;
         for (let i = 0; i < this.transitions.length; i += 1) {
-            let transition = this.transitions[i];
+            const transition = this.transitions[i];
             transition.restart();
         }
         this.sortByEndTime();
         return this;
     }
 
-    getLength() {
+    getLength(): number {
         return this.getEndTime() - this.startTime;
     }
 
-    getEndTime() {
+    getEndTime(): number {
         let endTime = 0;
         for (let i = 0; i < this.transitions.length; i += 1) {
-            let transitionEndTime = this.transitions[i].getEndTime();
+            const transitionEndTime = this.transitions[i].getEndTime();
             if (transitionEndTime > endTime) {
                 endTime = transitionEndTime;
             }
@@ -371,8 +406,8 @@ class TransitionList {
         return endTime;
     }
 
-    hasDependencyOn(t) {
-        for (let transition in this.dependsOn) {
+    hasDependencyOn(t: Transition): boolean {
+        for (let transition of this.dependsOn) {
             if (transition === t) {
                 return true;
             }
@@ -380,7 +415,7 @@ class TransitionList {
         return false;
     }
 
-    canAdvance() {
+    canAdvance(): boolean {
         for (let i = 0; i < this.dependsOn.length; i += 1) {
             if (!this.dependsOn[i].isStopped()) {
                 return false;
@@ -389,7 +424,7 @@ class TransitionList {
         return true;
     }
 
-    sortByStartTime() {
+    sortByStartTime(): void {
         // TODO: this comparator should be global
         this.transitions.sort((a, b) => {
             if (!equal(a.startTime, b.startTime, 0.001)) {
@@ -408,7 +443,8 @@ class TransitionList {
             return 0;
         });
     }
-    sortByEndTime() {
+
+    sortByEndTime(): void {
         this.transitions.sort((a, b) => {
             if (!equal(a.getEndTime(), b.getEndTime(), 0.001)) {
                 return a.getEndTime() - b.getEndTime();
@@ -427,24 +463,24 @@ class TransitionList {
         });
     }
 
-    forceStart(now=Date.now()) {
+    forceStart(now: number = Date.now()): this {
         this.sortByStartTime();
         for (let i = 0; i < this.transitions.length; i += 1) {
-            let transition = this.transitions[i];
+            const transition = this.transitions[i];
             if (transition.startTime <= now) {
-                transition.forceStart(now);
+                transition.forceStart();
             }
         }
         return this;
     }
 
-    forceFinish(now=Date.now(), startTime=-1) {
+    forceFinish(now: number = Date.now(), startTime: number = -1): this {
         this.sortByEndTime();
         for (let i = 0; i < this.transitions.length; i += 1) {
-            let transition = this.transitions[i];
+            const transition = this.transitions[i];
             if (transition.getEndTime() >= startTime) {
                 if (transition instanceof TransitionList) {
-                transition.forceFinish(now, startTime);
+                    transition.forceFinish(now, startTime);
                 } else {
                     if (typeof now === "undefined" || transition.getEndTime() < now) {
                         transition.forceFinish();
@@ -455,11 +491,13 @@ class TransitionList {
         return this;
     }
 
-    startAtPercent(startPercent, now=Date.now()) {
-        cancelAnimationFrame(this.animationFrameId);
+    startAtPercent(startPercent: number, now: number = Date.now()): void {
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+        }
         this.restart();
         // TODO(@wefgef): Buggy
-        let paused = this.pauseTime;
+        const paused = this.pauseTime;
         if (paused) {
             this.resume();
         }
@@ -473,7 +511,7 @@ class TransitionList {
             this.pause();
         }
 
-        let functionWrapper = () => {
+        const functionWrapper = (): void => {
             if (this.isStopped()) {
                 return;
             }
@@ -485,5 +523,3 @@ class TransitionList {
         this.animationFrameId = requestAnimationFrame(functionWrapper);
     }
 }
-
-export {Transition, Modifier, TransitionList};

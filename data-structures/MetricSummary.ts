@@ -2,17 +2,19 @@ import {Dispatchable} from "../base/Dispatcher";
 import {Deque} from "./Deque";
 import {StemDate} from "../time/Date";
 
-class MaxLengthDeque extends Deque {
-    constructor(maxLength) {
+export class MaxLengthDeque<T> extends Deque<T> {
+    readonly maxLength: number;
+
+    constructor(maxLength: number) {
         super();
         this.maxLength = maxLength;
     }
 
-    last() {
+    last(): T {
         return this.peekBack();
     }
 
-    push(value) {
+    push(value: T): void {
         if (this.length + 1 > this.maxLength) {
             this.popFront();
         }
@@ -27,23 +29,43 @@ export const MetricType = {
 };
 
 class ChunkAverager {
-    constructor(type, duration, maxLength) {
+    private values: MaxLengthDeque<number>;
+    private lastTimestamp: number | null;
+    private type: number;
+
+    constructor(type: number, duration: number, maxLength: number) {
         this.values = new MaxLengthDeque(maxLength);
         this.lastTimestamp = null;
         this.type = type;
     }
 
-    addInterval(start, end, value) {
+    addInterval(start: number, end: number, value: number): void {
         if (this.lastTimestamp && start != this.lastTimestamp) {
-            console.error("Timestamp inconsistency in latest chunk", time.lastTimestamp, start);
+            console.error("Timestamp inconsistency in latest chunk", this.lastTimestamp, start);
         }
         this.lastTimestamp = end;
         // Ignore the value for now
     }
 }
 
+interface MetricSummaryOptions {
+    maxLength?: number;
+}
+
+interface MetricValue {
+    timestamp: number;
+    value: number;
+}
+
 export class MetricSummary extends Dispatchable {
-    constructor(type, options={}) {
+    private type: symbol;
+    private options: MetricSummaryOptions;
+    private maxLength: number;
+    private rawTimestamps: MaxLengthDeque<number>;
+    private rawValues: MaxLengthDeque<number>;
+    private averagers: ChunkAverager[];
+
+    constructor(type: symbol, options: MetricSummaryOptions = {}) {
         super();
         this.type = type;
         this.options = options;
@@ -53,17 +75,17 @@ export class MetricSummary extends Dispatchable {
         this.rawValues = new MaxLengthDeque(this.maxLength);
         this.averagers = [];
         for (let i = 0, duration = 5; i < 7; i++, duration *= 4) {
-            this.averagers.push(new ChunkAverager(duration, this.maxLength));
+            this.averagers.push(new ChunkAverager(type as any, duration, this.maxLength));
         }
     }
 
-    addInterval(start, end, value) {
+    addInterval(start: number, end: number, value: number): void {
         for (let averager of this.averagers) {
             averager.addInterval(start, end, value);
         }
     }
 
-    addValue(timestamp=Date.now(), value=1) {
+    addValue(timestamp: number = Date.now(), value: number = 1): void {
         // Normalize timestamp to miliseconds
         timestamp = +(new StemDate(timestamp));
         const lastTimestamp = this.rawTimestamps.length && this.rawTimestamps.last();
@@ -99,10 +121,10 @@ export class MetricSummary extends Dispatchable {
         this.dispatchChange({timestamp, value, lastTimestamp});
     }
 
-    getValues(startDate=this.rawTimestamps.peekFront(), endDate=this.rawTimestamps.last(), maxValues=1024) {
+    getValues(startDate: number = this.rawTimestamps.peekFront(), endDate: number = this.rawTimestamps.last(), maxValues: number = 1024): MetricValue[] {
         startDate = +(new StemDate(startDate));
         endDate = +(new StemDate(endDate));
-        let values = [];
+        let values: MetricValue[] = [];
         for (let i = 0; i < this.rawValues.length; i++) {
             const timestamp = this.rawTimestamps.get(i);
             if (startDate <= timestamp && timestamp <= endDate) {

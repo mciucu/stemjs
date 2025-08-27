@@ -2,11 +2,11 @@ import {UI} from "./UIBase";
 import {registerStyle} from "./style/Theme";
 import {StyleSheet} from "./Style";
 import {styleRule} from "../decorators/Style";
-import {FAIcon} from "../ui/FontAwesome";
+import {FAIcon} from "./FontAwesome";
 import {Orientation} from "./Constants";
 
 // TODO Review CSS
-class CarouselStyle extends StyleSheet {
+export class CarouselStyle extends StyleSheet {
     navigatorHeight = "35px";
     hoverColor = "#364251";
     transitionTime = "0.3";
@@ -76,7 +76,7 @@ class CarouselNavigator extends UI.Element {
 
 
 @registerStyle(CarouselStyle)
-class Carousel extends UI.Element {
+export class Carousel extends UI.Element {
     extraNodeAttributes(attr) {
         attr.addClass(this.styleSheet.carousel);
     }
@@ -138,5 +138,3 @@ class Carousel extends UI.Element {
         return this.options.orientation || Orientation.VERTICAL;
     }
 }
-
-export {Carousel, CarouselStyle};

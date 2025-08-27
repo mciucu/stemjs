@@ -1,156 +1,160 @@
-// TODO: this whole file is mosly here to not break compatibility with pre-Stem code, need refactoring
-export var EPS = 1e-6;
+// TODO: this whole file is mostly here to not break compatibility with pre-Stem code, need refactoring
+
+export interface Point {
+    x: number;
+    y: number;
+}
+
+export interface Line {
+    a: number;
+    b: number;
+    c: number;
+}
+
+export interface Circle extends Point {
+    r: number;
+}
+
+export type Vector = Point;
+
+export const EPS = 1e-6;
 
 // Check if a value is equal to zero. Use epsilon check.
-export var isZero = function (val, epsilon=EPS) {
+export function isZero(val: number, epsilon: number = EPS): boolean {
     return (Math.abs(val) < epsilon);
-};
+}
 
 // Simulate C/C++ rand() function
-export var rand = function (mod) {
+export function rand(mod: number): number {
     return Math.floor(Math.random() * mod);
-};
+}
 
-export var equal = function (val1, val2, epsilon=EPS) {
-    return isZero(val1-val2, epsilon);
-};
+export function equal(val1: number, val2: number, epsilon: number = EPS): boolean {
+    return isZero(val1 - val2, epsilon);
+}
 
-export var equalPoints = function (p1, p2, epsilon=EPS) {
+export function equalPoints(p1: Point, p2: Point, epsilon: number = EPS): boolean {
     return isZero(p1.x - p2.x, epsilon) && isZero(p1.y - p2.y, epsilon);
-};
+}
 
 // Compute square of a number
-export var sqr = function (x) {
+export function sqr(x: number): number {
     return x * x;
-};
+}
 
 // Compute the distance between 2 points
-export var distance = function (p1, p2) {
+export function distance(p1: Point, p2: Point): number {
     return Math.sqrt(sqr(p1.x - p2.x) + sqr(p1.y - p2.y));
-};
+}
 
-export var signedDistancePointLine = function (point, line) {
+export function signedDistancePointLine(point: Point, line: Line): number {
     return (line.a * point.x + line.b * point.y + line.c) / Math.sqrt(sqr(line.a) + sqr(line.b));
-};
+}
 
-export var distancePointLine = function (point, line) {
+export function distancePointLine(point: Point, line: Line): number {
     return Math.abs(signedDistancePointLine(point, line));
-};
+}
 
-export var pointOnSegment = function (point, segmentStart, segmentEnd, epsilon) {
+export function pointOnSegment(point: Point, segmentStart: Point, segmentEnd: Point, epsilon?: number): boolean {
     epsilon = epsilon || EPS;
     return Math.abs(distance(point, segmentStart) + distance(point, segmentEnd) -
         distance(segmentStart, segmentEnd)) <= epsilon;
-};
+}
 
-export var perpendicularFoot = function (point, line) {
-    var distance = (line.a * point.x + line.b * point.y + line.c) / (sqr(line.a) + sqr(line.b));
+export function perpendicularFoot(point: Point, line: Line): Point {
+    const dist = (line.a * point.x + line.b * point.y + line.c) / (sqr(line.a) + sqr(line.b));
     return {
-        x: point.x - line.a * distance,
-        y: point.y - line.b * distance
-    }
-};
+        x: point.x - line.a * dist,
+        y: point.y - line.b * dist
+    };
+}
 
-export var lineEquation = function (A, B) {
+export function lineEquation(A: Point, B: Point): Line {
     return {
         a: B.y - A.y,
         b: A.x - B.x,
         c: A.y * B.x - A.x * B.y
-    }
-};
+    };
+}
 
 // Compute angle between 2 points in grad
-export var angleGrad = function (p1, p2) {
+export function angleGrad(p1: Point, p2: Point): number {
     return gradian(angleRad(p1, p2));
-};
+}
 
 // Transform gradian in radian
-export var radian = function (angle) {
+export function radian(angle: number): number {
     return angle * Math.PI / 180;
-};
+}
 
 // Transform radian in gradian
-export var gradian = function (angle) {
+export function gradian(angle: number): number {
     return angle * 180 / Math.PI;
-};
+}
 
 // Compute angle between 2 points in rad
-export var angleRad = function (p1, p2) {
-    p2 = p2 || {'x': 0, 'y': 0};
+export function angleRad(p1: Point, p2: Point = { x: 0, y: 0 }): number {
     return Math.atan2(p1.y - p2.y, p1.x - p2.x);
-};
+}
 
 // TODO: lots of these should be methods of the point class, not global functions
-export var crossProduct = function (p1, p2, p0) {
-    p0 = p0 || {x:0, y:0};
+export function crossProduct(p1: Point, p2: Point, p0: Point = { x: 0, y: 0 }): number {
     return (p1.x - p0.x) * (p2.y - p0.y) - (p1.y - p0.y) * (p2.x - p0.x);
-};
+}
 
-export var rotatePoint = function (point, orig, angle) {
-    // TODO: WTF, default argument value in the middle of argument list?
-    orig = orig || {x: 0, y: 0};
+export function rotatePoint(point: Point, angle: number, orig: Point = { x: 0, y: 0 }): Point {
     return {
         x: Math.cos(angle) * (point.x - orig.x) - Math.sin(angle) * (point.y - orig.y) + orig.x,
         y: Math.sin(angle) * (point.x - orig.x) + Math.cos(angle) * (point.y - orig.y) + orig.y
     };
-};
+}
 
-export var translatePoint = function (point, dx, dy) {
+export function translatePoint(point: Point, dx: number, dy: number): Point {
     return {
         x: point.x + dx,
         y: point.y + dy
     };
-};
+}
 
-export var scalePoint = function (point, orig, sx, sy) {
+export function scalePoint(point: Point, orig: Point, sx: number, sy?: number): Point {
     sy = sy || sx;
     return {
         x: (point.x - orig.x) * sx + orig.x,
         y: (point.y - orig.y) * sy + orig.y
-    }
-};
+    };
+}
 
-export var polarToCartesian = function (angle, radius, orig) {
-    orig = orig || {x: 0, y: 0};
+export function polarToCartesian(angle: number, radius: number, orig: Point = { x: 0, y: 0 }): Point {
     return {
         x: radius * Math.cos(angle) + orig.x,
         y: radius * Math.sin(angle) + orig.y
     };
-};
+}
 
-export var circlesIntersection = function (circle1, circle2) {
-    var points;
-    var centerDistance;
-    // TODO(@all) These vars are magic. Find out what they do and add comments
-    var l;
-    var h;
-
-    centerDistance = distance(circle1, circle2);
+export function circlesIntersection(circle1: Circle, circle2: Circle): Point[] {
+    const centerDistance = distance(circle1, circle2);
     if (centerDistance > circle1.r + circle2.r) {
         return [];
     }
 
-    l = (sqr(circle1.r)- sqr(circle2.r) + sqr(centerDistance)) / (2 * centerDistance);
+    // TODO(@all) These vars are magic. Find out what they do and add comments
+    const l = (sqr(circle1.r) - sqr(circle2.r) + sqr(centerDistance)) / (2 * centerDistance);
     if (sqr(circle1.r) - sqr(l) < 0) {
         return [];
     }
 
-    h = Math.sqrt(sqr(circle1.r) - sqr(l));
+    const h = Math.sqrt(sqr(circle1.r) - sqr(l));
 
-    points = [];
-    points.push({
+    return [{
         x: l / centerDistance * (circle2.x - circle1.x) + h / centerDistance * (circle2.y - circle1.y) + circle1.x,
         y: l / centerDistance * (circle2.y - circle1.y) - h / centerDistance * (circle2.x - circle1.x) + circle1.y
-    });
-    points.push({
+    }, {
         x: l / centerDistance * (circle2.x - circle1.x) - h / centerDistance * (circle2.y - circle1.y) + circle1.x,
         y: l / centerDistance * (circle2.y - circle1.y) + h / centerDistance * (circle2.x - circle1.x) + circle1.y
-    });
+    }];
+}
 
-    return points;
-};
-
-export var bound = function (value, minValue, maxValue) {
+export function bound(value: number, minValue: number, maxValue: number): number {
     if (value < minValue) {
         return minValue;
     }
@@ -158,21 +162,21 @@ export var bound = function (value, minValue, maxValue) {
         return maxValue;
     }
     return value;
-};
+}
 
-export var getVector = function (startPoint, endPoint) {
+export function getVector(startPoint: Point, endPoint: Point): Vector {
     return {
         x: endPoint.x - startPoint.x,
         y: endPoint.y - startPoint.y
     };
-};
+}
 
-export var vectorLength = function (vector) {
-    return distance({x:0, y:0}, vector);
-};
+export function vectorLength(vector: Vector): number {
+    return distance({ x: 0, y: 0 }, vector);
+}
 
-export var normalizeVector = function (vector) {
-    let len = vectorLength(vector);
+export function normalizeVector(vector: Vector): Vector {
+    const len = vectorLength(vector);
     if (Math.abs(len) < EPS) {
         return {
             x: 0,
@@ -183,54 +187,51 @@ export var normalizeVector = function (vector) {
         x: vector.x / len,
         y: vector.y / len
     };
-};
+}
 
-export var scaleVector = function (vector, scalar) {
+export function scaleVector(vector: Vector, scalar: number): Vector {
     return {
         x: vector.x * scalar,
         y: vector.y * scalar
     };
-};
+}
 
-export var addVectors = function (vector1, vector2) {
+export function addVectors(vector1: Vector, vector2: Vector): Vector {
     return {
         x: vector1.x + vector2.x,
         y: vector1.y + vector2.y
     };
-};
+}
 
-export var subtractVectors = function (vector1, vector2) {
+export function subtractVectors(vector1: Vector, vector2: Vector): Vector {
     return {
         x: vector1.x - vector2.x,
         y: vector1.y - vector2.y
     };
-};
+}
 
-export var triangleArea = function (point1, point2, point3) {
+export function triangleArea(point1: Point, point2: Point, point3: Point): number {
     return 0.5 * Math.abs(crossProduct(point1, point2, point3));
-};
+}
 
-export var inRange = function (value, minValue, maxValue) {
+export function inRange(value: number, minValue: number, maxValue: number): boolean {
     if (isNaN(value)) {
         return false;
     }
     return minValue <= value && value <= maxValue;
-};
+}
 
-export var interpolationValue = function (interpolationArray, X) {
-    var Y = 0;
-    var aux;
-    var i;
-    var j;
+export function interpolationValue(interpolationArray: Point[], X: number): number {
+    let Y = 0;
 
-    for (i = 0; i < interpolationArray.length; i += 1) {
-        if (interpolationArray.x === X) {
-           return interpolationArray.y;
+    for (let i = 0; i < interpolationArray.length; i += 1) {
+        if (interpolationArray[i].x === X) {
+           return interpolationArray[i].y;
         }
     }
-    for (i = 0; i < interpolationArray.length; i += 1) {
-        aux = interpolationArray[i].y;
-        for (j = 0; j < interpolationArray.length; j += 1) {
+    for (let i = 0; i < interpolationArray.length; i += 1) {
+        let aux = interpolationArray[i].y;
+        for (let j = 0; j < interpolationArray.length; j += 1) {
             if (i !== j) {
                 aux = aux * (X - interpolationArray[j].x) / (interpolationArray[i].x - interpolationArray[j].x);
             }
@@ -239,4 +240,4 @@ export var interpolationValue = function (interpolationArray, X) {
     }
 
     return Y;
-};
+}

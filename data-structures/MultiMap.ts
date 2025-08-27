@@ -1,89 +1,89 @@
 import {mapIterator} from "../base/Utils";
 
 // A map that supports multiple values to the same key
-class MultiMap {
+export class MultiMap<K = any, V = any> {
+    private map: Map<K, V[]>;
+
     constructor() {
         this.map = new Map();
     }
 
-    static iterator(items) {
-        return items[Symbol.iterator];
+    static iterator<T>(items: T[]): IterableIterator<T> {
+        return items[Symbol.iterator]();
     }
 
     // Methods that are called before every access inside
     // the internal map
-    normalizeKey(key) {
+    normalizeKey(key: K): K {
         return key;
     }
     
-    normalizeValue(value) {
+    normalizeValue(value: V): V {
         return value;
     }
 
-    append(key, value) {
-        let nKey = this.normalizeKey(key);
-        let nValue = this.normalizeValue(value);
+    append(key: K, value: V): void {
+        const nKey = this.normalizeKey(key);
+        const nValue = this.normalizeValue(value);
         if (this.map.has(nKey)) {
-            this.map.get(nKey).push(nValue);
+            this.map.get(nKey)!.push(nValue);
         } else {
             this.map.set(nKey, [nValue]);
         }
     }
 
-    has(key) {
+    has(key: K): boolean {
         return this.map.has(this.normalizeKey(key));
     }
 
-    delete(key) {
-        this.map.delete(this.normalizeKey(key));
+    delete(key: K): boolean {
+        return this.map.delete(this.normalizeKey(key));
     }
 
-    set(key, value) {
+    set(key: K, value: V): void {
         this.map.set(this.normalizeKey(key), [this.normalizeValue(value)]);
     }
 
     // Return the first value
-    get(key) {
-        let nKey = this.normalizeKey(key);
+    get(key: K): V | null {
+        const nKey = this.normalizeKey(key);
         if (this.map.has(nKey)) {
-            return this.map.get(nKey)[0];
+            return this.map.get(nKey)![0];
         }
         return null;
     }
 
-    getAll(key) {
-        let nKey = this.normalizeKey(key);
+    getAll(key: K): V[] | null {
+        const nKey = this.normalizeKey(key);
         if (this.map.has(nKey)) {
-            return this.map.get(nKey).slice();
+            return this.map.get(nKey)!.slice();
         }
         return null;
     }
 
-    forEach(callback, context) {
-        for (let [key, value] of this.entries()) {
+    forEach(callback: (value: V, key: K, map: this) => void, context?: any): void {
+        for (const [key, value] of this.entries()) {
             callback.call(context, value, key, this);
         }
     }
 
-    keys() {
+    keys(): IterableIterator<K> {
         return mapIterator(this.entries(), entry => entry[0]);
     }
 
-    values() {
+    values(): IterableIterator<V> {
         return mapIterator(this.entries(), entry => entry[1]);
     }
 
-    *entries() {
-        for (let [key, values] of this.map.entries()) {
-            for (let value of values) {
+    *entries(): IterableIterator<[K, V]> {
+        for (const [key, values] of this.map.entries()) {
+            for (const value of values) {
                 yield [key, value];
             }
         }
     }
 
-    [Symbol.iterator]() {
+    [Symbol.iterator](): IterableIterator<[K, V]> {
         return this.entries();
     }
 }
-
-export {MultiMap};

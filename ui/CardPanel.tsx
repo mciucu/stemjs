@@ -6,7 +6,7 @@ import {buildColors} from "./Color";
 import {styleRule} from "../decorators/Style";
 import {Level} from "./Constants";
 
-export function cardPanelColorToStyle(color) {
+export function cardPanelColorToStyle(color: string) {
     let colors = buildColors(color);
     return {
         borderColor: colors[4],
@@ -57,7 +57,7 @@ export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) 
     };
 }
 
-function cardPanelHeaderColorToStyle(color){
+function cardPanelHeaderColorToStyle(color: string) {
     let colors = buildColors(color);
     return {
         color: colors[6],
@@ -69,7 +69,7 @@ function cardPanelHeaderColorToStyle(color){
 export const CardPanelHeaderStyle = BasicLevelStyleSheet(cardPanelHeaderColorToStyle);
 
 @registerStyle(CardPanelStyle)
-class CardPanel extends SimpleStyledElement {
+export class CardPanel extends SimpleStyledElement {
     getTitle() {
         return this.options.title;
     }
@@ -134,5 +134,3 @@ class CardPanel extends SimpleStyledElement {
         ];
     }
 }
-
-export {CardPanel};

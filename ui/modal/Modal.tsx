@@ -7,10 +7,12 @@ import {UI} from "../UIBase";
 import {Dispatcher} from "../../base/Dispatcher";
 import {registerStyle} from "../style/Theme";
 import {Level, Size} from "../Constants";
-import {TemporaryMessageArea} from "../misc/TemporaryMessageArea.jsx";
+import {TemporaryMessageArea} from "../misc/TemporaryMessageArea";
+import {NodeAttributes} from "../NodeAttributes";
+
 
 @registerStyle(ModalStyle)
-class Modal extends UI.Element {
+export class Modal extends UI.Element {
     getDefaultOptions() {
         return {
             closeButton: true,
@@ -19,7 +21,7 @@ class Modal extends UI.Element {
         };
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         if (!this.options.visible) {
             attr.addClass("hidden");
         }
@@ -129,7 +131,7 @@ class Modal extends UI.Element {
 }
 
 
-class ActionModal extends Modal {
+export class ActionModal extends Modal {
     getDefaultOptions() {
         return {
             ...super.getDefaultOptions(),
@@ -217,7 +219,7 @@ class ActionModal extends Modal {
 }
 
 
-const ActionModalButton = (ActionModal) => class ActionModalButton extends Button {
+export const ActionModalButton = (ActionModal) => class ActionModalButton extends Button {
     getModalOptions() {
         let modalOptions = {
             actionName: this.options.label,
@@ -236,7 +238,7 @@ const ActionModalButton = (ActionModal) => class ActionModalButton extends Butto
 };
 
 
-class ErrorModal extends ActionModal {
+export class ErrorModal extends ActionModal {
     getTitle() {
         return "An Error occurred";
     }
@@ -249,5 +251,3 @@ class ErrorModal extends ActionModal {
         return <Button level={Level.DANGER} label="Dismiss" onClick={() => this.hide()}/>;
     }
 }
-
-export {Modal, ErrorModal, ActionModal, ActionModalButton};

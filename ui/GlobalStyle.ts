@@ -2,13 +2,21 @@ import {StyleSheet} from "./Style";
 import {styleRule} from "../decorators/Style";
 import {enhance} from "./Color";
 import {Device} from "../base/Device";
-import {Orientation, Level, Size} from "./Constants";
+import {Orientation, Level, Size, LevelType, SizeType, OrientationType} from "./Constants";
 import {Theme} from "./style/Theme";
 import {FloatType} from "./style/ThemeTypes.js";
 
-// TODO: export these properly, don't use a namespace here
+// Type definitions for CSS style objects
+interface CSSStyleObject {
+    [key: string]: string | number | (() => string | number) | CSSStyleObject;
+}
 
-export function getTextColor(backgroundColor) {
+// TODO @types move to Theme?
+interface ThemeProps {
+    [key: string]: string | number | ((props: ThemeProps) => string | number);
+}
+
+export function getTextColor(backgroundColor: string): string {
     return enhance(backgroundColor, 1);
 }
 
@@ -42,7 +50,7 @@ Theme.setProperties({
     BASE_DISABLED_OPACITY: FloatType(0.6),
 
     DEFAULT_TRANSITION_DURATION_MS: 250,
-    DEFAULT_TRANSITION: props => props.DEFAULT_TRANSITION_DURATION_MS + "ms ease",
+    DEFAULT_TRANSITION: (props: ThemeProps) => props.DEFAULT_TRANSITION_DURATION_MS + "ms ease",
 
     BASE_BORDER_RADIUS: 0,
     BASE_BOX_SHADOW: "0px 0px 10px rgb(160, 162, 168)",
@@ -51,9 +59,9 @@ Theme.setProperties({
     BASE_BORDER_COLOR: "#ddd",
 
     BUTTON_PADDING: "6px 12px",
-    BUTTON_BORDER_RADIUS: props => props.BASE_BORDER_RADIUS,
-    BUTTON_COLOR: props => props.COLOR_BACKGROUND,
-    BUTTON_FONT_WEIGHT: props => props.FONT_WEIGHT_DEFAULT,
+    BUTTON_BORDER_RADIUS: (props: ThemeProps) => props.BASE_BORDER_RADIUS,
+    BUTTON_COLOR: (props: ThemeProps) => props.COLOR_BACKGROUND,
+    BUTTON_FONT_WEIGHT: (props: ThemeProps) => props.FONT_WEIGHT_DEFAULT,
 
     TOGGLE_COLOR: "#086472",
     TOGGLE_BACKGROUND: "#D2E2E5",
@@ -82,7 +90,7 @@ Theme.setProperties({
     FONT_FAMILY_SANS_SERIF: "Lato, 'Segoe UI', 'Lucida Sans Unicode', 'Helvetica Neue', Helvetica, Arial, sans-serif",
     FONT_FAMILY_SERIF: "serif",
     FONT_FAMILY_MONOSPACE: "'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace",
-    FONT_FAMILY_DEFAULT: props => props.FONT_FAMILY_SANS_SERIF,
+    FONT_FAMILY_DEFAULT: (props: ThemeProps) => props.FONT_FAMILY_SANS_SERIF,
 
     NAV_MANAGER_NAVBAR_HEIGHT: 50,
     NAV_MANAGER_BOX_SHADOW_NAVBAR: "0px 0px 10px rgb(0, 0, 0)",
@@ -100,10 +108,10 @@ Theme.setProperties({
     INPUT_BACKGROUND: "#fff",
     INPUT_BORDER_COLOR: "#E5EAE9",
     INPUT_BORDER_RADIUS: 4,
-}, false);
+});
 
 export class BasicLevelSizeStyleSheet extends StyleSheet {
-    Level(level) {
+    Level(level: LevelType): string | null {
         if (!level) {
             return null;
         }
@@ -117,7 +125,7 @@ export class BasicLevelSizeStyleSheet extends StyleSheet {
         }
     }
 
-    Size(size) {
+    Size(size: SizeType): string | null {
         if (!size) {
             return null;
         }
@@ -129,8 +137,8 @@ export class BasicLevelSizeStyleSheet extends StyleSheet {
     }
 }
 
-export const BasicLevelStyleSheet = (colorToStyleFunction) => class BasicLevelStyleClass extends BasicLevelSizeStyleSheet {
-    colorStyleRule(color, textColor) {
+export const BasicLevelStyleSheet = (colorToStyleFunction: (color: string, textColor: string) => CSSStyleObject) => class BasicLevelStyleClass extends BasicLevelSizeStyleSheet {
+    colorStyleRule(color: string, textColor?: string): CSSStyleObject {
         return colorToStyleFunction(color, textColor || getTextColor(color));
     }
 
@@ -183,7 +191,7 @@ class FlexContainerStyle extends StyleSheet {
         }
     };
 
-    Orientation(orientation) {
+    Orientation(orientation: OrientationType): CSSStyleObject | undefined {
         for (let type of Object.keys(Orientation)) {
             if (orientation == Orientation[type]) {
                 return this[type];
@@ -193,7 +201,7 @@ class FlexContainerStyle extends StyleSheet {
 }
 
 class ContainerStyle extends StyleSheet {
-    getSizeStyle(mobilePixels, desktopPercent) {
+    getSizeStyle(mobilePixels: number, desktopPercent: number): CSSStyleObject {
         return {
             margin: Device.isMobileDevice() ? `0 ${mobilePixels}px` : `0% ${desktopPercent}%`,
         }
@@ -214,7 +222,7 @@ class ContainerStyle extends StyleSheet {
     @styleRule
     EXTRA_LARGE = this.getSizeStyle(2, 1);
 
-    Size(size) {
+    Size(size: SizeType): CSSStyleObject | undefined {
         for (let type of Object.keys(Size)) {
             if (size == Size[type]) {
                 return this[type];
@@ -225,7 +233,20 @@ class ContainerStyle extends StyleSheet {
 
 
 class StyleUtils extends StyleSheet {
-    extraTop = () => this.themeProps[Device.isMobileDevice() ? "MAIN_CONTAINER_EXTRA_PADDING_TOP_MOBILE" :
+    // TODO @types
+    get Utils() {
+        return StyleUtils.getInstance();
+    }
+
+    get Container() {
+        return ContainerStyle.getInstance();
+    }
+
+    get FlexContainer() {
+        return FlexContainerStyle.getInstance();
+    }
+
+    extraTop = (): number => this.themeProps[Device.isMobileDevice() ? "MAIN_CONTAINER_EXTRA_PADDING_TOP_MOBILE" :
         "MAIN_CONTAINER_EXTRA_PADDING_TOP_DESKTOP"];
 
     @styleRule
@@ -248,10 +269,4 @@ class StyleUtils extends StyleSheet {
 }
 
 // TODO simplify this
-const GlobalStyle = StyleUtils.getInstance();
-
-GlobalStyle.FlexContainer = FlexContainerStyle.getInstance();
-GlobalStyle.Container = ContainerStyle.getInstance();
-GlobalStyle.Utils = StyleUtils.getInstance();
-
-export {GlobalStyle};
+export const GlobalStyle = StyleUtils.getInstance();

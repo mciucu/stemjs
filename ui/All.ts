@@ -10,7 +10,6 @@ export * from "./Style";
 export * from "./UIPrimitives";
 export * from "./input/Input";
 export * from "./form/Form";
-export * from "./SVG";
 export * from "./SimpleElements";
 export * from "./ProgressBar";
 
@@ -40,7 +39,7 @@ export * from "./section-divider/TitledSectionDivider";
 export * from "./section-divider/Accordion";
 export * from "./section-divider/Style";
 export * from "./Carousel";
-export * from "./RangePanel";
+export * from "./table/RangePanel";
 
 export * from "./table/Table";
 export * from "./table/CollapsibleTable";
@@ -51,12 +50,12 @@ export * from "./DateTimePicker";
 export * from "./style/Theme";
 
 export * from "./CodeEditor";
-export {TemporaryMessageArea} from "./misc/TemporaryMessageArea.jsx";
-export {TimePassedSpan} from "./misc/TimePassedSpan.jsx";
-export {InfiniteScrollable} from "./misc/Scrollable.jsx";
-export {ScrollableMixin} from "./misc/Scrollable.jsx";
-export {ViewportMeta} from "./ViewportMeta.jsx";
-export {VerticalSlideBar} from "./input/SlideBar.jsx";
-export {HorizontalSlideBar} from "./input/SlideBar.jsx";
-export {SlideBar} from "./input/SlideBar.jsx";
-export {RawHTML} from "./RawHTML.jsx";
+export {TemporaryMessageArea} from "./misc/TemporaryMessageArea";
+export {TimePassedSpan} from "./misc/TimePassedSpan";
+export {InfiniteScrollable} from "./misc/Scrollable";
+export {ScrollableMixin} from "./misc/Scrollable";
+export {ViewportMeta} from "./ViewportMeta";
+export {VerticalSlideBar} from "./input/SlideBar";
+export {HorizontalSlideBar} from "./input/SlideBar";
+export {SlideBar} from "./input/SlideBar";
+export {RawHTML} from "./RawHTML";

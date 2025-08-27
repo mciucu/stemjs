@@ -7,7 +7,6 @@ import {HorizontalOverflow} from "../horizontal-overflow/HorizontalOverflow";
 import {unwrapArray} from "../../base/Utils";
 
 
-
 export class FlatTabTitle extends BasicTabTitle {
     setActive(active) {
         super.setActive(active);
@@ -121,10 +120,14 @@ export class FlatTabArea extends TabArea {
     }
 
     createTabPanel(panel) {
-        let tab = <FlatTabTitle panel={panel} activeTabDispatcher={this.activeTabDispatcher}
-                                activeTabTitleDispatcher={this.activeTabTitleDispatcher}
-                                active={panel.options.active} href={panel.options.tabHref}
-                                styleSheet={this.styleSheet} />;
+        const tab = <FlatTabTitle
+            panel={panel}
+            activeTabDispatcher={this.activeTabDispatcher}
+            activeTabTitleDispatcher={this.activeTabTitleDispatcher}
+            active={panel.options.active}
+            href={panel.options.tabHref}
+            styleSheet={this.styleSheet}
+        />;
 
         return [tab, panel];
     }

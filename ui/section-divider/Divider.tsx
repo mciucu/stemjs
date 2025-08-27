@@ -1,11 +1,11 @@
 import {UI} from "../UIBase";
 
-class Divider extends UI.Element {
-    dragMousedown(event) {};
+export class Divider extends UI.Element {
+    dragMousedown(event: Event): void {};
 
-    dragMousemove(event) {};
+    dragMousemove(event: Event): void {};
 
-    dragMouseup(event) {};
+    dragMouseup(event: Event): void {};
 
     dividerMousedownFunction(event) {
         this.dragMousedown(event);
@@ -39,5 +39,3 @@ class Divider extends UI.Element {
         this.addNodeListener("mousedown", (event) => {if (!this.touchDeviceTriggered) {this.dividerMousedownFunction(event);}});
     }
 }
-
-export {Divider};

@@ -1,7 +1,8 @@
-import {Ajax} from "../../base/Ajax.js";
-import {ActionStatus} from "../Constants.js";
-import {StateButton} from "./StateButton.jsx";
+import {Ajax} from "../../base/Ajax";
+import {ActionStatus} from "../Constants";
+import {StateButton} from "./StateButton";
 
+// TODO @types rename to RequestButton, remove Ajax references
 export class AjaxButton extends StateButton {
     getDefaultOptions() {
         return Object.assign(super.getDefaultOptions() || {}, {
@@ -32,6 +33,7 @@ export class AjaxButton extends StateButton {
         }, this.resetToDefaultTimeout);
     }
 
+    // TODO @types rename to makeRequest
     ajax(methodName, ...args) {
         this.setState(ActionStatus.RUNNING);
         let ajaxPromise = this.getAjaxHandler()[methodName](...args);

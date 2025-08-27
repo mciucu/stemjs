@@ -3,7 +3,6 @@ import {enhance} from "../Color";
 import {Device} from "../../base/Device";
 
 
-
 export class HorizontalOverflowStyle extends StyleSheet {
     baseColor = () =>  this.themeProps.COLOR_PRIMARY;
     arrowColor = () => enhance(this.baseColor(), .8);
@@ -11,7 +10,7 @@ export class HorizontalOverflowStyle extends StyleSheet {
     arrowHoverColor = () => enhance(this.baseColor(), 1);
     arrowHoverBackground = () => enhance(this.baseColor(), -.3);
 
-    transitionTime = .15;
+    transitionTime = 0.15;
 
     arrow = {
         zIndex: "1",

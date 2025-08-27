@@ -1,15 +1,42 @@
 import {StemDate} from "../time/Date.js";
 import {isFunction, isString} from "../base/Utils.js";
-import {GlobalState} from "./State.js";
+import {StoreObject} from "./Store";
 
+export interface FieldOptions {
+    rawField?: string | symbol | ((key: string, descriptor?: FieldDescriptor) => string | symbol);
+    cacheField?: boolean | symbol;
+    loader?: (value: any, obj: any) => any;
+    isReadOnly?: boolean;
+    [key: string]: any;
+}
 
-class FieldDescriptor {
-    constructor(type, options) {
+export interface StoreObjectWithFields extends StoreObject {
+    fieldDescriptors?: FieldDescriptor[];
+}
+
+export type FieldType = string | { makeFieldLoader?: (descriptor: FieldDescriptor) => (value: any, obj: any) => any; } | any;
+
+// Legacy decorator signature for JavaScript compatibility
+export type LegacyDecorator = (target: any, propertyKey: string, descriptor?: PropertyDescriptor) => PropertyDescriptor;
+export type FakedDecorated = (target: any, propertyKey: string) => void;
+
+export class FieldDescriptor {
+    type: FieldType;
+    targetProto?: any;
+    key?: string;
+    rawDescriptor?: PropertyDescriptor;
+    rawField?: string | symbol | ((key: string, descriptor?: FieldDescriptor) => string | symbol);
+    cacheField?: false | symbol;
+    loader?: (value: any, obj: any) => any;
+    isReadOnly?: boolean;
+    [key: string]: any;
+
+    constructor(type: FieldType, options: FieldOptions = {}) {
         this.type = type;
         Object.assign(this, options);
     }
 
-    setTarget(targetProto, key, rawDescriptor) {
+    setTarget(targetProto: StoreObjectWithFields, key: string, rawDescriptor?: PropertyDescriptor): void {
         if (!targetProto.fieldDescriptors) {
             targetProto.fieldDescriptors = [];
         }
@@ -21,23 +48,23 @@ class FieldDescriptor {
     }
 
     // TODO Use this to support lazy initialization
-    getDefaultValue(obj) {
-        const {initializer} = this.rawDescriptor;
+    getDefaultValue(obj: any): any {
+        const {initializer} = this.rawDescriptor as any;
         return initializer?.call(obj);
     }
 
-    makeDescriptor() {
+    makeDescriptor(): PropertyDescriptor {
         // TODO "self" should mean type = this.targetProto
         if (isString(this.type)) {
             // We're a Foreign key
-            this.rawField = this.rawField || (key => key + "Id"); // By default we'll add a suffix
+            this.rawField = this.rawField || ((key: string) => key + "Id"); // By default we'll add a suffix
             this.cacheField = false;
 
-            const storeName = (this.type === "self") ? null : this.type;
+            const storeName = (this.type === "self") ? null : this.type as string;
 
-            this.loader = (value, obj) => {
+            this.loader = (value: any, obj: StoreObjectWithFields) => {
                 // TODO Instead of calling GlobalState, the object should implement .getState()
-                const store = obj.getStore ? obj.getStore(storeName) : GlobalState.getStore(storeName);
+                const store = obj.getStore(storeName);
                 return store.get(value);
             }
         }
@@ -64,12 +91,12 @@ class FieldDescriptor {
         const {rawField, cacheField, loader, isReadOnly, key} = this;
 
         return {
-            get() {
+            get(this: any): any {
                 if (cacheField && this[cacheField]) {
                     return this[cacheField];
                 }
 
-                const value = this[rawField];
+                const value = this[rawField!];
 
                 if (value == null || !loader) {
                     return value;
@@ -81,7 +108,7 @@ class FieldDescriptor {
                 }
                 return result;
             },
-            set(value) {
+            set(this: any, value: any): void {
                 if (isReadOnly) {
                     throw `Not allowed to change field ${key}`;
                 }
@@ -100,16 +127,16 @@ class FieldDescriptor {
 
 
 // TODO Implement a way to say @field(Array, "StoreObject") for instance
-export function field(type, arg={}) {
-    // The actual descriptor
-    return (targetProto, name, rawDescriptor) => {
+export function field(type: FieldType, arg: FieldOptions = {}): FakedDecorated {
+    // The actual descriptor - supports both legacy JS decorators and can be gradually migrated to TS
+    return (targetProto: any, name: string, rawDescriptor?: PropertyDescriptor): PropertyDescriptor => {
         const fieldDescriptor = new FieldDescriptor(type, arg);
         fieldDescriptor.setTarget(targetProto, name, rawDescriptor);
         return fieldDescriptor.makeDescriptor();
-    }
+    };
 }
 
 // Default handling of objects
-Date.makeFieldLoader = () => {
-    return (value) => StemDate.optionally(value);
+(Date as any).makeFieldLoader = (): ((value: any) => any) => {
+    return (value: any) => StemDate.optionally(value);
 }

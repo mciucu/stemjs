@@ -4,7 +4,7 @@ import {getComputedStyle} from "../Utils";
 import {unwrapArray} from "../../base/Utils";
 import {Device} from "../../base/Device";
 import {AccordionStyle} from "./Style";
-import {FACollapseIcon} from "../../ui/FontAwesome";
+import {FACollapseIcon} from "../FontAwesome";
 import {Divider} from "./Divider";
 
 @registerStyle(AccordionStyle)

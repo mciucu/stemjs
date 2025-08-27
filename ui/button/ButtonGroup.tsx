@@ -1,32 +1,55 @@
-import {UI} from "../UIBase";
+import {UI, UIElementChild} from "../UIBase";
 import {Button} from "./Button";
-import {SimpleStyledElement} from "../SimpleElements";
-import {Orientation} from "../Constants";
+import {SimpleStyledElement, SimpleStyledElementOptions} from "../SimpleElements";
+import {Orientation, OrientationType} from "../Constants";
 import {registerStyle} from "../style/Theme";
 import {ButtonGroupStyle, RadioButtonGroupStyle} from "./ButtonStyle";
+import {NodeAttributes} from "../NodeAttributes";
+
+export interface ButtonGroupOptions extends SimpleStyledElementOptions {
+    orientation?: OrientationType;
+}
+
+export interface RadioButtonGroupOptions extends SimpleStyledElementOptions {
+    givenOptions: any[];
+    index?: number;
+}
+
+// Interface declarations for proper typing
+export interface ButtonGroup {
+    // @ts-ignore
+    styleSheet: ButtonGroupStyle;
+}
+
+export interface RadioButtonGroup {
+    // @ts-ignore
+    styleSheet: RadioButtonGroupStyle;
+}
 
 @registerStyle(ButtonGroupStyle)
-class ButtonGroup extends SimpleStyledElement {
-    getDefaultOptions() {
+export class ButtonGroup extends SimpleStyledElement<ButtonGroupOptions> {
+    getDefaultOptions(): Partial<ButtonGroupOptions> {
         return {
             orientation: Orientation.HORIZONTAL,
         };
     }
 
-    extraNodeAttributes(attr) {
-        attr.addClass(this.styleSheet.Orientation(this.options.orientation));
+    extraNodeAttributes(attr: NodeAttributes): void {
+        attr.addClass(this.styleSheet.Orientation(this.options.orientation!));
     }
 }
 
-
 @registerStyle(RadioButtonGroupStyle)
-class RadioButtonGroup extends SimpleStyledElement {
-    setOptions(options) {
+export class RadioButtonGroup extends SimpleStyledElement<RadioButtonGroupOptions> {
+    private index: number = 0;
+    private buttons: Button[] = [];
+
+    setOptions(options: RadioButtonGroupOptions): void {
         super.setOptions(options);
         this.index = this.options.index || 0;
     }
 
-    render() {
+    render(): UIElementChild {
         this.buttons = this.options.givenOptions.map((option, index) =>
             <Button key={index} onClick={() => this.setIndex(index)} size={this.getSize()}
                     label={option.toString()} level={this.getLevel()}
@@ -34,15 +57,15 @@ class RadioButtonGroup extends SimpleStyledElement {
         return this.buttons;
     }
 
-    getIndex() {
+    getIndex(): number {
         return this.index;
     }
 
-    getValue() {
+    getValue(): any {
         return this.options.givenOptions[this.index];
     }
 
-    setIndex(index) {
+    setIndex(index: number): void {
         this.dispatch("setIndex", {
             index: index,
             oldIndex: this.index,
@@ -54,5 +77,3 @@ class RadioButtonGroup extends SimpleStyledElement {
         this.buttons[this.index].addClass("active");
     }
 }
-
-export {ButtonGroup, RadioButtonGroup};

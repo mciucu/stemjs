@@ -1,16 +1,24 @@
-import {UI} from "UIBase";
-import {DOMAttributesMap} from "NodeAttributes";
+import {HTMLTagType, UI, UIElement, UIElementChild} from "./UIBase";
+import {DOMAttributesMap} from "./NodeAttributes";
 
+export interface VideoOptions {
+    source?: string;
+}
 
-class Video extends UI.Primitive( "video") {
+export class Video extends UIElement<VideoOptions, HTMLVideoElement> {
+    getNodeType(): HTMLTagType {
+        return "video";
+    }
+
     play() {
         return this.node.play();
     }
 
-    render() {
+    render(): UIElementChild {
         if (this.options.source) {
             return <source src={this.options.source} type="video/mp4" />
         }
+        return undefined;
     }
 }
 
@@ -25,6 +33,5 @@ Video.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
     ["playsinline"],
     ["poster"],
     ["preload"],
+    ["srcObject"],
 ]);
-
-export {Video};

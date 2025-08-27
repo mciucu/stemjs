@@ -1,1 +1,1 @@
-export const DEFAULT_HEARTBEAT_MESSAGE = "-heartbeat-city-";
+export const DEFAULT_HEARTBEAT_MESSAGE: string = "-heartbeat-city-";

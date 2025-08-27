@@ -1,12 +1,12 @@
-import {Draggable} from "../Draggable.js";
-import {UI} from "../UIBase.js";
-import {ProgressBar} from "../ProgressBar.jsx";
-import {Orientation} from "../Constants.js";
-import {Device} from "../../base/Device.js";
-import {getOffset} from "../Utils.js";
+import {Draggable} from "../Draggable";
+import {UI, UIElement} from "../UIBase";
+import {ProgressBar} from "../ProgressBar";
+import {Orientation} from "../Constants";
+import {Device} from "../../base/Device";
+import {getOffset} from "../Utils";
 
 // TODO This should extend an input
-export class SlideBar extends Draggable(UI.Element) {
+export class SlideBar extends Draggable(UIElement) {
     getDefaultOptions() {
         return {
             value: 0,

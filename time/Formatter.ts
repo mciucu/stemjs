@@ -1,20 +1,27 @@
+import {isString} from "../base/Utils";
+
+type TokenFormatterFunction = (value: any) => string | number;
+type TokenEntry = [string, TokenFormatterFunction];
+
 export class TokenFormatter {
-    constructor(tokens) {
-        this.tokenMap = new Map();
+    private tokenMap: Map<string, TokenFormatterFunction>;
+
+    constructor(tokens: TokenEntry[]) {
+        this.tokenMap = new Map<string, TokenFormatterFunction>();
         for (const [token, formatter] of tokens) {
             this.tokenMap.set(token, formatter);
         }
     }
 
     // TODO This is very old code, meh
-    splitToTokens(str) {
+    splitToTokens(str: string): string[] {
         // TODO: "[HH]HH" will be split to ["HH", "HH"], so the escape does not solve the problem
-        let tokens = [];
-        let lastIsLetter = null;
+        let tokens: string[] = [];
+        let lastIsLetter: boolean | null = null;
         let escapeByCurlyBracket = false;
         let escapeBySquareBracket = false;
         for (let i = 0; i < str.length; i++) {
-            let charCode = str.charCodeAt(i);
+            const charCode = str.charCodeAt(i);
             if (charCode === 125 && escapeByCurlyBracket) { // '}' ending the escape
                 escapeByCurlyBracket = false;
                 lastIsLetter = null;
@@ -30,7 +37,7 @@ export class TokenFormatter {
                 escapeBySquareBracket = true;
                 tokens.push("");
             } else {
-                let isLetter = (65 <= charCode && charCode <= 90) || (97 <= charCode && charCode <= 122);
+                const isLetter = (65 <= charCode && charCode <= 90) || (97 <= charCode && charCode <= 122);
                 if (isLetter === lastIsLetter) {
                     tokens[tokens.length - 1] += str[i];
                 } else {
@@ -45,17 +52,21 @@ export class TokenFormatter {
         return tokens;
     }
 
-    evalToken(value, token) {
-        let func = this.tokenMap.get(token);
+    evalToken(value: any, token: string): string {
+        const func = this.tokenMap.get(token);
         if (!func) {
             return token;
         }
-        return func(value);
+        const result = func(value);
+        if (!isString(result)) {
+            return String(result);
+        }
+        return result;
     }
 
-    format(value, str) {
+    format(value: any, str: string): string {
         let tokens = this.splitToTokens(str);
-        tokens = tokens.map(token => this.evalToken(value, token));
+        tokens = tokens.map((token: string) => this.evalToken(value, token));
         return tokens.join("");
     }
 }

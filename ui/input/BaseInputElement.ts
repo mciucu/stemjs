@@ -1,12 +1,20 @@
-import {UI} from "../UIBase.js";
+import {UI, UIElement} from "../UIBase";
 
-export class BaseInputElement extends UI.Element {
-    getValue() {
+export interface InputElementOptions<T = any> {
+    initialValue?: T;
+    value?: T;
+}
+
+// TODO @types should be an abstract class
+export class BaseInputElement<T = any> extends UIElement<InputElementOptions<T>, HTMLInputElement> {
+    protected value?: T;
+
+    getValue(): T | undefined {
         return this.value;
     }
 
     // TODO This should be an options object, not a list of bools
-    setValue(value, dispatchChange=true, doRedraw = true) {
+    setValue(value: T, dispatchChange: boolean = true, doRedraw: boolean = true): void {
         if (this.isEqual(this.value, value)) {
             return;
         }
@@ -19,12 +27,12 @@ export class BaseInputElement extends UI.Element {
         }
     }
 
-    isEqual(valueA, valueB) {
+    isEqual(valueA: T | undefined, valueB: T | undefined): boolean {
         return valueA === valueB;
     }
 
-    setOptions(options) {
-        const oldInitialValue = this.options.initialValue;
+    setOptions(options: any): void {
+        const oldInitialValue = this.options?.initialValue;
         super.setOptions(options);
         const {initialValue} = this.options;
         if (this.value === undefined || !this.node || !this.isEqual(initialValue, oldInitialValue)) {
@@ -35,11 +43,15 @@ export class BaseInputElement extends UI.Element {
         }
     }
 
-    focus() {
-        this.node.focus();
+    focus(): void {
+        this.node?.focus();
     }
 
-    blur() {
-        this.node.blur();
+    blur(): void {
+        this.node?.blur();
+    }
+
+    dispatchChange(value: T): void {
+        // Implementation will be provided by subclasses or mixins
     }
 }

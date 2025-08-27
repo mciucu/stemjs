@@ -1,62 +1,81 @@
 import {Device} from "../base/Device";
 import {UI} from "./UIBase";
 
-export const Draggable = (BaseClass=UI.Element) => class Draggable extends BaseClass {
-    _clickCallbacks = new Map();
-    _clickDragListeners = new Map();
+// Type definitions for draggable functionality
+interface DragListeners {
+    onStart?: (event: Event) => void;
+    onDrag: (deltaX: number, deltaY: number) => void;
+    onEnd?: (event: Event) => void;
+}
 
-    addClickListener(callback) {
-        if (this._clickCallbacks.has(callback)) {
+interface DragListenerWrapper extends DragListeners {
+    _lastX?: number;
+    _lastY?: number;
+    onWrapperStart?: (event: Event) => void;
+    onWrapperDrag?: (event: Event) => void;
+    onWrapperEnd?: (event: Event) => void;
+}
+
+type ClickCallback = () => void;
+
+export const Draggable = <T extends new (...args: any[]) => any>(BaseClass: T = UI.Element as any) => class Draggable extends BaseClass {
+    private clickCallbacks = new Map<ClickCallback, () => void>();
+    private clickDragListeners = new Map<ClickCallback, DragListeners>();
+    private dragListeners: DragListenerWrapper[] = [];
+    private okForClick?: boolean;
+
+    addClickListener(callback: ClickCallback): void {
+        if (this.clickCallbacks.has(callback)) {
             return;
         }
-        let callbackWrapper = () => {
-            if (this._okForClick) {
+        const callbackWrapper = (): void => {
+            if (this.okForClick) {
                 callback();
             }
         };
-        this._clickCallbacks.set(callback, callbackWrapper);
+        this.clickCallbacks.set(callback, callbackWrapper);
         super.addClickListener(callbackWrapper);
 
-        if (this._clickDragListeners.has(callback)) {
+        if (this.clickDragListeners.has(callback)) {
             return;
         }
-        let clickDragListener = {
-            onStart: () => { this.dragForClickStarted(); },
-            onDrag: () => { this.dragForClick(); }
+        const clickDragListener = {
+            onStart: (): void => { this.dragForClickStarted(); },
+            onDrag: (): void => { this.dragForClick(); }
         };
-        this._clickDragListeners.set(callback, clickDragListener);
+        this.clickDragListeners.set(callback, clickDragListener);
         this.addDragListener(clickDragListener);
     }
 
-    dragForClickStarted() {
-        this._okForClick = true;
+    dragForClickStarted(): void {
+        this.okForClick = true;
     }
 
-    dragForClick() {
-        this._okForClick = false;
+    dragForClick(): void {
+        this.okForClick = false;
     }
 
-    removeClickListener(callback) {
-        let callbackWrapper = this._clickCallbacks.get(callback);
+    removeClickListener(callback: ClickCallback): void {
+        let callbackWrapper = this.clickCallbacks.get(callback);
         if (callbackWrapper) {
-            this._clickCallbacks.delete(callback);
+            this.clickCallbacks.delete(callback);
             super.removeClickListener(callbackWrapper);
         }
-        if (!this._clickDragListeners) {
+        if (!this.clickDragListeners) {
             return;
         }
-        let clickDragListener = this._clickDragListeners.get(callback);
+        let clickDragListener = this.clickDragListeners.get(callback);
         if (clickDragListener) {
-            this._clickDragListeners.delete(callback);
+            this.clickDragListeners.delete(callback);
             this.removeDragListener(clickDragListener);
         }
     }
 
-    createDragGenericListenerWrapper(listeners, dragEventType) {
-        let listenerWrapper = Object.assign({}, listeners);
+    createDragGenericListenerWrapper(listeners: DragListeners, dragEventType: string): DragListenerWrapper {
+        let listenerWrapper: DragListenerWrapper = Object.assign({}, listeners);
         let dragStarted = false;
 
-        listenerWrapper.onWrapperDrag = (event) => {
+        listenerWrapper.onWrapperDrag = (event: Event): void => {
             if (!dragStarted) {
                 return;
             }
@@ -70,10 +89,10 @@ export const Draggable = (BaseClass=UI.Element) => class Draggable extends BaseC
             let deltaY = eventY - listenerWrapper._lastY;
             listenerWrapper._lastY = eventY;
 
-            listeners.onDrag(deltaX, deltaY);
+            listeners.onDrag!(deltaX, deltaY);
         };
 
-        listenerWrapper.onWrapperStart = (event) => {
+        listenerWrapper.onWrapperStart = (event: Event): void => {
             dragStarted = true;
 
             listenerWrapper._lastX = Device.getEventX(event);
@@ -87,7 +106,7 @@ export const Draggable = (BaseClass=UI.Element) => class Draggable extends BaseC
             document.body.addEventListener(dragEventType, listenerWrapper.onWrapperDrag);
         };
 
-        listenerWrapper.onWrapperEnd = (event) => {
+        listenerWrapper.onWrapperEnd = (event: Event): void => {
             if (dragStarted) {
                 if (listeners.onEnd) {
                     listeners.onEnd(event);
@@ -102,17 +121,17 @@ export const Draggable = (BaseClass=UI.Element) => class Draggable extends BaseC
         return listenerWrapper;
     }
 
-    createDragListenerWrapper(listeners) {
+    createDragListenerWrapper(listeners: DragListeners): DragListenerWrapper {
         return this.createDragGenericListenerWrapper(listeners, "mousemove");
     }
 
-    createTouchDragListenerWrapper(listeners) {
+    createTouchDragListenerWrapper(listeners: DragListeners): DragListenerWrapper {
         return this.createDragGenericListenerWrapper(listeners, "touchmove");
     }
 
-    addDragListener(listeners) {
-        let listenerWrapper = this.createDragListenerWrapper(listeners);
-        let touchListenerWrapper = this.createTouchDragListenerWrapper(listeners);
+    addDragListener(listeners: DragListeners): void {
+        const listenerWrapper = this.createDragListenerWrapper(listeners);
+        const touchListenerWrapper = this.createTouchDragListenerWrapper(listeners);
         this.addNodeListener("touchstart", touchListenerWrapper.onWrapperStart);
         if (!Device.isMobileDevice()) {
             this.addNodeListener("mousedown", listenerWrapper.onWrapperStart);
@@ -124,29 +143,24 @@ export const Draggable = (BaseClass=UI.Element) => class Draggable extends BaseC
             document.body.addEventListener("mouseup", listenerWrapper.onWrapperEnd);
         }
 
-        if (!this.hasOwnProperty("_dragListeners")) {
-            this._dragListeners = [];
-        }
-        this._dragListeners.push(touchListenerWrapper);
-        this._dragListeners.push(listenerWrapper);
+        this.dragListeners.push(touchListenerWrapper);
+        this.dragListeners.push(listenerWrapper);
     }
 
-    removeDragListener(listeners) {
-        if (this._dragListeners) {
-            for (let i = this._dragListeners.length - 1; i >= 0; i -= 1) {
-                if (this._dragListeners[i].onStart === listeners.onStart &&
-                    this._dragListeners[i].onDrag === listeners.onDrag &&
-                    this._dragListeners[i].onEnd === listeners.onEnd) {
+    removeDragListener(listeners: DragListeners): void {
+        for (let i = this.dragListeners.length - 1; i >= 0; i -= 1) {
+            if (this.dragListeners[i].onStart === listeners.onStart &&
+                this.dragListeners[i].onDrag === listeners.onDrag &&
+                this.dragListeners[i].onEnd === listeners.onEnd) {
 
-                    this.removeNodeListener("touchstart", this._dragListeners[i].onWrapperStart);
-                    document.body.removeEventListener("touchmove", this._dragListeners[i].onWrapperDrag);
-                    document.body.removeEventListener("touchmove", this._dragListeners[i].onWrapperEnd);
-                    this.removeNodeListener("mousedown", this._dragListeners[i].onWrapperStart);
-                    document.body.removeEventListener("mousemove", this._dragListeners[i].onWrapperDrag);
-                    document.body.removeEventListener("mousemove", this._dragListeners[i].onWrapperEnd);
+                this.removeNodeListener("touchstart", this.dragListeners[i].onWrapperStart);
+                document.body.removeEventListener("touchmove", this.dragListeners[i].onWrapperDrag);
+                document.body.removeEventListener("touchmove", this.dragListeners[i].onWrapperEnd);
+                this.removeNodeListener("mousedown", this.dragListeners[i].onWrapperStart);
+                document.body.removeEventListener("mousemove", this.dragListeners[i].onWrapperDrag);
+                document.body.removeEventListener("mousemove", this.dragListeners[i].onWrapperEnd);
 
-                    this._dragListeners.splice(i, 1);
-                }
+                this.dragListeners.splice(i, 1);
             }
         }
     }

@@ -1,16 +1,16 @@
-import {UI} from "../UIBase.js";
+import {UI} from "../UIBase";
 
 // Just putting in a lot of methods, to try to think of an interface
 export class ScrollableMixin extends UI.Element {
-    getDesiredExcessHeightTop() {
+    getDesiredExcessHeightTop(): number {
         return 600;
     }
 
-    getDesiredExcessHeightBottom() {
+    getDesiredExcessHeightBottom(): number {
         return 600;
     }
 
-    getHeightScrollPercent() {
+    getHeightScrollPercent(): number {
         let scrollHeight = this.node.scrollHeight;
         let height = this.node.clientHeight;
         if (scrollHeight === height) {
@@ -19,21 +19,21 @@ export class ScrollableMixin extends UI.Element {
         return this.node.scrollTop / (scrollHeight - height);
     }
 
-    getExcessTop() {
+    getExcessTop(): number {
         return this.node.scrollTop;
     }
 
-    getExcessBottom() {
+    getExcessBottom(): number {
         let scrollHeight = this.node.scrollHeight;
         let height = this.node.clientHeight;
         return scrollHeight - height - this.node.scrollTop;
     }
 
-    haveExcessTop() {
+    haveExcessTop(): boolean {
         return this.getExcessTop() > this.getDesiredExcessHeightTop();
     }
 
-    haveExcessBottom() {
+    haveExcessBottom(): boolean {
         return this.getExcessBottom() > this.getDesiredExcessHeightBottom();
     }
 

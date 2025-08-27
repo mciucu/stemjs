@@ -1,7 +1,7 @@
-import {StyleSheet, styleRule} from "./Style";
+import {StyleSheet, styleRule} from "../Style";
 
-class RangePanelStyle extends StyleSheet {
-    rowHeight = 52;
+export class RangePanelStyle extends StyleSheet {
+    rowHeight: number = 52;
 
     @styleRule
     default = {
@@ -66,5 +66,3 @@ class RangePanelStyle extends StyleSheet {
         }
     };
 }
-
-export {RangePanelStyle};

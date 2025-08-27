@@ -3,7 +3,7 @@ import {FloatingWindowStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
 
 @registerStyle(FloatingWindowStyle)
-class FloatingWindow extends UI.Element {
+export class FloatingWindow extends UI.Element {
     getDefaultOptions() {
         return {
             transitionTime: 0,
@@ -67,7 +67,7 @@ class FloatingWindow extends UI.Element {
 }
 
 
-class VolatileFloatingWindow extends FloatingWindow {
+export class VolatileFloatingWindow extends FloatingWindow {
     bindWindowListeners() {
         this.hideListener = this.hideListener || (() => {this.hide();});
         window.addEventListener("click", this.hideListener);
@@ -113,5 +113,3 @@ class VolatileFloatingWindow extends FloatingWindow {
         });
     }
 }
-
-export {FloatingWindow, VolatileFloatingWindow};

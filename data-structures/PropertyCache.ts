@@ -1,25 +1,29 @@
 import {isString} from "../base/Utils";
 
 // Basically a WeakMap with a default getter and which provides control over the Symbol key
-export class PropertyCache {
-    // When getter is null, assume that the first argument is the getter.
-    constructor(key, getter = null) {
+export class PropertyCache<T = any, R = any> {
+    private key: symbol;
+    private getter: (obj: T) => R;
+
+    // When getter is missing, assume that the first argument is the getter.
+    constructor(key: string | symbol | ((obj: T) => R), getter?: ((obj: T) => R)) {
         if (isString(key)) {
             key = Symbol.for(key);
         }
-        if (getter == null) {
-            getter = key;
-            key = Symbol();
+        if (!getter) {
+            this.getter = key as (obj: T) => R;
+            this.key = Symbol();
+        } else {
+            this.key = key as symbol;
+            this.getter = getter;
         }
-        this.key = key;
-        this.getter = getter;
     }
 
-    get(obj, getter = this.getter) {
+    get(obj: T, getter: (obj: T) => R = this.getter): R {
         const key = this.key;
-        if (obj.hasOwnProperty(key)) {
-            return obj[key];
+        if ((obj as any).hasOwnProperty(key)) {
+            return (obj as any)[key];
         }
-        return obj[key] = getter(obj);
+        return (obj as any)[key] = getter(obj);
     }
 }

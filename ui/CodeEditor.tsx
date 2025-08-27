@@ -1,24 +1,55 @@
 // Wrapper over the Ace code editor, needs ace to be loaded
 // TODO: should be renamed to AceCodeEditor?
-import {UI} from "./UIBase";
+import {UI, UIElement} from "./UIBase";
 import {StyleSheet, styleRule} from "./Style";
 import {registerStyle} from "./style/Theme";
 import {EnqueueableMethodMixin, enqueueIfNotLoaded} from "../base/EnqueueableMethodMixin";
 import {ensure} from "../base/Require";
+import {NodeAttributes} from "./NodeAttributes";
 
+// Type definitions for Ace Editor
+declare global {
+    interface Window {
+        ace: any;
+    }
+}
 
-class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
-    static langToolsSrc = null;
+export interface CodeEditorOptions {
+    aceMode?: string;
+    readOnly?: boolean;
+    aceTheme?: string;
+    aceKeyboardHandler?: string;
+    fontSize?: number;
+    tabSize?: number;
+    showLineNumber?: boolean;
+    showPrintMargin?: boolean;
+    printMarginSize?: number;
+    lineWrapping?: boolean;
+    numLines?: number;
+    maxLines?: number;
+    minLines?: number;
+    value?: string;
+    enableBasicAutocompletion?: boolean;
+    enableLiveAutocompletion?: boolean;
+    enableSnippets?: boolean;
+}
 
-    static requireAce(callback) {
+export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptions>) {
+    static langToolsSrc: string | null = null;
+    static AceRange: any;
+    
+    protected ace: any;
+    protected apiChange: boolean = false;
+
+    static requireAce(callback: () => void): void {
         throw Error("You need to implement requireAce");
     }
 
-    isLoaded() {
+    isLoaded(): boolean {
         return !!this.getAce();
     }
 
-    setOptions(options) {
+    setOptions(options: CodeEditorOptions): void {
         let defaultOptions = {
             aceMode: "text",
             readOnly: false,
@@ -51,12 +82,12 @@ class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
         if (this.getAce()) {
             this.aceResize();
             this.applyRef();
-            return;
+            return true;
         }
-        super.redraw();
+        return super.redraw();
     }
 
-    whenLoaded(callback) {
+    whenLoaded(callback: () => void): void {
         if (this.isLoaded()) {
             callback();
         } else {
@@ -64,7 +95,7 @@ class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
         }
     }
 
-    onMount() {
+    onMount(): void {
         // Sometimes when the parent div resizes the ace editor doesn't fully update.
         this.addListener("resize", () => {
             this.aceResize();
@@ -75,7 +106,7 @@ class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
         });
 
         if (!window.ace) {
-            this.constructor.requireAce(() => {
+            (this.constructor as typeof CodeEditor).requireAce(() => {
                 this.onDelayedMount();
             });
             return;
@@ -83,7 +114,7 @@ class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
         this.onDelayedMount();
     }
 
-    onDelayedMount() {
+    onDelayedMount(): void {
         this.ace = window.ace.edit(this.node);
 
         // Removes some warnings
@@ -95,36 +126,36 @@ class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
 
         //#voodoo was here to automatically redraw when unhiding
         //This Ace event listener might be useful in the future
-        this.getAce().renderer.$textLayer.addEventListener("changeCharacterSize", (event) => {
+        this.getAce().renderer.$textLayer.addEventListener("changeCharacterSize", (event: any) => {
             this.aceResize();
         });
         this.dispatch("aceReady");
     }
 
-    onUnmount() {
+    onUnmount(): void {
         this.getAce().destroy();
     }
 
-    getAce() {
+    getAce(): any {
         return this.ace;
     }
 
-    getValue() {
+    getValue(): string {
         return this.getAce().getValue();
     }
 
     @enqueueIfNotLoaded
-    applyAceOptions() {
+    applyAceOptions(): void {
         // TODO maybe only this should be with enqueueIfNotLoaded
-        this.setAceMode(this.options.aceMode);
-        this.setAceKeyboardHandler(this.options.aceKeyboardHandler);
-        this.setAceTheme(this.options.aceTheme);
-        this.setAceFontSize(this.options.fontSize);
-        this.setAceTabSize(this.options.tabSize);
-        this.setAceLineNumberVisible(this.options.showLineNumber);
-        this.setAcePrintMarginVisible(this.options.showPrintMargin);
-        this.setAcePrintMarginSize(this.options.printMarginSize);
-        this.setReadOnly(this.options.readOnly);
+        this.setAceMode(this.options.aceMode!);
+        this.setAceKeyboardHandler(this.options.aceKeyboardHandler!);
+        this.setAceTheme(this.options.aceTheme!);
+        this.setAceFontSize(this.options.fontSize!);
+        this.setAceTabSize(this.options.tabSize!);
+        this.setAceLineNumberVisible(this.options.showLineNumber!);
+        this.setAcePrintMarginVisible(this.options.showPrintMargin!);
+        this.setAcePrintMarginSize(this.options.printMarginSize!);
+        this.setReadOnly(this.options.readOnly!);
         this.setUseWrapMode(this.options.lineWrapping || false);
 
         if (this.options.numLines) {
@@ -148,26 +179,26 @@ class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
         }
         if (this.options.hasOwnProperty("enableBasicAutocompletion") ||
             this.options.hasOwnProperty("enableLiveAutocompletion")) {
-            const {langToolsSrc} = this.constructor;
+            const {langToolsSrc} = this.constructor as typeof CodeEditor;
             if (!langToolsSrc) {
                 console.warn("Autocompletion requires setting 'langToolSrc' in CodeEditor");
             } else {
                 ensure([langToolsSrc], () => {
-                    this.setBasicAutocompletion(this.options.enableBasicAutocompletion);
-                    this.setLiveAutocompletion(this.options.enableLiveAutocompletion);
-                    this.setSnippets(this.options.enableSnippets);
+                    this.setBasicAutocompletion(this.options.enableBasicAutocompletion!);
+                    this.setLiveAutocompletion(this.options.enableLiveAutocompletion!);
+                    this.setSnippets(this.options.enableSnippets!);
                 });
             }
         }
     }
 
     @enqueueIfNotLoaded
-    aceResize() {
+    aceResize(): void {
         this.getAce().resize();
     }
 
     @enqueueIfNotLoaded
-    setValue(sourceCode, fakeUserChange) {
+    setValue(sourceCode: string, fakeUserChange?: any): void {
         // We need to wrap the ace call in these flags so any event listeners can know if this change
         // was done by us or by the user
         this.apiChange = !fakeUserChange;
@@ -176,248 +207,250 @@ class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
     }
 
     @enqueueIfNotLoaded
-    setAceOptions(options) {
+    setAceOptions(options: any): void {
         this.getAce().setOptions(options);
     }
 
     // TODO: should this be setEditable?
     @enqueueIfNotLoaded
-    setReadOnly(value) {
+    setReadOnly(value: boolean): void {
         this.getAce().setReadOnly(value);
-    };
+    }
 
     @enqueueIfNotLoaded
-    setAceMode(aceMode) {
+    setAceMode(aceMode: string | {aceMode: string}): void {
         if (aceMode.hasOwnProperty("aceMode")) {
-            aceMode = aceMode.aceMode;
+            aceMode = (aceMode as any).aceMode;
         }
         this.getAce().getSession().setMode("ace/mode/" + aceMode);
     }
 
-    getAceKeyboardHandler() {
+    getAceKeyboardHandler(): string {
         return this.getAce().$keybindingId;
     }
 
     @enqueueIfNotLoaded
-    setAceKeyboardHandler(keyboardHandler) {
+    setAceKeyboardHandler(keyboardHandler: string | {aceName: string}): void {
         if (keyboardHandler.hasOwnProperty("aceName")) {
-            keyboardHandler = keyboardHandler.aceName;
+            keyboardHandler = (keyboardHandler as any).aceName;
         }
         this.getAce().setKeyboardHandler("ace/keyboard/" + keyboardHandler);
     }
 
-    getAceMode() {
+    getAceMode(): any {
         return this.getAce().getSession().getMode();
     }
 
     @enqueueIfNotLoaded
-    setAceTheme(theme) {
+    setAceTheme(theme: string | {aceName: string}): void {
         if (theme.hasOwnProperty("aceName")) {
-            theme = theme.aceName;
+            theme = (theme as any).aceName;
         }
         this.getAce().setTheme("ace/theme/" + theme);
     }
 
-    getAceTheme() {
+    getAceTheme(): string {
         return this.getAce().getTheme();
     }
 
     @enqueueIfNotLoaded
-    setAceFontSize(fontSize) {
+    setAceFontSize(fontSize: number): void {
         this.getAce().setOptions({
             fontSize: fontSize + "px"
         });
     }
 
-    getAceFontSize() {
+    getAceFontSize(): string {
         return this.getAce().getFontSize();
     }
 
     @enqueueIfNotLoaded
-    setAceTabSize(tabSize) {
+    setAceTabSize(tabSize: number): void {
         this.getAce().setOptions({
             tabSize: tabSize
         });
     }
 
-    getAceTabSize() {
+    getAceTabSize(): number {
         return this.getAce().getOption("tabSize");
     }
 
     @enqueueIfNotLoaded
-    setAceLineNumberVisible(value) {
+    setAceLineNumberVisible(value: boolean): void {
         this.getAce().renderer.setShowGutter(value);
     }
 
-    getAceLineNumberVisible() {
+    getAceLineNumberVisible(): boolean {
         return this.getAce().renderer.getShowGutter();
     }
 
     @enqueueIfNotLoaded
-    setAcePrintMarginVisible(value) {
+    setAcePrintMarginVisible(value: boolean): void {
         this.getAce().setShowPrintMargin(value);
     }
 
-    getAcePrintMarginVisible() {
+    getAcePrintMarginVisible(): boolean {
         return this.getAce().getShowPrintMargin();
     }
 
     @enqueueIfNotLoaded
-    setAcePrintMarginSize(printMarginSize) {
+    setAcePrintMarginSize(printMarginSize: number): void {
         this.getAce().setPrintMarginColumn(printMarginSize);
     }
 
-    getAcePrintMarginSize() {
+    getAcePrintMarginSize(): number {
         return this.getAce().getPrintMarginColumn();
     }
 
     @enqueueIfNotLoaded
-    setBasicAutocompletion(value) {
+    setBasicAutocompletion(value: boolean): void {
         this.getAce().setOptions({
             enableBasicAutocompletion: value
         });
     }
 
     @enqueueIfNotLoaded
-    setLiveAutocompletion(value) {
+    setLiveAutocompletion(value: boolean): void {
         this.getAce().setOptions({
             enableLiveAutocompletion: value
         });
     }
 
     @enqueueIfNotLoaded
-    setSnippets(value) {
+    setSnippets(value: boolean): void {
         this.getAce().setOptions({
             enableSnippets: value
         });
     }
 
     @enqueueIfNotLoaded
-    setAnnotations(annotations) {
+    setAnnotations(annotations: any[]): void {
         this.getAce().getSession().setAnnotations(annotations);
     }
 
     @enqueueIfNotLoaded
-    setUseWrapMode(value) {
+    setUseWrapMode(value: boolean): void {
         this.getAce().getSession().setUseWrapMode(value);
     }
 
     @enqueueIfNotLoaded
-    setIndentedSoftWrap(value) {
+    setIndentedSoftWrap(value: boolean): void {
         this.getAce().setOption("indentedSoftWrap", value);
     }
 
     @enqueueIfNotLoaded
-    blockScroll() {
+    blockScroll(): void {
         this.getAce().$blockScrolling = Infinity;
     }
 
     @enqueueIfNotLoaded
-    setFoldStyle(foldStyle) {
+    setFoldStyle(foldStyle: string): void {
         this.getAce().getSession().setFoldStyle(foldStyle);
     }
 
     @enqueueIfNotLoaded
-    setHighlightActiveLine(value) {
+    setHighlightActiveLine(value: boolean): void {
         this.getAce().setHighlightActiveLine(value);
     }
 
     @enqueueIfNotLoaded
-    setHighlightGutterLine(value) {
+    setHighlightGutterLine(value: boolean): void {
         this.getAce().setHighlightGutterLine(value);
     }
 
     @enqueueIfNotLoaded
-    setShowGutter(value) {
+    setShowGutter(value: boolean): void {
         this.getAce().renderer.setShowGutter(value);
     }
 
-    getScrollTop() {
+    getScrollTop(): number {
         return this.getAce().getSession().getScrollTop();
     }
 
     @enqueueIfNotLoaded
-    setScrollTop(value) {
+    setScrollTop(value: number): void {
         this.getAce().getSession().setScrollTop(value);
     }
 
     @enqueueIfNotLoaded
-    addMarker(startLine, startCol, endLine, endCol, ...args) {
-        const Range = this.constructor.AceRange;
+    addMarker(startLine: number, startCol: number, endLine: number, endCol: number, ...args: any[]): any {
+        const Range = (this.constructor as typeof CodeEditor).AceRange;
         return this.getAce().getSession().addMarker(new Range(startLine, startCol, endLine, endCol), ...args);
     }
 
     @enqueueIfNotLoaded
-    removeMarker(marker) {
+    removeMarker(marker: any): void {
         this.getAce().getSession().removeMarker(marker);
     }
 
-    getRendererLineHeight() {
+    getRendererLineHeight(): number {
         return this.getAce().renderer.lineHeight;
     }
 
-    getTextRange(startLine, startCol, endLine, endCol) {
-        const Range = this.constructor.AceRange;
+    getTextRange(startLine: number, startCol: number, endLine: number, endCol: number): string {
+        const Range = (this.constructor as typeof CodeEditor).AceRange;
         return this.getAce().getSession().doc.getTextRange(new Range(startLine, startCol, endLine, endCol));
     }
 
     @enqueueIfNotLoaded
-    setTextRange(startLine, startCol, endLine, endCol, text) {
-        const Range = this.constructor.AceRange;
+    setTextRange(startLine: number, startCol: number, endLine: number, endCol: number, text: string): void {
+        const Range = (this.constructor as typeof CodeEditor).AceRange;
         this.getAce().getSession().replace(new Range(startLine, startCol, endLine, endCol), text);
     }
 
     @enqueueIfNotLoaded
-    removeLine(line) {
-        const Range = this.constructor.AceRange;
+    removeLine(line: number): void {
+        const Range = (this.constructor as typeof CodeEditor).AceRange;
         this.getAce().getSession().getDocument().remove(new Range(line, 0, line + 1, 0));
     }
 
     @enqueueIfNotLoaded
-    insertAtLine(line, str) {
+    insertAtLine(line: number, str: string): void {
         let column = this.getAce().session.getLine(line - 1).length;
         this.getAce().gotoLine(line, column);
         this.insert(str);
     }
 
     @enqueueIfNotLoaded
-    replaceLine(line, str) {
-        const Range = this.constructor.AceRange;
+    replaceLine(line: number, str: string): void {
+        const Range = (this.constructor as typeof CodeEditor).AceRange;
         this.getAce().getSession().getDocument().replace(new Range(line, 0, line + 1, 0), str);
     }
 
     @enqueueIfNotLoaded
-    addAceSessionEventListener(event, callback) {
+    addAceSessionEventListener(event: string, callback: (...args: any[]) => void): void {
         this.getAce().getSession().addEventListener(event, callback);
     }
 
     @enqueueIfNotLoaded
-    addAceSessionChangeListener(callback) {
+    addAceSessionChangeListener(callback: (...args: any[]) => void): void {
         this.addAceSessionEventListener("change", callback);
     }
 
     @enqueueIfNotLoaded
-    addAceChangeListener(callback) {
+    addAceChangeListener(callback: Function): void {
         this.getAce().on("change", callback);
     }
 
     @enqueueIfNotLoaded
-    addChangeListener(callback) {
+    addChangeListener(callback: Function): undefined {
         this.getAce().getSession().addEventListener("change", callback);
+        // TODO We should return the handler to remove the listener here
+        return undefined;
     }
 
     @enqueueIfNotLoaded
-    addAceEventListener() {
-        this.getAce().addEventListener(...arguments);
+    addAceEventListener(...args: any[]): void {
+        this.getAce().addEventListener(...args);
     }
 
     @enqueueIfNotLoaded
-    focus() {
+    focus(): void {
         this.getAce().focus();
     }
 
     @enqueueIfNotLoaded
-    gotoEnd() {
+    gotoEnd(): void {
         let editor = this.getAce();
         let editorRow = editor.session.getLength() - 1;
         let editorColumn = editor.session.getLine(editorRow).length;
@@ -425,24 +458,24 @@ class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
     }
 
     @enqueueIfNotLoaded
-    setUndoManager(undoManager) {
+    setUndoManager(undoManager: any): void {
         this.getAce().getSession().setUndoManager(undoManager);
     }
 
     @enqueueIfNotLoaded
-    setAceRendererOption(key, value) {
+    setAceRendererOption(key: string, value: any): void {
         this.getAce().renderer.setOption(key, value);
     }
 
     // Inserts the text at the current cursor position
     @enqueueIfNotLoaded
-    insert(text) {
+    insert(text: string): void {
         this.getAce().insert(text);
     }
 
     // Appends the text at the end of the document
     @enqueueIfNotLoaded
-    append(text) {
+    append(text: string): void {
         var lastRow = this.getAce().getSession().getLength() - 1;
         if (lastRow < 0) {
             lastRow = 0;
@@ -465,7 +498,7 @@ class CodeEditor extends EnqueueableMethodMixin(UI.Element) {
         }
     }
 
-    copyTextToClipboard() {
+    copyTextToClipboard(): void {
         this.getAce().selectAll();
         this.getAce().focus();
         document.execCommand("copy");
@@ -488,10 +521,14 @@ class StaticCodeHighlighterStyle extends StyleSheet {
     }
 }
 
+// Interface declaration for proper typing
+export interface StaticCodeHighlighter {
+    get styleSheet(): StaticCodeHighlighterStyle;
+}
 
 @registerStyle(StaticCodeHighlighterStyle)
-class StaticCodeHighlighter extends CodeEditor {
-    setOptions(options) {
+export class StaticCodeHighlighter extends CodeEditor {
+    setOptions(options: CodeEditorOptions): void {
         options = Object.assign({
             fontSize: 13,
             readOnly: true,
@@ -500,9 +537,7 @@ class StaticCodeHighlighter extends CodeEditor {
         super.setOptions(options);
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes): void {
         attr.addClass(this.styleSheet.hideActive);
     }
 }
-
-export {CodeEditor, StaticCodeHighlighter};

@@ -1,12 +1,13 @@
-import {UI} from "../UIBase.js";
-import {sanitizeUrlFromOptions} from "./Link.jsx";
+import {UI} from "../UIBase";
+import {sanitizeUrlFromOptions} from "./Link";
+import {RemoveHandle} from "../../base/Dispatcher";
 
-export class Image extends UI.Primitive("img") {
-    setOptions(options) {
+export class Image extends UI.Primitive<void, "img">("img") {
+    setOptions(options: any): any {
         return super.setOptions(sanitizeUrlFromOptions(options, "src"));
     }
 
-    addLoadListener(callback) {
+    addLoadListener(callback: EventListener): RemoveHandle {
         return this.addNodeListener("load", callback);
     }
 }

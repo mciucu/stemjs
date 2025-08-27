@@ -2,8 +2,8 @@
 import {UI} from "./UIBase";
 import {TextInput} from "./input/Input";
 import {VolatileFloatingWindow} from "./modal/FloatingWindow";
-import {StemDate, DAY_IN_MILLISECONDS} from "../time/Time";
-import {VerticalSlideBar} from "./input/SlideBar.jsx";
+import {StemDate, TimeUnit} from "../time/Time";
+import {VerticalSlideBar} from "./input/SlideBar";
 
 class DatePickerTable extends UI.Element {
 
@@ -84,8 +84,8 @@ class DateTimeWindow extends VolatileFloatingWindow {
 
     computeInitial() {
         let initialDateTime = StemDate.parse(this.formatISO(this.options.initialDateTime)) || StemDate.now();
-        this.time = initialDateTime % DAY_IN_MILLISECONDS;
-        this.date = parseInt(initialDateTime / DAY_IN_MILLISECONDS);
+        this.time = initialDateTime % TimeUnit.DAY;
+        this.date = parseInt(initialDateTime / TimeUnit.DAY);
     }
 
     formatISO(str) {
@@ -103,7 +103,7 @@ class DateTimeWindow extends VolatileFloatingWindow {
     }
 
     getValue() {
-        let currentDate = this.time + DAY_IN_MILLISECONDS * this.date;
+        let currentDate = this.time + TimeUnit.DAY * this.date;
         currentDate = StemDate.create(currentDate);
         let date = currentDate.toISOString();
         date = date.slice(8, 10) + "/" + date.slice(5, 7) + "/" + date.slice(0, 4);
@@ -123,7 +123,7 @@ class DateTimeWindow extends VolatileFloatingWindow {
     }
 }
 
-class DateTimePicker extends UI.Element {
+export class DateTimePicker extends UI.Element {
     setOptions(options) {
         options.format = options.format || "DD/MM/YYYY HH:mm:ss";
         super.setOptions(options);
@@ -208,5 +208,3 @@ class DateTimePicker extends UI.Element {
     //     });
     // }
 }
-
-export {DateTimePicker};

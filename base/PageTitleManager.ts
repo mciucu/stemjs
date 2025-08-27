@@ -1,41 +1,41 @@
-import {unwrapArray} from "./Utils.js";
+import {unwrapArray} from "./Utils";
 
 export class PageTitleManager {
-    static title = null;
-    static defaultTitle = "Website";
-    static prefix = null;
+    static title: string | null = null;
+    static defaultTitle: string = "Website";
+    static prefix: string | null = null;
 
-    static getPrefix() {
+    static getPrefix(): string | null {
         return this.prefix;
     }
 
-    static setPrefix(prefix) {
+    static setPrefix(prefix: string | null): void {
         this.prefix = prefix;
         this.updatePageTitle();
     }
 
-    static setDefaultTitle(defaultTitle) {
+    static setDefaultTitle(defaultTitle: string): void {
         this.defaultTitle = defaultTitle;
     }
 
-    static getTitle() {
+    static getTitle(): string {
         return this.title || this.defaultTitle;
     }
 
-    static setTitle(title) {
+    static setTitle(title: string | null): void {
         this.title = title;
         this.updatePageTitle();
     }
 
-    static getFullPageTitle() {
+    static getFullPageTitle(): string {
         return unwrapArray([this.getPrefix(), this.getTitle()]).join(" - ");
     }
 
-    static updatePageTitle() {
+    static updatePageTitle(): void {
         document.title = this.getFullPageTitle();
     }
 
-    static setIcon() {
-        throw Error("Not implemented yet!");
+    static setIcon(): void {
+        throw new Error("Not implemented yet!");
     }
 }

@@ -1,7 +1,11 @@
-import {isString} from "../../base/Utils.js";
+import {isString} from "../../base/Utils";
 
-export class ThemeType {
-    constructor(type, value, options) {
+export class ThemeType<T = any> {
+    type: string;
+    value: T;
+    options: any;
+
+    constructor(type: string, value: T, options?: any) {
         options = options || {};
         if (isString(options)) {
             options = {comment: options};
@@ -13,17 +17,17 @@ export class ThemeType {
 }
 
 // TODO this should also have a validator here for instance
-export function MakeThemeType(type) {
-    return (value, options={}) => new ThemeType(type, value, options);
+export function MakeThemeType<T>(type: string): (value: T, options?: any) => ThemeType<T> {
+    return (value: T, options: any = {}) => new ThemeType<T>(type, value, options);
 }
 
-export const ColorType = MakeThemeType("Color");
-export const SizeType = MakeThemeType("Size");
-export const BorderType = MakeThemeType("Border");
-export const TextShadowType = MakeThemeType("Text Shadow");
-export const BoxShadowType = MakeThemeType("Box Shadow");
-export const FontFamilyType = MakeThemeType("Font Family");
-export const FontWeightType = MakeThemeType("Font Weight");
-export const FloatType = MakeThemeType("Float");
-export const BoolType = MakeThemeType("Boolean");
-export const ObjectType = MakeThemeType("Generic Object")
+export const ColorType = MakeThemeType<string>("Color");
+export const SizeType = MakeThemeType<string | number>("Size");
+export const BorderType = MakeThemeType<string>("Border");
+export const TextShadowType = MakeThemeType<string>("Text Shadow");
+export const BoxShadowType = MakeThemeType<string>("Box Shadow");
+export const FontFamilyType = MakeThemeType<string>("Font Family");
+export const FontWeightType = MakeThemeType<string | number>("Font Weight");
+export const FloatType = MakeThemeType<number>("Float");
+export const BoolType = MakeThemeType<boolean>("Boolean");
+export const ObjectType = MakeThemeType<object>("Generic Object");

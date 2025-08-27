@@ -1,61 +1,82 @@
-import {UI} from "../ui/UIBase.js";
-import {Router} from "../ui/Router.jsx";
-import {GlobalContainer} from "../ui/global-container/GlobalContainer.jsx";
-import {Dispatcher} from "../base/Dispatcher.js";
-import {GlobalState} from "../state/State.js";
+import {UI, UIElementChild} from "../ui/UIBase";
+import {Router} from "../ui/Router";
+import {GlobalContainer} from "../ui/global-container/GlobalContainer";
+import {Dispatcher} from "../base/Dispatcher";
+import {GlobalState} from "../state/State";
 
-export class StemApp extends UI.Element {
-    static init() {
+interface StemAppOptions {
+    routes: any[];
+    [key: string]: any;
+}
+
+interface RouterOptions {
+    style: {
+        height: string;
+    };
+    [key: string]: any;
+}
+
+declare global {
+    interface Window {
+        GlobalState: typeof GlobalState;
+        appInstance: StemApp;
+    }
+}
+
+export class StemApp extends UI.Element<StemAppOptions> {
+    declare options: StemAppOptions;
+
+    static init(): StemApp {
         self.GlobalState = GlobalState; // Expose it for debugging
         self.appInstance = this.create(document.body);
         return self.appInstance;
     }
 
-    getRoutes() {
+    getRoutes(): any[] {
         return this.options.routes;
     }
 
-    getBeforeContainer() {
+    getBeforeContainer(): UIElementChild {
         return null;
     }
 
-    getRouterOptions() {
+    getRouterOptions(): RouterOptions {
         return {
             style: {
                 height: "100%",
             }
-        }
+        };
     }
 
-    handleRouteChange() {
+    handleRouteChange(...args: any[]): void {
         document.body.click(); // TODO Really bro?
         Dispatcher.Global.dispatch("closeAllModals");
     }
 
-    getRouter() {
+    getRouter(): UIElementChild {
         return <Router
             ref="router"
             routes={this.getRoutes()}
-            onChange={(...args) => this.handleRouteChange(...args)}
+            onChange={(...args: any[]) => this.handleRouteChange(...args)}
             {...this.getRouterOptions()}
         />;
     }
 
-    getContainer() {
+    getContainer(): UIElementChild {
         return <GlobalContainer>
             {this.getRouter()}
         </GlobalContainer>;
     }
 
-    getAfterContainer() {
+    getAfterContainer(): UIElementChild {
         return null;
     }
 
-    render() {
+    render(): UIElementChild {
         return [
             this.getBeforeContainer(),
             this.getContainer(),
             this.getAfterContainer(),
-        ]
+        ];
     }
 }

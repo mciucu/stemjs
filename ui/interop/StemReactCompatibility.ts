@@ -1,13 +1,16 @@
-import {UI, BaseUIElement, RenderStack} from "../UIBase.js";
+import {UI, BaseUIElement, RenderStack} from "../UIBase";
 
-const stemInReactContext = {
-    reactComponentDecorator: (Component) => Component,
+const stemInReactContext: {
+    reactComponentDecorator: (Component: any) => any;
+    stemRootComponentProps: any;
+} = {
+    reactComponentDecorator: (Component: any) => Component,
     stemRootComponentProps: null,
 };
 
-const crossLibraryWrappers = new Map();
+const crossLibraryWrappers = new Map<any, any>();
 
-export function wrapStemInReact(React, StemClass) {
+export function wrapStemInReact(React: any, StemClass: any): any {
     const cachedValue = crossLibraryWrappers.get(StemClass);
     if (cachedValue) {
         return cachedValue;
@@ -66,7 +69,7 @@ export function wrapStemInReact(React, StemClass) {
     return DecoratedReactComponent;
 }
 
-export function wrapReactInStem(ReactDOM, React, ReactClass) {
+export function wrapReactInStem(ReactDOM: any, React: any, ReactClass: any): any {
     const cachedValue = crossLibraryWrappers.get(ReactClass);
     if (cachedValue) {
         return cachedValue;
@@ -88,7 +91,7 @@ export function wrapReactInStem(ReactDOM, React, ReactClass) {
 
 // This can be used to toggle if we should auto-wrap Stem elements
 // Right now it's simpler to just always enable, performance is minimally impacted
-export function enableStemInReactApp(ReactDOM, React, reactComponentDecorators) {
+export function enableStemInReactApp(ReactDOM: any, React: any, reactComponentDecorators: any[]): void {
     for (const decorator of reactComponentDecorators) {
         const oldReactComponentDecorator = stemInReactContext.reactComponentDecorator;
         stemInReactContext.reactComponentDecorator = (Component) => decorator(oldReactComponentDecorator(Component));
@@ -100,7 +103,7 @@ export function enableStemInReactApp(ReactDOM, React, reactComponentDecorators) 
         if (RenderStack.length > 0) {
             return UI.createElement(...args);
         }
-        if (firstArg && firstArg.prototype && firstArg.prototype instanceof BaseUIElement) {
+        if (firstArg?.prototype && firstArg.prototype instanceof BaseUIElement) {
             args[0] = wrapStemInReact(React, firstArg);
         }
         return oldReactCreateElement(...args);
