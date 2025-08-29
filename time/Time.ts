@@ -32,5 +32,5 @@ export const ServerTime: ServerTimeInterface = {
 };
 
 // TODO remove re-exports
-export * from "./Date.js";
-export * from "./Duration.js";
+export * from "./Date";
+export * from "./Duration";

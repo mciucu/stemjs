@@ -4,7 +4,7 @@ import {defaultComparator} from "../../base/Utils";
 import {MakeIcon} from "../SimpleElements";
 import {styleRule, StyleSheet} from "../Style";
 import {NodeAttributes} from "../NodeAttributes";
-import {ColumnHandler} from "../../base/ColumnHandler.js";
+import {ColumnHandler} from "../../base/ColumnHandler";
 
 
 export class SortableTableStyle extends StyleSheet {

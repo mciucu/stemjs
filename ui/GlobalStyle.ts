@@ -4,7 +4,7 @@ import {enhance} from "./Color";
 import {Device} from "../base/Device";
 import {Orientation, Level, Size, LevelType, SizeType, OrientationType} from "./Constants";
 import {Theme} from "./style/Theme";
-import {FloatType} from "./style/ThemeTypes.js";
+import {FloatType} from "./style/ThemeTypes";
 
 // Type definitions for CSS style objects
 interface CSSStyleObject {

@@ -1,7 +1,7 @@
 import {UI, UIElement, UIElementOptions, UIElementChild, HTMLTagType} from "../UIBase";
 import {TableStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
-import {ColumnHandler, ColumnLike} from "../../base/ColumnHandler.js";
+import {ColumnHandler, ColumnLike} from "../../base/ColumnHandler";
 
 // TODO @types
 UI.Element;

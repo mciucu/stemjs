@@ -5,7 +5,7 @@ import {StyleSheet} from "../Style";
 import {styleRule} from "../../decorators/Style";
 import {registerStyle} from "../style/Theme";
 import {GlobalStyle} from "../GlobalStyle";
-import {ColumnHandler} from "../../base/ColumnHandler.js";
+import {ColumnHandler} from "../../base/ColumnHandler";
 
 // TODO @types just putting here here to ensure it's not stripped for some strange reason
 UI.Element;

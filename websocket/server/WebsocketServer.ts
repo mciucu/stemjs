@@ -1,5 +1,5 @@
 import {createClient as redisCreateClient, RedisClientType} from "redis";
-import {App as WSApp, WebSocket, us_listen_socket, HttpResponse, HttpRequest, us_socket_context_t} from "uWebSockets.js";
+import {App as WSApp, WebSocket, us_listen_socket, HttpResponse, HttpRequest, us_socket_context_t} from "uWebSockets";
 import {CheckStreamPermission, IdentifySessionId, LoadSessionId, RPCCaller} from "./PermissionChecking";
 import {DEFAULT_HEARTBEAT_MESSAGE} from "../Shared";
 import {AppConfig} from "./AppConfig";

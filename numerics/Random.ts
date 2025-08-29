@@ -1,4 +1,4 @@
-import {isString} from "../base/Utils.js";
+import {isString} from "../base/Utils";
 
 export class RandGen {
     static readonly instance= new RandGen();

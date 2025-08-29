@@ -1,4 +1,4 @@
-import {isString, isBoolean, isNumber, titleCase} from "../base/Utils.js";
+import {isString, isBoolean, isNumber, titleCase} from "../base/Utils";
 
 export interface EnumOptions {
     value?: any;

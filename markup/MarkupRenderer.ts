@@ -1,5 +1,5 @@
-import {BaseUIElement, UI} from "../ui/UIBase.js";
-import {MarkupParser} from "./MarkupParser.js";
+import {BaseUIElement, UI} from "../ui/UIBase";
+import {MarkupParser} from "./MarkupParser";
 import {Panel, Link, Image} from "../ui/UIPrimitives";
 import {StaticCodeHighlighter} from "../ui/CodeEditor";
 
