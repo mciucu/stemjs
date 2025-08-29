@@ -1,12 +1,12 @@
 // TODO @Mihai this should become the new Store
 import {CleanupJobs, Dispatchable} from "../base/Dispatcher";
 import {GlobalState, RawStateData, State, StateData, StoreEvent, StoreId} from "./State";
-import {isNotNull, toArray} from "../base/Utils";
+import {isNotNull, isString, toArray} from "../base/Utils";
 import {FieldDescriptor} from "./StoreField";
 
 export interface StoreOptions {
     state?: State;
-    dependencies?: string[]; // Other stores that should have their objects loaded before this
+    dependencies?: (string | StoreClass<any>)[]; // Other stores that should have their objects loaded before this
 }
 
 // Shorthand type for static method this parameter
@@ -24,7 +24,7 @@ export class StoreObject extends Dispatchable {
         Object.assign(this, obj);
     }
 
-    getOwnStore<T extends this>(): T['constructor'] & StoreClass<this> & Dispatchable {
+    getOwnStore<T extends this>(): StoreClass<this> & Dispatchable {
         return this.constructor as any;
     }
 
@@ -311,7 +311,7 @@ export function BaseStore<T extends StoreObject = StoreObject>(objectType: strin
     class Store extends BaseClass {
         static objectType = objectType.toLowerCase();
         static state = state;
-        static dependencies = dependencies;
+        static dependencies = dependencies.map(d => isString(d) ? d : d.objectType);
         static objects = new Map<string, T>();
     }
 

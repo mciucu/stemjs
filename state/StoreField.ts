@@ -1,5 +1,5 @@
-import {StemDate} from "../time/Date.js";
-import {isFunction, isString} from "../base/Utils.js";
+import {StemDate} from "../time/Date";
+import {isFunction, isString} from "../base/Utils";
 import {StoreObject} from "./Store";
 
 export interface FieldOptions {
