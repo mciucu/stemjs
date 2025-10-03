@@ -363,6 +363,34 @@ export function deepCopy<T = any>(...sources: any[]): T {
 	return target;
 }
 
+export function isDeepEqual(obj1: any, obj2: any): boolean {
+    // Different types means different variables.
+    if (typeof obj1 !== typeof obj2) {
+        return false;
+    }
+    // If one of them is null or undefined, the equality check is trivial.
+    if (obj1 == null || obj2 == null) {
+        return obj1 === obj2;
+    }
+    if (!isPlainObject(obj1) && !Array.isArray(obj1)) {
+        // Not an object, so this is trivial.
+        return obj1 === obj2;
+    }
+
+    const obj1Keys = Object.keys(obj1);
+    if (obj1Keys.length !== Object.keys(obj2).length) {
+        return false;
+    }
+    // If the entry count is the same, it's enough to check that the second object has each of the first's entries.
+    for (const key of obj1Keys) {
+        if (!isDeepEqual(obj1[key], obj2[key])) {
+            return false;
+        }
+    }
+    // The objects have the same entries. That means they are equal.
+    return true;
+}
+
 export function dashCase(str: string): string {
     let rez = "";
     for (let i = 0; i < str.length; i++) {
