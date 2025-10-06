@@ -387,3 +387,19 @@ fetch.defaultPostprocessors = [] as FetchPostprocessor[];
 fetch.defaultErrorPostprocessors = [] as FetchErrorPostprocessor[];
 
 fetch.polyfill = true;
+
+
+// TODO @cleanup @Mihai normalize how api clients are implemented, they should have a standard interface to be usable inside Stem methods
+export type LoaderFunction = (url: string, params?: any) => Promise<any>;
+
+let CurrentLoaderFunc: LoaderFunction = (url: string, params?: any) => {
+    return fetch(url, {urlParams: params});
+}
+
+export function SetLoaderFunc(func: MakeTextFunction): void {
+    CurrentLoaderFunc = func;
+}
+
+export function LoadEndpoint(url: string, params?: any) {
+    return CurrentLoaderFunc(url, params);
+}
