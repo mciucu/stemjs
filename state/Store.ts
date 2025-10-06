@@ -1,6 +1,6 @@
 // TODO @Mihai this should become the new Store
 import {CleanupJobs, Dispatchable} from "../base/Dispatcher";
-import {GlobalState, RawStateData, State, StateData, StoreEvent, StoreId} from "./State";
+import {GlobalState, RawStateData, State, StateData, StoreEvent, StoreId, StoreIdOrNull} from "./State";
 import {isNotNull, isString, toArray} from "../base/Utils";
 import {FieldDescriptor} from "./StoreField";
 
@@ -123,14 +123,14 @@ export class StoreObject extends Dispatchable {
         return this.state;
     }
 
-    static get<T extends StoreObject>(this: StoreClass<T>, id: StoreId): T | undefined {
+    static get<T extends StoreObject>(this: StoreClass<T>, id: StoreIdOrNull): T | undefined {
         if (id == null) {
             return;
         }
         return this.objects.get(String(id)) as T;
     }
 
-    static addObject<T extends StoreObject>(this: typeof StoreObject, id: NonNullable<StoreId>, obj: T): void {
+    static addObject<T extends StoreObject>(this: typeof StoreObject, id: StoreId, obj: T): void {
         this.objects.set(String(id), obj);
     }
 

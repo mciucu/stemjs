@@ -1,7 +1,8 @@
 import {Dispatchable} from "../base/Dispatcher";
 import {isString} from "../base/Utils";
 
-export type StoreId = string | number | null | undefined;
+export type StoreId = string | number;
+export type StoreIdOrNull = StoreId | null | undefined;
 
 export interface StoreEvent {
     type: string;
