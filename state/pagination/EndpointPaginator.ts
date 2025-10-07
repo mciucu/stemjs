@@ -1,30 +1,37 @@
 import {Dispatchable} from "../../base/Dispatcher";
 import {apiFetchStorePage} from "../StoreUtils";
 import {isDeepEqual} from "../../base/Utils";
-import {StoreClass} from "../Store";
+import {StoreClass, StoreObject} from "../Store";
 
-// TODO @types remove this or merge and create an abstract base class
-export class BasePaginator extends Dispatchable {
-    async fetchFirstPage(): Promise<any> {
+export abstract class BasePaginator<Type> extends Dispatchable {
+    abstract getTotalEntries(): number;
+    abstract getNumPages(): number;
+    abstract getPageSize(): number;
+    abstract setPageSize(pageSize: number): void;
+    abstract getRange(page?: number | null): number[];
+    abstract getCurrentPageEntries(): Type[] | undefined;
+    abstract fetchPage(page: number): Promise<Type[]> | Type[];
+    abstract haveInitiatedFetch(): boolean;
+
+    async fetchFirstPage(): Promise<Type[]> {
         return this.fetchPage(1);
     }
 }
 
-// TODO @types template by object type
-export class EndpointPaginator extends Dispatchable {
+export class EndpointPaginator<Type extends StoreObject> extends BasePaginator<Type> {
     totalEntriesCount: number = 0; // The number of total objects we're paginating
     lastPageRequested: number | null = null; // The last page we requested
     lastPageLoaded: number | null = null; // The last page we successfully received
     fetchingNow: boolean = false;
     lastResponse: any = null;
-    store: StoreClass<any>;
+    store: StoreClass<Type>;
     endpoint: string;
     filters: any;
     storeFilters: any;
     error: any = null;
     loadedLastPage: boolean = false;
 
-    constructor(store: StoreClass<any>, endpoint: string, apiFilters: any = {}, storeFilters: any = {}) {
+    constructor(store: StoreClass<Type>, endpoint: string, apiFilters: any = {}, storeFilters: any = {}) {
         super();
         this.store = store;
         this.endpoint = endpoint;
@@ -64,7 +71,7 @@ export class EndpointPaginator extends Dispatchable {
 
     // Fetches the page and returns the new objects
     // Catching errors is left to the upper layers
-    async fetchPage(page: number | null = this.lastPageRequested, passErrors: boolean = true): Promise<any> {
+    async fetchPage(page: number | null = this.lastPageRequested, passErrors: boolean = true): Promise<Type[]> {
         page = Math.min(page, this.getNumPages());
 
         const request = {
@@ -96,12 +103,12 @@ export class EndpointPaginator extends Dispatchable {
         this.lastPageLoaded = page;
         this.totalEntriesCount = response.count;
 
-        const lastFetchedObjects = response.results;
+        const lastFetchedObjects = response.results as Type[];
         this.loadedLastPage = (lastFetchedObjects.length < this.filters.pageSize) || (response.count === this.getPageSize() * page);
 
-        this.dispatch("pageLoaded", response.results, response, this);
+        this.dispatch("pageLoaded", lastFetchedObjects, response, this);
 
-        return response;
+        return lastFetchedObjects;
     }
 
     // Return true if we've ever started a fetch
@@ -164,14 +171,14 @@ export class EndpointPaginator extends Dispatchable {
     }
 }
 
-export class ArrayPaginator extends Dispatchable {
-    entries: any[];
+export class ArrayPaginator<Type> extends BasePaginator<Type> {
+    entries: Type[];
     pageSize: number;
     lastPageLoaded: number | null = null;
     lastPageRequested: number | null = null;
-    pageEntries: any[] = [];
+    pageEntries: Type[] = [];
 
-    constructor(entries: any[], pageSize: number = 10) {
+    constructor(entries: Type[], pageSize: number = 10) {
         super();
         this.entries = entries;
         this.pageSize = pageSize;
@@ -209,9 +216,9 @@ export class ArrayPaginator extends Dispatchable {
     }
 
     // page is an integer between 1 and numPages
-    fetchPage(page: number): any[] {
+    fetchPage(page: number): Type[] {
         page = Math.max(1, Math.min(page, this.getNumPages()));
-        const entries = [];
+        const entries: Type[] = [];
         for (let index = this.pageSize * (page - 1); index < this.pageSize * page; index++) {
             if (index >= 0 && index < this.entries.length) {
                 entries.push(this.entries[index]);
@@ -223,8 +230,8 @@ export class ArrayPaginator extends Dispatchable {
         return entries;
     }
 
-    fetchFirstPage(): void {
-        this.fetchPage(1);
+    async fetchFirstPage(): Promise<Type[]> {
+        return this.fetchPage(1);
     }
 
     haveInitiatedFetch(): boolean {
