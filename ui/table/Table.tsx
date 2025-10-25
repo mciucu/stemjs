@@ -99,7 +99,7 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
         return <RowClass {...this.getRowOptions(entry, rowIndex)} />;
     }
 
-    getRowOptions(entry: BaseType, rowIndex: number): TableRowOptions<BaseType> {x
+    getRowOptions(entry: BaseType, rowIndex: number): TableRowOptions<BaseType> {
         const columns = this.getSafeColumns();
         return {
             entry,
