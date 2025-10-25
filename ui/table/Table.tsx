@@ -83,6 +83,10 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
         }
     }
 
+    getSafeColumns() {
+        return ColumnHandler.mapColumns(this.getDefaultColumns(this.options, this.options.entries));
+    }
+
     getRowClass(entry?: BaseType, rowIndex?: number): typeof TableRow<BaseType> {
         return this.options.rowClass || TableRow;
     }
@@ -95,8 +99,8 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
         return <RowClass {...this.getRowOptions(entry, rowIndex)} />;
     }
 
-    getRowOptions(entry: BaseType, rowIndex: number): TableRowOptions<BaseType> {
-        const {columns} = this.options;
+    getRowOptions(entry: BaseType, rowIndex: number): TableRowOptions<BaseType> {x
+        const columns = this.getSafeColumns();
         return {
             entry,
             columns: columns as ColumnHandler<BaseType>[],
@@ -127,7 +131,7 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
 
     renderTableHead(): UIElementChild {
         const {noHeader} = this.options;
-        const columns = this.getDefaultColumns(this.options, this.options.entries);
+        const columns = this.getSafeColumns();
 
         return !noHeader && <thead ref="thead" className={this.styleSheet.thead}>
             <tr>
