@@ -238,6 +238,52 @@ export const ActionModalButton = (ActionModal) => class ActionModalButton extend
 };
 
 
+export class ConfirmModal extends ActionModal {
+    getTitle() {
+        return this.options.title || "Confirm";
+    }
+
+    getBody() {
+        return this.options.message || "Are you sure?";
+    }
+
+    getActionName() {
+        return this.options.confirmText || this.options.title || "Confirm";
+    }
+
+    getCloseName() {
+        return this.options.cancelText || "Cancel";
+    }
+
+    getActionLevel() {
+        return this.options.level || Level.PRIMARY;
+    }
+
+    action() {
+        this.resolvePromise(true);
+        this.hide();
+    }
+
+    hide() {
+        if (!this._resolved) {
+            this.resolvePromise(false);
+        }
+        super.hide();
+    }
+
+    static async prompt(options) {
+        return new Promise((resolve) => {
+            const modal = new this({...options, destroyOnHide: true});
+            modal.resolvePromise = (value) => {
+                modal._resolved = true;
+                resolve(value);
+            };
+            modal.show();
+        });
+    }
+}
+
+
 export class ErrorModal extends ActionModal {
     getTitle() {
         return "An Error occurred";
