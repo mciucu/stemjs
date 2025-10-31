@@ -52,6 +52,9 @@ export class BaseInputElement<T = any> extends UIElement<InputElementOptions<T>,
     }
 
     dispatchChange(value: T): void {
-        // Implementation will be provided by subclasses or mixins
+        // TODO @Mihai WAT? Implementation will be provided by subclasses or mixins
+        if (this.options.onChange) {
+            this.options.onChange(value, this);
+        }
     }
 }
