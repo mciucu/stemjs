@@ -26,7 +26,7 @@ export type RefLinkOptions = {
 // Type definitions
 export interface UIElementOptions {
     children?: UIElementCleanChild[];
-    ref?: RefLinkOptions;
+    ref?: RefLinkOptions | string;
     key?: string | number;
     active?: boolean; // Tabs or switchers can put this on children
     nodeType?: HTMLTagType;
