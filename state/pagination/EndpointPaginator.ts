@@ -1,82 +1,101 @@
 import {Dispatchable} from "../../base/Dispatcher";
-import {apiFetchStorePage} from "../StoreUtils";
 import {isDeepEqual} from "../../base/Utils";
 import {StoreClass, StoreObject} from "../Store";
+import {LoadEndpoint} from "../../base/Fetch";
 
-export abstract class BasePaginator<Type> extends Dispatchable {
-    abstract getTotalEntries(): number;
-    abstract getNumPages(): number;
-    abstract getPageSize(): number;
-    abstract setPageSize(pageSize: number): void;
-    abstract getRange(page?: number | null): number[];
-    abstract getCurrentPageEntries(): Type[] | undefined;
-    abstract fetchPage(page: number): Promise<Type[]> | Type[];
-    abstract haveInitiatedFetch(): boolean;
-
-    async fetchFirstPage(): Promise<Type[]> {
-        return this.fetchPage(1);
-    }
-}
-
-export class EndpointPaginator<Type extends StoreObject> extends BasePaginator<Type> {
-    totalEntriesCount: number = 0; // The number of total objects we're paginating
+export abstract class BasePaginator<T> extends Dispatchable {
+    fetchingNow: boolean = false;
     lastPageRequested: number | null = null; // The last page we requested
     lastPageLoaded: number | null = null; // The last page we successfully received
-    fetchingNow: boolean = false;
-    lastResponse: any = null;
-    store: StoreClass<Type>;
-    endpoint: string;
-    filters: any;
-    storeFilters: any;
-    error: any = null;
-    loadedLastPage: boolean = false;
+    pageSize: number;
 
-    constructor(store: StoreClass<Type>, endpoint: string, apiFilters: any = {}, storeFilters: any = {}) {
-        super();
-        this.store = store;
-        this.endpoint = endpoint;
-        this.filters = apiFilters;
-        this.storeFilters = storeFilters;
-        this.filters.pageSize = this.filters.pageSize || 10;
+    abstract getTotalEntries(): number;
+    abstract getCurrentPageEntries(): T[];
+    abstract fetchPage(page: number): Promise<T[]> | T[];
+
+    getPageSize(): number {
+        return this.pageSize;
+    }
+
+    setPageSize(pageSize: number) {
+        this.pageSize = pageSize;
+        const activePageIndex = this.lastPageLoaded ? this.getRange()[0] : 1;
+        this.fetchPage(Math.floor((activePageIndex + pageSize - 1) / pageSize));
     }
 
     isLoading(): boolean {
         return this.fetchingNow;
     }
 
-    getError(): any {
-        return this.error;
+    // Return true if we've ever started a fetch
+    haveInitiatedFetch() {
+        return this.lastPageRequested != null;
     }
 
-    getPageSize() {
-        return this.filters.pageSize;
+    haveLoadedLastRequestedPage() {
+        return this.lastPageRequested && this.lastPageRequested === this.lastPageLoaded;
+    }
+
+    getNumPages(): number {
+        return Math.max(1, Math.ceil(this.getTotalEntries() / this.getPageSize()));
+    }
+
+    getRange(page: number | null = this.lastPageLoaded): number[] {
+        const pageSize = this.getPageSize();
+        const totalEntries = this.getTotalEntries();
+        return [
+            Math.max(0, Math.min(totalEntries, (page - 1) * pageSize + 1)),
+            Math.min(totalEntries, page * pageSize),
+        ];
+    }
+
+    fetchFirstPage() {
+        return this.fetchPage(1);
+    }
+}
+
+// TODO @types template by object type
+export class EndpointPaginator<T extends StoreObject> extends BasePaginator<T> {
+    totalEntriesCount: number = 0; // The number of total objects we're paginating
+    lastResponse: any = null;
+    lastResponseObjects?: T[] = null;
+    store: StoreClass<T>;
+    endpoint: string;
+    filters: any;
+    storeFilters: any;
+    error: any = null;
+    loadedLastPage: boolean = false;
+
+    constructor(store: StoreClass<T>, endpoint: string, apiFilters: any = {}, storeFilters: any = {}) {
+        super();
+        this.store = store;
+        this.endpoint = endpoint;
+        this.filters = apiFilters;
+        this.storeFilters = storeFilters;
+        this.pageSize = this.filters.pageSize || 10;
+    }
+
+    getError(): any {
+        return this.error;
     }
 
     getTotalEntries() {
         return this.totalEntriesCount;
     }
 
-    getCurrentPageEntries() {
-        return this.lastResponse?.results;
-    }
-
-    // TODO deprecate this / move
-    getRange(page: number | null = this.lastPageLoaded): number[] {
-        const pageSize = this.getPageSize();
-        return [
-            Math.max(0, Math.min(this.getTotalEntries(), (page - 1) * pageSize + 1)),
-            Math.min(this.getTotalEntries(), page * pageSize),
-        ]
+    getCurrentPageEntries(): T[] {
+        return this.lastResponseObjects;
     }
 
     // Fetches the page and returns the new objects
     // Catching errors is left to the upper layers
-    async fetchPage(page: number | null = this.lastPageRequested, passErrors: boolean = true): Promise<Type[]> {
+    async fetchPage(page: number | null = this.lastPageRequested, passErrors: boolean = true): Promise<T[]> {
         page = Math.min(page, this.getNumPages());
 
         const request = {
             page,
-            ...this.filters, // Also includes the page size
+            ...this.filters,
+            pageSize: this.pageSize,
         };
 
         let response = null;
@@ -86,7 +105,7 @@ export class EndpointPaginator<Type extends StoreObject> extends BasePaginator<T
         this.lastPageRequested = page;
         this.dispatch("pageRequested", page, this);
         try {
-            response = this.lastResponse = await apiFetchStorePage(this.store, this.endpoint, request);
+            response = this.lastResponse = await LoadEndpoint(this.endpoint, request);
         } catch (error) {
             this.error = error;
             this.dispatch("pageLoadFailed", error);
@@ -103,44 +122,20 @@ export class EndpointPaginator<Type extends StoreObject> extends BasePaginator<T
         this.lastPageLoaded = page;
         this.totalEntriesCount = response.count;
 
-        const lastFetchedObjects = response.results as Type[];
-        this.loadedLastPage = (lastFetchedObjects.length < this.filters.pageSize) || (response.count === this.getPageSize() * page);
+        this.lastResponseObjects = this.store.load(response);
+        this.loadedLastPage = (this.lastResponseObjects.length < this.getPageSize()) || (response.count === this.getPageSize() * page);
 
-        this.dispatch("pageLoaded", lastFetchedObjects, response, this);
+        this.dispatch("pageLoaded", this.lastResponseObjects, response, this);
 
-        return lastFetchedObjects;
-    }
-
-    // Return true if we've ever started a fetch
-    haveInitiatedFetch() {
-        return this.lastPageRequested != null;
+        return this.lastResponseObjects;
     }
 
     async fetchNextPage(): Promise<any> {
         return this.fetchPage(this.lastPageRequested! + 1);
     }
 
-    async fetchFirstPage() {
-        return this.fetchPage(1);
-    }
-
-    async fetchLastPage() {
-        if (this.lastPageRequested == this.getNumPages()) {
-            return;
-        }
-        return this.fetchPage(this.getNumPages());
-    }
-
-    getNumPages() {
-        return Math.max(1, Math.ceil(this.totalEntriesCount / this.getPageSize()));
-    }
-
     getLastResponse() {
         return this.lastResponse;
-    }
-
-    setPageSize(pageSize: number) {
-        this.updateFilter({pageSize});
     }
 
     // Update the filters and also fetch the first page
@@ -157,28 +152,16 @@ export class EndpointPaginator<Type extends StoreObject> extends BasePaginator<T
         }
     }
 
-    haveLoadedLastRequestedPage() {
-        return this.lastPageRequested && this.lastPageRequested === this.lastPageLoaded;
-    }
-
-    // TODO: pattern for naming bool getters/fields with the logic behind them?
-    isFetching() {
-        return this.fetchingNow;
-    }
-
     all() {
         return this.store.filterBy(this.storeFilters);
     }
 }
 
-export class ArrayPaginator<Type> extends BasePaginator<Type> {
-    entries: Type[];
-    pageSize: number;
-    lastPageLoaded: number | null = null;
-    lastPageRequested: number | null = null;
-    pageEntries: Type[] = [];
+export class ArrayPaginator<T> extends BasePaginator<T> {
+    entries: T[];
+    pageEntries: T[] = [];
 
-    constructor(entries: Type[], pageSize: number = 10) {
+    constructor(entries: T[], pageSize: number = 10) {
         super();
         this.entries = entries;
         this.pageSize = pageSize;
@@ -189,36 +172,13 @@ export class ArrayPaginator<Type> extends BasePaginator<Type> {
         return this.entries.length;
     }
 
-    getNumPages() {
-        return Math.ceil(this.getTotalEntries() / this.pageSize);
-    }
-
-    getPageSize() {
-        return this.pageSize;
-    }
-
-    setPageSize(pageSize: number) {
-        const activePageIndex = this.lastPageLoaded ? this.getRange()[0] : 1;
-        this.pageSize = pageSize;
-        this.fetchPage(Math.floor((activePageIndex + pageSize - 1) / pageSize));
-    }
-
-    getRange(page = this.lastPageLoaded) {
-        const pageSize = this.getPageSize();
-        return [
-            Math.max(0, Math.min(this.getTotalEntries(), (page - 1) * pageSize + 1)),
-            Math.min(this.getTotalEntries(), page * pageSize),
-        ]
-    }
-
-    getCurrentPageEntries() {
+    getCurrentPageEntries(): T[] {
         return this.pageEntries;
     }
 
-    // page is an integer between 1 and numPages
-    fetchPage(page: number): Type[] {
+    fetchPage(page: number): T[] {
         page = Math.max(1, Math.min(page, this.getNumPages()));
-        const entries: Type[] = [];
+        const entries: T[] = [];
         for (let index = this.pageSize * (page - 1); index < this.pageSize * page; index++) {
             if (index >= 0 && index < this.entries.length) {
                 entries.push(this.entries[index]);
@@ -228,13 +188,5 @@ export class ArrayPaginator<Type> extends BasePaginator<Type> {
         this.pageEntries = entries;
         this.dispatch("pageLoaded", entries, {entries}, this);
         return entries;
-    }
-
-    async fetchFirstPage(): Promise<Type[]> {
-        return this.fetchPage(1);
-    }
-
-    haveInitiatedFetch(): boolean {
-        return this.lastPageLoaded != null;
     }
 }
