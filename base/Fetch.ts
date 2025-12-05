@@ -393,10 +393,10 @@ fetch.polyfill = true;
 export type LoaderFunction = (url: string, params?: any) => Promise<any>;
 
 let CurrentLoaderFunc: LoaderFunction = (url: string, params?: any) => {
-    return fetch(url, {urlParams: params});
+    return fetch(url, {urlParams: params}) as any as Promise<any>;
 }
 
-export function SetLoaderFunc(func: MakeTextFunction): void {
+export function SetLoaderFunc(func: LoaderFunction): void {
     CurrentLoaderFunc = func;
 }
 
