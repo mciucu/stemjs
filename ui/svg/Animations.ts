@@ -2,7 +2,7 @@ import {Transition} from "../Transition";
 import {Color} from "../Color";
 import {SVGUIElement} from "./SVGBase";
 import {SVGText} from "./SVGText";
-import {Point} from "../../numerics/math";
+import {Point} from "../../numerics/StemMath";
 
 
 interface BlinkTransitionOptions {

@@ -1,5 +1,5 @@
 import {SVG, SVGPrimitive, SVGUIElement} from "./SVGBase";
-import * as math from "../../numerics/math";
+import * as math from "../../numerics/StemMath";
 
 export class SVGRoot extends SVGPrimitive("svg") {
 }

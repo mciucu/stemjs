@@ -4,11 +4,8 @@ import {setObjectPrototype} from "../../base/Utils";
 import {SVGNodeAttributes} from "./SVGNodeAttributes";
 import {Device} from "../../base/Device";
 import {applyDebugFlags} from "../UIBase";
+import {Point} from "../../numerics/StemMath";
 
-interface Point {
-    x: number;
-    y: number;
-}
 
 interface BoundingRect {
     top: number;

@@ -1,4 +1,4 @@
-import {equal} from "../numerics/math";
+import {equal} from "../numerics/StemMath";
 
 interface TransitionOptions {
     func: (t: number, context: any) => void;
