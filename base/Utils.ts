@@ -3,6 +3,10 @@ type UnwrapFunc<T = any> = (element: T) => T | undefined;
 type VersioningFunc = (str: string, index: number | string) => string;
 type FilterFunc = (key: string, value: any) => boolean;
 
+// Browser timer types (to avoid Node.js conflicts)
+export type TimeoutHandler = ReturnType<typeof setTimeout>;
+export type IntervalHandler = ReturnType<typeof setInterval>;
+
 interface CleanObjectOptions {
     skipEmptyString?: boolean;
     filterFunc?: FilterFunc | null;

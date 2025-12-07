@@ -1,4 +1,4 @@
-import {isFunction} from "./Utils";
+import {isFunction, TimeoutHandler, IntervalHandler} from "./Utils";
 
 type Callback = Function;
 
@@ -199,25 +199,26 @@ class Dispatchable {
         }
     }
 
-    attachTimeout(callback: () => void, timeout: number): number {
+    attachTimeout(callback: () => void, timeout: number): TimeoutHandler {
         // TODO when the timeout executes, it doesn't get cleared from the cleanup jobs and would leak
         const timeoutId = setTimeout(callback, timeout);
         this.addCleanupJob(() => clearTimeout(timeoutId));
         return timeoutId;
     }
 
-    attachInterval(callback: () => void, timeout: number): number {
+    attachInterval(callback: () => void, timeout: number): IntervalHandler {
         const intervalId = setInterval(callback, timeout);
         this.addCleanupJob(() => clearInterval(intervalId));
         return intervalId;
     }
 
-    attachAnimationFrame(callback: (time: number) => void): number {
+    attachAnimationFrame(callback: (time: number) => void): TimeoutHandler | number {
         const animationId = requestAnimationFrame(callback);
         this.addCleanupJob(() => cancelAnimationFrame(animationId));
         return animationId;
     }
 
+    // TODO @Mihai when can this return an undefined? Shouldn't be possible
     addChangeListener(callback: Callback): DispatcherHandle | CleanupJobs | undefined {
         return this.addListener("change", callback);
     }
@@ -256,7 +257,7 @@ function getAttachCleanupJobMethod(methodName: string) {
 (Dispatcher as any).Global = new Dispatchable();
 
 export class RunOnce {
-    private timeout?: number;
+    private timeout?: TimeoutHandler;
 
     run(callback: () => void, timeout: number = 0): void {
         if (this.timeout) {
