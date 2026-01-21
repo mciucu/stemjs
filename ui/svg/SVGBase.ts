@@ -124,7 +124,7 @@ export class SVGUIElement<
     }
 
     toFront(): void {
-        const parentNode = this.node && this.node.parentElement;
+        const parentNode = this.node?.parentElement;
         if (parentNode) {
             parentNode.removeChild(this.node);
             parentNode.appendChild(this.node);

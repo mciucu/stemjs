@@ -80,7 +80,7 @@ export function makeColorTransition(svgElement: SVGUIElement, color: string, dur
 export function makeMoveTransition(svgElement: SVGUIElement, coords: Point, duration: number, dependsOn: Transition[] = [], startTime: number = 0): Transition {
     return new Transition({
         func: (t: number, context: any) => {
-            svgElement.setPosition(
+            svgElement.setCoords(
                 (1 - t) * context.x + t * coords.x,
                 (1 - t) * context.y + t * coords.y
             );
