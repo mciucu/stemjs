@@ -3,6 +3,7 @@ import {Color} from "../Color";
 import {SVGUIElement} from "./SVGBase";
 import {SVGText} from "./SVGText";
 import {Point} from "../../numerics/StemMath";
+import {isFunction} from "../../base/Utils";
 
 
 interface BlinkTransitionOptions {
@@ -78,12 +79,16 @@ export function makeColorTransition(svgElement: SVGUIElement, color: string, dur
 }
 
 export function makeMoveTransition(svgElement: SVGUIElement, coords: Point, duration: number, dependsOn: Transition[] = [], startTime: number = 0): Transition {
+    if (isFunction(svgElement.moveTransition)) {
+        return svgElement.moveTransition(coords, duration, dependsOn, startTime) as Transition;
+    }
+
     return new Transition({
         func: (t: number, context: any) => {
-            svgElement.setCoords(
-                (1 - t) * context.x + t * coords.x,
-                (1 - t) * context.y + t * coords.y
-            );
+            const x = (1 - t) * context.x + t * coords.x;
+            const y = (1 - t) * context.y + t * coords.y;
+
+            svgElement.setPosition({x, y});
         },
         context: {
             x: svgElement.options.x,

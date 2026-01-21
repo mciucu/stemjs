@@ -1,6 +1,7 @@
 import {SVG, SVGPrimitive, SVGUIElement} from "./SVGBase";
 import {DOMAttributesMap, NodeAttributes} from "../NodeAttributes";
 import {UI, TextUIElement} from "../UIBase";
+import {Point} from "../../numerics/StemMath";
 
 interface SVGTextOptions {
     text?: string;
@@ -76,9 +77,9 @@ export class SVGText extends SVGPrimitive<SVGTextOptions>("text") {
         return this.options.text;
     }
 
-    setPosition(x: number, y: number): void {
-        this.setX(x);
-        this.setY(y);
+    setPosition(p: Point): void {
+        this.setX(p.x);
+        this.setY(p.y);
     }
 
     getColor(): string | undefined {
