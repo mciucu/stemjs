@@ -7,11 +7,11 @@ import {isPlainObject} from "./Utils";
 export function parseHeaders(xhr: XMLHttpRequest): Headers {
     const rawHeader = xhr.getAllResponseHeaders() || "";
     const rawHeaderLines = rawHeader.split(/\r?\n/);
-    let headers = new Headers();
+    const headers = new Headers();
 
     for (let line of rawHeaderLines) {
-        let parts = line.split(":");
-        let key = parts.shift().trim();
+        const parts = line.split(":");
+        const key = parts.shift().trim();
         if (key) {
             let value = parts.join(":").trim();
             headers.append(key, value);
@@ -27,9 +27,9 @@ export function getURLSearchParams(data: any, arrayKeySuffix: string = "[]"): UR
         return data;
     }
 
-    let urlSearchParams = new URLSearchParams();
+    const urlSearchParams = new URLSearchParams();
     for (const key of Object.keys(data)) {
-        let value = data[key];
+        const value = data[key];
         if (Array.isArray(value)) {
             for (let instance of value) {
                 urlSearchParams.append(key + arrayKeySuffix, instance);
