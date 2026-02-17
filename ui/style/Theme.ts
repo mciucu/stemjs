@@ -2,8 +2,8 @@ import {Dispatchable} from "../../base/Dispatcher";
 import {resolveFuncValue} from "../../base/Utils";
 import {CallThrottler} from "../../base/CallModifier";
 import {ThemeType} from "./ThemeTypes";
-import {StyleSheet} from "../Style";
-import {UIElement} from "../UIBase";
+import type {StyleSheet} from "../Style";
+import type {UIElement} from "../UIBase";
 
 export type ThemeProps = Record<string, any>;
 
