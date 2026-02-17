@@ -10,7 +10,7 @@ import {
 import {CleanupJobs, Dispatchable, OncePerTickRunner, RemoveHandle} from "../base/Dispatcher";
 import {DOMAttributesMap, NodeAttributes} from "./NodeAttributes";
 import {Theme, ThemeProps} from "./style/Theme";
-import {StyleSheet} from "./Style";
+import type {StyleSheet} from "./Style";
 
 export type SVGTagType = keyof SVGElementTagNameMap;
 export type HTMLTagType = keyof HTMLElementTagNameMap;

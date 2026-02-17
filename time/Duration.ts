@@ -132,8 +132,8 @@ export class TimeUnit {
 }
 
 export class Duration {
-    milliseconds?: number;
-    relativeDuration?: boolean;
+    declare milliseconds?: number;
+    declare relativeDuration?: boolean;
     [key: string]: any;
 
     constructor(duration?: DurationInput) {
