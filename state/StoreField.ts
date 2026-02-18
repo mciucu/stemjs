@@ -64,7 +64,7 @@ export class FieldDescriptor {
             const storeName = (this.type === "self") ? null : this.type as string;
 
             this.loader = (value: any, obj: StoreObjectWithFields) => {
-                // TODO Instead of calling GlobalState, the object should implement .getState()
+                // TODO Instead of calling GlobalState, the object should ALWAYS implement .getState()
                 const store = obj.getStore ? obj.getStore(storeName) : GlobalState.getStore(storeName);
                 return store.get(value);
             }
