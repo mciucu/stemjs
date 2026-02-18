@@ -319,6 +319,9 @@ class CleanupJobs {
 
     cleanup(): void {
         for (let job of this.jobs) {
+            if (!job) {
+                continue;
+            }
             if (implementsCleanupHandle(job)) {
                 job.cleanup();
             } else if (implementsRemoveHandle(job)) {
@@ -347,7 +350,7 @@ class CleanupJobs {
 // Class for events that should only happen once. Any listener added after the first firing will be automatically called with those arguments.
 // Useful for caching initializations for instance.
 export class OnceDispatcher extends Dispatcher {
-    private dispatchArgs?: any[];
+    private declare dispatchArgs?: any[];
 
     dispatch(...args: any[]): void {
         this.dispatchArgs = args; // Save the arguments
@@ -358,6 +361,7 @@ export class OnceDispatcher extends Dispatcher {
         return this.dispatchArgs;
     }
 
+    // TODO wouldn't it be simpler if this always returns a DispatchHandle?
     addListener(callback: Callback): DispatcherHandle | undefined {
         if (this.haveDispatched()) {
             // Just pass the existing arguments
