@@ -3,6 +3,7 @@ import {App as WSApp, WebSocket, us_listen_socket, HttpResponse, HttpRequest, us
 import {CheckStreamPermission, IdentifySessionId, LoadSessionId, RPCCaller} from "./PermissionChecking";
 import {DEFAULT_HEARTBEAT_MESSAGE} from "../Shared";
 import {AppConfig} from "./AppConfig";
+import {callWithRetry} from "../../base/Utils";
 
 declare global {
     namespace NodeJS {
@@ -235,11 +236,10 @@ export class WebsocketServer {
     async init() {
         this.rpcCaller = new RPCCaller(this.appConfig);
 
-        // TODO put this in 5 try loop
-        this.extraConfig = await this.rpcCaller.query("config");
+        this.extraConfig = await callWithRetry(() => this.rpcCaller!.query("config"));
 
         if (this.extraConfig == null) {
-            console.error("Failed to get a config response, shutting down!");
+            console.error("Failed to get a config response after retries, shutting down!");
             process.exit(1);
         }
 

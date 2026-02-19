@@ -539,6 +539,31 @@ export function eraseFirst<T>(array: T[], value: T): T[] {
     return array;
 }
 
+export function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+interface CallWithRetryOptions {
+    maxAttempts?: number;
+    delayMs?: number;
+    onFailedAttempt?: (attempt: number, options: CallWithRetryOptions) => void;
+}
+
+export async function callWithRetry<T>(fn: () => Promise<T>, options: CallWithRetryOptions = {}): Promise<T | null> {
+    const {maxAttempts = 5, delayMs = 2000, onFailedAttempt} = options;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        const result = await fn();
+        if (result != null) {
+            return result;
+        }
+        if (attempt < maxAttempts) {
+            onFailedAttempt?.(attempt, options);
+            await sleep(delayMs);
+        }
+    }
+    return null;
+}
+
 export const UNICODE_BOM_CHARACTER = 0xFEFF;
 export const NOOP_FUNCTION = () => undefined;
 
