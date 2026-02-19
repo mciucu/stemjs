@@ -44,7 +44,7 @@ class DispatcherHandle implements RemoveHandle {
     }
 }
 
-class Dispatcher {
+export class Dispatcher {
     options: any;
     listeners: Callback[];
 
@@ -122,7 +122,7 @@ class Dispatcher {
 export const DispatchersSymbol = Symbol("Dispatchers");
 export const CleanupJobsSymbol = Symbol("CleanupJobs");
 
-class Dispatchable {
+export class Dispatchable {
     declare private [DispatchersSymbol]?: Map<string, Dispatcher>;
     declare private [CleanupJobsSymbol]?: CleanupJobs;
 
@@ -218,6 +218,15 @@ class Dispatchable {
         return animationId;
     }
 
+    // These methods are added dynamically to the prototype below via getAttachCleanupJobMethod.
+    // They call obj.add[MethodName](...args) and register the result as a cleanup job.
+    declare attachListener: (obj: any, ...args: any[]) => CleanupJob;
+    declare attachEventListener: (obj: any, ...args: any[]) => CleanupJob;
+    declare attachCreateListener: (obj: any, ...args: any[]) => CleanupJob;
+    declare attachDeleteListener: (obj: any, ...args: any[]) => CleanupJob;
+    declare attachChangeListener: (obj: any, ...args: any[]) => CleanupJob;
+    declare attachListenerOnce: (obj: any, ...args: any[]) => CleanupJob;
+
     // TODO @Mihai when can this return an undefined? Shouldn't be possible
     addChangeListener(callback: Callback): DispatcherHandle | CleanupJobs | undefined {
         return this.addListener("change", callback);
@@ -229,7 +238,7 @@ class Dispatchable {
 }
 
 // Creates a method that calls the method methodName on obj, and adds the result as a cleanup task
-function getAttachCleanupJobMethod(methodName: string) {
+export function getAttachCleanupJobMethod(methodName: string) {
     let addMethodName = "add" + methodName;
     let removeMethodName = "remove" + methodName;
     return function (this: Dispatchable, obj: any, ...args: any[]) {
@@ -306,7 +315,7 @@ export class OncePerTickRunner {
     }
 }
 
-class CleanupJobs {
+export class CleanupJobs {
     jobs: CleanupJob[];
 
     constructor(jobs: CleanupJob[] = []) {
@@ -407,5 +416,3 @@ export class SingleActiveElementDispatcher<T = any> extends Dispatcher {
         return this._active;
     }
 }
-
-export {Dispatcher, Dispatchable, CleanupJobs, getAttachCleanupJobMethod};
