@@ -539,9 +539,16 @@ export function eraseFirst<T>(array: T[], value: T): T[] {
     return array;
 }
 
-export function sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+export async function sleep(milliseconds: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, Math.max(milliseconds, 0)));
 }
+
+// Still does a sleep(0) if date is in the past
+export async function sleepUntil(date: Date) {
+    const diff = date.valueOf() - Date.now();
+    return sleep(diff);
+}
+
 
 interface CallWithRetryOptions {
     maxAttempts?: number;
