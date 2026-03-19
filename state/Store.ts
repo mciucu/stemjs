@@ -153,9 +153,11 @@ export class StoreObject extends Dispatchable {
         return this.objects.values() as IterableIterator<T>;
     }
 
+    static comparator?: (a: any, b: any) => number;
+
     static all<T extends StoreObject>(this: StoreClass<T>): T[] {
-        const values = this.values();
-        return Array.from(values);
+        const values = Array.from(this.values());
+        return this.comparator ? values.sort(this.comparator) : values;
     }
 
     static find<T extends StoreObject>(this: StoreClass<T>, callback: (value: T) => boolean): T | undefined {
