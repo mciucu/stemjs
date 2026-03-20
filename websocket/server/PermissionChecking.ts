@@ -47,6 +47,14 @@ export async function IdentifySessionId(rpcCaller: RPCCaller, sessionId: string)
 }
 
 export async function CheckStreamPermission(rpcCaller: RPCCaller, userId: string, streamName: string): Promise<[boolean, string]> {
+    if (streamName === "global-events") {
+        return [true, "Default global stream"];
+    }
+
+    if (streamName === userId || streamName === `user-${userId}-events`) {
+        return [true, "Default user stream"];
+    }
+
     const response = rpcCaller.query("permission", {userId, streamName});
     // We're ignoring the failed response
     return response || [false, "Unknown reason"];
