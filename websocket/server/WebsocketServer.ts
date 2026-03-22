@@ -147,9 +147,11 @@ export class WebsocketServer {
             },
             open: (wsConnection: WSConnection) => {
                 this.addConnection(wsConnection);
-                const {userId} = wsConnection.getUserData();
+                const {userId, sessionId, ipAddress} = wsConnection.getUserData();
                 if (userId) {
                     wsConnection.send("id " + userId);
+                } else {
+                    wsConnection.send("nid " + sessionId + " " + ipAddress);
                 }
             },
             close: (wsConnection: WSConnection, code: number, message: ArrayBuffer) => this.removeConnection(wsConnection),
