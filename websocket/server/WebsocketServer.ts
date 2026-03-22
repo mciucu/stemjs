@@ -145,7 +145,13 @@ export class WebsocketServer {
                     );
                 });
             },
-            open: (wsConnection: WSConnection) => this.addConnection(wsConnection),
+            open: (wsConnection: WSConnection) => {
+                this.addConnection(wsConnection);
+                const {userId} = wsConnection.getUserData();
+                if (userId) {
+                    wsConnection.send("id " + userId);
+                }
+            },
             close: (wsConnection: WSConnection, code: number, message: ArrayBuffer) => this.removeConnection(wsConnection),
             message: async (wsConnection: WSConnection, message: ArrayBuffer) => {
                 this.stats.numMessagesReceived += 1;
@@ -204,7 +210,7 @@ export class WebsocketServer {
                 this.stats.gcDuration = performance.now() - startTime;
             }
             this.writeStats();
-        }, 10000);
+        }, 30000);
     }
 
     writeStats() {
