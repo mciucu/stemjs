@@ -25,7 +25,7 @@ export type RefLinkOptions = {
 
 // Type definitions
 export interface UIElementOptions {
-    children?: UIElementCleanChild[];
+    children?: UIElementCleanChild | UIElementCleanChild[];
     ref?: RefLinkOptions | string;
     key?: string | number;
     active?: boolean; // Tabs or switchers can put this on children
@@ -202,7 +202,7 @@ export class TextUIElement<ExtraOptions extends TextElementOptions = TextElement
 UI.TextElement = TextUIElement;
 
 export class UIElement<
-    ExtraOptions = void,
+    ExtraOptions = {},
     NodeType extends (HTMLElement | SVGElement) = HTMLElement,
     OptionsType extends UIElementOptions = UIOptions<NodeType, ExtraOptions>
 > extends BaseUIElement<NodeType> {
