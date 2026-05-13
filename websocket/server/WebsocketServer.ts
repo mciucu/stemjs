@@ -32,6 +32,7 @@ interface ConnectionStats {
     numOpenedConnection: number;
     numMessagesReceived: number;
     gcDuration?: number;
+    onlineStatusUpdateDuration?: number;
 }
 
 interface UserData {
@@ -51,6 +52,8 @@ interface WSConnection extends WebSocket<UserData> {
 const CONNECTION_KEYS = ["ipAddress", "userId", "sessionId"] as const;
 type ConnectionKey = typeof CONNECTION_KEYS[number];
 type ConnectionMap = Map<string, Set<WSConnection>>;
+
+const ONLINE_STATUS_BATCH_SIZE = 256;
 
 
 export class WebsocketServer {
@@ -213,6 +216,26 @@ export class WebsocketServer {
             }
             this.writeStats();
         }, 30000);
+
+        const {onlineStatusTickIntervalMs} = this.appConfig;
+        if (onlineStatusTickIntervalMs) {
+            setInterval(async () => {
+                const startTime = performance.now();
+                await this.publishOnlineStatusUpdate();
+                this.stats.onlineStatusUpdateDuration = performance.now() - startTime;
+            }, onlineStatusTickIntervalMs);
+        }
+    }
+
+    async publishOnlineStatusUpdate() {
+        const online = Array.from(this.connectionsBy.userId.keys()).filter(Boolean);
+        if (online.length === 0) {
+            return;
+        }
+        for (let i = 0; i < online.length; i += ONLINE_STATUS_BATCH_SIZE) {
+            const batch = online.slice(i, i + ONLINE_STATUS_BATCH_SIZE);
+            await this.rpcCaller!.query("online-status-update", {online: batch});
+        }
     }
 
     writeStats() {
