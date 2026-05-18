@@ -3,6 +3,7 @@ import {UI, UIElement} from "../UIBase";
 export interface InputElementOptions<T = any> {
     initialValue?: T;
     value?: T;
+    onChange?: (value: T, source: BaseInputElement<T>) => void;
 }
 
 // TODO @types should be an abstract class
