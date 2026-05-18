@@ -7,7 +7,7 @@ export interface InputElementOptions<T = any> {
 
 // TODO @types should be an abstract class
 export class BaseInputElement<T = any> extends UIElement<InputElementOptions<T>, HTMLInputElement> {
-    protected value?: T;
+    declare protected value?: T;
 
     getValue(): T | undefined {
         return this.value;
@@ -51,10 +51,8 @@ export class BaseInputElement<T = any> extends UIElement<InputElementOptions<T>,
         this.node?.blur();
     }
 
+    // Purely to force a type
     dispatchChange(value: T): void {
-        // TODO @Mihai WAT? Implementation will be provided by subclasses or mixins
-        if (this.options.onChange) {
-            this.options.onChange(value, this);
-        }
+        super.dispatchChange(value);
     }
 }
