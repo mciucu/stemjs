@@ -195,10 +195,10 @@ export class Money {
         }
     }
 
-    private formatAmountString(options: {includeSymbol?: boolean; useDecimalSeparator?: boolean} = {}): string {
-        const {includeSymbol = true, useDecimalSeparator = false} = options;
+    private formatAmountString(options: {includeSymbol?: boolean; useDecimalSeparator?: boolean; stripIfInteger?: boolean} = {}): string {
+        const {includeSymbol = true, useDecimalSeparator = false, stripIfInteger = false} = options;
         const currency = this.getCurrency();
-        const numberPart = currency.getFormatter({style: "decimal", useGrouping: useDecimalSeparator})
+        const numberPart = currency.getFormatter({style: "decimal", useGrouping: useDecimalSeparator, stripIfInteger})
             .format(currency.amountToMainUnits(this.amount));
         return (includeSymbol ? currency.getMainUnitSymbol() : "") + numberPart;
     }
