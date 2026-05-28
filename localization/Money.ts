@@ -194,6 +194,36 @@ export class Money {
             currencyId: this.currency.id,
         }
     }
+
+    private formatAmountString(options: {includeSymbol?: boolean; useDecimalSeparator?: boolean} = {}): string {
+        const {includeSymbol = true, useDecimalSeparator = false} = options;
+        const currency = this.getCurrency();
+        const numberPart = currency.getFormatter({style: "decimal", useGrouping: useDecimalSeparator})
+            .format(currency.amountToMainUnits(this.amount));
+        return (includeSymbol ? currency.getMainUnitSymbol() : "") + numberPart;
+    }
+
+    // Money, rich, get it?
+    toRichJSON(): {
+        currency: string;
+        currencyId: string | number;
+        amount: string;
+        amountInSubunits: number;
+        amountPrecise: number;
+        amountPreciseExponent: number;
+        amountFormatted: string;
+    } {
+        const currency = this.getCurrency();
+        return {
+            currency: currency.getIsoCode(),
+            currencyId: currency.id,
+            amount: this.formatAmountString({includeSymbol: false}),
+            amountInSubunits: Math.floor(currency.amountToSubunits(this.amount)),
+            amountPrecise: this.amount,
+            amountPreciseExponent: currency.getDecimalDigitsCount(),
+            amountFormatted: this.formatAmountString({useDecimalSeparator: true}),
+        };
+    }
 }
 
 // A generic store object that has a currency and an amount

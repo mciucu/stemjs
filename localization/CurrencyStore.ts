@@ -60,11 +60,14 @@ export class Currency extends BaseStore("Currency") {
         return this.isoCode.toLowerCase();
     }
 
-    getFormatter(): Intl.NumberFormat {
+    getFormatter(options: {style?: "currency" | "decimal", useGrouping?: boolean} = {}): Intl.NumberFormat {
+        const {style = "currency", useGrouping = true} = options;
         return new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: this.isoCode.toUpperCase(),
-            maximumFractionDigits: 2,
+            style,
+            ...(style === "currency" ? {currency: this.isoCode.toUpperCase()} : {}),
+            minimumFractionDigits: this.subdivisionDecimalDigits,
+            maximumFractionDigits: this.subdivisionDecimalDigits,
+            useGrouping,
         });
     }
 
