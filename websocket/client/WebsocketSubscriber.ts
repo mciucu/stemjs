@@ -40,6 +40,7 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
     connectionStatus: number = WebsocketSubscriber.ConnectionStatus.NONE;
     websocket: WebSocket | null = null;
     failedReconnectAttempts: number = 0;
+    manualClose: boolean = false;
     numConnectionAttempts: number = 0;
     retryDefaultTimeout: number = 3000;
     retryMaxTimeout: number = 30000;
@@ -65,6 +66,7 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
     }
 
     connect(): void {
+        this.manualClose = false;
         const url = this.getNextUrl();
         this.setConnectionStatus(WebsocketSubscriber.ConnectionStatus.CONNECTING);
         try {
@@ -78,6 +80,15 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
             this.tryReconnect();
             console.error("WebsocketSubscriber: Failed to connect to ", url, "\nError: ", e.message);
         }
+    }
+
+    disconnect(): void {
+        this.manualClose = true;
+        if (this.reconnectTimeout) {
+            clearTimeout(this.reconnectTimeout);
+            this.reconnectTimeout = undefined;
+        }
+        this.websocket?.close();
     }
 
     calcRetryTimeout(numFailedAttempts: number): number {
@@ -243,13 +254,17 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
     onWebsocketError(event: Event | string): void {
         console.error("WebsocketSubscriber: Websocket connection is broken!");
         this.reset();
-        this.tryReconnect();
+        if (!this.manualClose) {
+            this.tryReconnect();
+        }
     }
 
     onWebsocketClose(event: CloseEvent): void {
         console.log("WebsocketSubscriber: Connection closed!");
         this.reset();
-        this.tryReconnect();
+        if (!this.manualClose) {
+            this.tryReconnect();
+        }
     }
 
     send(message: string): void {
