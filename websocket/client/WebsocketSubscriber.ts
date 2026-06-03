@@ -237,8 +237,9 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
             this.dispatch("serverCommand", payload);
         } else if (type == "close") {
             this.handleServerClose(payload!);
-        } else if (type == "id") {
-            // Ignore this for now
+        } else if (type == "id" || type == "nid") {
+            // Connection identity handshake ("id <userId>" when authenticated,
+            // "nid <sessionId> <ipAddress>" when anonymous). Nothing to do here.
         } else {
             console.error("WebsocketSubscriber: Can't process " + event.data);
         }
