@@ -300,6 +300,15 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
         }
     }
 
+    // Fully drop a stream so a later reconnect's resubscribe() won't try to subscribe to it again.
+    unsubscribe(streamName: string): void {
+        const streamHandler = this.streamHandlers.get(streamName);
+        if (streamHandler) {
+            streamHandler.clearResubscribeTimeout();
+            this.streamHandlers.delete(streamName);
+        }
+    }
+
     static addListener(streamName: string, callback: Callback): void {
         return this.Global!.addStreamListener(streamName, callback);
     }
