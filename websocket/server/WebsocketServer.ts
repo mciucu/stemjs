@@ -110,7 +110,9 @@ export class WebsocketServer {
         const {rpcCaller} = this;
 
 
-        const {port} = this.appConfig;
+        // Default to loopback so the socket isn't directly reachable; a deployment must
+        // explicitly set "0.0.0.0" (or a specific interface) to expose it beyond localhost.
+        const {port, bindAddress = "127.0.0.1"} = this.appConfig;
         const {stats} = this;
 
         this.rawServer = WSApp({}).ws("/*", {
@@ -198,9 +200,11 @@ export class WebsocketServer {
             drain(wsConnection: WSConnection) {
                 // the socket is ready to receive more data
             },
-        }).listen(port, (token: us_listen_socket | false) => {
+        });
+
+        this.rawServer.listen(bindAddress, port, (token: us_listen_socket | false) => {
             if (token) {
-                console.log("WS Listening on port", port);
+                console.log("WS Listening on", bindAddress, port);
             } else {
                 console.error("Failed to listen on port", port);
             }
