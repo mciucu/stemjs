@@ -90,7 +90,7 @@ export function makeEnum<T extends BaseEnum>(cls: new (...args: any[]) => T & Re
     // TODO: have it working so that if cls doesn't manually inherit BaseEnum, everything still works.
     //  Object.setPrototypeOf(cls, BaseEnum);
     //  cls.prototype.__proto__ = BaseEnum.prototype;
-    const enumCls = cls as any as EnumConstructor<T>;
+    const enumCls = cls as any as EnumConstructor<T> & Record<string, any>;
     const allEntries: T[] = [];
     for (const key in enumCls) {
         const uppercaseKey = key.toUpperCase();

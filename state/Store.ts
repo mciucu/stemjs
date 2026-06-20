@@ -86,7 +86,7 @@ export class StoreObject extends Dispatchable {
     static dependencies: string[] = [];
     static objects = new Map<string, InstanceType<typeof this>>();
 
-    static makeFieldLoader<T extends StoreObject>(this: StoreClass<T>, fieldDescriptor: FieldDescriptor): (value: any, obj: any) => T {
+    static makeFieldLoader<T extends StoreObject>(this: StoreClass<T>, fieldDescriptor: FieldDescriptor): (value: any, obj: any) => T | undefined {
         fieldDescriptor.cacheField = false;
         fieldDescriptor.rawField = fieldDescriptor.rawField || (key => key + "Id");
 
@@ -228,7 +228,7 @@ export class StoreObject extends Dispatchable {
         return obj;
     }
 
-    static applyEvent<T extends StoreObject>(this: StoreClass<T>, event: StoreEvent): T | null {
+    static applyEvent<T extends StoreObject>(this: StoreClass<T>, event: StoreEvent): T | undefined {
         event.data = event.data || {};
 
         if (event.type === "create" || event.type === "createOrUpdate") {
@@ -243,7 +243,7 @@ export class StoreObject extends Dispatchable {
         const obj = this.getObjectForEvent<T>(event);
         if (!obj) {
             console.error("Missing object of type ", this.objectType, " ", event.objectId);
-            return null;
+            return undefined;
         }
 
         obj.applyEventAndDispatch(event);
