@@ -25,9 +25,10 @@ export class SingletonStore<T extends SingletonStore<T> = any> extends StoreObje
         return JSON.stringify([this]);
     }
 
-    applyEvent(event: StoreEvent): void {
+    applyEvent(event: StoreEvent): T {
         Object.assign(this, event.data);
         this.dispatchChange(event);
+        return this as any as T;
     }
 
     importState(obj: any): void {

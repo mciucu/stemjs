@@ -404,7 +404,7 @@ export class SingleActiveElementDispatcher<T = any> extends Dispatcher {
         this._active = element;
         this.dispatch(element);
         if (addChangeListener) {
-            this.addListenerOnce((newElement) => {
+            this.addListenerOnce((newElement: T) => {
                 if (newElement != element) {
                     addChangeListener(newElement);
                 }

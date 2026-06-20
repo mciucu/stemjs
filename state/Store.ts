@@ -217,7 +217,7 @@ export class StoreObject extends Dispatchable {
         return obj;
     }
 
-    static applyDeleteEvent<T extends StoreObject>(this: StoreClass<T>, event: StoreEvent): T | null {
+    static applyDeleteEvent<T extends StoreObject>(this: StoreClass<T>, event: StoreEvent): T | undefined {
         const obj = this.getObjectForEvent<T>(event);
         if (obj) {
             this.objects.delete(this.getObjectIdForEvent(event));

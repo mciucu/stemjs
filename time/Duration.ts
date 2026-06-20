@@ -56,7 +56,7 @@ export class TimeUnit {
         this.multiplier = multiplier;
         this.milliseconds = (baseUnit?.getMilliseconds() || 1) * multiplier;
         this.variableMultiplier = options.variableMultiplier || false;
-        this.variableDuration = this.variableMultiplier || (baseUnit && baseUnit.isVariable());
+        this.variableDuration = this.variableMultiplier || (baseUnit?.isVariable() ?? false);
 
         let methodSuffix = (name === "year") ? "FullYear" : (name === "day" ? "Date" : capitalize(name));
         this.getterName = "get" + methodSuffix;
