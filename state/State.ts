@@ -136,7 +136,7 @@ export class State extends Dispatchable {
         }
         while (stateMap.size > 0) {
             const allKeys = stateMap.keys();
-            const objectType = allKeys.next().value;
+            const objectType = allKeys.next().value!; // size > 0 guarantees a remaining key
             this.importStateFromTempMap(objectType, stateMap);
         }
     }
@@ -158,7 +158,7 @@ export class State extends Dispatchable {
     }
 
     toJSON(): Record<string, any> {
-        const state = {};
+        const state: Record<string, any> = {};
         for (const store of this.stores.values()) {
             state[store.objectType] = store.toJSON();
         }

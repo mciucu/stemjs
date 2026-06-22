@@ -7,6 +7,18 @@ type FilterFunc = (key: string, value: any) => boolean;
 export type TimeoutHandler = ReturnType<typeof setTimeout>;
 export type IntervalHandler = ReturnType<typeof setInterval>;
 
+// Map lookups are total over keys (a nullish key is just a miss), so allow nullish keys without a cast.
+// This only adds new methods, so get(K) still returns non-null V
+declare global {
+    interface Map<K, V> {
+        get(key: K | null | undefined): V | undefined;
+    }
+    interface ReadonlyMap<K, V> {
+        get(key: K | null | undefined): V | undefined;
+    }
+    //WeakMap might also make sense later
+}
+
 interface CleanObjectOptions {
     skipEmptyString?: boolean;
     filterFunc?: FilterFunc | null;

@@ -86,7 +86,7 @@ export class BaseEnum {
 }
 
 // Experimental enum maker method
-export function makeEnum<T extends BaseEnum>(cls: new (...args: any[]) => T & Record<string, any>): EnumConstructor<T> {
+export function makeEnum<T extends BaseEnum, C extends new (...args: any[]) => T & Record<string, any>>(cls: C): C & EnumConstructor<T> {
     // TODO: have it working so that if cls doesn't manually inherit BaseEnum, everything still works.
     //  Object.setPrototypeOf(cls, BaseEnum);
     //  cls.prototype.__proto__ = BaseEnum.prototype;
@@ -102,5 +102,5 @@ export function makeEnum<T extends BaseEnum>(cls: new (...args: any[]) => T & Re
 
     enumCls.allEntries = allEntries;
 
-    return Object.freeze(enumCls);
+    return Object.freeze(enumCls) as C & EnumConstructor<T>;
 }
