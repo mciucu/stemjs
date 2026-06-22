@@ -1,5 +1,5 @@
 import {padNumber, suffixWithOrdinal, isNumber, isString} from "../base/Utils";
-import {TimeUnit, Duration, DurationInput} from "./Duration";
+import {TimeUnit, Duration, DurationInput, TimeUnitKey} from "./Duration";
 import {TokenFormatter} from "./Formatter";
 import {Timezone} from "../localization/Timezone";
 
@@ -170,12 +170,12 @@ export class StemDate extends BaseDate {
 
         while (!timeUnit.dateMethodSuffix) {
             count *= timeUnit.multiplier;
-            timeUnit = timeUnit.baseUnit;
+            timeUnit = timeUnit.baseUnit!; // a variable unit always has a base chain reaching a unit with a date method
         }
 
         const dateMethodSuffix = timeUnit.dateMethodSuffix;
-        const currentValue = this["get" + dateMethodSuffix]();
-        this["set" + dateMethodSuffix](currentValue + count);
+        const currentValue = (this as any)["get" + dateMethodSuffix]();
+        (this as any)["set" + dateMethodSuffix](currentValue + count);
 
         return this;
     }
@@ -220,10 +220,10 @@ export class StemDate extends BaseDate {
     }
 
     roundDown(timeUnit: TimeUnit) {
-        timeUnit = TimeUnit.toTimeUnit(timeUnit);
+        let curUnit: TimeUnit | null = TimeUnit.toTimeUnit(timeUnit);
         // TODO: this is wrong for semester, etc, should be different then
-        while (timeUnit = timeUnit.baseUnit) {
-            timeUnit.setDateValue(this, 0);
+        while (curUnit = curUnit.baseUnit) {
+            curUnit.setDateValue(this, 0);
         }
         return this;
     }
@@ -257,7 +257,7 @@ export class StemDate extends BaseDate {
             return this;
         }
         for (const key in duration) {
-            const timeUnit = TimeUnit.CANONICAL[key];
+            const timeUnit = TimeUnit.CANONICAL[key as TimeUnitKey];
             if (timeUnit) {
                 this.addUnit(timeUnit, duration[key]);
             }

@@ -3,7 +3,7 @@ import {TokenFormatter} from "./Formatter";
 
 type TimeUnitName = "millisecond" | "second" | "minute" | "hour" | "day" | "week" | "month" | "quarter" | "trimester" | "semester" | "year";
 type TimeUnitPluralName = "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "quarters" | "trimesters" | "semesters" | "years";
-type TimeUnitKey = TimeUnitName | TimeUnitPluralName;
+export type TimeUnitKey = TimeUnitName | TimeUnitPluralName;
 
 interface TimeUnitOptions {
     variableMultiplier?: boolean;
@@ -76,7 +76,7 @@ export class TimeUnit {
         if (timeUnit instanceof TimeUnit) {
             return timeUnit;
         }
-        return this.CANONICAL[timeUnit];
+        return this.CANONICAL[timeUnit]!;
     }
 
     valueOf(): number {
@@ -159,7 +159,7 @@ export class Duration {
         }
         if (isPlainObject(duration)) {
             this.milliseconds = 0;
-            for (const key of Object.keys(duration)) {
+            for (const key of Object.keys(duration) as TimeUnitKey[]) {
                 let timeUnit = TimeUnit.CANONICAL[key];
                 if (!timeUnit) {
                     throw new Error(`Unknown time unit: ${key}`);
