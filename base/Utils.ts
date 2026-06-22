@@ -387,7 +387,7 @@ export function isDeepEqual(obj1: any, obj2: any): boolean {
     }
     // If the entry count is the same, it's enough to check that the second object has each of the first's entries.
     for (const key of obj1Keys) {
-        if (!isDeepEqual(obj1[key], obj2[key])) {
+        if (!isDeepEqual((obj1 as Record<string, any>)[key], (obj2 as Record<string, any>)[key])) {
             return false;
         }
     }

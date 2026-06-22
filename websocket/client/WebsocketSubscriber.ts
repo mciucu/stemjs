@@ -184,7 +184,7 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
         console.error("Websocket error:", payload);
         const [errorType, details] = splitPayload(payload);
 
-        if (errorType === "invalidSubscription") {
+        if (errorType === "invalidSubscription" && details) {
             // Stop trying to resubscribe to a stream that's been rejected by the server
             const streamHandler = this.getStreamHandler(details);
             if (streamHandler) {

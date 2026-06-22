@@ -17,7 +17,7 @@ interface DateValues {
 
 @makeEnum
 export class Timezone extends BaseEnum {
-    static LOCAL: TimezoneConfig = {value: "local", name: `Local timezone (${this.getCurrentTimezoneName()})`};
+    static LOCAL: TimezoneConfig = {value: "local", name: `Local timezone (${Timezone.getCurrentTimezoneName()})`};
     static UTC: TimezoneConfig = {value: "UTC", name: "Universal Time, Coordinated"};
     static US_EASTERN: TimezoneConfig = {value: "America/New_York", name: "US Eastern"};
     static US_CENTRAL: TimezoneConfig = {value: "America/Chicago", name: "US Central"};
