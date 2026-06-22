@@ -65,8 +65,8 @@ export class FieldDescriptor {
 
             this.loader = (value: any, obj: StoreObjectWithFields) => {
                 // TODO Instead of calling GlobalState, the object should ALWAYS implement .getState()
-                const store = obj.getStore ? obj.getStore(storeName) : GlobalState.getStore(storeName);
-                return store.get(value);
+                const store = obj.getStore ? obj.getStore(storeName as string) : GlobalState.getStore(storeName);
+                return store?.get(value);
             }
         }
 
@@ -79,7 +79,7 @@ export class FieldDescriptor {
 
         // Apply default logic in case it was not explicitly given
         if (isFunction(this.rawField)) {
-            this.rawField = this.rawField(this.key, this);
+            this.rawField = this.rawField(this.key!, this); // key is always set by setTarget before makeDescriptor runs
         }
 
         if (!this.rawField) {

@@ -63,7 +63,7 @@ export class StoreObject extends Dispatchable {
         // Ensure the private event dispatcher exists
         if (!this[EventDispatcherSymbol]) {
             this[EventDispatcherSymbol] = new Dispatchable();
-            this.addChangeListener((event) => {
+            this.addChangeListener((event: StoreEvent) => {
                 this[EventDispatcherSymbol]!.dispatch(event.type, event, this);
             });
         }
