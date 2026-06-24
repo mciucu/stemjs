@@ -1,6 +1,6 @@
 // TODO @Mihai this should become the new Store
 import {CleanupJobs, Dispatchable} from "../base/Dispatcher";
-import {GlobalState, RawStateData, State, StateData, StoreEvent, StoreId, StoreIdOrNull} from "./State";
+import {GlobalState, RawStateData, State, StateData, StoreEvent, StoreId, StoreIdOrNull, StoreInterface} from "./State";
 import {isNotNull, isString, toArray} from "../base/Utils";
 import {FieldDescriptor} from "./StoreField";
 
@@ -29,14 +29,15 @@ export class StoreObject extends Dispatchable {
     }
 
     // Overloaded signatures for better typing
-    getStore(): typeof this.constructor & StoreClass<this> & Dispatchable;
-    getStore(storeName: string): StoreClass<any> & Dispatchable;
-    getStore(storeName?: string): StoreClass<any> & Dispatchable {
+    // A nullish storeName resolves to the object's own store (same as the no-arg call)
+    getStore(storeName?: null): typeof this.constructor & StoreClass<this> & Dispatchable;
+    getStore(storeName: string | null): StoreInterface | undefined;
+    getStore(storeName?: string | null): (StoreClass<this> & Dispatchable) | StoreInterface | undefined {
         const ownStore = this.getOwnStore();
         if (storeName) {
-            return ownStore.getState().getStore(storeName) as any;
+            return ownStore.getState().getStore(storeName);
         }
-        return ownStore as any;
+        return ownStore;
     }
 
     // By default, applying an event just shallow copies the fields from event.data
