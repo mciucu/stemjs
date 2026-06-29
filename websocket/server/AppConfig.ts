@@ -10,4 +10,8 @@ export interface AppConfig {
     // list of currently-connected userIds. The RPC backend decides what to do with it.
     // Leave undefined to disable the sweep entirely.
     onlineStatusTickIntervalMs?: number;
+    // Whether a connection may authenticate via a "?sessionId=" query param instead of the
+    // session cookie. Query params leak into URLs, access logs and referrers, so prefer cookie
+    // auth and set this false. Defaults to allowed when unset, to preserve existing behavior.
+    allowQueryParamSessionAuth?: boolean;
 }

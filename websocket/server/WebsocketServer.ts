@@ -131,7 +131,10 @@ export class WebsocketServer {
                 });
 
                 // TODO limit num connections per IP/user
-                const sessionId = LoadSessionId(request) || new URLSearchParams(request.getQuery()).get("sessionId");
+                const queryParamSessionId = (appConfig.allowQueryParamSessionAuth ?? true)
+                    ? new URLSearchParams(request.getQuery()).get("sessionId")
+                    : null;
+                const sessionId = LoadSessionId(request) || queryParamSessionId;
                 const userId = sessionId ? await IdentifySessionId(rpcCaller!, sessionId) : null;
 
                 if (upgradeAborted.aborted) {
