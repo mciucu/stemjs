@@ -187,7 +187,7 @@ export class WebsocketSubscriber extends Dispatchable {
         this.streamHandlers.set(streamName, streamHandler);
 
         if (this.isOpen()) {
-            this.sendSubscribeCommand(streamName);
+            this.sendSubscribe(streamName);
         }
 
         return streamHandler;
@@ -205,11 +205,11 @@ export class WebsocketSubscriber extends Dispatchable {
         }
     }
 
-    sendSubscribeCommand(streamName: string): void {
+    sendSubscribe(streamName: string): void {
         this.send("s " + streamName);
     }
 
-    sendResubscribeCommand(streamName: string, index: number): void {
+    sendResubscribe(streamName: string, index: number): void {
         this.send("r " + index + " " + streamName);
     }
 
