@@ -190,7 +190,9 @@ export class WebsocketServer {
                             wsConnection.subscribe(streamName);
                             wsConnection.send("s " + streamName);
                         } else {
-                            wsConnection.send(`Failed to subscribe to stream ${streamName}: ${allowed[1]}`);
+                            // Structured form the client parses (handleServerError -> invalidSubscription).
+                            // No reason text: the client treats everything after the error type as the stream name.
+                            wsConnection.send(`e invalidSubscription ${streamName}`);
                         }
                     } catch (error) {
                         // It's possible that the connection might have been closed between

@@ -254,6 +254,7 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
                 // TODO: set permission denied explicitly?
                 streamHandler.clearResubscribeTimeout();
             }
+            this.dispatch("streamSubscribeRejected", details);
         }
     }
 
