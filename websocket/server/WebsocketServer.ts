@@ -1,7 +1,7 @@
 import {createClient as redisCreateClient, RedisClientType} from "redis";
 import {App as WSApp, WebSocket, us_listen_socket, HttpResponse, HttpRequest, us_socket_context_t} from "uWebSockets.js";
 import {CheckStreamPermission, IdentifySessionId, LoadSessionId, RPCCaller} from "./PermissionChecking";
-import {DEFAULT_HEARTBEAT_MESSAGE} from "../Shared";
+import {DEFAULT_HEARTBEAT_MESSAGE, HEARTBEAT_INTERVAL_MS} from "../Shared";
 import {AppConfig} from "./AppConfig";
 import {callWithRetry} from "../../base/Utils";
 
@@ -222,7 +222,7 @@ export class WebsocketServer {
                 this.stats.gcDuration = performance.now() - startTime;
             }
             this.writeStats();
-        }, 30000);
+        }, HEARTBEAT_INTERVAL_MS);
 
         const {onlineStatusTickIntervalMs} = this.appConfig;
         if (onlineStatusTickIntervalMs) {

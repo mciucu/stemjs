@@ -1,9 +1,10 @@
 // TODO @Mihai this was written originally in 2016, pretty old and crappy
 import {Dispatcher} from "../../base/Dispatcher";
 
+// Structural stand-in for WebsocketSubscriber, to avoid a circular import.
 interface WebsocketSubscriber {
-    sendResubscribe(streamName: string, index: number): void;
-    sendSubscribe(streamName: string): void;
+    sendResubscribeCommand(streamName: string, index: number): void;
+    sendSubscribeCommand(streamName: string): void;
     calcRetryTimeout(attempts: number): number;
 }
 
@@ -53,9 +54,9 @@ export class WebsocketStreamHandler extends Dispatcher {
         this.status = WebsocketStreamHandler.SUBSCRIBING;
 
         if (this.isIndexed) {
-            websocketSubscriber.sendResubscribe(this.streamName, this.getLastIndex());
+            websocketSubscriber.sendResubscribeCommand(this.streamName, this.getLastIndex());
         } else {
-            websocketSubscriber.sendSubscribe(this.streamName);
+            websocketSubscriber.sendSubscribeCommand(this.streamName);
         }
 
         this.subscribeTryCount++;
