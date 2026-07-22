@@ -1,7 +1,6 @@
 // TODO @Mihai this was written originally in 2016, pretty old and crappy
 import {Dispatcher} from "../../base/Dispatcher";
 
-// Structural stand-in for WebsocketSubscriber, to avoid a circular import.
 interface WebsocketSubscriber {
     sendResubscribe(streamName: string, index: number): void;
     sendSubscribe(streamName: string): void;
