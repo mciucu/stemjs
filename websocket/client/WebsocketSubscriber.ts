@@ -1,7 +1,7 @@
 import {Dispatchable} from "../../base/Dispatcher";
 import {WebsocketStreamHandler} from "./WebsocketStreamHandler";
 import {toArray} from "../../base/Utils";
-import {DEFAULT_HEARTBEAT_MESSAGE} from "../Shared";
+import {DEFAULT_HEARTBEAT_MESSAGE, HEARTBEAT_INTERVAL_MS} from "../Shared";
 
 type Callback = (...args: any[]) => void;
 
@@ -23,7 +23,6 @@ function splitPayload(str: string): [string, string | null] {
 }
 
 
-// TODO cleanup & simplify
 export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscriberInterface {
     static ConnectionStatus = {
         NONE: 0,
@@ -48,11 +47,14 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
     urls: string[];
     reconnectTimeout?: number;
     previousFailedReconnectAttempts?: number;
+    lastServerMessageTime: number = 0;
+    livenessCheckInterval?: number;
+    // Two missed heartbeats plus slack before a silent socket is declared dead.
+    staleConnectionThreshold: number = 2.5 * HEARTBEAT_INTERVAL_MS;
 
     constructor(urls: string | string[]) {
         super();
         this.urls = toArray(urls);
-        //TODO: should probably try to connect right now?
     }
 
     setConnectionStatus(connectionStatus: number): void {
@@ -65,8 +67,36 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
         return this.urls[currentURLIndex];
     }
 
+    clearReconnectTimeout(): void {
+        if (this.reconnectTimeout) {
+            clearTimeout(this.reconnectTimeout);
+            this.reconnectTimeout = undefined;
+        }
+    }
+
+    // Drop the socket without any close/reconnect side effects; connectionStatus is the caller's job.
+    discardWebsocket(): void {
+        const websocket = this.websocket;
+        if (!websocket) {
+            return;
+        }
+        websocket.onopen = null;
+        websocket.onmessage = null;
+        websocket.onerror = null;
+        websocket.onclose = null;
+        try {
+            websocket.close();
+        } catch {
+            // May still be connecting or already closed; nothing to do.
+        }
+        this.websocket = null;
+    }
+
+    // Idempotent: replaces any existing socket and cancels any pending reconnect.
     connect(): void {
         this.manualClose = false;
+        this.clearReconnectTimeout();
+        this.discardWebsocket();
         const url = this.getNextUrl();
         this.setConnectionStatus(WebsocketSubscriber.ConnectionStatus.CONNECTING);
         try {
@@ -80,15 +110,40 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
             this.tryReconnect();
             console.error("WebsocketSubscriber: Failed to connect to ", url, "\nError: ", e.message);
         }
+        this.startLivenessWatchdog();
     }
 
     disconnect(): void {
         this.manualClose = true;
-        if (this.reconnectTimeout) {
-            clearTimeout(this.reconnectTimeout);
-            this.reconnectTimeout = undefined;
+        this.stopLivenessWatchdog();
+        this.clearReconnectTimeout();
+        this.discardWebsocket();
+        this.reset();
+    }
+
+    startLivenessWatchdog(): void {
+        if (!this.livenessCheckInterval) {
+            this.livenessCheckInterval = setInterval(() => this.checkConnectionLiveness(), HEARTBEAT_INTERVAL_MS / 2);
         }
-        this.websocket?.close();
+    }
+
+    stopLivenessWatchdog(): void {
+        if (this.livenessCheckInterval) {
+            clearInterval(this.livenessCheckInterval);
+            this.livenessCheckInterval = undefined;
+        }
+    }
+
+    // Detects half-open sockets: the connection is dead, but no close/error event ever fired.
+    checkConnectionLiveness(): void {
+        // The CONNECTING/backoff states manage their own retries.
+        if (this.connectionStatus !== WebsocketSubscriber.ConnectionStatus.CONNECTED) {
+            return;
+        }
+        if (Date.now() - this.lastServerMessageTime > this.staleConnectionThreshold) {
+            console.warn("WebsocketSubscriber: no server traffic for too long, reconnecting");
+            this.connect();
+        }
     }
 
     calcRetryTimeout(numFailedAttempts: number): number {
@@ -109,7 +164,10 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
     }
 
     subscribe(streamName: string): WebsocketStreamHandler {
-        // TODO: make sure to not explicitly support streams with spaces in the name
+        // Stream names are space-delimited on the wire.
+        if (streamName.includes(" ")) {
+            throw new Error("Websocket stream names cannot contain spaces: " + streamName);
+        }
         console.log("WebsocketSubscriber: Subscribing to stream ", streamName);
 
         if (!this.attemptedConnect) {
@@ -167,11 +225,13 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
     }
 
     onWebsocketOpen(): void {
+        this.lastServerMessageTime = Date.now();
         this.previousFailedReconnectAttempts = this.failedReconnectAttempts;
         this.failedReconnectAttempts = 0;
         console.log("WebsocketSubscriber: Websocket connection established!");
 
-        this.reset();
+        // Not reset(): a DISCONNECTED dispatch right before CONNECTED would flicker status UI.
+        this.resetStreamHandlerStatuses();
         this.setConnectionStatus(WebsocketSubscriber.ConnectionStatus.CONNECTED);
         this.resubscribe();
     }
@@ -191,6 +251,7 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
                 // TODO: set permission denied explicitly?
                 streamHandler.clearResubscribeTimeout();
             }
+            this.dispatch("streamSubscribeRejected", details);
         }
     }
 
@@ -219,9 +280,9 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
     }
 
     onWebsocketMessage(event: MessageEvent): void {
+        this.lastServerMessageTime = Date.now();
         const {data} = event;
         if (data === this.heartbeatMessage) {
-            // TODO: keep track of the last heartbeat timestamp
             return;
         }
 
@@ -245,11 +306,15 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
         }
     }
 
-    reset(): void {
-        this.setConnectionStatus(WebsocketSubscriber.ConnectionStatus.DISCONNECTED);
+    resetStreamHandlerStatuses(): void {
         for (const streamHandler of this.streamHandlers.values()) {
             streamHandler.resetStatus();
         }
+    }
+
+    reset(): void {
+        this.setConnectionStatus(WebsocketSubscriber.ConnectionStatus.DISCONNECTED);
+        this.resetStreamHandlerStatuses();
     }
 
     onWebsocketError(event: Event | string): void {
@@ -269,7 +334,7 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
     }
 
     send(message: string): void {
-        // TODO: if the websocket is not open, enqueue WebsocketSubscriber message to be sent on open or just fail?
+        // Callers check isOpen(); nothing needs queueing, subscriptions are re-sent on open.
         this.websocket!.send(message);
     }
 

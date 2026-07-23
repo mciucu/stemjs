@@ -1,7 +1,7 @@
 import {createClient as redisCreateClient, RedisClientType} from "redis";
 import {App as WSApp, WebSocket, us_listen_socket, HttpResponse, HttpRequest, us_socket_context_t} from "uWebSockets.js";
 import {CheckStreamPermission, IdentifySessionId, LoadSessionId, RPCCaller} from "./PermissionChecking";
-import {DEFAULT_HEARTBEAT_MESSAGE} from "../Shared";
+import {DEFAULT_HEARTBEAT_MESSAGE, HEARTBEAT_INTERVAL_MS} from "../Shared";
 import {AppConfig} from "./AppConfig";
 import {callWithRetry} from "../../base/Utils";
 
@@ -190,7 +190,8 @@ export class WebsocketServer {
                             wsConnection.subscribe(streamName);
                             wsConnection.send("s " + streamName);
                         } else {
-                            wsConnection.send(`Failed to subscribe to stream ${streamName}: ${allowed[1]}`);
+                            // Structured form the client parses; the stream name must be the whole tail.
+                            wsConnection.send(`e invalidSubscription ${streamName}`);
                         }
                     } catch (error) {
                         // It's possible that the connection might have been closed between
@@ -222,7 +223,7 @@ export class WebsocketServer {
                 this.stats.gcDuration = performance.now() - startTime;
             }
             this.writeStats();
-        }, 30000);
+        }, HEARTBEAT_INTERVAL_MS);
 
         const {onlineStatusTickIntervalMs} = this.appConfig;
         if (onlineStatusTickIntervalMs) {
