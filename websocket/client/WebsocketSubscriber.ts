@@ -74,9 +74,7 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
         }
     }
 
-    // Drop the current socket without triggering any reconnect logic: handlers are
-    // detached first so its close event cannot schedule a competing reconnect.
-    // Leaves connectionStatus alone; status transitions belong to the callers.
+    // Drop the socket without any close/reconnect side effects; connectionStatus is the caller's job.
     discardWebsocket(): void {
         const websocket = this.websocket;
         if (!websocket) {
@@ -94,8 +92,7 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
         this.websocket = null;
     }
 
-    // Safe to call from any path at any time: replaces whatever socket exists and
-    // cancels any pending reconnect, so concurrent callers can never stack sockets.
+    // Idempotent: replaces any existing socket and cancels any pending reconnect.
     connect(): void {
         this.manualClose = false;
         this.clearReconnectTimeout();
@@ -139,7 +136,7 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
 
     // Detects half-open sockets: the connection is dead, but no close/error event ever fired.
     checkConnectionLiveness(): void {
-        // Only judge sockets we believe are healthy; the CONNECTING/backoff paths manage themselves.
+        // The CONNECTING/backoff states manage their own retries.
         if (this.connectionStatus !== WebsocketSubscriber.ConnectionStatus.CONNECTED) {
             return;
         }
@@ -167,7 +164,7 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
     }
 
     subscribe(streamName: string): WebsocketStreamHandler {
-        // The wire protocol is space-delimited, so a name with a space would silently corrupt it.
+        // Stream names are space-delimited on the wire.
         if (streamName.includes(" ")) {
             throw new Error("Websocket stream names cannot contain spaces: " + streamName);
         }
@@ -233,7 +230,7 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
         this.failedReconnectAttempts = 0;
         console.log("WebsocketSubscriber: Websocket connection established!");
 
-        // Not reset(): dispatching DISCONNECTED right before CONNECTED would flicker any status UI.
+        // Not reset(): a DISCONNECTED dispatch right before CONNECTED would flicker status UI.
         this.resetStreamHandlerStatuses();
         this.setConnectionStatus(WebsocketSubscriber.ConnectionStatus.CONNECTED);
         this.resubscribe();
@@ -337,7 +334,7 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
     }
 
     send(message: string): void {
-        // Callers guard with isOpen(); nothing needs queueing since all subscriptions are re-sent on open.
+        // Callers check isOpen(); nothing needs queueing, subscriptions are re-sent on open.
         this.websocket!.send(message);
     }
 

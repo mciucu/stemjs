@@ -190,8 +190,7 @@ export class WebsocketServer {
                             wsConnection.subscribe(streamName);
                             wsConnection.send("s " + streamName);
                         } else {
-                            // Structured form the client parses (handleServerError -> invalidSubscription).
-                            // No reason text: the client treats everything after the error type as the stream name.
+                            // Structured form the client parses; the stream name must be the whole tail.
                             wsConnection.send(`e invalidSubscription ${streamName}`);
                         }
                     } catch (error) {
