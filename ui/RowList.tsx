@@ -53,11 +53,6 @@ export interface RowListOptions<ValueType = any> {
     size?: string;
 }
 
-// TODO @types
-export interface RowList {
-    styleSheet: RowListStyle;
-}
-
 //TODO @cleanup just delete this?
 @registerStyle(RowListStyle)
 export class RowList extends SimpleStyledElement<RowListOptions> {

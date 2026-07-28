@@ -1,5 +1,6 @@
 // Implements a Class Factory, to be able to create element that can be easily set to full screen
 import {FullScreenStyle} from "./FullScreenStyle";
+import type {StyleRules} from "./Style";
 import {GlobalStyle} from "./GlobalStyle";
 import {UIElement, UIElementOptions} from "./UIBase";
 import {NodeAttributes} from "./NodeAttributes";
@@ -20,7 +21,7 @@ export const FullScreenable = function <T extends new (...args: any[]) => UIElem
             });
         }
 
-        getStyleSheet(): FullScreenStyle {
+        getStyleSheet(): StyleRules<FullScreenStyle> {
             return FullScreenStyle.getInstance();
         }
 

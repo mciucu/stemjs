@@ -39,6 +39,14 @@ export interface UIElementOptions {
 
 export type UIOptions<NodeType extends (SVGElement | HTMLElement), ExtraOptions = {}> = Partial<Omit<NodeType, "children" | "nodeType" | "style">> & UIElementOptions & ExtraOptions;
 
+// Declare the options of a class extending a Stem UI class that doesn't pass its options generic along, most often
+// one built by UI.Primitive: `class MyElement extends UI.Primitive("div") {declare options: ElementOptions<MyOptions>;}`
+export type ElementOptions<ExtraOptions = {}, NodeType extends (SVGElement | HTMLElement) = HTMLElement> = UIOptions<NodeType, ExtraOptions>;
+
+// Same, but when extending a component that already has options of its own: they're kept and yours are added on top.
+// `class MyButton extends Button {declare options: ExtendedOptions<Button, MyButtonOptions>;}`
+export type ExtendedOptions<BaseElement extends BaseUIElement<any>, ExtraOptions = {}> = NonNullable<BaseElement["options"]> & ExtraOptions;
+
 export const RenderStack: BaseUIElement[] = []; //keeps track of objects that are redrawing, to know where to assign refs automatically
 export const redrawPerTickRunner = new OncePerTickRunner((obj: BaseUIElement, event: any) => obj.node && obj.redraw(event));
 

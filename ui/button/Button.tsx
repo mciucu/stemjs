@@ -4,11 +4,6 @@ import {registerStyle} from "../style/Theme";
 import {ButtonStyle} from "./ButtonStyle";
 import {NodeAttributes} from "../NodeAttributes";
 
-export interface Button {
-    // @ts-ignore
-    styleSheet: ButtonStyle;
-}
-
 export interface ButtonOptions {
     disabled?: boolean;
 }

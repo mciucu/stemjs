@@ -19,6 +19,27 @@ interface KeyframeObject {
     [key: string]: StyleObject;
 }
 
+// What a @styleRule field actually holds at runtime. The decorator replaces the object literal you write with the
+// DynamicStyleElement returned by css(), but a property decorator can't change the declared type of the property
+// (microsoft/TypeScript#4881), so TypeScript still sees the literal. StyleRules<T> below applies the correction.
+//
+// It's typed as the class name it stands for rather than as DynamicStyleElement, because that's how rules are used
+// everywhere: assigned to className, concatenated with each other, passed to addClass. The element stringifies to
+// its class name through toString/valueOf, so all of that is valid at runtime. Reach for css() directly on the rare
+// occasion you want the element itself.
+export type StyleRuleValue = string;
+
+// The type a style sheet has when you read rules off it: every rule is the class name it generates, not the object
+// literal it was declared with. Members inherited from StyleSheet, and plain (non-object) fields such as a
+// transitionTime, are left alone - only the ones a @styleRule could have replaced are rewritten.
+export type StyleRules<T> = {
+    [Key in keyof T]: Key extends keyof StyleSheet ? T[Key] :
+        T[Key] extends StyleSheet ? T[Key] : // a nested style sheet, such as GlobalStyle.Utils, is not a rule
+        T[Key] extends (...args: infer Args) => any ? (...args: Args) => StyleRuleValue :
+        T[Key] extends object ? StyleRuleValue :
+        T[Key];
+};
+
 // Class meant to group multiple classes inside a single <style> element, for convenience
 // TODO: pattern should be more robust, to be able to only update classes
 class StyleSheet extends Dispatchable {
@@ -68,8 +89,8 @@ class StyleSheet extends Dispatchable {
     }
 
 
-    static getInstance<T extends typeof StyleSheet>(this: T, theme = (this.theme || Theme.Global)): InstanceType<T> {
-        return theme.getStyleSheetInstance(this);
+    static getInstance<T extends typeof StyleSheet>(this: T, theme = (this.theme || Theme.Global)): StyleRules<InstanceType<T>> {
+        return theme.getStyleSheetInstance(this) as StyleRules<InstanceType<T>>;
     }
 
     // Just to have the same pattern as objects or not

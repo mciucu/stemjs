@@ -1,0 +1,8 @@
+{
+  "name": "ts-plugin-registered-styles",
+  "version": "1.0.0",
+  "description": "Teaches TypeScript that @registerStyle(X) gives a class a styleSheet of type X",
+  "main": "index.js",
+  "type": "commonjs",
+  "private": true
+}

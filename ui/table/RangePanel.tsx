@@ -2,6 +2,7 @@ import {UI, UIElement, UIElementOptions, UIElementChild, HTMLTagType} from "../U
 import {Button} from "../button/Button";
 import {NumberInput} from "../input/Input";
 import {RangePanelStyle} from "./RangePanelStyle";
+import type {StyleRules} from "../Style";
 import {Dispatchable} from "../../base/Dispatcher";
 import {Size} from "../Constants";
 import {NodeAttributes} from "../NodeAttributes";
@@ -119,7 +120,7 @@ export function RangeTableInterface<BaseType, BaseTable extends typeof Table<Bas
             return "div"
         }
 
-        getRangePanelStyleSheet(): RangePanelStyle {
+        getRangePanelStyleSheet(): StyleRules<RangePanelStyle> {
             return RangePanelStyle.getInstance();
         }
 

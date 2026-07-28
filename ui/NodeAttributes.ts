@@ -1,4 +1,5 @@
 import {dashCase, isNumber, isString, isPlainObject, setObjectPrototype, resolveFuncValue} from "../base/Utils";
+import type {StyleRuleValue} from "./Style";
 
 export const defaultToPixelsAttributes = new Set([
     "border-radius",
@@ -119,6 +120,10 @@ export class ClassNameSet extends Set {
     }
 }
 
+// Anything that stringifies to a class name. Style rules are DynamicStyleElements, not strings, so this is what
+// className has to accept for `className={this.styleSheet.someRule}` to typecheck.
+export type ClassNameValue = string | number | ClassNameSet | StyleRuleValue;
+
 type NodeElement = HTMLElement | SVGElement;
 
 export class NodeAttributes {
@@ -128,7 +133,7 @@ export class NodeAttributes {
     
     // Type hint for style property when it exists (not automatically created)
     declare style?: Record<string, any> | string;
-    declare className?: string | ClassNameSet;
+    declare className?: ClassNameValue;
     declare styleString?: string;
     declare whitelistedAttributes?: Record<string, boolean>;
 

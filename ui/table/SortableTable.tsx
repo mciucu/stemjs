@@ -3,6 +3,7 @@ import {Table, TableOptions} from "./Table";
 import {defaultComparator} from "../../base/Utils";
 import {MakeIcon} from "../SimpleElements";
 import {styleRule, StyleSheet} from "../Style";
+import type {StyleRules} from "../Style";
 import {NodeAttributes} from "../NodeAttributes";
 import {ColumnHandler} from "../../base/ColumnHandler";
 
@@ -37,7 +38,7 @@ export function SortableTableInterface<BaseType, T extends typeof Table<BaseType
         sortBy?: ColumnHandler<BaseType>;
         sortDescending?: boolean;
         columnSortingOrder: ColumnHandler<BaseType>[] = [];
-        getSortableStyleSheet(): SortableTableStyle {
+        getSortableStyleSheet(): StyleRules<SortableTableStyle> {
             return SortableTableStyle.getInstance(this.getTheme()); // Make this optional maybe
         }
 
