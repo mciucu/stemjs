@@ -15,7 +15,11 @@ function parseConfig() {
     if (error) {
         throw new Error(ts.flattenDiagnosticMessageText(error.messageText, "\n"));
     }
-    return ts.parseJsonConfigFileContent(config, ts.sys, path.dirname(configPath));
+    const parsed = ts.parseJsonConfigFileContent(config, ts.sys, path.dirname(configPath));
+    // We only ever check. Without this, a project with allowJs and no outDir plans to emit next to every input and
+    // reports TS5055 for each .js file it would overwrite - one phantom error per unmigrated file.
+    parsed.options.noEmit = true;
+    return parsed;
 }
 
 // Use the same configuration the editor plugin gets from tsconfig.json
@@ -55,8 +59,9 @@ function main() {
     const program = ts.createProgram(fileNames, options, createAugmentingHost(options, originalLengths));
 
     const diagnostics = ts.getPreEmitDiagnostics(program).filter(diagnostic => {
+        // Project-wide diagnostics have no file to match against, so a filtered run isn't asking about them
         if (!diagnostic.file) {
-            return true;
+            return !filter;
         }
         // Anything reported inside the appended declarations is our own doing, not the user's code
         const limit = originalLengths.get(path.normalize(diagnostic.file.fileName));
