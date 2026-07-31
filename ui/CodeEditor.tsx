@@ -117,9 +117,6 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     onDelayedMount(): void {
         this.ace = window.ace.edit(this.node);
 
-        // Removes some warnings
-        this.getAce().$blockScrolling = Infinity;
-
         this.resolveQueuedMethods();
 
         this.applyAceOptions();
@@ -336,11 +333,6 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     @enqueueIfNotLoaded
     setIndentedSoftWrap(value: boolean): void {
         this.getAce().setOption("indentedSoftWrap", value);
-    }
-
-    @enqueueIfNotLoaded
-    blockScroll(): void {
-        this.getAce().$blockScrolling = Infinity;
     }
 
     @enqueueIfNotLoaded
