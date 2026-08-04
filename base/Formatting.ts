@@ -41,11 +41,25 @@ export function formatBytes(bytes: number | string | null | undefined): string {
 }
 
 export function formatError(error: any): string {
+    if (error == null) {
+        return "Unknown error";
+    }
     if (error.error) {
         return formatError(error.error);
     }
     if (error.message) {
+        // May be a TranslationTextElement (Messages template), String() evaluates it below.
         return formatError(error.message);
     }
-    return String(error);
+    const result = String(error);
+    if (result === "[object Object]") {
+        // Show the payload instead of "[object Object]".
+        // TODO @Mihai better log and replace with "Unknown error"?
+        try {
+            return JSON.stringify(error);
+        } catch (e) {
+            return result;
+        }
+    }
+    return result;
 }
