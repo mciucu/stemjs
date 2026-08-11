@@ -23,7 +23,10 @@ export type FakedDecorated = (target: any, propertyKey: string) => void;
 
 // The value a spec loads into: @field(Date) reads back a StemDate, @field(User) a User.
 // ts-plugin/ declares un-annotated @field members with this, which is what makes the decorator imply the type.
+// A field written `foo?` arrives here as `Spec | null`, since a loader hands back what it was given when
+// there's nothing to load (StemDate.optionally, Store.get).
 export type FieldValue<Spec> =
+    Spec extends null ? null :
     Spec extends DateConstructor ? StemDate :
     Spec extends abstract new (...args: any[]) => infer Instance ? Instance :
     Spec extends string ? StoreObject :
@@ -36,7 +39,7 @@ type StoreConstructor = abstract new (...args: any[]) => StoreObject;
 type FieldRawIdKey<Key extends string, Spec> = Spec extends StoreConstructor | string ? `${Key}Id` : never;
 
 export type FieldRawIds<Specs extends Record<string, unknown>, Omitted extends string = never> = Omit<{
-    [Key in keyof Specs as FieldRawIdKey<Key & string, Specs[Key]>]: StoreId;
+    [Key in keyof Specs as FieldRawIdKey<Key & string, Specs[Key]>]: null extends Specs[Key] ? StoreId | null : StoreId;
 }, Omitted>;
 
 // Checks a hand-written annotation against what the spec loads, for the fields the plugin leaves alone.

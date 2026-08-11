@@ -133,10 +133,13 @@ function collectFields(ts, classNode, sourceFile) {
         if (!specType) {
             continue;
         }
+        // `foo?` keeps its question mark; the spec carries the null so the raw id turns nullable with it
+        const isOptional = Boolean(member.questionToken);
         fields.push({
             name: member.name.text,
             nameStart: member.name.getStart(sourceFile),
-            specType,
+            specType: isOptional ? specType + " | null" : specType,
+            isOptional,
             isAnnotated: Boolean(member.type),
         });
     }
@@ -224,7 +227,8 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
                 sourceStart: fieldInfo.nameStart,
                 appendedStart: appended.length,
             });
-            appended += `${fieldInfo.name}: import("${stateModule}").FieldValue<${fieldInfo.specType}>;\n`;
+            const optional = fieldInfo.isOptional ? "?" : "";
+            appended += `${fieldInfo.name}${optional}: import("${stateModule}").FieldValue<${fieldInfo.specType}>;\n`;
         }
         appended += "}\n";
     }
