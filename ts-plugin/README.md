@@ -78,6 +78,10 @@ relocated member, which is mapped back to where that member is written.
 The one real cost is that **an un-annotated `@field` only has a type when the plugin is running**. Plain `tsc`
 reports it as an implicit `any`, so command-line checking has to go through `typecheck.js` (below).
 
+**Stem's own source relies on this**: `MoneyObject.currency` in `stem-core/localization/Money.ts` is un-annotated,
+so a project that consumes stem without registering the plugin reads it as `any` (or fails with TS7008 under
+`noImplicitAny`). Register the plugin, or annotate that field locally.
+
 ## Install in another project
 
 1. Add the dependency, pointing at wherever stem lives:
@@ -120,10 +124,28 @@ STEM_PLUGIN_DEBUG=1 node stem-core/ts-plugin/typecheck.js   # report errors in w
 `STEM_PLUGIN_DEBUG` is worth knowing about: a mistake in a generated declaration otherwise shows up as a member
 missing at the *call site*, with the error that would explain it suppressed for being ours.
 
+## Tests
+
+Run them from a project that has TypeScript installed - stem is a submodule and generally has none of its own:
+
+```sh
+cd web-admin && node ../stem-core/ts-plugin/test/run.js
+```
+
+Three suites over one fixture: what the transform emits (including the invariant that putting each name back
+where its placeholder sits reproduces the file exactly), what the fixture compiles to (its `ts-expect-error`
+directives are the assertions - an implied type that came out `any` leaves them unsatisfied, which is itself an
+error), and what a real language service answers through the plugin (hover, go-to-definition, rename,
+completions, diagnostics, outline).
+
 ## Files
 
 - `transform.js` - decides what to declare and what to rename for a file. The only part with any real logic.
 - `index.js` - the language service plugin: feeds the augmented text to the compiler, hides the appended region
   from anything the editor might display or apply as an edit (diagnostics, renames, formatting, code fixes), and
   maps results on a relocated member back to the member itself.
-- `typecheck.js` - the command-line counterpart.
+- `checker.js` - builds a program over the augmented text and drops our own noise from the diagnostics. Shared
+  by the command line and the tests, so the two can't disagree about what counts as an error.
+- `typecheck.js` - the command-line counterpart, a CLI over `checker.js`.
+- `loadTypeScript.js` - finds the project's TypeScript from wherever we're run.
+- `test/` - see above.
