@@ -1,7 +1,7 @@
 {
   "name": "ts-plugin-registered-styles",
   "version": "1.0.0",
-  "description": "Teaches TypeScript that @registerStyle(X) gives a class a styleSheet of type X",
+  "description": "Teaches TypeScript what Stem's decorators do: @registerStyle(X) gives a class a styleSheet of type X, @field(X) gives a property the type X loads",
   "main": "index.js",
   "type": "commonjs",
   "private": true

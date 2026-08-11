@@ -1,7 +1,7 @@
 import {StemDate} from "../time/Date";
 import {isFunction, isString} from "../base/Utils";
 import {StoreObject} from "./Store";
-import {GlobalState} from "./State";
+import {GlobalState, StoreId} from "./State";
 
 export interface FieldOptions {
     rawField?: string | symbol | ((key: string, descriptor?: FieldDescriptor) => string | symbol);
@@ -20,6 +20,28 @@ export type FieldType = string | { makeFieldLoader?: (descriptor: FieldDescripto
 // Legacy decorator signature for JavaScript compatibility
 export type LegacyDecorator = (target: any, propertyKey: string, descriptor?: PropertyDescriptor) => PropertyDescriptor;
 export type FakedDecorated = (target: any, propertyKey: string) => void;
+
+// The value a spec loads into: @field(Date) reads back a StemDate, @field(User) a User.
+// ts-plugin/ declares un-annotated @field members with this, which is what makes the decorator imply the type.
+export type FieldValue<Spec> =
+    Spec extends DateConstructor ? StemDate :
+    Spec extends abstract new (...args: any[]) => infer Instance ? Instance :
+    Spec extends string ? StoreObject :
+    never;
+
+type StoreConstructor = abstract new (...args: any[]) => StoreObject;
+
+// A foreign key keeps its raw value on the instance as `<key>Id` (see makeDescriptor); every other
+// spec reads the raw value out of a symbol, so there's nothing extra to declare for it.
+type FieldRawIdKey<Key extends string, Spec> = Spec extends StoreConstructor | string ? `${Key}Id` : never;
+
+export type FieldRawIds<Specs extends Record<string, unknown>, Omitted extends string = never> = Omit<{
+    [Key in keyof Specs as FieldRawIdKey<Key & string, Specs[Key]>]: StoreId;
+}, Omitted>;
+
+// Checks a hand-written annotation against what the spec loads, for the fields the plugin leaves alone.
+// Optional since plenty of fields are declared `foo?: Bar` or `foo?: Bar | null`.
+export type FieldDecorator<Spec> = <Key extends string>(targetProto: {[K in Key]?: FieldValue<Spec> | null}, key: Key) => void;
 
 export class FieldDescriptor {
     type: FieldType;
@@ -128,10 +150,11 @@ export class FieldDescriptor {
 
 
 // TODO Implement a way to say @field(Array, "StoreObject") for instance
-export function field(type: FieldType, arg: FieldOptions = {}): FakedDecorated {
+// `const Spec` keeps @field("Currency") at the literal type, so the spec survives into FieldValue
+export function field<const Spec extends FieldType>(type: Spec, options: FieldOptions = {}): FieldDecorator<Spec> {
     // The actual descriptor - supports both legacy JS decorators and can be gradually migrated to TS
     return (targetProto: any, name: string, rawDescriptor?: PropertyDescriptor): PropertyDescriptor => {
-        const fieldDescriptor = new FieldDescriptor(type, arg);
+        const fieldDescriptor = new FieldDescriptor(type, options);
         fieldDescriptor.setTarget(targetProto, name, rawDescriptor);
         return fieldDescriptor.makeDescriptor();
     };

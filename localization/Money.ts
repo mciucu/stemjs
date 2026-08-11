@@ -2,7 +2,6 @@ import {Currency} from "./CurrencyStore";
 import {StoreObject} from "../state/Store";
 import {isString} from "../base/Utils";
 import {field} from "../state/StoreField";
-import {StoreId} from "../state/State";
 
 const MoneyErrors = {
     INVALID_CURRENCY_PROVIDED: "Invalid currency provided.",
@@ -228,11 +227,10 @@ export class Money {
 
 // A generic store object that has a currency and an amount
 export class MoneyObject extends StoreObject {
-    declare currencyId: StoreId;
-    @field("Currency") currency: Currency;
+    @field(Currency) currency;
     declare amount: number;
 
-    getCurrency(): Currency | undefined {
+    getCurrency(): Currency {
         return this.currency;
     }
 
