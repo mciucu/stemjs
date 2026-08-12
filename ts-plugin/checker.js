@@ -88,6 +88,10 @@ function getProjectDiagnostics(ts, projectRoot, filter = null) {
         if (!diagnostic.file) {
             return !filter;
         }
+        // Third-party sources aren't ours to fix, and skipLibCheck only spares us the .d.ts ones
+        if (diagnostic.file.fileName.includes("node_modules")) {
+            return false;
+        }
         if (isOurs(augmentedFiles.get(path.normalize(diagnostic.file.fileName)), diagnostic.start)) {
             return false;
         }

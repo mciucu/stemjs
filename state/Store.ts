@@ -19,12 +19,12 @@ export class StoreObject extends Dispatchable {
     declare [EventDispatcherSymbol]?: Dispatchable;
     declare id: StoreId;
 
-    constructor(obj: any, event?: StoreEvent) {
+    constructor(obj: any, _event?: StoreEvent) {
         super();
         Object.assign(this, obj);
     }
 
-    getOwnStore<T extends this>(): StoreClass<this> & Dispatchable {
+    getOwnStore(): StoreClass<this> & Dispatchable {
         return this.constructor as any;
     }
 
@@ -91,10 +91,8 @@ export class StoreObject extends Dispatchable {
         fieldDescriptor.cacheField = false;
         fieldDescriptor.rawField = fieldDescriptor.rawField || (key => key + "Id");
 
-        return (value: any, obj: any) => {
-            //const store = obj.getStore(this.objectType);
-            return this.get(value);
-        };
+        // TODO resolve through the object's own store, once a state can own its stores instead of everything growing in the global one
+        return (value: any, _obj: any) => this.get(value);
     }
 
     static loadRaw(responseOrState: StateData): any[] {

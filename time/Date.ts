@@ -286,7 +286,7 @@ export class StemDate extends BaseDate {
     }
 
     // Just to keep moment compatibility, until we actually implement locales
-    locale(loc: any) {
+    locale(_loc: any) {
         return this;
     }
 

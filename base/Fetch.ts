@@ -11,7 +11,7 @@ export function parseHeaders(xhr: XMLHttpRequest): Headers {
 
     for (let line of rawHeaderLines) {
         const parts = line.split(":");
-        const key = parts.shift().trim();
+        const key = (parts.shift() || "").trim();
         if (key) {
             let value = parts.join(":").trim();
             headers.append(key, value);
@@ -127,8 +127,9 @@ export class XHRPromise {
                 let response = new Response(body, responseInit);
                 // In case dataType is "arrayBuffer", "blob", "formData", "json", "text"
                 // Response has methods to return these as promises
-                if (typeof response[options.dataType] === "function") {
-                    const responsePromise = response[options.dataType]() as Promise<any>;
+                const {dataType} = options;
+                if (dataType && typeof response[dataType] === "function") {
+                    const responsePromise = response[dataType]() as Promise<any>;
                     // TODO: should whitelist dataType to json, blob
                     responsePromise.then((data) => {
                         this.resolve(data);
@@ -306,7 +307,7 @@ export function jQueryCompatibilityPreprocessor(options: FetchOptions): FetchOpt
     }
 
     if (isPlainObject(options.data)) {
-        let method = options.method.toUpperCase();
+        const method = (options.method || "GET").toUpperCase();
         if (method === "GET" || method === "HEAD") {
             options.urlParams = options.urlParams || options.data;
             // TODO @types at the end we shouldn't need this anymore

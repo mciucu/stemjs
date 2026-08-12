@@ -41,6 +41,9 @@ export abstract class BasePaginator<T> extends Dispatchable {
     }
 
     getRange(page: number | null = this.lastPageLoaded): number[] {
+        if (page == null) {
+            return [0, 0];
+        }
         const pageSize = this.getPageSize();
         const totalEntries = this.getTotalEntries();
         return [
@@ -58,7 +61,7 @@ export abstract class BasePaginator<T> extends Dispatchable {
 export class EndpointPaginator<T extends StoreObject> extends BasePaginator<T> {
     totalEntriesCount: number = 0; // The number of total objects we're paginating
     lastResponse: any = null;
-    lastResponseObjects?: T[] = null;
+    lastResponseObjects: T[] = [];
     store: StoreClass<T>;
     endpoint: string;
     filters: any;
@@ -90,7 +93,7 @@ export class EndpointPaginator<T extends StoreObject> extends BasePaginator<T> {
     // Fetches the page and returns the new objects
     // Catching errors is left to the upper layers
     async fetchPage(page: number | null = this.lastPageRequested, passErrors: boolean = true): Promise<T[]> {
-        page = Math.min(page, this.getNumPages());
+        page = Math.min(page ?? 1, this.getNumPages());
 
         const request = {
             page,
@@ -112,7 +115,7 @@ export class EndpointPaginator<T extends StoreObject> extends BasePaginator<T> {
             if (passErrors) {
                 throw error;
             }
-            return;
+            return [];
         } finally { // All error are thrown up here
             this.fetchingNow = false;
         }
@@ -139,7 +142,7 @@ export class EndpointPaginator<T extends StoreObject> extends BasePaginator<T> {
     }
 
     // Update the filters and also fetch the first page
-    updateFilter(filters) {
+    updateFilter(filters: Record<string, any> | null) {
         let haveChange = false;
         for (const [key, value] of Object.entries(filters || {})) {
             if (!isDeepEqual(this.filters[key], value)) {

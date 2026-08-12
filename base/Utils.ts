@@ -298,11 +298,11 @@ export function isPlainObject(obj: any): obj is Record<string, any> {
     return true;
 }
 
-function FILTER_NULLS(key: string, value: any): boolean {
+function FILTER_NULLS(_key: string, value: any): boolean {
     return value != null;
 }
 
-function FILTER_NULLS_AND_EMPTY_STR(key: string, value: any): boolean {
+function FILTER_NULLS_AND_EMPTY_STR(_key: string, value: any): boolean {
     return value != null && value !== "";
 }
 
