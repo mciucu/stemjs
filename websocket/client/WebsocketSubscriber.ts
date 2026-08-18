@@ -45,10 +45,10 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
     retryMaxTimeout: number = 30000;
     heartbeatMessage: string = DEFAULT_HEARTBEAT_MESSAGE;
     urls: string[];
-    reconnectTimeout?: number;
+    reconnectTimeout?: ReturnType<typeof setTimeout>;
     previousFailedReconnectAttempts?: number;
     lastServerMessageTime: number = 0;
-    livenessCheckInterval?: number;
+    livenessCheckInterval?: ReturnType<typeof setInterval>;
     // Two missed heartbeats plus slack before a silent socket is declared dead.
     staleConnectionThreshold: number = 2.5 * HEARTBEAT_INTERVAL_MS;
 

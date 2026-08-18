@@ -30,7 +30,7 @@ export class WebsocketStreamHandler extends Dispatcher {
     missedPackets: number;
     status: symbol;
     subscribeTryCount: number;
-    resendSubscribeTimeout?: number;
+    resendSubscribeTimeout?: ReturnType<typeof setTimeout>;
 
     constructor(websocketSubscriber: WebsocketSubscriber, streamName: string, options: StreamHandlerOptions = {}) {
         super();
