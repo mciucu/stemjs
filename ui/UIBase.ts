@@ -16,6 +16,11 @@ export type SVGTagType = keyof SVGElementTagNameMap;
 export type HTMLTagType = keyof HTMLElementTagNameMap;
 export type UIElementCleanChild = BaseUIElement | string | number;
 export type UIElementChild = Iterable<UIElementChild> | UIElementCleanChild | null | undefined | false;
+// node.style coerces, so a unitless property is as often written 1 as "1"
+export type StyleObject = {[Key in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[Key] | number};
+
+// Called with the event, then the element itself
+export type UIEventHandler = (...args: any[]) => any;
 export type RefLinkOptions = {
     parent: UIElement<any, any>;
     name?: string;
@@ -31,21 +36,24 @@ export interface UIElementOptions {
     active?: boolean; // Tabs or switchers can put this on children
     nodeType?: HTMLTagType;
     className?: string;
-    style?: string | CSSStyleDeclaration;
+    style?: string | StyleObject;
     theme?: Theme;
     styleSheet?: StyleSheet;
+    // The events every element answers to; anything narrower belongs on its own options
+    onClick?: UIEventHandler;
+    onDoubleClick?: UIEventHandler;
+    onMouseEnter?: UIEventHandler;
+    onMouseLeave?: UIEventHandler;
     //[key: string]: any;
 }
 
-// The keys of T that aren't readonly, told apart by whether the two mapped types are still identical once the
-// modifier is stripped off one of them
+// The keys of T that aren't readonly
 type WritableKeys<T> = {
     [Key in keyof T]-?: (<G>() => G extends {[P in Key]: T[Key]} ? 1 : 2) extends
         (<G>() => G extends {-readonly [P in Key]: T[Key]} ? 1 : 2) ? Key : never;
 }[keyof T];
 
-// Options land on the node as attributes, so a readonly DOM member can never be one of them - and leaving it in
-// makes the name unusable for an option of the element's own, as the DOM's type wins the intersection
+// Options land on the node as attributes, so a readonly DOM member can never be one
 export type NodeOptions<NodeType> = Partial<Omit<Pick<NodeType, WritableKeys<NodeType>>, "children" | "nodeType" | "style">>;
 
 export type UIOptions<NodeType extends (SVGElement | HTMLElement), ExtraOptions = {}> = NodeOptions<NodeType> & UIElementOptions & ExtraOptions;
@@ -239,7 +247,9 @@ export class UIElement<
         this.setOptions(options); // TODO maybe this actually needs to be removed, since on a copy we don't want the default options of the other object
     }
 
-    getDefaultOptions(options?: OptionsType): Partial<OptionsType> | undefined {
+    // Nothing is provably a Partial of an unresolved OptionsType, so a class generic in its options
+    // annotates its own concrete options instead
+    getDefaultOptions(options?: OptionsType): Partial<OptionsType> | Partial<UIElementOptions> | undefined {
         return undefined;
     }
 

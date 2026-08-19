@@ -31,6 +31,8 @@ export function getOffset(element: NodeLike): Offset {
     return {left, top};
 }
 
+export function getComputedStyle(node: NodeLike): CSSStyleDeclaration;
+export function getComputedStyle(node: NodeLike, attribute: string): string;
 export function getComputedStyle(node: NodeLike, attribute?: string): string | CSSStyleDeclaration {
     node = getNode(node);
     let computedStyle = window.getComputedStyle(node, null);
