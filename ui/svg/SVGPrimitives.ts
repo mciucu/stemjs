@@ -1,5 +1,39 @@
 import {SVG, SVGPrimitive, SVGUIElement} from "./SVGBase";
 import * as math from "../../numerics/StemMath";
+import {ExtendedOptions} from "../UIBase";
+
+
+interface SVGPathOptions {
+    d?: string;
+}
+
+interface SVGCircleOptions {
+    radius?: number;
+    center?: math.Point;
+}
+
+interface SVGCircleArcOptions extends SVGCircleOptions {
+    startAngle?: number;
+    endAngle?: number;
+}
+
+interface SVGRectOptions {
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+}
+
+interface SVGLineOptions {
+    x1?: number;
+    y1?: number;
+    x2?: number;
+    y2?: number;
+}
+
+interface PolygonOptions {
+    points?: math.Point[];
+}
 
 export class SVGRoot extends SVGPrimitive("svg") {
 }
@@ -20,7 +54,7 @@ export class SVGGroup extends SVGPrimitive("g") {
     }
 }
 
-export class SVGPath extends SVGPrimitive("path") {
+export class SVGPath extends SVGPrimitive<SVGPathOptions>("path") {
     getDefaultOptions(options?: any): Partial<any> {
         return {
             d: ""
@@ -69,7 +103,7 @@ export class SVGPath extends SVGPrimitive("path") {
     }
 }
 
-export class SVGCircle extends SVGPrimitive("circle") {
+export class SVGCircle extends SVGPrimitive<SVGCircleOptions>("circle") {
     getDefaultOptions(options?: any): Partial<any> {
         return {
             radius: 0,
@@ -121,6 +155,8 @@ export class SVGCircle extends SVGPrimitive("circle") {
 }
 
 export class SVGCircleArc extends SVGPath {
+    declare options: ExtendedOptions<SVGPath, SVGCircleArcOptions>;
+
     getPath(): string {
         let startAngle = this.options.startAngle;
         let endAngle = this.options.endAngle;
@@ -156,14 +192,14 @@ export class SVGCircleArc extends SVGPath {
     }
 }
 
-export class SVGRect extends SVGPrimitive("rect") {
+export class SVGRect extends SVGPrimitive<SVGRectOptions>("rect") {
     getX(): number {
         return this.options.x;
     }
 
     setX(x: number): void {
         this.options.x = x;
-        this.node.setAttribute("x", this.options.x);
+        this.node.setAttribute("x", String(this.options.x));
     }
 
     getY(): number {
@@ -172,7 +208,7 @@ export class SVGRect extends SVGPrimitive("rect") {
 
     setY(y: number): void {
         this.options.y = y;
-        this.node.setAttribute("y", this.options.y);
+        this.node.setAttribute("y", String(this.options.y));
     }
 
     getWidth(): number {
@@ -181,7 +217,7 @@ export class SVGRect extends SVGPrimitive("rect") {
 
     setWidth(width: number): void {
         this.options.width = width;
-        this.node.setAttribute("width", this.options.width);
+        this.node.setAttribute("width", String(this.options.width));
     }
 
     getHeight(): number {
@@ -190,11 +226,11 @@ export class SVGRect extends SVGPrimitive("rect") {
 
     setHeight(height: number): void {
         this.options.height = height;
-        this.node.setAttribute("height", this.options.height);
+        this.node.setAttribute("height", String(this.options.height));
     }
 }
 
-export class SVGLine extends SVGPrimitive("line") {
+export class SVGLine extends SVGPrimitive<SVGLineOptions>("line") {
     getDefaultOptions(options?: any): Partial<any> {
         return {
             fill: "black",
@@ -218,6 +254,8 @@ export class SVGLine extends SVGPrimitive("line") {
 }
 
 export class Polygon extends SVGPath {
+    declare options: ExtendedOptions<SVGPath, PolygonOptions>;
+
     getDefaultOptions(options?: any): Partial<any> {
         return {
             points: []

@@ -37,7 +37,18 @@ export interface UIElementOptions {
     //[key: string]: any;
 }
 
-export type UIOptions<NodeType extends (SVGElement | HTMLElement), ExtraOptions = {}> = Partial<Omit<NodeType, "children" | "nodeType" | "style">> & UIElementOptions & ExtraOptions;
+// The keys of T that aren't readonly, told apart by whether the two mapped types are still identical once the
+// modifier is stripped off one of them
+type WritableKeys<T> = {
+    [Key in keyof T]-?: (<G>() => G extends {[P in Key]: T[Key]} ? 1 : 2) extends
+        (<G>() => G extends {-readonly [P in Key]: T[Key]} ? 1 : 2) ? Key : never;
+}[keyof T];
+
+// Options land on the node as attributes, so a readonly DOM member can never be one of them - and leaving it in
+// makes the name unusable for an option of the element's own, as the DOM's type wins the intersection
+export type NodeOptions<NodeType> = Partial<Omit<Pick<NodeType, WritableKeys<NodeType>>, "children" | "nodeType" | "style">>;
+
+export type UIOptions<NodeType extends (SVGElement | HTMLElement), ExtraOptions = {}> = NodeOptions<NodeType> & UIElementOptions & ExtraOptions;
 
 // Declare the options of a class extending a Stem UI class that doesn't pass its options generic along, most often
 // one built by UI.Primitive: `class MyElement extends UI.Primitive("div") {declare options: ElementOptions<MyOptions>;}`

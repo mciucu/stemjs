@@ -253,6 +253,9 @@ export function setObjectPrototype<T>(obj: any, Class: new (...args: any[]) => T
 
 export type Nullable<T> = T | null | undefined;
 
+// What a mixin has to take for the class it returns to keep the members of the class it extends
+export type Constructor<T = {}> = new (...args: any[]) => T;
+
 export function isNotNull<T>(obj: T | null | undefined): obj is T {
     return obj != null;
 }

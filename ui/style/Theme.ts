@@ -132,11 +132,10 @@ export class Theme extends Dispatchable {
 }
 
 // TODO @types move this to Style.ts, makes more sense to be there
-// There's a fucking Typescript proposal from 10 years ago that developers are bullshitting against: https://github.com/Microsoft/TypeScript/issues/4881
-// It needs to be implemented before the new type is properly recognized
+// Returning the widened class here is what a decorator can't do (microsoft/TypeScript#4881); the styleSheet
+// member is declared by ts-plugin/transform.js instead, so this only ever registers.
 export function registerStyle<T extends typeof StyleSheet>(styleClass: T, theme: Theme = Theme.Global) {
-    return function<TBase extends typeof UIElement<any, any>> (target: TBase): (TBase & {styleSheet: InstanceType<T>})  {
+    return function (target: typeof UIElement<any, any>): void {
         theme.register(target, styleClass);
-        return target as any;
     };
 }
