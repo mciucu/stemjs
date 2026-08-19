@@ -1,4 +1,4 @@
-import {SVG, SVGPrimitive, SVGUIElement} from "./SVGBase";
+import {SVGPrimitive} from "./SVGBase";
 import * as math from "../../numerics/StemMath";
 import {ExtendedOptions} from "../UIBase";
 
@@ -283,9 +283,3 @@ export class Polygon extends SVGPath {
         return pathString;
     }
 }
-
-SVG.Circle = SVGCircle;
-SVG.Path = SVGPath;
-SVG.Group = SVGGroup;
-SVG.Line = SVGLine;
-SVG.Rect = SVGRect;

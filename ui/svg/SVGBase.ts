@@ -216,21 +216,4 @@ export function SVGPrimitive<ExtraOptions = void, T extends keyof SVGElementTagN
     return resultClass as any;
 }
 
-// The primitives import this module, so each one attaches itself here rather than being listed above
-export interface SVGNamespace {
-    Element: typeof SVGUIElement;
-    Primitive: typeof SVGPrimitive;
-    Circle: typeof import("./SVGPrimitives").SVGCircle;
-    Group: typeof import("./SVGPrimitives").SVGGroup;
-    Line: typeof import("./SVGPrimitives").SVGLine;
-    Path: typeof import("./SVGPrimitives").SVGPath;
-    Rect: typeof import("./SVGPrimitives").SVGRect;
-    Text: typeof import("./SVGText").SVGText;
-}
-
-export const SVG: SVGNamespace = {
-    Element: SVGUIElement,
-    Primitive: SVGPrimitive,
-} as SVGNamespace;
-
 UI.SVGElement = SVGUIElement;

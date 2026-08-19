@@ -1,4 +1,4 @@
-import {SVG, SVGPrimitive, SVGUIElement} from "./SVGBase";
+import {SVGPrimitive, SVGUIElement} from "./SVGBase";
 import {DOMAttributesMap, NodeAttributes} from "../NodeAttributes";
 import {UI, TextUIElement} from "../UIBase";
 import {Point} from "../../numerics/StemMath";
@@ -16,7 +16,7 @@ interface SVGTextOptions {
 
 export class SVGText extends SVGPrimitive<SVGTextOptions>("text") {
     declare textElement: TextUIElement;
-    static domAttributesMap = new DOMAttributesMap(SVG.Element.domAttributesMap, [
+    static domAttributesMap = new DOMAttributesMap(SVGUIElement.domAttributesMap, [
         ["dx"],
         ["dy"],
         ["fontFamily", {domName: "font-family"}],
@@ -96,5 +96,3 @@ export class SVGText extends SVGPrimitive<SVGTextOptions>("text") {
         }
     }
 }
-
-SVG.Text = SVGText;
