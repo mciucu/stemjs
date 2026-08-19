@@ -1,4 +1,5 @@
 import {UI} from "../UIBase";
+import {Panel} from "../UIPrimitives";
 import {registerStyle} from "../style/Theme";
 import {getComputedStyle} from "../Utils";
 import {unwrapArray} from "../../base/Utils";
@@ -9,6 +10,8 @@ import {Divider} from "./Divider";
 
 @registerStyle(AccordionStyle)
 class AccordionDivider extends Divider {
+    declare collapseIcon?: FACollapseIcon;
+
     dragMousedown(event) {
         document.body.classList.add(this.styleSheet.noTextSelection);
         this.addClass(this.styleSheet.grabbing);
@@ -41,6 +44,9 @@ class AccordionDivider extends Divider {
 
 @registerStyle(AccordionStyle)
 class Accordion extends UI.Element {
+    declare panels: Panel[];
+    declare dividers: AccordionDivider[];
+
     extraNodeAttributes(attr) {
         attr.addClass(this.styleSheet.accordion);
     }
@@ -49,7 +55,7 @@ class Accordion extends UI.Element {
         let children = [];
         this.dividers = [];
         this.panels = [];
-        for (let child of unwrapArray(this.render())) {
+        for (const child of unwrapArray<Panel>(this.render())) {
             let title = (child.getTitle ? child.getTitle() : (child.options.title ? child.options.title : ""));
             let divider = <AccordionDivider>{title}</AccordionDivider>;
             this.dividers.push(divider);
