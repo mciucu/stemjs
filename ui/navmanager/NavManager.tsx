@@ -1,18 +1,23 @@
-import {UI} from "../UIBase";
+import {ElementOptions, UI, UIElement} from "../UIBase";
 import {changeParent} from "../Utils";
 import {registerStyle} from "../style/Theme";
 import {NavStyle} from "./NavStyle";
+import {StyleRules} from "../Style";
 import {Carousel, CarouselStyle} from "../Carousel";
 import {LeftSideNavIcon, RightSideNavIcon, WrappedNavIcon} from "./NavIcon";
-import {BasicOrientedElement, NavSection} from "./NavElement";
+import {BasicOrientedElement, BasicOrientedElementType, NavSection} from "./NavElement";
 import {initializeSwipeEvents} from "./NavSwipeDetection";
 import {SessionStorageMap} from "../../base/StorageMap";
-import {Orientation, Direction} from "../Constants";
+import {DirectionType, Orientation, Direction} from "../Constants";
 
 
-class SidePanelGroup extends UI.Element {
-    get styleSheet() {
-        return this.options.styleSheet || this.parent.styleSheet;
+interface SidePanelGroupOptions {
+    anchor?: DirectionType;
+}
+
+class SidePanelGroup extends UI.Element<SidePanelGroupOptions> {
+    get styleSheet(): StyleRules<NavStyle> {
+        return this.options.styleSheet || (this.parent as any)?.styleSheet;
     }
 
     extraNodeAttributes(attr) {
@@ -31,8 +36,17 @@ class SidePanelGroup extends UI.Element {
 }
 
 
+interface SidePanelOptions {
+    anchor?: DirectionType;
+    name?: string;
+    persistent?: boolean;
+}
+
 @registerStyle(NavStyle)
-class SidePanel extends UI.Element {
+class SidePanel extends UI.Element<SidePanelOptions> {
+    declare storageSerializer?: SessionStorageMap;
+    declare visible?: boolean;
+
     constructor(...args) {
         super(...args);
         this.initNode();
@@ -122,13 +136,38 @@ class NavCarouselStyle extends CarouselStyle {
 }
 
 
+interface NavManagerOptions {
+    carouselStyleSheet?: CarouselStyle;
+    persistentLeftSidePanel?: boolean;
+    persistentRightSidePanel?: boolean;
+}
+
 @registerStyle(NavStyle)
-class NavManager extends UI.Primitive("nav") {
+class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
+    declare static Global?: NavManager;
+
+    declare leftSidePanel?: SidePanel;
+    declare rightSidePanel?: SidePanel;
+    declare leftPanelToggler?: LeftSideNavIcon;
+    declare rightPanelToggler?: RightSideNavIcon;
+    declare wrappedToggler?: WrappedNavIcon;
+    declare leftConditioned?: NavSection;
+    declare rightConditioned?: NavSection;
+    declare leftConditionedWrapper?: NavSection;
+    declare rightConditionedWrapper?: NavSection;
+    declare carousel?: Carousel;
+    declare navigationPanel?: BasicOrientedElementType;
+    declare wrappedPanel?: BasicOrientedElementType;
+    declare wrapped?: boolean;
+    declare wrapSkip?: boolean;
+    declare wrapScheduled?: boolean;
+    declare unwrappedTotalWidth?: number;
+
     getCarouselStyleSheet() {
         return this.options.carouselStyleSheet || NavCarouselStyle.getInstance();
     }
 
-    getDefaultOptions() {
+    getDefaultOptions(options?: ElementOptions<NavManagerOptions>): Partial<ElementOptions<NavManagerOptions>> {
         return {
             persistentLeftSidePanel: true,
             persistentRightSidePanel: true,
@@ -157,7 +196,7 @@ class NavManager extends UI.Primitive("nav") {
         </SidePanel>;
     }
 
-    constructor(options) {
+    constructor(options = {}) {
         super(options);
 
         this.initLeftSidePanel();
@@ -231,7 +270,7 @@ class NavManager extends UI.Primitive("nav") {
 
     getFixedWidth() {
         let width = 10;
-        for (let child of this.children) {
+        for (let child of this.children as UIElement[]) {
             width += child.getWidth();
         }
         width -= this.getLeftConditioned().getWidth();
@@ -334,9 +373,10 @@ class NavManager extends UI.Primitive("nav") {
         ];
     }
 
-    bindToNode() {
-        super.bindToNode(...arguments);
+    bindToNode(node: HTMLElement, doRedraw?: boolean): this {
+        super.bindToNode(node, doRedraw);
         this.onMount();
+        return this;
     }
 
     // This method enforces the wrapping to be skipped. It is useful when navbar elements change.
@@ -382,7 +422,7 @@ class NavManager extends UI.Primitive("nav") {
         if (this.getLeftConditioned().children.length || this.getRightConditioned().children.length) {
             if (!this.wrapped) {
                 this.unwrappedTotalWidth = 10;
-                for (let child of this.children) {
+                for (let child of this.children as UIElement[]) {
                     this.unwrappedTotalWidth += child.getWidth();
                 }
             }

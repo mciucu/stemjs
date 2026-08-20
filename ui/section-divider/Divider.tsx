@@ -1,6 +1,8 @@
 import {UI} from "../UIBase";
 
-export class Divider extends UI.Element {
+export class Divider<ExtraOptions = {}> extends UI.Element<ExtraOptions> {
+    declare touchDeviceTriggered?: boolean;
+
     dragMousedown(event: Event): void {};
 
     dragMousemove(event: Event): void {};

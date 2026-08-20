@@ -92,7 +92,7 @@ export class StyleInstance extends UI.TextElement {
     }
 }
 
-export class StyleElement<ExtraOptions = StyleElementOptions> extends UI.Primitive<ExtraOptions>("style") {
+export class StyleElement<ExtraOptions = StyleElementOptions> extends UI.Primitive("style")<ExtraOptions, HTMLStyleElement> {
     getNodeAttributes(): NodeAttributes {
         // TODO: allow custom style attributes (media, scoped, etc)
         const attr = new NodeAttributes({});

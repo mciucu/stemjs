@@ -1,35 +1,65 @@
-import {UI} from "../UIBase";
+import {ElementOptions, UI, UIElement, UIElementCleanChild} from "../UIBase";
+import {StyleRules} from "../Style";
+import {NavStyle} from "./NavStyle";
 import {Switcher} from "../Switcher";
 import {Link} from "../UIPrimitives";
 import {FACollapseIcon} from "../FontAwesome"; //TODO: more flexibility, do not require FAIcons in NavElements
 import {SessionStorageMap} from "../../base/StorageMap";
-import {unwrapArray} from "../../base/Utils";
-import {Orientation, Direction} from "../Constants";
+import {Constructor, unwrapArray} from "../../base/Utils";
+import {DirectionType, Orientation, OrientationType, Direction} from "../Constants";
 
 let navSessionManager = new SessionStorageMap("navManager");
 
-const BasicOrientedElementInterface = (BaseClass) => class BasicOrientedElement extends BaseClass {
-    get styleSheet() {
-        return this.options.styleSheet || this.parent.styleSheet;
+interface BasicOrientedElementOptions {
+    orientation?: OrientationType;
+}
+
+interface OrientedElement extends UIElement<any, any, any> {
+    getOrientation(): OrientationType;
+    get styleSheet(): StyleRules<NavStyle>;
+}
+
+const BasicOrientedElementInterface = <TBase extends Constructor<UIElement<any, any, any>>>(BaseClass: TBase) =>
+    class BasicOrientedElement extends BaseClass {
+    declare options: ElementOptions<BasicOrientedElementOptions>;
+
+    get styleSheet(): StyleRules<NavStyle> {
+        return (this.options.styleSheet || (this.parent as OrientedElement)?.styleSheet) as StyleRules<NavStyle>;
     }
 
-    getOrientation() {
+    getOrientation(): OrientationType {
         if (this.options.orientation) {
             return this.options.orientation;
         }
-        if (this.parent && typeof this.parent.getOrientation === "function") {
-            return this.parent.getOrientation();
+        const parent = this.parent as OrientedElement;
+        if (parent && typeof parent.getOrientation === "function") {
+            return parent.getOrientation();
         }
         return Orientation.HORIZONTAL;
     }
 };
 
 const BasicOrientedElement = BasicOrientedElementInterface(UI.Element);
+type BasicOrientedElementType = InstanceType<typeof BasicOrientedElement>;
 const BasicOrientedLinkElement = BasicOrientedElementInterface(Link);
 
 
+interface NavElementOptions extends BasicOrientedElementOptions {
+    value?: any;
+    href?: string;
+    sessionKey?: string;
+    persistent?: boolean;
+    defaultToggled?: boolean;
+}
+
 // NavElements should know if they are in vertical or horizontal mode, so they can behave differently
-const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
+const NavElementInterface = <TBase extends Constructor<OrientedElement>>(BaseClass: TBase) =>
+    class NavElement extends BaseClass {
+    declare options: ElementOptions<NavElementOptions>;
+    declare isToggled?: boolean;
+    declare contentArea?: UIElement;
+    declare collapseIcon?: any;
+
     constructor(...args) {
         super(...args);
         this.isToggled = this.getToggledState();
@@ -64,7 +94,7 @@ const NavElementInterface = (BaseClass) => class NavElement extends BaseClass {
     }
 
     getSubElements() {
-        let childrenToRender = unwrapArray(this.render());
+        const childrenToRender = unwrapArray<UIElementCleanChild>(this.render());
         if (childrenToRender.length) {
             let subElementsClass;
             if (!this.isToggled) {
@@ -198,9 +228,13 @@ class NavLinkElement extends NavElementInterface(BasicOrientedLinkElement) {
 }
 
 
-class NavSection extends UI.Primitive("ul") {
-    get styleSheet() {
-        return this.options.styleSheet || this.parent.styleSheet;
+interface NavSectionOptions {
+    anchor?: DirectionType;
+}
+
+class NavSection extends UI.Primitive("ul")<NavSectionOptions> {
+    get styleSheet(): StyleRules<NavStyle> {
+        return (this.options.styleSheet || (this.parent as OrientedElement)?.styleSheet) as StyleRules<NavStyle>;
     }
 
     extraNodeAttributes(attr) {
@@ -219,13 +253,17 @@ class NavSection extends UI.Primitive("ul") {
         return this.options.anchor || Direction.LEFT;
     }
 
-    getOrientation() {
-        return this.parent.getOrientation();
+    getOrientation(): OrientationType {
+        return (this.parent as OrientedElement).getOrientation();
     }
 }
 
 
 class NavAnchoredNotifications extends NavSection {
+    declare switcher?: Switcher;
+    declare activeChild?: any;
+    declare bodyListener?: any;
+
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
         attr.setStyle({
@@ -283,3 +321,4 @@ class NavAnchoredNotifications extends NavSection {
 
 
 export {BasicOrientedElement, NavElement, NavLinkElement, NavSection, NavAnchoredNotifications, navSessionManager};
+export type {BasicOrientedElementType};

@@ -1,19 +1,36 @@
 import {ButtonGroup} from "../button/ButtonGroup";
-import {Button} from "../button/Button";
+import {Button, ButtonOptions} from "../button/Button";
 import {FloatingWindow} from "./FloatingWindow";
 import {ModalStyle} from "./Style";
 import {Panel} from "../UIPrimitives";
-import {UI} from "../UIBase";
-import {Dispatcher} from "../../base/Dispatcher";
+import {UI, UIElementChild, UIElementOptions} from "../UIBase";
+import {Dispatcher, RemoveHandle} from "../../base/Dispatcher";
 import {registerStyle} from "../style/Theme";
-import {Level, Size} from "../Constants";
+import {Level, LevelType, Size} from "../Constants";
 import {TemporaryMessageArea} from "../misc/TemporaryMessageArea";
 import {NodeAttributes} from "../NodeAttributes";
+import {isString} from "../../base/Utils";
 
+
+export interface ModalOptions extends UIElementOptions {
+    closeButton?: boolean;
+    destroyOnHide?: boolean;
+    visible?: boolean;
+    fillScreen?: boolean;
+    display?: string;
+    maxHeight?: string;
+    width?: string;
+    height?: string;
+    overflow?: string;
+}
 
 @registerStyle(ModalStyle)
-export class Modal extends UI.Element {
-    getDefaultOptions() {
+export class Modal<ExtraOptions extends ModalOptions = ModalOptions> extends UI.Element<ExtraOptions> {
+    declare behindPanel?: Panel;
+    declare modalWindow?: FloatingWindow;
+    declare closeListenerHandler?: RemoveHandle;
+
+    getDefaultOptions(): Partial<ModalOptions> {
         return {
             closeButton: true,
             destroyOnHide: true,
@@ -119,7 +136,7 @@ export class Modal extends UI.Element {
         }, 0);
         this.closeListenerHandler = this.attachListener(Dispatcher.Global, "closeAllModals", () => {
             this.hide();
-        });
+        }) as RemoveHandle;
         document.body.classList.add("unscrollable");
     }
 
@@ -131,8 +148,17 @@ export class Modal extends UI.Element {
 }
 
 
-export class ActionModal extends Modal {
-    getDefaultOptions() {
+export interface ActionModalOptions extends ModalOptions {
+    closeName?: string;
+    actionName?: string;
+    level?: LevelType;
+    title?: UIElementChild;
+}
+
+export class ActionModal<ExtraOptions extends ActionModalOptions = ActionModalOptions> extends Modal<ExtraOptions> {
+    declare actionButton?: Button;
+
+    getDefaultOptions(): Partial<ActionModalOptions> {
         return {
             ...super.getDefaultOptions(),
             closeButton: false,
@@ -219,7 +245,7 @@ export class ActionModal extends Modal {
 }
 
 
-export const ActionModalButton = (ActionModal) => class ActionModalButton extends Button {
+export const ActionModalButton = (ActionModal) => class ActionModalButton extends Button<ButtonOptions & {modalOptions?: ActionModalOptions}> {
     getModalOptions() {
         let modalOptions = {
             actionName: this.options.label,
@@ -238,7 +264,18 @@ export const ActionModalButton = (ActionModal) => class ActionModalButton extend
 };
 
 
-export class ConfirmModal extends ActionModal {
+interface ConfirmModalOptions extends ActionModalOptions {
+    // Narrower than the base, since it also stands in for the action name
+    title?: string;
+    message?: UIElementChild;
+    confirmText?: string;
+    cancelText?: string;
+}
+
+export class ConfirmModal extends ActionModal<ConfirmModalOptions> {
+    declare resolvePromise: (value: boolean) => void;
+    declare resolved?: boolean;
+
     getTitle() {
         return this.options.title || "Confirm";
     }
@@ -265,7 +302,7 @@ export class ConfirmModal extends ActionModal {
     }
 
     hide() {
-        if (!this._resolved) {
+        if (!this.resolved) {
             this.resolvePromise(false);
         }
         super.hide();
@@ -275,7 +312,7 @@ export class ConfirmModal extends ActionModal {
         return new Promise((resolve) => {
             const modal = new this({...options, destroyOnHide: true});
             modal.resolvePromise = (value) => {
-                modal._resolved = true;
+                modal.resolved = true;
                 resolve(value);
             };
             modal.show();
@@ -284,13 +321,18 @@ export class ConfirmModal extends ActionModal {
 }
 
 
-export class ErrorModal extends ActionModal {
+interface ErrorModalOptions extends ActionModalOptions {
+    error?: {message?: string} | string;
+}
+
+export class ErrorModal extends ActionModal<ErrorModalOptions> {
     getTitle() {
         return "An Error occurred";
     }
 
     getBody() {
-        return this.options.error.message || this.options.error;
+        const {error} = this.options;
+        return (isString(error) ? error : error?.message) || error;
     }
 
     getFooter() {

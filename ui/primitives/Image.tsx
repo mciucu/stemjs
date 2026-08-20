@@ -2,7 +2,7 @@ import {UI} from "../UIBase";
 import {sanitizeUrlFromOptions} from "./Link";
 import {RemoveHandle} from "../../base/Dispatcher";
 
-export class Image extends UI.Primitive<void, "img">("img") {
+export class Image extends UI.Primitive("img")<{}, HTMLImageElement> {
     setOptions(options: any): any {
         return super.setOptions(sanitizeUrlFromOptions(options, "src"));
     }

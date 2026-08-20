@@ -2,16 +2,20 @@
 import {Device} from "../../base/Device";
 import {unwrapArray} from "../../base/Utils";
 import {Divider} from "./Divider";
-import {UI} from "../UIBase";
+import {ElementOptions, UI, UIElement, UIElementOptions} from "../UIBase";
 import {registerStyle} from "../style/Theme";
 import {SectionDividerStyle} from "./Style";
-import {Orientation} from "../Constants";
+import {Orientation, OrientationType} from "../Constants";
 
 
+
+interface DividerBarOptions {
+    orientation?: OrientationType;
+}
 
 // options.orientation is the orientation of the divided elements
 @registerStyle(SectionDividerStyle)
-export class DividerBar extends Divider {
+export class DividerBar extends Divider<DividerBarOptions> {
     getDefaultOptions() {
         return Object.assign({}, super.getDefaultOptions(), {
             orientation: Orientation.HORIZONTAL,
@@ -42,9 +46,31 @@ export class DividerBar extends Divider {
     - All the children it's dividing
     - An option on how to redivide the sizes of the children
  */
+export interface SectionDividerOptions extends UIElementOptions {
+    orientation?: OrientationType;
+    autoCollapse?: boolean;
+}
+
+export interface SectionDividerPanelOptions {
+    fixed?: boolean;
+    minWidth?: number;
+    minHeight?: number;
+}
+
+// What a section divider needs of the children it lays out
+export interface SectionDividerPanel extends UIElement<any, any, any> {
+    options: ElementOptions<SectionDividerPanelOptions>;
+    collapsed?: boolean;
+}
+
 @registerStyle(SectionDividerStyle)
-export class SectionDivider extends UI.Element {
-    getDefaultOptions() {
+export class SectionDivider<ExtraOptions extends SectionDividerOptions = SectionDividerOptions> extends UI.Element<ExtraOptions> {
+    declare panels: SectionDividerPanel[];
+    declare dividers: DividerBar[];
+    declare uncollapsedSizes: WeakMap<SectionDividerPanel, number>;
+    declare clearListeners?: (() => void) | null;
+
+    getDefaultOptions(): Partial<SectionDividerOptions> {
         return Object.assign({
             autoCollapse: false,
         }, super.getDefaultOptions())
@@ -342,7 +368,7 @@ export class SectionDivider extends UI.Element {
         let leftChildVisible = false;
         const DividerBarClass = this.getDividerBarClass();
 
-        for (let child of unwrapArray(this.render())) {
+        for (const child of unwrapArray<SectionDividerPanel>(this.render())) {
             if (this.panels.length) {
                 let hiddenClass = "hidden";
                 if (leftChildVisible && !child.hasClass("hidden")) {
@@ -352,7 +378,7 @@ export class SectionDivider extends UI.Element {
                 children.push(divider);
                 this.dividers.push(divider);
             }
-            leftChildVisible |= !child.hasClass("hidden");
+            leftChildVisible ||= !child.hasClass("hidden");
             children.push(child);
             this.panels.push(child);
         }

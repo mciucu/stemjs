@@ -18,10 +18,10 @@ function touchEventHandler(
         }
         let startX: number = event.targetTouches[0][xType + "X"];
         let panelToggler = new Dispatcher();
-        let startTime: number = StemDate.now();
+        let startTime: number = StemDate.now().valueOf();
 
         let touchCallback = (event: TouchEvent) => {
-            if (successCondition(event.targetTouches[0][xType + "X"], startX, StemDate.now() - startTime)) {
+            if (successCondition(event.targetTouches[0][xType + "X"], startX, StemDate.now().valueOf() - startTime)) {
                 panelToggler.dispatch(true);
             }
         };

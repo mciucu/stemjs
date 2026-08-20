@@ -3,6 +3,8 @@ import {enhance} from "../Color";
 
 
 export class NavStyle extends StyleSheet {
+    declare colors: Record<string, string>;
+
     // Custom variables
     getColors() {
         const themeProps = this.themeProps;

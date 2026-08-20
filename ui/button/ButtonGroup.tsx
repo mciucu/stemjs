@@ -15,17 +15,6 @@ export interface RadioButtonGroupOptions extends SimpleStyledElementOptions {
     index?: number;
 }
 
-// Interface declarations for proper typing
-export interface ButtonGroup {
-    // @ts-ignore
-    styleSheet: ButtonGroupStyle;
-}
-
-export interface RadioButtonGroup {
-    // @ts-ignore
-    styleSheet: RadioButtonGroupStyle;
-}
-
 @registerStyle(ButtonGroupStyle)
 export class ButtonGroup extends SimpleStyledElement<ButtonGroupOptions> {
     getDefaultOptions(): Partial<ButtonGroupOptions> {

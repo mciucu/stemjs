@@ -1,17 +1,28 @@
-import {UI} from "../UIBase";
+import {ExtendedOptions, UI, UIElement, UIElementChild} from "../UIBase";
 import {Switcher} from "../Switcher";
-import {Link} from "../UIPrimitives";
+import {Link, Panel} from "../UIPrimitives";
 import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
 import {registerStyle} from "../style/Theme";
+import {StyleRules} from "../Style";
 import {DefaultTabAreaStyle} from "./Style";
 import {unwrapArray} from "../../base/Utils";
 
 
+interface BasicTabTitleOptions {
+    panel?: Panel;
+    activeTabDispatcher?: SingleActiveElementDispatcher;
+    title?: UIElementChild;
+}
+
 class BasicTabTitle extends Link {
+    declare options: ExtendedOptions<Link, BasicTabTitleOptions>;
+
     extraNodeAttributes(attr) {
-        attr.addClass(this.styleSheet.tab);
+        // The sheet a tab title renders with is the TabArea's, passed down through options
+        const styleSheet = this.styleSheet as unknown as StyleRules<DefaultTabAreaStyle>;
+        attr.addClass(styleSheet.tab);
         if (this.options.active) {
-            attr.addClass(this.styleSheet.activeTab);
+            attr.addClass(styleSheet.activeTab);
         }
     }
 
@@ -44,11 +55,7 @@ class BasicTabTitle extends Link {
         if (this.options.title) {
             return this.options.title;
         }
-        let panel = this.getPanel();
-        if (typeof panel.getTitle === "function") {
-            return panel.getTitle();
-        }
-        return panel.options.title;
+        return this.getPanel().getTitle();
     }
 
     render() {
@@ -75,15 +82,25 @@ class BasicTabTitle extends Link {
 }
 
 
-class TabTitleArea extends UI.Element {
+class TabTitleArea<ExtraOptions = {}> extends UI.Element<ExtraOptions> {
+}
+
+interface TabAreaOptions {
+    autoActive?: boolean;
+    lazyRender?: boolean;
+    panelClass?: string;
+    titleAreaClass?: string;
 }
 
 
 @registerStyle(DefaultTabAreaStyle)
-class TabArea extends UI.Element {
+class TabArea extends UI.Element<TabAreaOptions> {
     activeTabDispatcher = new SingleActiveElementDispatcher();
+    declare titleArea?: TabTitleArea<any>;
+    declare switcher?: Switcher;
+    declare activePanel?: Panel;
 
-    getDefaultOptions() {
+    getDefaultOptions(): Partial<TabAreaOptions> {
         return {
             autoActive: true, // means the first Tab will be automatically selected
             // lazyRender: true, // TODO: should be true by default
@@ -104,13 +121,14 @@ class TabArea extends UI.Element {
         return [tab, panel];
     }
 
-    appendChild(panel, doMount) {
+    appendChild(panel, doMount?) {
         let [tabTitle, tabPanel] = this.createTabPanel(panel);
 
-        this.options.children.push(panel);
+        (this.options.children as UIElement[]).push(panel);
 
         this.titleArea.appendChild(tabTitle);
         this.switcher.appendChild(tabPanel, doMount || !this.options.lazyRender);
+        return panel;
     }
 
     getTitleArea(tabTitles) {
@@ -138,7 +156,7 @@ class TabArea extends UI.Element {
         let tabPanels = [];
         let activeTab;
 
-        let givenChildren = unwrapArray(this.render());
+        let givenChildren = unwrapArray<UIElement>(this.render());
         if (this.switcher) {
             // In order to keep track of the active tab we'll use the switcher's logic
             // This also reuses the children

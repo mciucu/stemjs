@@ -49,11 +49,6 @@ export class AnchoredPopupStyle extends StyleSheet {
 }
 
 // TODO @types
-export interface AnchoredPopup {
-    // @ts-ignore
-    styleSheet: AnchoredPopupStyle;
-}
-
 // TODO: Fix when it doesn't fit the body. (see the popup in the Reports chart)
 @registerStyle(AnchoredPopupStyle)
 export class AnchoredPopup extends UIElement<AnchoredPopupOptions> {

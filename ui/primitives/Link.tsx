@@ -46,7 +46,7 @@ export class LinkStyle extends StyleSheet {
 }
 
 @registerStyle(LinkStyle)
-export class Link extends UI.Primitive<LinkOptions, "a">("a") {
+export class Link extends UI.Primitive("a")<LinkOptions, HTMLAnchorElement> {
     getDefaultOptions(options?: any): Partial<any> {
         return {
             newTab: false,

@@ -31,6 +31,7 @@ export type RefLinkOptions = {
 // Type definitions
 export interface UIElementOptions {
     children?: UIElementCleanChild | UIElementCleanChild[];
+    title?: UIElementChild;
     ref?: RefLinkOptions | string;
     key?: string | number;
     active?: boolean; // Tabs or switchers can put this on children
@@ -38,7 +39,7 @@ export interface UIElementOptions {
     className?: string;
     style?: string | StyleObject;
     theme?: Theme;
-    styleSheet?: StyleSheet;
+    styleSheet?: StyleSheet | typeof StyleSheet;
     // The events every element answers to; anything narrower belongs on its own options
     onClick?: UIEventHandler;
     onDoubleClick?: UIEventHandler;
@@ -54,7 +55,7 @@ type WritableKeys<T> = {
 }[keyof T];
 
 // Options land on the node as attributes, so a readonly DOM member can never be one
-export type NodeOptions<NodeType> = Partial<Omit<Pick<NodeType, WritableKeys<NodeType>>, "children" | "nodeType" | "style">>;
+export type NodeOptions<NodeType> = Partial<Omit<Pick<NodeType, WritableKeys<NodeType>>, "children" | "nodeType" | "style" | "title">>;
 
 export type UIOptions<NodeType extends (SVGElement | HTMLElement), ExtraOptions = {}> = NodeOptions<NodeType> & UIElementOptions & ExtraOptions;
 
@@ -322,6 +323,10 @@ export class UIElement<
         return this.options?.children;
     }
 
+    getTitle(): UIElementChild {
+        return this.options?.title;
+    }
+
     createNode(): NodeType {
         this.node = document.createElement(this.getNodeType()) as NodeType;
         applyDebugFlags(this);
@@ -541,7 +546,7 @@ export class UIElement<
     }
 
     get themeProps(): ThemeProps {
-        return this.options?.styleSheet?.themeProps || this.getTheme().props;
+        return (this.options?.styleSheet as StyleSheet)?.themeProps || this.getTheme().props;
     }
 
     addListenersFromOptions() {

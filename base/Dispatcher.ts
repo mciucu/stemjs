@@ -45,6 +45,9 @@ class DispatcherHandle implements RemoveHandle {
 }
 
 export class Dispatcher {
+    // Assigned below, once Dispatchable is defined
+    declare static Global: Dispatchable;
+
     options: any;
     listeners: Callback[];
 
@@ -191,7 +194,7 @@ export class Dispatchable {
         this.cleanupJobs?.cleanup();
     }
 
-    detachListener(dispatcherHandle: DispatcherHandle): void {
+    detachListener(dispatcherHandle: RemoveHandle): void {
         if (this[CleanupJobsSymbol]) {
             this[CleanupJobsSymbol].remove(dispatcherHandle);
         } else {
@@ -263,7 +266,7 @@ export function getAttachCleanupJobMethod(methodName: string) {
 (Dispatchable.prototype as any).attachChangeListener     = getAttachCleanupJobMethod("ChangeListener");
 (Dispatchable.prototype as any).attachListenerOnce       = getAttachCleanupJobMethod("ListenerOnce");
 
-(Dispatcher as any).Global = new Dispatchable();
+Dispatcher.Global = new Dispatchable();
 
 export class RunOnce {
     private timeout?: TimeoutHandler;

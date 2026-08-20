@@ -70,10 +70,6 @@ export const CardPanelHeaderStyle = BasicLevelStyleSheet(cardPanelHeaderColorToS
 
 @registerStyle(CardPanelStyle)
 export class CardPanel extends SimpleStyledElement {
-    getTitle() {
-        return this.options.title;
-    }
-
     getHeaderStyleSheet() {
         return CardPanelHeaderStyle.getInstance();
     }

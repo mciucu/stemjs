@@ -88,12 +88,6 @@ export class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToSty
     };
 }
 
-// Interface declaration for proper typing
-export interface ProgressBar {
-    // @ts-ignore
-    styleSheet: ProgressBarStyle;
-}
-
 @registerStyle(ProgressBarStyle)
 export class ProgressBar extends SimpleStyledElement<ProgressBarOptions> {
     render(): UIElementChild {

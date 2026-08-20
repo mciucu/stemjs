@@ -39,12 +39,6 @@ export interface SelectOptions<ValueType> extends InputableElementOptions<ValueT
     serializer?: (obj: ValueType) => string;
 }
 
-// TODO @types fucking Typescript not implementing decorators properly
-export interface InputableElement<ValueType, ExtraOptions extends InputableElementOptions<ValueType> = InputableElementOptions<ValueType>, NodeType extends (HTMLElement | SVGElement) = HTMLElement> {
-    // @ts-ignore
-    styleSheet: InputStyle;
-}
-
 // TODO rename to BaseInputElement
 // TODO handle the setOptions - initialValue lifecycle
 @registerStyle(InputStyle)

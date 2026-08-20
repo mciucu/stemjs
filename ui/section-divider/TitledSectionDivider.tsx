@@ -1,17 +1,20 @@
 // TODO: This class is incomplete for horizontal orientation and more than 2 panels.
 
-import {UI} from "../UIBase";
+import {ElementOptions, UI, UIElement, UIElementChild} from "../UIBase";
 import {registerStyle} from "../style/Theme";
 import {unwrapArray} from "../../base/Utils";
-import {DividerBar, SectionDivider} from "./SectionDivider";
+import {DividerBar, SectionDivider, SectionDividerOptions, SectionDividerPanelOptions} from "./SectionDivider";
 import {TitledDividerStyle} from "./Style";
-import {Orientation} from "../Constants";
+import {Orientation, OrientationType} from "../Constants";
 import {FAIcon} from "../FontAwesome";
 
 
 
 @registerStyle(TitledDividerStyle)
 class TitledSectionDividerBar extends DividerBar {
+    declare leftButton?: UIElement;
+    declare rightButton?: UIElement;
+
     render() {
         if (this.options.orientation === Orientation.VERTICAL) {
             return [
@@ -46,8 +49,27 @@ class TitledSectionDividerBar extends DividerBar {
 }
 
 
+interface TitledSectionDividerOptions extends SectionDividerOptions {
+    collapsedSize?: number;
+}
+
+// The children given to a TitledSectionDivider, before each is wrapped in a BarCollapsePanel
+interface TitledPanel extends UIElement<any, any, any> {
+    options: ElementOptions<{title?: UIElementChild; collapsed?: boolean}>;
+}
+
+interface BarCollapsePanelOptions extends SectionDividerPanelOptions {
+    orientation?: OrientationType;
+    collapsedSize?: number;
+    title?: UIElementChild;
+}
+
 @registerStyle(TitledDividerStyle)
-class BarCollapsePanel extends UI.Element {
+class BarCollapsePanel extends UI.Element<BarCollapsePanelOptions> {
+    declare parent?: TitledSectionDivider;
+    declare collapsed?: boolean;
+    declare collapsedBarTitle?: UIElement;
+
     extraNodeAttributes(attr) {
         const panelChild = this.getGivenChildren()[0];
         attr.addClass(this.styleSheet.barCollapsePanel);
@@ -112,7 +134,7 @@ class BarCollapsePanel extends UI.Element {
              this.dispatch("expand");
          });
          this.addListener("resize", () => {
-             for (const child of unwrapArray(this.render())) {
+             for (const child of unwrapArray<UIElement>(this.render())) {
                  child.dispatch("resize");
              }
          })
@@ -121,8 +143,9 @@ class BarCollapsePanel extends UI.Element {
 
 
 @registerStyle(TitledDividerStyle)
-export class TitledSectionDivider extends SectionDivider {
-    getDefaultOptions() {
+export class TitledSectionDivider extends SectionDivider<TitledSectionDividerOptions> {    declare panels: BarCollapsePanel[];
+
+    getDefaultOptions(): Partial<TitledSectionDividerOptions> {
         return Object.assign({}, super.getDefaultOptions(), {
             collapsedSize: 40,
             autoCollapse: true,
@@ -219,7 +242,7 @@ export class TitledSectionDivider extends SectionDivider {
         this.panels = [];
         const DividerBarClass = this.getDividerBarClass();
 
-        for (const child of unwrapArray(this.render())) {
+        for (const child of unwrapArray<TitledPanel>(this.render())) {
             if (child.options.collapsed) {
                 this.addClass(this.styleSheet.paddingRemoved);
             }

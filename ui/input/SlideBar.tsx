@@ -1,13 +1,22 @@
 import {Draggable} from "../Draggable";
-import {UI, UIElement} from "../UIBase";
+import {ElementOptions, UI, UIElement} from "../UIBase";
 import {ProgressBar} from "../ProgressBar";
 import {Orientation} from "../Constants";
 import {Device} from "../../base/Device";
 import {getOffset} from "../Utils";
 
 // TODO This should extend an input
-export class SlideBar extends Draggable(UIElement) {
-    getDefaultOptions() {
+interface SlideBarOptions {
+    value?: number;
+    // What the subclasses normalize height/width into
+    size?: number;
+    barSize?: number;
+}
+
+export class SlideBar<ExtraOptions = {}> extends Draggable(UIElement) {
+    declare options: ElementOptions<SlideBarOptions & ExtraOptions>;
+
+    getDefaultOptions(): Partial<ElementOptions<SlideBarOptions>> {
         return {
             value: 0,
         };
@@ -25,7 +34,7 @@ export class SlideBar extends Draggable(UIElement) {
 
     render() {
         return [
-            <ProgressBar ref="progressBar" active="true" value={this.options.value} disableTransition={true}
+            <ProgressBar ref="progressBar" active={true} value={this.options.value} disableTransition={true}
                          orientation={this.getOrientation()}
                          style={Object.assign({
                              position: "relative",
@@ -103,7 +112,12 @@ export class HorizontalSlideBar extends SlideBar {
     }
 }
 
-export class VerticalSlideBar extends SlideBar {
+interface VerticalSlideBarOptions {
+    height?: number;
+    barHeight?: number;
+}
+
+export class VerticalSlideBar extends SlideBar<VerticalSlideBarOptions> {
     setOptions(options) {
         options.size = options.size || options.height || 100;
         options.barSize = options.barSize || options.barHeight || 5;

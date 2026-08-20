@@ -1,7 +1,7 @@
 import {UI} from "../UIBase";
 import {DOMAttributesMap} from "../NodeAttributes";
 
-export class IFrame extends UI.Primitive<void, "iframe">("iframe") {
+export class IFrame extends UI.Primitive("iframe")<{}, HTMLIFrameElement> {
     static domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
         ["allow"],
         ["allowfullscreen", {noValue: true}],

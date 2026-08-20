@@ -10,7 +10,8 @@ interface StyleSheetOptions {
     delayedMount?: boolean;
 }
 
-interface StyleObject {
+// The object a @styleRule is declared with
+export interface StyleObject {
     [PREFERRED_CLASS_NAME_KEY]?: string;
     [key: string]: any;
 }
@@ -33,9 +34,10 @@ export type StyleRuleValue = string;
 // literal it was declared with. Members inherited from StyleSheet, and plain (non-object) fields such as a
 // transitionTime, are left alone - only the ones a @styleRule could have replaced are rewritten.
 export type StyleRules<T> = {
-    [Key in keyof T]: Key extends keyof StyleSheet ? T[Key] :
+    // ts-plugin renames each @styleRule field and re-declares the real name, so skip the stand-ins it leaves
+    [Key in keyof T as Key extends `${string}$${number}` ? never : Key]: Key extends keyof StyleSheet ? T[Key] :
         T[Key] extends StyleSheet ? T[Key] : // a nested style sheet, such as GlobalStyle.Utils, is not a rule
-        T[Key] extends (...args: infer Args) => any ? (...args: Args) => StyleRuleValue :
+        T[Key] extends (...args: any[]) => any ? T[Key] : // a method, which @styleRule is never on
         T[Key] extends object ? StyleRuleValue :
         T[Key];
 };

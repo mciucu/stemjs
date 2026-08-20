@@ -11,6 +11,14 @@
 //     export class DashboardTitle extends UI.Element {}
 //     // appended: export interface DashboardTitle {get styleSheet(): StyleRules<...>;}
 //
+// @styleRule gives the property the object it is written with, rather than that object's exact literal type.
+// The decorator swaps the literal for the class name it generates, so the literal type is never what anyone
+// reads - and it makes a subclass's own literal a mismatched override.
+//
+//     @styleRule tab = {marginBottom: "-1px"};   on disk
+//     @styleRule t$1 = {marginBottom: "-1px"};   what the compiler parses
+//     // appended: interface TabAreaStyle {tab: StyleObject;}
+//
 // @field(SomeStore) gives the property the type its spec loads, plus the raw id that comes with a foreign
 // key. A class and a merged interface can't both declare the same member (TS2300), so an un-annotated
 // field first has to stop being a member: its *name* is replaced by an equal-length placeholder.
@@ -30,6 +38,7 @@
 const STYLE_MEMBER = "styleSheet";
 const STYLE_DECORATOR = "registerStyle";
 const FIELD_DECORATOR = "field";
+const STYLE_RULE_DECORATORS = ["styleRule", "styleRuleInherit", "styleRuleCustom"];
 // Where StyleRules and the field types live. Configurable through the tsconfig plugin entry, for projects
 // that place stem elsewhere
 const DEFAULT_STYLE_MODULE = "stem-core/ui/Style";
@@ -68,6 +77,37 @@ function getDecoratorCall(ts, node, decoratorName) {
         }
     }
     return null;
+}
+
+// A rule decorator is used bare (@styleRule) or called (@styleRuleCustom({...}))
+function hasStyleRuleDecorator(ts, node) {
+    const decorators = ts.canHaveDecorators(node) ? ts.getDecorators(node) : null;
+    for (const decorator of decorators || []) {
+        let {expression} = decorator;
+        if (ts.isCallExpression(expression)) {
+            expression = expression.expression;
+        }
+        if (ts.isIdentifier(expression) && STYLE_RULE_DECORATORS.includes(expression.escapedText)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function collectStyleRules(ts, classNode, sourceFile) {
+    const rules = [];
+    for (const member of classNode.members) {
+        if (!ts.isPropertyDeclaration(member) || !ts.isIdentifier(member.name) || member.type) {
+            continue;
+        }
+        if (ts.getCombinedModifierFlags(member) & (ts.ModifierFlags.Static | ts.ModifierFlags.Ambient)) {
+            continue;
+        }
+        if (hasStyleRuleDecorator(ts, member)) {
+            rules.push({name: member.name.text, nameStart: member.name.getStart(sourceFile)});
+        }
+    }
+    return rules;
 }
 
 function getRegisteredStyle(ts, classNode, sourceFile) {
@@ -161,7 +201,8 @@ function makePlaceholder(name, index) {
 // Returns {text, originalLength, fields} for the augmented file, or null when there's nothing to declare.
 // `fields` pairs each renamed member with the declaration that replaced it, for the plugin to map between.
 function getAugmentedSource(ts, fileName, text, options = {}) {
-    if (!text.includes(STYLE_DECORATOR) && !text.includes("@" + FIELD_DECORATOR)) {
+    const hasStyleRule = STYLE_RULE_DECORATORS.some(name => text.includes("@" + name));
+    if (!text.includes(STYLE_DECORATOR) && !text.includes("@" + FIELD_DECORATOR) && !hasStyleRule) {
         return null;
     }
 
@@ -187,6 +228,37 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
             // StyleRules is what corrects each rule from the object literal it's declared with to the class name it is
             const styleType = `import("${styleModule}").StyleRules<InstanceType<typeof ${styleName}>>`;
             appended += `${prefix}interface ${className}${typeParams} {get ${STYLE_MEMBER}(): ${styleType};}\n`;
+        }
+
+        // The decorator swaps the object literal for the class name it generates, so the literal type it was
+        // written with is never what anyone reads - and it makes a subclass's own literal a mismatched override
+        const styleRules = collectStyleRules(ts, statement, sourceFile).filter(
+            rule => !interfaceDeclaresMember(ts, sourceFile, className, rule.name));
+        let ruleDeclarations = "";
+        for (const rule of styleRules) {
+            const placeholder = makePlaceholder(rule.name, impliedFields.length + 1);
+            if (!placeholder) {
+                continue;
+            }
+            ruleDeclarations += "    ";
+            impliedFields.push({
+                name: rule.name,
+                placeholder,
+                sourceStart: rule.nameStart,
+                appendedStart: 0, // filled in once the interface it lands in has a known offset
+                pendingOffset: ruleDeclarations.length,
+            });
+            ruleDeclarations += `${rule.name}: import("${styleModule}").StyleObject;\n`;
+        }
+        if (ruleDeclarations !== "") {
+            const header = `${prefix}interface ${className}${typeParams} {\n`;
+            for (const fieldInfo of impliedFields) {
+                if (fieldInfo.pendingOffset != null) {
+                    fieldInfo.appendedStart = appended.length + header.length + fieldInfo.pendingOffset;
+                    delete fieldInfo.pendingOffset;
+                }
+            }
+            appended += header + ruleDeclarations + "}\n";
         }
 
         const fields = collectFields(ts, statement, sourceFile);
@@ -236,6 +308,8 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
     if (appended === "") {
         return null;
     }
+
+    impliedFields.sort((left, right) => left.sourceStart - right.sourceStart);
 
     let rewritten = "";
     let cursor = 0;

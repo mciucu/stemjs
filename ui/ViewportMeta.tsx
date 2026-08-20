@@ -8,7 +8,7 @@ export interface ViewportMetaOptions {
     minDeviceWidth?: number;
 }
 
-export class ViewportMeta extends UI.Primitive<ViewportMetaOptions, "meta">("meta") {
+export class ViewportMeta extends UI.Primitive("meta")<ViewportMetaOptions, HTMLMetaElement> {
     getDefaultOptions(): ViewportMetaOptions {
         return {
             scale: this.getDesiredScale(),

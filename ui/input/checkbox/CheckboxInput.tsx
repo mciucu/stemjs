@@ -1,5 +1,5 @@
 import {UI} from "../../UIBase";
-import {StyleSheet} from "../../Style";
+import {StyleRules, StyleSheet} from "../../Style";
 import {styleRule} from "../../../decorators/Style";
 import {registerStyle} from "../../style/Theme";
 import {Device} from "../../../base/Device";
@@ -61,7 +61,7 @@ export interface CheckboxInputOptions {
 
 // Fucking Typescript idiots
 export interface CheckboxInput {
-    get styleSheet(): CheckboxInputStyle;
+    get styleSheet(): StyleRules<CheckboxInputStyle>;
 }
 
 @registerStyle(CheckboxInputStyle)

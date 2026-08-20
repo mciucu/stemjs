@@ -1,10 +1,17 @@
-import {UI} from "../UIBase";
+import {UI, UIElementOptions} from "../UIBase";
 import {FloatingWindowStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
 
+export interface FloatingWindowOptions extends UIElementOptions {
+    // Where the window mounts, since it escapes its parent's subtree
+    parentNode?: HTMLElement;
+    transitionTime?: number;
+    notVisible?: boolean;
+}
+
 @registerStyle(FloatingWindowStyle)
-export class FloatingWindow extends UI.Element {
-    getDefaultOptions() {
+export class FloatingWindow<ExtraOptions extends FloatingWindowOptions = FloatingWindowOptions> extends UI.Element<ExtraOptions> {
+    getDefaultOptions(): Partial<FloatingWindowOptions> {
         return {
             transitionTime: 0,
             style: {
@@ -67,7 +74,9 @@ export class FloatingWindow extends UI.Element {
 }
 
 
-export class VolatileFloatingWindow extends FloatingWindow {
+export class VolatileFloatingWindow<ExtraOptions extends FloatingWindowOptions = FloatingWindowOptions> extends FloatingWindow<ExtraOptions> {
+    declare hideListener?: () => void;
+
     bindWindowListeners() {
         this.hideListener = this.hideListener || (() => {this.hide();});
         window.addEventListener("click", this.hideListener);

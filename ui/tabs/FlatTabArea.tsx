@@ -1,13 +1,20 @@
-import {UI} from "../UIBase";
+import {ExtendedOptions, UI, UIElement} from "../UIBase";
 import {FlatTabAreaStyle, FlatTabAreaHorizontalOverflowStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
 import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
+import {StyleRules} from "../Style";
 import {TabTitleArea, BasicTabTitle, TabArea} from "./TabArea";
 import {HorizontalOverflow} from "../horizontal-overflow/HorizontalOverflow";
 import {unwrapArray} from "../../base/Utils";
 
 
+interface FlatTabTitleOptions {
+    activeTabTitleDispatcher?: SingleActiveElementDispatcher;
+}
+
 export class FlatTabTitle extends BasicTabTitle {
+    declare options: ExtendedOptions<BasicTabTitle, FlatTabTitleOptions>;
+
     setActive(active) {
         super.setActive(active);
         if (active) {
@@ -20,9 +27,17 @@ export class FlatTabTitle extends BasicTabTitle {
 
 
 // This class displays a bottom bar on the active tab, and when changing tabs it also moves the bottom bar.
-export class FlatTabTitleArea extends TabTitleArea {
+export class FlatTabTitleArea extends TabTitleArea<FlatTabTitleOptions> {
     barLeft = 0; // Active bar left and width must be cached so the redraw is done seamlessly.
     barWidth = 0;
+    declare bar?: UIElement;
+    declare activeTab?: FlatTabTitle;
+    declare horizontalOverflow?: HorizontalOverflow;
+
+    // The sheet is the FlatTabArea's, passed down through options
+    get styleSheet(): StyleRules<FlatTabAreaStyle> {
+        return super.styleSheet as unknown as StyleRules<FlatTabAreaStyle>;
+    }
 
     extraNodeAttributes(attr) {
         super.extraNodeAttributes(attr);
@@ -30,7 +45,7 @@ export class FlatTabTitleArea extends TabTitleArea {
     }
 
     getChildrenToRender() {
-        for (const child of this.render()) {
+        for (const child of unwrapArray<FlatTabTitle>(this.render())) {
             if (child.options.active) {
                 child.addClass(this.styleSheet.activeOnRender);
             }
@@ -47,7 +62,7 @@ export class FlatTabTitleArea extends TabTitleArea {
     setActiveBar(activeTab) {
         let barLeft = 0;
         let barWidth = 0;
-        for (const tab of unwrapArray(this.render())) {
+        for (const tab of unwrapArray<FlatTabTitle>(this.render())) {
             const tabWidth = tab.getWidth();
             if (tab === activeTab) {
                 barWidth = tabWidth;
@@ -94,7 +109,7 @@ export class FlatTabTitleArea extends TabTitleArea {
 
     onMount() {
         super.onMount();
-        for (const child of this.options.children) {
+        for (const child of unwrapArray<FlatTabTitle>(this.options.children)) {
             if (child.options.active) {
                 this.setActive(child);
             }
@@ -108,6 +123,7 @@ export class FlatTabTitleArea extends TabTitleArea {
 @registerStyle(FlatTabAreaStyle)
 export class FlatTabArea extends TabArea {
     activeTabTitleDispatcher = new SingleActiveElementDispatcher();
+    declare titleArea?: FlatTabTitleArea;
 
     getTitleArea(tabTitles) {
         return <FlatTabTitleArea

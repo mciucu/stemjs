@@ -61,12 +61,28 @@ module.exports = (ts, check) => {
         optional.appended.includes(`startedAt: ${FIELD_VALUE}<typeof Date>;`), true);
 
     const styles = augment(ts, "styles.tsx");
-    check("a .tsx source half is untouched too",
-        styles.result.text.slice(0, styles.result.originalLength), styles.text);
+    let restoredStyles = styles.result.text.slice(0, styles.result.originalLength);
+    for (const field of styles.result.fields) {
+        restoredStyles = restoredStyles.slice(0, field.sourceStart) + field.name +
+            restoredStyles.slice(field.sourceStart + field.name.length);
+    }
+    check("a .tsx source half differs only at the renamed members", restoredStyles, styles.text);
     check("@registerStyle declares the style sheet",
         styles.appended.includes('export interface DashboardTitle {get styleSheet(): import("@stemjs/ui/Style").StyleRules<InstanceType<typeof DashboardTitleStyle>>;}'), true);
     check("a class that declares styleSheet is left alone",
         styles.appended.includes("AnnotatedTitle"), false);
+
+    const STYLE_OBJECT = 'import("@stemjs/ui/Style").StyleObject';
+    check("@styleRule declares the rule as the object it is written with",
+        styles.appended.includes(`title: ${STYLE_OBJECT};`), true);
+    check("@styleRuleInherit is a rule too",
+        styles.appended.includes(`heading: ${STYLE_OBJECT};`), true);
+    check("an annotated rule is left alone",
+        styles.appended.includes("annotated:"), false);
+    check("a plain field is not a rule",
+        styles.appended.includes("plainField"), false);
+    check("every rule name is renamed in the source half",
+        ["title", "heading"].every(name => styles.result.fields.some(field => field.name === name)), true);
 
     check("a file with neither decorator is not touched at all",
         getAugmentedSource(ts, "/x/plain.ts", "export const value = 1;\n", OPTIONS), null);

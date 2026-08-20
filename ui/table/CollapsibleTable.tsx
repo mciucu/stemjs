@@ -1,7 +1,7 @@
 import {UI, UIElementChild, HTMLTagType} from "../UIBase";
 import {Table, TableRow, TableOptions, TableRowOptions} from "./Table";
 import {CollapsibleMixin} from "../collapsible/CollapsibleMixin";
-import {StyleRules, StyleSheet} from "../Style";
+import {StyleSheet} from "../Style";
 import {styleRule} from "../../decorators/Style";
 import {registerStyle} from "../style/Theme";
 import {GlobalStyle} from "../GlobalStyle";

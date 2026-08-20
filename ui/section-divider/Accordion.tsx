@@ -1,4 +1,4 @@
-import {UI} from "../UIBase";
+import {cleanChildren, UI} from "../UIBase";
 import {Panel} from "../UIPrimitives";
 import {registerStyle} from "../style/Theme";
 import {getComputedStyle} from "../Utils";
@@ -56,7 +56,7 @@ class Accordion extends UI.Element {
         this.dividers = [];
         this.panels = [];
         for (const child of unwrapArray<Panel>(this.render())) {
-            let title = (child.getTitle ? child.getTitle() : (child.options.title ? child.options.title : ""));
+            const title = cleanChildren(child.getTitle());
             let divider = <AccordionDivider>{title}</AccordionDivider>;
             this.dividers.push(divider);
             this.panels.push(child);

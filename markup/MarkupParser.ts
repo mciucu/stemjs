@@ -6,6 +6,10 @@ interface MarkupElement {
     [key: string]: any;
 }
 
+function isMarkupElement(content?: MarkupElement | string): content is MarkupElement {
+    return content != null && typeof content !== "string";
+}
+
 interface ParsedElement {
     content?: MarkupElement | string;
     start: number;
@@ -271,7 +275,7 @@ class ModifierAutomation {
         let lastNode = this.startNode;
 
         let char = options.pattern.charAt(0);
-        let startPatternNode = {
+        let startPatternNode: AutomatonNode = {
             value: char,
             startNode: true,
         };
@@ -281,7 +285,7 @@ class ModifierAutomation {
 
         if (options.leftWhitespace) {
             // We don't want to match if the first char is not preceeded by whitespace
-            let whitespaceNode = {
+            let whitespaceNode: AutomatonNode = {
                 value: " ",
                 whitespaceNode: true,
             };
@@ -302,7 +306,7 @@ class ModifierAutomation {
 
         for (let i = 1; i < options.pattern.length; i += 1) {
             let char = options.pattern[i];
-            let newNode = {
+            let newNode: AutomatonNode = {
                 value: char,
             };
             patternNode.push(newNode);
@@ -322,14 +326,14 @@ class ModifierAutomation {
 
         if (options.captureContent) {
             this.capture = [];
-            let captureNode = {
+            let captureNode: AutomatonNode = {
                 value: "",
                 captureNode: true,
             };
 
             // We treat the first character separately in order to support empty capture
             let char = options.endPattern.charAt(0);
-            let endCaptureNode = {
+            let endCaptureNode: AutomatonNode = {
                 value: char
             };
 
@@ -343,7 +347,7 @@ class ModifierAutomation {
             lastNode = endCaptureNode;
             for (let i = 1; i < options.endPattern.length; i += 1) {
                 let char = options.endPattern[i];
-                let newNode = {
+                let newNode: AutomatonNode = {
                     value: char,
                 };
                 endPatternNodes.push(newNode);
@@ -395,7 +399,12 @@ class ModifierAutomation {
     }
 }
 
-class Modifier {
+// Content is whatever processChildren hands to wrap, which differs per modifier
+class Modifier<Content = (string | MarkupElement)[]> {
+    wrap(content: Content, options?: any): MarkupElement {
+        throw Error("Modifier does not wrap");
+    }
+
     pattern?: string;
     endPattern?: string;
     captureContent?: boolean;
@@ -502,10 +511,10 @@ class Modifier {
         return newArray;
     }
 
-    processChildren(capture: ParsedElement[], originalString: string): (string | MarkupElement)[] {
+    processChildren(capture: ParsedElement[], originalString: string): Content {
         return capture.map((element) => {
             return this.processChild(element, originalString);
-        });
+        }) as Content;
     }
 
     processChild(element: ParsedElement, originalString: string): string | MarkupElement {
@@ -521,8 +530,8 @@ class Modifier {
 
 function InlineModifierMixin<T extends new (...args: any[]) => Modifier>(BaseModifierClass: T) {
     return class InlineModifier extends BaseModifierClass {
-        constructor(options: ModifierOptions) {
-            super(options);
+        constructor(...args: any[]) {
+            super(...args);
 
             this.captureContent = true;
         }
@@ -546,18 +555,19 @@ function InlineModifierMixin<T extends new (...args: any[]) => Modifier>(BaseMod
 
 function LineStartModifierMixin<T extends new (...args: any[]) => Modifier>(BaseModifierClass: T) {
     return class LineStartModifier extends BaseModifierClass {
-        constructor(options: ModifierOptions) {
-            super(options);
+        constructor(...args: any[]) {
+            super(...args);
 
             this.groupConsecutive = false;
         }
 
-        isValidElement(element: ParsedElement): boolean {
-            return element.content &&
-                element.content.tag === "p" &&
-                element.content.children.length > 0 &&
-                !element.content.children[0].tag && // child is text string
-                element.content.children[0].startsWith(this.pattern);
+        isValidElement(element: ParsedElement): element is ParsedElement & {content: MarkupElement} {
+            const {content} = element;
+            if (!isMarkupElement(content) || content.tag !== "p" || !content.children?.length) {
+                return false;
+            }
+            const [firstChild] = content.children;
+            return typeof firstChild === "string" && firstChild.startsWith(this.pattern);
         }
 
         modify(currentArray: ParsedElement[], originalString: string): ParsedElement[] {
@@ -571,9 +581,12 @@ function LineStartModifierMixin<T extends new (...args: any[]) => Modifier>(Base
 
                         let start, end;
                         start = currentArray[i].start;
-                        while (i < currentArray.length && this.isValidElement(currentArray[i])) {
-                            elements.push(this.wrapItem(currentArray[i].content.children));
-
+                        while (i < currentArray.length) {
+                            const item = currentArray[i];
+                            if (!this.isValidElement(item)) {
+                                break;
+                            }
+                            elements.push(this.wrapItem(item.content.children));
                             i += 1;
                         }
                         // we make sure no elements are skipped
@@ -615,7 +628,7 @@ function LineStartModifierMixin<T extends new (...args: any[]) => Modifier>(Base
             }
         }
 
-        wrap(content: MarkupElement[]): MarkupElement {
+        wrap(content: (string | MarkupElement)[]): MarkupElement {
             return {
                 tag: this.tag!,
                 children: content,
@@ -636,7 +649,7 @@ function RawContentModifierMixin<T extends new (...args: any[]) => Modifier>(Bas
     }
 }
 
-export class BlockCodeModifier extends Modifier {
+export class BlockCodeModifier extends Modifier<string> {
     constructor(options?: ModifierOptions) {
         super(options);
 
@@ -679,21 +692,19 @@ export class BlockCodeModifier extends Modifier {
     }
 
     wrap(content: string, options?: any): MarkupElement {
-        let codeHighlighter = this.getElement(content);
-
-        // TODO: this code should not be here
-        let codeOptions = {
-            aceMode: "c_cpp",
-            maxLines: 32,
-        };
-
-        if (this.codeOptions) {
-            Object.assign(codeOptions, this.codeOptions);
+        const codeHighlighter = this.getElement(content);
+        const extraOptions = this.codeOptions;
+        if (extraOptions) {
             delete this.codeOptions;
         }
 
-        Object.assign(codeOptions, codeHighlighter);
-        return codeOptions;
+        // TODO: this code should not be here
+        return {
+            aceMode: "c_cpp",
+            maxLines: 32,
+            ...extraOptions,
+            ...codeHighlighter,
+        };
     }
 }
 
@@ -1001,8 +1012,8 @@ let MarkupModifier = Modifier;
 export {MarkupModifier, HeaderModifier, ParagraphModifier, InlineCodeModifier, InlineLatexModifier, StrongModifier, LinkModifier, HorizontalRuleModifier, UnorderedListModifier, OrderedListModifier, InlineVarModifier, ItalicModifier};
 
 class MarkupParser {
-    static modifiers: Modifier[];
-    static parseJSON5: (json: string) => any;
+    static modifiers: Modifier<any>[];
+    static parseJSON5: (json: string, reviver?: any) => any;
     
     modifiers: Modifier[];
     uiElements: any;
@@ -1278,6 +1289,13 @@ MarkupParser.modifiers = [
     new LinkModifier()
 ];
 
+// The diagnostic fields Gecko adds to a JSON.parse error
+interface JSON5SyntaxError extends SyntaxError {
+    at?: number;
+    lineNumber?: number;
+    columnNumber?: number;
+}
+
 // json5.js
 // This file is based directly off of Douglas Crockford's json_parse.js:
 // https://github.com/douglascrockford/JSON-js/blob/master/json_parse.js
@@ -1315,7 +1333,7 @@ MarkupParser.parseJSON5 = (function() {
     let error = (m) => {
         // Call error when something is wrong.
 
-        let error = new SyntaxError();
+        let error: JSON5SyntaxError = new SyntaxError();
         // beginning of message suffix to agree with that provided by Gecko - see https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
         error.message = m + " at line " + lineNumber + " column " + columnNumber + " of the JSON5 data. Still to read: " + JSON.stringify(text.substring(at - 1, at + 19));
         error.at = at;
@@ -1326,7 +1344,7 @@ MarkupParser.parseJSON5 = (function() {
         throw error;
     };
 
-    let next = (c) => {
+    let next = (c?) => {
         // If a c parameter is provided, verify that it matches the current character.
 
         if (c && c !== ch) {

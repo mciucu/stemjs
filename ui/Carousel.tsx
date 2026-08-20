@@ -81,7 +81,7 @@ export class Carousel extends UI.Element {
         attr.addClass(this.styleSheet.carousel);
     }
 
-    appendChild(child, doMount) {
+    appendChild(child, doMount?) {
         this.options.children.push(child);
         if (doMount) {
             this.setActive(child);
