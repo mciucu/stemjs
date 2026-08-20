@@ -1,7 +1,7 @@
 import {UI, UIElementChild, HTMLTagType} from "../UIBase";
 import {Table, TableRow, TableOptions, TableRowOptions} from "./Table";
 import {CollapsibleMixin} from "../collapsible/CollapsibleMixin";
-import {StyleSheet} from "../Style";
+import {StyleRules, StyleSheet} from "../Style";
 import {styleRule} from "../../decorators/Style";
 import {registerStyle} from "../style/Theme";
 import {GlobalStyle} from "../GlobalStyle";
@@ -31,11 +31,6 @@ class CollapsibleTableStyle extends StyleSheet {
 export interface CollapsibleTableRowOptions<BaseType> extends TableRowOptions<BaseType> {
     collapsed?: boolean;
     renderCollapsible?: (entry: BaseType, row: CollapsibleTableRow<BaseType>) => UIElementChild;
-}
-
-// TODO @types
-export interface CollapsibleTableRow<BaseType> {
-    styleSheet: CollapsibleTableStyle;
 }
 
 // TODO: refactor this to support redraw and render override
