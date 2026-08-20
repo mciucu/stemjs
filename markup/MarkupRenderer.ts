@@ -1,6 +1,6 @@
-import {BaseUIElement, UI} from "../ui/UIBase";
+import {BaseUIElement, UI, UIElement} from "../ui/UIBase";
 import {MarkupParser} from "./MarkupParser";
-import {Panel, Link, Image} from "../ui/UIPrimitives";
+import {Link, Image} from "../ui/UIPrimitives";
 import {StaticCodeHighlighter} from "../ui/CodeEditor";
 
 interface MarkupElement {
@@ -71,7 +71,7 @@ export class MarkupClassMap {
     }
 }
 
-export class MarkupRenderer extends Panel {
+export class MarkupRenderer extends UIElement {
     declare options: MarkupRendererOptions;
     private declare classMap: MarkupClassMap;
 

@@ -1,6 +1,6 @@
 import {ExtendedOptions, UI, UIElement, UIElementChild} from "../UIBase";
 import {Switcher} from "../Switcher";
-import {Link, Panel} from "../UIPrimitives";
+import {Link} from "../UIPrimitives";
 import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
 import {registerStyle} from "../style/Theme";
 import {StyleRules} from "../Style";
@@ -9,7 +9,7 @@ import {unwrapArray} from "../../base/Utils";
 
 
 interface BasicTabTitleOptions {
-    panel?: Panel;
+    panel?: UIElement;
     activeTabDispatcher?: SingleActiveElementDispatcher;
     title?: UIElementChild;
 }
@@ -98,7 +98,7 @@ class TabArea extends UI.Element<TabAreaOptions> {
     activeTabDispatcher = new SingleActiveElementDispatcher();
     declare titleArea?: TabTitleArea<any>;
     declare switcher?: Switcher;
-    declare activePanel?: Panel;
+    declare activePanel?: UIElement;
 
     getDefaultOptions(): Partial<TabAreaOptions> {
         return {

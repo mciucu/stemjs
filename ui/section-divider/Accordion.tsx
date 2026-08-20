@@ -1,5 +1,4 @@
-import {cleanChildren, UI} from "../UIBase";
-import {Panel} from "../UIPrimitives";
+import {UI, UIElement, cleanChildren} from "../UIBase";
 import {registerStyle} from "../style/Theme";
 import {getComputedStyle} from "../Utils";
 import {unwrapArray} from "../../base/Utils";
@@ -44,7 +43,7 @@ class AccordionDivider extends Divider {
 
 @registerStyle(AccordionStyle)
 class Accordion extends UI.Element {
-    declare panels: Panel[];
+    declare panels: UIElement[];
     declare dividers: AccordionDivider[];
 
     extraNodeAttributes(attr) {
@@ -55,7 +54,7 @@ class Accordion extends UI.Element {
         let children = [];
         this.dividers = [];
         this.panels = [];
-        for (const child of unwrapArray<Panel>(this.render())) {
+        for (const child of unwrapArray<UIElement>(this.render())) {
             const title = cleanChildren(child.getTitle());
             let divider = <AccordionDivider>{title}</AccordionDivider>;
             this.dividers.push(divider);

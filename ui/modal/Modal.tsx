@@ -2,8 +2,7 @@ import {ButtonGroup} from "../button/ButtonGroup";
 import {Button, ButtonOptions} from "../button/Button";
 import {FloatingWindow} from "./FloatingWindow";
 import {ModalStyle} from "./Style";
-import {Panel} from "../UIPrimitives";
-import {UI, UIElementChild, UIElementOptions} from "../UIBase";
+import {UI, UIElement, UIElementChild, UIElementOptions} from "../UIBase";
 import {Dispatcher, RemoveHandle} from "../../base/Dispatcher";
 import {registerStyle} from "../style/Theme";
 import {Level, LevelType, Size} from "../Constants";
@@ -26,7 +25,7 @@ export interface ModalOptions extends UIElementOptions {
 
 @registerStyle(ModalStyle)
 export class Modal<ExtraOptions extends ModalOptions = ModalOptions> extends UI.Element<ExtraOptions> {
-    declare behindPanel?: Panel;
+    declare behindPanel?: UIElement;
     declare modalWindow?: FloatingWindow;
     declare closeListenerHandler?: RemoveHandle;
 
@@ -46,7 +45,7 @@ export class Modal<ExtraOptions extends ModalOptions = ModalOptions> extends UI.
 
     getChildrenToRender() {
         return [
-            <Panel
+            <UIElement
                 ref="behindPanel"
                 className={this.styleSheet.hiddenAnimated + this.styleSheet.background}
                 onClick={() => this.hide()}
