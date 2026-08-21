@@ -1,12 +1,13 @@
-import {UI, UIElement, UIElementOptions, UIElementChild, HTMLTagType} from "../UIBase";
+import {ExtendedOptions, UI, UIElement, UIElementOptions, UIElementChild, HTMLTagType} from "../UIBase";
 import {Button} from "../button/Button";
 import {NumberInput} from "../input/Input";
 import {RangePanelStyle} from "./RangePanelStyle";
 import type {StyleRules} from "../Style";
 import {Dispatchable} from "../../base/Dispatcher";
+import {Constructor} from "../../base/Utils";
 import {Size} from "../Constants";
 import {NodeAttributes} from "../NodeAttributes";
-import { Table } from "./Table";
+import {Table} from "./Table";
 
 export interface EntriesManagerOptions<T = any> {
     comparator?: (a: T, b: T) => number;
@@ -92,8 +93,12 @@ export interface RangeTableOptions extends UIElementOptions {
 
 // A wrapper for tables which optimizes rendering when many entries / updates are involved. It currently has hardcoded
 // row height for functionality reasons.
-export function RangeTableInterface<BaseType, BaseTable extends typeof Table<BaseType>>(TableClass: BaseTable) {
-    class RangeTable<BaseType> extends TableClass {
+export function RangeTableInterface<BaseType, BaseTable extends Constructor<Table<BaseType>>>(TableClass: BaseTable) {
+    class RangeTable extends TableClass {
+        constructor(...args: any[]) {
+            super(...args);
+        }
+
         // @ts-ignore
         declare node?: HTMLElement;
 
@@ -102,8 +107,7 @@ export function RangeTableInterface<BaseType, BaseTable extends typeof Table<Bas
         entriesManager?: EntriesManager<BaseType>;
         scrollState?: number;
         inSetScroll?: boolean;
-        // @ts-ignore
-        rows?: BaseType[];
+        declare options: ExtendedOptions<Table<BaseType>, RangeTableOptions>;
         
         // Component refs
         declare tableContainer?: UIElement<any, HTMLTableElement>;
@@ -130,7 +134,7 @@ export function RangeTableInterface<BaseType, BaseTable extends typeof Table<Bas
 
         getEntriesManager(): EntriesManager {
             if (!this.entriesManager) {
-                this.entriesManager = new EntriesManager<T>(this.getEntries());
+                this.entriesManager = new EntriesManager<BaseType>(this.getEntries());
             }
             return this.entriesManager;
         }
@@ -269,7 +273,7 @@ export function RangeTableInterface<BaseType, BaseTable extends typeof Table<Bas
             });
             this.container.addNodeListener("mouseup", (event: MouseEvent) => {
                 const mouseDownEvent = new MouseEvent("click", event);
-                const domElement = document.elementFromPoint(parseFloat(event.clientX), parseFloat(event.clientY));
+                const domElement = document.elementFromPoint(event.clientX, event.clientY);
                 setTimeout(() => {
                     this.container.setStyle("pointerEvents", "none");
                     domElement.dispatchEvent(mouseDownEvent);

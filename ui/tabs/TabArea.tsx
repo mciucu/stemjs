@@ -1,6 +1,6 @@
 import {ExtendedOptions, UI, UIElement, UIElementChild} from "../UIBase";
 import {Switcher} from "../Switcher";
-import {Link} from "../UIPrimitives";
+import {Link} from "../primitives/Link";
 import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
 import {registerStyle} from "../style/Theme";
 import {StyleRules} from "../Style";

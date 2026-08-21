@@ -1,4 +1,4 @@
-import {UI} from "../UIBase";
+import {UI, UIElement} from "../UIBase";
 import {CollapsibleStyle} from "./Style";
 import {GlobalStyle} from "../GlobalStyle";
 import {MakeIcon} from "../SimpleElements";
@@ -29,9 +29,14 @@ class SimpleCollapsibleStyle extends StyleSheet {
 }
 
 
+interface CollapsibleControllerInputOptions {
+    // The panel to collapse, given directly or resolved lazily
+    target?: UIElement | (() => UIElement);
+}
+
 // If value is true, it means we're collapsed
 @registerStyle(SimpleCollapsibleStyle)
-export class CollapsibleControllerInput extends BaseInputElement {
+export class CollapsibleControllerInput extends BaseInputElement<boolean, CollapsibleControllerInputOptions> {
     getTarget() {
         const {target} = this.options;
         return isFunction(target) ? target() : target;

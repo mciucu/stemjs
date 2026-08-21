@@ -2,7 +2,7 @@ import {ElementOptions, UI, UIElement, UIElementCleanChild} from "../UIBase";
 import {StyleRules} from "../Style";
 import {NavStyle} from "./NavStyle";
 import {Switcher} from "../Switcher";
-import {Link} from "../UIPrimitives";
+import {Link} from "../primitives/Link";
 import {FACollapseIcon} from "../FontAwesome"; //TODO: more flexibility, do not require FAIcons in NavElements
 import {SessionStorageMap} from "../../base/StorageMap";
 import {Constructor, unwrapArray} from "../../base/Utils";

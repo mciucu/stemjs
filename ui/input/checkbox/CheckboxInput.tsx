@@ -65,7 +65,7 @@ export interface CheckboxInput {
 }
 
 @registerStyle(CheckboxInputStyle)
-export class CheckboxInput extends BaseInputElement<boolean | null> {
+export class CheckboxInput extends BaseInputElement<boolean | null, CheckboxInputOptions> {
     getDefaultOptions(options: CheckboxInputOptions): CheckboxInputOptions {
         return {
             ...super.getDefaultOptions(options),

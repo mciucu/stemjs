@@ -7,7 +7,7 @@ export interface InputElementOptions<T = any> {
 }
 
 // TODO @types should be an abstract class
-export class BaseInputElement<T = any> extends UIElement<InputElementOptions<T>, HTMLInputElement> {
+export class BaseInputElement<T = any, ExtraOptions = {}> extends UIElement<InputElementOptions<T> & ExtraOptions, HTMLInputElement> {
     declare protected value?: T;
 
     getValue(): T | undefined {

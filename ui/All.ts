@@ -7,7 +7,9 @@ export * from "./Utils";
 export * from "./StyleElement";
 export * from "./Style";
 
-export * from "./UIPrimitives";
+export * from "./primitives/Link";
+export * from "./primitives/IFrame";
+export * from "./primitives/Image";
 export * from "./input/Input";
 export * from "./form/Form";
 export * from "./SimpleElements";

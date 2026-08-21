@@ -137,31 +137,35 @@ export class BasicLevelSizeStyleSheet extends StyleSheet {
     }
 }
 
-export const BasicLevelStyleSheet = (colorToStyleFunction: (color: string, textColor: string) => CSSStyleObject) => class BasicLevelStyleClass extends BasicLevelSizeStyleSheet {
-    colorStyleRule(color: string, textColor?: string): CSSStyleObject {
-        return colorToStyleFunction(color, textColor || getTextColor(color));
+export const BasicLevelStyleSheet = (colorToStyleFunction: (color: string, textColor: string) => CSSStyleObject) => {
+    class BasicLevelStyleClass extends BasicLevelSizeStyleSheet {
+        colorStyleRule(color: string, textColor?: string): CSSStyleObject {
+            return colorToStyleFunction(color, textColor || getTextColor(color));
+        }
+
+        @styleRule
+        BASE = this.colorStyleRule(this.themeProps.COLOR_BACKGROUND);
+
+        @styleRule
+        PRIMARY = this.colorStyleRule(this.themeProps.COLOR_PRIMARY);
+
+        @styleRule
+        SECONDARY = this.colorStyleRule(this.themeProps.COLOR_SECONDARY);
+
+        @styleRule
+        SUCCESS = this.colorStyleRule(this.themeProps.COLOR_SUCCESS);
+
+        @styleRule
+        INFO = this.colorStyleRule(this.themeProps.COLOR_INFO);
+
+        @styleRule
+        WARNING = this.colorStyleRule(this.themeProps.COLOR_WARNING);
+
+        @styleRule
+        DANGER = this.colorStyleRule(this.themeProps.COLOR_DANGER);
     }
 
-    @styleRule
-    BASE = this.colorStyleRule(this.themeProps.COLOR_BACKGROUND);
-
-    @styleRule
-    PRIMARY = this.colorStyleRule(this.themeProps.COLOR_PRIMARY);
-
-    @styleRule
-    SECONDARY = this.colorStyleRule(this.themeProps.COLOR_SECONDARY);
-
-    @styleRule
-    SUCCESS = this.colorStyleRule(this.themeProps.COLOR_SUCCESS);
-
-    @styleRule
-    INFO = this.colorStyleRule(this.themeProps.COLOR_INFO);
-
-    @styleRule
-    WARNING = this.colorStyleRule(this.themeProps.COLOR_WARNING);
-
-    @styleRule
-    DANGER = this.colorStyleRule(this.themeProps.COLOR_DANGER);
+    return BasicLevelStyleClass;
 };
 
 

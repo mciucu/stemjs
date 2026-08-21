@@ -1,4 +1,4 @@
-import {UI} from "../../UIBase";
+import {StyleObject, UI, UIElement} from "../../UIBase";
 import {toArray, unwrapArray} from "../../../base/Utils";
 import {CollapsibleControllerInput} from "../../collapsible/CollapsibleMixin";
 import {CheckboxInput} from "./CheckboxInput";
@@ -30,9 +30,9 @@ function UpdateCheckedValues(entry) {
     entry.checked = CalcChecked(entry.children || []);
 }
 
-function CalcChecked(entries = []) {
+function CalcChecked(entries: TreeEntry | TreeEntry[] = []) {
     let allChecked = true, allUnchecked = true;
-    for (const entry of entries) {
+    for (const entry of toArray(entries)) {
         if (entry.checked !== true) {
             allChecked = false;
         }
@@ -76,7 +76,27 @@ function UpdateEntryRecursively(entry, value) {
 }
 
 // TODO @Andrei This should also inherit BaseInputElement
-export class TreeViewCheckbox extends UI.Element {
+// One node of the tree: a value, whether it is checked, and any children
+interface TreeEntry {
+    value?: any;
+    label?: string;
+    checked?: boolean;
+    disabled?: boolean;
+    collapsed?: boolean;
+    children?: TreeEntry | TreeEntry[];
+}
+
+interface TreeViewCheckboxOptions {
+    entries?: TreeEntry | TreeEntry[];
+    onChange?: (value: any) => void;
+}
+
+export class TreeViewCheckbox extends UI.Element<TreeViewCheckboxOptions> {
+    declare checkboxInput?: CheckboxInput;
+    declare collapsibleController?: CollapsibleControllerInput;
+    declare childrenInputs?: UIElement;
+    declare subTree?: TreeViewCheckbox;
+
     static entryToValue(entry) {
         if (!entry) {
             return [];
@@ -94,7 +114,7 @@ export class TreeViewCheckbox extends UI.Element {
         if (linearize) {
             // TODO @Mihai a bit tricky to implement this, since we don't want to recursively expand non-array entries by default.
             // return unwrapArray(this.options.entries, entry => [entry.checked !== false ? entry.value : undefined, entry.children]);
-            return this.constructor.entryToValue(this.options.entries);
+            return (this.constructor as typeof TreeViewCheckbox).entryToValue(this.options.entries);
         }
         return this.options.entries;
     }
@@ -154,7 +174,7 @@ export class TreeViewCheckbox extends UI.Element {
     }
 
     renderCollapsibleController(entry) {
-        const collapsibleIconStyle = {}
+        const collapsibleIconStyle: StyleObject = {};
 
         if (!entry.children) {
             collapsibleIconStyle.visibility = "hidden";
@@ -198,8 +218,9 @@ export class TreeViewCheckbox extends UI.Element {
         ];
     }
 
-    redraw() {
-        super.redraw();
+    redraw(): boolean {
+        const result = super.redraw();
         this.collapsibleController?.applyCollapsedState();
+        return result;
     }
 }

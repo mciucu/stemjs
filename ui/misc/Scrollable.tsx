@@ -1,7 +1,12 @@
-import {UI} from "../UIBase";
+import {UI, UIElement, UIElementCleanChild} from "../UIBase";
 
 // Just putting in a lot of methods, to try to think of an interface
-export class ScrollableMixin extends UI.Element {
+interface ScrollableOptions {
+    scrollTop?: number;
+    scrollInfo?: {scrollAtTop: boolean; scrollAtBottom: boolean};
+}
+
+export class ScrollableMixin<ExtraOptions extends ScrollableOptions = ScrollableOptions> extends UI.Element<ExtraOptions> {
     getDesiredExcessHeightTop(): number {
         return 600;
     }
@@ -102,7 +107,15 @@ export class ScrollableMixin extends UI.Element {
 }
 
 //TODO: this class would need some binary searches
-export class InfiniteScrollable extends ScrollableMixin {
+interface InfiniteScrollableOptions extends ScrollableOptions {
+    entries?: any[];
+    entryRenderer?: (entry: any) => UIElementCleanChild;
+    entryComparator?: (left: any, right: any) => number;
+    staticTop?: UIElement;
+    children?: UIElementCleanChild[];
+}
+
+export class InfiniteScrollable extends ScrollableMixin<InfiniteScrollableOptions> {
     setOptions(options) {
         options = Object.assign({
             entries: [],

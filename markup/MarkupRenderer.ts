@@ -1,6 +1,7 @@
 import {BaseUIElement, UI, UIElement} from "../ui/UIBase";
 import {MarkupParser} from "./MarkupParser";
-import {Link, Image} from "../ui/UIPrimitives";
+import {Link} from "../ui/primitives/Link";
+import {Image} from "../ui/primitives/Image";
 import {StaticCodeHighlighter} from "../ui/CodeEditor";
 
 interface MarkupElement {
