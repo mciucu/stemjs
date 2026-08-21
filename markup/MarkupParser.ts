@@ -1,6 +1,6 @@
 // TODO: this file is in dire need of a rewrite
 
-interface MarkupElement {
+export interface MarkupElement {
     tag: string;
     children?: (MarkupElement | string)[];
     [key: string]: any;

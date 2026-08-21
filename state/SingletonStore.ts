@@ -1,10 +1,10 @@
 import {State, StoreEvent} from "./State";
-import {StoreObject, StoreOptions} from "./Store";
+import {StoreClass, StoreObject, StoreOptions} from "./Store";
 
 export class SingletonStore<T extends SingletonStore<T> = any> extends StoreObject {
     objectType: string;
     state?: State;
-    dependencies: string[];
+    dependencies?: (string | StoreClass<any>)[];
 
     constructor(objectType: string, options: StoreOptions = {}) {
         super({});

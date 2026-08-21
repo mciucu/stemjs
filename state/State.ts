@@ -26,6 +26,9 @@ export interface StoreInterface {
     importState(objects: any[]): void;
     clear?(): void;
     toJSON(): any;
+    // getStore() hands back the store class itself, so its statics are callable on the result
+    all(): any[];
+    findBy(filter: Record<string, any>): any;
 }
 
 export type RawStateData = Record<string, any[]>;

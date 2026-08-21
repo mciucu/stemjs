@@ -112,7 +112,7 @@ class PinchZoomEventHandler {
             return;
         }
         this.pinchActive = true;
-        Object.assign(this, this.calculateCentroid(touches));
+        Object.assign(this, this.calculateCentroid(touches as TouchList));
     }
 
     cleanup(): void {

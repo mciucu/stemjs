@@ -5,7 +5,7 @@ import {
     isPlainObject,
     unwrapElementWithFunc,
     isString,
-    Nullable, isFunction
+    Nullable, isFunction, Constructor
 } from "../base/Utils";
 import {CleanupJobs, Dispatchable, OncePerTickRunner, RemoveHandle} from "../base/Dispatcher";
 import {DOMAttributesMap, NodeAttributes} from "./NodeAttributes";
@@ -22,20 +22,20 @@ export type StyleObject = {[Key in keyof CSSStyleDeclaration]?: CSSStyleDeclarat
 // Called with the event, then the element itself
 export type UIEventHandler = (...args: any[]) => any;
 export type RefLinkOptions = {
-    parent: UIElement<any, any>;
+    parent: UIElement<any, any, any>;
     name?: string;
     key?: string;
 };
 
 
 // Type definitions
-export interface UIElementOptions {
-    children?: UIElementCleanChild | UIElementCleanChild[];
+export interface UIElementOptions<TagType extends string = HTMLTagType> {
+    children?: UIElementChild;
     title?: UIElementChild;
     ref?: RefLinkOptions | string;
     key?: string | number;
     active?: boolean; // Tabs or switchers can put this on children
-    nodeType?: HTMLTagType;
+    nodeType?: TagType;
     className?: string;
     style?: string | StyleObject;
     theme?: Theme;
@@ -57,7 +57,7 @@ type WritableKeys<T> = {
 // Options land on the node as attributes, so a readonly DOM member can never be one
 export type NodeOptions<NodeType> = Partial<Omit<Pick<NodeType, WritableKeys<NodeType>>, "children" | "nodeType" | "style" | "title">>;
 
-export type UIOptions<NodeType extends (SVGElement | HTMLElement), ExtraOptions = {}> = NodeOptions<NodeType> & UIElementOptions & ExtraOptions;
+export type UIOptions<NodeType extends (SVGElement | HTMLElement), ExtraOptions = {}, TagType extends string = HTMLTagType> = NodeOptions<NodeType> & UIElementOptions<TagType> & ExtraOptions;
 
 // Declare the options of a class extending a Stem UI class that doesn't pass its options generic along, most often
 // one built by UI.Primitive: `class MyElement extends UI.Primitive("div") {declare options: ElementOptions<MyOptions>;}`
@@ -74,13 +74,15 @@ export const redrawPerTickRunner = new OncePerTickRunner((obj: BaseUIElement, ev
 export interface UINamespace {
     TextElement: typeof TextUIElement;
     Element: typeof UIElement;
-    SVGElement: typeof UIElement;
+    SVGElement: typeof UIElement<any, any, any>;
     createElement<K extends HTMLTagType>(tag: K, options?: UIElementOptions | null, ...children: any[]): UIElement<{}, HTMLElementTagNameMap[K]>;
     createElement<K extends SVGTagType>(tag: K, options?: UIElementOptions | null, ...children: any[]): UIElement<{}, SVGElementTagNameMap[K]>;
-    createElement<UIClass extends BaseUIElement<any>>(tag: new (options: any) => UIClass, options?: UIElementOptions | null, ...children: any[]): UIClass;
+    createElement<UIClass extends BaseUIElement<any>>(tag: new (options: any) => UIClass, options?: any, ...children: any[]): UIClass;
     createElement(tag: any, options?: UIElementOptions | null, ...children: any[]): BaseUIElement | null;
     str: (value: any) => any;
-    Primitive: <ExtraOptions = void, T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap, BaseClassType extends typeof UIElement = typeof UIElement>(nodeType: T, BaseClass?: BaseClassType) => BaseClassType;
+    T: (value: string) => BaseUIElement; // Assigned by Translation.ts
+    // The constraint only has to admit the base class; the return type carries whatever was passed
+    Primitive: <ExtraOptions = void, T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap, BaseClassType extends Constructor<UIElement<any, any, any>> = typeof UIElement>(nodeType: T, BaseClass?: BaseClassType) => BaseClassType;
 }
 
 export const UI: UINamespace = {} as UINamespace;
@@ -92,7 +94,7 @@ export function cleanChildren(children: UIElementChild): UIElementCleanChild[] {
 export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HTMLElement | Text> extends Dispatchable {
     declare node?: NodeType;
     declare parent?: UIElement;
-    declare options?: UIElementOptions;
+    declare options?: UIElementOptions<string>; // Tag-agnostic: an SVG element answers with its own tag set
     declare context?: any;
 
     canOverwrite(existingChild: BaseUIElement): boolean {
@@ -101,9 +103,10 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
     }
 
     applyRef(): void {
+        // createElement resolves a string ref against the render stack before options are ever read
         if (this.options?.ref) {
-            const obj = this.options.ref.parent;
-            const name = this.options.ref.name ?? this.options.ref.key; // TODO: should be key
+            const obj = (this.options.ref as RefLinkOptions).parent;
+            const name = (this.options.ref as RefLinkOptions).name ?? (this.options.ref as RefLinkOptions).key; // TODO: should be key
             obj[name] = this;
         }
 
@@ -113,8 +116,8 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
 
     removeRef(): void {
         if (this.options?.ref) {
-            const obj = this.options.ref.parent;
-            const name = this.options.ref.name;
+            const obj = (this.options.ref as RefLinkOptions).parent;
+            const name = (this.options.ref as RefLinkOptions).name;
             if (obj[name] === this) {
                 obj[name] = undefined;
             }
@@ -138,7 +141,7 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
 
     abstract getNodeType(): string | number;
 
-    abstract mount(parent: UIElement<any, any> | HTMLElement, nextSibling?: Node | null): void;
+    abstract mount(parent: UIElement<any, any, any> | HTMLElement, nextSibling?: Node | null): void;
 
     abstract redraw(event?: any): void;
 
@@ -156,20 +159,20 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
     }
 }
 
-type TextElementOptions = {value: string};
+export type TextElementOptions = {value?: string};
 
-export class TextUIElement<ExtraOptions extends TextElementOptions = TextElementOptions> extends BaseUIElement<Text> {
-    value: string;
+export class TextUIElement<ExtraOptions extends TextElementOptions = TextElementOptions, ValueType = string> extends BaseUIElement<Text> {
+    value: ValueType;
     // @ts-ignore
     declare options?: ExtraOptions & UIElementOptions;
 
-    constructor(value: string | TextElementOptions = "") {
+    constructor(value: ValueType | TextElementOptions = "" as ValueType) {
         super();
         if (value?.hasOwnProperty("value") && isPlainObject(value)) {
-            this.value = value.value;
+            this.value = (value as TextElementOptions).value as ValueType;
             this.options = value as any;
         } else {
-            this.value = (value as string) ?? "";
+            this.value = (value ?? "") as ValueType;
         }
     }
 
@@ -189,7 +192,7 @@ export class TextUIElement<ExtraOptions extends TextElementOptions = TextElement
         return Node.TEXT_NODE;
     }
 
-    copyState(element: TextUIElement<any>): void {
+    copyState(element: TextUIElement<any, ValueType>): void {
         this.value = element.value;
         this.options = element.options;
     }
@@ -232,7 +235,8 @@ UI.TextElement = TextUIElement;
 export class UIElement<
     ExtraOptions = {},
     NodeType extends (HTMLElement | SVGElement) = HTMLElement,
-    OptionsType extends UIElementOptions = UIOptions<NodeType, ExtraOptions>
+    TagType extends string = HTMLTagType,
+    OptionsType extends UIElementOptions<TagType> = UIOptions<NodeType, ExtraOptions, TagType>
 > extends BaseUIElement<NodeType> {
     static domAttributesMap: DOMAttributesMap = NodeAttributes.defaultAttributesMap;
     static nodeEventsMap: DOMAttributesMap = NodeAttributes.defaultEventsMap;
@@ -248,9 +252,9 @@ export class UIElement<
         this.setOptions(options); // TODO maybe this actually needs to be removed, since on a copy we don't want the default options of the other object
     }
 
-    // Nothing is provably a Partial of an unresolved OptionsType, so a class generic in its options
-    // annotates its own concrete options instead
-    getDefaultOptions(options?: OptionsType): Partial<OptionsType> | Partial<UIElementOptions> | undefined {
+    // Keyed on this.options rather than OptionsType, so a subclass that redeclares its options is believed;
+    // UIElementOptions is there for a class generic in its options, where nothing concrete is provable
+    getDefaultOptions(options?: OptionsType): Partial<typeof this.options> | Partial<UIElementOptions> | undefined {
         return undefined;
     }
 
@@ -288,7 +292,7 @@ export class UIElement<
     }
 
     setChildren(...args: UIElementChild[]): void {
-        this.updateOptions({children: cleanChildren(args)} as Partial<OptionsType>);
+        this.updateOptions({children: cleanChildren(args)} as unknown as Partial<OptionsType>);
     }
 
     // Used when we want to reuse the current element, with the options from the passed in argument
@@ -303,8 +307,9 @@ export class UIElement<
         this.addListenersFromOptions();
     }
 
-    getNodeType(): HTMLTagType {
-        return this.options?.nodeType || "div";
+    // SVG elements create their nodes with createElementNS, so they answer with a different tag set
+    getNodeType(): TagType {
+        return (this.options?.nodeType || "div") as TagType;
     }
 
     static create<T extends UIElement<any>, TOptions = any>(this: new (options?: TOptions) => T, parentNode: UIElement | HTMLElement, options?: TOptions): T {
@@ -328,7 +333,7 @@ export class UIElement<
     }
 
     createNode(): NodeType {
-        this.node = document.createElement(this.getNodeType()) as NodeType;
+        this.node = document.createElement(this.getNodeType() as HTMLTagType) as NodeType;
         applyDebugFlags(this);
         return this.node;
     }
@@ -606,7 +611,7 @@ export class UIElement<
         return this;
     }
 
-    mount(parentNode: UIElement<any, any> | HTMLElement, nextSiblingNode?: Node | null): void {
+    mount(parentNode: UIElement<any, any, any> | HTMLElement, nextSiblingNode?: Node | null): void {
         const parent = (parentNode instanceof HTMLElement) ? new UIElement().bindToNode(parentNode) : parentNode;
         this.parent = parent;
         if (this.node) {
@@ -632,7 +637,7 @@ export class UIElement<
             throw "Can't properly handle appendChild, you need to implement it for " + this.constructor;
         }
         this.options.children = this.options.children || [];
-        this.options.children.push(child);
+        (this.options.children as UIElementCleanChild[]).push(child);
         child.mount(this, null);
         return child;
     }
@@ -644,9 +649,9 @@ export class UIElement<
         position = position || 0;
 
         this.options!.children = this.options!.children || [];
-        this.options!.children.splice(position, 0, child);
+        (this.options!.children as UIElementCleanChild[]).splice(position, 0, child);
 
-        const nextChildNode = position + 1 < this.options!.children.length ? this.children[position + 1].node : null;
+        const nextChildNode = position + 1 < (this.options!.children as UIElementCleanChild[]).length ? this.children[position + 1].node : null;
 
         (child as UIElement).mount(this, nextChildNode);
 
@@ -655,7 +660,7 @@ export class UIElement<
 
     eraseChild(child: BaseUIElement, destroy: boolean = true): BaseUIElement | null {
         if (!this.options?.children) return null;
-        let index = this.options.children.indexOf(child);
+        let index = (this.options.children as UIElementCleanChild[]).indexOf(child);
 
         if (index < 0) {
             // child not found
@@ -665,14 +670,14 @@ export class UIElement<
     }
 
     eraseChildAtIndex(index: number, destroy: boolean = true): BaseUIElement | null {
-        if (!this.options?.children || index < 0 || index >= this.options.children.length) {
-            console.error("Erasing child at invalid index ", index, this.options.children?.length || 0);
+        if (!this.options?.children || index < 0 || index >= (this.options.children as UIElementCleanChild[]).length) {
+            console.error("Erasing child at invalid index ", index, (this.options.children as UIElementCleanChild[])?.length || 0);
             return null;
         }
         if (this.children !== this.options.children) {
             throw "Can't properly handle eraseChild, you need to implement it for " + this.constructor;
         }
-        let erasedChild = this.options.children.splice(index, 1)[0] as BaseUIElement;
+        let erasedChild = (this.options.children as UIElementCleanChild[]).splice(index, 1)[0] as BaseUIElement;
         if (destroy) {
             erasedChild.destroyNode();
         } else {
@@ -795,6 +800,7 @@ function isSVGTag(tag: string): tag is SVGTagType {
     return SVG_TAGS.has(tag);
 }
 
+// Written once to cover every declared overload, which is why the implementation type is looser
 UI.createElement = function (tag: typeof BaseUIElement<any> | HTMLTagType | SVGTagType, options?: UIElementOptions | null, ...children: any[]): BaseUIElement | null {
     if (!tag) {
         console.error("Create element needs a valid object tag, did you mistype a class name?");
@@ -830,15 +836,15 @@ UI.createElement = function (tag: typeof BaseUIElement<any> | HTMLTagType | SVGT
     }
 
     if (isString(tag)) {
-        options.nodeType = tag as HTMLTagType; // TODO @types just shutting down the types
+        options.nodeType = tag as HTMLTagType; // An SVG tag lands here too, and SVGUIElement narrows it back
         if (isSVGTag(tag)) {
-            return new UI.SVGElement<void, SVGElementTagNameMap[typeof tag]>(options as any);
+            return new UI.SVGElement(options as any);
         }
         return new UIElement<void, HTMLElementTagNameMap[typeof tag]>(options as any);
     }
 
     return new (tag as typeof UIElement)(options);
-};
+} as UINamespace["createElement"];
 
 UI.Element = UIElement;
 
@@ -847,7 +853,7 @@ UI.str = (value: string) => new TextUIElement(value);
 // Keep a map for every base class, and for each base class keep a map for each nodeType, to cache classes
 const primitiveMap: WeakMap<typeof UIElement, Map<string, typeof UIElement<any>>> = new WeakMap();
 
-UI.Primitive = <ExtraOptions = void, T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap, BaseClassType extends typeof UIElement = typeof UIElement>(nodeType: T, BaseClass: BaseClassType = UIElement as BaseClassType): BaseClassType => {
+UI.Primitive = (<ExtraOptions = void, T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap, BaseClassType extends typeof UIElement = typeof UIElement>(nodeType: T, BaseClass: BaseClassType = UIElement as BaseClassType): BaseClassType => {
     let baseClassPrimitiveMap = primitiveMap.get(BaseClass);
     if (!baseClassPrimitiveMap) {
         baseClassPrimitiveMap = new Map();
@@ -873,7 +879,7 @@ UI.Primitive = <ExtraOptions = void, T extends keyof HTMLElementTagNameMap = key
     };
     baseClassPrimitiveMap.set(nodeType, resultClass);
     return resultClass as any;
-};
+}) as UINamespace["Primitive"];
 
 export function applyDebugFlags(element: BaseUIElement): void {
     if (globalThis.STEM_DEBUG && element.node) {
