@@ -1,4 +1,4 @@
-import {RenderStack, UI} from "../UIBase";
+import {UI} from "../UIBase";
 import {CollapsibleMixin} from "./CollapsibleMixin";
 import {CardPanel} from "../CardPanel";
 import {CollapsiblePanelStyle} from "./Style";
@@ -34,24 +34,3 @@ export class CollapsiblePanel extends CollapsibleMixin(CardPanel) {
     }
 }
 
-
-export class DelayedCollapsiblePanel extends CollapsiblePanel {
-    toggle() {
-        if (!this._haveExpanded) {
-            this._haveExpanded = true;
-            RenderStack.push(this);
-            this.contentArea.options.children = this.render();
-            RenderStack.pop();
-            this.contentArea.redraw();
-            this.delayedMount();
-        }
-        super.toggle();
-    }
-
-    render() {
-        if (!this._haveExpanded) {
-            return [];
-        }
-        return this.getDelayedChildren();
-    }
-}
