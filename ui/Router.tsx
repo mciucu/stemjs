@@ -1,4 +1,4 @@
-import {UI, UIElement} from "./UIBase";
+import {ExtendedOptions, UI, UIElement} from "./UIBase";
 import {Switcher} from "./Switcher";
 import {Dispatcher} from "../base/Dispatcher";
 import {PageTitleManager} from "../base/PageTitleManager";
@@ -41,9 +41,17 @@ interface GeneratorArgs {
     doNotCache?: boolean;
 }
 
-type PageGenerator = new (args: GeneratorArgs) => UIElement | ((args: GeneratorArgs) => UIElement);
+type PageGenerator = (new (args: GeneratorArgs) => UIElement) | ((args: GeneratorArgs) => UIElement);
+
+// What a Router needs of the elements it renders, beyond being an element
+export interface RoutablePage extends UIElement<any, any, any> {
+    pageTitle?: string;
+    setURL?(urlParts: string[]): void;
+}
 
 export class Router extends Switcher {
+    declare options: ExtendedOptions<Switcher, RouterOptions>;
+
     static Global: Router;
     static globalSetURL: (urlParts: string[]) => void;
     
@@ -121,7 +129,7 @@ export class Router extends Switcher {
         }
 
         options.state = options.state || {};
-        const historyArgs = [options.state, PageTitleManager.getTitle(), url];
+        const historyArgs: [any, string, string] = [options.state, PageTitleManager.getTitle(), url];
         if (this.useLocalHistory) {
             if (options.replaceHistory) {
                 this.localHistory.pop();
@@ -181,20 +189,20 @@ export class Router extends Switcher {
         return this.options.routes;
     }
 
-    getPageNotFound(): UIElement {
-        const element = UI.createElement("h1", {children: ["Can't find url, make sure you typed it correctly"]});
+    getPageNotFound(): RoutablePage {
+        const element = UI.createElement("h1", {children: ["Can't find url, make sure you typed it correctly"]}) as RoutablePage;
         element.pageTitle = "Page not found";
         return element;
     }
 
-    getPageToRender(urlParts: string[]): UIElement | null {
+    getPageToRender(urlParts: string[]): RoutablePage | null {
         const result = this.getRoutes().getPage(urlParts);
         if (result === false) {
             return this.getPageNotFound();
         }
 
         if (Array.isArray(result)) {
-            this.constructor.changeURL(...result);
+            (this.constructor as typeof Router).changeURL(result);
             return null;
         }
 
@@ -203,7 +211,7 @@ export class Router extends Switcher {
 
     deactivateChild(child: UIElement): void {
         super.deactivateChild(child);
-        if (child.options.doNotCache) {
+        if ((child.options as RouteOptions).doNotCache) {
             child.destroyNode();
         }
     }
@@ -233,7 +241,7 @@ export class Router extends Switcher {
 
     onMount(): void {
         if (!Router.Global) {
-            this.constructor.setGlobalRouter(this);
+            (this.constructor as typeof Router).setGlobalRouter(this);
         }
     }
 }
@@ -282,7 +290,7 @@ export class Route {
         }
         let args = [];
         for (let i = 0; i < this.expr.length; i += 1) {
-            const isArg = this.expr[i] === this.constructor.ARG_KEY;
+            const isArg = this.expr[i] === (this.constructor as typeof Route).ARG_KEY;
             if (urlParts[i] != this.expr[i] && !isArg) {
                 return null;
             }
@@ -304,7 +312,7 @@ export class Route {
         return this.options.beforeEnter;
     }
 
-    generatePage(pageGenerator: PageGenerator, ...argsArray: any[]): UIElement | null {
+    generatePage(pageGenerator: PageGenerator, ...argsArray: any[]): RoutablePage | null {
         if (!pageGenerator) {
             return null;
         }
@@ -317,7 +325,9 @@ export class Route {
                 argsArray,
                 doNotCache: this.options.doNotCache,
             };
-            const page = (pageGenerator.prototype instanceof UI.Element) ? new pageGenerator(generatorArgs) : pageGenerator(generatorArgs);
+            const page = ((pageGenerator as any).prototype instanceof UI.Element
+                ? new (pageGenerator as new (args: GeneratorArgs) => UIElement)(generatorArgs)
+                : (pageGenerator as (args: GeneratorArgs) => UIElement)(generatorArgs)) as RoutablePage;
             if (page && !page.pageTitle) {
                 const myPageTitle = this.getPageTitle();
                 if (myPageTitle) {
@@ -345,7 +355,7 @@ export class Route {
         return pageGuard(this.getSnapshot());
     }
 
-    getPage(urlParts: string[], router?: Router, ...argsArray: any[]): UIElement | string[] | false {
+    getPage(urlParts: string[], router?: Router, ...argsArray: any[]): RoutablePage | string[] | false {
         let match;
         let matchingRoute: Route | null = this.matchesOwnNode(urlParts) ? this : null;
 
@@ -378,7 +388,7 @@ export class Route {
             return guardResult;
         }
 
-        return this.generatePage(guardResult, ...argsArray);
+        return this.generatePage(guardResult as unknown as PageGenerator, ...argsArray);
     }
 
     getSnapshot(): RouteSnapshot {
@@ -402,12 +412,12 @@ export class TerminalRoute extends Route {
         return true;
     }
 
-    getPage(urlParts: string[], router?: Router): UIElement | string[] | false {
-        const page = super.getPage(...arguments);
+    getPage(urlParts: string[], router?: Router): RoutablePage | string[] | false {
+        const page = super.getPage(urlParts, router);
         // TODO: why is this in a setTimeout?
         clearTimeout(this.timeout);
         this.timeout = setTimeout(() => {
-            if (page?.setURL) {
+            if (page && !Array.isArray(page) && page.setURL) {
                 page.setURL(urlParts);
             }
         });

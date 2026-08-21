@@ -3,7 +3,8 @@ import {changeParent} from "../Utils";
 import {registerStyle} from "../style/Theme";
 import {NavStyle} from "./NavStyle";
 import {StyleRules} from "../Style";
-import {Carousel, CarouselStyle} from "../Carousel";
+import {PagedHorizontalOverflow} from "../horizontal-overflow/PagedHorizontalOverflow";
+import {PagedHorizontalOverflowStyle} from "../horizontal-overflow/Style";
 import {LeftSideNavIcon, RightSideNavIcon, WrappedNavIcon} from "./NavIcon";
 import {BasicOrientedElement, BasicOrientedElementType, NavSection} from "./NavElement";
 import {initializeSwipeEvents} from "./NavSwipeDetection";
@@ -129,15 +130,15 @@ class SidePanel extends UI.Element<SidePanelOptions> {
 }
 
 
-class NavCarouselStyle extends CarouselStyle {
-    hoverColor = () => NavStyle.getInstance().getColors().sidepanelHover;
-    textColor = () => NavStyle.getInstance().getColors().text;
-    navigatorTransitionTime = () => NavStyle.getInstance().dimensions.backgroundTransitionDuration;
+class NavPagerStyle extends PagedHorizontalOverflowStyle {
+    navigatorColor = () => NavStyle.getInstance().getColors().text;
+    navigatorHoverBackground = () => NavStyle.getInstance().getColors().sidepanelHover;
+    navigatorTransition = () => NavStyle.getInstance().getDimensions().backgroundTransitionDuration;
 }
 
 
 interface NavManagerOptions {
-    carouselStyleSheet?: CarouselStyle;
+    pagerStyleSheet?: PagedHorizontalOverflowStyle;
     persistentLeftSidePanel?: boolean;
     persistentRightSidePanel?: boolean;
 }
@@ -155,7 +156,7 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
     declare rightConditioned?: NavSection;
     declare leftConditionedWrapper?: NavSection;
     declare rightConditionedWrapper?: NavSection;
-    declare carousel?: Carousel;
+    declare pager?: PagedHorizontalOverflow;
     declare navigationPanel?: BasicOrientedElementType;
     declare wrappedPanel?: BasicOrientedElementType;
     declare wrapped?: boolean;
@@ -163,8 +164,8 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
     declare wrapScheduled?: boolean;
     declare unwrappedTotalWidth?: number;
 
-    getCarouselStyleSheet() {
-        return this.options.carouselStyleSheet || NavCarouselStyle.getInstance();
+    getPagerStyleSheet() {
+        return this.options.pagerStyleSheet || NavPagerStyle.getInstance();
     }
 
     getDefaultOptions(options?: ElementOptions<NavManagerOptions>): Partial<ElementOptions<NavManagerOptions>> {
@@ -176,12 +177,12 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
 
     initLeftSidePanel() {
         this.leftSidePanel = <SidePanel anchor={Direction.LEFT} name="left" persistent={this.options.persistentLeftSidePanel}>
-            <Carousel ref={this.refLink("carousel")} styleSheet={this.getCarouselStyleSheet()}>
+            <PagedHorizontalOverflow ref={this.refLink("pager")} styleSheet={this.getPagerStyleSheet()}>
                 <BasicOrientedElement orientation={Orientation.VERTICAL} ref={this.refLink("navigationPanel")}
                                       styleSheet={this.styleSheet}>
                     {this.getLeftSidePanelChildren()}
                 </BasicOrientedElement>
-            </Carousel>
+            </PagedHorizontalOverflow>
         </SidePanel>;
     }
 
@@ -229,10 +230,10 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
 
     leftSideIconAction() {
         if (this.wrapped) {
-            if (this.carousel.getActive() === this.navigationPanel) {
+            if (this.pager.getActive() === this.navigationPanel) {
                 this.toggleLeftSidePanel();
             } else {
-                this.carousel.setActive(this.navigationPanel);
+                this.pager.setActive(this.navigationPanel);
                 if (!this.leftSidePanel.visible) {
                     this.toggleLeftSidePanel();
                 }
@@ -280,10 +281,10 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
 
     wrappedIconAction() {
         if (this.wrapped) {
-            if (this.carousel.getActive() === this.wrappedPanel) {
+            if (this.pager.getActive() === this.wrappedPanel) {
                 this.toggleLeftSidePanel();
             } else {
-                this.carousel.setActive(this.wrappedPanel);
+                this.pager.setActive(this.wrappedPanel);
                 if (!this.leftSidePanel.visible) {
                     this.toggleLeftSidePanel();
                 }
@@ -400,7 +401,7 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
         const wrapNavElements = () => {
             this.wrapped = true;
             this.wrappedPanel = <BasicOrientedElement orientation={Orientation.VERTICAL} styleSheet={this.styleSheet}/>;
-            this.carousel.appendChild(this.wrappedPanel);
+            this.pager.appendChild(this.wrappedPanel);
 
             changeParent(this.getRightConditioned(), this.wrappedPanel);
             changeParent(this.getLeftConditioned(), this.wrappedPanel);
@@ -414,7 +415,7 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
             this.getWrappedIcon().addClass("hidden");
             changeParent(this.getLeftConditioned(), this.getLeftConditionedWrapper());
             changeParent(this.getRightConditioned(), this.getRightConditionedWrapper());
-            this.carousel.eraseChild(this.wrappedPanel);
+            this.pager.eraseChild(this.wrappedPanel);
             this.getLeftConditioned().redraw();
             this.getRightConditioned().redraw();
         };
@@ -457,4 +458,4 @@ let initializeNavbar = () => {
 };
 
 
-export {NavManager, initializeNavbar, NavCarouselStyle, SidePanel}
+export {NavManager, initializeNavbar, NavPagerStyle, SidePanel}

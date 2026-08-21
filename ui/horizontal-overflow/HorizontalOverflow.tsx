@@ -1,12 +1,25 @@
-import {UI} from "../UIBase";
+import {BaseUIElement, UI, UIElement} from "../UIBase";
 import {FAIcon} from "../FontAwesome";
 import {registerStyle} from "../style/Theme";
 import {HorizontalOverflowStyle} from "./Style";
 
 
 
+interface HorizontalOverflowOptions {
+    // How much of the visible width one arrow click scrolls
+    swipePercent?: number;
+    // Rendered into pusherContainer, and mutated in place by appendChild/eraseChild
+    children?: UIElement[];
+}
+
 @registerStyle(HorizontalOverflowStyle)
-export class HorizontalOverflow extends UI.Element {
+export class HorizontalOverflow extends UI.Element<HorizontalOverflowOptions> {
+    declare leftArrow?: FAIcon;
+    declare rightArrow?: FAIcon;
+    declare childrenContainer?: UIElement;
+    declare swipeHelperChild?: UIElement;
+    declare pusherContainer?: UIElement;
+
     getDefaultOptions() {
         return {
             swipePercent: .5,
@@ -31,16 +44,56 @@ export class HorizontalOverflow extends UI.Element {
         ];
     }
 
-    appendChild(...args) {
-        this.pusherContainer.appendChild(...args);
+    // Our own children, not the scroller's: getChildrenToRender rebuilds the scroller from them
+    appendChild(child: UIElement, doMount: boolean = true): UIElement {
+        this.options.children = this.options.children || [];
+        this.options.children.push(child);
+        if (doMount) {
+            child.mount(this.pusherContainer, null);
+        }
+        this.redraw();
+        return child;
     }
 
-    eraseChild(...args) {
-        this.pusherContainer.eraseChild(...args);
+    eraseChild(child: UIElement, destroy: boolean = true): UIElement | null {
+        const index = (this.options.children || []).indexOf(child);
+        if (index < 0) {
+            return null;
+        }
+        this.options.children.splice(index, 1);
+        if (destroy) {
+            child.destroyNode();
+        }
+        this.redraw();
+        return child;
+    }
+
+    getChildOffset(child: UIElement): number {
+        return child.node.offsetLeft - this.pusherContainer.node.offsetLeft;
+    }
+
+    scrollToChild(child: UIElement): void {
+        this.scrollToOffset(this.getChildOffset(child));
+    }
+
+    // Whichever child the scroller is currently closest to
+    getActiveChild(): UIElement | undefined {
+        const children = this.options.children || [];
+        const scrollLeft = this.pusherContainer.node.scrollLeft;
+        let closest;
+        let closestDistance = Infinity;
+        for (const child of children) {
+            const distance = Math.abs(this.getChildOffset(child) - scrollLeft);
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closest = child;
+            }
+        }
+        return closest;
     }
 
     checkForOverflow() {
-        const children = this.pusherContainer.children;
+        const children = this.pusherContainer.children as UIElement[];
 
         if (!children.length) {
             return;
@@ -53,8 +106,8 @@ export class HorizontalOverflow extends UI.Element {
 
         for (let child of children) {
             const childRect = child.node.getBoundingClientRect();
-            shouldOverflowRight |= elementRect.left + elementRect.width < childRect.left + childRect.width - 1;
-            shouldOverflowLeft |= elementRect.left > childRect.left;
+            shouldOverflowRight ||= elementRect.left + elementRect.width < childRect.left + childRect.width - 1;
+            shouldOverflowLeft ||= elementRect.left > childRect.left;
         }
 
         const leftArrowHidden = !this.leftArrow.getWidth();
@@ -73,14 +126,16 @@ export class HorizontalOverflow extends UI.Element {
     }
 
     scrollContent(amount) {
-        let scrollLeft;
         const containerNode = this.pusherContainer.node;
-        if (amount < 0) {
-            scrollLeft = Math.max(0, containerNode.scrollLeft + amount * this.getWidth());
-        } else {
-            scrollLeft = Math.min(containerNode.scrollWidth - this.getWidth(), containerNode.scrollLeft + amount * this.getWidth());
-        }
+        const target = containerNode.scrollLeft + amount * this.getWidth();
+        this.scrollToOffset(amount < 0 ?
+            Math.max(0, target) :
+            Math.min(containerNode.scrollWidth - this.getWidth(), target));
+    }
 
+    scrollToOffset(scrollLeft: number) {
+        const containerNode = this.pusherContainer.node;
+        const amount = scrollLeft - containerNode.scrollLeft;
         if (amount < 0) {
             this.swipeHelperChild.setStyle("marginLeft", scrollLeft - containerNode.scrollLeft);
             containerNode.scrollLeft = scrollLeft;

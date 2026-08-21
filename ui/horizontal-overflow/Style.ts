@@ -1,4 +1,4 @@
-import {StyleSheet, styleRule} from "../Style";
+import {StyleSheet, styleRule, styleRuleInherit} from "../Style";
 import {enhance} from "../Color";
 import {Device} from "../../base/Device";
 
@@ -77,4 +77,52 @@ export class HorizontalOverflowStyle extends StyleSheet {
         display: "flex",
         width: "100%",
     }
+}
+
+
+export class PagedHorizontalOverflowStyle extends HorizontalOverflowStyle {
+    navigatorHeight = "35px";
+    transitionTime = 0.3;
+
+    navigatorColor = () => this.arrowColor();
+    navigatorHoverBackground = () => this.arrowHoverBackground();
+    navigatorTransition = () => "0s";
+
+    // Every page fills the viewport, so a step is exactly one page
+    @styleRuleInherit
+    pusherContainer = {
+        ">*": {
+            width: "100%",
+            flexShrink: 0,
+        },
+    };
+
+    // Paging is driven by the bar, not by the edge arrows
+    @styleRuleInherit
+    leftArrow = {display: "none !important"};
+
+    @styleRuleInherit
+    rightArrow = {display: "none !important"};
+
+    @styleRule
+    navigator = {
+        width: "100%",
+        height: this.navigatorHeight,
+        display: "flex",
+    };
+
+    @styleRule
+    navigatorIcon = {
+        color: () => this.navigatorColor(),
+        fontSize: "180% !important",
+        textAlign: "center",
+        cursor: "pointer",
+        flex: "1",
+        fontWeight: "900 !important",
+        lineHeight: this.navigatorHeight + " !important",
+        transition: () => "background-color " + this.navigatorTransition(),
+        ":hover": {
+            backgroundColor: () => this.navigatorHoverBackground(),
+        },
+    };
 }

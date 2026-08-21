@@ -38,7 +38,6 @@ export * from "./section-divider/SectionDivider";
 export * from "./section-divider/TitledSectionDivider";
 export * from "./section-divider/Accordion";
 export * from "./section-divider/Style";
-export * from "./Carousel";
 export * from "./table/RangePanel";
 
 export * from "./table/Table";
