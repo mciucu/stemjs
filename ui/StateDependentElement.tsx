@@ -1,4 +1,4 @@
-import {UI, UIElement} from "./UIBase";
+import {ElementOptions, UI, UIElement} from "./UIBase";
 import {ConcentricCirclesLoadingScreen} from "./ConcentricCirclesLoadingScreen";
 import {DelayedElement} from "./DelayedElement";
 import {Ajax} from "../base/Ajax";
@@ -22,7 +22,7 @@ export interface StateDependentElementOptions {
 
 export const StateDependentElement = <T extends typeof UIElement>(BaseClass: T) => {
     return class StateDependentElementClass extends DelayedElement(BaseClass) {
-        declare options: StateDependentElementOptions;
+        declare options: ElementOptions<StateDependentElementOptions>;
         
         importState(data: any): void {
             GlobalState.load(data);

@@ -38,7 +38,7 @@ export function SetMakeIcon(func: MakeIconFunction): void {
     MakeIconFunc = func;
 }
 
-export function MakeIcon(icon: IconType, options?: any): UIElement | null {
+export function MakeIcon(icon: IconType, options?: any): BaseUIElement | null {
     return MakeIconFunc(icon, options);
 }
 
@@ -94,12 +94,12 @@ export class IconableInterface<T = void> extends SimpleStyledElement<T & SimpleS
         this.updateOptions({icon} as any);
     }
 
-    getIcon(): UIElement | null {
+    getIcon(): BaseUIElement | null {
         const icon = (this.options as any).icon;
         return icon ? MakeIcon(icon) : null;
     }
 
-    beforeChildren(): UIElement | null {
+    beforeChildren(): BaseUIElement | null {
         return this.getIcon();
     }
 }
@@ -246,9 +246,9 @@ export interface Badge {
 }
 
 @registerStyle(BadgeStyle)
-export class Badge extends UI.Primitive("span", IconableInterface as any) {
+export class Badge extends UI.Primitive("span", IconableInterface) {
     extraNodeAttributes(attr: NodeAttributes): void {
-        attr.addClass((this.styleSheet as any).Size(this.getSize()));
-        attr.addClass((this.styleSheet as any).Level(this.getLevel()));
+        attr.addClass(this.styleSheet.Size(this.getSize()));
+        attr.addClass(this.styleSheet.Level(this.getLevel()));
     }
 }

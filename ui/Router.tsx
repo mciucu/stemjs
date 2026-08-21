@@ -1,4 +1,4 @@
-import {ExtendedOptions, UI, UIElement} from "./UIBase";
+import {ExtendedOptions, UI, UIElement, UIEventHandler} from "./UIBase";
 import {Switcher} from "./Switcher";
 import {Dispatcher} from "../base/Dispatcher";
 import {PageTitleManager} from "../base/PageTitleManager";
@@ -6,6 +6,7 @@ import {unwrapArray, isString} from "../base/Utils";
 
 interface RouterOptions {
     routes: Route;
+    onChange?: UIEventHandler;
 }
 
 interface ChangeURLOptions {
@@ -16,8 +17,9 @@ interface ChangeURLOptions {
     keepSearchParams?: boolean;
 }
 
+// A route that captures the whole part rather than ARG_KEY slots answers with the bare string
 export interface RouteMatch {
-    args: string[];
+    args: string[] | string;
     urlParts: string[];
 }
 
@@ -412,8 +414,8 @@ export class TerminalRoute extends Route {
         return true;
     }
 
-    getPage(urlParts: string[], router?: Router): RoutablePage | string[] | false {
-        const page = super.getPage(urlParts, router);
+    getPage(urlParts: string[], router?: Router, ...argsArray: any[]): RoutablePage | string[] | false {
+        const page = super.getPage(urlParts, router, ...argsArray);
         // TODO: why is this in a setTimeout?
         clearTimeout(this.timeout);
         this.timeout = setTimeout(() => {

@@ -1,8 +1,9 @@
-import {UI, UIElementOptions, UIElementChild} from "./UIBase";
+import {TextUIElement, UI, UIElementOptions, UIElementChild} from "./UIBase";
 import {dashCase, isFunction, isNumber, isString} from "../base/Utils";
 import {NodeAttributes, defaultToPixelsAttributes} from "./NodeAttributes";
 
 interface StyleInstanceOptions extends UIElementOptions {
+    value?: string; // The rule text, which render() computes from the attributes below
     selector?: string;
     key?: string;
     attributes?: Record<string, any>;
@@ -27,8 +28,7 @@ interface KeyframeElementOptions extends StyleElementOptions {
 
 // TODO: should this be actually better done throught the dynamic CSS API, without doing through the DOM?
 // So far it's actually better like this, since we want to edit the classes inline
-export class StyleInstance extends UI.TextElement {
-    declare options: StyleInstanceOptions;
+export class StyleInstance extends TextUIElement<StyleInstanceOptions> {
     attributes: Map<string, any>;
 
     constructor(options: StyleInstanceOptions) {
@@ -92,7 +92,7 @@ export class StyleInstance extends UI.TextElement {
     }
 }
 
-export class StyleElement<ExtraOptions = StyleElementOptions> extends UI.Primitive("style")<ExtraOptions, HTMLStyleElement> {
+export class StyleElement<ExtraOptions = {}> extends UI.Primitive("style")<ExtraOptions & StyleElementOptions, HTMLStyleElement> {
     getNodeAttributes(): NodeAttributes {
         // TODO: allow custom style attributes (media, scoped, etc)
         const attr = new NodeAttributes({});
@@ -166,7 +166,8 @@ export class DynamicStyleElement extends StyleElement<DynamicStyleElementOptions
     }
 
     render(): UIElementChild {
-        let style = this.options.style || {};
+        // On a style element `style` is the rule body it generates, not the node's own inline style
+        let style = (this.options.style || {}) as StyleAttributes | (() => StyleAttributes);
         if (typeof style === "function") {
             style = style();
         }
