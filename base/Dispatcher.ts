@@ -202,7 +202,7 @@ export class Dispatchable {
         }
     }
 
-    attachTimeout(callback: () => void, timeout: number): TimeoutHandler {
+    attachTimeout(callback: () => void, timeout: number = 0): TimeoutHandler {
         // TODO when the timeout executes, it doesn't get cleared from the cleanup jobs and would leak
         const timeoutId = setTimeout(callback, timeout);
         this.addCleanupJob(() => clearTimeout(timeoutId));

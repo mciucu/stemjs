@@ -76,6 +76,8 @@ export function autoredrawDecorator<T extends AutoRedrawableClass>(Cls: T, ...ar
 }
 
 // Can be called decorated as @autoredraw or @autoredraw(Watch1, Watch2, ...)
+export function autoredraw<T extends AutoRedrawableClass>(Cls: T): T;
+export function autoredraw<T extends AutoRedrawableClass>(...stores: StoreObject[]): (Cls: T) => T;
 export function autoredraw<T extends AutoRedrawableClass>(...args: any[]): T | ((Cls: T) => T) {
     if (args[0]?.prototype instanceof BaseUIElement) {
         return autoredrawDecorator(args[0]);

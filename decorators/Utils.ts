@@ -5,7 +5,8 @@ export function isDescriptor(desc: any): desc is PropertyDescriptor {
         return false;
     }
 
-    const keys: (keyof PropertyDescriptor)[] = ["value", "initializer", "get", "set"];
+    // `initializer` is what a legacy decorator descriptor carries, and PropertyDescriptor doesn't model it
+    const keys = ["value", "initializer", "get", "set"];
 
     for (let key of keys) {
         if (desc.hasOwnProperty(key)) {
@@ -19,7 +20,7 @@ export function isDescriptor(desc: any): desc is PropertyDescriptor {
 // TODO @types what should entryArgs really be?
 export function decorate(handleDescriptor: HandleDescriptor, entryArgs: any[]): any {
     if (isDescriptor(entryArgs[entryArgs.length - 1])) {
-        return handleDescriptor(...entryArgs, []);
+        return handleDescriptor(...entryArgs as [any, string | symbol, PropertyDescriptor], []);
     } else {
         return function (target: any, key: string | symbol, descriptor: PropertyDescriptor) {
             return handleDescriptor(target, key, descriptor, entryArgs);

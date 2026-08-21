@@ -1,19 +1,17 @@
 import {BaseUIElement, UI, UIElement} from "../ui/UIBase";
-import {MarkupParser} from "./MarkupParser";
+import {Constructor} from "../base/Utils";
+import {MarkupElement, MarkupParser} from "./MarkupParser";
 import {Link} from "../ui/primitives/Link";
 import {Image} from "../ui/primitives/Image";
 import {StaticCodeHighlighter} from "../ui/CodeEditor";
 
-interface MarkupElement {
-    tag: string;
-    children?: MarkupElement[] | string[];
-    [key: string]: any;
-}
+// What MarkupParser.parse returns, plus the raw forms a caller may hand to setValue
+type MarkupValue = string | MarkupElement | (string | MarkupElement)[];
 
 interface MarkupRendererOptions {
     classMap?: MarkupClassMap;
     parser?: MarkupParser;
-    value?: string | MarkupElement;
+    value?: MarkupValue;
     rawValue?: string;
     [key: string]: any;
 }
@@ -72,8 +70,7 @@ export class MarkupClassMap {
     }
 }
 
-export class MarkupRenderer extends UIElement {
-    declare options: MarkupRendererOptions;
+export class MarkupRenderer extends UIElement<MarkupRendererOptions> {
     private declare classMap: MarkupClassMap;
 
     setOptions(options: MarkupRendererOptions): void {
@@ -91,7 +88,7 @@ export class MarkupRenderer extends UIElement {
         this.classMap = this.options.classMap;
     }
 
-    setValue(value: string | MarkupElement): void {
+    setValue(value: MarkupValue): void {
         if (typeof value === "string") {
             this.options.rawValue = value;
             try {
@@ -100,7 +97,7 @@ export class MarkupRenderer extends UIElement {
                 console.error("Can't parse ", value, e);
                 value = {
                     tag: "span",
-                    children: [value]
+                    children: [value as string]
                 };
             }
         }
@@ -120,7 +117,8 @@ export class MarkupRenderer extends UIElement {
         }
     }
 
-    addClass(className: string, classObject: UIClass): void {
+    // Not addClass: that is the DOM class helper on every element
+    addMarkupClass(className: string, classObject: UIClass): void {
         this.classMap.addClass(className, classObject);
     }
 
@@ -128,7 +126,7 @@ export class MarkupRenderer extends UIElement {
         return this.classMap.getClass(className);
     }
 
-    getValue(): string | MarkupElement | undefined {
+    getValue(): MarkupValue | undefined {
         return this.options.value;
     }
 
@@ -162,7 +160,7 @@ export class MarkupRenderer extends UIElement {
 
 MarkupClassMap.addClass("CodeSnippet", StaticCodeHighlighter);
 
-const SafeUriEnhancer = <T extends UIClass>(BaseClass: T, attribute: string) => class SafeUriClass extends BaseClass {
+const SafeUriEnhancer = <T extends Constructor<UIElement>>(BaseClass: T, attribute: string) => class SafeUriClass extends BaseClass {
     setOptions(options: any): any {
         if (options[attribute] && !(this.constructor as typeof SafeUriClass).isSafeUri(options[attribute])) {
             options = Object.assign({}, options, {[attribute]: undefined});

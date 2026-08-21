@@ -9,7 +9,8 @@ interface TouchEvent extends Event {
     originalEvent?: TouchEvent;
 }
 
-interface EventWithCoordinates extends Event {
+// Partial<Event>, not Event: a Touch carries the same coordinates but is not itself an event
+interface EventWithCoordinates extends Partial<Event> {
     clientX?: number;
     clientY?: number;
     pageX?: number;

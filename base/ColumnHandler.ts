@@ -2,12 +2,13 @@
 // Takes in an array ["Name", obj => obj.field, options] or simply an array of options
 
 import {isNotNullOrFalse} from "./Utils";
+import type {UIElementChild} from "../ui/UIBase";
 
 export type ColumnMapper<BaseType, ResultType> = (obj: BaseType) => ResultType;
 
 // TODO @Mihai this might make sense to templatized, depending on the object type for ColumnMapper
 export interface ColumnOptions<BaseType, ResultType> {
-    headerName?: string;
+    headerName?: UIElementChild | (() => UIElementChild);
     value?: ColumnMapper<BaseType, ResultType>;
     name?: string;
     index?: number;

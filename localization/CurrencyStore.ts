@@ -67,9 +67,10 @@ export class Currency extends BaseStore("Currency") {
             ...(style === "currency" ? {currency: this.isoCode.toUpperCase()} : {}),
             minimumFractionDigits: this.subdivisionDecimalDigits,
             maximumFractionDigits: this.subdivisionDecimalDigits,
+            // Not in this TS lib's Intl.NumberFormatOptions yet, though every target browser supports it
             trailingZeroDisplay: stripIfInteger ? "stripIfInteger" : "auto",
             useGrouping,
-        });
+        } as Intl.NumberFormatOptions);
     }
 
     toString(): string {
