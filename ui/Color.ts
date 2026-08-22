@@ -159,7 +159,7 @@ export class Color {
     }
 
     setColor(color: ColorInput): void {
-        this.color = (this.constructor as typeof Color).parseColor(color);
+        this.color = this.constructor.parseColor(color);
     }
 
     getColor(): string {

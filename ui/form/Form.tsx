@@ -1,5 +1,5 @@
 import {FormStyle} from "./Style";
-import {TextUIElement, UI} from "../UIBase";
+import {ElementOptions, TextUIElement, UI, UIElementChild} from "../UIBase";
 import {registerStyle} from "../style/Theme";
 import {NodeAttributes} from "../NodeAttributes";
 
@@ -43,13 +43,21 @@ export class FormGroup extends UI.Element {
 }
 
 
+export interface FormFieldOptions {
+    inline?: boolean;
+    label?: UIElementChild;
+    contentFirst?: boolean;
+}
+
 export class FormField extends FormGroup {
+    declare options: ElementOptions<FormFieldOptions>;
+
     inline() {
         return !(this.options.inline === false ||
-                 (this.parent && this.parent.options && this.parent.options.inline === false));
+                 (this.parent && this.parent.options && (this.parent.options as FormFieldOptions).inline === false));
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         attr.addClass(this.styleSheet.formField);
         if (this.inline()) {
             attr.addClass(this.styleSheet.sameLine);

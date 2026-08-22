@@ -59,7 +59,7 @@ export class Timezone extends BaseEnum {
 
     getTimezoneName(): string {
         if (this.value === "local") {
-            return (this.constructor as typeof Timezone).getCurrentTimezoneName();
+            return this.constructor.getCurrentTimezoneName();
         }
         return this.value;
     }

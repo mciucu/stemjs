@@ -1,4 +1,4 @@
-import {UI, UIElement, UIElementCleanChild} from "../UIBase";
+import {BaseUIElement, UI, UIElement, UIElementCleanChild} from "../UIBase";
 
 // Just putting in a lot of methods, to try to think of an interface
 interface ScrollableOptions {
@@ -109,7 +109,7 @@ export class ScrollableMixin<ExtraOptions extends ScrollableOptions = Scrollable
 //TODO: this class would need some binary searches
 interface InfiniteScrollableOptions extends ScrollableOptions {
     entries?: any[];
-    entryRenderer?: (entry: any) => UIElementCleanChild;
+    entryRenderer?: (entry: any) => BaseUIElement; // Inserted as a child directly, so it has to be an element
     entryComparator?: (left: any, right: any) => number;
     staticTop?: UIElement;
     children?: UIElementCleanChild[];
@@ -142,7 +142,7 @@ export class InfiniteScrollable extends ScrollableMixin<InfiniteScrollableOption
     getLastVisibleIndex() {
     }
 
-    renderEntry(entry) {
+    renderEntry(entry): BaseUIElement {
         if (this.options.entryRenderer) {
             return this.options.entryRenderer(entry);
         } else {

@@ -192,7 +192,7 @@ export class Duration {
     }
 
     increment(duration: DurationInput): Duration {
-        const durationObj = (this.constructor as typeof Duration).toDuration(duration);
+        const durationObj = this.constructor.toDuration(duration);
         for (const key in durationObj) {
             if (!(key in TimeUnit.CANONICAL)) {
                 continue;
@@ -212,7 +212,7 @@ export class Duration {
     }
 
     subtract(duration: DurationInput): Duration {
-        const negatedDuration = (this.constructor as typeof Duration).toDuration(duration).negate();
+        const negatedDuration = this.constructor.toDuration(duration).negate();
         return this.add(negatedDuration);
     }
 
@@ -339,7 +339,7 @@ export class Duration {
     format(optionsOrPattern: DateFormatOptions | string = {}): string {
         if (isString(optionsOrPattern)) {
             const pattern = String(optionsOrPattern).toLowerCase();
-            return (this.constructor as typeof Duration).formatter.format(this, pattern);
+            return this.constructor.formatter.format(this, pattern);
         }
 
         const {maxEntries = 2, separator = ", "} = optionsOrPattern;

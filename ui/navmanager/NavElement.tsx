@@ -24,16 +24,15 @@ const BasicOrientedElementInterface = <TBase extends Constructor<UIElement<any, 
     declare options: ElementOptions<BasicOrientedElementOptions>;
 
     get styleSheet(): StyleRules<NavStyle> {
-        return (this.options.styleSheet || (this.parent as OrientedElement)?.styleSheet) as StyleRules<NavStyle>;
+        return (this.options.styleSheet || (this.parent as OrientedElement).styleSheet) as StyleRules<NavStyle>;
     }
 
     getOrientation(): OrientationType {
         if (this.options.orientation) {
             return this.options.orientation;
         }
-        const parent = this.parent as OrientedElement;
-        if (parent && typeof parent.getOrientation === "function") {
-            return parent.getOrientation();
+        if (this.parent && typeof (this.parent as OrientedElement).getOrientation === "function") {
+            return (this.parent as OrientedElement).getOrientation();
         }
         return Orientation.HORIZONTAL;
     }
@@ -94,7 +93,7 @@ const NavElementInterface = <TBase extends Constructor<OrientedElement>>(BaseCla
     }
 
     getSubElements() {
-        const childrenToRender = unwrapArray<UIElementCleanChild>(this.render());
+        let childrenToRender = unwrapArray<UIElementCleanChild>(this.render());
         if (childrenToRender.length) {
             let subElementsClass;
             if (!this.isToggled) {
@@ -234,7 +233,7 @@ interface NavSectionOptions {
 
 class NavSection extends UI.Primitive("ul")<NavSectionOptions> {
     get styleSheet(): StyleRules<NavStyle> {
-        return (this.options.styleSheet || (this.parent as OrientedElement)?.styleSheet) as StyleRules<NavStyle>;
+        return (this.options.styleSheet || (this.parent as OrientedElement).styleSheet) as StyleRules<NavStyle>;
     }
 
     extraNodeAttributes(attr) {
@@ -291,10 +290,10 @@ class NavAnchoredNotifications extends NavSection {
         ];
     }
 
-    show(content, child) {
+    show(content?: UIElement, child?: UIElement) {
         this.activeChild = child;
         this.switcher.removeClass("hidden");
-        this.switcher.setActive(content, child);
+        (this.switcher.setActive as any)(content, child);
         this.bodyListener = document.body.addEventListener("click", () => this.hide());
     }
 

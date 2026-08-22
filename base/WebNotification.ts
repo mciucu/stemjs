@@ -24,12 +24,12 @@ export class WebNotification extends EnqueueableMethodMixin(Dispatchable) {
     }
 
     show(): void {
-        if (!(this.constructor as typeof WebNotification).isSupported()) {
+        if (!this.constructor.isSupported()) {
             console.error("Notifications not supported by browser.");
             return;
         }
         // Into a fresh object: assigning onto defaultOptions would leak this notification's options into every later one
-        this._notification = new self.Notification(this.options.title, Object.assign({}, (this.constructor as typeof WebNotification).defaultOptions, this.options));
+        this._notification = new self.Notification(this.options.title, Object.assign({}, this.constructor.defaultOptions, this.options));
     }
 
     @enqueueIfNotLoaded

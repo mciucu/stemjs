@@ -5,6 +5,8 @@ import {Device} from "../../base/Device";
 
 @registerStyle(GlobalContainerStyle)
 export class GlobalContainer extends UI.Element {
+    declare static Global?: GlobalContainer;
+
     onMount() {
         if (!Device.isTouchDevice() || !Device.isMobileDevice()) {
             Object.assign(document.body.style, {

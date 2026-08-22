@@ -1,14 +1,20 @@
-import {UI} from "../UIBase";
+import {ElementOptions, TextUIElement, UI} from "../UIBase";
 import {NodeAttributes} from "../NodeAttributes";
 
+export interface TemporaryMessageAreaOptions {
+    value?: string;
+    margin?: number;
+}
+
 export class TemporaryMessageArea extends UI.Primitive("span") {
-    clearValueTimeout?: number;
+    declare options: ElementOptions<TemporaryMessageAreaOptions>;
+    clearValueTimeout?: any;
     textElement: any;
 
     getDefaultOptions() {
         return {
             margin: 10
-        };
+        } as Partial<typeof this.options>;
     }
 
     render() {

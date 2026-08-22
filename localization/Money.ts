@@ -161,7 +161,7 @@ export class Money {
         const currency = this.getCurrency();
         const amount = this.getAmount();
 
-        if ((this.constructor as typeof Money).useFormatter) {
+        if (this.constructor.useFormatter) {
             const mainUnitAmount = currency.amountToMainUnits(amount);
             return currency.getFormatter().format(mainUnitAmount);
         }

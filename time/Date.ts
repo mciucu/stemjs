@@ -93,13 +93,13 @@ export class StemDate extends BaseDate {
     }
 
     set(date: DateInput) {
-        date = (this.constructor as typeof StemDate).toDate(date);
+        date = this.constructor.toDate(date);
         this.setTime(date.getTime());
         return this;
     }
 
     clone(): StemDate {
-        return new (this.constructor as typeof StemDate)(this.getTime());
+        return new this.constructor(this.getTime());
     }
 
     toUnix(): number {
@@ -129,7 +129,7 @@ export class StemDate extends BaseDate {
         }
 
         timeUnit = TimeUnit.toTimeUnit(timeUnit);
-        const stemDate = (this.constructor as typeof StemDate).toDate(date);
+        const stemDate = this.constructor.toDate(date);
         let diff = this.diff(stemDate);
         if (diff.valueOf() >= 2 * timeUnit.valueOf()) {
             // If the distance between the two dates is more than 2 standard lengths of the time unit
@@ -205,7 +205,7 @@ export class StemDate extends BaseDate {
 
     // Assign the given date if current value if greater than it
     capUp(date: DateInput) {
-        date = (this.constructor as typeof StemDate).toDate(date);
+        date = this.constructor.toDate(date);
         if (this.isAfter(date)) {
             this.set(date);
         }
@@ -213,7 +213,7 @@ export class StemDate extends BaseDate {
 
     // Assign the given date if current value if less than it
     capDown(date: DateInput) {
-        date = (this.constructor as typeof StemDate).toDate(date);
+        date = this.constructor.toDate(date);
         if (this.isBefore(date)) {
             this.set(date);
         }

@@ -15,7 +15,7 @@ export class StorageMap extends Dispatchable {
         super();
         this.storage = storage;
         this.name = name;
-        this.prefix = name + (this.constructor as typeof StorageMap).SEPARATOR;
+        this.prefix = name + this.constructor.SEPARATOR;
     }
 
     getPrefix(): string {
@@ -153,6 +153,6 @@ export class LocalStorageMap extends StorageMap {
             };
         }
 
-        return (this.constructor as typeof LocalStorageMap).getChangeDispatchable().addListener(this.name, realCallback);
+        return this.constructor.getChangeDispatchable().addListener(this.name, realCallback);
     }
 }

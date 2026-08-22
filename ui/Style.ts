@@ -75,7 +75,7 @@ class StyleSheet extends Dispatchable {
         return {
             parent: document.head,
             theme,
-            name: options.name || (this.constructor as typeof StyleSheet).getElementName(theme), // call only if needed
+            name: options.name || this.constructor.getElementName(theme), // call only if needed
         }
     }
 

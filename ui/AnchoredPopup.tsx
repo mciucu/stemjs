@@ -123,8 +123,8 @@ export class AnchoredPopup extends UIElement<AnchoredPopupOptions> {
     }
 
     hide(): void {
-        if ((this.constructor as typeof AnchoredPopup).lastShownModal === this) {
-            (this.constructor as typeof AnchoredPopup).lastShownModal = undefined;
+        if (this.constructor.lastShownModal === this) {
+            this.constructor.lastShownModal = undefined;
         }
 
         clearInterval(this.interval);

@@ -2,9 +2,10 @@ import {SortableTableInterface} from "./SortableTable";
 import {CollapsibleTable} from "./CollapsibleTable";
 import {UIElementChild} from "../UIBase";
 import {ColumnHandler} from "../../base/ColumnHandler";
-import {Table} from "./Table";
 
-export class SortableCollapsibleTable<BaseType> extends SortableTableInterface<BaseType>(CollapsibleTable as Table<BaseType>) {
+const SortableCollapsibleTableBase = SortableTableInterface(CollapsibleTable);
+
+export class SortableCollapsibleTable<BaseType> extends SortableCollapsibleTableBase {
     renderColumnHeader(column: ColumnHandler<BaseType>): UIElementChild {
         if (column.isToggleColumn) {
             column.noSort = true;

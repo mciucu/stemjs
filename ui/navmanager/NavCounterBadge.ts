@@ -1,9 +1,13 @@
 import {NavManager} from "./NavManager";
-import {Badge} from "../SimpleElements";
+import {Badge, SimpleStyledElementOptions} from "../SimpleElements";
 import {NodeAttributes} from "../NodeAttributes";
 
-export class NavCounterBadge extends Badge {
-    getDefaultOptions() {
+interface NavCounterBadgeOptions extends SimpleStyledElementOptions {
+    counter?: number;
+}
+
+export class NavCounterBadge extends Badge<NavCounterBadgeOptions> {
+    getDefaultOptions(): Partial<typeof this.options> {
         return {
             style: {
                 right: "-5px",

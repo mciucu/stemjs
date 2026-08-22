@@ -135,7 +135,8 @@ export class Theme extends Dispatchable {
 // Returning the widened class here is what a decorator can't do (microsoft/TypeScript#4881); the styleSheet
 // member is declared by ts-plugin/transform.js instead, so this only ever registers.
 export function registerStyle<T extends typeof StyleSheet>(styleClass: T, theme: Theme = Theme.Global) {
-    return function (target: typeof UIElement<any, any>): void {
+    return function <ElementClass extends typeof UIElement<any, any, any>>(target: ElementClass): ElementClass {
         theme.register(target, styleClass);
+        return target;
     };
 }

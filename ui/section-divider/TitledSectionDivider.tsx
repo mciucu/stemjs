@@ -104,7 +104,7 @@ class BarCollapsePanel extends UI.Element<BarCollapsePanelOptions> {
             <div ref="collapsedBarTitle" style={{display: this.collapsed ? "flex": " none"}}
                  className={this.styleSheet.collapsedBarTitle}>
                 <div><FAIcon icon={"caret-" + firstCaret}/></div>
-                <div className={this.styleSheet.title}>
+                <div>
                     <div>
                         {this.options.title}
                     </div>

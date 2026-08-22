@@ -151,7 +151,7 @@ export class NodeAttributes {
 
     // Change the attribute & apply it, regardless if it exists in the attribute map (in that case it's whitelisted)
     // TODO: should this use the domName or the reverseName? Still needs work
-    setAttribute(key: string, value: any, node?: NodeElement, attributesMap: DOMAttributesMap = (this.constructor as any).defaultAttributesMap): void {
+    setAttribute(key: string, value: any, node?: NodeElement, attributesMap: DOMAttributesMap = this.constructor.defaultAttributesMap): void {
         // TODO: might want to find a better way than whitelistAttributes field to do this
         if (!attributesMap.has(key)) {
             this.whitelistedAttributes = this.whitelistedAttributes || {}; // TODO: reconsider the whitelisted attributes
@@ -230,7 +230,7 @@ export class NodeAttributes {
     }
 
     addClass(classes: any, node?: NodeElement): void {
-        classes = (this.constructor as typeof NodeAttributes).getClassArray(classes);
+        classes = this.constructor.getClassArray(classes);
 
         for (const cls of classes) {
             this.getClassNameSet().add(cls);
@@ -241,7 +241,7 @@ export class NodeAttributes {
     }
 
     removeClass(classes: any, node?: NodeElement): void {
-        classes = (this.constructor as typeof NodeAttributes).getClassArray(classes);
+        classes = this.constructor.getClassArray(classes);
 
         for (const cls of classes) {
             this.getClassNameSet().delete(cls);

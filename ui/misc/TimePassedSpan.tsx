@@ -1,7 +1,12 @@
-import {UI} from "../UIBase";
+import {ElementOptions, UI} from "../UIBase";
 import {Dispatchable} from "../../base/Dispatcher";
 
+export interface TimePassedSpanOptions {
+    timeStamp?: number;
+}
+
 export class TimePassedSpan extends UI.Primitive("span") {
+    declare options: ElementOptions<TimePassedSpanOptions>;
     private _updateListener?: any;
     private static updateFunction?: number;
     private static TIME_DISPATCHER?: Dispatchable;

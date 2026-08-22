@@ -1,5 +1,12 @@
 import {UI, BaseUIElement, RenderStack} from "../UIBase";
 
+// The custom tag the React bridge mounts into
+declare global {
+    interface HTMLElementTagNameMap {
+        "react-tree": HTMLElement;
+    }
+}
+
 const stemInReactContext: {
     reactComponentDecorator: (Component: any) => any;
     stemRootComponentProps: any;
@@ -98,7 +105,7 @@ export function enableStemInReactApp(ReactDOM: any, React: any, reactComponentDe
     }
 
     const oldReactCreateElement = React.createElement;
-    React.createElement = (...args) => {
+    React.createElement = (...args: [any, ...any[]]) => {
         const firstArg = args[0];
         if (RenderStack.length > 0) {
             return UI.createElement(...args);
@@ -110,7 +117,7 @@ export function enableStemInReactApp(ReactDOM: any, React: any, reactComponentDe
     };
 
     const oldStemCreateElement = UI.createElement;
-    UI.createElement = (...args) => {
+    UI.createElement = (...args: [any, ...any[]]) => {
         const firstArg = args[0];
         if (firstArg
             && !(firstArg instanceof String)

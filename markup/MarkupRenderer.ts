@@ -161,8 +161,11 @@ export class MarkupRenderer extends UIElement<MarkupRendererOptions> {
 MarkupClassMap.addClass("CodeSnippet", StaticCodeHighlighter);
 
 const SafeUriEnhancer = <T extends Constructor<UIElement>>(BaseClass: T, attribute: string) => class SafeUriClass extends BaseClass {
+    // Declared inside a function, so ts-plugin can't append a merged interface for it
+    declare ["constructor"]: UIElement["constructor"] & {isSafeUri(uri: string): boolean};
+
     setOptions(options: any): any {
-        if (options[attribute] && !(this.constructor as typeof SafeUriClass).isSafeUri(options[attribute])) {
+        if (options[attribute] && !this.constructor.isSafeUri(options[attribute])) {
             options = Object.assign({}, options, {[attribute]: undefined});
         }
         return super.setOptions(options);

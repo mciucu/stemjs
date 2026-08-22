@@ -498,11 +498,11 @@ export class UIElement<
     applyNodeAttributes(): void {
         const attr = this.getNodeAttributes();
         this.extraNodeAttributes(attr);
-        attr.apply(this.node, (this.constructor as typeof UIElement).domAttributesMap);
+        attr.apply(this.node, this.constructor.domAttributesMap);
     }
 
     setAttribute(key: string, value: any): void {
-        this.getOptionsAsNodeAttributes().setAttribute(key, value, this.node, (this.constructor as any).domAttributesMap);
+        this.getOptionsAsNodeAttributes().setAttribute(key, value, this.node, this.constructor.domAttributesMap);
     }
 
     setStyle(key: string | Record<string, any>, value?: any): void {
@@ -574,7 +574,7 @@ export class UIElement<
                 }
 
                 const haveListenerMethod = (typeof this[addListenerMethodName] === "function");
-                const nodeEvent = (this.constructor as typeof UIElement).nodeEventsMap.getKeyFromDOMName(eventType.toLowerCase());
+                const nodeEvent = this.constructor.nodeEventsMap.getKeyFromDOMName(eventType.toLowerCase());
 
                 if (haveListenerMethod || nodeEvent) {
                     this[handlerMethodName] = (...args) => {

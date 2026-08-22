@@ -106,7 +106,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
         });
 
         if (!window.ace) {
-            (this.constructor as typeof CodeEditor).requireAce(() => {
+            this.constructor.requireAce(() => {
                 this.onDelayedMount();
             });
             return;
@@ -176,7 +176,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
         }
         if (this.options.hasOwnProperty("enableBasicAutocompletion") ||
             this.options.hasOwnProperty("enableLiveAutocompletion")) {
-            const {langToolsSrc} = this.constructor as typeof CodeEditor;
+            const {langToolsSrc} = this.constructor;
             if (!langToolsSrc) {
                 console.warn("Autocompletion requires setting 'langToolSrc' in CodeEditor");
             } else {
@@ -366,7 +366,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
 
     @enqueueIfNotLoaded
     addMarker(startLine: number, startCol: number, endLine: number, endCol: number, ...args: any[]): any {
-        const Range = (this.constructor as typeof CodeEditor).AceRange;
+        const Range = this.constructor.AceRange;
         return this.getAce().getSession().addMarker(new Range(startLine, startCol, endLine, endCol), ...args);
     }
 
@@ -380,19 +380,19 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     }
 
     getTextRange(startLine: number, startCol: number, endLine: number, endCol: number): string {
-        const Range = (this.constructor as typeof CodeEditor).AceRange;
+        const Range = this.constructor.AceRange;
         return this.getAce().getSession().doc.getTextRange(new Range(startLine, startCol, endLine, endCol));
     }
 
     @enqueueIfNotLoaded
     setTextRange(startLine: number, startCol: number, endLine: number, endCol: number, text: string): void {
-        const Range = (this.constructor as typeof CodeEditor).AceRange;
+        const Range = this.constructor.AceRange;
         this.getAce().getSession().replace(new Range(startLine, startCol, endLine, endCol), text);
     }
 
     @enqueueIfNotLoaded
     removeLine(line: number): void {
-        const Range = (this.constructor as typeof CodeEditor).AceRange;
+        const Range = this.constructor.AceRange;
         this.getAce().getSession().getDocument().remove(new Range(line, 0, line + 1, 0));
     }
 
@@ -405,7 +405,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
 
     @enqueueIfNotLoaded
     replaceLine(line: number, str: string): void {
-        const Range = (this.constructor as typeof CodeEditor).AceRange;
+        const Range = this.constructor.AceRange;
         this.getAce().getSession().getDocument().replace(new Range(line, 0, line + 1, 0), str);
     }
 

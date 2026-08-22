@@ -9,10 +9,10 @@ export class AjaxHandler {
     errorHandler: ((...args: any[]) => void) | null;
 
     constructor(ajaxHandler?: AjaxHandler | null, errorHandler: ((...args: any[]) => void) | null = null) {
-        if ((this.constructor as typeof AjaxHandler)._baseAjax === null) {
-            (this.constructor as typeof AjaxHandler)._baseAjax = this;
+        if (this.constructor._baseAjax === null) {
+            this.constructor._baseAjax = this;
         } else if (arguments.length === 0) {
-            ajaxHandler = (this.constructor as typeof AjaxHandler)._baseAjax;
+            ajaxHandler = this.constructor._baseAjax;
         }
         this.parentHandler = ajaxHandler;
         this.preprocessors = (ajaxHandler) ? [] : Array.from(fetch.defaultPreprocessors);

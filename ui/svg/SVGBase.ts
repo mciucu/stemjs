@@ -16,16 +16,42 @@ interface BoundingRect {
     right: number;
 }
 
-interface DefaultSVGOptions {
-
+// Mirrors the attributes registered in SVGUIElement.domAttributesMap below
+export interface SVGOptions {
+    fill?: string;
+    stroke?: string;
+    strokeWidth?: number | string;
+    strokeDasharray?: number | string;
+    strokeLinecap?: string;
+    stopColor?: string;
+    clipPath?: string;
+    opacity?: number;
+    transform?: string;
+    viewBox?: string;
+    offset?: number | string;
+    width?: number | string;
+    height?: number | string;
+    x?: number;
+    y?: number;
+    x1?: number;
+    y1?: number;
+    x2?: number;
+    y2?: number;
+    cx?: number;
+    cy?: number;
+    rx?: number;
+    ry?: number;
+    // Written by translate() and setColor(), which have no attribute of their own
+    translate?: string;
+    color?: string;
 }
 
 // TODO Simplify this class
 export class SVGUIElement<
-    ExtraOptions = DefaultSVGOptions,
+    ExtraOptions = {},
     SVGNodeType extends SVGElement = SVGElement
-> extends UIElement<ExtraOptions, SVGNodeType> {
-    declare children?: SVGUIElement<any, any>[];
+> extends UIElement<ExtraOptions & SVGOptions, SVGNodeType, SVGTagType> {
+    declare children: SVGUIElement<any, any>[];
 
     createNode(): SVGNodeType {
         this.node = document.createElementNS("http://www.w3.org/2000/svg", this.getNodeType()) as SVGNodeType;
@@ -34,13 +60,15 @@ export class SVGUIElement<
     }
 
     getNodeType(): SVGTagType {
-        return this.options?.nodeType || "div";
+        // TODO "div" is not an SVG tag, and createElementNS renders nothing for it
+        return this.options?.nodeType || "div" as SVGTagType;
     }
+
 
     getScreenCoordinatedForPoint(point: Point): Point {
         const {node} = this;
         // TODO: this is a good argument to always keep a reference to the Stem element in the nodes
-        const svgNode = node.ownerSVGElement || node as SVGSVGElement;
+        const svgNode = node.ownerSVGElement || node as unknown as SVGSVGElement;
 
         if (svgNode.createSVGPoint) {
             // Using native SVG transformations
@@ -48,7 +76,7 @@ export class SVGUIElement<
             let svgPoint = svgNode.createSVGPoint();
             svgPoint.x = point.x;
             svgPoint.y = point.y;
-            return svgPoint.matrixTransform(node.getScreenCTM().inverse());
+            return svgPoint.matrixTransform((node as unknown as SVGGraphicsElement).getScreenCTM().inverse());
         }
 
         const rect = this.getBoundingClientRect();
@@ -63,7 +91,7 @@ export class SVGUIElement<
     }
 
     saveState() {
-        let state = {};
+        let state: any = {};
         state.options = Object.assign({}, this.options);
         return state;
     }
@@ -88,13 +116,13 @@ export class SVGUIElement<
 
     //TODO(@all) : getBoundingClientRect is unreliable, reimplement it.
     getBoundingClientRect(): BoundingRect {
-        let element = this.node;
+        let element: Element | null = this.node;
         let x = 0;
         let y = 0;
         while (element && element !== document.body) {
             x -= element.scrollLeft;
             y -= element.scrollTop;
-            element = element.offsetParent || element.parentNode;
+            element = (element as HTMLElement).offsetParent || element.parentNode as Element;
         }
         if (element) {
             x -= element.scrollLeft;
@@ -112,7 +140,7 @@ export class SVGUIElement<
     }
 
     getBBox(): DOMRect {
-        return this.node.getBBox();
+        return (this.node as unknown as SVGGraphicsElement).getBBox();
     }
 
     getHeight(): number {
@@ -137,7 +165,7 @@ export class SVGUIElement<
     setOpacity(newOpacity: number): void {
         this.options.opacity = newOpacity;
         if (this.node) {
-            this.node.setAttribute("opacity", newOpacity);
+            this.node.setAttribute("opacity", String(newOpacity));
         }
     }
 
@@ -156,7 +184,7 @@ export class SVGUIElement<
         if (this.getNodeType() == "svg") {
             return this;
         }
-        return (this.parent as SVGUIElement).getSvg();
+        return (this.parent as unknown as SVGUIElement).getSvg();
     }
 }
 

@@ -6,6 +6,16 @@ import {Point} from "../../numerics/StemMath";
 import {isFunction} from "../../base/Utils";
 
 
+// Each helper asks for the capability it animates, since only some SVG elements implement these
+interface ColorAnimatable extends SVGUIElement {
+    getColor(): string | undefined;
+}
+
+interface MoveAnimatable extends SVGUIElement {
+    setPosition(point: Point): void;
+    moveTransition?: (coords: Point, duration: number, dependsOn: Transition[], startTime: number) => Transition;
+}
+
 interface BlinkTransitionOptions {
     duration?: number;
     times?: number;
@@ -64,7 +74,7 @@ export function makeOpacityTransition(svgElement: SVGUIElement, opacity: number,
     });
 }
 
-export function makeColorTransition(svgElement: SVGUIElement, color: string, duration: number, dependsOn: Transition[] = [], startTime: number = 0): Transition {
+export function makeColorTransition(svgElement: ColorAnimatable, color: string, duration: number, dependsOn: Transition[] = [], startTime: number = 0): Transition {
     return new Transition({
         func: (t: number, context: any) => {
             svgElement.setColor(Color.interpolate(context.color, color, t));
@@ -78,7 +88,7 @@ export function makeColorTransition(svgElement: SVGUIElement, color: string, dur
     });
 }
 
-export function makeMoveTransition(svgElement: SVGUIElement, coords: Point, duration: number, dependsOn: Transition[] = [], startTime: number = 0): Transition {
+export function makeMoveTransition(svgElement: MoveAnimatable, coords: Point, duration: number, dependsOn: Transition[] = [], startTime: number = 0): Transition {
     if (isFunction(svgElement.moveTransition)) {
         return svgElement.moveTransition(coords, duration, dependsOn, startTime) as Transition;
     }

@@ -44,7 +44,7 @@ export class CallThrottler extends CallModifier {
     }
 
     isThrottleOnAnimationFrame(): boolean {
-        return this.throttle === (this.constructor as any).ON_ANIMATION_FRAME;
+        return this.throttle === this.constructor.ON_ANIMATION_FRAME;
     }
 
     clearPendingCall(): void {

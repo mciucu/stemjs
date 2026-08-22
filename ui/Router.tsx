@@ -204,7 +204,7 @@ export class Router extends Switcher {
         }
 
         if (Array.isArray(result)) {
-            (this.constructor as typeof Router).changeURL(result);
+            this.constructor.changeURL(result);
             return null;
         }
 
@@ -243,7 +243,7 @@ export class Router extends Switcher {
 
     onMount(): void {
         if (!Router.Global) {
-            (this.constructor as typeof Router).setGlobalRouter(this);
+            this.constructor.setGlobalRouter(this);
         }
     }
 }
@@ -292,7 +292,7 @@ export class Route {
         }
         let args = [];
         for (let i = 0; i < this.expr.length; i += 1) {
-            const isArg = this.expr[i] === (this.constructor as typeof Route).ARG_KEY;
+            const isArg = this.expr[i] === this.constructor.ARG_KEY;
             if (urlParts[i] != this.expr[i] && !isArg) {
                 return null;
             }

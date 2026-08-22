@@ -157,7 +157,7 @@ export function RangeTableInterface<BaseType, BaseTable extends Constructor<Tabl
                      style={{paddingTop: headHeight + "px", marginLeft: margin + "px"}}>
                     <div ref="scrollablePanel" className={rangePanelStyleSheet.scrollablePanel}>
                         <div ref="fakePanel" className={rangePanelStyleSheet.fakePanel} style={{height: fakePanelHeight}}/>
-                        <table ref="container" className={`${this.styleSheet.table} ${rangePanelStyleSheet.table}`}
+                        <table ref="container" className={rangePanelStyleSheet.table}
                                                style={{marginLeft: -margin + "px"}}>
                             {this.renderTableHead()}
                             <tbody ref="containerBody">

@@ -50,7 +50,7 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
         return "table";
     }
 
-    getDefaultOptions(options?: typeof this.options) {
+    getDefaultOptions(options?: typeof this.options): Partial<TableOptions<BaseType>> {
         const entries = this.getDefaultEntries(options);
         const columns = this.getDefaultColumns(options, entries);
 
@@ -156,7 +156,7 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
     }
 
     // Only renders the content of the header cell
-    renderColumnHeader(column: ColumnHandler<BaseType>): string {
+    renderColumnHeader(column: ColumnHandler<BaseType>): UIElementChild {
         if (typeof column.headerName === "function") {
             return column.headerName();
         }

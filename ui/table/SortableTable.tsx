@@ -1,4 +1,5 @@
 import {UI, UIElement, UIElementChild} from "../UIBase";
+import {Constructor} from "../../base/Utils";
 import {Table, TableOptions} from "./Table";
 import {defaultComparator} from "../../base/Utils";
 import {MakeIcon} from "../SimpleElements";
@@ -33,7 +34,7 @@ export interface SortableTableOptions<BaseType> extends TableOptions<BaseType> {
     columnSortingOrder?: ColumnHandler<BaseType>[];
 }
 
-export function SortableTableInterface<BaseType, T extends typeof Table<BaseType>>(BaseTableClass: T) {
+export function SortableTableInterface<BaseType, T extends Constructor<Table<BaseType>>>(BaseTableClass: T) {
     class SortableTable extends BaseTableClass {
         sortBy?: ColumnHandler<BaseType>;
         sortDescending?: boolean;
@@ -145,4 +146,4 @@ export function SortableTableInterface<BaseType, T extends typeof Table<BaseType
     return SortableTable;
 }
 
-export const SortableTable = SortableTableInterface(Table);
+export const SortableTable = SortableTableInterface(Table<any>);

@@ -3,10 +3,15 @@ import {CollapsibleStyle} from "./Style";
 import {GlobalStyle} from "../GlobalStyle";
 import {MakeIcon} from "../SimpleElements";
 import {registerStyle} from "../style/Theme";
-import {isFunction} from "../../base/Utils";
+import {Constructor, isFunction} from "../../base/Utils";
 import {BaseInputElement} from "../input/BaseInputElement";
-import {styleRule, StyleSheet} from "../Style";
+import {StyleRules, styleRule, StyleSheet} from "../Style";
 
+
+export interface CollapsibleOptions {
+    collapsed?: boolean;
+    collapsibleStyleSheet?: StyleRules<CollapsibleStyle>;
+}
 
 class SimpleCollapsibleStyle extends StyleSheet {
     @styleRule
@@ -105,11 +110,17 @@ export class CollapsibleControllerInput extends BaseInputElement<boolean, Collap
     }
 }
 
-function CollapsibleMixin(BaseClass, CollapsibleClass = CollapsibleStyle) {
+function CollapsibleMixin<BaseClassType extends Constructor<UIElement<any>>>(BaseClass: BaseClassType, CollapsibleClass: typeof CollapsibleStyle = CollapsibleStyle) {
     class CollapsibleElement extends BaseClass {
+        // Declared inside a function, so ts-plugin can't append a merged interface for it
+        declare ["constructor"]: UIElement<any>["constructor"] & {collapsibleStyleSheet: StyleRules<CollapsibleStyle>};
+
         static collapsibleStyleSheet = CollapsibleClass.getInstance();
 
-        getDefaultOptions() {
+        declare contentArea: UIElement;
+        declare toggleIcon?: UIElement;
+
+        getDefaultOptions(): Partial<CollapsibleOptions> {
             return {
                 collapsed: true,
             };

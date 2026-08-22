@@ -12,7 +12,13 @@ interface LinkOptions {
     // Note: href, target, etc. are inherited from Partial<HTMLAnchorElement>
 }
 
-export function sanitizeUrlFromOptions<T extends LinkOptions>(options: T, key: string): T {
+// The text fields this replaces on an invalid URL, across every element that carries one
+interface UrlBearingOptions extends LinkOptions {
+    alt?: string;
+    [key: string]: any;
+}
+
+export function sanitizeUrlFromOptions<T extends UrlBearingOptions>(options: T, key: string): T {
     const rawURL = options[key];
 
     if (!rawURL || !rawURL.includes(":")) {
@@ -21,7 +27,7 @@ export function sanitizeUrlFromOptions<T extends LinkOptions>(options: T, key: s
 
     const invalidateUrl = () => {
         console.error("Invalid URL", rawURL);
-        options[key] = "";
+        (options as UrlBearingOptions)[key] = "";
         options.value = options.label = options.alt = "[Invalid URL]";
     };
 

@@ -14,7 +14,7 @@ export class Plugin extends Dispatchable {
     }
 
     name(): string {
-        return (this.constructor as typeof Plugin).pluginName();
+        return this.constructor.pluginName();
     }
 
     static pluginName(): string {

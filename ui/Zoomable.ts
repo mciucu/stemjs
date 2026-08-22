@@ -124,6 +124,9 @@ class PinchZoomEventHandler {
 }
 
 export const Zoomable = <T extends new (...args: any[]) => any>(BaseClass: T) => class Zoomable extends BaseClass {
+    // Declared inside a function, so ts-plugin can't append a merged interface for it
+    declare ["constructor"]: Function & {EVENT_HANDLERS: ZoomEventHandler[]};
+
     static EVENT_HANDLERS: ZoomEventHandler[] = [WheelZoomEventHandler, PinchZoomEventHandler];
 
     private _zoomListeners: ZoomListener[] = [];
@@ -162,7 +165,7 @@ export const Zoomable = <T extends new (...args: any[]) => any>(BaseClass: T) =>
             return new CleanupJobs([]);
         }
         let eventHandlers: any[] = [];
-        for (const EventHandlerClass of (this.constructor as any).EVENT_HANDLERS) {
+        for (const EventHandlerClass of this.constructor.EVENT_HANDLERS) {
             eventHandlers.push(new EventHandlerClass(this,
                 (event: Event, delta: number) => callback(generateZoomEvent(event, delta, unit))
             ));

@@ -54,7 +54,7 @@ export class CSVBuilder<BaseType> {
             if (index) {
                 str += ",";
             }
-            str += (this.constructor as typeof CSVBuilder).escapeEntry(column.name);
+            str += this.constructor.escapeEntry(column.name);
         }
         return str;
     }
@@ -66,7 +66,7 @@ export class CSVBuilder<BaseType> {
             if (index) {
                 str += ",";
             }
-            str += (this.constructor as typeof CSVBuilder).escapeEntry(column.value(entry));
+            str += this.constructor.escapeEntry(column.value(entry));
         }
         return str;
     }

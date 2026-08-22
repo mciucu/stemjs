@@ -650,6 +650,8 @@ function RawContentModifierMixin<T extends new (...args: any[]) => Modifier>(Bas
 }
 
 export class BlockCodeModifier extends Modifier<string> {
+    declare static tag?: string;
+
     constructor(options?: ModifierOptions) {
         super(options);
 
@@ -686,7 +688,7 @@ export class BlockCodeModifier extends Modifier<string> {
 
     getElement(content: string): MarkupElement {
         return {
-            tag: (this.constructor as any).tag || "pre",
+            tag: this.constructor.tag || "pre",
             children: [content],
         }
     }
@@ -952,7 +954,7 @@ class LinkModifier extends Modifier {
 
         let checkAndAddUrl = (start: number, end: number) => {
             let substr = originalString.substring(start, end);
-            if ((this.constructor as typeof LinkModifier).isCorrectUrl(substr)) {
+            if (this.constructor.isCorrectUrl(substr)) {
                 if (currentElement.start < start) {
                     newArray.push({
                         isString: true,
@@ -966,7 +968,7 @@ class LinkModifier extends Modifier {
                     content: {
                         tag: "a",
                         href: substr,
-                        children: [(this.constructor as typeof LinkModifier).trimProtocol(substr)],
+                        children: [this.constructor.trimProtocol(substr)],
                         target: "_blank"
                     },
                     start: start,
@@ -1021,7 +1023,7 @@ class MarkupParser {
     constructor(options?: MarkupParserOptions) {
         options = options || {};
 
-        this.modifiers = options.modifiers || (this.constructor as any).modifiers;
+        this.modifiers = options.modifiers || this.constructor.modifiers;
         this.uiElements = options.uiElements || new Map();
     }
 
@@ -1126,7 +1128,7 @@ class MarkupParser {
     }
 
     parseOptions(stream: StringStream, optionsEnd?: RegExp): any {
-        return (this.constructor as any).parseOptions(stream, optionsEnd);
+        return this.constructor.parseOptions(stream, optionsEnd);
     }
 
     // optionsEnd cannot include whitespace or start with '='

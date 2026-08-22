@@ -114,7 +114,7 @@ export class TreeViewCheckbox extends UI.Element<TreeViewCheckboxOptions> {
         if (linearize) {
             // TODO @Mihai a bit tricky to implement this, since we don't want to recursively expand non-array entries by default.
             // return unwrapArray(this.options.entries, entry => [entry.checked !== false ? entry.value : undefined, entry.children]);
-            return (this.constructor as typeof TreeViewCheckbox).entryToValue(this.options.entries);
+            return this.constructor.entryToValue(this.options.entries);
         }
         return this.options.entries;
     }

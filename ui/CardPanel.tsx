@@ -1,5 +1,5 @@
-import {UI} from "./UIBase";
-import {SimpleStyledElement} from "./SimpleElements";
+import {StyleObject, UI} from "./UIBase";
+import {SimpleStyledElement, SimpleStyledElementOptions} from "./SimpleElements";
 import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";
@@ -68,8 +68,14 @@ function cardPanelHeaderColorToStyle(color: string) {
 
 export const CardPanelHeaderStyle = BasicLevelStyleSheet(cardPanelHeaderColorToStyle);
 
+export interface CardPanelOptions extends SimpleStyledElementOptions {
+    headingCentered?: boolean;
+    bodyCentered?: boolean;
+    bodyStyle?: StyleObject;
+}
+
 @registerStyle(CardPanelStyle)
-export class CardPanel extends SimpleStyledElement {
+export class CardPanel extends SimpleStyledElement<CardPanelOptions> {
     getHeaderStyleSheet() {
         return CardPanelHeaderStyle.getInstance();
     }

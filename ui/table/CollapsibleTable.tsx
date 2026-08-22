@@ -1,5 +1,6 @@
-import {UI, UIElementChild, HTMLTagType} from "../UIBase";
+import {ExtendedOptions, UI, UIElementChild, HTMLTagType} from "../UIBase";
 import {Table, TableRow, TableOptions, TableRowOptions} from "./Table";
+import {Constructor} from "../../base/Utils";
 import {CollapsibleMixin} from "../collapsible/CollapsibleMixin";
 import {StyleSheet} from "../Style";
 import {styleRule} from "../../decorators/Style";
@@ -34,8 +35,12 @@ export interface CollapsibleTableRowOptions<BaseType> extends TableRowOptions<Ba
 }
 
 // TODO: refactor this to support redraw and render override
+const CollapsibleTableRowBase = CollapsibleMixin(TableRow<any>);
+
 @registerStyle(CollapsibleTableStyle)
-export class CollapsibleTableRow<BaseType> extends CollapsibleMixin(TableRow<BaseType>) {
+export class CollapsibleTableRow<BaseType> extends CollapsibleTableRowBase {
+    declare options: CollapsibleTableRowOptions<BaseType>;
+
     getNodeType(): HTMLTagType {
         return "tbody";
     }
@@ -96,7 +101,7 @@ export class CollapsibleTableRow<BaseType> extends CollapsibleMixin(TableRow<Bas
     getCollapsibleRow() {
         const {collapsed} = this.options;
         return <tr>
-            <td style={{padding: 0, overflow: "hidden", height: "auto"}} colspan={this.options.columns?.length}>
+            <td style={{padding: 0, overflow: "hidden", height: "auto"}} colSpan={this.options.columns?.length}>
                 <div ref="contentArea" className={collapsed ? GlobalStyle.hidden : null}>
                     {this.getInitialCollapsedContent()}
                 </div>
@@ -116,8 +121,10 @@ export interface CollapsibleTableOptions<BaseType> extends TableOptions<BaseType
     renderCollapsible?: (entry: BaseType, row: CollapsibleTableRow<BaseType>) => UIElementChild;
 }
 
-export function CollapsibleTableInterface<BaseType, T extends typeof Table<BaseType>>(BaseTableClass: T) {
+export function CollapsibleTableInterface<BaseType, T extends Constructor<Table<BaseType>>>(BaseTableClass: T) {
     return class CollapsibleTable extends BaseTableClass {
+        declare options: ExtendedOptions<Table<BaseType>, CollapsibleTableOptions<BaseType>>;
+
         getDefaultOptions(options?: CollapsibleTableOptions<BaseType>): Partial<CollapsibleTableOptions<BaseType>> {
             return {
                 ...super.getDefaultOptions(options),
@@ -160,4 +167,4 @@ export function CollapsibleTableInterface<BaseType, T extends typeof Table<BaseT
     };
 }
 
-export const CollapsibleTable = CollapsibleTableInterface(Table);
+export const CollapsibleTable = CollapsibleTableInterface(Table<any>);
