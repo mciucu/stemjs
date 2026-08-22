@@ -1,11 +1,11 @@
 import {UI, UIElementChild} from "../ui/UIBase";
-import {Router} from "../ui/Router";
+import {Route, Router} from "../ui/Router";
 import {GlobalContainer} from "../ui/global-container/GlobalContainer";
 import {Dispatcher} from "../base/Dispatcher";
 import {GlobalState} from "../state/State";
 
 interface StemAppOptions {
-    routes: any[];
+    routes: Route;
     [key: string]: any;
 }
 
@@ -32,7 +32,7 @@ export class StemApp extends UI.Element<StemAppOptions> {
         return self.appInstance;
     }
 
-    getRoutes(): any[] {
+    getRoutes(): Route {
         return this.options.routes;
     }
 
