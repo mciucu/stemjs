@@ -19,5 +19,5 @@
             }
         ]
     },
-    "include": ["stores.ts", "optional.ts"]
+    "include": ["stores.ts", "optional.ts", "constructor.ts"]
 }

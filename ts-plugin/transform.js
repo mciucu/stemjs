@@ -29,6 +29,26 @@
 //     //              messageThread: FieldValue<typeof MessageThread>;
 //     //          }
 //
+// this.constructor is typed as Function by lib.es5.d.ts, which loses every static the class has. The
+// declaration drops the class's own construct signature - keeping it would make a derived class's
+// constructor an incompatible override of its base's - and adds one back that returns the instance:
+//
+//     class StemDate extends Date {
+//         static toDate(date: DateInput): StemDate {...}
+//         set(date: DateInput) {date = this.constructor.toDate(date); ...}
+//         clone() {return new this.constructor(this.getTime());}
+//     }
+//     // appended: interface StemDate {
+//     //              ["constructor"]: Omit<typeof StemDate, "prototype"> &
+//     //                               (new (...args: any[]) => StemDate);
+//     //          }
+//
+// Both halves are load-bearing there: Omit carries `toDate`, and the signature it adds back is what
+// `new this.constructor(...)` needs - and it returns the instance, so a subclass's stays covariant.
+//
+// Only a class declared at the top level gets one, since a merged interface needs a name to attach to;
+// a class declared inside a function - what the mixins return - still needs a cast.
+//
 // Equal length is the whole point of the placeholder: the file keeps its exact shape, so a position means
 // the same thing to the editor and to the compiler. The decorator itself is untouched, so its argument
 // keeps its type checking, its completion and its go-to-definition, and its import still counts as used.
@@ -36,6 +56,7 @@
 // this file only decides which member goes where.
 
 const STYLE_MEMBER = "styleSheet";
+const CONSTRUCTOR_MEMBER = "constructor";
 const STYLE_DECORATOR = "registerStyle";
 const FIELD_DECORATOR = "field";
 const STYLE_RULE_DECORATORS = ["styleRule", "styleRuleInherit", "styleRuleCustom"];
@@ -158,6 +179,14 @@ function getTypeParameterText(classNode, sourceFile) {
     return "<" + classNode.typeParameters.map(param => param.getText(sourceFile)).join(", ") + ">";
 }
 
+// The instance type refers to its own parameters by name, without constraints or defaults
+function getTypeArgumentText(classNode) {
+    if (!classNode.typeParameters || classNode.typeParameters.length === 0) {
+        return "";
+    }
+    return "<" + classNode.typeParameters.map(param => param.name.text).join(", ") + ">";
+}
+
 function collectFields(ts, classNode, sourceFile) {
     const fields = [];
     for (const member of classNode.members) {
@@ -202,7 +231,8 @@ function makePlaceholder(name, index) {
 // `fields` pairs each renamed member with the declaration that replaced it, for the plugin to map between.
 function getAugmentedSource(ts, fileName, text, options = {}) {
     const hasStyleRule = STYLE_RULE_DECORATORS.some(name => text.includes("@" + name));
-    if (!text.includes(STYLE_DECORATOR) && !text.includes("@" + FIELD_DECORATOR) && !hasStyleRule) {
+    const usesThisConstructor = text.includes("this." + CONSTRUCTOR_MEMBER + ".");
+    if (!text.includes(STYLE_DECORATOR) && !text.includes("@" + FIELD_DECORATOR) && !hasStyleRule && !usesThisConstructor) {
         return null;
     }
 
@@ -222,6 +252,16 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
         const typeParams = getTypeParameterText(statement, sourceFile);
         const alreadyDeclares = (memberName) => declaresMember(statement.members, memberName) ||
             interfaceDeclaresMember(ts, sourceFile, className, memberName);
+
+        // lib.es5.d.ts types Object.constructor as Function, so every static is lost. Omit drops the
+        // construct signature the class carries - keeping it would make a subclass's own constructor an
+        // incompatible override - and the signature added back returns the instance, which stays covariant.
+        if (statement.getText(sourceFile).includes("this." + CONSTRUCTOR_MEMBER + ".") &&
+                !alreadyDeclares(CONSTRUCTOR_MEMBER)) {
+            const instance = className + getTypeArgumentText(statement);
+            const constructorType = `Omit<typeof ${className}, "prototype"> & (new (...args: any[]) => ${instance})`;
+            appended += `${prefix}interface ${className}${typeParams} {["${CONSTRUCTOR_MEMBER}"]: ${constructorType};}\n`;
+        }
 
         const styleName = getRegisteredStyle(ts, statement, sourceFile);
         if (styleName && !alreadyDeclares(STYLE_MEMBER)) {
