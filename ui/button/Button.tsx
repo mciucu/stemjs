@@ -1,10 +1,10 @@
 import {HTMLTagType, UI} from "../UIBase";
-import {IconableInterface} from "../SimpleElements";
+import {IconableInterface, SimpleStyledElementOptions} from "../SimpleElements";
 import {registerStyle} from "../style/Theme";
 import {ButtonStyle} from "./ButtonStyle";
 import {NodeAttributes} from "../NodeAttributes";
 
-export interface ButtonOptions {
+export interface ButtonOptions extends SimpleStyledElementOptions {
     disabled?: boolean;
 }
 

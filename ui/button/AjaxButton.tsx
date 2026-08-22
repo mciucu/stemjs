@@ -2,9 +2,16 @@ import {Ajax} from "../../base/Ajax";
 import {ActionStatus} from "../Constants";
 import {StateButton} from "./StateButton";
 
+export interface AjaxButtonOptions {
+    ajaxHandler?: typeof Ajax;
+    resetToDefaultTimeout?: number;
+}
+
 // TODO @types rename to RequestButton, remove Ajax references
-export class AjaxButton extends StateButton {
-    getDefaultOptions() {
+export class AjaxButton extends StateButton<AjaxButtonOptions> {
+    declare stateResetTimeout?: ReturnType<typeof setTimeout>;
+
+    getDefaultOptions(): Partial<AjaxButtonOptions> {
         return Object.assign(super.getDefaultOptions() || {}, {
             resetToDefaultTimeout: 1000
         });
@@ -14,7 +21,7 @@ export class AjaxButton extends StateButton {
         return this.options.ajaxHandler || Ajax;
     }
 
-    setAjaxHandler(ajaxHandler) {
+    setAjaxHandler(ajaxHandler: typeof Ajax) {
         this.options.ajaxHandler = ajaxHandler;
     }
 
@@ -30,11 +37,11 @@ export class AjaxButton extends StateButton {
         this.stateResetTimeout = setTimeout(() => {
             this.setState(ActionStatus.INITIAL);
             this.clearResetTimeout();
-        }, this.resetToDefaultTimeout);
+        }, this.options.resetToDefaultTimeout);
     }
 
     // TODO @types rename to makeRequest
-    ajax(methodName, ...args) {
+    ajax(methodName: string, ...args: any[]) {
         this.setState(ActionStatus.RUNNING);
         let ajaxPromise = this.getAjaxHandler()[methodName](...args);
         ajaxPromise.getPromise().then(
@@ -50,13 +57,13 @@ export class AjaxButton extends StateButton {
         return ajaxPromise;
     }
 
-    ajaxCall(data) {
+    ajaxCall(data: any) {
         return this.ajax("fetch", data);
     }
 }
 
 for (const methodName of ["fetch", "request", "get", "post", "getJSON", "postJSON"]) {
-    AjaxButton.prototype[methodName] = function(...args) {
+    (AjaxButton.prototype as any)[methodName] = function(...args: any[]) {
         return this.ajax(methodName, ...args);
     }
 }

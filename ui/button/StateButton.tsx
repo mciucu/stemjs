@@ -14,7 +14,7 @@ export type StateButtonOptions = ButtonOptions & StatusOption & {
     statusOptions?: (string | StatusOption)[];
 };
 
-export class StateButton extends Button<StateButtonOptions> {
+export class StateButton<ExtraOptions = {}> extends Button<StateButtonOptions & ExtraOptions> {
     setOptions(options: typeof this.options): void {
         options.state = this.options?.state || options.state || ActionStatus.INITIAL;
 
