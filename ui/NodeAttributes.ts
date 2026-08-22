@@ -364,7 +364,7 @@ NodeAttributes.defaultAttributesMap = new DOMAttributesMap(null, [
     ["id"],
     ["action"],
     ["checked", {noValue: true}],
-    ["colspan"],
+    ["colSpan", {domName: "colspan"}],
     ["default"],
     ["disabled", {noValue: true}],
     ["fixed"],
