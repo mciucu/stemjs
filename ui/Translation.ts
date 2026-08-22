@@ -1,4 +1,4 @@
-import {TextUIElement, UI} from "./UIBase";
+import {TextElementOptions, TextUIElement, UI} from "./UIBase";
 import {evaluateSprintf, isString} from "../base/Utils";
 
 // Type definitions for translation functionality
@@ -26,15 +26,13 @@ let translationMap: TranslationMap | null = null;
 export const TranslationElements = new Set<TranslationTextElement>();
 
 
-export class TranslationTextElement extends TextUIElement {
-    declare value: string | any[]; // Typescript is idiotic in overriding fields
-
+export class TranslationTextElement extends TextUIElement<TextElementOptions, string | any[]> {
     constructor(value: string | any[]) {
         if (arguments.length === 1) {
-            super(value as string);
+            super(value);
         } else {
             super("");
-            this.setValue(...arguments);
+            (this.setValue as (...args: any[]) => void)(...arguments as any);
         }
     }
 
@@ -71,11 +69,11 @@ export class TranslationTextElement extends TextUIElement {
     getValue(): string {
         let {value} = this;
         if (Array.isArray(value)) {
-            value = this.evaluate(...value);
+            value = this.evaluate(...value as [string | string[], ...any[]]);
         } else {
             value = (translationMap && translationMap.get(value)) ?? value;
         }
-        return value;
+        return value as string;
     }
 
     toString(): string {
@@ -142,14 +140,9 @@ export function getTranslationMap(): TranslationMap | null {
     return translationMap;
 }
 
-// TODO @types move this from there
-declare global {
-    interface Document {
-        startViewTransition(callback: () => void): void;
-    }
-}
-
+// TODO @Mihai why is this here?
 if (!document.startViewTransition) {
-    document.startViewTransition = (callback: () => void) => callback();
+    // A no-op stand-in for browsers without the API, which never returns the ViewTransition nobody here reads
+    document.startViewTransition = ((callback: () => void) => callback()) as typeof document.startViewTransition;
 }
 

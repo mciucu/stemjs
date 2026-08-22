@@ -2,7 +2,7 @@
 import {FullScreenStyle} from "./FullScreenStyle";
 import type {StyleRules} from "./Style";
 import {GlobalStyle} from "./GlobalStyle";
-import {UIElement, UIElementOptions} from "./UIBase";
+import {ElementOptions, UIElement, UIElementOptions} from "./UIBase";
 import {NodeAttributes} from "./NodeAttributes";
 
 export interface FullScreenableOptions extends UIElementOptions {
@@ -11,14 +11,16 @@ export interface FullScreenableOptions extends UIElementOptions {
 
 export const FullScreenable = function <T extends new (...args: any[]) => UIElement>(BaseClass: T) {
     return class FullScreenable extends BaseClass {
+        declare options: ElementOptions<FullScreenableOptions>;
         _expectingFullScreen?: boolean;
         _isFullScreen?: boolean;
         _attachedFullscreenHandler?: boolean;
 
-        getDefaultOptions(): any {
-            return Object.assign({}, super.getDefaultOptions(), {
+        getDefaultOptions(): Partial<FullScreenableOptions> {
+            return {
+                ...super.getDefaultOptions(),
                 fullContainer: true,
-            });
+            };
         }
 
         getStyleSheet(): StyleRules<FullScreenStyle> {

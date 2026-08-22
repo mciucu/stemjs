@@ -64,7 +64,7 @@ export class SimpleStyledElement<T extends SimpleStyledElementOptions = SimpleSt
     }
 
     setLevel(level: LevelType): void {
-        this.updateOptions({level} as Partial<T>);
+        this.updateOptions({level});
     }
 
     getSize(): SizeType | undefined {
@@ -72,12 +72,12 @@ export class SimpleStyledElement<T extends SimpleStyledElementOptions = SimpleSt
     }
 
     setSize(size: SizeType): void {
-        this.updateOptions({size} as Partial<T>);
+        this.updateOptions({size});
     }
 }
 
 
-export class IconableInterface<T = void> extends SimpleStyledElement<T & SimpleStyledElementOptions> {
+export class IconableInterface<T extends SimpleStyledElementOptions = SimpleStyledElementOptions> extends SimpleStyledElement<T> {
     render(): UIElementChild {
         return [this.beforeChildren(), this.getLabel(), super.render()];
     }
@@ -87,11 +87,11 @@ export class IconableInterface<T = void> extends SimpleStyledElement<T & SimpleS
     }
 
     setLabel(label: string | BaseUIElement): void {
-        this.updateOptions({label} as any);
+        this.updateOptions({label});
     }
 
     setIcon(icon: IconType): void {
-        this.updateOptions({icon} as any);
+        this.updateOptions({icon});
     }
 
     getIcon(): BaseUIElement | null {
@@ -246,7 +246,7 @@ export interface Badge {
 }
 
 @registerStyle(BadgeStyle)
-export class Badge extends UI.Primitive("span", IconableInterface) {
+export class Badge<ExtraOptions extends SimpleStyledElementOptions = SimpleStyledElementOptions> extends UI.Primitive("span", IconableInterface)<ExtraOptions> {
     extraNodeAttributes(attr: NodeAttributes): void {
         attr.addClass(this.styleSheet.Size(this.getSize()));
         attr.addClass(this.styleSheet.Level(this.getLevel()));

@@ -81,8 +81,9 @@ export interface UINamespace {
     createElement(tag: any, options?: UIElementOptions | null, ...children: any[]): BaseUIElement | null;
     str: (value: any) => any;
     T: (value: string) => BaseUIElement; // Assigned by Translation.ts
-    // The constraint only has to admit the base class; the return type carries whatever was passed
-    Primitive: <ExtraOptions = void, T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap, BaseClassType extends Constructor<UIElement<any, any, any>> = typeof UIElement>(nodeType: T, BaseClass?: BaseClassType) => BaseClassType;
+    // The constraint only has to admit the base class; the return carries whatever was passed, so extra
+    // options go on the result: UI.Primitive("span", Base)<MyOptions>
+    Primitive: <T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap, BaseClassType extends Constructor<UIElement<any, any, any>> = typeof UIElement>(nodeType: T, BaseClass?: BaseClassType) => BaseClassType;
 }
 
 export const UI: UINamespace = {} as UINamespace;
@@ -285,14 +286,16 @@ export class UIElement<
     }
 
     // TODO: should probably add a second arg, doRedraw=true - same for setOptions
-    updateOptions(options: Partial<OptionsType>): void {
+    // Generic over the keys given, so each value is still checked against its declared type. A plain
+    // Partial<OptionsType> can't be satisfied at all from inside a class generic in its options.
+    updateOptions<Key extends keyof OptionsType>(options: {[P in Key]?: OptionsType[P]}): void {
         this.setOptions(Object.assign(this.options, options));
         // TODO: if the old options and the new options are deep equal, we can skip this redraw, right?
         this.redraw();
     }
 
     setChildren(...args: UIElementChild[]): void {
-        this.updateOptions({children: cleanChildren(args)} as unknown as Partial<OptionsType>);
+        this.updateOptions({children: cleanChildren(args)});
     }
 
     // Used when we want to reuse the current element, with the options from the passed in argument
@@ -853,7 +856,7 @@ UI.str = (value: string) => new TextUIElement(value);
 // Keep a map for every base class, and for each base class keep a map for each nodeType, to cache classes
 const primitiveMap: WeakMap<typeof UIElement, Map<string, typeof UIElement<any>>> = new WeakMap();
 
-UI.Primitive = (<ExtraOptions = void, T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap, BaseClassType extends typeof UIElement = typeof UIElement>(nodeType: T, BaseClass: BaseClassType = UIElement as BaseClassType): BaseClassType => {
+UI.Primitive = (<T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap, BaseClassType extends typeof UIElement = typeof UIElement>(nodeType: T, BaseClass: BaseClassType = UIElement as BaseClassType): BaseClassType => {
     let baseClassPrimitiveMap = primitiveMap.get(BaseClass);
     if (!baseClassPrimitiveMap) {
         baseClassPrimitiveMap = new Map();
@@ -864,7 +867,7 @@ UI.Primitive = (<ExtraOptions = void, T extends keyof HTMLElementTagNameMap = ke
         return resultClass as any;
     }
     // @ts-ignore
-    resultClass = class Primitive extends BaseClass<ExtraOptions, HTMLElementTagNameMap[T]> {
+    resultClass = class Primitive extends BaseClass<{}, HTMLElementTagNameMap[T]> {
         declare node?: HTMLElementTagNameMap[T];
         
         getNodeType(): T {
