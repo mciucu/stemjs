@@ -2,6 +2,7 @@ import {Dispatchable} from "../../base/Dispatcher";
 import {WebsocketStreamHandler} from "./WebsocketStreamHandler";
 import {toArray} from "../../base/Utils";
 import {DEFAULT_HEARTBEAT_MESSAGE, HEARTBEAT_INTERVAL_MS} from "../Shared";
+import {GlobalState} from "../../state/State";
 
 type Callback = (...args: any[]) => void;
 
@@ -377,4 +378,9 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
     static addListener(streamName: string, callback: Callback): void {
         return this.Global!.addStreamListener(streamName, callback);
     }
+}
+
+// Registering a stream only means anything once there's a websocket connection to carry it
+if (WebsocketSubscriber.Global) {
+    GlobalState.registerStream = (streamName: string) => WebsocketSubscriber.addListener(streamName, GlobalState.applyEventWrapper);
 }

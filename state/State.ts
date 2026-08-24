@@ -90,6 +90,10 @@ export class State extends Dispatchable {
     // Bound to the instance, so it can be handed straight to an event stream as a listener
     applyEventWrapper = (event: StateEvent | StateEvent[] | null | undefined): void => this.applyEvent(event);
 
+    registerStream(streamName: string): void {
+        console.error("Websockets are not enabled, can't register stream:", streamName);
+    }
+
     get(objectType: string, id: StoreId): any {
         const store = this.getStore(objectType);
         if (store) {
