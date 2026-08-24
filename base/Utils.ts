@@ -200,14 +200,19 @@ export function defaultComparator(a: any, b: any): number {
     return aStr < bStr ? -1 : 1;
 }
 
+interface MultikeySortOptions {
+    desc?: boolean;
+}
+
 // Sort by a tuple of keys, comparing lexicographically. Returns a new array, keys are evaluated once per element.
-export function multikeySort<T>(array: T[], keyFunc: (obj: T) => any): T[] {
+export function multikeySort<T>(array: T[], keyFunc: (obj: T) => any, options: MultikeySortOptions = {}): T[] {
+    const sign = options.desc ? -1 : 1;
     const entries = array.map(obj => ({keys: toArray(keyFunc(obj)), obj}));
     entries.sort((a, b) => {
         for (let index = 0; index < a.keys.length; index++) {
             const cmp = defaultComparator(a.keys[index], b.keys[index]);
             if (cmp !== 0) {
-                return cmp;
+                return sign * cmp;
             }
         }
         return 0;
