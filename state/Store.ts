@@ -153,6 +153,12 @@ export class StoreObject extends Dispatchable {
         return this.get(objectId);
     }
 
+    // The precise view of the objects map: a `this` parameter is the only thing that can carry the store's own
+    // type, which the static property it wraps cannot
+    static getObjects<T extends StoreObject>(this: StoreClass<T>): Map<string, T> {
+        return this.objects as Map<string, T>;
+    }
+
     static values<T extends StoreObject>(this: StoreClass<T>): IterableIterator<T> {
         return this.objects.values() as IterableIterator<T>;
     }

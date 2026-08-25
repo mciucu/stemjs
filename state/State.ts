@@ -37,6 +37,7 @@ export interface StoreInterface<BaseType extends StoreObject = StoreObject> {
     importState(objects: any[]): void;
     clear?(): void;
     toJSON(): any[];
+    getObjects(): Map<string, BaseType>;
     all(): BaseType[];
     filterBy(filter: Record<string, any>): BaseType[];
     findBy(filter: Record<string, any>): BaseType | undefined;

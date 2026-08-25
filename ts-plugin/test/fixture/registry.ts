@@ -29,6 +29,13 @@ export const planets: Planet[] = GlobalState.getStore("Planet")!.all();
 export const described: string = GlobalState.getStore("Planet")!.findBy({radius: 1})!.describe();
 export const moons: MoonObject[] = GlobalState.getStore("Moon")!.all();
 
+// getObjects() carries the store's own type through a `this` parameter; the property it wraps cannot, since a
+// static property is resolved where it is written rather than per subclass
+export const byId: Map<string, Planet> = Planet.getObjects();
+export const viaStore: Map<string, Planet> = GlobalState.getStore("Planet")!.getObjects();
+// @ts-expect-error
+export const rawProperty: Map<string, Planet> = Planet.objects;
+
 // A name nothing registered still resolves, just at base precision
 export const unknown = GlobalState.getStore("NotAStore")!.all();
 // @ts-expect-error
