@@ -340,7 +340,12 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
         if (isModule && hasDecorator(ts, statement, [STORE_DECORATOR]) && !typeParams) {
             const storeName = getStoreName(ts, statement);
             if (storeName) {
-                appended += `declare global {interface ${STORE_REGISTRY} {${storeName}: ${className};}}\n`;
+                // A store registers under its lowercased name and getStore() lowercases what it is called with,
+                // so both spellings reach it - and both have to be keys, or the canonical one misses the registry
+                // and falls through to the untyped signature. Deduped, since a name can already be lowercase.
+                const members = [...new Set([storeName, storeName.toLowerCase()])]
+                    .map(name => `${name}: ${className};`).join(" ");
+                appended += `declare global {interface ${STORE_REGISTRY} {${members}}}\n`;
             }
         }
 
