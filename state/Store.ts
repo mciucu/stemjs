@@ -31,6 +31,7 @@ export class StoreObject extends Dispatchable {
     // Overloaded signatures for better typing
     // A nullish storeName resolves to the object's own store (same as the no-arg call)
     getStore(storeName?: null): typeof this.constructor & StoreClass<this> & Dispatchable;
+    getStore<Name extends keyof StemStoreRegistry>(storeName: Name): StoreInterface<StemStoreRegistry[Name]> | undefined;
     getStore(storeName: string | null): StoreInterface | undefined;
     getStore(storeName?: string | null): (StoreClass<this> & Dispatchable) | StoreInterface | undefined {
         const ownStore = this.getOwnStore();
@@ -85,6 +86,9 @@ export class StoreObject extends Dispatchable {
     static objectType: string;
     static state: State = GlobalState;
     static dependencies: string[] = [];
+    // Not polymorphic - a static property is resolved where it is written. What a given store holds is said by
+    // StoreClass<T>, which every static below takes as `this`. Naming the class here instead would cost an
+    // emitted self-reference alias, so `typeof this` stays.
     static objects = new Map<string, InstanceType<typeof this>>();
 
     static makeFieldLoader<T extends StoreObject>(this: StoreClass<T>, fieldDescriptor: FieldDescriptor): (value: any, obj: any) => T | undefined {
@@ -126,6 +130,7 @@ export class StoreObject extends Dispatchable {
         if (id == null) {
             return;
         }
+        // The map is a static property, so it can't be polymorphic - StoreClass<T> is what says these are T
         return this.objects.get(String(id)) as T;
     }
 
@@ -304,16 +309,19 @@ export function globalStore<T extends new (...args: any[]) => any>(constructor: 
     return constructor;
 }
 
-export function BaseStore<T extends StoreObject = StoreObject>(objectType: string, options: StoreOptions = {}, BaseClass?: StoreClass<T>): StoreClass<T> & Dispatchable {
+// Generic over the base class itself, not just its instance type, so a base store's statics survive into the subclass
+export function BaseStore<BaseType extends StoreClass<StoreObject> = typeof StoreObject>(objectType: string, options: StoreOptions = {}, BaseClass?: BaseType): BaseType & Dispatchable {
     const state = options.state || GlobalState;
-    BaseClass = BaseClass || (StoreObject as StoreClass<T>);
+    BaseClass = BaseClass || (StoreObject as BaseType);
     const dependencies = [...(options.dependencies || []), ...(BaseClass.dependencies || [])];
 
-    class Store extends BaseClass {
+    // A mixin base has to be a single rest-args signature, which the constraint isn't - it also carries the
+    // statics. Those reach the caller through the return type, so the base only has to construct here.
+    class Store extends (BaseClass as new (...args: any[]) => StoreObject) {
         static objectType = objectType.toLowerCase();
         static state = state;
         static dependencies = dependencies.map(d => isString(d) ? d : d.objectType);
-        static objects = new Map<string, T>();
+        static objects = new Map<string, InstanceType<BaseType>>();
     }
 
     // Copy Dispatchable instance properties and methods to the Store class
