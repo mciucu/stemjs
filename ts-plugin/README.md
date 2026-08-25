@@ -66,6 +66,37 @@ navigable, renameable, and counts as a used import.
 shorter than its placeholder would be, or whose spec isn't a plain name or string. Same for a member the class
 body or a hand-written merged interface already declares - the plugin never fights an existing declaration.
 
+## `@makeEnum`
+
+Every `SCREAMING_CASE` static holds an instance of the class once the decorator has run, not the config it is
+written with. Statics merge through a namespace rather than an interface, and the entry's name is relocated
+the same way a `@field`'s is:
+
+```ts
+@makeEnum
+export class Timezone extends BaseEnum {
+    static UTC: TimezoneConfig = {value: "UTC", name: "Universal Time, Coordinated"};
+    static getFiltersTimezone(): Timezone {return this.US_EASTERN;}   // no cast
+}
+// appended in memory:
+export declare namespace Timezone {
+    const UTC: Timezone;
+    const allEntries: Timezone[];
+}
+```
+
+Unlike an annotated `@field`, an annotated entry is **not** left alone: the annotation is the config
+`makeEnum` consumes, which is exactly what it replaces, so every entry is relocated regardless.
+
+Only those two members are declared. `all()` and `fromValue()` already reach their own class through the
+`this: EnumConstructor<T>` parameter, whose `NoInfer` leaves the construct signature as the single inference
+site; `allEntries` is a property, so it has nothing to infer from, and an entry has no inference site at all.
+Declaring the two methods here would be worse than useless - a namespace cannot narrow a generic static, and
+TypeScript rejects the attempt with TS2417.
+
+A generic enum class is left alone, since a namespace can't take type parameters, and so is one that already
+has a hand-written namespace. The namespace is emitted `export`ed exactly when the class is, or TS2395.
+
 ## What it costs
 
 Because the declarations are appended and the rename is length-neutral, every offset in the original file stays

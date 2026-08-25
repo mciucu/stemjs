@@ -25,9 +25,15 @@ export type FakedDecorated = (target: any, propertyKey: string) => void;
 // ts-plugin/ declares un-annotated @field members with this, which is what makes the decorator imply the type.
 // A field written `foo?` arrives here as `Spec | null`, since a loader hands back what it was given when
 // there's nothing to load (StemDate.optionally, Store.get).
+// A primitive wrapper has to be answered before the generic constructor branch, which would otherwise infer the
+// wrapper object (String, not string) - what the field actually holds is the primitive.
 export type FieldValue<Spec> =
     Spec extends null ? null :
     Spec extends DateConstructor ? StemDate :
+    Spec extends StringConstructor ? string :
+    Spec extends NumberConstructor ? number :
+    Spec extends BooleanConstructor ? boolean :
+    Spec extends ArrayConstructor ? any[] :
     Spec extends abstract new (...args: any[]) => infer Instance ? Instance :
     Spec extends string ? StoreObject :
     never;

@@ -50,11 +50,11 @@ export class Timezone extends BaseEnum {
     }
 
     static getFiltersTimezone(): Timezone {
-        return this.US_EASTERN as Timezone;
+        return this.US_EASTERN;
     }
 
     static getDashboardTimezone(): Timezone {
-        return this.LOCAL as Timezone;
+        return this.LOCAL;
     }
 
     getTimezoneName(): string {

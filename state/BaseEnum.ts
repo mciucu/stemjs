@@ -6,17 +6,25 @@ export interface EnumOptions {
     [key: string]: any;
 }
 
+// The `this` type of the statics below. A decorator can't retype the class it decorates, so an enum class only
+// ever inherits what BaseEnum declares: allEntries can't be T[], and every other member is generic in its own
+// T, which would only ever infer the constraint. NoInfer leaves the construct signature as the single site
+// that says what the entries are. The entries themselves have no inference site at all, so ts-plugin/ declares
+// those - and allEntries with them, a property having nothing to infer from.
 export interface EnumConstructor<T extends BaseEnum> {
     new (obj: EnumOptions): T;
-    allEntries: T[];
+    allEntries: BaseEnum[];
     defaultName(value: any): string;
-    init(key: string, obj?: any): T;
-    all(): T[];
-    fromValue(value: any): T | null;
-    makeFieldLoader(): (value: any) => T | any;
+    init(key: string, obj?: any): NoInfer<T>;
+    all(): NoInfer<T>[];
+    fromValue(value: any): NoInfer<T> | null;
+    makeFieldLoader(): (value: any) => NoInfer<T> | any;
 }
 
 export class BaseEnum {
+    // Set by makeEnum, so every enum class has it without declaring it
+    declare static allEntries: BaseEnum[];
+
     value: any;
     name: string;
     [key: string]: any;
@@ -64,7 +72,7 @@ export class BaseEnum {
 
     static all<T extends BaseEnum>(this: EnumConstructor<T>): T[] {
         // Clone the Array to be able to make changes
-        return Array.from(this.allEntries);
+        return Array.from(this.allEntries) as T[];
     }
 
     static fromValue<T extends BaseEnum>(this: EnumConstructor<T>, value: any): T | null {

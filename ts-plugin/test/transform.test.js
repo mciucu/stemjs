@@ -84,6 +84,30 @@ module.exports = (ts, check) => {
     check("every rule name is renamed in the source half",
         ["title", "heading"].every(name => styles.result.fields.some(field => field.name === name)), true);
 
+    const enums = augment(ts, "enums.ts");
+    let restoredEnums = enums.result.text.slice(0, enums.result.originalLength);
+    for (const field of enums.result.fields) {
+        restoredEnums = restoredEnums.slice(0, field.sourceStart) + field.name +
+            restoredEnums.slice(field.sourceStart + field.name.length);
+    }
+    check("an enum source half differs only at the relocated entries", restoredEnums, enums.text);
+    check("statics merge through a namespace, not an interface",
+        enums.appended.includes("export declare namespace Planet {"), true);
+    check("an entry is declared as the class it becomes",
+        enums.appended.includes("const EARTH: Planet;"), true);
+    // The annotation is the config makeEnum consumes, not the author's answer, so it is not a reason to skip
+    check("an annotated entry is relocated all the same",
+        enums.result.fields.some(field => field.name === "ALPHA_CENTAURI_B"), true);
+    check("allEntries is restated, since a property has nothing to infer from",
+        enums.appended.includes("const allEntries: Planet[];"), true);
+    // Both reach their class through the `this` parameter, so declaring them would only lose precision
+    check("all() and fromValue() are left to BaseEnum",
+        /function (all|fromValue)\(/.test(enums.appended), false);
+    check("a lowercase static is not an entry",
+        enums.appended.includes("defaultSymbol"), false);
+    check("a class without @makeEnum gets no namespace",
+        enums.appended.includes("namespace Untouched"), false);
+
     check("a file with neither decorator is not touched at all",
         getAugmentedSource(ts, "/x/plain.ts", "export const value = 1;\n", OPTIONS), null);
 };

@@ -29,6 +29,22 @@
 //     //              messageThread: FieldValue<typeof MessageThread>;
 //     //          }
 //
+// @makeEnum turns every SCREAMING_CASE static into an instance of the class. Statics merge through a
+// namespace rather than an interface, and the entry is written as the config it is built from, so its name
+// is relocated the same way a field's is:
+//
+//     @makeEnum class Timezone extends BaseEnum {
+//         static UTC: TimezoneConfig = {value: "UTC", name: "..."};   on disk
+//         static UT$1: TimezoneConfig = {value: "UTC", name: "..."};  what the compiler parses
+//     }
+//     // appended: export declare namespace Timezone {
+//     //              const UTC: Timezone;
+//     //              const allEntries: Timezone[];
+//     //          }
+//
+// Only those two: BaseEnum's all() and fromValue() already reach their class through a `this` parameter,
+// while an entry has no inference site at all and allEntries, being a property, has nothing to infer from.
+//
 // this.constructor is typed as Function by lib.es5.d.ts, which loses every static the class has. The
 // declaration drops the class's own construct signature - keeping it would make a derived class's
 // constructor an incompatible override of its base's - and adds one back that returns the instance:
@@ -59,6 +75,10 @@ const STYLE_MEMBER = "styleSheet";
 const CONSTRUCTOR_MEMBER = "constructor";
 const STYLE_DECORATOR = "registerStyle";
 const FIELD_DECORATOR = "field";
+const ENUM_DECORATOR = "makeEnum";
+// The one static BaseEnum can't narrow on its own: a property has no inference site, while all() and
+// fromValue() reach their class through the `this` parameter and are better left alone
+const ENUM_ENTRIES_MEMBER = "allEntries";
 const STYLE_RULE_DECORATORS = ["styleRule", "styleRuleInherit", "styleRuleCustom"];
 // Where StyleRules and the field types live. Configurable through the tsconfig plugin entry, for projects
 // that place stem elsewhere
@@ -100,15 +120,15 @@ function getDecoratorCall(ts, node, decoratorName) {
     return null;
 }
 
-// A rule decorator is used bare (@styleRule) or called (@styleRuleCustom({...}))
-function hasStyleRuleDecorator(ts, node) {
+// A decorator is used bare (@styleRule, @makeEnum) or called (@styleRuleCustom({...}))
+function hasDecorator(ts, node, decoratorNames) {
     const decorators = ts.canHaveDecorators(node) ? ts.getDecorators(node) : null;
     for (const decorator of decorators || []) {
         let {expression} = decorator;
         if (ts.isCallExpression(expression)) {
             expression = expression.expression;
         }
-        if (ts.isIdentifier(expression) && STYLE_RULE_DECORATORS.includes(expression.escapedText)) {
+        if (ts.isIdentifier(expression) && decoratorNames.includes(expression.escapedText)) {
             return true;
         }
     }
@@ -124,7 +144,7 @@ function collectStyleRules(ts, classNode, sourceFile) {
         if (ts.getCombinedModifierFlags(member) & (ts.ModifierFlags.Static | ts.ModifierFlags.Ambient)) {
             continue;
         }
-        if (hasStyleRuleDecorator(ts, member)) {
+        if (hasDecorator(ts, member, STYLE_RULE_DECORATORS)) {
             rules.push({name: member.name.text, nameStart: member.name.getStart(sourceFile)});
         }
     }
@@ -156,6 +176,35 @@ function getSpecType(ts, specArg, sourceFile) {
 
 function declaresMember(members, memberName) {
     return members.some(member => member.name && member.name.escapedText === memberName);
+}
+
+// makeEnum walks the class's own statics and replaces every SCREAMING_CASE one with an instance built from
+// it, so what an entry is written as is never what anyone reads back. Same rule the runtime applies, and
+// only property declarations - a static method isn't enumerable, so makeEnum never reaches one.
+function collectEnumEntries(ts, classNode, sourceFile) {
+    const entries = [];
+    for (const member of classNode.members) {
+        if (!ts.isPropertyDeclaration(member) || !ts.isIdentifier(member.name)) {
+            continue;
+        }
+        const modifiers = ts.getCombinedModifierFlags(member);
+        if (!(modifiers & ts.ModifierFlags.Static) || (modifiers & ts.ModifierFlags.Ambient)) {
+            continue;
+        }
+        const name = member.name.text;
+        if (name === name.toUpperCase()) {
+            entries.push({name, nameStart: member.name.getStart(sourceFile)});
+        }
+    }
+    return entries;
+}
+
+// A hand-written namespace is the only other thing that can declare a static, so one means the entries are
+// already spoken for and we stay out entirely
+function hasMergedNamespace(ts, sourceFile, className) {
+    return sourceFile.statements.some(
+        statement => ts.isModuleDeclaration(statement) && statement.name.text === className
+    );
 }
 
 // A hand-written merged interface wins over anything we'd say about the same member
@@ -232,7 +281,9 @@ function makePlaceholder(name, index) {
 function getAugmentedSource(ts, fileName, text, options = {}) {
     const hasStyleRule = STYLE_RULE_DECORATORS.some(name => text.includes("@" + name));
     const usesThisConstructor = text.includes("this." + CONSTRUCTOR_MEMBER + ".");
-    if (!text.includes(STYLE_DECORATOR) && !text.includes("@" + FIELD_DECORATOR) && !hasStyleRule && !usesThisConstructor) {
+    const hasEnum = text.includes("@" + ENUM_DECORATOR);
+    if (!text.includes(STYLE_DECORATOR) && !text.includes("@" + FIELD_DECORATOR) && !hasStyleRule &&
+            !usesThisConstructor && !hasEnum) {
         return null;
     }
 
@@ -261,6 +312,45 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
             const instance = className + getTypeArgumentText(statement);
             const constructorType = `Omit<typeof ${className}, "prototype"> & (new (...args: any[]) => ${instance})`;
             appended += `${prefix}interface ${className}${typeParams} {["${CONSTRUCTOR_MEMBER}"]: ${constructorType};}\n`;
+        }
+
+        // Every SCREAMING_CASE static holds an instance once makeEnum has run, not the config it is written
+        // with, and that config is not the author's answer the way an annotated @field is - so every entry is
+        // relocated. A namespace is what merges onto the class object, and it can't take type parameters,
+        // so a generic enum class is left alone.
+        if (hasDecorator(ts, statement, [ENUM_DECORATOR]) && !typeParams &&
+                !hasMergedNamespace(ts, sourceFile, className)) {
+            let entryDeclarations = "";
+            for (const entry of collectEnumEntries(ts, statement, sourceFile)) {
+                const placeholder = makePlaceholder(entry.name, impliedFields.length + 1);
+                if (!placeholder) {
+                    continue;
+                }
+                entryDeclarations += "    const ";
+                impliedFields.push({
+                    name: entry.name,
+                    placeholder,
+                    sourceStart: entry.nameStart,
+                    appendedStart: 0, // filled in once the namespace it lands in has a known offset
+                    pendingOffset: entryDeclarations.length,
+                });
+                entryDeclarations += `${entry.name}: ${className};\n`;
+            }
+            if (entryDeclarations !== "") {
+                if (!alreadyDeclares(ENUM_ENTRIES_MEMBER)) {
+                    entryDeclarations += `    const ${ENUM_ENTRIES_MEMBER}: ${className}[];\n`;
+                }
+                // Ambient, so every member is exported without saying so and nothing is emitted for it.
+                // TS2395: it has to be exported exactly when the class it merges with is.
+                const header = `${prefix}declare namespace ${className} {\n`;
+                for (const fieldInfo of impliedFields) {
+                    if (fieldInfo.pendingOffset != null) {
+                        fieldInfo.appendedStart = appended.length + header.length + fieldInfo.pendingOffset;
+                        delete fieldInfo.pendingOffset;
+                    }
+                }
+                appended += header + entryDeclarations + "}\n";
+            }
         }
 
         const styleName = getRegisteredStyle(ts, statement, sourceFile);
