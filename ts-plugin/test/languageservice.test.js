@@ -5,7 +5,7 @@ const path = require("path");
 const init = require("../index");
 
 const FIXTURE = path.join(__dirname, "fixture");
-const OPTIONS = {styleModule: "@stemjs/ui/Style", stateModule: "@stemjs/state/StoreField"};
+const OPTIONS = {stemRoot: "@stemjs"};
 
 function createPlugin(ts) {
     const configPath = ts.findConfigFile(FIXTURE, ts.sys.fileExists, "tsconfig.json");

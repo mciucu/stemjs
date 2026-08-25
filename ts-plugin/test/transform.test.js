@@ -6,7 +6,7 @@ const path = require("path");
 const {getAugmentedSource} = require("../transform");
 
 const FIXTURE = path.join(__dirname, "fixture");
-const OPTIONS = {styleModule: "@stemjs/ui/Style", stateModule: "@stemjs/state/StoreField"};
+const OPTIONS = {stemRoot: "@stemjs"};
 const FIELD_VALUE = 'import("@stemjs/state/StoreField").FieldValue';
 const FIELD_RAW_IDS = 'import("@stemjs/state/StoreField").FieldRawIds';
 
@@ -107,6 +107,18 @@ module.exports = (ts, check) => {
         enums.appended.includes("defaultSymbol"), false);
     check("a class without @makeEnum gets no namespace",
         enums.appended.includes("namespace Untouched"), false);
+
+    const registry = augment(ts, "registry.ts");
+    check("a @globalStore class is registered under the name its store was declared with",
+        registry.appended.includes("declare global {interface StemStoreRegistry {Planet: Planet;}}"), true);
+    // AceThemeObject registers as "AceTheme" in the real codebase, so the key can't be the class name
+    check("the key is the store name, not the class name",
+        registry.appended.includes("{Moon: MoonObject;}"), true);
+    check("a class without @globalStore is not registered",
+        registry.appended.includes("Unregistered:"), false);
+    // Nothing is redeclared, so unlike an entry or a field no name has to move
+    check("registering renames nothing",
+        registry.result.fields.length, 0);
 
     check("a file with neither decorator is not touched at all",
         getAugmentedSource(ts, "/x/plain.ts", "export const value = 1;\n", OPTIONS), null);

@@ -1,5 +1,7 @@
 import {Dispatchable} from "../base/Dispatcher";
 import {isString} from "../base/Utils";
+// Store imports this module back, so the reference has to stay erasable
+import type {StoreObject} from "./Store";
 
 export type StoreId = string | number;
 export type StoreIdOrNull = StoreId | null | undefined;
@@ -17,18 +19,27 @@ interface StateEvent extends StoreEvent {
     state?: RawStateData; // events may have an extra state that is applied before the object
 }
 
-export interface StoreInterface {
+declare global {
+    // ts-plugin/ adds an entry for every @globalStore class, keyed by the name its store was declared with,
+    // so looking a store up by that name says what it holds. Empty without the plugin, which only costs
+    // precision - an unlisted name still resolves through the general signature.
+    interface StemStoreRegistry {}
+}
+
+// getStore() hands back the store class itself, so its statics are callable on the result. Each one below
+// mirrors what StoreObject declares, which is where the shapes are decided.
+export interface StoreInterface<BaseType extends StoreObject = StoreObject> {
     objectType: string;
     dependencies: string[];
     getState(): State;
-    applyEvent(event: StateEvent): any;
-    get(id: StoreId): any;
+    applyEvent(event: StateEvent): BaseType | undefined;
+    get(id: StoreId): BaseType | undefined;
     importState(objects: any[]): void;
     clear?(): void;
-    toJSON(): any;
-    // getStore() hands back the store class itself, so its statics are callable on the result
-    all(): any[];
-    findBy(filter: Record<string, any>): any;
+    toJSON(): any[];
+    all(): BaseType[];
+    filterBy(filter: Record<string, any>): BaseType[];
+    findBy(filter: Record<string, any>): BaseType | undefined;
 }
 
 export type RawStateData = Record<string, any[]>;
@@ -43,6 +54,8 @@ export type StateData = RawStateData | StateLoadOptions;
 export class State extends Dispatchable {
     stores = new Map<string, StoreInterface>();
 
+    getStore<Name extends keyof StemStoreRegistry>(objectType: Name): StoreInterface<StemStoreRegistry[Name]> | undefined;
+    getStore(objectType: string | { objectType?: string } | null | undefined): StoreInterface | undefined;
     getStore(objectType: string | { objectType?: string } | null | undefined): StoreInterface | undefined {
         const objectName = isString(objectType) ? objectType?.toLowerCase() : objectType?.objectType;
         return this.stores.get(objectName);

@@ -15,9 +15,9 @@
         "plugins": [
             {
                 "name": "ts-plugin-registered-styles",
-                "stateModule": "@stemjs/state/StoreField"
+                "stemRoot": "@stemjs"
             }
         ]
     },
-    "include": ["stores.ts", "optional.ts", "constructor.ts", "enums.ts"]
+    "include": ["stores.ts", "optional.ts", "constructor.ts", "enums.ts", "registry.ts"]
 }

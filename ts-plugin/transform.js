@@ -76,14 +76,18 @@ const CONSTRUCTOR_MEMBER = "constructor";
 const STYLE_DECORATOR = "registerStyle";
 const FIELD_DECORATOR = "field";
 const ENUM_DECORATOR = "makeEnum";
+const STORE_DECORATOR = "globalStore";
+// Declared in stem's State.ts, in the global scope so a store file can add to it without knowing a path
+const STORE_REGISTRY = "StemStoreRegistry";
 // The one static BaseEnum can't narrow on its own: a property has no inference site, while all() and
 // fromValue() reach their class through the `this` parameter and are better left alone
 const ENUM_ENTRIES_MEMBER = "allEntries";
 const STYLE_RULE_DECORATORS = ["styleRule", "styleRuleInherit", "styleRuleCustom"];
-// Where StyleRules and the field types live. Configurable through the tsconfig plugin entry, for projects
-// that place stem elsewhere
-const DEFAULT_STYLE_MODULE = "stem-core/ui/Style";
-const DEFAULT_STATE_MODULE = "stem-core/state/StoreField";
+// Where stem itself lives, as this project's files import it. Set `stemRoot` in the tsconfig plugin entry
+// for a project that places it elsewhere - the two modules below move together, so it is the only knob.
+const DEFAULT_STEM_ROOT = "stem-core";
+const STYLE_MODULE = "/ui/Style";
+const STATE_MODULE = "/state/StoreField";
 
 function getScriptKind(ts, fileName) {
     if (fileName.endsWith(".tsx")) {
@@ -199,6 +203,19 @@ function collectEnumEntries(ts, classNode, sourceFile) {
     return entries;
 }
 
+// A store declares the name it is registered under as the first argument of whatever it extends -
+// BaseStore("EvalTask", ...), FetchStoreMixin("EvalTask", ...). That name is what getStore() is called with,
+// and it is not always the class name: AceThemeObject registers as "AceTheme".
+function getStoreName(ts, classNode) {
+    const heritage = (classNode.heritageClauses || [])[0];
+    const base = heritage && heritage.types[0] && heritage.types[0].expression;
+    if (!base || !ts.isCallExpression(base)) {
+        return null;
+    }
+    const nameArg = base.arguments[0];
+    return nameArg && ts.isStringLiteralLike(nameArg) ? nameArg.text : null;
+}
+
 // A hand-written namespace is the only other thing that can declare a static, so one means the entries are
 // already spoken for and we stay out entirely
 function hasMergedNamespace(ts, sourceFile, className) {
@@ -282,15 +299,19 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
     const hasStyleRule = STYLE_RULE_DECORATORS.some(name => text.includes("@" + name));
     const usesThisConstructor = text.includes("this." + CONSTRUCTOR_MEMBER + ".");
     const hasEnum = text.includes("@" + ENUM_DECORATOR);
+    const hasStore = text.includes("@" + STORE_DECORATOR);
     if (!text.includes(STYLE_DECORATOR) && !text.includes("@" + FIELD_DECORATOR) && !hasStyleRule &&
-            !usesThisConstructor && !hasEnum) {
+            !usesThisConstructor && !hasEnum && !hasStore) {
         return null;
     }
 
-    const styleModule = options.styleModule || DEFAULT_STYLE_MODULE;
-    const stateModule = options.stateModule || DEFAULT_STATE_MODULE;
+    const stemRoot = options.stemRoot || DEFAULT_STEM_ROOT;
+    const styleModule = stemRoot + STYLE_MODULE;
+    const stateModule = stemRoot + STATE_MODULE;
     const sourceFile = ts.createSourceFile(fileName, text, ts.ScriptTarget.ESNext, true, getScriptKind(ts, fileName));
 
+    // Only a module can carry a `declare global` block, so a plain script gets no registry entry
+    const isModule = ts.isExternalModule(sourceFile);
     const impliedFields = [];
     let appended = "";
 
@@ -312,6 +333,15 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
             const instance = className + getTypeArgumentText(statement);
             const constructorType = `Omit<typeof ${className}, "prototype"> & (new (...args: any[]) => ${instance})`;
             appended += `${prefix}interface ${className}${typeParams} {["${CONSTRUCTOR_MEMBER}"]: ${constructorType};}\n`;
+        }
+
+        // @globalStore is what puts the class in GlobalState, so it is exactly the set getStore() can find.
+        // Nothing is redeclared here, so no name has to move - the entry only adds what the name maps to.
+        if (isModule && hasDecorator(ts, statement, [STORE_DECORATOR]) && !typeParams) {
+            const storeName = getStoreName(ts, statement);
+            if (storeName) {
+                appended += `declare global {interface ${STORE_REGISTRY} {${storeName}: ${className};}}\n`;
+            }
         }
 
         // Every SCREAMING_CASE static holds an instance once makeEnum has run, not the config it is written

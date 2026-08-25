@@ -97,6 +97,27 @@ TypeScript rejects the attempt with TS2417.
 A generic enum class is left alone, since a namespace can't take type parameters, and so is one that already
 has a hand-written namespace. The namespace is emitted `export`ed exactly when the class is, or TS2395.
 
+## `@globalStore`
+
+`GlobalState.getStore("Name")` finds a store by the name it was declared with, and a string carries no type.
+The decorator is what puts the class in `GlobalState`, so it is exactly the set `getStore` can return - and
+each one adds an entry to a registry interface in the global scope:
+
+```ts
+@globalStore
+export class AceThemeObject extends BaseStore("AceTheme") {...}
+// appended in memory:
+declare global {interface StemStoreRegistry {AceTheme: AceThemeObject;}}
+```
+
+`getStore` is overloaded on `keyof StemStoreRegistry`, so `getStore("AceTheme")` resolves to
+`StoreInterface<AceThemeObject>` with **nothing written at the call site** - no type argument, no cast. The
+key is the store's declared name, which is often not the class name, as above. A name nothing registered
+still resolves through the general signature, at `StoreObject` precision.
+
+The global scope is what makes this work across files: a store module can add to the registry without
+knowing any path back to stem. A class with type parameters, or a file that isn't a module, is skipped.
+
 ## What it costs
 
 Because the declarations are appended and the rename is length-neutral, every offset in the original file stays
@@ -133,9 +154,9 @@ so a project that consumes stem without registering the plugin reads it as `any`
 }
 ```
 
-If `StyleRules` and the field types aren't importable as `stem-core/ui/Style` and `stem-core/state/StoreField` from
-your files, say where they are:
-`{"name": "ts-plugin-registered-styles", "styleModule": "your/path/to/Style", "stateModule": "your/path/to/StoreField"}`.
+If stem isn't importable as `stem-core` from your files, say where it is - the modules the plugin references
+all move together, so the directory is the only thing to set:
+`{"name": "ts-plugin-registered-styles", "stemRoot": "your/path/to/stem"}`.
 
 3. Make sure the editor uses the project's TypeScript, not its own bundled copy - a language service plugin is
    loaded by the `tsserver` that's running. In VS Code that's *TypeScript: Select TypeScript Version → Use
