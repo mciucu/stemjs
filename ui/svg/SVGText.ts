@@ -5,7 +5,10 @@ import {Point} from "../../numerics/StemMath";
 
 interface SVGTextOptions {
     text?: string;
+    fontFamily?: string;
     fontSize?: string;
+    fontStyle?: string;
+    dx?: string;
     color?: string;
     dy?: string;
     textAnchor?: string;
@@ -21,6 +24,7 @@ export class SVGText extends SVGPrimitive<SVGTextOptions>("text") {
         ["dy"],
         ["fontFamily", {domName: "font-family"}],
         ["fontSize", {domName: "font-size"}],
+        ["fontStyle", {domName: "font-style"}],
         ["textAnchor", {domName: "text-anchor"}]
     ]);
 

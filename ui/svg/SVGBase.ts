@@ -217,7 +217,7 @@ SVGUIElement.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap
 // Keep a map for every base class, and for each base class keep a map for each nodeType, to cache classes
 const svgPrimitiveMap: WeakMap<typeof SVGUIElement, Map<string, typeof SVGUIElement<any>>> = new WeakMap();
 
-export function SVGPrimitive<ExtraOptions = void, T extends keyof SVGElementTagNameMap = keyof SVGElementTagNameMap>(nodeType: T, BaseClass: typeof SVGUIElement = SVGUIElement): typeof SVGUIElement<ExtraOptions & Partial<SVGElementTagNameMap[T]>, SVGElementTagNameMap[T]> {
+export function SVGPrimitive<ExtraOptions = {}, T extends keyof SVGElementTagNameMap = keyof SVGElementTagNameMap>(nodeType: T, BaseClass: typeof SVGUIElement = SVGUIElement): typeof SVGUIElement<ExtraOptions & Omit<Partial<SVGElementTagNameMap[T]>, keyof SVGOptions | "children">, SVGElementTagNameMap[T]> {
     let baseClassPrimitiveMap = svgPrimitiveMap.get(BaseClass);
     if (!baseClassPrimitiveMap) {
         baseClassPrimitiveMap = new Map();
@@ -227,7 +227,7 @@ export function SVGPrimitive<ExtraOptions = void, T extends keyof SVGElementTagN
     if (resultClass) {
         return resultClass as any;
     }
-    resultClass = class SVGPrimitive extends BaseClass<ExtraOptions & Partial<SVGElementTagNameMap[T]>, SVGElementTagNameMap[T]> {
+    resultClass = class SVGPrimitive extends BaseClass<ExtraOptions & Omit<Partial<SVGElementTagNameMap[T]>, keyof SVGOptions | "children">, SVGElementTagNameMap[T]> {
         declare node?: SVGElementTagNameMap[T];
         
         getNodeType(): T {
