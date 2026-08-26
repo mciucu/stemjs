@@ -43,7 +43,8 @@ interface GeneratorArgs {
     doNotCache?: boolean;
 }
 
-type PageGenerator = (new (args: GeneratorArgs) => UIElement) | ((args: GeneratorArgs) => UIElement);
+// A page is any element class, and generatePage hands it GeneratorArgs as its options
+type PageGenerator = (new (args: any) => UIElement) | ((args: GeneratorArgs) => UIElement);
 
 // What a Router needs of the elements it renders, beyond being an element
 export interface RoutablePage extends UIElement<any, any, any> {

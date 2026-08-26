@@ -1,7 +1,7 @@
 import {ensure} from "../base/Require";
 import {UIElement} from "./UIBase";
 
-export const DelayedElement = <T extends new (...args: any[]) => UIElement>(BaseClass: T) => class DelayedElement extends BaseClass {
+export const DelayedElement = <T extends new (...args: any[]) => UIElement<any, any, any, any>>(BaseClass: T) => class DelayedElement extends BaseClass {
     private _loaded: boolean = false;
     private _executedMount: boolean = false;
     applyNodeAttributesNotLoaded(): void {
@@ -84,7 +84,7 @@ export const DelayedElement = <T extends new (...args: any[]) => UIElement>(Base
     }
 };
 
-export const ScriptDelayedElement = <T extends new (...args: any[]) => UIElement>(BaseClass: T, scripts: string | string[]) => class ScriptDelayedElement extends DelayedElement(BaseClass) {
+export const ScriptDelayedElement = <T extends new (...args: any[]) => UIElement<any, any, any, any>>(BaseClass: T, scripts: string | string[]) => class ScriptDelayedElement extends DelayedElement(BaseClass) {
     beforeRedrawNotLoaded(): void {
         ensure(scripts, () => {
             this.setLoaded();

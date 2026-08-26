@@ -22,7 +22,8 @@ export type StyleObject = {[Key in keyof CSSStyleDeclaration]?: CSSStyleDeclarat
 // Called with the event, then the element itself
 export type UIEventHandler = (...args: any[]) => any;
 export type RefLinkOptions = {
-    parent: UIElement<any, any, any>;
+    // Only ever assigned into by applyRef, so a plugin holding its own refs qualifies as well
+    parent: Dispatchable;
     name?: string;
     key?: string;
 };

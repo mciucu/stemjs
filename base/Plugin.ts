@@ -1,6 +1,12 @@
 // Plugins should be used to extends on runtime the functionality of a class, to easily split functionality
 import {Dispatchable} from "./Dispatcher";
 
+declare global {
+    // Each plugin declares its own name here, so getPlugin("EditLog") hands back the plugin rather than
+    // the base class. An unlisted name still resolves through the general signature.
+    interface StemPluginRegistry {}
+}
+
 export class Plugin extends Dispatchable {
     parent: any;
 
@@ -53,6 +59,8 @@ export const Pluginable = function <T extends new (...args: any[]) => any>(BaseC
             }
         }
 
+        getPlugin<Name extends keyof StemPluginRegistry>(pluginName: Name): StemPluginRegistry[Name] | null;
+        getPlugin(pluginName: string | { pluginName(): string }): Plugin | null;
         getPlugin(pluginName: string | { pluginName(): string }): Plugin | null {
             let name: string;
             if (!(typeof pluginName === "string")) {
