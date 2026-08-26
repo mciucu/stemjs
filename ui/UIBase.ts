@@ -59,8 +59,8 @@ export type NodeOptions<NodeType> = Partial<Omit<Pick<NodeType, WritableKeys<Nod
 
 export type UIOptions<NodeType extends (SVGElement | HTMLElement), ExtraOptions = {}, TagType extends string = HTMLTagType> = NodeOptions<NodeType> & UIElementOptions<TagType> & ExtraOptions;
 
-// Declare the options of a class extending a Stem UI class that doesn't pass its options generic along, most often
-// one built by UI.Primitive: `class MyElement extends UI.Primitive("div") {declare options: ElementOptions<MyOptions>;}`
+// Declare the options of a class extending a Stem UI class that doesn't pass its options generic along:
+// `class MyElement extends UI.Element {declare options: ElementOptions<MyOptions>;}`
 export type ElementOptions<ExtraOptions = {}, NodeType extends (SVGElement | HTMLElement) = HTMLElement> = UIOptions<NodeType, ExtraOptions>;
 
 // Same, but when extending a component that already has options of its own: they're kept and yours are added on top.
@@ -253,14 +253,14 @@ export class UIElement<
         this.setOptions(options); // TODO maybe this actually needs to be removed, since on a copy we don't want the default options of the other object
     }
 
-    // Keyed on this.options rather than OptionsType, so a subclass that redeclares its options is believed;
-    // UIElementOptions is there for a class generic in its options, where nothing concrete is provable
-    getDefaultOptions(options?: OptionsType): Partial<typeof this.options> | Partial<UIElementOptions> | undefined {
+    // The return stays keyed on the generic: polymorphic this in return position would forbid a class from
+    // defaulting anything, since a subclass may narrow the options it redeclares
+    getDefaultOptions(options?: this["options"]): Partial<typeof this.options> | Partial<UIElementOptions> | undefined {
         return undefined;
     }
 
     // Return our options without the UI specific fields, so they can be passed along
-    getCleanedOptions(): Partial<OptionsType> {
+    getCleanedOptions(): Partial<this["options"]> {
         const options = {
             ...this.options,
         };
@@ -273,11 +273,11 @@ export class UIElement<
         return options;
     }
 
-    getPreservedOptions(): Partial<OptionsType> | undefined {
+    getPreservedOptions(): Partial<this["options"]> | undefined {
         return undefined;
     }
 
-    setOptions(options: OptionsType): void {
+    setOptions(options: this["options"]): void {
         const defaultOptions = this.getDefaultOptions(options);
         if (defaultOptions) {
             options = Object.assign(defaultOptions, options);
@@ -287,8 +287,8 @@ export class UIElement<
 
     // TODO: should probably add a second arg, doRedraw=true - same for setOptions
     // Generic over the keys given, so each value is still checked against its declared type. A plain
-    // Partial<OptionsType> can't be satisfied at all from inside a class generic in its options.
-    updateOptions<Key extends keyof OptionsType>(options: {[P in Key]?: OptionsType[P]}): void {
+    // Partial<this["options"]> can't be satisfied at all from inside a class generic in its options.
+    updateOptions<Key extends keyof this["options"]>(options: {[P in Key]?: this["options"][P]}): void {
         this.setOptions(Object.assign(this.options, options));
         // TODO: if the old options and the new options are deep equal, we can skip this redraw, right?
         this.redraw();
