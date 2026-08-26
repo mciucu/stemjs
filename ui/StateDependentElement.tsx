@@ -20,7 +20,9 @@ export interface StateDependentElementOptions {
 // StateDependentElement.renderLoading = () => <MyCustomLoadingAnimation />
 // StateDependentElement.renderError = (error) => <MyCustomErrorMessageClass error={error} />
 
-export const StateDependentElement = <T extends typeof UIElement>(BaseClass: T) => {
+// A concrete element class never satisfies `typeof UIElement`, whose construct signature is generic.
+// DelayedElement, which this wraps, already constrains the way that admits one.
+export const StateDependentElement = <T extends new (...args: any[]) => UIElement<any, any, any, any>>(BaseClass: T) => {
     return class StateDependentElementClass extends DelayedElement(BaseClass) {
         declare options: ElementOptions<StateDependentElementOptions>;
         

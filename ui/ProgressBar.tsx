@@ -1,4 +1,4 @@
-import {UI, UIElementChild} from "./UIBase";
+import {UI, type UIChild} from "./UIBase";
 import {buildColors} from "./Color";
 import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {styleRule} from "../decorators/Style";
@@ -15,7 +15,7 @@ export interface ProgressBarOptions extends SimpleStyledElementOptions {
     striped?: boolean;
     active?: boolean;
     color?: string;
-    label?: string | BaseUIElement;
+    label?: UIChild;
 }
 
 const progressBarColorToStyle = (color: string): any => {
@@ -90,7 +90,7 @@ export class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToSty
 
 @registerStyle(ProgressBarStyle)
 export class ProgressBar extends SimpleStyledElement<ProgressBarOptions> {
-    render(): UIElementChild {
+    render(): UIChild {
         const valueInPercent = (this.options.value || 0) * 100;
         let orientation: OrientationType = Orientation.HORIZONTAL;
         if (this.options.hasOwnProperty("orientation")) {

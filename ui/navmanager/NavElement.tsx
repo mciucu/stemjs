@@ -1,4 +1,4 @@
-import {ElementOptions, UI, UIElement, UIElementCleanChild} from "../UIBase";
+import {ElementOptions, UI, UIElement, type UICleanChild} from "../UIBase";
 import {StyleRules} from "../Style";
 import {NavStyle} from "./NavStyle";
 import {Switcher} from "../Switcher";
@@ -93,7 +93,7 @@ const NavElementInterface = <TBase extends Constructor<OrientedElement>>(BaseCla
     }
 
     getSubElements() {
-        let childrenToRender = unwrapArray<UIElementCleanChild>(this.render());
+        let childrenToRender = unwrapArray<UICleanChild>(this.render());
         if (childrenToRender.length) {
             let subElementsClass;
             if (!this.isToggled) {

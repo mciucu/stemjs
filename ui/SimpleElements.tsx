@@ -1,4 +1,4 @@
-import {BaseUIElement, UI, UIElement, UIElementChild} from "./UIBase";
+import {BaseUIElement, UI, UIElement, type UIChild, type UICleanChild} from "./UIBase";
 import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";
@@ -10,11 +10,11 @@ import {LevelType, SizeType} from "./Constants";
 // Type definitions
 export type IconType = string | BaseUIElement | ((options: any) => BaseUIElement);
 export type MakeIconFunction = (icon: IconType, options?: any) => BaseUIElement | null;
-export type MakeTextFunction = (text: string | BaseUIElement, options?: any) => BaseUIElement;
+export type MakeTextFunction = (text: UICleanChild, options?: any) => BaseUIElement;
 
 export interface SimpleStyledElementOptions {
     icon?: IconType;
-    label?: string | BaseUIElement;
+    label?: UIChild;
     level?: string;
     size?: string;
 }
@@ -43,7 +43,7 @@ export function MakeIcon(icon: IconType, options?: any): BaseUIElement | null {
 }
 
 // Same as for icons, but for text
-let MakeTextFunc: MakeTextFunction = (text: string | BaseUIElement, _options?: any): BaseUIElement => {
+let MakeTextFunc: MakeTextFunction = (text: UICleanChild, _options?: any): BaseUIElement => {
     if (text instanceof BaseUIElement) {
         return text;
     }
@@ -54,7 +54,7 @@ export function SetMakeText(func: MakeTextFunction): void {
     MakeTextFunc = func;
 }
 
-export function MakeText(text: string | BaseUIElement, options?: any): BaseUIElement {
+export function MakeText(text: UICleanChild, options?: any): BaseUIElement {
     return MakeTextFunc(text, options);
 }
 
@@ -78,15 +78,15 @@ export class SimpleStyledElement<T extends SimpleStyledElementOptions = SimpleSt
 
 
 export class IconableInterface<T extends SimpleStyledElementOptions = SimpleStyledElementOptions> extends SimpleStyledElement<T> {
-    render(): UIElementChild {
+    render(): UIChild {
         return [this.beforeChildren(), this.getLabel(), super.render()];
     }
 
-    getLabel(): string | BaseUIElement | undefined {
+    getLabel(): UIChild {
         return this.options.label;
     }
 
-    setLabel(label: string | BaseUIElement): void {
+    setLabel(label: UIChild): void {
         this.updateOptions({label});
     }
 

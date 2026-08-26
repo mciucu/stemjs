@@ -1,10 +1,13 @@
-import {StoreObject} from "../state/Store";
+import {StoreObject, type StoreClass} from "../state/Store";
 import {PropertyCache} from "../data-structures/PropertyCache";
 import {BaseUIElement} from "../ui/UIBase";
+import {type Constructor} from "../base/Utils";
 
-type Constructor<T = {}> = new (...args: any[]) => T;
 type UIElementConstructor = Constructor<BaseUIElement>;
 type RedrawHandler = (event: any) => void;
+// The decorator is handed store classes, while the scan over options finds store objects. Both end up
+// in the same set, and attachChangeListener takes either.
+type ChangeSource = StoreObject | StoreClass<any>;
 
 interface AutoRedrawableClass extends UIElementConstructor {
     autoRedrawImplemented?: boolean;
@@ -12,13 +15,13 @@ interface AutoRedrawableClass extends UIElementConstructor {
         setOptions: (options: any) => void;
         onMount: () => void;
         enqueueRedraw: (event: any) => void;
-        attachChangeListener: (obj: StoreObject, handler: RedrawHandler) => void;
+        attachChangeListener: (obj: ChangeSource, handler: RedrawHandler) => void;
         node?: any;
     };
 }
 
 // TODO: maybe have better names
-const autoRedrawListenersLazy = new PropertyCache<any, Set<StoreObject>>("autoRedrawHandler", () => new Set());
+const autoRedrawListenersLazy = new PropertyCache<any, Set<ChangeSource>>("autoRedrawHandler", () => new Set());
 
 const redrawHandlerLazy = new PropertyCache<BaseUIElement, RedrawHandler>("autoRedrawListener", (obj: BaseUIElement) => {
     return (event: any) => obj.enqueueRedraw(event);
@@ -26,7 +29,7 @@ const redrawHandlerLazy = new PropertyCache<BaseUIElement, RedrawHandler>("autoR
 
 // Decorator that attaches a change listener on all store objects in options
 // The logic is very crude, but works in most cases
-export function autoredrawDecorator<T extends AutoRedrawableClass>(Cls: T, ...args: StoreObject[]): T {
+export function autoredrawDecorator<T extends AutoRedrawableClass>(Cls: T, ...args: ChangeSource[]): T {
     const listenersDefault = () => new Set([...args]);
     // TODO: we only need to do this once, throw an error if applying multiple times to the same class
 
@@ -76,12 +79,14 @@ export function autoredrawDecorator<T extends AutoRedrawableClass>(Cls: T, ...ar
 }
 
 // Can be called decorated as @autoredraw or @autoredraw(Watch1, Watch2, ...)
+// The curried form infers on the class it is applied to, not on the stores - a T declared out here has
+// nothing to be inferred from and collapses to its constraint, taking the class's own type with it
 export function autoredraw<T extends AutoRedrawableClass>(Cls: T): T;
-export function autoredraw<T extends AutoRedrawableClass>(...stores: StoreObject[]): (Cls: T) => T;
-export function autoredraw<T extends AutoRedrawableClass>(...args: any[]): T | ((Cls: T) => T) {
+export function autoredraw(...stores: ChangeSource[]): <T extends AutoRedrawableClass>(Cls: T) => T;
+export function autoredraw(...args: any[]): any {
     if (args[0]?.prototype instanceof BaseUIElement) {
         return autoredrawDecorator(args[0]);
     } else {
-        return (Cls: T) => autoredrawDecorator(Cls, ...(args as StoreObject[]));
+        return <T extends AutoRedrawableClass>(Cls: T) => autoredrawDecorator(Cls, ...(args as ChangeSource[]));
     }
 }

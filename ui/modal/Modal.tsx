@@ -2,7 +2,7 @@ import {ButtonGroup} from "../button/ButtonGroup";
 import {Button, ButtonOptions} from "../button/Button";
 import {FloatingWindow} from "./FloatingWindow";
 import {ModalStyle} from "./Style";
-import {UI, UIElement, UIElementChild, UIElementOptions} from "../UIBase";
+import {UI, UIElement, type UIChild, UIElementOptions, type BaseUIElement} from "../UIBase";
 import {Dispatcher, RemoveHandle} from "../../base/Dispatcher";
 import {registerStyle} from "../style/Theme";
 import {Level, LevelType, Size} from "../Constants";
@@ -149,9 +149,9 @@ export class Modal<ExtraOptions extends ModalOptions = ModalOptions> extends UI.
 
 export interface ActionModalOptions extends ModalOptions {
     closeName?: string;
-    actionName?: string;
+    actionName?: UIChild;
     level?: LevelType;
-    title?: UIElementChild;
+    title?: UIChild;
 }
 
 export class ActionModal<ExtraOptions extends ActionModalOptions = ActionModalOptions> extends Modal<ExtraOptions> {
@@ -266,7 +266,7 @@ export const ActionModalButton = (ActionModal) => class ActionModalButton extend
 interface ConfirmModalOptions extends ActionModalOptions {
     // Narrower than the base, since it also stands in for the action name
     title?: string;
-    message?: UIElementChild;
+    message?: UIChild;
     confirmText?: string;
     cancelText?: string;
 }

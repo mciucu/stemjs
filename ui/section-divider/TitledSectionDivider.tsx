@@ -1,6 +1,6 @@
 // TODO: This class is incomplete for horizontal orientation and more than 2 panels.
 
-import {ElementOptions, UI, UIElement, UIElementChild} from "../UIBase";
+import {ElementOptions, UI, UIElement, type UIChild} from "../UIBase";
 import {registerStyle} from "../style/Theme";
 import {unwrapArray} from "../../base/Utils";
 import {DividerBar, SectionDivider, SectionDividerOptions, SectionDividerPanelOptions} from "./SectionDivider";
@@ -55,13 +55,13 @@ interface TitledSectionDividerOptions extends SectionDividerOptions {
 
 // The children given to a TitledSectionDivider, before each is wrapped in a BarCollapsePanel
 interface TitledPanel extends UIElement<any, any, any> {
-    options: ElementOptions<{title?: UIElementChild; collapsed?: boolean}>;
+    options: ElementOptions<{title?: UIChild; collapsed?: boolean}>;
 }
 
 interface BarCollapsePanelOptions extends SectionDividerPanelOptions {
     orientation?: OrientationType;
     collapsedSize?: number;
-    title?: UIElementChild;
+    title?: UIChild;
 }
 
 @registerStyle(TitledDividerStyle)

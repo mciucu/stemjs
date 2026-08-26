@@ -1,4 +1,4 @@
-import {UI, UIElement, UIElementOptions, UIElementChild, HTMLTagType} from "../UIBase";
+import {UI, UIElement, UIElementOptions, type UIChild, HTMLTagType} from "../UIBase";
 import {TableStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
 import {ColumnHandler, ColumnLike} from "../../base/ColumnHandler";
@@ -13,7 +13,7 @@ export interface TableRowOptions<BaseType> extends UIElementOptions {
     rowIndex?: number;
 }
 
-export class TableRow<BaseType> extends UIElement<TableRowOptions<BaseType>, HTMLTableRowElement> {
+export class TableRow<BaseType = any> extends UIElement<TableRowOptions<BaseType>, HTMLTableRowElement> {
     getNodeType(): HTMLTagType {
         return "tr";
     }
@@ -22,7 +22,7 @@ export class TableRow<BaseType> extends UIElement<TableRowOptions<BaseType>, HTM
         return this.options.columns || [];
     }
 
-    render(): UIElementChild {
+    render(): UIChild {
         const columns = this.getColumns();
         return columns.map((column, index) => this.renderEntryCell(column, index));
     }
@@ -43,7 +43,7 @@ export interface TableOptions<BaseType> extends UIElementOptions {
 type RowLikeElement = UIElement<any, HTMLTableRowElement | HTMLTableSectionElement>;
 
 @registerStyle(TableStyle)
-export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTableElement> {
+export class Table<BaseType = any> extends UIElement<TableOptions<BaseType>, HTMLTableElement> {
     rows?: RowLikeElement[];
 
     getNodeType(): HTMLTagType {
@@ -116,14 +116,14 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
         return null;
     }
 
-    render(): UIElementChild {
+    render(): UIChild {
         return [
             this.renderTableHead(),
             this.renderTableBody(),
         ];
     }
 
-    renderTableHead(): UIElementChild {
+    renderTableHead(): UIChild {
         const {noHeader} = this.options;
         const columns = this.getSafeColumns();
 
@@ -138,13 +138,13 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
         return (entry as any)?.id ?? index;
     }
 
-    renderRows(): UIElementChild {
+    renderRows(): UIChild {
         const entries = this.getEntries();
         this.rows = entries.map((entry, index) => this.makeRow(entry, index)) as any;
         return this.rows;
     }
 
-    renderTableBody(): UIElementChild {
+    renderTableBody(): UIChild {
         return <tbody>{this.renderRows()}</tbody>;
     }
 
@@ -156,7 +156,7 @@ export class Table<BaseType> extends UIElement<TableOptions<BaseType>, HTMLTable
     }
 
     // Only renders the content of the header cell
-    renderColumnHeader(column: ColumnHandler<BaseType>): UIElementChild {
+    renderColumnHeader(column: ColumnHandler<BaseType>): UIChild {
         if (typeof column.headerName === "function") {
             return column.headerName();
         }

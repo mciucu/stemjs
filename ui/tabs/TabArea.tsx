@@ -1,4 +1,4 @@
-import {ExtendedOptions, UI, UIElement, UIElementChild} from "../UIBase";
+import {ExtendedOptions, UI, UIElement, type UIChild} from "../UIBase";
 import {Switcher} from "../Switcher";
 import {Link} from "../primitives/Link";
 import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
@@ -11,7 +11,7 @@ import {unwrapArray} from "../../base/Utils";
 interface BasicTabTitleOptions {
     panel?: UIElement;
     activeTabDispatcher?: SingleActiveElementDispatcher;
-    title?: UIElementChild;
+    title?: UIChild;
 }
 
 class BasicTabTitle extends Link {

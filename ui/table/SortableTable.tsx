@@ -1,4 +1,4 @@
-import {UI, UIElement, UIElementChild} from "../UIBase";
+import {UI, UIElement, type UIChild} from "../UIBase";
 import {Constructor} from "../../base/Utils";
 import {Table, TableOptions} from "./Table";
 import {defaultComparator} from "../../base/Utils";
@@ -54,7 +54,7 @@ export function SortableTableInterface<BaseType, T extends Constructor<Table<Bas
             this.columnSortingOrder = options.columnSortingOrder || [];
         }
 
-        renderColumnHeader(column: ColumnHandler<BaseType>): UIElementChild {
+        renderColumnHeader(column: ColumnHandler<BaseType>): UIChild {
             if (column.noSort) {
                 return super.renderColumnHeader(column);
             }

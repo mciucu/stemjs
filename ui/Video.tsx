@@ -1,4 +1,4 @@
-import {HTMLTagType, UI, UIElement, UIElementChild} from "./UIBase";
+import {HTMLTagType, UI, UIElement, type UIChild} from "./UIBase";
 import {DOMAttributesMap} from "./NodeAttributes";
 
 export interface VideoOptions {
@@ -14,7 +14,7 @@ export class Video extends UIElement<VideoOptions, HTMLVideoElement> {
         return this.node.play();
     }
 
-    render(): UIElementChild {
+    render(): UIChild {
         if (this.options.source) {
             return <source src={this.options.source} type="video/mp4" />
         }

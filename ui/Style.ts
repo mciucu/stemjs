@@ -3,7 +3,7 @@ import {Dispatchable} from "../base/Dispatcher";
 import {PREFERRED_CLASS_NAME_KEY} from "../decorators/Style";
 import {registerStyle, Theme, ThemeProps} from "./style/Theme";
 
-interface StyleSheetOptions {
+export interface StyleSheetOptions {
     parent: HTMLElement;
     theme?: Theme;
     name?: string;

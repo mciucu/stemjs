@@ -24,20 +24,31 @@ function getPluginConfig(options) {
     return (options.plugins || []).find(entry => entry.name === PLUGIN_NAME) || {};
 }
 
-function createAugmentingHost(ts, options, augmentedFiles) {
+// Replaced by something of its own length, so every offset the augmented source is built from stays valid
+function neutralizeNoCheck(text) {
+    return text.split("@ts-nocheck").join(" ts-nocheck");
+}
+
+function createAugmentingHost(ts, options, augmentedFiles, previewNoCheck) {
     const host = ts.createCompilerHost(options, true);
     const getSourceFile = host.getSourceFile.bind(host);
 
     host.getSourceFile = (fileName, languageVersion, onError, shouldCreate) => {
-        const text = host.readFile(fileName);
+        let text = host.readFile(fileName);
         if (text == null || fileName.includes("node_modules")) {
             return getSourceFile(fileName, languageVersion, onError, shouldCreate);
+        }
+        if (previewNoCheck) {
+            text = neutralizeNoCheck(text);
         }
         const augmented = process.env.NO_STEM_PLUGIN
             ? null
             : getAugmentedSource(ts, fileName, text, getPluginConfig(options));
         if (!augmented) {
-            return getSourceFile(fileName, languageVersion, onError, shouldCreate);
+            // Only build the file ourselves when we rewrote it - otherwise the host still knows best
+            return previewNoCheck
+                ? ts.createSourceFile(fileName, text, languageVersion, true)
+                : getSourceFile(fileName, languageVersion, onError, shouldCreate);
         }
         augmentedFiles.set(path.normalize(fileName), augmented);
         return ts.createSourceFile(fileName, augmented.text, languageVersion, true);
@@ -77,11 +88,12 @@ function restoreNames(augmented, messageText) {
     return restored;
 }
 
-// The diagnostics the user is answerable for, in the project rooted at projectRoot
-function getProjectDiagnostics(ts, projectRoot, filter = null) {
+// The diagnostics the user is answerable for, in the project rooted at projectRoot. previewNoCheck
+// answers what a file would report if it weren't silenced, which is how a migration measures itself.
+function getProjectDiagnostics(ts, projectRoot, filter = null, previewNoCheck = false) {
     const {options, fileNames} = parseConfig(ts, projectRoot);
     const augmentedFiles = new Map();
-    const program = ts.createProgram(fileNames, options, createAugmentingHost(ts, options, augmentedFiles));
+    const program = ts.createProgram(fileNames, options, createAugmentingHost(ts, options, augmentedFiles, previewNoCheck));
 
     return ts.getPreEmitDiagnostics(program).filter(diagnostic => {
         // Project-wide diagnostics have no file to match against, so a filtered run isn't asking about them

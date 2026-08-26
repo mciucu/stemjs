@@ -115,7 +115,7 @@ const styleRuleInherit = styleRuleWithOptions({
     inherit: true,
 });
 
-export function styleRuleCustom(options: StyleRuleOptions): (target: any, key: string | symbol, descriptor: StyleDescriptor) => PropertyDescriptor {
+export function styleRuleCustom(options: StyleRuleOptions): FakedDecoratorType {
     return styleRuleWithOptions(Object.assign({
         targetMethodName: "css",
         getKey: getStyleRuleKey,

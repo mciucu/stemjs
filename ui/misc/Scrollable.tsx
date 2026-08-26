@@ -1,4 +1,4 @@
-import {BaseUIElement, UI, UIElement, UIElementCleanChild} from "../UIBase";
+import {BaseUIElement, UI, UIElement, type UICleanChild} from "../UIBase";
 
 // Just putting in a lot of methods, to try to think of an interface
 interface ScrollableOptions {
@@ -112,7 +112,7 @@ interface InfiniteScrollableOptions extends ScrollableOptions {
     entryRenderer?: (entry: any) => BaseUIElement; // Inserted as a child directly, so it has to be an element
     entryComparator?: (left: any, right: any) => number;
     staticTop?: UIElement;
-    children?: UIElementCleanChild[];
+    children?: UICleanChild[];
 }
 
 export class InfiniteScrollable extends ScrollableMixin<InfiniteScrollableOptions> {

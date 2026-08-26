@@ -14,25 +14,26 @@ import type {StyleSheet} from "./Style";
 
 export type SVGTagType = keyof SVGElementTagNameMap;
 export type HTMLTagType = keyof HTMLElementTagNameMap;
-export type UIElementCleanChild = BaseUIElement | string | number;
-export type UIElementChild = Iterable<UIElementChild> | UIElementCleanChild | null | undefined | false;
+export type UICleanChild = BaseUIElement | string | number;
+export type UIChild = Iterable<UIChild> | UICleanChild | null | undefined | false;
 // node.style coerces, so a unitless property is as often written 1 as "1"
 export type StyleObject = {[Key in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[Key] | number};
 
 // Called with the event, then the element itself
 export type UIEventHandler = (...args: any[]) => any;
 export type RefLinkOptions = {
-    // Only ever assigned into by applyRef, so a plugin holding its own refs qualifies as well
-    parent: Dispatchable;
-    name?: string;
+    // Only ever assigned into by applyRef, so a plugin holding its own refs qualifies as well - and
+    // refLinkArray hands it an array with an index, which is the same assignment
+    parent: Dispatchable | any[];
+    name?: string | number;
     key?: string;
 };
 
 
 // Type definitions
 export interface UIElementOptions<TagType extends string = HTMLTagType> {
-    children?: UIElementChild;
-    title?: UIElementChild;
+    children?: UIChild;
+    title?: UIChild;
     ref?: RefLinkOptions | string;
     key?: string | number;
     active?: boolean; // Tabs or switchers can put this on children
@@ -89,7 +90,7 @@ export interface UINamespace {
 
 export const UI: UINamespace = {} as UINamespace;
 
-export function cleanChildren(children: UIElementChild): UIElementCleanChild[] {
+export function cleanChildren(children: UIChild): UICleanChild[] {
     return unwrapArray(children, unwrapElementWithFunc);
 }
 
@@ -256,7 +257,9 @@ export class UIElement<
 
     // The return stays keyed on the generic: polymorphic this in return position would forbid a class from
     // defaulting anything, since a subclass may narrow the options it redeclares
-    getDefaultOptions(options?: this["options"]): Partial<typeof this.options> | Partial<UIElementOptions> | undefined {
+    // Not Partial<this["options"]>: a `this` type in return position stays deferred, so no subclass can
+    // answer with its own options. Defaults are a bag, and this is as close as the type system gets.
+    getDefaultOptions(options?: this["options"]): Record<string, any> | undefined {
         return undefined;
     }
 
@@ -295,7 +298,7 @@ export class UIElement<
         this.redraw();
     }
 
-    setChildren(...args: UIElementChild[]): void {
+    setChildren(...args: UIChild[]): void {
         this.updateOptions({children: cleanChildren(args)});
     }
 
@@ -324,15 +327,15 @@ export class UIElement<
     }
 
     // TODO: should be renamed to renderContent
-    getGivenChildren(): UIElementChild {
+    getGivenChildren(): UIChild {
         return this.options?.children || [];
     }
 
-    render(): UIElementChild {
+    render(): UIChild {
         return this.options?.children;
     }
 
-    getTitle(): UIElementChild {
+    getTitle(): UIChild {
         return this.options?.title;
     }
 
@@ -372,7 +375,7 @@ export class UIElement<
         return childrenKeyMap;
     }
 
-    getChildrenToRender(): UIElementChild {
+    getChildrenToRender(): UIChild {
         return this.render();
     }
 
@@ -641,7 +644,7 @@ export class UIElement<
             throw "Can't properly handle appendChild, you need to implement it for " + this.constructor;
         }
         this.options.children = this.options.children || [];
-        (this.options.children as UIElementCleanChild[]).push(child);
+        (this.options.children as UICleanChild[]).push(child);
         child.mount(this, null);
         return child;
     }
@@ -653,9 +656,9 @@ export class UIElement<
         position = position || 0;
 
         this.options!.children = this.options!.children || [];
-        (this.options!.children as UIElementCleanChild[]).splice(position, 0, child);
+        (this.options!.children as UICleanChild[]).splice(position, 0, child);
 
-        const nextChildNode = position + 1 < (this.options!.children as UIElementCleanChild[]).length ? this.children[position + 1].node : null;
+        const nextChildNode = position + 1 < (this.options!.children as UICleanChild[]).length ? this.children[position + 1].node : null;
 
         (child as UIElement).mount(this, nextChildNode);
 
@@ -664,7 +667,7 @@ export class UIElement<
 
     eraseChild(child: BaseUIElement, destroy: boolean = true): BaseUIElement | null {
         if (!this.options?.children) return null;
-        let index = (this.options.children as UIElementCleanChild[]).indexOf(child);
+        let index = (this.options.children as UICleanChild[]).indexOf(child);
 
         if (index < 0) {
             // child not found
@@ -674,14 +677,14 @@ export class UIElement<
     }
 
     eraseChildAtIndex(index: number, destroy: boolean = true): BaseUIElement | null {
-        if (!this.options?.children || index < 0 || index >= (this.options.children as UIElementCleanChild[]).length) {
-            console.error("Erasing child at invalid index ", index, (this.options.children as UIElementCleanChild[])?.length || 0);
+        if (!this.options?.children || index < 0 || index >= (this.options.children as UICleanChild[]).length) {
+            console.error("Erasing child at invalid index ", index, (this.options.children as UICleanChild[])?.length || 0);
             return null;
         }
         if (this.children !== this.options.children) {
             throw "Can't properly handle eraseChild, you need to implement it for " + this.constructor;
         }
-        let erasedChild = (this.options.children as UIElementCleanChild[]).splice(index, 1)[0] as BaseUIElement;
+        let erasedChild = (this.options.children as UICleanChild[]).splice(index, 1)[0] as BaseUIElement;
         if (destroy) {
             erasedChild.destroyNode();
         } else {

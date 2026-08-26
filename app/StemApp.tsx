@@ -1,4 +1,4 @@
-import {UI, UIElementChild} from "../ui/UIBase";
+import {UI, type UIChild} from "../ui/UIBase";
 import {Route, Router} from "../ui/Router";
 import {GlobalContainer} from "../ui/global-container/GlobalContainer";
 import {Dispatcher} from "../base/Dispatcher";
@@ -36,7 +36,7 @@ export class StemApp extends UI.Element<StemAppOptions> {
         return this.options.routes;
     }
 
-    getBeforeContainer(): UIElementChild {
+    getBeforeContainer(): UIChild {
         return null;
     }
 
@@ -53,7 +53,7 @@ export class StemApp extends UI.Element<StemAppOptions> {
         Dispatcher.Global.dispatch("closeAllModals");
     }
 
-    getRouter(): UIElementChild {
+    getRouter(): UIChild {
         return <Router
             ref="router"
             routes={this.getRoutes()}
@@ -62,17 +62,17 @@ export class StemApp extends UI.Element<StemAppOptions> {
         />;
     }
 
-    getContainer(): UIElementChild {
+    getContainer(): UIChild {
         return <GlobalContainer>
             {this.getRouter()}
         </GlobalContainer>;
     }
 
-    getAfterContainer(): UIElementChild {
+    getAfterContainer(): UIChild {
         return null;
     }
 
-    render(): UIElementChild {
+    render(): UIChild {
         return [
             this.getBeforeContainer(),
             this.getContainer(),

@@ -2,7 +2,8 @@ import {ensure} from "../base/Require";
 import {UIElement} from "./UIBase";
 
 export const DelayedElement = <T extends new (...args: any[]) => UIElement<any, any, any, any>>(BaseClass: T) => class DelayedElement extends BaseClass {
-    private _loaded: boolean = false;
+    // Read by subclasses deciding what to render before the load lands
+    protected _loaded: boolean = false;
     private _executedMount: boolean = false;
     applyNodeAttributesNotLoaded(): void {
         super.applyNodeAttributes();

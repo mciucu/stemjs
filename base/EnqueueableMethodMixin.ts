@@ -1,3 +1,4 @@
+import {type Constructor} from "./Utils";
 export function enqueueIfNotLoaded(target: any, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
     const method = descriptor.value;
     return Object.assign({}, descriptor, {
@@ -13,7 +14,6 @@ export function enqueueIfNotLoaded(target: any, key: string, descriptor: Propert
 }
 
 
-type Constructor<T = {}> = new (...args: any[]) => T;
 
 interface EnqueueableMethodInterface {
     methodCallQueue?: [Function, any[]][];

@@ -1,4 +1,4 @@
-import {TextUIElement, UI, UIElementOptions, UIElementChild} from "./UIBase";
+import {TextUIElement, UI, UIElementOptions, type UIChild} from "./UIBase";
 import {dashCase, isFunction, isNumber, isString} from "../base/Utils";
 import {NodeAttributes, defaultToPixelsAttributes} from "./NodeAttributes";
 
@@ -165,7 +165,7 @@ export class DynamicStyleElement extends StyleElement<DynamicStyleElementOptions
         return result;
     }
 
-    render(): UIElementChild {
+    render(): UIChild {
         // On a style element `style` is the rule body it generates, not the node's own inline style
         let style = (this.options.style || {}) as StyleAttributes | (() => StyleAttributes);
         if (typeof style === "function") {
@@ -234,7 +234,7 @@ export class KeyframeElement extends StyleElement<KeyframeElementOptions> {
         return result + "}";
     }
 
-    render(): UIElementChild {
+    render(): UIChild {
         return "@keyframes " + this.getKeyframeName() + this.getKeyframeInstance(this.options.keyframe || {});
     }
 }

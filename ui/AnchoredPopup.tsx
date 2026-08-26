@@ -1,4 +1,4 @@
-import {UI, UIElementOptions, UIElementChild, UIElement} from "./UIBase";
+import {UI, UIElementOptions, type UIChild, UIElement} from "./UIBase";
 import {styleRule, StyleSheet} from "./Style";
 import {registerStyle} from "./style/Theme";
 import {Router} from "./Router";
@@ -11,7 +11,7 @@ export interface AnchoredPopupOptions extends UIElementOptions {
     toggleOnSameAnchor?: boolean;
     hideOnMouseLeave?: boolean;
     direction?: DirectionType;
-    content?: UIElementChild;
+    content?: UIChild;
 }
 
 export class AnchoredPopupStyle extends StyleSheet {

@@ -1,5 +1,5 @@
 import {FormStyle} from "./Style";
-import {ElementOptions, TextUIElement, UI, UIElementChild} from "../UIBase";
+import {ElementOptions, TextUIElement, UI, type UIChild} from "../UIBase";
 import {registerStyle} from "../style/Theme";
 import {NodeAttributes} from "../NodeAttributes";
 
@@ -45,7 +45,7 @@ export class FormGroup extends UI.Element {
 
 export interface FormFieldOptions {
     inline?: boolean;
-    label?: UIElementChild;
+    label?: UIChild;
     contentFirst?: boolean;
 }
 

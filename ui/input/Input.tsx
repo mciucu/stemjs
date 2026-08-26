@@ -1,4 +1,4 @@
-import {UI, UIElement, UIElementOptions, UIElementChild, HTMLTagType} from "../UIBase";
+import {UI, UIElement, UIElementOptions, type UIChild, HTMLTagType} from "../UIBase";
 import {DOMAttributesMap, NodeAttributes} from "../NodeAttributes";
 import {InputStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
@@ -354,7 +354,7 @@ export class RawCheckboxInput extends Input<boolean, CheckboxInputOptions> {
     }
 
     // TODO @branch fix this
-    render(): UIElementChild {
+    render(): UIChild {
         super.render();
         if (this.options.noStupid) {
             // Temp hack
@@ -432,7 +432,7 @@ export class Select<ValueType, ExtraOptions = void> extends InputableElement<Val
         return "select"
     }
 
-    render(): UIElementChild {
+    render(): UIChild {
         this.givenOptions = this.options.options || [];
         let selectOptions: any[] = [];
 

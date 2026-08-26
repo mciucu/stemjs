@@ -1,10 +1,10 @@
 import {ActionStatus, ActionStatusType} from "../Constants";
 import {Button, ButtonOptions} from "./Button";
-import {UIElementChild} from "../UIBase";
+import {type UIChild} from "../UIBase";
 import {BaseUIElement} from "../UIBase";
 
 export interface StatusOption {
-    label: string | BaseUIElement;
+    label: UIChild;
     faIcon: string;
 }
 
@@ -45,7 +45,7 @@ export class StateButton<ExtraOptions = {}> extends Button<StateButtonOptions & 
         this.redraw();
     }
 
-    render(): UIElementChild {
+    render(): UIChild {
         const stateOptions = this.options.statusOptions![this.options.state! - 1] as StatusOption;
 
         this.options.label = stateOptions.label;

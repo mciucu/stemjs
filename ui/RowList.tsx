@@ -1,4 +1,4 @@
-import {UI, UIElementChild} from "./UIBase";
+import {UI, type UIChild} from "./UIBase";
 import {styleRule} from "./Style";
 import {registerStyle} from "./style/Theme"
 import {SimpleStyledElement} from "./SimpleElements";
@@ -48,7 +48,7 @@ class RowListStyle extends BasicLevelSizeStyleSheet {
 export interface RowListOptions<ValueType = any> {
     alternateColors?: boolean;
     rows: ValueType[];
-    rowParser: (row: ValueType) => UIElementChild;
+    rowParser: (row: ValueType) => UIChild;
     level?: string;
     size?: string;
 }
@@ -79,7 +79,7 @@ export class RowList extends SimpleStyledElement<RowListOptions> {
         return rowClasses;
     }
 
-    render(): UIElementChild {
+    render(): UIChild {
         const {rows, rowParser} = this.options;
 
         return rows.map((row, index) => {

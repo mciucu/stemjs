@@ -1,4 +1,4 @@
-import {ExtendedOptions, UI, UIElement, UIElementOptions, UIElementChild, HTMLTagType} from "../UIBase";
+import {ExtendedOptions, UI, UIElement, UIElementOptions, type UIChild, HTMLTagType} from "../UIBase";
 import {Button} from "../button/Button";
 import {NumberInput} from "../input/Input";
 import {RangePanelStyle} from "./RangePanelStyle";
@@ -143,7 +143,7 @@ export function RangeTableInterface<BaseType, BaseTable extends Constructor<Tabl
             attr.addClass(this.getRangePanelStyleSheet().default);
         }
 
-        render(): UIElementChild {
+        render(): UIChild {
             const rangePanelStyleSheet = this.getRangePanelStyleSheet();
             const fakePanelHeight = (this.getRowHeight() * this.getEntriesManager().getEntriesCount() + 1) + "px";
             const headHeight = this.thead?.getHeight() || 0;

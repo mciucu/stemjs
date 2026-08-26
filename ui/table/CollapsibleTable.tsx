@@ -1,4 +1,4 @@
-import {ExtendedOptions, UI, UIElementChild, HTMLTagType} from "../UIBase";
+import {ExtendedOptions, UI, type UIChild, HTMLTagType} from "../UIBase";
 import {Table, TableRow, TableOptions, TableRowOptions} from "./Table";
 import {Constructor} from "../../base/Utils";
 import {CollapsibleMixin} from "../collapsible/CollapsibleMixin";
@@ -31,14 +31,14 @@ class CollapsibleTableStyle extends StyleSheet {
 
 export interface CollapsibleTableRowOptions<BaseType> extends TableRowOptions<BaseType> {
     collapsed?: boolean;
-    renderCollapsible?: (entry: BaseType, row: CollapsibleTableRow<BaseType>) => UIElementChild;
+    renderCollapsible?: (entry: BaseType, row: CollapsibleTableRow<BaseType>) => UIChild;
 }
 
 // TODO: refactor this to support redraw and render override
 const CollapsibleTableRowBase = CollapsibleMixin(TableRow<any>);
 
 @registerStyle(CollapsibleTableStyle)
-export class CollapsibleTableRow<BaseType> extends CollapsibleTableRowBase {
+export class CollapsibleTableRow<BaseType = any> extends CollapsibleTableRowBase {
     declare options: CollapsibleTableRowOptions<BaseType>;
 
     getNodeType(): HTMLTagType {
@@ -78,7 +78,7 @@ export class CollapsibleTableRow<BaseType> extends CollapsibleTableRowBase {
         }
     }
 
-    getInitialCollapsedContent(): UIElementChild {
+    getInitialCollapsedContent(): UIChild {
         const {renderCollapsible, entry} = this.options;
         if (renderCollapsible) {
             return renderCollapsible(entry, this);
@@ -86,11 +86,11 @@ export class CollapsibleTableRow<BaseType> extends CollapsibleTableRowBase {
         return this.renderCollapsible(this.options.entry, this);
     }
 
-    renderCollapsible(entry: BaseType, row: CollapsibleTableRow<BaseType>): UIElementChild {
+    renderCollapsible(entry: BaseType, row: CollapsibleTableRow<BaseType>): UIChild {
         return [];
     }
 
-    getMainRowContent(): UIElementChild {
+    getMainRowContent(): UIChild {
         return super.render();
     }
 
@@ -109,7 +109,7 @@ export class CollapsibleTableRow<BaseType> extends CollapsibleTableRowBase {
         </tr>
     }
 
-    render(): UIElementChild {
+    render(): UIChild {
         return [
             this.getMainRow(),
             this.getCollapsibleRow(),
@@ -118,7 +118,7 @@ export class CollapsibleTableRow<BaseType> extends CollapsibleTableRowBase {
 }
 
 export interface CollapsibleTableOptions<BaseType> extends TableOptions<BaseType> {
-    renderCollapsible?: (entry: BaseType, row: CollapsibleTableRow<BaseType>) => UIElementChild;
+    renderCollapsible?: (entry: BaseType, row: CollapsibleTableRow<BaseType>) => UIChild;
 }
 
 export function CollapsibleTableInterface<BaseType, T extends Constructor<Table<BaseType>>>(BaseTableClass: T) {
