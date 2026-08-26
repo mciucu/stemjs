@@ -118,6 +118,24 @@ still resolves through the general signature, at `StoreObject` precision.
 The global scope is what makes this work across files: a store module can add to the registry without
 knowing any path back to stem. A class with type parameters, or a file that isn't a module, is skipped.
 
+A store object's class is also its own store, which `obj.getStore()` returns. `StoreObject` can only say that
+as `this["constructor"]`, and `this.constructor` is typed as `Function` by `lib.es5.d.ts` - so each store gets
+the declaration that carries its statics, the same one a class reading `this.constructor.something` gets:
+
+```ts
+@globalStore
+export class Currency extends BaseStore("Currency") {
+    sameAs(isoCode: string) {return this === this.getStore().getByIsoCode(isoCode);}   // no cast
+    static getByIsoCode(isoCode: string): Currency | undefined {...}
+}
+// appended in memory:
+export interface Currency {["constructor"]: Omit<typeof Currency, "prototype"> & (new (...args: any[]) => Currency);}
+```
+
+A base that stores are built on top of extends `StoreObject` directly and carries no decorator, since nothing
+registers it - it gets the declaration for extending `StoreObject`. Anything else the plugin doesn't recognize
+as a store falls back to `StoreObject`'s own statics, which is what `getStore()` was before.
+
 ## What it costs
 
 Because the declarations are appended and the rename is length-neutral, every offset in the original file stays

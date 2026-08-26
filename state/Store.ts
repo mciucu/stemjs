@@ -12,6 +12,13 @@ export interface StoreOptions {
 // Shorthand type for static method this parameter
 export type StoreClass<T extends StoreObject> = {new (...args: any[]): T} & typeof StoreObject;
 
+// An object's own store is its class, so this["constructor"] is what says which store that is - an indexed
+// access on the `this` type, resolved per subclass against the declaration ts-plugin/ appends for each store.
+// It is read through a conditional rather than directly, so a class the plugin never reached (or a plain tsc,
+// without it) falls back to the statics StoreClass carries instead of failing to index.
+export type OwnStore<T extends StoreObject> =
+    (T extends {["constructor"]: infer StoreType} ? StoreType : unknown) & StoreClass<T> & Dispatchable;
+
 // A symbol to dispatch state events by type, since Dispatchable owns generic dispatchers
 export const EventDispatcherSymbol = Symbol("EventDispatcher");
 
@@ -24,17 +31,13 @@ export class StoreObject extends Dispatchable {
         Object.assign(this, obj);
     }
 
-    getOwnStore(): StoreClass<this> & Dispatchable {
-        return this.constructor as any;
-    }
-
     // Overloaded signatures for better typing
     // A nullish storeName resolves to the object's own store (same as the no-arg call)
-    getStore(storeName?: null): typeof this.constructor & StoreClass<this> & Dispatchable;
+    getStore(storeName?: null): OwnStore<this>;
     getStore<Name extends keyof StemStoreRegistry>(storeName: Name): StoreInterface<StemStoreRegistry[Name]> | undefined;
     getStore(storeName: string | null): StoreInterface | undefined;
-    getStore(storeName?: string | null): (StoreClass<this> & Dispatchable) | StoreInterface | undefined {
-        const ownStore = this.getOwnStore();
+    getStore(storeName?: string | null): OwnStore<this> | StoreInterface | undefined {
+        const ownStore = this.constructor as OwnStore<this>;
         if (storeName) {
             return ownStore.getState().getStore(storeName);
         }

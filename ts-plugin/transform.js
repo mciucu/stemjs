@@ -62,6 +62,10 @@
 // Both halves are load-bearing there: Omit carries `toDate`, and the signature it adds back is what
 // `new this.constructor(...)` needs - and it returns the instance, so a subclass's stays covariant.
 //
+// A store gets the same declaration whether or not it names this.constructor itself: a store object's
+// class *is* its store, and getStore() hands it back as this["constructor"], so the declaration is what
+// makes getStore() reach the statics that store declares.
+//
 // Only a class declared at the top level gets one, since a merged interface needs a name to attach to;
 // a class declared inside a function - what the mixins return - still needs a cast.
 //
@@ -77,12 +81,18 @@ const STYLE_DECORATOR = "registerStyle";
 const FIELD_DECORATOR = "field";
 const ENUM_DECORATOR = "makeEnum";
 const STORE_DECORATOR = "globalStore";
+// The root of the store hierarchy, in stem's Store.ts. A class extending it directly is a store base, which
+// the decorator doesn't mark since only the classes registered in a state carry it.
+const STORE_OBJECT_CLASS = "StoreObject";
+const EXTENDS_STORE_OBJECT = new RegExp("extends\\s+" + STORE_OBJECT_CLASS + "\\b");
 // Declared in stem's State.ts, in the global scope so a store file can add to it without knowing a path
 const STORE_REGISTRY = "StemStoreRegistry";
 // The one static BaseEnum can't narrow on its own: a property has no inference site, while all() and
 // fromValue() reach their class through the `this` parameter and are better left alone
 const ENUM_ENTRIES_MEMBER = "allEntries";
 const STYLE_RULE_DECORATORS = ["styleRule", "styleRuleInherit", "styleRuleCustom"];
+// Reading a static off this.constructor is what needs the class behind Function
+const THIS_CONSTRUCTOR_STATIC = "this." + CONSTRUCTOR_MEMBER + ".";
 // Where stem itself lives, as this project's files import it. Set `stemRoot` in the tsconfig plugin entry
 // for a project that places it elsewhere - the two modules below move together, so it is the only knob.
 const DEFAULT_STEM_ROOT = "stem-core";
@@ -203,17 +213,32 @@ function collectEnumEntries(ts, classNode, sourceFile) {
     return entries;
 }
 
+function getBaseExpression(classNode) {
+    const heritage = (classNode.heritageClauses || [])[0];
+    return (heritage && heritage.types[0] && heritage.types[0].expression) || null;
+}
+
 // A store declares the name it is registered under as the first argument of whatever it extends -
 // BaseStore("EvalTask", ...), FetchStoreMixin("EvalTask", ...). That name is what getStore() is called with,
 // and it is not always the class name: AceThemeObject registers as "AceTheme".
 function getStoreName(ts, classNode) {
-    const heritage = (classNode.heritageClauses || [])[0];
-    const base = heritage && heritage.types[0] && heritage.types[0].expression;
+    const base = getBaseExpression(classNode);
     if (!base || !ts.isCallExpression(base)) {
         return null;
     }
     const nameArg = base.arguments[0];
     return nameArg && ts.isStringLiteralLike(nameArg) ? nameArg.text : null;
+}
+
+// A store object's class is its own store, which is what getStore() returns. @globalStore marks the ones a
+// state registers; a base that others are built on top of extends StoreObject directly and carries neither
+// the decorator nor a name of its own.
+function isStoreClass(ts, classNode) {
+    if (hasDecorator(ts, classNode, [STORE_DECORATOR])) {
+        return true;
+    }
+    const base = getBaseExpression(classNode);
+    return base != null && ts.isIdentifier(base) && base.escapedText === STORE_OBJECT_CLASS;
 }
 
 // A hand-written namespace is the only other thing that can declare a static, so one means the entries are
@@ -297,9 +322,9 @@ function makePlaceholder(name, index) {
 // `fields` pairs each renamed member with the declaration that replaced it, for the plugin to map between.
 function getAugmentedSource(ts, fileName, text, options = {}) {
     const hasStyleRule = STYLE_RULE_DECORATORS.some(name => text.includes("@" + name));
-    const usesThisConstructor = text.includes("this." + CONSTRUCTOR_MEMBER + ".");
+    const usesThisConstructor = text.includes(THIS_CONSTRUCTOR_STATIC);
     const hasEnum = text.includes("@" + ENUM_DECORATOR);
-    const hasStore = text.includes("@" + STORE_DECORATOR);
+    const hasStore = text.includes("@" + STORE_DECORATOR) || EXTENDS_STORE_OBJECT.test(text);
     if (!text.includes(STYLE_DECORATOR) && !text.includes("@" + FIELD_DECORATOR) && !hasStyleRule &&
             !usesThisConstructor && !hasEnum && !hasStore) {
         return null;
@@ -328,7 +353,9 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
         // lib.es5.d.ts types Object.constructor as Function, so every static is lost. Omit drops the
         // construct signature the class carries - keeping it would make a subclass's own constructor an
         // incompatible override - and the signature added back returns the instance, which stays covariant.
-        if (statement.getText(sourceFile).includes("this." + CONSTRUCTOR_MEMBER + ".") &&
+        // A store never has to name this.constructor to need it: getStore() is typed as this["constructor"],
+        // so this is what says which store a store object's own class is.
+        if ((statement.getText(sourceFile).includes(THIS_CONSTRUCTOR_STATIC) || isStoreClass(ts, statement)) &&
                 !alreadyDeclares(CONSTRUCTOR_MEMBER)) {
             const instance = className + getTypeArgumentText(statement);
             const constructorType = `Omit<typeof ${className}, "prototype"> & (new (...args: any[]) => ${instance})`;

@@ -109,16 +109,26 @@ module.exports = (ts, check) => {
         enums.appended.includes("namespace Untouched"), false);
 
     const registry = augment(ts, "registry.ts");
+    // A store registers lowercased and getStore() lowercases what it is called with, so both spellings are keys
     check("a @globalStore class is registered under the name its store was declared with",
-        registry.appended.includes("declare global {interface StemStoreRegistry {Planet: Planet;}}"), true);
+        registry.appended.includes("declare global {interface StemStoreRegistry {Planet: Planet; planet: Planet;}}"), true);
     // AceThemeObject registers as "AceTheme" in the real codebase, so the key can't be the class name
     check("the key is the store name, not the class name",
-        registry.appended.includes("{Moon: MoonObject;}"), true);
+        registry.appended.includes("{Moon: MoonObject; moon: MoonObject;}"), true);
     check("a class without @globalStore is not registered",
         registry.appended.includes("Unregistered:"), false);
     // Nothing is redeclared, so unlike an entry or a field no name has to move
     check("registering renames nothing",
         registry.result.fields.length, 0);
+
+    // getStore() is typed as the object's own constructor, so a store needs the declaration without ever
+    // naming this.constructor - that is what makes it the store's own statics rather than StoreObject's
+    check("a store declares its constructor",
+        registry.appended.includes('export interface Planet {["constructor"]: Omit<typeof Planet, "prototype"> & (new (...args: any[]) => Planet);}'), true);
+    check("a base extending StoreObject declares one too, since nothing registers it",
+        registry.appended.includes('export interface CelestialBody {["constructor"]:'), true);
+    check("a store built on that base declares its own",
+        registry.appended.includes('export interface Star {["constructor"]:'), true);
 
     check("a file with neither decorator is not touched at all",
         getAugmentedSource(ts, "/x/plain.ts", "export const value = 1;\n", OPTIONS), null);
