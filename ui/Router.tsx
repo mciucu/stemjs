@@ -44,6 +44,8 @@ interface GeneratorArgs {
 }
 
 // A page is any element class, and generatePage hands it GeneratorArgs as its options
+export type URLPart = string | number;
+
 type PageGenerator = (new (args: any) => UIElement) | ((args: GeneratorArgs) => UIElement);
 
 // What a Router needs of the elements it renders, beyond being an element
@@ -98,7 +100,9 @@ export class Router extends Switcher {
             .map((param) => `${encodeURIComponent(param)}=${encodeURIComponent(queryParams[param])}`).join("&");
     }
 
-    static formatURL(url: string | string[]): string {
+    // A part is as often an id straight off a store as a literal, and join() stringifies either. Only
+    // the array element widens: a bare scalar still has to be a string for the return type to hold.
+    static formatURL(url: string | URLPart[]): string {
         if (Array.isArray(url)) {
             url = url.length ? ("/" + url.join("/")) : "/";
         }
@@ -110,7 +114,7 @@ export class Router extends Switcher {
         return url;
     }
 
-    static changeURL(url: string | string[], options: ChangeURLOptions = {
+    static changeURL(url: string | URLPart[], options: ChangeURLOptions = {
         queryParams: {},
         state: {},
         replaceHistory: false,

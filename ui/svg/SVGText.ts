@@ -6,11 +6,11 @@ import {Point} from "../../numerics/StemMath";
 interface SVGTextOptions {
     text?: string;
     fontFamily?: string;
-    fontSize?: string;
+    fontSize?: string | number;
     fontStyle?: string;
-    dx?: string;
+    dx?: string | number;
     color?: string;
-    dy?: string;
+    dy?: string | number;
     textAnchor?: string;
     selectable?: boolean;
     x?: number;
