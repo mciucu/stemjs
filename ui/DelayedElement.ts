@@ -56,7 +56,7 @@ export const DelayedElement = <T extends new (...args: any[]) => UIElement<any, 
         // Implement here anything you might need
     }
 
-    redrawNotLoaded(): boolean {
+    redrawNotLoaded(): boolean | void {
         this.beforeRedrawNotLoaded();
         // The previous code might have triggered a redraw, skip if that was the case
         if (!this._loaded) {
@@ -65,11 +65,11 @@ export const DelayedElement = <T extends new (...args: any[]) => UIElement<any, 
         return false;
     }
 
-    redrawLoaded(): boolean {
+    redrawLoaded(): boolean | void {
         return super.redraw();
     }
 
-    redraw(): boolean {
+    redraw(): boolean | void {
         if (!this._loaded) {
             return this.redrawNotLoaded();
         }
@@ -85,7 +85,7 @@ export const DelayedElement = <T extends new (...args: any[]) => UIElement<any, 
     }
 };
 
-export const ScriptDelayedElement = <T extends new (...args: any[]) => UIElement<any, any, any, any>>(BaseClass: T, scripts: string | string[]) => class ScriptDelayedElement extends DelayedElement(BaseClass) {
+export const ScriptDelayedElement = <T extends new (...args: any[]) => UIElement<any, any, any, any>>(BaseClass: T, scripts?: string | string[]) => class ScriptDelayedElement extends DelayedElement(BaseClass) {
     beforeRedrawNotLoaded(): void {
         ensure(scripts, () => {
             this.setLoaded();

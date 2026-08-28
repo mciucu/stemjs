@@ -41,7 +41,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     protected ace: any;
     protected apiChange: boolean = false;
 
-    static requireAce(callback: () => void): void {
+    static requireAce(callback?: () => void): void {
         throw Error("You need to implement requireAce");
     }
 

@@ -244,7 +244,11 @@ export class ActionModal<ExtraOptions extends ActionModalOptions = ActionModalOp
 }
 
 
-export const ActionModalButton = (ActionModal) => class ActionModalButton extends Button<ButtonOptions & {modalOptions?: ActionModalOptions}> {
+// modalOptions is whatever the modal being wrapped accepts, not merely what every ActionModal accepts
+type ActionModalClass = (new (...args: any[]) => UIElement<any, any, any, any>) & {show(options?: any): any};
+
+export const ActionModalButton = <T extends ActionModalClass>(ActionModal: T) =>
+    class ActionModalButton extends Button<ButtonOptions & {modalOptions?: NonNullable<InstanceType<T>["options"]>}> {
     getModalOptions() {
         let modalOptions = {
             actionName: this.options.label,

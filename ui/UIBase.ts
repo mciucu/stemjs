@@ -401,7 +401,8 @@ export class UIElement<
         return children;
     }
 
-    redraw(): boolean {
+    // Most overrides answer with nothing, and only one caller anywhere reads the result
+    redraw(): boolean | void {
         if (!this.node) {
             console.error("Element not yet mounted. Redraw aborted!", this);
             return false;
@@ -497,7 +498,7 @@ export class UIElement<
         return attr;
     }
 
-    extraNodeAttributes(attr: NodeAttributes): void {}
+    extraNodeAttributes(attr?: NodeAttributes): void {}
 
     applyNodeAttributes(): void {
         const attr = this.getNodeAttributes();

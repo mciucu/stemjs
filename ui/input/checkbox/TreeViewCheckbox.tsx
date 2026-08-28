@@ -218,7 +218,7 @@ export class TreeViewCheckbox extends UI.Element<TreeViewCheckboxOptions> {
         ];
     }
 
-    redraw(): boolean {
+    redraw(): boolean | void {
         const result = super.redraw();
         this.collapsibleController?.applyCollapsedState();
         return result;

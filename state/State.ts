@@ -7,7 +7,8 @@ export type StoreId = string | number;
 export type StoreIdOrNull = StoreId | null | undefined;
 
 export interface StoreEvent {
-    type: string;
+    // Absent on an event built locally, where the applyX method being called is the type
+    type?: string;
     objectId?: StoreId;
     data?: any;
     isFake?: boolean;

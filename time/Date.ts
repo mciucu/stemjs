@@ -250,8 +250,8 @@ export class StemDate extends BaseDate {
     }
 
     // TODO @branch have all of these return a new objects and have dates immutable
-    add(duration: DurationInput) {
-        duration = Duration.toDuration(duration);
+    add(durationInput: DurationInput) {
+        const duration = Duration.toDuration(durationInput);
         if (duration.isAbsolute()) {
             this.setTime(this.getTime() + duration.toMilliseconds());
             return this;

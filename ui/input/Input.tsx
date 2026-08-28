@@ -405,7 +405,7 @@ export class TextArea extends InputableElement<string, InputableElementOptions<s
         return this.node.value;
     }
 
-    redraw(): boolean {
+    redraw(): boolean | void {
         const result = super.redraw();
         if (this.options.hasOwnProperty("value")) {
             this.node.value = this.options.value + "";
@@ -495,7 +495,7 @@ export class Select<ValueType, ExtraOptions = {}> extends InputableElement<Value
         this.options.selected = this.givenOptions[index];
     }
 
-    redraw(): boolean {
+    redraw(): boolean | void {
         const result = super.redraw();
         if (this.options.selected) {
             this.set(this.options.selected);

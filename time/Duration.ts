@@ -10,7 +10,7 @@ interface TimeUnitOptions {
     dateMethodSuffix?: string;
 }
 
-export type DurationInput = number | Duration | TimeUnit | Date | Record<TimeUnitKey, number>;
+export type DurationInput = number | Duration | TimeUnit | Date | Partial<Record<TimeUnitKey, number>>;
 export type TimeUnitInput = TimeUnit | TimeUnitKey;
 
 interface DateFormatOptions {

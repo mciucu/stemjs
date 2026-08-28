@@ -49,7 +49,7 @@ export class EntriesManager<T = any> extends Dispatchable {
         return this.cachedEntries.slice(low, high);
     }
 
-    updateEntries(entries: T[]): void {
+    updateEntries(entries?: T[]): void {
         this.rawEntries = entries;
         this.cacheEntries();
     }
