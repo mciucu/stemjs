@@ -156,6 +156,7 @@ export interface ActionModalOptions extends ModalOptions {
 
 export class ActionModal<ExtraOptions extends ActionModalOptions = ActionModalOptions> extends Modal<ExtraOptions> {
     declare actionButton?: Button;
+    declare messageArea?: TemporaryMessageArea;
 
     getDefaultOptions(): Partial<ActionModalOptions> {
         return {

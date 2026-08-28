@@ -1,4 +1,4 @@
-import {StyleObject, UI} from "./UIBase";
+import {StyleObject, UI, type UIElement} from "./UIBase";
 import {SimpleStyledElement, SimpleStyledElementOptions} from "./SimpleElements";
 import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {registerStyle} from "./style/Theme";
@@ -76,6 +76,8 @@ export interface CardPanelOptions extends SimpleStyledElementOptions {
 
 @registerStyle(CardPanelStyle)
 export class CardPanel extends SimpleStyledElement<CardPanelOptions> {
+    declare panelTitle?: UIElement;
+
     getHeaderStyleSheet() {
         return CardPanelHeaderStyle.getInstance();
     }
