@@ -19,6 +19,9 @@ export class Plugin extends Dispatchable {
         this.parent = parent;
     }
 
+    // Implemented by the plugins that need to undo what they attached; called when the host unmounts
+    remove?(parent?: any): void | Promise<void>;
+
     name(): string {
         return this.constructor.pluginName();
     }
@@ -52,7 +55,7 @@ export const Pluginable = function <T extends new (...args: any[]) => any>(BaseC
         removePlugin(pluginName: string | { pluginName(): string }): void {
             const plugin = this.getPlugin(pluginName);
             if (plugin) {
-                (plugin as any).remove(this);
+                plugin.remove!(this);
                 this.plugins!.delete(plugin.name());
             } else {
                 console.error("Can't remove plugin ", pluginName);

@@ -425,7 +425,7 @@ export class TextArea extends InputableElement<string, InputableElementOptions<s
 
 
 // TODO this element is inconsistent with the rest. Properly fix the initialValue pattern
-export class Select<ValueType, ExtraOptions = void> extends InputableElement<ValueType, SelectOptions<ValueType> & ExtraOptions, HTMLSelectElement> {
+export class Select<ValueType, ExtraOptions = {}> extends InputableElement<ValueType, SelectOptions<ValueType> & ExtraOptions, HTMLSelectElement> {
     givenOptions: ValueType[] = [];
 
     getNodeType(): HTMLTagType {

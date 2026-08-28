@@ -42,11 +42,7 @@ export class SVGText extends SVGPrimitive<SVGTextOptions>("text") {
     extraNodeAttributes(attr: NodeAttributes): void {
         // TODO: For some reason, still selectable in mozilla...
         if (!this.options.selectable) {
-            attr.setStyle("-webkit-user-select", "none");
-            attr.setStyle("-khtml-user-select", "none");
-            attr.setStyle("-moz-user-select", "none");
-            attr.setStyle("-ms-user-select", "none");
-            attr.setStyle("user-select", "none");
+            attr.setStyle("userSelect", "none");
         }
     }
 

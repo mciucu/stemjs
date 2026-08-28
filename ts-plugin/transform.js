@@ -78,6 +78,8 @@
 const STYLE_MEMBER = "styleSheet";
 const CONSTRUCTOR_MEMBER = "constructor";
 const STYLE_DECORATOR = "registerStyle";
+// The other way a sheet is attached, leaving nothing on the class for a decorator scan to find
+const THEME_REGISTER = "Theme.register";
 const FIELD_DECORATOR = "field";
 const ENUM_DECORATOR = "makeEnum";
 const STORE_DECORATOR = "globalStore";
@@ -165,13 +167,30 @@ function collectStyleRules(ts, classNode, sourceFile) {
     return rules;
 }
 
+// Every `Theme.register(SomeClass, SomeStyle)` in the file, by the class it names
+function getThemeRegistrations(ts, sourceFile) {
+    if (!sourceFile.stemThemeRegistrations) {
+        const registrations = new Map();
+        (function walk(node) {
+            if (ts.isCallExpression(node) && node.arguments.length >= 2 &&
+                    node.expression.getText(sourceFile) === THEME_REGISTER &&
+                    isEntityName(ts, node.arguments[0]) && isEntityName(ts, node.arguments[1])) {
+                registrations.set(node.arguments[0].getText(sourceFile), node.arguments[1].getText(sourceFile));
+            }
+            node.forEachChild(walk);
+        })(sourceFile);
+        sourceFile.stemThemeRegistrations = registrations;
+    }
+    return sourceFile.stemThemeRegistrations;
+}
+
 function getRegisteredStyle(ts, classNode, sourceFile) {
     const call = getDecoratorCall(ts, classNode, STYLE_DECORATOR);
     const styleArg = call && call.arguments[0];
     if (styleArg && isEntityName(ts, styleArg)) {
         return styleArg.getText(sourceFile);
     }
-    return null;
+    return classNode.name ? getThemeRegistrations(ts, sourceFile).get(classNode.name.text) || null : null;
 }
 
 // The type of a field spec: a class reference is used as `typeof User`, a store name stays the string it is
@@ -325,8 +344,8 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
     const usesThisConstructor = text.includes(THIS_CONSTRUCTOR_STATIC);
     const hasEnum = text.includes("@" + ENUM_DECORATOR);
     const hasStore = text.includes("@" + STORE_DECORATOR) || EXTENDS_STORE_OBJECT.test(text);
-    if (!text.includes(STYLE_DECORATOR) && !text.includes("@" + FIELD_DECORATOR) && !hasStyleRule &&
-            !usesThisConstructor && !hasEnum && !hasStore) {
+    if (!text.includes(STYLE_DECORATOR) && !text.includes(THEME_REGISTER) && !text.includes("@" + FIELD_DECORATOR) &&
+            !hasStyleRule && !usesThisConstructor && !hasEnum && !hasStore) {
         return null;
     }
 

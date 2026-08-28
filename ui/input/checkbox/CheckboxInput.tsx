@@ -42,7 +42,6 @@ export class CheckboxInputStyle extends StyleSheet {
     @styleRule
     label = {
         userSelect: "none",
-        "-webkit-user-select": "none",
     };
 
     @styleRule

@@ -97,11 +97,11 @@ class BarCollapsePanel extends UI.Element<BarCollapsePanelOptions> {
         this.collapsed = this.getGivenChildren()[0].options.collapsed;
         const isFirst = this.parent.panels.indexOf(this) === 0;
         const isLast = this.parent.panels.indexOf(this) === this.parent.panels.length - 1;
-        const firstCaret = isLast ? "left" : "right";
-        const lastCaret = isFirst ? "right" : "left";
+        const firstCaret = isLast ? left : "right";
+        const lastCaret = isFirst ? right : "left";
         return [
             this.render(),
-            <div ref="collapsedBarTitle" style={{display: this.collapsed ? "flex": " none"}}
+            <div ref="collapsedBarTitle" style={{display: this.collapsed ? flex: " none"}}
                  className={this.styleSheet.collapsedBarTitle}>
                 <div><FAIcon icon={"caret-" + firstCaret}/></div>
                 <div>

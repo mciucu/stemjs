@@ -3,10 +3,6 @@ import {StyleSheet, styleRule, styleRuleInherit} from "../Style";
 export class DividerStyle extends StyleSheet {
     @styleRule
     noTextSelection = {
-        "-webkit-user-select": "none",
-        "-moz-user-select": "none",
-        "-ms-user-select": "none",
-        "-o-user-select": "none",
         userSelect: "none",
     };
 }

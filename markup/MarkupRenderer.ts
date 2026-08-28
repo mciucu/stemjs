@@ -8,7 +8,7 @@ import {StaticCodeHighlighter} from "../ui/CodeEditor";
 // What MarkupParser.parse returns, plus the raw forms a caller may hand to setValue
 type MarkupValue = string | MarkupElement | (string | MarkupElement)[];
 
-interface MarkupRendererOptions {
+export interface MarkupRendererOptions {
     classMap?: MarkupClassMap;
     parser?: MarkupParser;
     value?: MarkupValue;

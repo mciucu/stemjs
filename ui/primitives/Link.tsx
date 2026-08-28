@@ -1,4 +1,4 @@
-import {UI} from "../UIBase";
+import {UI, type UIChild} from "../UIBase";
 import {styleRule, StyleSheet} from "../Style";
 import {registerStyle} from "../style/Theme";
 import {isLocalUrl, isString, trimLocalUrl} from "../../base/Utils";
@@ -7,8 +7,8 @@ import {Router} from "../Router";
 interface LinkOptions {
     // Custom properties not on HTMLAnchorElement
     newTab?: boolean;  // Custom property to automatically set target="_blank"
-    value?: string;    // Custom property for link text content
-    label?: string;    // Custom property for link text content
+    value?: UIChild;   // Rendered as the link's content, so anything renderable
+    label?: UIChild;   // Same, and the one used when value is absent
     // Note: href, target, etc. are inherited from Partial<HTMLAnchorElement>
 }
 

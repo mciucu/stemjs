@@ -20,9 +20,8 @@ export interface StateDependentElementOptions {
 // StateDependentElement.renderLoading = () => <MyCustomLoadingAnimation />
 // StateDependentElement.renderError = (error) => <MyCustomErrorMessageClass error={error} />
 
-// A concrete element class never satisfies `typeof UIElement`, whose construct signature is generic.
-// DelayedElement, which this wraps, already constrains the way that admits one.
-export const StateDependentElement = <T extends new (...args: any[]) => UIElement<any, any, any, any>>(BaseClass: T) => {
+// A function declaration, not a const: only that form takes the hooks assigned below as its own properties
+export function StateDependentElement<T extends new (...args: any[]) => UIElement<any, any, any, any>>(BaseClass: T) {
     return class StateDependentElementClass extends DelayedElement(BaseClass) {
         declare options: ElementOptions<StateDependentElementOptions>;
         
@@ -48,7 +47,7 @@ export const StateDependentElement = <T extends new (...args: any[]) => UIElemen
         }
 
         renderNotLoaded(): any {
-            let renderLoading = (StateDependentElement as any).renderLoading;
+            let renderLoading = StateDependentElement.renderLoading;
             if (typeof renderLoading === "function") {
                 renderLoading = renderLoading();
             }
@@ -60,7 +59,7 @@ export const StateDependentElement = <T extends new (...args: any[]) => UIElemen
         }
 
         renderError(): any {
-            let renderError = (StateDependentElement as any).renderError;
+            let renderError = StateDependentElement.renderError;
             if (typeof renderError === "function") {
                 renderError = renderError(this.options.error);
             }
@@ -94,11 +93,11 @@ export const StateDependentElement = <T extends new (...args: any[]) => UIElemen
             );
         }
     };
-};
+}
 
-(StateDependentElement as any).renderLoading = (): any => <ConcentricCirclesLoadingScreen />;
+StateDependentElement.renderLoading = (): any => <ConcentricCirclesLoadingScreen />;
 
-(StateDependentElement as any).renderError = (error: any, message?: string): any => {
+StateDependentElement.renderError = (error: any, message?: string): any => {
     return <div style={{maxWidth: "300px", margin: "0 auto", marginTop: "30px"}}>
             <CardPanel title={UI.T("Error in opening the URL")} level={Level.ERROR}>
                 <h3>{message || error.message}</h3>

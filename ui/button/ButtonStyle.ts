@@ -86,12 +86,12 @@ export class ButtonGroupStyle extends StyleSheet {
     HORIZONTAL = {
         pointerEvents: "none",
         ">*": {
-            "margin-left": "5px",
-            "display": "inline-block",
+            marginLeft: "5px",
+            display: "inline-block",
             pointerEvents: "initial",
         },
         ">:first-child": {
-            "margin-left": "0px",
+            marginLeft: "0px",
         },
     };
 
@@ -99,12 +99,12 @@ export class ButtonGroupStyle extends StyleSheet {
     VERTICAL = {
         pointerEvents: "none",
         ">*": {
-            "margin-top": "5px",
-            "display": "block",
+            marginTop: "5px",
+            display: "block",
             pointerEvents: "initial",
         },
         ">:first-child": {
-            "margin-top": "0px",
+            marginTop: "0px",
         },
     };
 

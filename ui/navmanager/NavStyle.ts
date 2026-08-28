@@ -173,8 +173,6 @@ export class NavStyle extends StyleSheet {
         this.sidePanel, {
             overflowY: "scroll",
             width: this.dimensions.sidepanelWidthLeft,
-            "-ms-overflow-style": "none",
-            overflow: "-moz-scrollbars-none",
             "::-webkit-scrollbar": {
                 display: "none"
             }
