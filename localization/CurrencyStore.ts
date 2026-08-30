@@ -8,6 +8,7 @@ export class Currency extends BaseStore("Currency") {
     declare subdivisionSymbol: string;
     declare subdivisionDecimalDigits: number;
     declare isoCode: string;
+    declare name: string;
 
     getDecimalDigitsCount(): number {
         return this.decimalDigits;
