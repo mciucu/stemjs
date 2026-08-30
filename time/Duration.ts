@@ -351,6 +351,10 @@ export class Duration {
         return this.format(...args);
     }
 
+    toUI(): string {
+        return this.toString();
+    }
+
     static formatter = new TokenFormatter([
         ["h", (date: Duration) => date.getHours()],
         ["hh", (date: Duration) => padNumber(date.getHours(), 2)],

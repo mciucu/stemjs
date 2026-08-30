@@ -176,6 +176,10 @@ export class Money {
         }
     }
 
+    toUI(): string {
+        return this.toString();
+    }
+
     valueOf(): number {
         return this.amount;
     }

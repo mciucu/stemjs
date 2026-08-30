@@ -74,6 +74,10 @@ export class StemDate extends BaseDate {
         return DEFAULT_DATE_FORMAT(this);
     }
 
+    toUI(): string {
+        return this.toString();
+    }
+
     static fromUnixMilliseconds(unixMilliseconds: number): StemDate {
         return this.create(new BaseDate(unixMilliseconds));
     }

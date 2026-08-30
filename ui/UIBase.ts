@@ -12,14 +12,16 @@ import {DOMAttributesMap, NodeAttributes} from "./NodeAttributes";
 import {Theme, type ThemeProps} from "./style/Theme";
 import {type StyleSheet} from "./Style";
 import {type Duration} from "../time/Duration";
-import type {StemDate} from "../time/Date";
 
 export type SVGTagType = keyof SVGElementTagNameMap;
 export type HTMLTagType = keyof HTMLElementTagNameMap;
 export type UICleanChild = BaseUIElement | string | number;
-// A Duration or a StemDate is a child too: each exists to be formatted, and a non-element child
-// is stringified
-export type UIChild = Iterable<UIChild> | UICleanChild | Duration | StemDate | null | undefined | false;
+// Keyed on toUI() rather than toString(), which every object inherits and would admit anything
+export interface UIRenderable {
+    toUI(parent?: any): UICleanChild;
+}
+
+export type UIChild = Iterable<UIChild> | UICleanChild | UIRenderable | null | undefined | false;
 // node.style coerces, so a unitless property is as often written 1 as "1", and applyStyleToNode
 // calls a value that is a function, so a function returning the value is as good as the value
 export type StyleValue<T> = T | number | (() => T | number);
@@ -487,7 +489,9 @@ export class UIElement<
             if (!newChild.getNodeType) {
                 if (newChild.toUI) {
                     newChild = newChild.toUI(this); // TODO move this inside the unwrap logic
-                } else {
+                }
+                // No toUI(), or toUI() gave back a plain value
+                if (!newChild?.getNodeType) {
                     newChild = new UI.TextElement(String(newChild));
                 }
                 newChildren[i] = newChild;
