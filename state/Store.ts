@@ -2,7 +2,7 @@
 import {CleanupJobs, Dispatchable} from "../base/Dispatcher";
 import {GlobalState, type RawStateData, State, type StateData, type StoreEvent, type StoreId, type StoreIdOrNull, type StoreInterface} from "./State";
 import {isNotNull, isString, toArray} from "../base/Utils";
-import {FieldDescriptor} from "./StoreField";
+import {type FieldDescriptor} from "./StoreField";
 
 export interface StoreOptions {
     state?: State;

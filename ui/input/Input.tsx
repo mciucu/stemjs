@@ -39,6 +39,11 @@ export interface CheckboxInputOptions extends InputOptions<boolean> {
     noStupid?: boolean;
 }
 
+export interface TextAreaOptions extends InputableElementOptions<string> {
+    // Reaches the node through setAttribute, which takes either spelling
+    rows?: number | string;
+}
+
 export interface SelectOptions<ValueType> extends InputableElementOptions<ValueType> {
     options?: ValueType[];
     selected?: ValueType;
@@ -393,7 +398,11 @@ export class RadioInput extends RawCheckboxInput {
 }
 
 
-export class TextArea extends InputableElement<string, InputableElementOptions<string>, HTMLTextAreaElement> {
+export class TextArea extends InputableElement<string, TextAreaOptions, HTMLTextAreaElement> {
+    static domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
+        ["rows"],
+    ]);
+
     getNodeType(): HTMLTagType {
         return "textarea";
     }

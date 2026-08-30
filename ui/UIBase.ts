@@ -70,7 +70,7 @@ type WritableKeys<T> = {
 // would either leave `never` or narrow away the spelling setAttribute accepts, and an inputable's
 // value or bounds are numbers until they reach the node
 type OverriddenNodeMembers = "children" | "nodeType" | "style" | "title" | "value" | "min" | "max"
-    | "step" | "autofocus" | "id" | "height" | "width" | "href";
+    | "step" | "autofocus" | "id" | "height" | "width" | "href" | "rows";
 
 // Options land on the node as attributes, so a readonly DOM member can never be one
 export type NodeOptions<NodeType> = Partial<Omit<Pick<NodeType, WritableKeys<NodeType>>, OverriddenNodeMembers>>;

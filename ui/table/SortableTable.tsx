@@ -3,8 +3,7 @@ import {type Constructor} from "../../base/Utils";
 import {Table, type TableOptions} from "./Table";
 import {defaultComparator} from "../../base/Utils";
 import {MakeIcon} from "../SimpleElements";
-import {styleRule, StyleSheet} from "../Style";
-import type {StyleRules} from "../Style";
+import {styleRule, StyleSheet, type StyleRules} from "../Style";
 import {NodeAttributes} from "../NodeAttributes";
 import {ColumnHandler} from "../../base/ColumnHandler";
 

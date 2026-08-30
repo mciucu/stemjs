@@ -1,6 +1,6 @@
 import {StemDate} from "../time/Date";
 import {isFunction, isString} from "../base/Utils";
-import {StoreObject} from "./Store";
+import {type StoreObject} from "./Store";
 import {GlobalState, type StoreId} from "./State";
 
 export interface FieldOptions {

@@ -1,7 +1,7 @@
 import {padNumber, suffixWithOrdinal, isNumber, isString} from "../base/Utils";
 import {TimeUnit, Duration, type DurationInput, type TimeUnitKey} from "./Duration";
 import {TokenFormatter} from "./Formatter";
-import {Timezone} from "../localization/Timezone";
+import {type Timezone} from "../localization/Timezone";
 
 // By default, StemDate will guess if the value is in milliseconds or seconds.
 // Any value less than this is interpreted as a unix time in seconds
