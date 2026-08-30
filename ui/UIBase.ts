@@ -12,12 +12,14 @@ import {DOMAttributesMap, NodeAttributes} from "./NodeAttributes";
 import {Theme, type ThemeProps} from "./style/Theme";
 import {type StyleSheet} from "./Style";
 import {type Duration} from "../time/Duration";
+import type {StemDate} from "../time/Date";
 
 export type SVGTagType = keyof SVGElementTagNameMap;
 export type HTMLTagType = keyof HTMLElementTagNameMap;
 export type UICleanChild = BaseUIElement | string | number;
-// A Duration is a child too: it exists to be formatted, and a non-element child is stringified
-export type UIChild = Iterable<UIChild> | UICleanChild | Duration | null | undefined | false;
+// A Duration or a StemDate is a child too: each exists to be formatted, and a non-element child
+// is stringified
+export type UIChild = Iterable<UIChild> | UICleanChild | Duration | StemDate | null | undefined | false;
 // node.style coerces, so a unitless property is as often written 1 as "1", and applyStyleToNode
 // calls a value that is a function, so a function returning the value is as good as the value
 export type StyleValue<T> = T | number | (() => T | number);
@@ -26,9 +28,10 @@ export type StyleObject = {[Key in keyof CSSStyleDeclaration]?: StyleValue<CSSSt
 // Called with the event, then the element itself
 export type UIEventHandler = (...args: any[]) => any;
 export type RefLinkOptions = {
-    // Only ever assigned into by applyRef, so a plugin holding its own refs qualifies as well - and
-    // refLinkArray hands it an array with an index, which is the same assignment
-    parent: Dispatchable | any[];
+    // Only ever assigned into by applyRef (obj[name] = this), so anything indexable qualifies: a
+    // plugin holding its own refs, a plain object a form collects its inputs into, and the array
+    // refLinkArray hands it with an index
+    parent: Dispatchable | any[] | Record<string, any>;
     name?: string | number;
     key?: string;
 };

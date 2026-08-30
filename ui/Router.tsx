@@ -10,7 +10,7 @@ interface RouterOptions {
     onChange?: UIEventHandler;
 }
 
-interface ChangeURLOptions {
+export interface ChangeURLOptions {
     queryParams?: Record<string, string>;
     state?: Record<string, any>;
     replaceHistory?: boolean;
@@ -24,9 +24,12 @@ export interface RouteMatch {
     urlParts: string[];
 }
 
+// A guard either renders a page, or redirects with the arguments changeURL takes
+export type RouteRedirect = [string | URLPart[], ChangeURLOptions?];
+
 export interface RouteOptions {
     title?: string;
-    beforeEnter?: (snapshot: RouteSnapshot) => UIElement | string[] | null;
+    beforeEnter?: (snapshot: RouteSnapshot) => UIElement | RouteRedirect | null;
     cachePage?: boolean;
     doNotCache?: boolean;
 }
@@ -210,7 +213,8 @@ export class Router extends Switcher {
         }
 
         if (Array.isArray(result)) {
-            this.constructor.changeURL(result);
+            // A redirect from a guard: [url, options], not a url made of parts
+            this.constructor.changeURL(result[0], result[1]);
             return null;
         }
 
@@ -316,7 +320,7 @@ export class Route {
         return this.options.title;
     }
 
-    getPageGuard(): ((snapshot: RouteSnapshot) => UIElement | string[] | null) | undefined {
+    getPageGuard(): ((snapshot: RouteSnapshot) => UIElement | RouteRedirect | null) | undefined {
         return this.options.beforeEnter;
     }
 
@@ -354,7 +358,7 @@ export class Route {
         return urlParts.length === 0;
     }
 
-    executeGuard(): UIElement | string[] | null {
+    executeGuard(): UIElement | RouteRedirect | null {
         const pageGuard = this.getPageGuard();
         if (!pageGuard) {
             return null;
@@ -363,7 +367,7 @@ export class Route {
         return pageGuard(this.getSnapshot());
     }
 
-    getPage(urlParts: string[], router?: Router, ...argsArray: any[]): RoutablePage | string[] | false {
+    getPage(urlParts: string[], router?: Router, ...argsArray: any[]): RoutablePage | RouteRedirect | false {
         let match;
         let matchingRoute: Route | null = this.matchesOwnNode(urlParts) ? this : null;
 
@@ -420,7 +424,7 @@ export class TerminalRoute extends Route {
         return true;
     }
 
-    getPage(urlParts: string[], router?: Router, ...argsArray: any[]): RoutablePage | string[] | false {
+    getPage(urlParts: string[], router?: Router, ...argsArray: any[]): RoutablePage | RouteRedirect | false {
         const page = super.getPage(urlParts, router, ...argsArray);
         // TODO: why is this in a setTimeout?
         clearTimeout(this.timeout);
