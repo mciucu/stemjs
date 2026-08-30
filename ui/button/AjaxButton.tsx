@@ -11,6 +11,14 @@ export interface AjaxButtonOptions {
 export class AjaxButton extends StateButton<AjaxButtonOptions> {
     declare stateResetTimeout?: ReturnType<typeof setTimeout>;
 
+    // Installed on the prototype at the bottom of this file, each forwarding to the handler's own method
+    declare fetch: typeof Ajax.fetch;
+    declare request: typeof Ajax.request;
+    declare get: typeof Ajax.get;
+    declare post: typeof Ajax.post;
+    declare getJSON: typeof Ajax.getJSON;
+    declare postJSON: typeof Ajax.postJSON;
+
     getDefaultOptions(): Partial<AjaxButtonOptions> {
         return Object.assign(super.getDefaultOptions() || {}, {
             resetToDefaultTimeout: 1000

@@ -17,7 +17,7 @@
 //
 //     @styleRule tab = {marginBottom: "-1px"};   on disk
 //     @styleRule t$1 = {marginBottom: "-1px"};   what the compiler parses
-//     // appended: interface TabAreaStyle {tab: StyleObject;}
+//     // appended: interface TabAreaStyle {tab: StyleRuleObject;}
 //
 // @field(SomeStore) gives the property the type its spec loads, plus the raw id that comes with a foreign
 // key. A class and a merged interface can't both declare the same member (TS2300), so an un-annotated
@@ -92,7 +92,8 @@ const STORE_REGISTRY = "StemStoreRegistry";
 // The one static BaseEnum can't narrow on its own: a property has no inference site, while all() and
 // fromValue() reach their class through the `this` parameter and are better left alone
 const ENUM_ENTRIES_MEMBER = "allEntries";
-const STYLE_RULE_DECORATORS = ["styleRule", "styleRuleInherit", "styleRuleCustom"];
+// @keyframesRule is here too: it swaps the literal for the animation name, exactly as @styleRule does
+const STYLE_RULE_DECORATORS = ["styleRule", "styleRuleInherit", "styleRuleCustom", "keyframesRule", "keyframesRuleInherit"];
 // Reading a static off this.constructor is what needs the class behind Function
 const THIS_CONSTRUCTOR_STATIC = "this." + CONSTRUCTOR_MEMBER + ".";
 // Where stem itself lives, as this project's files import it. Set `stemRoot` in the tsconfig plugin entry
@@ -459,7 +460,7 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
                 appendedStart: 0, // filled in once the interface it lands in has a known offset
                 pendingOffset: ruleDeclarations.length,
             });
-            ruleDeclarations += `${rule.name}: import("${styleModule}").StyleObject;\n`;
+            ruleDeclarations += `${rule.name}: import("${styleModule}").StyleRuleObject;\n`;
         }
         if (ruleDeclarations !== "") {
             const header = `${prefix}interface ${className}${typeParams} {\n`;

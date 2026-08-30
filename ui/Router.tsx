@@ -5,7 +5,8 @@ import {PageTitleManager} from "../base/PageTitleManager";
 import {unwrapArray, isString} from "../base/Utils";
 
 interface RouterOptions {
-    routes: Route;
+    // A subclass may answer with its own routes from getDefaultOptions instead of being handed them
+    routes?: Route;
     onChange?: UIEventHandler;
 }
 
@@ -23,7 +24,7 @@ export interface RouteMatch {
     urlParts: string[];
 }
 
-interface RouteOptions {
+export interface RouteOptions {
     title?: string;
     beforeEnter?: (snapshot: RouteSnapshot) => UIElement | string[] | null;
     cachePage?: boolean;

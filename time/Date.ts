@@ -332,6 +332,9 @@ export class StemDate extends BaseDate {
         return totalDays + this.getDate() - 1;
     }
 
+    // Annex B, so absent from the TypeScript lib, but present in every browser
+    declare getYear: () => number;
+
     getWeekInYear() {
         return (this.getDayInYear() - this.getWeekDay()) / 7;
     }

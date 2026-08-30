@@ -72,7 +72,7 @@ module.exports = (ts, check) => {
     check("a class that declares styleSheet is left alone",
         styles.appended.includes("AnnotatedTitle"), false);
 
-    const STYLE_OBJECT = 'import("@stemjs/ui/Style").StyleObject';
+    const STYLE_OBJECT = 'import("@stemjs/ui/Style").StyleRuleObject';
     check("@styleRule declares the rule as the object it is written with",
         styles.appended.includes(`title: ${STYLE_OBJECT};`), true);
     check("@styleRuleInherit is a rule too",

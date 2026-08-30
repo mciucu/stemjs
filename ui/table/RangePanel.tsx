@@ -16,7 +16,8 @@ export interface EntriesManagerOptions<T = any> {
 
 export class EntriesManager<T = any> extends Dispatchable {
     private rawEntries: T[];
-    private cachedEntries: T[];
+    // Not private: the scoreboards refresh it themselves after filtering
+    cachedEntries: T[];
     private options: EntriesManagerOptions<T>;
 
     constructor(entries: T[], options: EntriesManagerOptions<T> = {}) {

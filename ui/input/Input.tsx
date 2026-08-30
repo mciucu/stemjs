@@ -9,16 +9,23 @@ export interface InputableElementOptions<ValueType> extends UIElementOptions {
     initialValue?: ValueType;
     value?: any;
     readOnly?: boolean;
+    // Every inputable answers addChangeListener, which is what makes this one an option
+    onChange?: (value: ValueType, element: any) => void;
 }
 
 export interface InputOptions<ValueType> extends InputableElementOptions<ValueType> {
     type?: string;
+    // Applied with noValue, which only ever tests it for truthiness
+    autofocus?: boolean | string;
+    // The attribute map spells it in lower case, next to the node's own readOnly
+    readonly?: boolean;
 }
 
 export interface NumberInputOptions extends InputOptions<number> {
-    min?: number;
-    max?: number;
-    step?: number;
+    // Only ever set as an attribute, which takes either spelling
+    min?: number | string;
+    max?: number | string;
+    step?: number | string;
 }
 
 export interface FileInputOptions extends InputOptions<FileList> {
@@ -269,7 +276,7 @@ export class PasswordInput extends Input {
 }
 
 
-export class FileInput extends Input<FileInputOptions> {
+export class FileInput extends Input<FileList, FileInputOptions> {
     declare node: HTMLInputElement
 
     static domAttributesMap = new DOMAttributesMap(Input.domAttributesMap, [

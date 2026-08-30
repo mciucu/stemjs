@@ -1,4 +1,4 @@
-import {ExtendedOptions, UI, UIElement, type UIChild} from "../UIBase";
+import {ExtendedOptions, UI, UIElement, type PartialOptions, type UIChild} from "../UIBase";
 import {Switcher} from "../Switcher";
 import {Link} from "../primitives/Link";
 import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
@@ -26,7 +26,7 @@ class BasicTabTitle extends Link {
         }
     }
 
-    getDefaultOptions() {
+    getDefaultOptions(): PartialOptions<BasicTabTitle> {
         return {
             newTab: false,
         }

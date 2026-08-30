@@ -14,12 +14,16 @@ declare global {
     }
 }
 
+// Concatenated into an "ace/theme/..." path, so anything that stringifies to the name is one
+export type AceNamed = string | {aceName: string} | {toString(): string};
+
 export interface CodeEditorOptions {
     aceMode?: string;
     readOnly?: boolean;
-    aceTheme?: string;
-    aceKeyboardHandler?: string;
-    fontSize?: number;
+    aceTheme?: AceNamed;
+    aceKeyboardHandler?: AceNamed;
+    // Concatenated with "px", which takes either spelling
+    fontSize?: number | string;
     tabSize?: number;
     showLineNumber?: boolean;
     showPrintMargin?: boolean;
@@ -32,13 +36,16 @@ export interface CodeEditorOptions {
     enableBasicAutocompletion?: boolean;
     enableLiveAutocompletion?: boolean;
     enableSnippets?: boolean;
+    // addListenersFromOptions wires this to addAceSessionChangeListener
+    onAceSessionChange?: (...args: any[]) => void;
 }
 
 export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptions>) {
     static langToolsSrc: string | null = null;
     static AceRange: any;
     
-    protected ace: any;
+    // Not protected: the workspace plugins and the template editor reach straight into the Ace instance
+    ace: any;
     protected apiChange: boolean = false;
 
     static requireAce(callback?: () => void): void {
@@ -227,7 +234,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     }
 
     @enqueueIfNotLoaded
-    setAceKeyboardHandler(keyboardHandler: string | {aceName: string}): void {
+    setAceKeyboardHandler(keyboardHandler: AceNamed): void {
         if (keyboardHandler.hasOwnProperty("aceName")) {
             keyboardHandler = (keyboardHandler as any).aceName;
         }
@@ -239,7 +246,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     }
 
     @enqueueIfNotLoaded
-    setAceTheme(theme: string | {aceName: string}): void {
+    setAceTheme(theme: AceNamed): void {
         if (theme.hasOwnProperty("aceName")) {
             theme = (theme as any).aceName;
         }
@@ -251,7 +258,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     }
 
     @enqueueIfNotLoaded
-    setAceFontSize(fontSize: number): void {
+    setAceFontSize(fontSize: number | string): void {
         this.getAce().setOptions({
             fontSize: fontSize + "px"
         });

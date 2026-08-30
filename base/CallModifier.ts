@@ -1,7 +1,16 @@
 import {NOOP_FUNCTION} from "./Utils";
 
+// What wrap answers with: it forwards whatever it is called with, and carries the handles for
+// cancelling or flushing the call it is holding
+export interface WrappedCall {
+    (...args: any[]): any;
+    originalFunc: Function;
+    cancel: () => void;
+    flush: () => void;
+}
+
 export class CallModifier {
-    wrap(func: Function): Function {
+    wrap(func: Function): WrappedCall {
         throw new Error("Implement wrap method");
     }
 
@@ -109,7 +118,7 @@ export class CallThrottler extends CallModifier {
         }
     }
 
-    wrap(func: Function): Function {
+    wrap(func: Function): WrappedCall {
         const funcCall = () => {
             const timeNow = Date.now();
             // The expected time when the function should be executed next might have been changed

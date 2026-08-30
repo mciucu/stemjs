@@ -17,7 +17,12 @@ interface BoundingRect {
 }
 
 // Mirrors the attributes registered in SVGUIElement.domAttributesMap below
+// What an svg node may hold: svg nodes, foreignObject aside. Shaped like UIChild so that nesting an
+// array of children still works - intersecting with a flat array collapses the iterable arm
+export type SVGChild = Iterable<SVGChild> | SVGUIElement | string | number | null | undefined | false;
+
 export interface SVGOptions {
+    children?: SVGChild;
     fill?: string;
     stroke?: string;
     strokeWidth?: number | string;
@@ -25,22 +30,25 @@ export interface SVGOptions {
     strokeLinecap?: string;
     stopColor?: string;
     clipPath?: string;
-    opacity?: number;
+    opacity?: number | string;
     transform?: string;
     viewBox?: string;
     offset?: number | string;
+    dx?: number | string;
+    dy?: number | string;
+    // Every one of these reaches the node through setAttribute, which takes either spelling
     width?: number | string;
     height?: number | string;
-    x?: number;
-    y?: number;
-    x1?: number;
-    y1?: number;
-    x2?: number;
-    y2?: number;
-    cx?: number;
-    cy?: number;
-    rx?: number;
-    ry?: number;
+    x?: number | string;
+    y?: number | string;
+    x1?: number | string;
+    y1?: number | string;
+    x2?: number | string;
+    y2?: number | string;
+    cx?: number | string;
+    cy?: number | string;
+    rx?: number | string;
+    ry?: number | string;
     // Written by translate() and setColor(), which have no attribute of their own
     translate?: string;
     color?: string;
@@ -214,11 +222,20 @@ SVGUIElement.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap
     ["viewBox", {domName: "viewBox"}],
 ]);
 
+// The members SVGOptions replaces, the same ones NodeOptions keeps out - a node's own style or
+// children would intersect with the option's rather than replace it
+type SVGNodeOptions<T extends keyof SVGElementTagNameMap> =
+    Omit<Partial<SVGElementTagNameMap[T]>, keyof SVGOptions | "children" | "style" | "title" | "nodeType">;
+
+// The options a primitive on this tag ends up with, before its own are added: what a class that lets
+// SVGPrimitive infer the tag cannot reach back for - see Backlog item 5
+export type SVGPrimitiveOptions<T extends keyof SVGElementTagNameMap> =
+    NonNullable<SVGUIElement<SVGNodeOptions<T>, SVGElementTagNameMap[T]>["options"]>;
+
 // Keep a map for every base class, and for each base class keep a map for each nodeType, to cache classes
-// The same members NodeOptions keeps out - a node's own style would intersect with the option's
 const svgPrimitiveMap: WeakMap<typeof SVGUIElement, Map<string, typeof SVGUIElement<any>>> = new WeakMap();
 
-export function SVGPrimitive<ExtraOptions = {}, T extends keyof SVGElementTagNameMap = keyof SVGElementTagNameMap>(nodeType: T, BaseClass: typeof SVGUIElement = SVGUIElement): typeof SVGUIElement<ExtraOptions & Omit<Partial<SVGElementTagNameMap[T]>, keyof SVGOptions | "children" | "style" | "title" | "nodeType">, SVGElementTagNameMap[T]> {
+export function SVGPrimitive<ExtraOptions = {}, T extends keyof SVGElementTagNameMap = keyof SVGElementTagNameMap>(nodeType: T, BaseClass: typeof SVGUIElement = SVGUIElement): typeof SVGUIElement<ExtraOptions & SVGNodeOptions<T>, SVGElementTagNameMap[T]> {
     let baseClassPrimitiveMap = svgPrimitiveMap.get(BaseClass);
     if (!baseClassPrimitiveMap) {
         baseClassPrimitiveMap = new Map();

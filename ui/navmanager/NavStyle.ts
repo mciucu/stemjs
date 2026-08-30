@@ -27,7 +27,6 @@ export class NavStyle extends StyleSheet {
         return this.colors;
     }
 
-    // StyleRules rewrites object-valued fields to class names, so reads from outside go through here
     getDimensions() {
         return this.dimensions;
     }

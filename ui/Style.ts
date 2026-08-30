@@ -11,13 +11,13 @@ export interface StyleSheetOptions {
 }
 
 // The object a @styleRule is declared with
-export interface StyleObject {
+export interface StyleRuleObject {
     [PREFERRED_CLASS_NAME_KEY]?: string;
     [key: string]: any;
 }
 
 interface KeyframeObject {
-    [key: string]: StyleObject;
+    [key: string]: StyleRuleObject;
 }
 
 // What a @styleRule field actually holds at runtime. The decorator replaces the object literal you write with the
@@ -35,11 +35,18 @@ export type StyleRuleValue = string;
 // transitionTime, are left alone - only the ones a @styleRule could have replaced are rewritten.
 export type StyleRules<T> = {
     // ts-plugin renames each @styleRule field and re-declares the real name, so skip the stand-ins it leaves
-    [Key in keyof T as Key extends `${string}$${number}` ? never : Key]: Key extends keyof StyleSheet ? T[Key] :
+    [Key in keyof T as Key extends `${string}$${number}` | "container" ? never : Key]:
+        Key extends keyof StyleSheet ? T[Key] :
         T[Key] extends StyleSheet ? T[Key] : // a nested style sheet, such as GlobalStyle.Utils, is not a rule
         T[Key] extends (...args: any[]) => any ? T[Key] : // a method, which @styleRule is never on
-        T[Key] extends object ? StyleRuleValue :
+        // The plugin declares every rule as StyleRuleObject, and its symbol key is what tells a rule apart
+        // from a plain object field such as an inline style two rules share
+        typeof PREFERRED_CLASS_NAME_KEY extends keyof T[Key] ? StyleRuleValue :
         T[Key];
+} & {
+    // `container` is on StyleSheet for the elements that read it, and is also the commonest rule name;
+    // optional so that an element registering a sheet unrelated to its base's still overrides styleSheet
+    container?: StyleRuleValue;
 };
 
 // Class meant to group multiple classes inside a single <style> element, for convenience
@@ -136,7 +143,7 @@ class StyleSheet extends Dispatchable {
         this.dispatch("beforeUpdate", this);
     }
 
-    css(style: StyleObject, ...args: StyleObject[]): DynamicStyleElement {
+    css(style: StyleRuleObject, ...args: StyleRuleObject[]): DynamicStyleElement {
         this.ensureFirstUpdate();
         if (arguments.length > 1) {
             style = Object.assign({}, style, ...args);
@@ -238,21 +245,21 @@ class ExclusiveClassSet {
     }
 }
 
-function wrapCSS(context: string, style: StyleObject): StyleObject {
+function wrapCSS(context: string, style: StyleRuleObject): StyleRuleObject {
     return {
         [context]: style
     };
 }
 
-function hover(style: StyleObject): StyleObject {
+function hover(style: StyleRuleObject): StyleRuleObject {
     return wrapCSS(":hover", style);
 }
 
-function active(style: StyleObject): StyleObject {
+function active(style: StyleRuleObject): StyleRuleObject {
     return wrapCSS(":active", style);
 }
 
-function focus(style: StyleObject): StyleObject {
+function focus(style: StyleRuleObject): StyleRuleObject {
     return wrapCSS(":focus", style);
 }
 

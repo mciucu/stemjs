@@ -57,7 +57,7 @@ const NavElementInterface = <TBase extends Constructor<OrientedElement>>(BaseCla
     declare options: ElementOptions<NavElementOptions>;
     declare isToggled?: boolean;
     declare contentArea?: UIElement;
-    declare collapseIcon?: any;
+    declare collapseIcon?: FACollapseIcon;
 
     constructor(...args) {
         super(...args);

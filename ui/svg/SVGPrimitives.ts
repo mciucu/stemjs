@@ -1,4 +1,4 @@
-import {SVGPrimitive} from "./SVGBase";
+import {SVGPrimitive, type SVGPrimitiveOptions} from "./SVGBase";
 import * as math from "../../numerics/StemMath";
 import {ExtendedOptions} from "../UIBase";
 
@@ -17,6 +17,7 @@ interface SVGCircleArcOptions extends SVGCircleOptions {
     endAngle?: number;
 }
 
+// A rect owns these four: getX/setX and their neighbours below read and write them as numbers
 interface SVGRectOptions {
     x?: number;
     y?: number;
@@ -24,12 +25,8 @@ interface SVGRectOptions {
     height?: number;
 }
 
-interface SVGLineOptions {
-    x1?: number;
-    y1?: number;
-    x2?: number;
-    y2?: number;
-}
+// The four endpoints are SVGOptions already; a line adds nothing of its own
+type SVGLineOptions = {};
 
 interface PolygonOptions {
     points?: math.Point[];
@@ -54,7 +51,9 @@ export class SVGGroup extends SVGPrimitive("g") {
     }
 }
 
-export class SVGPath extends SVGPrimitive<SVGPathOptions>("path") {
+export class SVGPath extends SVGPrimitive("path") {
+    declare options: SVGPrimitiveOptions<"path"> & SVGPathOptions;
+
     getDefaultOptions(options?: any): Partial<any> {
         return {
             d: ""
@@ -77,11 +76,11 @@ export class SVGPath extends SVGPrimitive<SVGPathOptions>("path") {
     }
 
     getLength(): number {
-        return (this.node as SVGPathElement).getTotalLength();
+        return this.node.getTotalLength();
     }
 
     getPointAtLength(len: number): DOMPoint {
-        return (this.node as SVGPathElement).getPointAtLength(len);
+        return this.node.getPointAtLength(len);
     }
 
     getPointAtLengthWithAngle(len: number): {x: number, y: number, alpha: number} {
@@ -103,7 +102,9 @@ export class SVGPath extends SVGPrimitive<SVGPathOptions>("path") {
     }
 }
 
-export class SVGCircle extends SVGPrimitive<SVGCircleOptions>("circle") {
+export class SVGCircle extends SVGPrimitive("circle") {
+    declare options: SVGPrimitiveOptions<"circle"> & SVGCircleOptions;
+
     getDefaultOptions(options?: any): Partial<any> {
         return {
             radius: 0,
@@ -150,6 +151,8 @@ export class SVGCircle extends SVGPrimitive<SVGCircleOptions>("circle") {
                 "a" + r + " " + r + " 0 0 1 " + r + " " + r +       // Move to E
                 "a" + r + " " + r + " 0 0 1 " + (-r) + " " + r +    // Move to S
                 "a" + r + " " + r + " 0 0 1 " + (-r) + " " + (-r);  // Finally, move back to W
+        // @ts-expect-error The tag is inferred instead of the options being pinned, so the constructor
+        // no longer names them - see Backlog item 5
         return new SVGPath({d: pathString});
     }
 }
@@ -192,7 +195,9 @@ export class SVGCircleArc extends SVGPath {
     }
 }
 
-export class SVGRect extends SVGPrimitive<SVGRectOptions>("rect") {
+export class SVGRect extends SVGPrimitive("rect") {
+    declare options: SVGPrimitiveOptions<"rect"> & SVGRectOptions;
+
     getX(): number {
         return this.options.x;
     }
@@ -230,7 +235,9 @@ export class SVGRect extends SVGPrimitive<SVGRectOptions>("rect") {
     }
 }
 
-export class SVGLine extends SVGPrimitive<SVGLineOptions>("line") {
+export class SVGLine extends SVGPrimitive("line") {
+    declare options: SVGPrimitiveOptions<"line"> & SVGLineOptions;
+
     getDefaultOptions(options?: any): Partial<any> {
         return {
             fill: "black",

@@ -1,4 +1,4 @@
-import {RenderStack, UIElement} from "./UIBase";
+import {RenderStack, UIElement, type PartialOptions} from "./UIBase";
 import {GlobalStyle} from "./GlobalStyle";
 import {NodeAttributes} from "./NodeAttributes";
 
@@ -31,7 +31,7 @@ export class Switcher extends UIElement<SwitcherOptions> {
         return children[0] || this.activeChild;
     }
 
-    getDefaultOptions() {
+    getDefaultOptions(): PartialOptions<Switcher> {
         return {
             fullHeight: false,
             preserveScroll: true,

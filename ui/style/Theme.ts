@@ -8,10 +8,14 @@ import type {UIElement} from "../UIBase";
 export type ThemeProps = Record<string, any>;
 
 
+// What @registerStyle decorates: any class that makes elements, abstract ones included. `typeof UIElement`
+// carries UIElement's own generic construct signature, which no concrete subclass satisfies - Backlog item 12
+type ElementClassLike = abstract new (...args: any[]) => UIElement<any, any, any, any>;
+
 export class Theme extends Dispatchable {
     static Global = new this(null, "Global");
 
-    classSet = new Set<typeof UIElement>();
+    classSet = new Set<ElementClassLike & {theme?: Theme}>();
     styleSheetInstances = new Map<typeof StyleSheet, StyleSheet>(); // map from StyleSheet class to instance
     updateThrottled: Function = (new CallThrottler({throttle: 50})).wrap(() => this.updateStyleSheets()); // TODO @cleanup CallThrottler syntax is really ugly
     name: string;
@@ -60,7 +64,8 @@ export class Theme extends Dispatchable {
         return new Theme(this, name, extraProps);
     }
 
-    register(cls: typeof UIElement, styleSheet: typeof StyleSheet): void {
+    // A constructor type rather than `typeof UIElement`, which no concrete subclass satisfies - Backlog item 12
+    register(cls: ElementClassLike & {theme?: Theme}, styleSheet: typeof StyleSheet): void {
         cls.theme = this;
         cls[this.styleSheetSymbol] = styleSheet;
         this.classSet.add(cls);
@@ -135,7 +140,7 @@ export class Theme extends Dispatchable {
 // Returning the widened class here is what a decorator can't do (microsoft/TypeScript#4881); the styleSheet
 // member is declared by ts-plugin/transform.js instead, so this only ever registers.
 export function registerStyle<T extends typeof StyleSheet>(styleClass: T, theme: Theme = Theme.Global) {
-    return function <ElementClass extends typeof UIElement<any, any, any>>(target: ElementClass): ElementClass {
+    return function <ElementClass extends ElementClassLike>(target: ElementClass): ElementClass {
         theme.register(target, styleClass);
         return target;
     };

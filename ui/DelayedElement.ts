@@ -1,5 +1,5 @@
 import {ensure} from "../base/Require";
-import {UIElement} from "./UIBase";
+import {UIElement, type UIChild} from "./UIBase";
 
 export const DelayedElement = <T extends new (...args: any[]) => UIElement<any, any, any, any>>(BaseClass: T) => class DelayedElement extends BaseClass {
     // Read by subclasses deciding what to render before the load lands
@@ -21,7 +21,7 @@ export const DelayedElement = <T extends new (...args: any[]) => UIElement<any, 
         }
     }
 
-    renderNotLoaded(): string {
+    renderNotLoaded(): UIChild {
         return "Loading component...";
     }
 

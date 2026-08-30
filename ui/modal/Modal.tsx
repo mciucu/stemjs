@@ -2,7 +2,7 @@ import {ButtonGroup} from "../button/ButtonGroup";
 import {Button, ButtonOptions} from "../button/Button";
 import {FloatingWindow} from "./FloatingWindow";
 import {ModalStyle} from "./Style";
-import {UI, UIElement, type UIChild, UIElementOptions, type BaseUIElement} from "../UIBase";
+import {UI, UIElement, type StyleObject, type UIChild, UIElementOptions, type BaseUIElement} from "../UIBase";
 import {Dispatcher, RemoveHandle} from "../../base/Dispatcher";
 import {registerStyle} from "../style/Theme";
 import {Level, LevelType, Size} from "../Constants";
@@ -69,7 +69,7 @@ export class Modal<ExtraOptions extends ModalOptions = ModalOptions> extends UI.
         </FloatingWindow>;
     }
 
-    getModalWindowStyle() {
+    getModalWindowStyle(): StyleObject {
         if (this.options.fillScreen) {
             this.options.width = "85%";
         }
@@ -148,7 +148,7 @@ export class Modal<ExtraOptions extends ModalOptions = ModalOptions> extends UI.
 
 
 export interface ActionModalOptions extends ModalOptions {
-    closeName?: string;
+    closeName?: UIChild;
     actionName?: UIChild;
     level?: LevelType;
     title?: UIChild;
@@ -250,7 +250,8 @@ type ActionModalClass = (new (...args: any[]) => UIElement<any, any, any, any>) 
 
 export const ActionModalButton = <T extends ActionModalClass>(ActionModal: T) =>
     class ActionModalButton extends Button<ButtonOptions & {modalOptions?: NonNullable<InstanceType<T>["options"]>}> {
-    getModalOptions() {
+    // The options the modal is shown with: what the button carries, plus whatever an override adds
+    getModalOptions(): Record<string, any> {
         let modalOptions = {
             actionName: this.options.label,
             level: this.options.level

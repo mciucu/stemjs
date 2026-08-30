@@ -607,7 +607,8 @@ export async function callWithRetry<T>(fn: () => Promise<T>, options: CallWithRe
 }
 
 export const UNICODE_BOM_CHARACTER = 0xFEFF;
-export const NOOP_FUNCTION = () => undefined;
+// Typed to take anything, since it stands in as the default for callbacks of every shape
+export const NOOP_FUNCTION: (...args: any[]) => void = () => undefined;
 
 export function isFirefox(): boolean {
     return (navigator.userAgent.indexOf("Firefox") !== -1

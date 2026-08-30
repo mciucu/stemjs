@@ -1,4 +1,4 @@
-import {Transition} from "../Transition";
+import {Transition, type TransitionLike} from "../Transition";
 import {Color} from "../Color";
 import {SVGUIElement} from "./SVGBase";
 import {SVGText} from "./SVGText";
@@ -11,9 +11,10 @@ interface ColorAnimatable extends SVGUIElement {
     getColor(): string | undefined;
 }
 
+// Either the element moves itself through setPosition, or it hands back the transition that does
 interface MoveAnimatable extends SVGUIElement {
-    setPosition(point: Point): void;
-    moveTransition?: (coords: Point, duration: number, dependsOn: Transition[], startTime: number) => Transition;
+    setPosition?(point: Point): void;
+    moveTransition?: (coords: Point, duration: number, dependsOn: TransitionLike[], startTime: number) => Transition;
 }
 
 interface BlinkTransitionOptions {
@@ -23,7 +24,7 @@ interface BlinkTransitionOptions {
     secondColor?: string;
     executeLastStep?: boolean;
     startTime?: number;
-    dependsOn?: Transition[];
+    dependsOn?: TransitionLike[];
 }
 
 export function makeBlinkTransition(svgElement: SVGUIElement, options?: BlinkTransitionOptions): Transition {
@@ -57,7 +58,7 @@ export function makeBlinkTransition(svgElement: SVGUIElement, options?: BlinkTra
     });
 }
 
-export function makeOpacityTransition(svgElement: SVGUIElement, opacity: number, duration: number, dependsOn: Transition[] = [], startTime: number = 0): Transition {
+export function makeOpacityTransition(svgElement: SVGUIElement, opacity: number, duration: number, dependsOn: TransitionLike[] = [], startTime: number = 0): Transition {
     if (!svgElement.options.hasOwnProperty("opacity")) {
         svgElement.options.opacity = 1;
     }
@@ -74,7 +75,7 @@ export function makeOpacityTransition(svgElement: SVGUIElement, opacity: number,
     });
 }
 
-export function makeColorTransition(svgElement: ColorAnimatable, color: string, duration: number, dependsOn: Transition[] = [], startTime: number = 0): Transition {
+export function makeColorTransition(svgElement: ColorAnimatable, color: string, duration: number, dependsOn: TransitionLike[] = [], startTime: number = 0): Transition {
     return new Transition({
         func: (t: number, context: any) => {
             svgElement.setColor(Color.interpolate(context.color, color, t));
@@ -88,7 +89,7 @@ export function makeColorTransition(svgElement: ColorAnimatable, color: string, 
     });
 }
 
-export function makeMoveTransition(svgElement: MoveAnimatable, coords: Point, duration: number, dependsOn: Transition[] = [], startTime: number = 0): Transition {
+export function makeMoveTransition(svgElement: MoveAnimatable, coords: Point, duration: number, dependsOn: TransitionLike[] = [], startTime: number = 0): Transition {
     if (isFunction(svgElement.moveTransition)) {
         return svgElement.moveTransition(coords, duration, dependsOn, startTime) as Transition;
     }
@@ -110,7 +111,7 @@ export function makeMoveTransition(svgElement: MoveAnimatable, coords: Point, du
     });
 }
 
-export function makeTextFillColorTransition(svgTextElement: SVGText, color: string, duration: number, dependsOn: Transition[] = [], startTime: number = 0): Transition {
+export function makeTextFillColorTransition(svgTextElement: SVGText, color: string, duration: number, dependsOn: TransitionLike[] = [], startTime: number = 0): Transition {
     return new Transition({
         func: (t: number, context: any) => {
             svgTextElement.setColor(Color.interpolate(context.color, color, t), true);

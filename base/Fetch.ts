@@ -62,8 +62,10 @@ export type FetchPostprocessor = (payload: any, xhrPromise?: XHRPromise) => any;
 export type FetchErrorPostprocessor = (error: any) => any;
 export type FetchPreprocessor = (options: FetchOptions, input?: RequestInfo) => FetchOptions | void;
 
-export interface FetchOptions extends RequestInit {
+export interface FetchOptions extends Omit<RequestInit, "cache"> {
     url?: string;
+    // Normalized to a RequestCache below, where false means a cache-busting parameter on the URL
+    cache?: RequestCache | boolean;
     dataType?: DataType;
     onUploadProgress?: (event: ProgressEvent) => void;
     onDownloadProgress?: (event: ProgressEvent) => void;
@@ -85,7 +87,8 @@ export interface FetchOptions extends RequestInit {
     
     // jQuery compatibility
     type?: string;
-    contentType?: string;
+    // Only read when truthy, so false is how a caller says to leave the header off
+    contentType?: string | false;
     data?: any;
 
 }
@@ -104,7 +107,8 @@ export class XHRPromise {
     _chained?: boolean;
 
     constructor(request: RequestInfo, options: FetchOptions = {}) {
-        request = new Request(request, options);
+        // fetch() has normalized cache to a RequestCache by the time a request is built from these
+        request = new Request(request, options as RequestInit);
         let xhr = new XMLHttpRequest();
         this.options = options;
         this.request = request;
@@ -310,8 +314,7 @@ export function jQueryCompatibilityPreprocessor(options: FetchOptions): FetchOpt
         const method = (options.method || "GET").toUpperCase();
         if (method === "GET" || method === "HEAD") {
             options.urlParams = options.urlParams || options.data;
-            // TODO @types at the end we shouldn't need this anymore
-            if ((options.cache as unknown as boolean) === false) {
+            if (options.cache === false) {
                 options.urlParams = getURLSearchParams(options.urlParams, options.arraySearchParamSuffix);
                 options.urlParams.set("_", Date.now());
             }

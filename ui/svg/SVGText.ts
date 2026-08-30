@@ -1,23 +1,24 @@
-import {SVGPrimitive, SVGUIElement} from "./SVGBase";
+import {SVGPrimitive, SVGUIElement, type SVGPrimitiveOptions} from "./SVGBase";
 import {DOMAttributesMap, NodeAttributes} from "../NodeAttributes";
-import {UI, TextUIElement} from "../UIBase";
+import {UI, TextUIElement, type ExtendedOptions} from "../UIBase";
 import {Point} from "../../numerics/StemMath";
 
 interface SVGTextOptions {
-    text?: string;
+    // Stringified on render, so a number is as good as the string it becomes
+    text?: string | number;
     fontFamily?: string;
     fontSize?: string | number;
     fontStyle?: string;
-    dx?: string | number;
     color?: string;
-    dy?: string | number;
     textAnchor?: string;
     selectable?: boolean;
     x?: number;
     y?: number;
 }
 
-export class SVGText extends SVGPrimitive<SVGTextOptions>("text") {
+export class SVGText extends SVGPrimitive("text") {
+    declare options: SVGPrimitiveOptions<"text"> & SVGTextOptions;
+
     declare textElement: TextUIElement;
     static domAttributesMap = new DOMAttributesMap(SVGUIElement.domAttributesMap, [
         ["dx"],
@@ -68,12 +69,12 @@ export class SVGText extends SVGPrimitive<SVGTextOptions>("text") {
         this.node.setAttribute("y", String(this.options.y));
     }
 
-    setText(text: string): void {
+    setText(text: string | number): void {
         this.options.text = text;
         this.textElement.setValue(text + "");
     }
 
-    getText(): string | undefined {
+    getText(): string | number | undefined {
         return this.options.text;
     }
 

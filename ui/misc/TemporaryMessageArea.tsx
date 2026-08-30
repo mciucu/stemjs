@@ -1,4 +1,4 @@
-import {ElementOptions, TextUIElement, UI} from "../UIBase";
+import {ElementOptions, TextUIElement, UI, type PartialOptions} from "../UIBase";
 import {NodeAttributes} from "../NodeAttributes";
 
 export interface TemporaryMessageAreaOptions {
@@ -14,7 +14,7 @@ export class TemporaryMessageArea extends UI.Primitive("span") {
     getDefaultOptions() {
         return {
             margin: 10
-        } as Partial<typeof this.options>;
+        } as PartialOptions<TemporaryMessageArea>;
     }
 
     render() {

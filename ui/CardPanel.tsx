@@ -1,4 +1,4 @@
-import {StyleObject, UI, type UIElement} from "./UIBase";
+import {StyleObject, UI, type PartialOptions, type UIElement} from "./UIBase";
 import {SimpleStyledElement, SimpleStyledElementOptions} from "./SimpleElements";
 import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {registerStyle} from "./style/Theme";
@@ -82,7 +82,7 @@ export class CardPanel extends SimpleStyledElement<CardPanelOptions> {
         return CardPanelHeaderStyle.getInstance();
     }
 
-    getDefaultOptions() {
+    getDefaultOptions(): PartialOptions<CardPanel> {
         return {
             headingCentered: true,
             bodyCentered: false,

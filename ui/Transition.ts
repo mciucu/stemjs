@@ -5,19 +5,22 @@ interface TransitionOptions {
     context?: any;
     duration?: number;
     startTime?: number;
-    dependsOn?: Transition[];
+    dependsOn?: TransitionLike[];
 }
 
 interface ModifierOptions extends TransitionOptions {
     reverseFunc: (context: any) => void;
 }
 
+// A list is a transition to everything that holds one: it answers every method the elements are asked for
+export type TransitionLike = Transition | TransitionList;
+
 export class Transition {
     func: (t: number, context: any) => void;
     context: any;
     duration: number;
     startTime: number;
-    dependsOn: Transition[];
+    dependsOn: TransitionLike[];
     speedFactor: number;
     stopped?: boolean;
     pauseTime?: number;
@@ -42,7 +45,7 @@ export class Transition {
                 "}\n";
     }
 
-    hasDependencyOn(t: Transition): boolean {
+    hasDependencyOn(t: TransitionLike): boolean {
         for (let transition of this.dependsOn) {
             if (transition === t) {
                 return true;
@@ -218,8 +221,8 @@ export class Modifier extends Transition {
 export class TransitionList {
     startTime: number;
     speedFactor: number;
-    transitions: Transition[];
-    dependsOn: Transition[];
+    transitions: TransitionLike[];
+    dependsOn: TransitionLike[];
     stopped?: boolean;
     pauseTime?: number;
     onNewFrame?: (fraction: number) => void;
@@ -244,7 +247,7 @@ export class TransitionList {
                 "}\n";
     }
 
-    add(transition: Transition, forceFinish: boolean = true): this {
+    add(transition: TransitionLike, forceFinish: boolean = true): this {
         for (let i = 0; i < transition.dependsOn.length; i += 1) {
             if (transition.dependsOn[i].getEndTime() > transition.startTime) {
                 console.error(transition.toString() + "\ndepends on\n" + transition.dependsOn[i].toString() + "\n" + "which ends after its start!");
@@ -257,7 +260,7 @@ export class TransitionList {
         return this;
     }
 
-    push(transition: Transition, forceFinish: boolean = true): this {
+    push(transition: TransitionLike, forceFinish: boolean = true): this {
         transition.setStartTime(this.getLength());
         for (let i = 0; i < transition.dependsOn.length; i += 1) {
             if (transition.dependsOn[i].getEndTime() > transition.startTime) {
@@ -406,7 +409,7 @@ export class TransitionList {
         return endTime;
     }
 
-    hasDependencyOn(t: Transition): boolean {
+    hasDependencyOn(t: TransitionLike): boolean {
         for (let transition of this.dependsOn) {
             if (transition === t) {
                 return true;

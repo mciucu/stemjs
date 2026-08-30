@@ -11,13 +11,17 @@ import {CleanupJobs, Dispatchable, OncePerTickRunner, RemoveHandle} from "../bas
 import {DOMAttributesMap, NodeAttributes} from "./NodeAttributes";
 import {Theme, ThemeProps} from "./style/Theme";
 import type {StyleSheet} from "./Style";
+import type {Duration} from "../time/Duration";
 
 export type SVGTagType = keyof SVGElementTagNameMap;
 export type HTMLTagType = keyof HTMLElementTagNameMap;
 export type UICleanChild = BaseUIElement | string | number;
-export type UIChild = Iterable<UIChild> | UICleanChild | null | undefined | false;
-// node.style coerces, so a unitless property is as often written 1 as "1"
-export type StyleObject = {[Key in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[Key] | number};
+// A Duration is a child too: it exists to be formatted, and a non-element child is stringified
+export type UIChild = Iterable<UIChild> | UICleanChild | Duration | null | undefined | false;
+// node.style coerces, so a unitless property is as often written 1 as "1", and applyStyleToNode
+// calls a value that is a function, so a function returning the value is as good as the value
+export type StyleValue<T> = T | number | (() => T | number);
+export type StyleObject = {[Key in keyof CSSStyleDeclaration]?: StyleValue<CSSStyleDeclaration[Key]>};
 
 // Called with the event, then the element itself
 export type UIEventHandler = (...args: any[]) => any;
@@ -37,9 +41,15 @@ export interface UIElementOptions<TagType extends string = HTMLTagType> {
     ref?: RefLinkOptions | string;
     key?: string | number;
     active?: boolean; // Tabs or switchers can put this on children
+    tabHref?: string; // A tab area reads this off the panel to link its tab
     nodeType?: TagType;
     className?: string;
     style?: string | StyleObject;
+    // These all reach the node through setAttribute, on whatever tag the element is
+    id?: string | number;
+    height?: number | string;
+    width?: number | string;
+    href?: string;
     theme?: Theme;
     styleSheet?: StyleSheet | typeof StyleSheet;
     // The events every element answers to; anything narrower belongs on its own options
@@ -56,8 +66,14 @@ type WritableKeys<T> = {
         (<G>() => G extends {-readonly [P in Key]: T[Key]} ? 1 : 2) ? Key : never;
 }[keyof T];
 
+// The DOM members stem's own option interfaces replace. Intersecting them with the node's member
+// would either leave `never` or narrow away the spelling setAttribute accepts, and an inputable's
+// value or bounds are numbers until they reach the node
+type OverriddenNodeMembers = "children" | "nodeType" | "style" | "title" | "value" | "min" | "max"
+    | "step" | "autofocus" | "id" | "height" | "width" | "href";
+
 // Options land on the node as attributes, so a readonly DOM member can never be one
-export type NodeOptions<NodeType> = Partial<Omit<Pick<NodeType, WritableKeys<NodeType>>, "children" | "nodeType" | "style" | "title">>;
+export type NodeOptions<NodeType> = Partial<Omit<Pick<NodeType, WritableKeys<NodeType>>, OverriddenNodeMembers>>;
 
 export type UIOptions<NodeType extends (SVGElement | HTMLElement), ExtraOptions = {}, TagType extends string = HTMLTagType> = NodeOptions<NodeType> & UIElementOptions<TagType> & ExtraOptions;
 
@@ -67,7 +83,31 @@ export type ElementOptions<ExtraOptions = {}, NodeType extends (SVGElement | HTM
 
 // Same, but when extending a component that already has options of its own: they're kept and yours are added on top.
 // `class MyButton extends Button {declare options: ExtendedOptions<Button, MyButtonOptions>;}`
-export type ExtendedOptions<BaseElement extends BaseUIElement<any>, ExtraOptions = {}> = NonNullable<BaseElement["options"]> & ExtraOptions;
+export type ExtendedOptions<BaseElement extends {options?: any}, ExtraOptions = {}> = NonNullable<BaseElement["options"]> & ExtraOptions;
+
+// The defaults an element returns from getDefaultOptions: a subset of its own options.
+// Name the class, not `this` - a polymorphic return type rejects the object literal the method returns.
+export type PartialOptions<Element extends {options?: any}> = Partial<NonNullable<Element["options"]>>;
+
+// A container that only ever holds one kind of element, which neither `children: BaseUIElement[]` nor
+// `options.children: UIChild` can say. `declare nodeGroup: ElementContainer<SVGGroup, GraphNode>;`
+export type ElementContainer<Container extends {options?: any}, ChildType> = Container & {
+    children: ChildType[];
+    options: NonNullable<Container["options"]> & {children?: ChildType[]};
+};
+
+// An element whose style another one writes into, which `style?: string | StyleObject` cannot say.
+// `declare svg: StyledElement<SVGRoot>;`
+export type StyledElement<Element extends {options?: any}> = Element & {
+    options: NonNullable<Element["options"]> & {style: StyleObject};
+};
+
+// An element that lays itself out from its size: the attribute may be a percentage, the arithmetic may not.
+// `export interface MyWidgetOptions extends NumericSizeOptions {...}`
+export interface NumericSizeOptions {
+    width?: number;
+    height?: number;
+}
 
 export const RenderStack: BaseUIElement[] = []; //keeps track of objects that are redrawing, to know where to assign refs automatically
 export const redrawPerTickRunner = new OncePerTickRunner((obj: BaseUIElement, event: any) => obj.node && obj.redraw(event));
@@ -162,7 +202,8 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
     }
 }
 
-export type TextElementOptions = {value?: string};
+// The value is stringified on read, so a number is as good a one as a string
+export type TextElementOptions = {value?: string | number};
 
 export class TextUIElement<ExtraOptions extends TextElementOptions = TextElementOptions, ValueType = string> extends BaseUIElement<Text> {
     value: ValueType;
@@ -319,7 +360,7 @@ export class UIElement<
         return (this.options?.nodeType || "div") as TagType;
     }
 
-    static create<T extends UIElement<any>, TOptions = any>(this: new (options?: TOptions) => T, parentNode: UIElement | HTMLElement, options?: TOptions): T {
+    static create<T extends UIElement<any>>(this: new (options?: PartialOptions<T>) => T, parentNode: UIElement | HTMLElement, options?: PartialOptions<T>): T {
         const uiElement = new this(options);
         uiElement.mount(parentNode, null);
         uiElement.dispatch("mount", uiElement);
@@ -401,7 +442,10 @@ export class UIElement<
         return children;
     }
 
-    // Most overrides answer with nothing, and only one caller anywhere reads the result
+    // Most overrides answer with nothing, and only one caller anywhere reads the result.
+    // The overload is what lets an override take the event redrawPerTickRunner passes, without
+    // putting a parameter this body never reads into the emitted method.
+    redraw(event?: any): boolean | void;
     redraw(): boolean | void {
         if (!this.node) {
             console.error("Element not yet mounted. Redraw aborted!", this);
@@ -745,6 +789,9 @@ export class UIElement<
         this.dispatch("resize");
     }
 
+    // A known DOM event name says which event the callback gets, so a listener does not have to widen it
+    addNodeListener<Name extends keyof HTMLElementEventMap>(name: Name, callback: (event: HTMLElementEventMap[Name]) => void, ...args: any[]): RemoveHandle;
+    addNodeListener(name: string, callback: EventListener, ...args: any[]): RemoveHandle;
     addNodeListener(name: string, callback: EventListener, ...args: any[]): RemoveHandle {
         (this.node as HTMLElement).addEventListener(name, callback, ...(args as []));
         const handler = {
