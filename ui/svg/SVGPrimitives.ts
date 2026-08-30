@@ -151,7 +151,6 @@ export class SVGCircle extends SVGPrimitive("circle") {
                 "a" + r + " " + r + " 0 0 1 " + r + " " + r +       // Move to E
                 "a" + r + " " + r + " 0 0 1 " + (-r) + " " + r +    // Move to S
                 "a" + r + " " + r + " 0 0 1 " + (-r) + " " + (-r);  // Finally, move back to W
-        // @ts-expect-error The tag is inferred instead of the options being pinned, so the constructor
         // no longer names them - see Backlog item 5
         return new SVGPath({d: pathString});
     }

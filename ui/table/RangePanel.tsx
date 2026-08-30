@@ -2,7 +2,7 @@ import {type ExtendedOptions, UI, UIElement, type UIElementOptions, type UIChild
 import {Button} from "../button/Button";
 import {NumberInput} from "../input/Input";
 import {RangePanelStyle} from "./RangePanelStyle";
-import type {StyleRules} from "../Style";
+import {type StyleRules} from "../Style";
 import {Dispatchable} from "../../base/Dispatcher";
 import {type Constructor} from "../../base/Utils";
 import {Size} from "../Constants";

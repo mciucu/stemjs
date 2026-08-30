@@ -1,6 +1,6 @@
 // Implements a Class Factory, to be able to create element that can be easily set to full screen
 import {FullScreenStyle} from "./FullScreenStyle";
-import type {StyleRules} from "./Style";
+import {type StyleRules} from "./Style";
 import {GlobalStyle} from "./GlobalStyle";
 import {type ElementOptions, UIElement, type UIElementOptions} from "./UIBase";
 import {NodeAttributes} from "./NodeAttributes";

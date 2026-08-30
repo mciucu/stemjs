@@ -8,8 +8,8 @@ export interface StatusOption {
     faIcon: string;
 }
 
-export type StateButtonOptions = ButtonOptions & StatusOption & {
-    faIcon?: string;
+// Partial, because render fills the label and the icon in from whichever status is current
+export type StateButtonOptions = ButtonOptions & Partial<StatusOption> & {
     state?: ActionStatusType;
     statusOptions?: (string | StatusOption)[];
 };

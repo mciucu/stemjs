@@ -1,5 +1,5 @@
 import {dashCase, isNumber, isString, isPlainObject, setObjectPrototype, resolveFuncValue} from "../base/Utils";
-import type {StyleRuleValue} from "./Style";
+import {type StyleRuleValue} from "./Style";
 
 export const defaultToPixelsAttributes = new Set([
     "border-radius",

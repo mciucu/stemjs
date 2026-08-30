@@ -10,8 +10,8 @@ import {
 import {CleanupJobs, Dispatchable, OncePerTickRunner, type RemoveHandle} from "../base/Dispatcher";
 import {DOMAttributesMap, NodeAttributes} from "./NodeAttributes";
 import {Theme, type ThemeProps} from "./style/Theme";
-import type {StyleSheet} from "./Style";
-import type {Duration} from "../time/Duration";
+import {type StyleSheet} from "./Style";
+import {type Duration} from "../time/Duration";
 
 export type SVGTagType = keyof SVGElementTagNameMap;
 export type HTMLTagType = keyof HTMLElementTagNameMap;
@@ -46,6 +46,8 @@ export interface UIElementOptions<TagType extends string = HTMLTagType> {
     className?: string;
     style?: string | StyleObject;
     // These all reach the node through setAttribute, on whatever tag the element is
+    // domTitle rather than title, since an element's own title is a child of <head>
+    domTitle?: string;
     id?: string | number;
     height?: number | string;
     width?: number | string;
