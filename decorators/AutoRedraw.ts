@@ -2,12 +2,14 @@ import {StoreObject, type StoreClass} from "../state/Store";
 import {PropertyCache} from "../data-structures/PropertyCache";
 import {BaseUIElement} from "../ui/UIBase";
 import {type Constructor} from "../base/Utils";
+import type {Dispatchable} from "../base/Dispatcher";
 
 type UIElementConstructor = Constructor<BaseUIElement>;
 type RedrawHandler = (event: any) => void;
 // The decorator is handed store classes, while the scan over options finds store objects. Both end up
-// in the same set, and attachChangeListener takes either.
-type ChangeSource = StoreObject | StoreClass<any>;
+// in the same set, and attachChangeListener takes either - or any other Dispatchable, which is how
+// services like iFrameUserDataService and serverStatisticsManager are passed here.
+type ChangeSource = Dispatchable | StoreClass<any>;
 
 interface AutoRedrawableClass extends UIElementConstructor {
     autoRedrawImplemented?: boolean;
