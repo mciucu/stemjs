@@ -1,6 +1,6 @@
 // TODO @Mihai this should become the new Store
 import {CleanupJobs, Dispatchable} from "../base/Dispatcher";
-import {GlobalState, RawStateData, State, StateData, StoreEvent, StoreId, StoreIdOrNull, StoreInterface} from "./State";
+import {GlobalState, type RawStateData, State, type StateData, type StoreEvent, type StoreId, type StoreIdOrNull, type StoreInterface} from "./State";
 import {isNotNull, isString, toArray} from "../base/Utils";
 import {FieldDescriptor} from "./StoreField";
 

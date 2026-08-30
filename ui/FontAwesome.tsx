@@ -1,6 +1,6 @@
 // Contains classes to abstract some generic Font Awesome usecases.
-import {UI, UIElementOptions} from "./UIBase";
-import {Direction, DirectionType} from "./Constants";
+import {UI, type UIElementOptions} from "./UIBase";
+import {Direction, type DirectionType} from "./Constants";
 import {NodeAttributes} from "./NodeAttributes";
 
 export interface FAIconOptions extends UIElementOptions {

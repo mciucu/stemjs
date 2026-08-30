@@ -1,5 +1,5 @@
-import {State, StoreEvent} from "./State";
-import {StoreClass, StoreObject, StoreOptions} from "./Store";
+import {State, type StoreEvent} from "./State";
+import {type StoreClass, StoreObject, type StoreOptions} from "./Store";
 
 export class SingletonStore<T extends SingletonStore<T> = any> extends StoreObject {
     objectType: string;

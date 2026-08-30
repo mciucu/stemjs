@@ -2,7 +2,7 @@
 import {FullScreenStyle} from "./FullScreenStyle";
 import type {StyleRules} from "./Style";
 import {GlobalStyle} from "./GlobalStyle";
-import {ElementOptions, UIElement, UIElementOptions} from "./UIBase";
+import {type ElementOptions, UIElement, type UIElementOptions} from "./UIBase";
 import {NodeAttributes} from "./NodeAttributes";
 
 export interface FullScreenableOptions extends UIElementOptions {

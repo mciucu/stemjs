@@ -2,7 +2,7 @@ import {buildColors} from "../Color";
 import {BasicLevelStyleSheet} from "../GlobalStyle";
 import {styleRule} from "../../decorators/Style";
 import {StyleSheet} from "../Style";
-import {Orientation, OrientationType} from "../Constants";
+import {Orientation, type OrientationType} from "../Constants";
 
 export const buttonColorToStyle = (color: string) => {
     const colors = buildColors(color);

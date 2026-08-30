@@ -1,9 +1,9 @@
-import {UI, UIElement, UIElementOptions, type UIChild, HTMLTagType} from "../UIBase";
+import {UI, UIElement, type UIElementOptions, type UIChild, type HTMLTagType} from "../UIBase";
 import {DOMAttributesMap, NodeAttributes} from "../NodeAttributes";
 import {InputStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
 import {StemDate} from "../../time/Date";
-import {CleanupJobs, RemoveHandle} from "../../base/Dispatcher";
+import {CleanupJobs, type RemoveHandle} from "../../base/Dispatcher";
 
 export interface InputableElementOptions<ValueType> extends UIElementOptions {
     initialValue?: ValueType;

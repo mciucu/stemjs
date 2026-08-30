@@ -1,6 +1,6 @@
 import {UI, UIElement, type UIChild} from "../UIBase";
-import {Constructor} from "../../base/Utils";
-import {Table, TableOptions} from "./Table";
+import {type Constructor} from "../../base/Utils";
+import {Table, type TableOptions} from "./Table";
 import {defaultComparator} from "../../base/Utils";
 import {MakeIcon} from "../SimpleElements";
 import {styleRule, StyleSheet} from "../Style";

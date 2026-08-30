@@ -1,5 +1,5 @@
 import {NavManager} from "./NavManager";
-import {Badge, SimpleStyledElementOptions} from "../SimpleElements";
+import {Badge, type SimpleStyledElementOptions} from "../SimpleElements";
 import {NodeAttributes} from "../NodeAttributes";
 
 interface NavCounterBadgeOptions extends SimpleStyledElementOptions {

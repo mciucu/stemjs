@@ -3,8 +3,8 @@ import {buildColors} from "./Color";
 import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {styleRule} from "../decorators/Style";
 import {registerStyle} from "./style/Theme";
-import {Orientation, OrientationType} from "./Constants";
-import {SimpleStyledElement, SimpleStyledElementOptions} from "./SimpleElements";
+import {Orientation, type OrientationType} from "./Constants";
+import {SimpleStyledElement, type SimpleStyledElementOptions} from "./SimpleElements";
 import {BaseUIElement} from "./UIBase";
 
 export interface ProgressBarOptions extends SimpleStyledElementOptions {

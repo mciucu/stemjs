@@ -1,12 +1,12 @@
-import {ElementOptions, UI, UIElement, type UICleanChild} from "../UIBase";
-import {StyleRules} from "../Style";
+import {type ElementOptions, UI, UIElement, type UICleanChild} from "../UIBase";
+import {type StyleRules} from "../Style";
 import {NavStyle} from "./NavStyle";
 import {Switcher} from "../Switcher";
 import {Link} from "../primitives/Link";
 import {FACollapseIcon} from "../FontAwesome"; //TODO: more flexibility, do not require FAIcons in NavElements
 import {SessionStorageMap} from "../../base/StorageMap";
-import {Constructor, unwrapArray} from "../../base/Utils";
-import {DirectionType, Orientation, OrientationType, Direction} from "../Constants";
+import {type Constructor, unwrapArray} from "../../base/Utils";
+import {type DirectionType, Orientation, type OrientationType, Direction} from "../Constants";
 
 let navSessionManager = new SessionStorageMap("navManager");
 

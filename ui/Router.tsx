@@ -1,4 +1,4 @@
-import {ExtendedOptions, UI, UIElement, UIEventHandler} from "./UIBase";
+import {type ExtendedOptions, UI, UIElement, type UIEventHandler} from "./UIBase";
 import {Switcher} from "./Switcher";
 import {Dispatcher} from "../base/Dispatcher";
 import {PageTitleManager} from "../base/PageTitleManager";

@@ -1,4 +1,4 @@
-import {isFunction, TimeoutHandler, IntervalHandler} from "./Utils";
+import {isFunction, type TimeoutHandler, type IntervalHandler} from "./Utils";
 
 type Callback = Function;
 

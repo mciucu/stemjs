@@ -1,11 +1,11 @@
 // TODO: This class is incomplete for horizontal orientation and more than 2 panels.
 
-import {ElementOptions, UI, UIElement, type UIChild} from "../UIBase";
+import {type ElementOptions, UI, UIElement, type UIChild} from "../UIBase";
 import {registerStyle} from "../style/Theme";
 import {unwrapArray} from "../../base/Utils";
-import {DividerBar, SectionDivider, SectionDividerOptions, SectionDividerPanelOptions} from "./SectionDivider";
+import {DividerBar, SectionDivider, type SectionDividerOptions, type SectionDividerPanelOptions} from "./SectionDivider";
 import {TitledDividerStyle} from "./Style";
-import {Orientation, OrientationType} from "../Constants";
+import {Orientation, type OrientationType} from "../Constants";
 import {FAIcon} from "../FontAwesome";
 
 

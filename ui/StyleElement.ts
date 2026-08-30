@@ -1,4 +1,4 @@
-import {TextUIElement, UI, UIElementOptions, type UIChild} from "./UIBase";
+import {TextUIElement, UI, type UIElementOptions, type UIChild} from "./UIBase";
 import {dashCase, isFunction, isNumber, isString} from "../base/Utils";
 import {NodeAttributes, defaultToPixelsAttributes} from "./NodeAttributes";
 

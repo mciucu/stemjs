@@ -1,11 +1,11 @@
 import {ButtonGroup} from "../button/ButtonGroup";
-import {Button, ButtonOptions} from "../button/Button";
+import {Button, type ButtonOptions} from "../button/Button";
 import {FloatingWindow} from "./FloatingWindow";
 import {ModalStyle} from "./Style";
-import {UI, UIElement, type StyleObject, type UIChild, UIElementOptions, type BaseUIElement} from "../UIBase";
-import {Dispatcher, RemoveHandle} from "../../base/Dispatcher";
+import {UI, UIElement, type StyleObject, type UIChild, type UIElementOptions, type BaseUIElement} from "../UIBase";
+import {Dispatcher, type RemoveHandle} from "../../base/Dispatcher";
 import {registerStyle} from "../style/Theme";
-import {Level, LevelType, Size} from "../Constants";
+import {Level, type LevelType, Size} from "../Constants";
 import {TemporaryMessageArea} from "../misc/TemporaryMessageArea";
 import {NodeAttributes} from "../NodeAttributes";
 import {isString} from "../../base/Utils";

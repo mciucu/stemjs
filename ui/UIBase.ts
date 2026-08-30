@@ -5,11 +5,11 @@ import {
     isPlainObject,
     unwrapElementWithFunc,
     isString,
-    Nullable, isFunction, Constructor
+    type Nullable, isFunction, type Constructor
 } from "../base/Utils";
-import {CleanupJobs, Dispatchable, OncePerTickRunner, RemoveHandle} from "../base/Dispatcher";
+import {CleanupJobs, Dispatchable, OncePerTickRunner, type RemoveHandle} from "../base/Dispatcher";
 import {DOMAttributesMap, NodeAttributes} from "./NodeAttributes";
-import {Theme, ThemeProps} from "./style/Theme";
+import {Theme, type ThemeProps} from "./style/Theme";
 import type {StyleSheet} from "./Style";
 import type {Duration} from "../time/Duration";
 

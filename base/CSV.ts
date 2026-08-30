@@ -1,6 +1,6 @@
 import {FileSaver} from "./FileSaver";
 import {UNICODE_BOM_CHARACTER} from "./Utils";
-import {ColumnHandler, ColumnInput} from "./ColumnHandler";
+import {ColumnHandler, type ColumnInput} from "./ColumnHandler";
 
 const DEFAULT_FILE_NAME = "data.csv";
 

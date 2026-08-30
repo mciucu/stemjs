@@ -1,7 +1,7 @@
 import {StyleElement, KeyframeElement, DynamicStyleElement} from "./StyleElement";
 import {Dispatchable} from "../base/Dispatcher";
 import {PREFERRED_CLASS_NAME_KEY} from "../decorators/Style";
-import {registerStyle, Theme, ThemeProps} from "./style/Theme";
+import {registerStyle, Theme, type ThemeProps} from "./style/Theme";
 
 export interface StyleSheetOptions {
     parent: HTMLElement;

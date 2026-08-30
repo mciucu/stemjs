@@ -1,6 +1,6 @@
-import {StoreEvent, StoreId} from "../State";
+import {type StoreEvent, type StoreId} from "../State";
 import {isString} from "../../base/Utils";
-import {BaseStore, StoreClass} from "../Store";
+import {BaseStore, type StoreClass} from "../Store";
 import {Dispatchable} from "../../base/Dispatcher";
 
 export const VirtualObjectStoreMixin = (objectType: string) => class VirtualStoreObject extends BaseStore(objectType) {

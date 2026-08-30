@@ -1,4 +1,4 @@
-import {ElementOptions, TextUIElement, UI, type PartialOptions} from "../UIBase";
+import {type ElementOptions, TextUIElement, UI, type PartialOptions} from "../UIBase";
 import {NodeAttributes} from "../NodeAttributes";
 
 export interface TemporaryMessageAreaOptions {

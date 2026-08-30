@@ -1,4 +1,4 @@
-import {ElementOptions, UI} from "../UIBase";
+import {type ElementOptions, UI} from "../UIBase";
 import {Dispatchable} from "../../base/Dispatcher";
 
 export interface TimePassedSpanOptions {

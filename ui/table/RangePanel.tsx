@@ -1,10 +1,10 @@
-import {ExtendedOptions, UI, UIElement, UIElementOptions, type UIChild, HTMLTagType} from "../UIBase";
+import {type ExtendedOptions, UI, UIElement, type UIElementOptions, type UIChild, type HTMLTagType} from "../UIBase";
 import {Button} from "../button/Button";
 import {NumberInput} from "../input/Input";
 import {RangePanelStyle} from "./RangePanelStyle";
 import type {StyleRules} from "../Style";
 import {Dispatchable} from "../../base/Dispatcher";
-import {Constructor} from "../../base/Utils";
+import {type Constructor} from "../../base/Utils";
 import {Size} from "../Constants";
 import {NodeAttributes} from "../NodeAttributes";
 import {Table} from "./Table";

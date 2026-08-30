@@ -2,7 +2,7 @@ import {StyleSheet} from "./Style";
 import {styleRule} from "../decorators/Style";
 import {enhance} from "./Color";
 import {Device} from "../base/Device";
-import {Orientation, Level, Size, LevelType, SizeType, OrientationType} from "./Constants";
+import {Orientation, Level, Size, type LevelType, type SizeType, type OrientationType} from "./Constants";
 import {Theme} from "./style/Theme";
 import {FloatType} from "./style/ThemeTypes";
 

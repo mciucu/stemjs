@@ -3,9 +3,9 @@ import {CollapsibleStyle} from "./Style";
 import {GlobalStyle} from "../GlobalStyle";
 import {MakeIcon} from "../SimpleElements";
 import {registerStyle} from "../style/Theme";
-import {Constructor, isFunction} from "../../base/Utils";
+import {type Constructor, isFunction} from "../../base/Utils";
 import {BaseInputElement} from "../input/BaseInputElement";
-import {StyleRules, styleRule, StyleSheet} from "../Style";
+import {type StyleRules, styleRule, StyleSheet} from "../Style";
 
 
 export interface CollapsibleOptions {

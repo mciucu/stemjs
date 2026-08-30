@@ -1,4 +1,4 @@
-import {fetch, XHRPromise, FetchPreprocessor, FetchPostprocessor, FetchErrorPostprocessor, FetchOptions, URLFetchOptions} from "./Fetch";
+import {fetch, XHRPromise, type FetchPreprocessor, type FetchPostprocessor, type FetchErrorPostprocessor, type FetchOptions, type URLFetchOptions} from "./Fetch";
 
 export class AjaxHandler {
     static _baseAjax: AjaxHandler | null = null;

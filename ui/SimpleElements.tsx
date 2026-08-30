@@ -5,7 +5,7 @@ import {buildColors} from "./Color";
 import {styleRule} from "../decorators/Style";
 import {isFunction} from "../base/Utils";
 import {NodeAttributes} from "./NodeAttributes";
-import {LevelType, SizeType} from "./Constants";
+import {type LevelType, type SizeType} from "./Constants";
 
 // Type definitions
 export type IconType = string | BaseUIElement | ((options: any) => BaseUIElement);

@@ -1,4 +1,4 @@
-import {UI, UIElementOptions} from "../UIBase";
+import {UI, type UIElementOptions} from "../UIBase";
 import {FloatingWindowStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
 

@@ -1,5 +1,5 @@
-import {ActionStatus, ActionStatusType} from "../Constants";
-import {Button, ButtonOptions} from "./Button";
+import {ActionStatus, type ActionStatusType} from "../Constants";
+import {Button, type ButtonOptions} from "./Button";
 import {type UIChild} from "../UIBase";
 import {BaseUIElement} from "../UIBase";
 

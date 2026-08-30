@@ -1,4 +1,4 @@
-import {ElementOptions, UI, UIElement} from "./UIBase";
+import {type ElementOptions, UI, UIElement} from "./UIBase";
 import {ConcentricCirclesLoadingScreen} from "./ConcentricCirclesLoadingScreen";
 import {DelayedElement} from "./DelayedElement";
 import {Ajax} from "../base/Ajax";

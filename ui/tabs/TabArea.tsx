@@ -1,9 +1,9 @@
-import {ExtendedOptions, UI, UIElement, type PartialOptions, type UIChild} from "../UIBase";
+import {type ExtendedOptions, UI, UIElement, type PartialOptions, type UIChild} from "../UIBase";
 import {Switcher} from "../Switcher";
 import {Link} from "../primitives/Link";
 import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
 import {registerStyle} from "../style/Theme";
-import {StyleRules} from "../Style";
+import {type StyleRules} from "../Style";
 import {DefaultTabAreaStyle} from "./Style";
 import {unwrapArray} from "../../base/Utils";
 

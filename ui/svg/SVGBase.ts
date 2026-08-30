@@ -1,10 +1,10 @@
-import {SVGTagType, UI, UIElement} from "../UIBase";
+import {type SVGTagType, UI, UIElement} from "../UIBase";
 import {DOMAttributesMap} from "../NodeAttributes";
 import {setObjectPrototype} from "../../base/Utils";
 import {SVGNodeAttributes} from "./SVGNodeAttributes";
 import {Device} from "../../base/Device";
 import {applyDebugFlags} from "../UIBase";
-import {Point} from "../../numerics/StemMath";
+import {type Point} from "../../numerics/StemMath";
 
 
 interface BoundingRect {

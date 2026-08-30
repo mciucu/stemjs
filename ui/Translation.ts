@@ -1,4 +1,4 @@
-import {TextElementOptions, TextUIElement, UI} from "./UIBase";
+import {type TextElementOptions, TextUIElement, UI} from "./UIBase";
 import {evaluateSprintf, isString} from "../base/Utils";
 
 // Type definitions for translation functionality

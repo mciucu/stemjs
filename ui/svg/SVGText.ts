@@ -1,7 +1,7 @@
 import {SVGPrimitive, SVGUIElement, type SVGPrimitiveOptions} from "./SVGBase";
 import {DOMAttributesMap, NodeAttributes} from "../NodeAttributes";
 import {UI, TextUIElement, type ExtendedOptions} from "../UIBase";
-import {Point} from "../../numerics/StemMath";
+import {type Point} from "../../numerics/StemMath";
 
 interface SVGTextOptions {
     // Stringified on render, so a number is as good as the string it becomes

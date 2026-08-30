@@ -2,7 +2,7 @@ import {Transition, type TransitionLike} from "../Transition";
 import {Color} from "../Color";
 import {SVGUIElement} from "./SVGBase";
 import {SVGText} from "./SVGText";
-import {Point} from "../../numerics/StemMath";
+import {type Point} from "../../numerics/StemMath";
 import {isFunction} from "../../base/Utils";
 
 

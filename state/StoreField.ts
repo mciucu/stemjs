@@ -1,7 +1,7 @@
 import {StemDate} from "../time/Date";
 import {isFunction, isString} from "../base/Utils";
 import {StoreObject} from "./Store";
-import {GlobalState, StoreId} from "./State";
+import {GlobalState, type StoreId} from "./State";
 
 export interface FieldOptions {
     rawField?: string | symbol | ((key: string, descriptor?: FieldDescriptor) => string | symbol);

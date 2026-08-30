@@ -1,15 +1,15 @@
-import {ElementOptions, UI, UIElement} from "../UIBase";
+import {type ElementOptions, UI, UIElement} from "../UIBase";
 import {changeParent} from "../Utils";
 import {registerStyle} from "../style/Theme";
 import {NavStyle} from "./NavStyle";
-import {StyleRules} from "../Style";
+import {type StyleRules} from "../Style";
 import {PagedHorizontalOverflow} from "../horizontal-overflow/PagedHorizontalOverflow";
 import {PagedHorizontalOverflowStyle} from "../horizontal-overflow/Style";
 import {LeftSideNavIcon, RightSideNavIcon, WrappedNavIcon} from "./NavIcon";
-import {BasicOrientedElement, BasicOrientedElementType, NavSection} from "./NavElement";
+import {BasicOrientedElement, type BasicOrientedElementType, NavSection} from "./NavElement";
 import {initializeSwipeEvents} from "./NavSwipeDetection";
 import {SessionStorageMap} from "../../base/StorageMap";
-import {DirectionType, Orientation, Direction} from "../Constants";
+import {type DirectionType, Orientation, Direction} from "../Constants";
 
 
 interface SidePanelGroupOptions {

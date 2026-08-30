@@ -1,5 +1,5 @@
 import {FormStyle} from "./Style";
-import {ElementOptions, TextUIElement, UI, type UIChild} from "../UIBase";
+import {type ElementOptions, TextUIElement, UI, type UIChild} from "../UIBase";
 import {registerStyle} from "../style/Theme";
 import {NodeAttributes} from "../NodeAttributes";
 

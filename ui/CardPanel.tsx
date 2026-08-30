@@ -1,5 +1,5 @@
-import {StyleObject, UI, type PartialOptions, type UIElement} from "./UIBase";
-import {SimpleStyledElement, SimpleStyledElementOptions} from "./SimpleElements";
+import {type StyleObject, UI, type PartialOptions, type UIElement} from "./UIBase";
+import {SimpleStyledElement, type SimpleStyledElementOptions} from "./SimpleElements";
 import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";

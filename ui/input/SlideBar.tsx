@@ -1,5 +1,5 @@
 import {Draggable} from "../Draggable";
-import {ElementOptions, UI, UIElement} from "../UIBase";
+import {type ElementOptions, UI, UIElement} from "../UIBase";
 import {ProgressBar} from "../ProgressBar";
 import {Orientation} from "../Constants";
 import {Device} from "../../base/Device";

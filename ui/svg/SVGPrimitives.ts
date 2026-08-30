@@ -1,6 +1,6 @@
 import {SVGPrimitive, type SVGPrimitiveOptions} from "./SVGBase";
 import * as math from "../../numerics/StemMath";
-import {ExtendedOptions} from "../UIBase";
+import {type ExtendedOptions} from "../UIBase";
 
 
 interface SVGPathOptions {

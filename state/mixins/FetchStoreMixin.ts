@@ -1,8 +1,8 @@
 import {unwrapArray, splitInChunks, isString} from "../../base/Utils";
 import {Ajax} from "../../base/Ajax";
-import {GlobalState, StoreId} from "../State";
-import {URLFetchOptions} from "../../base/Fetch";
-import {BaseStore, StoreOptions, StoreObject, StoreClass} from "../Store";
+import {GlobalState, type StoreId} from "../State";
+import {type URLFetchOptions} from "../../base/Fetch";
+import {BaseStore, type StoreOptions, StoreObject, type StoreClass} from "../Store";
 
 // Options a fetch can be called with, might be overridden
 export interface BaseFetchOptions {

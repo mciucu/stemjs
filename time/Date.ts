@@ -1,5 +1,5 @@
 import {padNumber, suffixWithOrdinal, isNumber, isString} from "../base/Utils";
-import {TimeUnit, Duration, DurationInput, TimeUnitKey} from "./Duration";
+import {TimeUnit, Duration, type DurationInput, type TimeUnitKey} from "./Duration";
 import {TokenFormatter} from "./Formatter";
 import {Timezone} from "../localization/Timezone";
 
