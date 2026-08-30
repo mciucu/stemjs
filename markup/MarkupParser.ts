@@ -600,11 +600,11 @@ function LineStartModifierMixin<T extends new (...args: any[]) => Modifier>(Base
                             content: this.wrap(elements)
                         });
                     } else {
-                        // We use object assign here to keep the start and end properties. (Maybe along with others)
-                        let newElement = Object.assign({}, element, {
+                        // Copied rather than rebuilt, to keep the start and end properties (maybe along with others)
+                        newArray.push({
+                            ...element,
                             content: this.wrap(element.content.children)
                         });
-                        newArray.push(newElement);
                     }
 
                 } else {

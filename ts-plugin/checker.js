@@ -3,6 +3,7 @@
 
 const path = require("path");
 const {getAugmentedSource} = require("./transform");
+const {isNumericCoercion} = require("./numericCoercion");
 
 const PLUGIN_NAME = "ts-plugin-registered-styles";
 
@@ -94,6 +95,7 @@ function getProjectDiagnostics(ts, projectRoot, filter = null, previewNoCheck = 
     const {options, fileNames} = parseConfig(ts, projectRoot);
     const augmentedFiles = new Map();
     const program = ts.createProgram(fileNames, options, createAugmentingHost(ts, options, augmentedFiles, previewNoCheck));
+    const checker = program.getTypeChecker();
 
     return ts.getPreEmitDiagnostics(program).filter(diagnostic => {
         // Project-wide diagnostics have no file to match against, so a filtered run isn't asking about them
@@ -105,6 +107,9 @@ function getProjectDiagnostics(ts, projectRoot, filter = null, previewNoCheck = 
             return false;
         }
         if (isOurs(augmentedFiles.get(path.normalize(diagnostic.file.fileName)), diagnostic.start)) {
+            return false;
+        }
+        if (isNumericCoercion(ts, checker, diagnostic)) {
             return false;
         }
         return !filter || diagnostic.file.fileName.includes(filter);

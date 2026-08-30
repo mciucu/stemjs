@@ -136,6 +136,26 @@ A base that stores are built on top of extends `StoreObject` directly and carrie
 registers it - it gets the declaration for extending `StoreObject`. Anything else the plugin doesn't recognize
 as a store falls back to `StoreObject`'s own statics, which is what `getStore()` was before.
 
+## Operands with a numeric `valueOf`
+
+An operator reads its operands through `valueOf` at runtime; TypeScript consults neither `valueOf` nor
+`Symbol.toPrimitive` and offers no way to say a class coerces. `StemDate`, `Duration` and `TimeUnit` all answer
+with a number, so `duration >= 2 * TimeUnit.DAY` runs correctly and reports three errors.
+
+The plugin states the rule instead of working around it: an operand coerces if it is number-like already, or if
+its type declares a `valueOf` returning a number, and `TS2362`/`TS2363`/`TS2365` are dropped when every operand
+does. Nothing is added to the code being typed — no cast, no explicit `.valueOf()`, no intersection with `number`.
+
+It stays narrow deliberately:
+
+- only `- * / % ** < > <= >=`. `+` concatenates as readily as it adds, so an object reaching it is worth
+  reporting even when it would coerce
+- a union coerces only if every constituent does, so a `string | number` id still reports
+- a `valueOf` returning anything but a number does not count, which is what keeps `number * boolean` an error
+
+`test/fixture/numeric.ts` asserts both directions: the coercing forms compile, and the four that must keep
+reporting carry `@ts-expect-error`.
+
 ## What it costs
 
 Because the declarations are appended and the rename is length-neutral, every offset in the original file stays
@@ -216,6 +236,8 @@ completions, diagnostics, outline).
   maps results on a relocated member back to the member itself.
 - `checker.js` - builds a program over the augmented text and drops our own noise from the diagnostics. Shared
   by the command line and the tests, so the two can't disagree about what counts as an error.
+- `numericCoercion.js` - the rule above, shared by `checker.js` and `index.js` so the editor and the command
+  line agree about which operators are fine.
 - `typecheck.js` - the command-line counterpart, a CLI over `checker.js`.
 - `loadTypeScript.js` - finds the project's TypeScript from wherever we're run.
 - `test/` - see above.

@@ -60,7 +60,7 @@ export function MakeText(text: UICleanChild, options?: any): BaseUIElement {
 
 export class SimpleStyledElement<T extends SimpleStyledElementOptions = SimpleStyledElementOptions> extends UIElement<T> {
     getLevel(): LevelType | undefined {
-        return (this.options as any).level || (this.parent && (this.parent as any).getLevel && (this.parent as any).getLevel());
+        return this.options.level || (this.parent && (this.parent as any).getLevel && (this.parent as any).getLevel());
     }
 
     setLevel(level: LevelType): void {
@@ -68,7 +68,7 @@ export class SimpleStyledElement<T extends SimpleStyledElementOptions = SimpleSt
     }
 
     getSize(): SizeType | undefined {
-        return (this.options as any).size || (this.parent && (this.parent as any).getSize && (this.parent as any).getSize());
+        return this.options.size || (this.parent && (this.parent as any).getSize && (this.parent as any).getSize());
     }
 
     setSize(size: SizeType): void {
@@ -95,7 +95,7 @@ export class IconableInterface<T extends SimpleStyledElementOptions = SimpleStyl
     }
 
     getIcon(): BaseUIElement | null {
-        const icon = (this.options as any).icon;
+        const icon = this.options.icon;
         return icon ? MakeIcon(icon) : null;
     }
 
@@ -117,12 +117,13 @@ let labelColorToStyle = (color: string): any => {
         borderColor: colors[5],
         color: colors[6],
     };
-    return Object.assign({}, regular, {
+    return {
+        ...regular,
         ":hover": darker,
         ":hover:disabled": regular,
         ":focus": darker,
         ":active": darker,
-    });
+    };
 };
 
 export class LabelStyle extends BasicLevelStyleSheet(labelColorToStyle) {

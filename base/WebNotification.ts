@@ -29,7 +29,7 @@ export class WebNotification extends EnqueueableMethodMixin(Dispatchable) {
             return;
         }
         // Into a fresh object: assigning onto defaultOptions would leak this notification's options into every later one
-        this._notification = new self.Notification(this.options.title, Object.assign({}, this.constructor.defaultOptions, this.options));
+        this._notification = new self.Notification(this.options.title, {...this.constructor.defaultOptions, ...this.options});
     }
 
     @enqueueIfNotLoaded

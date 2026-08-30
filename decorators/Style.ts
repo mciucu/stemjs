@@ -87,7 +87,7 @@ function styleRuleWithOptions(...optionsArgs: StyleRuleOptions[]): FakedDecorato
         };
 
         // Change the prototype of this object to be able to access the old descriptor/value
-        (target as any)[options.getKey!(key)] = Object.assign({}, descriptor);
+        (target as any)[options.getKey!(key)] = {...descriptor};
 
         descriptor.initializer = function (this: any) {
             let style = descriptor.objInitializer!.call(this);

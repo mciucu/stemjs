@@ -131,7 +131,7 @@ export class StemDate extends BaseDate {
         timeUnit = TimeUnit.toTimeUnit(timeUnit);
         const stemDate = this.constructor.toDate(date);
         let diff = this.diff(stemDate);
-        if (diff.valueOf() >= 2 * timeUnit.valueOf()) {
+        if (diff >= 2 * timeUnit) {
             // If the distance between the two dates is more than 2 standard lengths of the time unit
             // This would be wrong if you would have time unit that can sometimes last more than twice their canonical duration
             // Works correctly for all implemented time units

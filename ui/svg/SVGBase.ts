@@ -100,7 +100,7 @@ export class SVGUIElement<
 
     saveState() {
         let state: any = {};
-        state.options = Object.assign({}, this.options);
+        state.options = {...this.options};
         return state;
     }
 

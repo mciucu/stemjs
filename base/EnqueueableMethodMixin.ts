@@ -1,7 +1,8 @@
 import {type Constructor} from "./Utils";
 export function enqueueIfNotLoaded(target: any, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
     const method = descriptor.value;
-    return Object.assign({}, descriptor, {
+    return {
+        ...descriptor,
         value: function(...args: any[]) {
             if (this.isLoaded()) {
                 return method.call(this, ...args);
@@ -9,8 +10,8 @@ export function enqueueIfNotLoaded(target: any, key: string, descriptor: Propert
                 this.enqueueMethodCall(method, args);
                 return null;
             }
-        }
-    });
+        },
+    };
 }
 
 

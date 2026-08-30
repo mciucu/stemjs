@@ -601,7 +601,7 @@ export class UIElement<
     }
 
     get styleSheet(): Nullable<StyleSheet> {
-        let {styleSheet} = (this.options as any) || {};
+        let {styleSheet} = this.options || {};
         const theme = this.getTheme();
 
         if (!styleSheet) {

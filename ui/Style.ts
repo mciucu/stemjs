@@ -98,6 +98,9 @@ class StyleSheet extends Dispatchable {
     }
 
 
+    // A sheet and its class are interchangeable to every caller, so the receiver is either; the body still
+    // only ever runs with the class, which is what the implementation signature below keeps saying
+    static getInstance<T extends typeof StyleSheet>(this: T | StyleSheet, theme?: Theme): StyleRules<InstanceType<T>>;
     static getInstance<T extends typeof StyleSheet>(this: T, theme = (this.theme || Theme.Global)): StyleRules<InstanceType<T>> {
         return theme.getStyleSheetInstance(this) as StyleRules<InstanceType<T>>;
     }

@@ -30,16 +30,18 @@ export class HorizontalOverflowStyle extends StyleSheet {
     };
 
     @styleRule
-    leftArrow = Object.assign({}, this.arrow, {
+    leftArrow = {
+        ...this.arrow,
         left: 0,
         borderRight: () => "2px solid " + this.arrowHoverBackground(),
-    });
+    };
 
     @styleRule
-    rightArrow = Object.assign({}, this.arrow, {
+    rightArrow = {
+        ...this.arrow,
         right: 0,
         borderLeft: () => "2px solid " + this.arrowHoverBackground(),
-    });
+    };
 
     @styleRule
     horizontalOverflow = {

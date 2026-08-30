@@ -71,7 +71,8 @@ export class Theme extends Dispatchable {
         this.classSet.add(cls);
     }
 
-    getStyleSheet(cls: any): StyleSheet {
+    // Answers with what register stored, which is the class rather than an instance
+    getStyleSheet(cls: any): typeof StyleSheet {
         return cls[this.styleSheetSymbol] || this.baseTheme?.getStyleSheet(cls);
     }
 
@@ -98,7 +99,8 @@ export class Theme extends Dispatchable {
     }
 
     getAllStyleSheets(): any[] {
-        const styleSheetSet = new Set(this.styleSheetInstances.values());
+        // Already-built instances seed it and registered classes join them, and getInstance takes either
+        const styleSheetSet = new Set<StyleSheet | typeof StyleSheet>(this.styleSheetInstances.values());
         for (const cls of this.classSet.values()) {
             styleSheetSet.add(this.getStyleSheet(cls));
         }

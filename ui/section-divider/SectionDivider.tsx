@@ -17,9 +17,10 @@ interface DividerBarOptions {
 @registerStyle(SectionDividerStyle)
 export class DividerBar extends Divider<DividerBarOptions> {
     getDefaultOptions() {
-        return Object.assign({}, super.getDefaultOptions(), {
+        return {
+            ...super.getDefaultOptions(),
             orientation: Orientation.HORIZONTAL,
-        });
+        };
     }
 
     dragMousedown(event) {

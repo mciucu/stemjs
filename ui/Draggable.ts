@@ -72,7 +72,7 @@ export const Draggable = <T extends new (...args: any[]) => any>(BaseClass: T = 
     }
 
     createDragGenericListenerWrapper(listeners: DragListeners, dragEventType: string): DragListenerWrapper {
-        let listenerWrapper: DragListenerWrapper = Object.assign({}, listeners);
+        let listenerWrapper: DragListenerWrapper = {...listeners};
         let dragStarted = false;
 
         listenerWrapper.onWrapperDrag = (event: Event): void => {

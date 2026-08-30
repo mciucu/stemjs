@@ -9,6 +9,7 @@
 // where that member is actually written.
 
 const {getAugmentedSource} = require("./transform");
+const {isNumericCoercion} = require("./numericCoercion");
 
 function init(modules) {
     const ts = modules.typescript;
@@ -143,6 +144,9 @@ function init(modules) {
         for (const key of ["getSemanticDiagnostics", "getSyntacticDiagnostics", "getSuggestionDiagnostics"]) {
             proxy[key] = (fileName) => languageService[key](fileName).filter(diagnostic => {
                 if (isOurs(fileName, diagnostic.start)) {
+                    return false;
+                }
+                if (isNumericCoercion(ts, languageService.getProgram().getTypeChecker(), diagnostic)) {
                     return false;
                 }
                 // A placeholder is un-annotated on purpose; its implicit any is ours to answer for, not the user's

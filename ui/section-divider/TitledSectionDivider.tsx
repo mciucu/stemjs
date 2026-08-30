@@ -143,13 +143,15 @@ class BarCollapsePanel extends UI.Element<BarCollapsePanelOptions> {
 
 
 @registerStyle(TitledDividerStyle)
-export class TitledSectionDivider extends SectionDivider<TitledSectionDividerOptions> {    declare panels: BarCollapsePanel[];
+export class TitledSectionDivider extends SectionDivider<TitledSectionDividerOptions> {
+    declare panels: BarCollapsePanel[];
 
     getDefaultOptions(): Partial<TitledSectionDividerOptions> {
-        return Object.assign({}, super.getDefaultOptions(), {
+        return {
+            ...super.getDefaultOptions(),
             collapsedSize: 40,
             autoCollapse: true,
-        });
+        };
     }
 
     getDividerBarClass() {

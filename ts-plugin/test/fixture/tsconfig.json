@@ -19,5 +19,5 @@
             }
         ]
     },
-    "include": ["stores.ts", "optional.ts", "constructor.ts", "enums.ts", "registry.ts"]
+    "include": ["stores.ts", "optional.ts", "constructor.ts", "enums.ts", "registry.ts", "numeric.ts"]
 }
