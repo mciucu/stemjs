@@ -313,12 +313,12 @@ export class ConfirmModal extends ActionModal<ConfirmModalOptions> {
         super.hide();
     }
 
-    static async prompt(options) {
-        return new Promise((resolve) => {
+    static async prompt<T = any>(options): Promise<T> {
+        return new Promise<T>((resolve) => {
             const modal = new this({...options, destroyOnHide: true});
             modal.resolvePromise = (value) => {
                 modal.resolved = true;
-                resolve(value);
+                resolve(value as any);
             };
             modal.show();
         });

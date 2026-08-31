@@ -26,7 +26,7 @@ declare global {
 export class StemApp extends UI.Element<StemAppOptions> {
     declare options: StemAppOptions;
 
-    static init(): StemApp {
+    static init(): StemApp | void {
         self.GlobalState = GlobalState; // Expose it for debugging
         self.appInstance = this.create(document.body);
         return self.appInstance;

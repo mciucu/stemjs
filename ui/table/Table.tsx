@@ -40,7 +40,7 @@ export interface TableOptions<BaseType> extends UIElementOptions {
     noHeader?: boolean;
 }
 
-type RowLikeElement = UIElement<any, HTMLTableRowElement | HTMLTableSectionElement>;
+export type RowLikeElement = UIElement<any, HTMLTableRowElement | HTMLTableSectionElement>;
 
 @registerStyle(TableStyle)
 export class Table<BaseType = any> extends UIElement<TableOptions<BaseType>, HTMLTableElement> {

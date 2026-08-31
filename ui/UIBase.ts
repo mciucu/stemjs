@@ -125,7 +125,7 @@ export interface UINamespace {
     str: (value: any) => any;
     T: (value: string) => BaseUIElement; // Assigned by Translation.ts
     // The return carries whatever was passed, so extra options go on the result, not here
-    Primitive: <T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap, BaseClassType extends Constructor<UIElement<any, any, any>> = typeof UIElement>(nodeType: T, BaseClass?: BaseClassType) => BaseClassType;
+    Primitive: <T extends string = keyof HTMLElementTagNameMap, BaseClassType extends Constructor<UIElement<any, any, any>> = typeof UIElement>(nodeType: T, BaseClass?: BaseClassType) => BaseClassType;
 }
 
 export const UI: UINamespace = {} as UINamespace;

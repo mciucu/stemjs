@@ -50,7 +50,7 @@ function getPreferredClassName(cls: any, key: string | symbol, descriptor: Prope
 }
 
 // TODO @types faking it for Typescript, we're actually using old decorators
-type FakedDecoratorType = (target: any, key: string | symbol) => any;
+type FakedDecoratorType = (target: any, key: string | symbol, descriptor?: any) => any;
 
 // TODO: this function can be made a lot more generic, to wrap plain object initializer with inheritance support
 function styleRuleWithOptions(...optionsArgs: StyleRuleOptions[]): FakedDecoratorType {

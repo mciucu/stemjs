@@ -7,7 +7,7 @@ import {Dispatchable} from "../../base/Dispatcher";
 import {type Constructor} from "../../base/Utils";
 import {Size} from "../Constants";
 import {NodeAttributes} from "../NodeAttributes";
-import {Table} from "./Table";
+import {type RowLikeElement, Table} from "./Table";
 
 export interface EntriesManagerOptions<T = any> {
     comparator?: (a: T, b: T) => number;
@@ -196,7 +196,7 @@ export function RangeTableInterface<BaseType, BaseTable extends Constructor<Tabl
             for (let i = 0; i < entries.length; i += 1) {
                 const entry = entries[i];
                 const RowClass = this.getRowClass(entry);
-                this.rows.push(<RowClass {...this.getRowOptions(entry, i + this.lowIndex)} />);
+                this.rows.push(<RowClass {...this.getRowOptions(entry, i + this.lowIndex)} /> as RowLikeElement);
             }
             return this.rows;
         }

@@ -175,6 +175,8 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
         };
     }
 
+    // JSX always yields BaseUIElement, never the tag's own class, so each cached element is cast back
+    // to what it is - the fields below are read for members only the concrete class has.
     initLeftSidePanel() {
         this.leftSidePanel = <SidePanel anchor={Direction.LEFT} name="left" persistent={this.options.persistentLeftSidePanel}>
             <PagedHorizontalOverflow ref={this.refLink("pager")} styleSheet={this.getPagerStyleSheet()}>
@@ -183,7 +185,7 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
                     {this.getLeftSidePanelChildren()}
                 </BasicOrientedElement>
             </PagedHorizontalOverflow>
-        </SidePanel>;
+        </SidePanel> as SidePanel;
     }
 
     initRightSidePanel() {
@@ -194,7 +196,7 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
             persistent={this.options.persistentRightSidePanel}
         >
             {this.getRightSidePanelChildren()}
-        </SidePanel>;
+        </SidePanel> as SidePanel;
     }
 
     constructor(options = {}) {
@@ -250,7 +252,7 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
         }
 
         if (!this.leftPanelToggler) {
-            this.leftPanelToggler = <LeftSideNavIcon onClick={() => this.leftSideIconAction()} />;
+            this.leftPanelToggler = <LeftSideNavIcon onClick={() => this.leftSideIconAction()} /> as LeftSideNavIcon;
         }
         return this.leftPanelToggler;
     }
@@ -264,7 +266,7 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
             return null;
         }
         if (!this.rightPanelToggler) {
-            this.rightPanelToggler = <RightSideNavIcon onClick={() => this.rightSideIconAction()} />;
+            this.rightPanelToggler = <RightSideNavIcon onClick={() => this.rightSideIconAction()} /> as RightSideNavIcon;
         }
         return this.rightPanelToggler;
     }
@@ -297,7 +299,7 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
     getWrappedIcon() {
         if (!this.wrappedToggler) {
             this.wrappedToggler = <WrappedNavIcon onClick={() => this.wrappedIconAction()}
-                                               className={this.wrapped ? "" : "hidden"} />;
+                                               className={this.wrapped ? "" : "hidden"} /> as WrappedNavIcon;
         }
         return this.wrappedToggler;
     }
@@ -314,7 +316,7 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
         if (!this.leftConditionedWrapper) {
             this.leftConditionedWrapper = <NavSection anchor={Direction.LEFT}>
                 {this.getLeftConditioned()}
-            </NavSection>;
+            </NavSection> as NavSection;
         }
         return this.leftConditionedWrapper;
     }
@@ -323,21 +325,21 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
         if (!this.rightConditionedWrapper) {
             this.rightConditionedWrapper = <NavSection anchor={Direction.RIGHT}>
                 {this.getRightConditioned()}
-            </NavSection>;
+            </NavSection> as NavSection;
         }
         return this.rightConditionedWrapper;
     }
 
     getLeftConditioned() {
         if (!this.leftConditioned) {
-            this.leftConditioned = <NavSection>{this.getLeftConditionedChildren()}</NavSection>;
+            this.leftConditioned = <NavSection>{this.getLeftConditionedChildren()}</NavSection> as NavSection;
         }
         return this.leftConditioned;
     }
 
     getRightConditioned() {
         if (!this.rightConditioned) {
-            this.rightConditioned =  <NavSection>{this.getRightConditionedChildren()}</NavSection>;
+            this.rightConditioned =  <NavSection>{this.getRightConditionedChildren()}</NavSection> as NavSection;
         }
         return this.rightConditioned;
     }
@@ -400,7 +402,7 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
         }
         const wrapNavElements = () => {
             this.wrapped = true;
-            this.wrappedPanel = <BasicOrientedElement orientation={Orientation.VERTICAL} styleSheet={this.styleSheet}/>;
+            this.wrappedPanel = <BasicOrientedElement orientation={Orientation.VERTICAL} styleSheet={this.styleSheet}/> as InstanceType<typeof BasicOrientedElement>;
             this.pager.appendChild(this.wrappedPanel);
 
             changeParent(this.getRightConditioned(), this.wrappedPanel);

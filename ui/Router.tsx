@@ -1,4 +1,4 @@
-import {type ExtendedOptions, UI, UIElement, type UIEventHandler} from "./UIBase";
+import {type BaseUIElement, type ExtendedOptions, UI, UIElement, type UIEventHandler} from "./UIBase";
 import {Switcher} from "./Switcher";
 import {Dispatcher} from "../base/Dispatcher";
 import {PageTitleManager} from "../base/PageTitleManager";
@@ -50,7 +50,7 @@ interface GeneratorArgs {
 // A page is any element class, and generatePage hands it GeneratorArgs as its options
 export type URLPart = string | number;
 
-type PageGenerator = (new (args: any) => UIElement) | ((args: GeneratorArgs) => UIElement);
+type PageGenerator = (new (args: any) => BaseUIElement) | ((args: GeneratorArgs) => BaseUIElement);
 
 // What a Router needs of the elements it renders, beyond being an element
 export interface RoutablePage extends UIElement<any, any, any> {

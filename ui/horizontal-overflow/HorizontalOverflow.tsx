@@ -1,4 +1,4 @@
-import {BaseUIElement, UI, UIElement} from "../UIBase";
+import {BaseUIElement, UI, type UIChild, UIElement} from "../UIBase";
 import {FAIcon} from "../FontAwesome";
 import {registerStyle} from "../style/Theme";
 import {HorizontalOverflowStyle} from "./Style";
@@ -9,7 +9,7 @@ interface HorizontalOverflowOptions {
     // How much of the visible width one arrow click scrolls
     swipePercent?: number;
     // Rendered into pusherContainer, and mutated in place by appendChild/eraseChild
-    children?: UIElement[];
+    children?: UIChild[];
 }
 
 @registerStyle(HorizontalOverflowStyle)
@@ -45,7 +45,7 @@ export class HorizontalOverflow extends UI.Element<HorizontalOverflowOptions> {
     }
 
     // Our own children, not the scroller's: getChildrenToRender rebuilds the scroller from them
-    appendChild(child: UIElement, doMount: boolean = true): UIElement {
+    appendChild(child: BaseUIElement, doMount: boolean = true): BaseUIElement {
         this.options.children = this.options.children || [];
         this.options.children.push(child);
         if (doMount) {
@@ -55,7 +55,7 @@ export class HorizontalOverflow extends UI.Element<HorizontalOverflowOptions> {
         return child;
     }
 
-    eraseChild(child: UIElement, destroy: boolean = true): UIElement | null {
+    eraseChild(child: BaseUIElement, destroy: boolean = true): BaseUIElement | null {
         const index = (this.options.children || []).indexOf(child);
         if (index < 0) {
             return null;
@@ -83,7 +83,7 @@ export class HorizontalOverflow extends UI.Element<HorizontalOverflowOptions> {
         let closest;
         let closestDistance = Infinity;
         for (const child of children) {
-            const distance = Math.abs(this.getChildOffset(child) - scrollLeft);
+            const distance = Math.abs(this.getChildOffset(child as UIElement) - scrollLeft);
             if (distance < closestDistance) {
                 closestDistance = distance;
                 closest = child;

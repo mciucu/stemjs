@@ -1,4 +1,4 @@
-import {UI, type UIChild} from "../UIBase";
+import {PartialOptions, UI, type UIChild} from "../UIBase";
 import {styleRule, StyleSheet} from "../Style";
 import {registerStyle} from "../style/Theme";
 import {isLocalUrl, isString, trimLocalUrl} from "../../base/Utils";
@@ -52,14 +52,14 @@ export class LinkStyle extends StyleSheet {
 }
 
 @registerStyle(LinkStyle)
-export class Link extends UI.Primitive("a")<LinkOptions, HTMLAnchorElement> {
-    getDefaultOptions(options?: any): Partial<any> {
+export class Link<ExtraOptions = {}> extends UI.Primitive("a")<LinkOptions & ExtraOptions, HTMLAnchorElement> {
+    getDefaultOptions(options?: PartialOptions<Link>): PartialOptions<Link> {
         return {
             newTab: false,
         }
     }
 
-    setOptions(options: any): any {
+    setOptions(options: this["options"]): this["options"] {
         options = sanitizeUrlFromOptions(options, "href");
 
         super.setOptions(options);

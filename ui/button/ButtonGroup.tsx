@@ -39,7 +39,7 @@ export class RadioButtonGroup extends SimpleStyledElement<RadioButtonGroupOption
     }
 
     render(): UIChild {
-        this.buttons = this.options.givenOptions.map((option, index) =>
+        this.buttons = this.options.givenOptions.map((option, index): Button =>
             <Button key={index} onClick={() => this.setIndex(index)} size={this.getSize()}
                     label={option.toString()} level={this.getLevel()}
                     className={this.index === index ? "active" : ""}/>);

@@ -92,8 +92,11 @@ const STORE_REGISTRY = "StemStoreRegistry";
 // The one static BaseEnum can't narrow on its own: a property has no inference site, while all() and
 // fromValue() reach their class through the `this` parameter and are better left alone
 const ENUM_ENTRIES_MEMBER = "allEntries";
-// @keyframesRule is here too: it swaps the literal for the animation name, exactly as @styleRule does
-const STYLE_RULE_DECORATORS = ["styleRule", "styleRuleInherit", "styleRuleCustom", "keyframesRule", "keyframesRuleInherit"];
+// @keyframesRule is here too: it swaps the literal for the animation name, exactly as @styleRule does.
+// Matched by name rather than a fixed list, so a project's own wrapper - one that sanitizes before
+// delegating to styleRule, say - is recognised as long as it is named after what it builds.
+const STYLE_RULE_NAME = /styleRule|keyframesRule/i;
+const isStyleRuleDecorator = (name) => STYLE_RULE_NAME.test(name);
 // Reading a static off this.constructor is what needs the class behind Function
 const THIS_CONSTRUCTOR_STATIC = "this." + CONSTRUCTOR_MEMBER + ".";
 // Where stem itself lives, as this project's files import it. Set `stemRoot` in the tsconfig plugin entry
@@ -138,14 +141,18 @@ function getDecoratorCall(ts, node, decoratorName) {
 }
 
 // A decorator is used bare (@styleRule, @makeEnum) or called (@styleRuleCustom({...}))
+// decoratorNames is either the names to accept or a predicate over the name
 function hasDecorator(ts, node, decoratorNames) {
+    const matchesName = typeof decoratorNames === "function"
+        ? decoratorNames
+        : (name) => decoratorNames.includes(name);
     const decorators = ts.canHaveDecorators(node) ? ts.getDecorators(node) : null;
     for (const decorator of decorators || []) {
         let {expression} = decorator;
         if (ts.isCallExpression(expression)) {
             expression = expression.expression;
         }
-        if (ts.isIdentifier(expression) && decoratorNames.includes(expression.escapedText)) {
+        if (ts.isIdentifier(expression) && matchesName(expression.escapedText)) {
             return true;
         }
     }
@@ -161,7 +168,7 @@ function collectStyleRules(ts, classNode, sourceFile) {
         if (ts.getCombinedModifierFlags(member) & (ts.ModifierFlags.Static | ts.ModifierFlags.Ambient)) {
             continue;
         }
-        if (hasDecorator(ts, member, STYLE_RULE_DECORATORS)) {
+        if (hasDecorator(ts, member, isStyleRuleDecorator)) {
             rules.push({name: member.name.text, nameStart: member.name.getStart(sourceFile)});
         }
     }
@@ -341,7 +348,7 @@ function makePlaceholder(name, index) {
 // Returns {text, originalLength, fields} for the augmented file, or null when there's nothing to declare.
 // `fields` pairs each renamed member with the declaration that replaced it, for the plugin to map between.
 function getAugmentedSource(ts, fileName, text, options = {}) {
-    const hasStyleRule = STYLE_RULE_DECORATORS.some(name => text.includes("@" + name));
+    const hasStyleRule = /@\w*(?:styleRule|keyframesRule)/i.test(text);
     const usesThisConstructor = text.includes(THIS_CONSTRUCTOR_STATIC);
     const hasEnum = text.includes("@" + ENUM_DECORATOR);
     const hasStore = text.includes("@" + STORE_DECORATOR) || EXTENDS_STORE_OBJECT.test(text);

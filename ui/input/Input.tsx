@@ -1,4 +1,4 @@
-import {UI, UIElement, type UIElementOptions, type UIChild, type HTMLTagType} from "../UIBase";
+import {UI, UIElement, type UIElementOptions, type UIEventHandler, type UIChild, type HTMLTagType} from "../UIBase";
 import {DOMAttributesMap, NodeAttributes} from "../NodeAttributes";
 import {InputStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
@@ -26,6 +26,7 @@ export interface NumberInputOptions extends InputOptions<number> {
     min?: number | string;
     max?: number | string;
     step?: number | string;
+    onKeyUp?: UIEventHandler;
 }
 
 export interface FileInputOptions extends InputOptions<FileList> {
@@ -42,6 +43,8 @@ export interface CheckboxInputOptions extends InputOptions<boolean> {
 export interface TextAreaOptions extends InputableElementOptions<string> {
     // Reaches the node through setAttribute, which takes either spelling
     rows?: number | string;
+    onInput?: UIEventHandler;
+    onKeyUp?: UIEventHandler;
 }
 
 export interface SelectOptions<ValueType> extends InputableElementOptions<ValueType> {

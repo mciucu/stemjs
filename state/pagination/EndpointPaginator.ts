@@ -4,6 +4,8 @@ import {StoreClass, StoreObject} from "../Store";
 import {LoadEndpoint} from "../../base/Fetch";
 
 export abstract class BasePaginator<T> extends Dispatchable {
+    // Subclasses set this to suppress the pagination controls
+    declare disablePaginationController?: boolean;
     fetchingNow: boolean = false;
     lastPageRequested: number | null = null; // The last page we requested
     lastPageLoaded: number | null = null; // The last page we successfully received

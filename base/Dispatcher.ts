@@ -1,6 +1,6 @@
 import {isFunction, type TimeoutHandler, type IntervalHandler} from "./Utils";
 
-type Callback = Function;
+export type Callback = Function;
 
 export interface RemoveHandle {
     remove: () => void;
@@ -125,11 +125,13 @@ export class Dispatcher {
 export const DispatchersSymbol = Symbol("Dispatchers");
 export const CleanupJobsSymbol = Symbol("CleanupJobs");
 
+export type DispatcherName = string | number;
+
 export class Dispatchable {
-    declare private [DispatchersSymbol]?: Map<string, Dispatcher>;
+    declare private [DispatchersSymbol]?: Map<DispatcherName, Dispatcher>;
     declare private [CleanupJobsSymbol]?: CleanupJobs;
 
-    get dispatchers(): Map<string, Dispatcher> {
+    get dispatchers(): Map<DispatcherName, Dispatcher> {
         return this[DispatchersSymbol] || (this[DispatchersSymbol] = new Map());
     }
 
@@ -137,7 +139,7 @@ export class Dispatchable {
         return this[CleanupJobsSymbol] || (this[CleanupJobsSymbol] = new CleanupJobs());
     }
 
-    getDispatcher(name: string, addIfMissing: boolean = true): Dispatcher | undefined {
+    getDispatcher(name: DispatcherName, addIfMissing: boolean = true): Dispatcher | undefined {
         let dispatcher = this.dispatchers.get(name);
         if (!dispatcher && addIfMissing) {
             dispatcher = new Dispatcher();
@@ -146,34 +148,34 @@ export class Dispatchable {
         return dispatcher;
     }
 
-    dispatch(name: string, ...args: any[]): void {
+    dispatch(name: DispatcherName, ...args: any[]): void {
         let dispatcher = this.getDispatcher(name, false);
         if (dispatcher) {
             dispatcher.dispatch(...args);
         }
     }
 
-    addListenerGeneric(methodName: keyof Dispatcher, name: string | string[], callback: Callback): DispatcherHandle | CleanupJobs | undefined {
+    addListenerGeneric(methodName: keyof Dispatcher, name: DispatcherName | DispatcherName[], callback: Callback): DispatcherHandle | CleanupJobs | undefined {
         if (Array.isArray(name)) {
             return new CleanupJobs(name.map(x => (this as any)[methodName](x, callback)));
         }
         return (this.getDispatcher(name) as any)?.[methodName](callback);
     }
 
-    addListener(name: string | string[], callback: Callback): DispatcherHandle | CleanupJobs | undefined {
+    addListener(name: DispatcherName | DispatcherName[], callback: Callback): DispatcherHandle | CleanupJobs | undefined {
         return this.addListenerGeneric("addListener", name, callback);
     }
 
-    addListenerOnce(name: string | string[], callback: Callback): DispatcherHandle | CleanupJobs | undefined {
+    addListenerOnce(name: DispatcherName | DispatcherName[], callback: Callback): DispatcherHandle | CleanupJobs | undefined {
         return this.addListenerGeneric("addListenerOnce", name, callback);
     }
 
-    removeListener(name: string, callback: Callback): void {
+    removeListener(name: DispatcherName, callback: Callback): void {
         const dispatcher = this.getDispatcher(name, false);
         dispatcher?.removeListener(callback);
     }
 
-    removeAllListeners(name: string): void {
+    removeAllListeners(name: DispatcherName): void {
         const dispatcher = this.getDispatcher(name, false);
         dispatcher?.removeAllListeners();
     }

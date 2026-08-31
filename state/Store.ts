@@ -26,7 +26,7 @@ export class StoreObject extends Dispatchable {
     declare [EventDispatcherSymbol]?: Dispatchable;
     declare id: StoreId;
 
-    constructor(obj: any, _event?: StoreEvent) {
+    constructor(obj?: any, _event?: StoreEvent) {
         super();
         Object.assign(this, obj);
     }

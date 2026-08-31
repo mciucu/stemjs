@@ -1,4 +1,4 @@
-import {StyleObject, UI, UIElement} from "../../UIBase";
+import {StyleObject, UI, type UICleanChild, UIElement} from "../../UIBase";
 import {toArray, unwrapArray} from "../../../base/Utils";
 import {CollapsibleControllerInput} from "../../collapsible/CollapsibleMixin";
 import {CheckboxInput} from "./CheckboxInput";
@@ -79,7 +79,7 @@ function UpdateEntryRecursively(entry, value) {
 // One node of the tree: a value, whether it is checked, and any children
 interface TreeEntry {
     value?: any;
-    label?: string;
+    label?: UICleanChild;
     checked?: boolean;
     disabled?: boolean;
     collapsed?: boolean;
@@ -88,10 +88,10 @@ interface TreeEntry {
 
 interface TreeViewCheckboxOptions {
     entries?: TreeEntry | TreeEntry[];
-    onChange?: (value: any) => void;
+    onChange?: (...args: any[]) => void;
 }
 
-export class TreeViewCheckbox extends UI.Element<TreeViewCheckboxOptions> {
+export class TreeViewCheckbox<ExtraOptions = {}> extends UI.Element<TreeViewCheckboxOptions & ExtraOptions> {
     declare checkboxInput?: CheckboxInput;
     declare collapsibleController?: CollapsibleControllerInput;
     declare childrenInputs?: UIElement;

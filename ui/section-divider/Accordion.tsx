@@ -56,7 +56,7 @@ class Accordion extends UI.Element {
         this.panels = [];
         for (const child of unwrapArray<UIElement>(this.render())) {
             const title = cleanChildren(child.getTitle());
-            let divider = <AccordionDivider>{title}</AccordionDivider>;
+            let divider = <AccordionDivider>{title}</AccordionDivider> as AccordionDivider;
             this.dividers.push(divider);
             this.panels.push(child);
             children.push(divider);

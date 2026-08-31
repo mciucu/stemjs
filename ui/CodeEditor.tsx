@@ -38,6 +38,7 @@ export interface CodeEditorOptions {
     enableSnippets?: boolean;
     // addListenersFromOptions wires this to addAceSessionChangeListener
     onAceSessionChange?: (...args: any[]) => void;
+    onAceChange?: (...args: any[]) => any;
 }
 
 export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptions>) {

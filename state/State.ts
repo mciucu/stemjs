@@ -1,4 +1,4 @@
-import {Dispatchable} from "../base/Dispatcher";
+import {type Callback, type CleanupJobs, Dispatchable, type RemoveHandle} from "../base/Dispatcher";
 import {isString} from "../base/Utils";
 // Store imports this module back, so the reference has to stay erasable
 import {type StoreObject} from "./Store";
@@ -42,6 +42,8 @@ export interface StoreInterface<BaseType extends StoreObject = StoreObject> {
     all(): BaseType[];
     filterBy(filter: Record<string, any>): BaseType[];
     findBy(filter: Record<string, any>): BaseType | undefined;
+    // Every store is a Dispatchable
+    addChangeListener(callback: Callback): RemoveHandle | CleanupJobs | undefined;
 }
 
 export type RawStateData = Record<string, any[]>;

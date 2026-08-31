@@ -61,7 +61,8 @@ export class AnchoredPopup extends UIElement<AnchoredPopupOptions> {
     anchorRect = this.options.anchor.node.getBoundingClientRect();
     bodyRect = document.body.getBoundingClientRect();
 
-    static show(options: AnchoredPopupOptions): AnchoredPopup | null {
+    // Typed off the subclass it's called on, so each one's own options are accepted
+    static show<T extends typeof AnchoredPopup>(this: T, options: Partial<InstanceType<T>["options"]>): InstanceType<T> | null {
         const {anchor, toggleOnSameAnchor} = options;
         if (!anchor) {
             console.error("An anchor is required for a popup");
@@ -77,10 +78,10 @@ export class AnchoredPopup extends UIElement<AnchoredPopupOptions> {
         }
 
         this.lastShownModal = this.create(document.body, options);
-        return this.lastShownModal;
+        return this.lastShownModal as InstanceType<T>;
     }
 
-    getDefaultOptions(options) {
+    getDefaultOptions(options?): Record<string, any> | undefined {
         return {
             ...super.getDefaultOptions(options),
             anchor: null,

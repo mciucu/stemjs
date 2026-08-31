@@ -57,7 +57,7 @@ export function unwrapElementWithFunc<T>(element: T | (() => T)): T | undefined 
     return unwrapElementPlain(element);
 }
 
-export function unwrapArray<T>(elements: any, unwrapFunc: UnwrapFunc<T> = unwrapElementPlain): T[] {
+export function unwrapArray<T = any>(elements: any, unwrapFunc: UnwrapFunc<T> = unwrapElementPlain): T[] {
     if (elements == null || elements === false) {
         return [];
     }
@@ -457,7 +457,7 @@ export function getCookie(name: string): string {
     return "";
 }
 
-export function setCookie(name: string, value: string, maxAge: number = 60*60*4 /* 4 hours */, domain?: string): void {
+export function setCookie(name: string, value: string | number, maxAge: number = 60*60*4 /* 4 hours */, domain?: string): void {
     let cookie = `${name}=${value}; path=/; max-age=${maxAge}; ${window.location.protocol === "http:" ? "" : "SameSite=None; Secure; "}`;
     if (domain && domain.trim().length) {
         cookie += `domain=${domain};`
@@ -537,7 +537,7 @@ function appendNumberInParanthesis(str: string, index: number | string): string 
 }
 
 // Starting from the suggestion, tries a bunch of versioning values until one is free (passes checkFunc)
-export function findFirstFreeVersion(suggestion: string, checkFunc: (str: string) => boolean, versioning: VersioningFunc = appendNumberInParanthesis): string {
+export function findFirstFreeVersion(suggestion: string, checkFunc: (str: string) => any, versioning: VersioningFunc = appendNumberInParanthesis): string {
     for (let index = 0; index < 100; index++) {
         const str = versioning(suggestion, index);
         if (!checkFunc(str)) {

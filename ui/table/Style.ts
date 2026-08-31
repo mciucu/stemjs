@@ -1,8 +1,9 @@
-import {StyleSheet} from "../Style";
+import {StyleSheet, type StyleRuleObject} from "../Style";
 import {styleRule} from "../../decorators/Style";
 
 export class TableStyle extends StyleSheet {
-    cellStyle = {
+    // Subclasses override this with their own partial rule
+    cellStyle: StyleRuleObject = {
         padding: 8,
         lineHeight: "1.42857143",
         verticalAlign: "top",
