@@ -1,5 +1,4 @@
 import {isString, isBoolean, isNumber, titleCase} from "../base/Utils";
-import type {UICleanChild} from "../ui/UIBase";
 
 export interface EnumOptions {
     value?: any;
@@ -48,8 +47,8 @@ export class BaseEnum {
         return this.getName();
     }
 
-    toUI(parent?: any): UICleanChild;
-    toUI(): UICleanChild {
+    toUI(parent?: any): string;
+    toUI(): string {
         return this.toString();
     }
 
