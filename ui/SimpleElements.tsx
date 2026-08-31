@@ -82,7 +82,7 @@ export class IconableInterface<T extends SimpleStyledElementOptions = SimpleStyl
         return [this.beforeChildren(), this.getLabel(), super.render()];
     }
 
-    getLabel(): UIChild {
+    getLabel(): this["options"]["label"] {
         return this.options.label;
     }
 

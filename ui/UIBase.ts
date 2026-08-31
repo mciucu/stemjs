@@ -58,6 +58,8 @@ export interface UIElementOptions<TagType extends string = HTMLTagType> {
     width?: number | string;
     href?: string;
     theme?: Theme;
+    // The element that owns this one, which components read to call back into it
+    parent?: any;
     styleSheet?: StyleSheet | typeof StyleSheet;
     // The events every element answers to; anything narrower belongs on its own options
     onClick?: UIEventHandler;
@@ -217,7 +219,6 @@ export type TextElementOptions = {value?: string | number};
 
 export class TextUIElement<ExtraOptions extends TextElementOptions = TextElementOptions, ValueType = string> extends BaseUIElement<Text> {
     value: ValueType;
-    // @ts-ignore
     declare options?: ExtraOptions & UIElementOptions;
 
     constructor(value: ValueType | TextElementOptions = "" as ValueType) {
@@ -930,7 +931,6 @@ UI.Primitive = (<T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNam
     if (resultClass) {
         return resultClass as any;
     }
-    // @ts-ignore
     resultClass = class Primitive extends BaseClass<{}, HTMLElementTagNameMap[T]> {
         declare node?: HTMLElementTagNameMap[T];
         

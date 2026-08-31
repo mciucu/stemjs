@@ -11,6 +11,8 @@ interface SlideBarOptions {
     // What the subclasses normalize height/width into
     size?: number;
     barSize?: number;
+    // The alias a caller may write instead, normalized into barSize
+    barWidth?: number;
 }
 
 export class SlideBar<ExtraOptions = {}> extends Draggable(UIElement) {

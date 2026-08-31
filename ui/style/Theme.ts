@@ -99,12 +99,13 @@ export class Theme extends Dispatchable {
     }
 
     getAllStyleSheets(): any[] {
-        // Already-built instances seed it and registered classes join them, and getInstance takes either
-        const styleSheetSet = new Set<StyleSheet | typeof StyleSheet>(this.styleSheetInstances.values());
+        // Deduplicated after resolving, since a cached instance and the class it was built from are two objects
+        const styleSheets = [...this.styleSheetInstances.values()];
         for (const cls of this.classSet.values()) {
-            styleSheetSet.add(this.getStyleSheet(cls));
+            styleSheets.push(this.getStyleSheet(cls).getInstance(this));
         }
-        return Array.from(styleSheetSet).map(styleSheet => styleSheet.getInstance(this));
+        // Deduplicated style instances
+        return [...new Set(styleSheets)];
     }
 
     getStyleSheetInstance<T extends typeof StyleSheet>(Cls: T): InstanceType<T> {
