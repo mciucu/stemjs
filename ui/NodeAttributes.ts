@@ -348,7 +348,6 @@ export class NodeAttributes {
         node.removeAttribute("style");
         this.ensureNoStringStyle();
         if (this.styleString) {
-            // @ts-ignore
             node.style = this.styleString;
         }
         if (this.style) {

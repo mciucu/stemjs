@@ -1,4 +1,4 @@
-import {type SVGTagType, UI, UIElement} from "../UIBase";
+import {type OverriddenNodeMembers, type SVGTagType, UI, UIElement} from "../UIBase";
 import {DOMAttributesMap} from "../NodeAttributes";
 import {setObjectPrototype} from "../../base/Utils";
 import {SVGNodeAttributes} from "./SVGNodeAttributes";
@@ -225,7 +225,7 @@ SVGUIElement.domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap
 // The members SVGOptions replaces, the same ones NodeOptions keeps out - a node's own style or
 // children would intersect with the option's rather than replace it
 type SVGNodeOptions<T extends keyof SVGElementTagNameMap> =
-    Omit<Partial<SVGElementTagNameMap[T]>, keyof SVGOptions | "children" | "style" | "title" | "nodeType">;
+    Omit<Partial<SVGElementTagNameMap[T]>, keyof SVGOptions | OverriddenNodeMembers>;
 
 // The options a primitive on this tag ends up with, before its own are added: what a class that lets
 // SVGPrimitive infer the tag cannot reach back for - see Backlog item 5

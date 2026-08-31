@@ -90,8 +90,8 @@ export class Dispatcher {
     async awaitOnce(): Promise<any> {
         return new Promise((resolve) => {
             this.addListenerOnce((...args: any[]) => {
-                // @ts-ignore
-                resolve(...args);
+                // A promise's resolve only takes a single argument
+                resolve(args[0]);
             });
         });
     }

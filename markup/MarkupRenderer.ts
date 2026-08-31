@@ -166,7 +166,8 @@ const SafeUriEnhancer = <T extends Constructor<UIElement>>(BaseClass: T, attribu
 
     setOptions(options: any): any {
         if (options[attribute] && !this.constructor.isSafeUri(options[attribute])) {
-            options = {...options, [attribute]: undefined};
+            // Emptied rather than unset, so no default can ever be what a hostile URI falls back to
+            options = {...options, [attribute]: ""};
         }
         return super.setOptions(options);
     }

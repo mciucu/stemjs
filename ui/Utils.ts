@@ -49,8 +49,7 @@ export function isElementInView(element: NodeLike): boolean {
     const node = getNode(element);
 
     const {top, bottom} = node.getBoundingClientRect();
-    // @ts-ignore
-    for (let pathNode = node; pathNode && pathNode !== document; pathNode = pathNode.parentNode) {
+    for (let pathNode = node; pathNode; pathNode = pathNode.parentElement) {
         if (window.getComputedStyle(pathNode).overflowY === "auto" && pathNode.scrollHeight !== pathNode.offsetHeight) {
             const rect = pathNode.getBoundingClientRect();
             return (top >= rect.top && top <= rect.bottom && bottom >= rect.top && bottom <= rect.bottom);

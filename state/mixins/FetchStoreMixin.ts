@@ -33,7 +33,7 @@ export const FetchStoreMixin = <
     objectType: string,
     storeOptions: FetchMixinOptions = {},
     BaseClass?: StoreClass<T>
-) => // @ts-ignore
+) =>
 class AjaxFetchStore extends BaseStore(objectType, storeOptions, BaseClass) {
     static fetchJobs: FetchJob<T, FetchOptions>[] = [];
     static fetchTimeout?: number;

@@ -18,9 +18,9 @@ export function SetDefaultDateFormat(dateFormat: DateFormatter): void {
     DEFAULT_DATE_FORMAT = dateFormat;
 }
 
-const BaseDate = globalThis.Date;
+// now() answers with a date rather than a timestamp, so the static it replaces is not inherited
+const BaseDate = globalThis.Date as Omit<DateConstructor, "now"> & {new (...args: any[]): Date};
 
-// @ts-ignore It bitches about overriding now()
 export class StemDate extends BaseDate {
     declare timezone?: Timezone;
 
@@ -55,7 +55,7 @@ export class StemDate extends BaseDate {
 
     // Contract change: Date.now() returns a time in milliseconds, while we return an actual date
     static now(): StemDate {
-        return new this(BaseDate.now());
+        return new this(Date.now());
     }
 
     toBaseString(): string {

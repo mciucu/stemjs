@@ -100,8 +100,6 @@ export function RangeTableInterface<BaseType, BaseTable extends Constructor<Tabl
             super(...args);
         }
 
-        // @ts-ignore
-        declare node?: HTMLElement;
 
         lowIndex: number = 0;
         highIndex: number = 0;

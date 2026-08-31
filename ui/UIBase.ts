@@ -16,23 +16,21 @@ import {type Duration} from "../time/Duration";
 export type SVGTagType = keyof SVGElementTagNameMap;
 export type HTMLTagType = keyof HTMLElementTagNameMap;
 export type UICleanChild = BaseUIElement | string | number;
-// Keyed on toUI() rather than toString(), which every object inherits and would admit anything
+
+// So classes can signal that they can be converted to UI elements, or at least string-represented in the UI
 export interface UIRenderable {
     toUI(parent?: any): UICleanChild;
 }
 
 export type UIChild = Iterable<UIChild> | UICleanChild | UIRenderable | null | undefined | false;
-// node.style coerces, so a unitless property is as often written 1 as "1", and applyStyleToNode
-// calls a value that is a function, so a function returning the value is as good as the value
+// node.style coerces and applyStyleToNode calls a function value, so both spellings are the value
 export type StyleValue<T> = T | number | (() => T | number);
 export type StyleObject = {[Key in keyof CSSStyleDeclaration]?: StyleValue<CSSStyleDeclaration[Key]>};
 
 // Called with the event, then the element itself
 export type UIEventHandler = (...args: any[]) => any;
 export type RefLinkOptions = {
-    // Only ever assigned into by applyRef (obj[name] = this), so anything indexable qualifies: a
-    // plugin holding its own refs, a plain object a form collects its inputs into, and the array
-    // refLinkArray hands it with an index
+    // Only ever assigned into by applyRef, so anything indexable qualifies
     parent: Dispatchable | any[] | Record<string, any>;
     name?: string | number;
     key?: string;
@@ -75,13 +73,10 @@ type WritableKeys<T> = {
         (<G>() => G extends {-readonly [P in Key]: T[Key]} ? 1 : 2) ? Key : never;
 }[keyof T];
 
-// The DOM members stem's own option interfaces replace. Intersecting them with the node's member
-// would either leave `never` or narrow away the spelling setAttribute accepts, and an inputable's
-// value or bounds are numbers until they reach the node
-type OverriddenNodeMembers = "children" | "nodeType" | "style" | "title" | "value" | "min" | "max"
+// The DOM members stem's own options replace, since intersecting narrows away the spelling setAttribute takes
+export type OverriddenNodeMembers = "children" | "nodeType" | "style" | "title" | "value" | "min" | "max"
     | "step" | "autofocus" | "id" | "height" | "width" | "href" | "rows"
-    // A method is never a sensible attribute, and leaving it in means an element that wants an
-    // option of the same name gets `boolean & ((keyframes) => Animation)`, which nothing satisfies
+    // A method is never an attribute, and intersecting one leaves a type nothing satisfies
     | "animate";
 
 // Options land on the node as attributes, so a readonly DOM member can never be one
@@ -89,33 +84,27 @@ export type NodeOptions<NodeType> = Partial<Omit<Pick<NodeType, WritableKeys<Nod
 
 export type UIOptions<NodeType extends (SVGElement | HTMLElement), ExtraOptions = {}, TagType extends string = HTMLTagType> = NodeOptions<NodeType> & UIElementOptions<TagType> & ExtraOptions;
 
-// Declare the options of a class extending a Stem UI class that doesn't pass its options generic along:
-// `class MyElement extends UI.Element {declare options: ElementOptions<MyOptions>;}`
+// For a class extending a Stem UI class that doesn't pass its options generic along
 export type ElementOptions<ExtraOptions = {}, NodeType extends (SVGElement | HTMLElement) = HTMLElement> = UIOptions<NodeType, ExtraOptions>;
 
-// Same, but when extending a component that already has options of its own: they're kept and yours are added on top.
-// `class MyButton extends Button {declare options: ExtendedOptions<Button, MyButtonOptions>;}`
+// Same, for a base that has options of its own: they're kept and yours are added on top
 export type ExtendedOptions<BaseElement extends {options?: any}, ExtraOptions = {}> = NonNullable<BaseElement["options"]> & ExtraOptions;
 
-// The defaults an element returns from getDefaultOptions: a subset of its own options.
-// Name the class, not `this` - a polymorphic return type rejects the object literal the method returns.
+// Name the class, not `this`: a polymorphic return type rejects the literal getDefaultOptions returns
 export type PartialOptions<Element extends {options?: any}> = Partial<NonNullable<Element["options"]>>;
 
-// A container that only ever holds one kind of element, which neither `children: BaseUIElement[]` nor
-// `options.children: UIChild` can say. `declare nodeGroup: ElementContainer<SVGGroup, GraphNode>;`
+// A container that only ever holds one kind of element, which neither children type can say
 export type ElementContainer<Container extends {options?: any}, ChildType> = Container & {
     children: ChildType[];
     options: NonNullable<Container["options"]> & {children?: ChildType[]};
 };
 
-// An element whose style another one writes into, which `style?: string | StyleObject` cannot say.
-// `declare svg: StyledElement<SVGRoot>;`
+// An element whose style another one writes into, which `string | StyleObject` cannot say
 export type StyledElement<Element extends {options?: any}> = Element & {
     options: NonNullable<Element["options"]> & {style: StyleObject};
 };
 
-// An element that lays itself out from its size: the attribute may be a percentage, the arithmetic may not.
-// `export interface MyWidgetOptions extends NumericSizeOptions {...}`
+// An element that lays itself out from its size: the attribute may be a percentage, the arithmetic may not
 export interface NumericSizeOptions {
     width?: number;
     height?: number;
@@ -135,8 +124,7 @@ export interface UINamespace {
     createElement(tag: any, options?: UIElementOptions | null, ...children: any[]): BaseUIElement | null;
     str: (value: any) => any;
     T: (value: string) => BaseUIElement; // Assigned by Translation.ts
-    // The constraint only has to admit the base class; the return carries whatever was passed, so extra
-    // options go on the result: UI.Primitive("span", Base)<MyOptions>
+    // The return carries whatever was passed, so extra options go on the result, not here
     Primitive: <T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNameMap, BaseClassType extends Constructor<UIElement<any, any, any>> = typeof UIElement>(nodeType: T, BaseClass?: BaseClassType) => BaseClassType;
 }
 
@@ -307,10 +295,7 @@ export class UIElement<
         this.setOptions(options); // TODO maybe this actually needs to be removed, since on a copy we don't want the default options of the other object
     }
 
-    // The return stays keyed on the generic: polymorphic this in return position would forbid a class from
-    // defaulting anything, since a subclass may narrow the options it redeclares
-    // Not Partial<this["options"]>: a `this` type in return position stays deferred, so no subclass can
-    // answer with its own options. Defaults are a bag, and this is as close as the type system gets.
+    // Not Partial<this["options"]>: a `this` return type stays deferred, so no subclass could satisfy it
     getDefaultOptions(options?: this["options"]): Record<string, any> | undefined {
         return undefined;
     }
@@ -342,8 +327,7 @@ export class UIElement<
     }
 
     // TODO: should probably add a second arg, doRedraw=true - same for setOptions
-    // Generic over the keys given, so each value is still checked against its declared type. A plain
-    // Partial<this["options"]> can't be satisfied at all from inside a class generic in its options.
+    // Generic over the keys given, so each value is still checked against its own declared type
     updateOptions<Key extends keyof this["options"]>(options: {[P in Key]?: this["options"][P]}): void {
         this.setOptions(Object.assign(this.options, options));
         // TODO: if the old options and the new options are deep equal, we can skip this redraw, right?
@@ -453,9 +437,7 @@ export class UIElement<
         return children;
     }
 
-    // Most overrides answer with nothing, and only one caller anywhere reads the result.
-    // The overload is what lets an override take the event redrawPerTickRunner passes, without
-    // putting a parameter this body never reads into the emitted method.
+    // The overload lets an override take redrawPerTickRunner's event without this body declaring one
     redraw(event?: any): boolean | void;
     redraw(): boolean | void {
         if (!this.node) {
