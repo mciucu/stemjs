@@ -29,9 +29,11 @@ function parseConfig(ts, projectRoot) {
     return parsed;
 }
 
-// Use the same configuration the editor plugin gets from tsconfig.json
+// Use the same configuration the editor plugin gets from tsconfig.json, plus the JSX runtime the project
+// compiles with, which is what says whether a tag stands for an instance or for a React element
 function getPluginConfig(options) {
-    return (options.plugins || []).find(entry => entry.name === PLUGIN_NAME) || {};
+    const entry = (options.plugins || []).find(entry => entry.name === PLUGIN_NAME) || {};
+    return {...entry, jsxFactory: options.jsxFactory, jsxImportSource: options.jsxImportSource};
 }
 
 // Replaced by something of its own length, so every offset the augmented source is built from stays valid

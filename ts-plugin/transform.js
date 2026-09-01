@@ -359,6 +359,12 @@ const JSX_HELPER = `type ${JSX_HELPER_NAME}<T> = 0 extends 1 & T ? any :`
 // A capitalised tag somewhere in the file. Generic arguments match too; they simply yield no insertions.
 const HAS_COMPONENT_TAG = /<[A-Z][\w.]*[\s/>]/;
 
+// A Stem JSX element is an instance of its tag's class; under React's own runtime it is an element, and the
+// assertion would retype every component that returns one. Redirecting JSX is how a project says which it is.
+function usesStemJsx(options) {
+    return Boolean(options.jsxFactory || options.jsxImportSource);
+}
+
 // Where the assertion goes, for every JSX element in expression position. A direct JSX child is skipped:
 // appending there would turn the assertion into JSX text rather than an expression.
 function collectJsxAssertions(ts, sourceFile) {
@@ -384,7 +390,7 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
     const usesThisConstructor = text.includes(THIS_CONSTRUCTOR_STATIC);
     const hasEnum = text.includes("@" + ENUM_DECORATOR);
     const hasStore = text.includes("@" + STORE_DECORATOR) || EXTENDS_STORE_OBJECT.test(text);
-    const hasComponentTag = HAS_COMPONENT_TAG.test(text);
+    const hasComponentTag = usesStemJsx(options) && HAS_COMPONENT_TAG.test(text);
     if (!text.includes(STYLE_DECORATOR) && !text.includes(THEME_REGISTER) && !text.includes("@" + FIELD_DECORATOR) &&
             !hasStyleRule && !usesThisConstructor && !hasEnum && !hasStore && !hasComponentTag) {
         return null;

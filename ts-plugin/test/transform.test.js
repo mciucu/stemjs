@@ -6,7 +6,8 @@ const path = require("path");
 const {getAugmentedSource, toSourceOffset, toAugmentedOffset} = require("../transform");
 
 const FIXTURE = path.join(__dirname, "fixture");
-const OPTIONS = {stemRoot: "@stemjs"};
+// jsxFactory mirrors fixture/tsconfig.json: the classic Stem transform, where a tag is an instance
+const OPTIONS = {stemRoot: "@stemjs", jsxFactory: "UI.createElement"};
 const FIELD_VALUE = 'import("@stemjs/state/StoreField").FieldValue';
 const FIELD_RAW_IDS = 'import("@stemjs/state/StoreField").FieldRawIds';
 
@@ -167,4 +168,10 @@ module.exports = (ts, check) => {
     const firstShift = jsx.result.shifts[0];
     check("a position inside an assertion maps to where it was inserted",
         toSourceOffset(jsx.result.shifts, firstShift.offset + 1), firstShift.offset);
+
+    // On React's own runtime a tag is an element, not an instance, and a component returning one would be
+    // retyped into something React rejects as a component
+    const reactPath = path.join(FIXTURE, "jsx.tsx");
+    const onReact = getAugmentedSource(ts, reactPath, fs.readFileSync(reactPath, "utf8"), {stemRoot: "@stemjs"});
+    check("a project on React's JSX gets no assertions", onReact, null);
 };

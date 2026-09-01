@@ -18,7 +18,12 @@ function init(modules) {
         const host = info.languageServiceHost;
         const languageService = info.languageService;
         const log = (message) => info.project.projectService.logger.info("[stem] " + message);
-        const config = info.config || {};
+        const compilerOptions = host.getCompilationSettings();
+        const config = {
+            ...(info.config || {}),
+            jsxFactory: compilerOptions.jsxFactory,
+            jsxImportSource: compilerOptions.jsxImportSource,
+        };
 
         // Per augmented file: where the user's text ends, and the members we relocated out of it
         const augmentedFiles = new Map();
