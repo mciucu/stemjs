@@ -1,7 +1,7 @@
 import {type Callback, type CleanupJobs, Dispatchable, type RemoveHandle} from "../base/Dispatcher";
 import {isString} from "../base/Utils";
 // Store imports this module back, so the reference has to stay erasable
-import {type StoreObject} from "./Store";
+import type {StoreObject} from "./Store";
 
 export type StoreId = string | number;
 export type StoreIdOrNull = StoreId | null | undefined;
