@@ -1,5 +1,5 @@
 // TODO @Mihai this should become the new Store
-import {CleanupJobs, Dispatchable} from "../base/Dispatcher";
+import {CleanupJobs, Dispatchable, type ListenerHandle} from "../base/Dispatcher";
 import {GlobalState, type RawStateData, State, type StateData, type StoreEvent, type StoreId, type StoreIdOrNull, type StoreInterface} from "./State";
 import {isNotNull, isString, toArray} from "../base/Utils";
 import {type FieldDescriptor} from "./StoreField";
@@ -54,13 +54,13 @@ export class StoreObject extends Dispatchable {
         this.dispatchChange(event);
     }
 
-    addDeleteListener(callback: (...args: any[]) => void): any {
+    addDeleteListener(callback: (...args: any[]) => void): ListenerHandle {
         return this.addListener("delete", callback);
     }
 
     // Add a listener on updates from events with this specific type.
     // Can accept an array as eventType
-    addEventListener(eventType: string | string[], callback: (...args: any[]) => void): any {
+    addEventListener(eventType: string | string[], callback: (...args: any[]) => void): ListenerHandle {
         if (Array.isArray(eventType)) {
             const handlers = eventType.map(e => this.addEventListener(e, callback));
             return new CleanupJobs(handlers);
@@ -86,6 +86,12 @@ export class StoreObject extends Dispatchable {
     }
 
 // Static store logic
+    // BaseStore copies Dispatchable's own properties and its prototype onto the store class, so the
+    // dispatcher lives on the statics rather than on an instance
+    declare static dispatch: Dispatchable["dispatch"];
+    declare static dispatchChange: Dispatchable["dispatchChange"];
+    declare static addListener: Dispatchable["addListener"];
+
     static objectType: string;
     static state: State = GlobalState;
     static dependencies: string[] = [];
@@ -143,7 +149,7 @@ export class StoreObject extends Dispatchable {
 
     static clear(): void {
         this.objects.clear();
-        (this as any as Dispatchable).dispatchChange();
+        this.dispatchChange();
     }
 
     static getObjectIdForEvent(event: StoreEvent): string {
@@ -221,11 +227,11 @@ export class StoreObject extends Dispatchable {
             obj = new this(event.data, event) as T;
             this.addObject<T>(this.getObjectIdForEvent(event), obj);
             if (sendDispatch) {
-                (this as any as Dispatchable).dispatch("create", obj, event);
+                this.dispatch("create", obj, event);
             }
         }
         if (sendDispatch) {
-            (this as any as Dispatchable).dispatchChange(obj, event);
+            this.dispatchChange(obj, event);
         }
         return obj;
     }
@@ -235,8 +241,8 @@ export class StoreObject extends Dispatchable {
         if (obj) {
             this.objects.delete(this.getObjectIdForEvent(event));
             obj.dispatch("delete", event, obj);
-            (this as any as Dispatchable).dispatch("delete", obj, event);
-            (this as any as Dispatchable).dispatch("change", obj, event);
+            this.dispatch("delete", obj, event);
+            this.dispatch("change", obj, event);
         }
         return obj;
     }
@@ -261,7 +267,7 @@ export class StoreObject extends Dispatchable {
 
         obj.applyEventAndDispatch(event);
 
-        (this as any as Dispatchable).dispatchChange(obj, event); // TODO this is not a store event, but how can we still register for all of these?
+        this.dispatchChange(obj, event); // TODO this is not a store event, but how can we still register for all of these?
 
         return obj;
     }
@@ -303,12 +309,12 @@ export class StoreObject extends Dispatchable {
             }
         }
 
-        return (this as any as Dispatchable).addListener("create", callback);
+        return this.addListener("create", callback);
     }
 
     // Add a listener for any object deletions
     static addDeleteListener(callback: (...args: any[]) => void) {
-        return (this as any as Dispatchable).addListener("delete", callback);
+        return this.addListener("delete", callback);
     }
 }
 

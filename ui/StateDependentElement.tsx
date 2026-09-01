@@ -1,4 +1,4 @@
-import {type ElementOptions, UI, UIElement} from "./UIBase";
+import {type ElementOptions, UI, type UIChild, UIElement} from "./UIBase";
 import {ConcentricCirclesLoadingScreen} from "./ConcentricCirclesLoadingScreen";
 import {DelayedElement} from "./DelayedElement";
 import {Ajax} from "../base/Ajax";
@@ -46,8 +46,8 @@ export function StateDependentElement<T extends new (...args: any[]) => UIElemen
             return {};
         }
 
-        renderNotLoaded(): any {
-            let renderLoading = StateDependentElement.renderLoading;
+        renderNotLoaded(): UIChild {
+            let renderLoading: UIChild | (() => UIChild) = StateDependentElement.renderLoading;
             if (typeof renderLoading === "function") {
                 renderLoading = renderLoading();
             }
@@ -58,15 +58,15 @@ export function StateDependentElement<T extends new (...args: any[]) => UIElemen
             this.options.error = error;
         }
 
-        renderError(): any {
-            let renderError = StateDependentElement.renderError;
+        renderError(): UIChild {
+            let renderError: UIChild | ((error: any, message?: string) => UIChild) = StateDependentElement.renderError;
             if (typeof renderError === "function") {
                 renderError = renderError(this.options.error);
             }
             return renderError;
         }
 
-        renderLoaded(): any {
+        renderLoaded(): UIChild {
             if (this.options.error) {
                 return this.renderError();
             }
@@ -95,9 +95,9 @@ export function StateDependentElement<T extends new (...args: any[]) => UIElemen
     };
 }
 
-StateDependentElement.renderLoading = (): any => <ConcentricCirclesLoadingScreen />;
+StateDependentElement.renderLoading = (): UIChild => <ConcentricCirclesLoadingScreen />;
 
-StateDependentElement.renderError = (error: any, message?: string): any => {
+StateDependentElement.renderError = (error: any, message?: string): UIChild => {
     return <div style={{maxWidth: "300px", margin: "0 auto", marginTop: "30px"}}>
             <CardPanel title={UI.T("Error in opening the URL")} level={Level.ERROR}>
                 <h3>{message || error.message}</h3>

@@ -1,4 +1,4 @@
-import {UI} from "../UIBase";
+import {UI, type UIChild} from "../UIBase";
 import {NavElement} from "./NavElement";
 import {FAIcon} from "../FontAwesome";
 import {Size} from "../Constants";
@@ -17,11 +17,11 @@ export class NavIcon extends NavElement {
         ];
     }
 
-    getContent(): any {
+    getContent(): UIChild {
         return null;
     }
 
-    getIcon(): any {
+    getIcon(): UIChild {
         return null;
     }
 
@@ -39,7 +39,7 @@ export class LeftSideNavIcon extends NavIcon {
         attr.addClass(this.styleSheet.sideIcon);
     }
 
-    getIcon(): any {
+    getIcon(): UIChild {
         return <FAIcon icon="bars" size={Size.LARGE}/>;
     }
 }
@@ -51,7 +51,7 @@ export class RightSideNavIcon extends NavIcon {
         attr.addClass(this.styleSheet.sideIcon);
     }
 
-    getIcon(): any {
+    getIcon(): UIChild {
         return <FAIcon icon="ellipsis-v" size={Size.LARGE}/>;
     }
 }
@@ -63,7 +63,7 @@ export class WrappedNavIcon extends NavIcon {
         attr.addClass(this.styleSheet.wrappedIcon);
     }
 
-    getIcon(): any {
+    getIcon(): UIChild {
         return <FAIcon icon="ellipsis-h" size={Size.LARGE}/>;
     }
 }

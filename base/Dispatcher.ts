@@ -12,6 +12,10 @@ export interface CleanupHandle {
 
 export type CleanupJob = RemoveHandle | CleanupHandle | Function;
 
+// What the add*Listener family answers with: one handle, a bundle of them for an array of names, or
+// nothing when the dispatcher does not exist
+export type ListenerHandle = DispatcherHandle | CleanupJobs | undefined;
+
 function implementsRemoveHandle(job: CleanupJob): job is RemoveHandle {
     return "remove" in job && isFunction(job.remove);
 }

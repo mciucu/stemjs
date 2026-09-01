@@ -25,11 +25,11 @@ export const DelayedElement = <T extends new (...args: any[]) => UIElement<any, 
         return "Loading component...";
     }
 
-    renderLoaded(): any {
+    renderLoaded(): UIChild {
         return super.render();
     }
 
-    render(): any {
+    render(): UIChild {
         if (!this._loaded) {
             return this.renderNotLoaded();
         } else {

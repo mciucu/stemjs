@@ -1,4 +1,4 @@
-import {BaseUIElement, UI, UIElement} from "../ui/UIBase";
+import {BaseUIElement, UI, type UIChild, UIElement} from "../ui/UIBase";
 import {type Constructor} from "../base/Utils";
 import {type MarkupElement, MarkupParser} from "./MarkupParser";
 import {Link} from "../ui/primitives/Link";
@@ -153,7 +153,7 @@ export class MarkupRenderer extends UIElement<MarkupRendererOptions> {
         return UI.createElement(classObject, value, ...(value.children || []));
     }
 
-    render(): any {
+    render(): UIChild {
         return this.convertToUI(this.getValue());
     }
 }

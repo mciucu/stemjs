@@ -1,5 +1,5 @@
 import {StyleElement, KeyframeElement, DynamicStyleElement} from "./StyleElement";
-import {Dispatchable} from "../base/Dispatcher";
+import {Dispatchable, type ListenerHandle} from "../base/Dispatcher";
 import {PREFERRED_CLASS_NAME_KEY} from "../decorators/Style";
 import {registerStyle, Theme, type ThemeProps} from "./style/Theme";
 
@@ -178,7 +178,7 @@ class StyleSheet extends Dispatchable {
         return element;
     }
 
-    addBeforeUpdateListener(callback: Function): any {
+    addBeforeUpdateListener(callback: Function): ListenerHandle {
         return this.addListener("beforeUpdate", callback);
     }
 

@@ -124,7 +124,7 @@ export class ClassNameSet extends Set {
 // className has to accept for `className={this.styleSheet.someRule}` to typecheck.
 export type ClassNameValue = string | number | ClassNameSet | StyleRuleValue;
 
-type NodeElement = HTMLElement | SVGElement;
+export type NodeElement = HTMLElement | SVGElement;
 
 export class NodeAttributes {
     [key: string]: any;

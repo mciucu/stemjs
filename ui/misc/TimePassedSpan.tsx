@@ -1,5 +1,5 @@
 import {type ElementOptions, UI} from "../UIBase";
-import {Dispatchable} from "../../base/Dispatcher";
+import {Dispatchable, type ListenerHandle} from "../../base/Dispatcher";
 
 export interface TimePassedSpanOptions {
     timeStamp?: number;
@@ -40,7 +40,7 @@ export class TimePassedSpan extends UI.Primitive("span") {
         return "Few seconds ago";
     }
 
-    static addIntervalListener(callback: () => void): any {
+    static addIntervalListener(callback: () => void): ListenerHandle {
         if (!this.updateFunction) {
             this.TIME_DISPATCHER = new Dispatchable();
             this.updateFunction = setInterval(() => {

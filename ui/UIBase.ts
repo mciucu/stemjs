@@ -205,7 +205,7 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
 // The value is stringified on read, so a number is as good a one as a string
 export type TextElementOptions = {value?: string | number};
 
-export class TextUIElement<ExtraOptions extends TextElementOptions = TextElementOptions, ValueType = string> extends BaseUIElement<Text> {
+export class TextUIElement<ExtraOptions extends TextElementOptions = TextElementOptions, ValueType = string | number> extends BaseUIElement<Text> {
     value: ValueType;
     declare options?: ExtraOptions & UIElementOptions;
 
@@ -246,8 +246,8 @@ export class TextUIElement<ExtraOptions extends TextElementOptions = TextElement
         return this.node;
     }
 
-    setValue(value: any): void {
-        this.value = (value != null) ? value : "";
+    setValue(value: ValueType): void {
+        this.value = (value != null) ? value : "" as ValueType;
         if (this.node) {
             this.redraw();
         }

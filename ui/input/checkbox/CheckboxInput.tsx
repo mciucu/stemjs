@@ -1,4 +1,4 @@
-import {UI, type UICleanChild} from "../../UIBase";
+import {UI, type UIChild, type UICleanChild} from "../../UIBase";
 import {StyleRules, StyleSheet} from "../../Style";
 import {styleRule} from "../../../decorators/Style";
 import {registerStyle} from "../../style/Theme";
@@ -81,7 +81,7 @@ export class CheckboxInput extends BaseInputElement<boolean | null, CheckboxInpu
         }
     }
 
-    getIcon(): any {
+    getIcon(): UIChild {
         const iconOptions = {
             color: this.themeProps.CHECKBOX_CHECKMARK_COLOR,
             size: "100%",
@@ -98,7 +98,7 @@ export class CheckboxInput extends BaseInputElement<boolean | null, CheckboxInpu
         return null;
     }
 
-    render(): any[] {
+    render(): UIChild[] {
         const {styleSheet} = this;
         const checkboxClass = styleSheet.checkbox + (this.getValue() !== false ? styleSheet.selected : "");
         return [

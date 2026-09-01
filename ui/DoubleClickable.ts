@@ -1,3 +1,4 @@
+import {type ListenerHandle} from "../base/Dispatcher";
 const SINGLE_CLICK_EVENT = "SingleClick";
 const DOUBLE_CLICK_EVENT = "DoubleClick";
 
@@ -45,7 +46,7 @@ export const DoubleClickable = <T extends new (...args: any[]) => any>(BaseClass
         });
     }
 
-    addClickListener(callback: ClickCallback): any {
+    addClickListener(callback: ClickCallback): ListenerHandle {
         this.ensureClickListener();
         return this.addListener(SINGLE_CLICK_EVENT, callback);
     }
@@ -54,8 +55,9 @@ export const DoubleClickable = <T extends new (...args: any[]) => any>(BaseClass
         this.removeListener(SINGLE_CLICK_EVENT, callback);
     }
 
-    addDoubleClickListener(callback: ClickCallback): any {
-        this.addListener(DOUBLE_CLICK_EVENT, callback);
+    addDoubleClickListener(callback: ClickCallback): ListenerHandle {
+        this.ensureClickListener();
+        return this.addListener(DOUBLE_CLICK_EVENT, callback);
     }
 
     removeDoubleClickListener(callback: ClickCallback): void {

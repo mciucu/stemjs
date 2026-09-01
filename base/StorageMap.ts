@@ -1,4 +1,5 @@
 import {Dispatchable} from "./Dispatcher";
+import {type ListenerHandle} from "./Dispatcher";
 
 // Class for working with the Window.localStorage and Window.sessionStorage objects
 // All keys are prefixed with our custom name, so we don't have to worry about polluting the global storage namespace
@@ -143,7 +144,7 @@ export class LocalStorageMap extends StorageMap {
     // Only works if we're being backed by Window.localStorage and only received events from other tabs (not the current tab)
     // The event has the following fields: key, oldValue, newValue, url, storageArea, originalEvent
     // The key is modified to be the same the one you used in the map
-    addChangeListener(callback: (event: any) => void, doDeserialization: boolean = true): any {
+    addChangeListener(callback: (event: any) => void, doDeserialization: boolean = true): ListenerHandle {
         let realCallback = callback;
         if (doDeserialization) {
             realCallback = (event: any) => {
