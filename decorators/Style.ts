@@ -16,7 +16,7 @@ interface StyleDescriptor extends PropertyDescriptor {
 type StyleRuleFunction = () => any;
 type StyleRuleValue = any | StyleRuleFunction | any[];
 
-function evaluateStyleRuleObject(target: any, initializer: (() => any) | undefined, value: StyleRuleValue, options: StyleRuleOptions): any {
+function evaluateStyleRuleObject(target: any, initializer: (() => any) | undefined, value: StyleRuleValue, _options: StyleRuleOptions): any {
     let result = initializer ? initializer.call(target) : value;
     if (typeof result === "function") {
         result = result();
@@ -37,7 +37,7 @@ function getKeyframesRuleKey(key: string | symbol): string {
 
 export const PREFERRED_CLASS_NAME_KEY = Symbol("PreferredClassName");
 
-function getPreferredClassName(cls: any, key: string | symbol, descriptor: PropertyDescriptor): string {
+function getPreferredClassName(cls: any, key: string | symbol, _descriptor: PropertyDescriptor): string {
     if (key !== "container") {
         return String(key);
     }

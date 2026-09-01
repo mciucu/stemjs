@@ -10,7 +10,7 @@ export interface WrappedCall {
 }
 
 export class CallModifier {
-    wrap(func: Function): WrappedCall {
+    wrap(_func: Function): WrappedCall {
         throw new Error("Implement wrap method");
     }
 

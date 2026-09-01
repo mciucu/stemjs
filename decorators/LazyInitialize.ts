@@ -4,7 +4,7 @@ interface LazyDescriptor extends PropertyDescriptor {
     initializer?: () => any;
 }
 
-function handleDescriptor(target: any, key: string | symbol, descriptor: LazyDescriptor, args: any[]): PropertyDescriptor {
+function handleDescriptor(target: any, key: string | symbol, descriptor: LazyDescriptor, _args: any[]): PropertyDescriptor {
     const { configurable, enumerable, initializer, value } = descriptor;
     // The "key" property is constructed with accessor descriptor (getter / setter),
     // but the first time the getter is used, the property is reconstructed with data descriptor.

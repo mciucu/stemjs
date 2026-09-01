@@ -37,7 +37,7 @@ export class Theme extends Dispatchable {
         this.propTypes = {};
 
         this.props = new Proxy(this.properties, {
-            get: (properties, key: string, receiver) => {
+            get: (_properties, key: string, _receiver) => {
                 const rawValue = this.getProperty(key);
                 const value = resolveFuncValue(rawValue, {args: [this.props]});
 
@@ -47,7 +47,7 @@ export class Theme extends Dispatchable {
 
                 return value;
             },
-            set: (properties, key: string, value) => {
+            set: (_properties, key: string, value) => {
                 this.setProperties({[key]: value});
                 // TODO this should also update all themes that inherit from us
                 return true;

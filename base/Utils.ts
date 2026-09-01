@@ -17,6 +17,9 @@ declare global {
         get(key: K | null | undefined): V | undefined;
     }
     //WeakMap might also make sense later
+
+    // Set by the page, not by us, so it is only ever read
+    var STEM_DEBUG: boolean | undefined;
 }
 
 interface CleanObjectOptions {

@@ -300,7 +300,6 @@ export class NodeAttributes {
 
     apply(node: NodeElement, attributesMap: DOMAttributesMap): void {
         const addedAttributes: Record<string, boolean> = {};
-        const whitelistedAttributes = this.whitelistedAttributes || {};
 
         // First update existing node attributes and delete old ones
         // TODO: optimize to not run this if the node was freshly created

@@ -106,7 +106,7 @@ class StyleSheet extends Dispatchable {
     }
 
     // Just to have the same pattern as objects or not
-    getInstance(theme?: Theme): StyleSheet {
+    getInstance(_theme?: Theme): StyleSheet {
         return this;
     }
 

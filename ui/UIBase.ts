@@ -295,7 +295,7 @@ export class UIElement<
     }
 
     // Not Partial<this["options"]>: a `this` return type stays deferred, so no subclass could satisfy it
-    getDefaultOptions(options?: this["options"]): Record<string, any> | undefined {
+    getDefaultOptions(_options?: this["options"]): Record<string, any> | undefined {
         return undefined;
     }
 
@@ -536,7 +536,7 @@ export class UIElement<
         return attr;
     }
 
-    extraNodeAttributes(attr?: NodeAttributes): void {}
+    extraNodeAttributes(_attr?: NodeAttributes): void {}
 
     applyNodeAttributes(): void {
         const attr = this.getNodeAttributes();

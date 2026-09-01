@@ -185,7 +185,7 @@ export class DynamicStyleElement extends StyleElement<DynamicStyleElementOptions
         }
     }
 
-    setSubStyle(selector: string, key: string, value: any): void {
+    setSubStyle(_selector: string, _key: string, _value: any): void {
         throw Error("Implement me!");
     }
 
