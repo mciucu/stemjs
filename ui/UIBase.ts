@@ -40,7 +40,7 @@ export type RefLinkOptions = {
 export interface UIElementOptions<TagType extends string = HTMLTagType> {
     children?: UIChild;
     title?: UIChild;
-    ref?: RefLinkOptions | string;
+    ref?: RefLinkOptions | string; // TODO @cleanup. There's a difference between the options for createElement and the options after they are cleaned.
     key?: string | number;
     active?: boolean; // Tabs or switchers can put this on children
     tabHref?: string; // A tab area reads this off the panel to link its tab
