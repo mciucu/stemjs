@@ -121,14 +121,16 @@ module.exports = (ts, check) => {
     check("registering renames nothing",
         registry.result.fields.length, 0);
 
-    // getStore() is typed as the object's own constructor, so a store needs the declaration without ever
-    // naming this.constructor - that is what makes it the store's own statics rather than StoreObject's
-    check("a store declares its constructor",
-        registry.appended.includes('export interface Planet {["constructor"]: Omit<typeof Planet, "prototype"> & (new (...args: any[]) => Planet);}'), true);
+    // getStore() is typed off this member, so a store needs it without ever naming this.constructor - that is
+    // what makes it the store's own statics rather than StoreObject's
+    check("a store declares its own store member",
+        registry.appended.includes('export interface Planet {$stemOwnStore?: Omit<typeof Planet, "prototype"> & (new (...args: any[]) => Planet);}'), true);
     check("a base extending StoreObject declares one too, since nothing registers it",
-        registry.appended.includes('export interface CelestialBody {["constructor"]:'), true);
+        registry.appended.includes("export interface CelestialBody {$stemOwnStore?:"), true);
     check("a store built on that base declares its own",
-        registry.appended.includes('export interface Star {["constructor"]:'), true);
+        registry.appended.includes("export interface Star {$stemOwnStore?:"), true);
+    check("a store that never names this.constructor leaves constructor alone",
+        registry.appended.includes('["constructor"]'), false);
 
     check("a file with neither decorator is not touched at all",
         getAugmentedSource(ts, "/x/plain.ts", "export const value = 1;\n", OPTIONS), null);

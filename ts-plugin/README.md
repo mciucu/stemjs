@@ -118,9 +118,10 @@ still resolves through the general signature, at `StoreObject` precision.
 The global scope is what makes this work across files: a store module can add to the registry without
 knowing any path back to stem. A class with type parameters, or a file that isn't a module, is skipped.
 
-A store object's class is also its own store, which `obj.getStore()` returns. `StoreObject` can only say that
-as `this["constructor"]`, and `this.constructor` is typed as `Function` by `lib.es5.d.ts` - so each store gets
-the declaration that carries its statics, the same one a class reading `this.constructor.something` gets:
+A store object's class is also its own store, which `obj.getStore()` returns. Each store gets a member of its
+own naming that class, which `OwnStore` reads it back off. It isn't `constructor`: every object inherits one
+of those as `Function`, so declaring the class there would stop `{isoCode: "EUR"}` being a `Partial<Currency>`.
+A class that reads `this.constructor.something` gets `constructor` retyped as well:
 
 ```ts
 @globalStore
@@ -129,7 +130,7 @@ export class Currency extends BaseStore("Currency") {
     static getByIsoCode(isoCode: string): Currency | undefined {...}
 }
 // appended in memory:
-export interface Currency {["constructor"]: Omit<typeof Currency, "prototype"> & (new (...args: any[]) => Currency);}
+export interface Currency {$stemOwnStore?: Omit<typeof Currency, "prototype"> & (new (...args: any[]) => Currency);}
 ```
 
 A base that stores are built on top of extends `StoreObject` directly and carries no decorator, since nothing

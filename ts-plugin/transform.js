@@ -77,6 +77,8 @@
 
 const STYLE_MEMBER = "styleSheet";
 const CONSTRUCTOR_MEMBER = "constructor";
+// What OwnStore reads a store's own class off, kept off `constructor` since every object inherits one
+const OWN_STORE_MEMBER = "$stemOwnStore";
 const STYLE_DECORATOR = "registerStyle";
 // The other way a sheet is attached, leaving nothing on the class for a decorator scan to find
 const THEME_REGISTER = "Theme.register";
@@ -380,13 +382,18 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
         // lib.es5.d.ts types Object.constructor as Function, so every static is lost. Omit drops the
         // construct signature the class carries - keeping it would make a subclass's own constructor an
         // incompatible override - and the signature added back returns the instance, which stays covariant.
-        // A store never has to name this.constructor to need it: getStore() is typed as this["constructor"],
-        // so this is what says which store a store object's own class is.
-        if ((statement.getText(sourceFile).includes(THIS_CONSTRUCTOR_STATIC) || isStoreClass(ts, statement)) &&
-                !alreadyDeclares(CONSTRUCTOR_MEMBER)) {
+        const usesConstructorStatic = statement.getText(sourceFile).includes(THIS_CONSTRUCTOR_STATIC);
+        const isStore = isStoreClass(ts, statement);
+        if (usesConstructorStatic || isStore) {
             const instance = className + getTypeArgumentText(statement);
-            const constructorType = `Omit<typeof ${className}, "prototype"> & (new (...args: any[]) => ${instance})`;
-            appended += `${prefix}interface ${className}${typeParams} {["${CONSTRUCTOR_MEMBER}"]: ${constructorType};}\n`;
+            const classType = `Omit<typeof ${className}, "prototype"> & (new (...args: any[]) => ${instance})`;
+            if (usesConstructorStatic && !alreadyDeclares(CONSTRUCTOR_MEMBER)) {
+                appended += `${prefix}interface ${className}${typeParams} {["${CONSTRUCTOR_MEMBER}"]: ${classType};}\n`;
+            }
+            // A store never has to name this.constructor to need its class: getStore() is typed off this member
+            if (isStore && !alreadyDeclares(OWN_STORE_MEMBER)) {
+                appended += `${prefix}interface ${className}${typeParams} {${OWN_STORE_MEMBER}?: ${classType};}\n`;
+            }
         }
 
         // @globalStore is what puts the class in GlobalState, so it is exactly the set getStore() can find.

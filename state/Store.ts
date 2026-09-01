@@ -12,12 +12,11 @@ export interface StoreOptions {
 // Shorthand type for static method this parameter
 export type StoreClass<T extends StoreObject> = {new (...args: any[]): T} & typeof StoreObject;
 
-// An object's own store is its class, so this["constructor"] is what says which store that is - an indexed
-// access on the `this` type, resolved per subclass against the declaration ts-plugin/ appends for each store.
-// It is read through a conditional rather than directly, so a class the plugin never reached (or a plain tsc,
-// without it) falls back to the statics StoreClass carries instead of failing to index.
+// An object's own store is its class, which ts-plugin/ names per subclass through the member below. It is read
+// through a conditional rather than directly, so a class the plugin never reached (or a plain tsc, without it)
+// falls back to the statics StoreClass carries instead of failing to index.
 export type OwnStore<T extends StoreObject> =
-    (T extends {["constructor"]: infer StoreType} ? StoreType : unknown) & StoreClass<T> & Dispatchable;
+    (T extends {$stemOwnStore?: infer StoreType} ? NonNullable<StoreType> : unknown) & StoreClass<T> & Dispatchable;
 
 // A symbol to dispatch state events by type, since Dispatchable owns generic dispatchers
 export const EventDispatcherSymbol = Symbol("EventDispatcher");
@@ -69,7 +68,9 @@ export class StoreObject extends Dispatchable {
         if (!this[EventDispatcherSymbol]) {
             this[EventDispatcherSymbol] = new Dispatchable();
             this.addChangeListener((event: StoreEvent) => {
-                this[EventDispatcherSymbol]!.dispatch(event.type, event, this);
+                if (event.type) {
+                    this[EventDispatcherSymbol]!.dispatch(event.type, event, this);
+                }
             });
         }
         return this[EventDispatcherSymbol]!.addListener(eventType, callback);

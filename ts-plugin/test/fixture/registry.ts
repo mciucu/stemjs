@@ -88,3 +88,6 @@ export const inheritedStatic: CelestialBody | undefined = Star.get("sun")!.getSt
 planet.getStore().named("earth");
 // @ts-expect-error
 export const wrongOwnObjects: MoonObject[] = planet.getStore().all();
+
+// Naming the class through `constructor` would leave an object literal with a Function where the class goes
+export const patch: Partial<Planet> = {radius: 1};
