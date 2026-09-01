@@ -12,9 +12,8 @@ export interface CleanupHandle {
 
 export type CleanupJob = RemoveHandle | CleanupHandle | Function;
 
-// What the add*Listener family answers with: one handle, a bundle of them for an array of names, or
-// nothing when the dispatcher does not exist
-export type ListenerHandle = DispatcherHandle | CleanupJobs | undefined;
+// What the add*Listener family answers with: one handle, or a bundle of them for an array of names
+export type ListenerHandle = DispatcherHandle | CleanupJobs;
 
 function implementsRemoveHandle(job: CleanupJob): job is RemoveHandle {
     return "remove" in job && isFunction(job.remove);
@@ -143,6 +142,10 @@ export class Dispatchable {
         return this[CleanupJobsSymbol] || (this[CleanupJobsSymbol] = new CleanupJobs());
     }
 
+    // Asked to add the missing one, it always answers with a dispatcher, which is what lets a listener
+    // added under a name nothing has dispatched yet still hand back a real handle
+    getDispatcher(name: DispatcherName, addIfMissing?: true): Dispatcher;
+    getDispatcher(name: DispatcherName, addIfMissing: boolean): Dispatcher | undefined;
     getDispatcher(name: DispatcherName, addIfMissing: boolean = true): Dispatcher | undefined {
         let dispatcher = this.dispatchers.get(name);
         if (!dispatcher && addIfMissing) {
@@ -159,18 +162,18 @@ export class Dispatchable {
         }
     }
 
-    addListenerGeneric(methodName: keyof Dispatcher, name: DispatcherName | DispatcherName[], callback: Callback): DispatcherHandle | CleanupJobs | undefined {
+    addListenerGeneric(methodName: keyof Dispatcher, name: DispatcherName | DispatcherName[], callback: Callback): ListenerHandle {
         if (Array.isArray(name)) {
             return new CleanupJobs(name.map(x => (this as any)[methodName](x, callback)));
         }
-        return (this.getDispatcher(name) as any)?.[methodName](callback);
+        return (this.getDispatcher(name) as any)[methodName](callback);
     }
 
-    addListener(name: DispatcherName | DispatcherName[], callback: Callback): DispatcherHandle | CleanupJobs | undefined {
+    addListener(name: DispatcherName | DispatcherName[], callback: Callback): ListenerHandle {
         return this.addListenerGeneric("addListener", name, callback);
     }
 
-    addListenerOnce(name: DispatcherName | DispatcherName[], callback: Callback): DispatcherHandle | CleanupJobs | undefined {
+    addListenerOnce(name: DispatcherName | DispatcherName[], callback: Callback): ListenerHandle {
         return this.addListenerGeneric("addListenerOnce", name, callback);
     }
 
