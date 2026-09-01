@@ -1,4 +1,4 @@
-import {HTMLTagType, UI, UIElement, type UIChild} from "./UIBase";
+import {type HTMLTagType, UI, UIElement, type UIChild} from "./UIBase";
 import {DOMAttributesMap} from "./NodeAttributes";
 
 export interface VideoOptions {

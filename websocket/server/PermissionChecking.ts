@@ -1,5 +1,5 @@
 import {Dispatchable} from "../../base/Dispatcher";
-import {AppConfig} from "./AppConfig";
+import {type AppConfig} from "./AppConfig";
 
 interface HttpRequest {
     getHeader(name: string): string | undefined;

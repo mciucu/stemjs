@@ -1,5 +1,5 @@
 // JSX Runtime for StemJS
-import {UI, BaseUIElement, UIElement, UIElementOptions, HTMLTagType, SVGTagType} from "./UIBase";
+import {UI, BaseUIElement, UIElement, type UIElementOptions, type HTMLTagType, type SVGTagType} from "./UIBase";
 import {SVGUIElement} from "./svg/SVGBase";
 
 // The new JSX transform expects jsx/jsxs with (type, props, key) signature

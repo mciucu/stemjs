@@ -1,4 +1,4 @@
-import {StyleObject, UI, type UICleanChild, UIElement} from "../../UIBase";
+import {type StyleObject, UI, type UICleanChild, UIElement} from "../../UIBase";
 import {toArray, unwrapArray} from "../../../base/Utils";
 import {CollapsibleControllerInput} from "../../collapsible/CollapsibleMixin";
 import {CheckboxInput} from "./CheckboxInput";

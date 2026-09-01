@@ -1,4 +1,4 @@
-import {PartialOptions, UI, type UIChild} from "../UIBase";
+import {type PartialOptions, UI, type UIChild} from "../UIBase";
 import {styleRule, StyleSheet} from "../Style";
 import {registerStyle} from "../style/Theme";
 import {isLocalUrl, isString, trimLocalUrl} from "../../base/Utils";

@@ -1,6 +1,6 @@
 import {Dispatchable} from "../../base/Dispatcher";
 import {isDeepEqual} from "../../base/Utils";
-import {StoreClass, StoreObject} from "../Store";
+import {type StoreClass, StoreObject} from "../Store";
 import {LoadEndpoint} from "../../base/Fetch";
 
 export abstract class BasePaginator<T> extends Dispatchable {

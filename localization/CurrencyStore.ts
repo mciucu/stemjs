@@ -1,5 +1,5 @@
-import {globalStore, BaseStore, StoreClass, StoreObject} from "../state/Store";
-import {StoreId} from "../state/State";
+import {globalStore, BaseStore, type StoreClass, StoreObject} from "../state/Store";
+import {type StoreId} from "../state/State";
 
 @globalStore
 export class Currency extends BaseStore("Currency") {

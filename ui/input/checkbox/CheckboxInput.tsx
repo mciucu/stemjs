@@ -1,5 +1,5 @@
 import {UI, type UIChild, type UICleanChild} from "../../UIBase";
-import {StyleRules, StyleSheet} from "../../Style";
+import {type StyleRules, StyleSheet} from "../../Style";
 import {styleRule} from "../../../decorators/Style";
 import {registerStyle} from "../../style/Theme";
 import {Device} from "../../../base/Device";
