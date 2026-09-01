@@ -402,7 +402,7 @@ export class UIElement<
         const childrenKeyMap = new Map<string | number, BaseUIElement>();
 
         for (let i = 0; i < elements.length; i += 1) {
-            const childKey = (elements[i].options && elements[i].options.key) || ("autokey" + i);
+            const childKey = elements[i].options?.key || ("autokey" + i); // TODO @cleanup an element shouldn't have missing options
 
             childrenKeyMap.set(childKey, elements[i]);
         }
