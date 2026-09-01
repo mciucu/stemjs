@@ -347,15 +347,46 @@ function makePlaceholder(name, index) {
     return name.slice(0, name.length - suffix.length) + suffix;
 }
 
-// Returns {text, originalLength, fields} for the augmented file, or null when there's nothing to declare.
+// TypeScript types every JSX expression as JSX.Element, whatever the tag, and jsxFactory drives emit
+// rather than inference, so UI.createElement's overloads are never consulted. The element itself is left
+// exactly as written and a type assertion is appended after it, which is enough to make the type real.
+// The helper falls back to JSX.Element for a tag that isn't constructable, so nothing new can break.
+const JSX_HELPER_NAME = "__stemJsxInstance";
+// `0 extends 1 & T` is the standard test for any: an untyped tag has to stay any rather than collapse to
+// unknown, which is what the conditional would otherwise give for both of its branches.
+const JSX_HELPER = `type ${JSX_HELPER_NAME}<T> = 0 extends 1 & T ? any :`
+    + ` T extends abstract new (...args: any[]) => infer R ? R : JSX.Element;`;
+// A capitalised tag somewhere in the file. Generic arguments match too; they simply yield no insertions.
+const HAS_COMPONENT_TAG = /<[A-Z][\w.]*[\s/>]/;
+
+// Where the assertion goes, for every JSX element in expression position. A direct JSX child is skipped:
+// appending there would turn the assertion into JSX text rather than an expression.
+function collectJsxAssertions(ts, sourceFile) {
+    const insertions = [];
+    const visit = (node) => {
+        if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
+            const tagName = ts.isJsxElement(node) ? node.openingElement.tagName : node.tagName;
+            const isChild = node.parent && (ts.isJsxElement(node.parent) || ts.isJsxFragment(node.parent));
+            if (!isChild && ts.isIdentifier(tagName) && /^[A-Z]/.test(tagName.text)) {
+                insertions.push({offset: node.end, text: ` as ${JSX_HELPER_NAME}<typeof ${tagName.text}>`});
+            }
+        }
+        ts.forEachChild(node, visit);
+    };
+    ts.forEachChild(sourceFile, visit);
+    return insertions;
+}
+
+// Returns {text, originalLength, fields, insertions} for the augmented file, or null when there's nothing to do.
 // `fields` pairs each renamed member with the declaration that replaced it, for the plugin to map between.
 function getAugmentedSource(ts, fileName, text, options = {}) {
     const hasStyleRule = /@\w*(?:styleRule|keyframesRule)/i.test(text);
     const usesThisConstructor = text.includes(THIS_CONSTRUCTOR_STATIC);
     const hasEnum = text.includes("@" + ENUM_DECORATOR);
     const hasStore = text.includes("@" + STORE_DECORATOR) || EXTENDS_STORE_OBJECT.test(text);
+    const hasComponentTag = HAS_COMPONENT_TAG.test(text);
     if (!text.includes(STYLE_DECORATOR) && !text.includes(THEME_REGISTER) && !text.includes("@" + FIELD_DECORATOR) &&
-            !hasStyleRule && !usesThisConstructor && !hasEnum && !hasStore) {
+            !hasStyleRule && !usesThisConstructor && !hasEnum && !hasStore && !hasComponentTag) {
         return null;
     }
 
@@ -531,6 +562,10 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
         appended += "}\n";
     }
 
+    const insertions = hasComponentTag ? collectJsxAssertions(ts, sourceFile) : [];
+    if (insertions.length > 0) {
+        appended = JSX_HELPER + "\n" + appended;
+    }
     if (appended === "") {
         return null;
     }
@@ -539,18 +574,65 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
 
     let rewritten = "";
     let cursor = 0;
-    for (const fieldInfo of impliedFields) {
-        rewritten += text.slice(cursor, fieldInfo.sourceStart) + fieldInfo.placeholder;
-        cursor = fieldInfo.sourceStart + fieldInfo.name.length;
-        fieldInfo.appendedStart += text.length + 1; // +1 for the newline that separates the two halves
+    // A field placeholder is the same length as the name it stands in for; a JSX assertion is inserted.
+    // Both are applied in one pass, in source order, so the shift each one contributes stays accountable.
+    const edits = [
+        ...impliedFields.map(field => ({offset: field.sourceStart, skip: field.name.length, text: field.placeholder, field})),
+        ...insertions.map(insertion => ({offset: insertion.offset, skip: 0, text: insertion.text})),
+    ].sort((a, b) => a.offset - b.offset);
+
+    let shift = 0;
+    for (const edit of edits) {
+        rewritten += text.slice(cursor, edit.offset) + edit.text;
+        cursor = edit.offset + edit.skip;
+        if (edit.field) {
+            edit.field.sourceStart += 0; // the name stays where the user wrote it
+        }
+        shift += edit.text.length - edit.skip;
+        edit.shiftAfter = shift;
     }
     rewritten += text.slice(cursor);
 
+    const originalLength = text.length + shift;
+    for (const fieldInfo of impliedFields) {
+        fieldInfo.appendedStart += originalLength + 1; // +1 for the newline that separates the two halves
+    }
+
     return {
         text: rewritten + "\n" + appended,
-        originalLength: text.length,
+        originalLength,
         fields: impliedFields,
+        // Sorted; each entry says how much the augmented side has grown by that point in the source
+        shifts: edits.filter(edit => edit.text.length !== edit.skip).map(edit => ({offset: edit.offset, shiftAfter: edit.shiftAfter})),
     };
 }
 
-module.exports = {getAugmentedSource};
+// An insertion has no counterpart in the source, so a position landing inside one answers with the point
+// it was inserted at. Insertions never contain a newline, so only columns move, never lines.
+function toSourceOffset(shifts, position) {
+    let previous = 0;
+    for (const {offset, shiftAfter} of shifts || []) {
+        if (position < offset + previous) {
+            return position - previous;
+        }
+        if (position < offset + shiftAfter) {
+            return offset;
+        }
+        previous = shiftAfter;
+    }
+    return position - previous;
+}
+
+// A position at the insertion point itself stays before the text that was inserted there
+function toAugmentedOffset(shifts, position) {
+    let shift = 0;
+    for (const {offset, shiftAfter} of shifts || []) {
+        if (position <= offset) {
+            break;
+        }
+        shift = shiftAfter;
+    }
+    return position + shift;
+}
+
+module.exports = {getAugmentedSource, toSourceOffset, toAugmentedOffset};

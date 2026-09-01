@@ -7,6 +7,8 @@
         "strict": true,
         "strictPropertyInitialization": false,
         "experimentalDecorators": true,
+        "jsx": "react",
+        "jsxFactory": "UI.createElement",
         "skipLibCheck": true,
         "noEmit": true,
         "paths": {
@@ -19,5 +21,5 @@
             }
         ]
     },
-    "include": ["stores.ts", "optional.ts", "constructor.ts", "enums.ts", "registry.ts", "numeric.ts"]
+    "include": ["stores.ts", "optional.ts", "constructor.ts", "enums.ts", "registry.ts", "numeric.ts", "jsx.tsx", "../../../ui/jsx.d.ts"]
 }

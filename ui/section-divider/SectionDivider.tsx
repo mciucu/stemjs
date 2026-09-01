@@ -375,7 +375,7 @@ export class SectionDivider<ExtraOptions extends SectionDividerOptions = Section
                 if (leftChildVisible && !child.hasClass("hidden")) {
                     hiddenClass = "";
                 }
-                let divider = <DividerBarClass className={hiddenClass} orientation={this.getOrientation()} /> as DividerBar;
+                let divider = <DividerBarClass className={hiddenClass} orientation={this.getOrientation()} />;
                 children.push(divider);
                 this.dividers.push(divider);
             }

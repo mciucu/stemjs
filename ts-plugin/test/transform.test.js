@@ -3,7 +3,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const {getAugmentedSource} = require("../transform");
+const {getAugmentedSource, toSourceOffset, toAugmentedOffset} = require("../transform");
 
 const FIXTURE = path.join(__dirname, "fixture");
 const OPTIONS = {stemRoot: "@stemjs"};
@@ -20,8 +20,11 @@ function augment(ts, name) {
 module.exports = (ts, check) => {
     const {text, result, appended} = augment(ts, "stores.ts");
 
-    // The invariant the whole approach rests on: a position means the same thing to the editor and to us
+    // A file with nothing inserted keeps the original invariant: a position means the same thing to the
+    // editor and to us. A JSX assertion breaks it on purpose, and `shifts` is what maps across - asserted
+    // at the end of this file.
     check("the source half is byte-identical in length", result.originalLength, text.length);
+    check("a file with no insertions needs no mapping", result.shifts.length, 0);
     // Putting each name back where its placeholder sits has to reproduce the file exactly - proof that the
     // rewrite touched the member names and nothing else
     let restored = result.text.slice(0, result.originalLength);
@@ -134,4 +137,34 @@ module.exports = (ts, check) => {
 
     check("a file with neither decorator is not touched at all",
         getAugmentedSource(ts, "/x/plain.ts", "export const value = 1;\n", OPTIONS), null);
+
+
+    // A JSX assertion is inserted rather than substituted, so the source half grows and every position after
+    // it moves. Removing what we inserted has to give the file back exactly, and the two mappings have to be
+    // inverses of each other - that is what lets a diagnostic, a hover or a definition land where it was written.
+    const jsx = augment(ts, "jsx.tsx");
+
+    check("a JSX file records one shift per assertion", jsx.result.shifts.length > 0, true);
+
+    let stripped = jsx.result.text.slice(0, jsx.result.originalLength);
+    for (const {offset, shiftAfter} of [...jsx.result.shifts].reverse()) {
+        const previous = jsx.result.shifts.filter(entry => entry.offset < offset).pop();
+        const start = offset + (previous ? previous.shiftAfter : 0);
+        stripped = stripped.slice(0, start) + stripped.slice(start + shiftAfter - (previous ? previous.shiftAfter : 0));
+    }
+    check("removing the assertions gives the file back", stripped, jsx.text);
+
+    check("the JSX itself is never rewritten", jsx.result.text.includes("<Panel/> as __stemJsxInstance<typeof Panel>"), true);
+
+    const roundTrips = [];
+    for (let position = 0; position <= jsx.text.length; position += 1) {
+        roundTrips.push(toSourceOffset(jsx.result.shifts, toAugmentedOffset(jsx.result.shifts, position)));
+    }
+    check("every source position survives the round trip",
+        roundTrips.findIndex((value, index) => value !== index), -1);
+
+    // An offset inside inserted text has no counterpart, so it answers with the point it was inserted at
+    const firstShift = jsx.result.shifts[0];
+    check("a position inside an assertion maps to where it was inserted",
+        toSourceOffset(jsx.result.shifts, firstShift.offset + 1), firstShift.offset);
 };

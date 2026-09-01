@@ -8,7 +8,7 @@
 // hidden from results the editor displays, and anything that lands on a relocated member is mapped back to
 // where that member is actually written.
 
-const {getAugmentedSource} = require("./transform");
+const {getAugmentedSource, toSourceOffset, toAugmentedOffset} = require("./transform");
 const {isNumericCoercion} = require("./numericCoercion");
 
 function init(modules) {
@@ -77,10 +77,19 @@ function init(modules) {
             );
         };
 
-        // Ask about the declaration we appended rather than the placeholder standing in for it
+        const shiftsOf = (fileName) => {
+            const augmented = augmentedFiles.get(fileName);
+            return (augmented && augmented.shifts) || [];
+        };
+
+        // Ask about the declaration we appended rather than the placeholder standing in for it, and account
+        // for the JSX assertions inserted before this point
         const toAppendedPosition = (fileName, position) => {
             const field = fieldAtSource(fileName, position);
-            return field ? field.appendedStart + (position - field.sourceStart) : position;
+            if (field) {
+                return field.appendedStart + (position - field.sourceStart);
+            }
+            return toAugmentedOffset(shiftsOf(fileName), position);
         };
 
         // ...and report it back at the member the class actually declares
@@ -97,7 +106,9 @@ function init(modules) {
         const mapSpans = (items, defaultFileName) => (items || []).map(item => {
             const fileName = item.fileName || defaultFileName;
             if (!isOurs(fileName, item.textSpan.start)) {
-                return item;
+                const shifts = shiftsOf(fileName);
+                return shifts.length === 0 ? item
+                    : {...item, textSpan: {...item.textSpan, start: toSourceOffset(shifts, item.textSpan.start)}};
             }
             const textSpan = toSourceSpan(fileName, item.textSpan);
             return textSpan ? {...item, textSpan, contextSpan: undefined} : null;
@@ -158,7 +169,12 @@ function init(modules) {
         proxy.getQuickInfoAtPosition = (fileName, position) => {
             const field = fieldAtSource(fileName, position);
             if (!field) {
-                return languageService.getQuickInfoAtPosition(fileName, position);
+                const quickInfo = languageService.getQuickInfoAtPosition(fileName, toAppendedPosition(fileName, position));
+                const shifts = shiftsOf(fileName);
+                if (!quickInfo || shifts.length === 0) {
+                    return quickInfo;
+                }
+                return {...quickInfo, textSpan: {...quickInfo.textSpan, start: toSourceOffset(shifts, quickInfo.textSpan.start)}};
             }
             const quickInfo = languageService.getQuickInfoAtPosition(fileName, field.appendedStart);
             if (!quickInfo) {
@@ -204,7 +220,8 @@ function init(modules) {
         };
 
         proxy.getCompletionsAtPosition = (fileName, position, options, formatOptions) => {
-            const result = languageService.getCompletionsAtPosition(fileName, position, options, formatOptions);
+            const result = languageService.getCompletionsAtPosition(
+                fileName, toAppendedPosition(fileName, position), options, formatOptions);
             if (!result) {
                 return result;
             }

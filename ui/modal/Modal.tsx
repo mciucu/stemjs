@@ -231,7 +231,7 @@ export class ActionModal<ExtraOptions extends ActionModalOptions = ActionModalOp
         />;
     }
 
-    getFooter() {
+    getFooter(): UIChild {
         return [
             <TemporaryMessageArea ref="messageArea"/>,
             <ButtonGroup>

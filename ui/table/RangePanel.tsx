@@ -196,7 +196,7 @@ export function RangeTableInterface<BaseType, BaseTable extends Constructor<Tabl
             for (let i = 0; i < entries.length; i += 1) {
                 const entry = entries[i];
                 const RowClass = this.getRowClass(entry);
-                this.rows.push(<RowClass {...this.getRowOptions(entry, i + this.lowIndex)} /> as RowLikeElement);
+                this.rows.push(<RowClass {...this.getRowOptions(entry, i + this.lowIndex)} />);
             }
             return this.rows;
         }

@@ -2,10 +2,19 @@
 // so command-line checking agrees with the editor. typecheck.js is the CLI over this; the tests use it directly.
 
 const path = require("path");
-const {getAugmentedSource} = require("./transform");
+const {getAugmentedSource, toSourceOffset} = require("./transform");
 const {isNumericCoercion} = require("./numericCoercion");
 
 const PLUGIN_NAME = "ts-plugin-registered-styles";
+
+// The user's own text, built once per file that reports, so line and column line up with what they see
+const sourceFiles = new Map();
+function sourceFileFor(ts, fileName, augmented) {
+    if (!sourceFiles.has(fileName)) {
+        sourceFiles.set(fileName, ts.createSourceFile(fileName, augmented.sourceText, ts.ScriptTarget.ESNext, true));
+    }
+    return sourceFiles.get(fileName);
+}
 
 function parseConfig(ts, projectRoot) {
     const configPath = ts.findConfigFile(projectRoot, ts.sys.fileExists, "tsconfig.json");
@@ -45,6 +54,9 @@ function createAugmentingHost(ts, options, augmentedFiles, previewNoCheck) {
         const augmented = process.env.NO_STEM_PLUGIN
             ? null
             : getAugmentedSource(ts, fileName, text, getPluginConfig(options));
+        if (augmented) {
+            augmented.sourceText = text;
+        }
         if (!augmented) {
             // Only build the file ourselves when we rewrote it - otherwise the host still knows best
             return previewNoCheck
@@ -118,7 +130,14 @@ function getProjectDiagnostics(ts, projectRoot, filter = null, previewNoCheck = 
             return diagnostic;
         }
         const augmented = augmentedFiles.get(path.normalize(diagnostic.file.fileName));
-        return {...diagnostic, messageText: restoreNames(augmented, diagnostic.messageText)};
+        const mapped = {...diagnostic, messageText: restoreNames(augmented, diagnostic.messageText)};
+        if (augmented && augmented.shifts && augmented.shifts.length > 0) {
+            // The line is already right - an inserted assertion never carries a newline - but the column
+            // and the excerpt have to come from the text as written
+            mapped.start = toSourceOffset(augmented.shifts, diagnostic.start);
+            mapped.file = sourceFileFor(ts, diagnostic.file.fileName, augmented);
+        }
+        return mapped;
     });
 }
 

@@ -249,12 +249,12 @@ export class TitledSectionDivider extends SectionDivider<TitledSectionDividerOpt
                 this.addClass(this.styleSheet.paddingRemoved);
             }
             if (this.panels.length) {
-                let divider = <DividerBarClass orientation={this.getOrientation()} /> as DividerBar;
+                let divider = <DividerBarClass orientation={this.getOrientation()} />;
                 children.push(divider);
                 this.dividers.push(divider);
             }
             const wrappedChild = <BarCollapsePanel orientation={this.options.orientation} collapsedSize={this.options.collapsedSize}
-                                                   title={child.options.title || "..."}>{child}</BarCollapsePanel> as BarCollapsePanel;
+                                                   title={child.options.title || "..."}>{child}</BarCollapsePanel>;
             children.push(wrappedChild);
             this.panels.push(wrappedChild);
         }

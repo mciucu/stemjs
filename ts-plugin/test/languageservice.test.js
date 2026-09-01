@@ -66,6 +66,26 @@ module.exports = (ts, check) => {
     check("go-to-definition lands on the member",
         text.substr(definitions[0].textSpan.start, definitions[0].textSpan.length), "messageThread");
 
+    // A JSX element is typed as its tag, not as JSX.Element, and the span comes back where it was written
+    const jsxFile = path.join(FIXTURE, "jsx.tsx");
+    const jsxText = ts.sys.readFile(jsxFile);
+    const jsxTypeAt = (position) => {
+        const info = plugin.getQuickInfoAtPosition(jsxFile, position);
+        return info ? ts.displayPartsToString(info.displayParts) : "<none>";
+    };
+
+    const namePosition = jsxText.indexOf("panel.open()");
+    check("hover on a JSX-derived name", jsxTypeAt(namePosition), "const panel: Panel");
+
+    const jsxQuickInfo = plugin.getQuickInfoAtPosition(jsxFile, namePosition);
+    check("the hover span is where the name is written",
+        jsxText.substr(jsxQuickInfo.textSpan.start, jsxQuickInfo.textSpan.length), "panel");
+
+    const members = plugin.getCompletionsAtPosition(jsxFile, namePosition + "panel.".length, {});
+    const memberNames = (members ? members.entries : []).map(entry => entry.name);
+    check("completion offers the tag's own member", memberNames.includes("open"), true);
+    check("completion does not offer another tag's", memberNames.includes("slide"), false);
+
     const renames = plugin.findRenameLocations(storesFile, usagePosition, false, false);
     check("rename covers the declaration and all four usages", renames.length, 5);
     check("every rename location is the real name",

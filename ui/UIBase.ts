@@ -11,7 +11,6 @@ import {CleanupJobs, Dispatchable, OncePerTickRunner, type RemoveHandle} from ".
 import {DOMAttributesMap, NodeAttributes} from "./NodeAttributes";
 import {Theme, type ThemeProps} from "./style/Theme";
 import {type StyleSheet} from "./Style";
-import {type Duration} from "../time/Duration";
 
 export type SVGTagType = keyof SVGElementTagNameMap;
 export type HTMLTagType = keyof HTMLElementTagNameMap;
@@ -913,7 +912,8 @@ UI.Primitive = (<T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNam
     if (resultClass) {
         return resultClass as any;
     }
-    resultClass = class Primitive extends BaseClass<{}, HTMLElementTagNameMap[T]> {
+    // Cast off the type parameter: a class expression can only extend a type variable that constructs from (...args: any[])
+    resultClass = class Primitive extends (BaseClass as typeof UIElement)<{}, HTMLElementTagNameMap[T]> {
         declare node?: HTMLElementTagNameMap[T];
         
         getNodeType(): T {

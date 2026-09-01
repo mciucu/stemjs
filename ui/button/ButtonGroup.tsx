@@ -35,14 +35,20 @@ export class RadioButtonGroup extends SimpleStyledElement<RadioButtonGroupOption
 
     setOptions(options: RadioButtonGroupOptions): void {
         super.setOptions(options);
-        this.index = this.options.index || 0;
+        this.index = this.options.index || 0; // TODO @cleanup This should be an input type
     }
 
     render(): UIChild {
-        this.buttons = this.options.givenOptions.map((option, index): Button =>
-            <Button key={index} onClick={() => this.setIndex(index)} size={this.getSize()}
-                    label={option.toString()} level={this.getLevel()}
-                    className={this.index === index ? "active" : ""}/>);
+        this.buttons = this.options.givenOptions.map(
+            (option, index) => <Button
+                key={index}
+                onClick={() => this.setIndex(index)}
+                size={this.getSize()}
+                label={option.toString()}
+                level={this.getLevel()}
+                className={this.index === index ? "active" : ""}
+            />
+        );
         return this.buttons;
     }
 
