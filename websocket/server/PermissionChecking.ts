@@ -46,6 +46,8 @@ export async function IdentifySessionId(rpcCaller: RPCCaller, sessionId: string)
     return rpcCaller.query("identify", {sessionId});
 }
 
+// TODO Take the default streams from AppConfig as templates like ["global-events", "user-$"], "$" being the
+// identified user id and the entry dropped for anonymous connections; then also subscribe them on open.
 export async function CheckStreamPermission(rpcCaller: RPCCaller, userId: string, streamName: string): Promise<[boolean, string]> {
     if (streamName === "global-events") {
         return [true, "Default global stream"];
@@ -55,7 +57,7 @@ export async function CheckStreamPermission(rpcCaller: RPCCaller, userId: string
         return [true, "Default user stream"];
     }
 
-    const response = rpcCaller.query("permission", {userId, streamName});
+    const response = await rpcCaller.query("permission", {userId, streamName});
     // We're ignoring the failed response
     return response || [false, "Unknown reason"];
 }
