@@ -1,6 +1,6 @@
 import {Dispatchable} from "../base/Dispatcher";
 import {Deque} from "./Deque";
-import {StemDate} from "../time/Date";
+import {StemDate, type DateInput} from "../time/Date";
 
 export class MaxLengthDeque<T> extends Deque<T> {
     readonly maxLength: number;
@@ -58,7 +58,8 @@ interface MetricValue {
 }
 
 export class MetricSummary extends Dispatchable {
-    private type: symbol;
+    // Read by the panels drawing a summary, to pick the unit its values are formatted in
+    readonly type: symbol;
     private options: MetricSummaryOptions;
     private maxLength: number;
     private rawTimestamps: MaxLengthDeque<number>;
@@ -121,7 +122,7 @@ export class MetricSummary extends Dispatchable {
         this.dispatchChange({timestamp, value, lastTimestamp});
     }
 
-    getValues(startDate: number = this.rawTimestamps.peekFront(), endDate: number = this.rawTimestamps.last(), maxValues: number = 1024): MetricValue[] {
+    getValues(startDate: DateInput = this.rawTimestamps.peekFront(), endDate: DateInput = this.rawTimestamps.last(), maxValues: number = 1024): MetricValue[] {
         startDate = +(new StemDate(startDate));
         endDate = +(new StemDate(endDate));
         let values: MetricValue[] = [];

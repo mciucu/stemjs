@@ -2,7 +2,7 @@ import {Device} from "../base/Device";
 import {UI} from "./UIBase";
 
 // Type definitions for draggable functionality
-interface DragListeners {
+export interface DragListeners {
     onStart?: (event: Event) => void;
     onDrag: (deltaX: number, deltaY: number) => void;
     onEnd?: (event: Event) => void;

@@ -7,23 +7,49 @@ const init = require("../index");
 const FIXTURE = path.join(__dirname, "fixture");
 const OPTIONS = {stemRoot: "@stemjs"};
 
+// Held in memory rather than on disk, because it has to report an error and the fixture compiles clean.
+// Everything below the JSX element sits further along in the text the compiler sees than in the file.
+const SHIFTED = path.join(FIXTURE, "shifted.tsx");
+const SHIFTED_SOURCE = [
+    `import {UI, UIElement} from "../../../ui/UIBase";`,
+    ``,
+    `class Panel extends UIElement {`,
+    `    open(): void {}`,
+    `}`,
+    ``,
+    `class Holder extends UIElement {`,
+    `    declare panel: Panel;`,
+    ``,
+    `    assign(): void {`,
+    `        this.panel = <Panel/>;`,
+    `        const count: number = "not a number";`,
+    `        const doubled = count * 2;`,
+    `        const box: {width: number} = {width: "wide"};`,
+    `        this.panel.open();`,
+    `        this.missingMember();`,
+    `    }`,
+    `}`,
+    ``,
+    `export {Holder, UI};`,
+].join("\n");
+
 function createPlugin(ts) {
     const configPath = ts.findConfigFile(FIXTURE, ts.sys.fileExists, "tsconfig.json");
     const {config} = ts.readConfigFile(configPath, ts.sys.readFile);
     const {options, fileNames} = ts.parseJsonConfigFileContent(config, ts.sys, FIXTURE);
 
     const host = {
-        getScriptFileNames: () => fileNames,
+        getScriptFileNames: () => [...fileNames, SHIFTED],
         getScriptVersion: () => "1",
         getScriptSnapshot: (fileName) => {
-            const text = ts.sys.readFile(fileName);
+            const text = fileName === SHIFTED ? SHIFTED_SOURCE : ts.sys.readFile(fileName);
             return text === undefined ? undefined : ts.ScriptSnapshot.fromString(text);
         },
         getCurrentDirectory: () => FIXTURE,
         getCompilationSettings: () => options,
         getDefaultLibFileName: (settings) => ts.getDefaultLibFilePath(settings),
-        fileExists: ts.sys.fileExists,
-        readFile: ts.sys.readFile,
+        fileExists: (fileName) => fileName === SHIFTED || ts.sys.fileExists(fileName),
+        readFile: (fileName) => (fileName === SHIFTED ? SHIFTED_SOURCE : ts.sys.readFile(fileName)),
         readDirectory: ts.sys.readDirectory,
         directoryExists: ts.sys.directoryExists,
         getDirectories: ts.sys.getDirectories,
@@ -102,6 +128,35 @@ module.exports = (ts, check) => {
     const diagnostics = plugin.getSemanticDiagnostics(storesFile);
     check("no diagnostics of our own leak out",
         diagnostics.map(diagnostic => ts.flattenDiagnosticMessageText(diagnostic.messageText, " ")).join(" | "), "");
+
+    const [assignment, literal] = plugin.getSemanticDiagnostics(SHIFTED);
+    check("an error is underlined where the file has it",
+        SHIFTED_SOURCE.substr(assignment.start, assignment.length), "count");
+
+    const [related] = literal.relatedInformation;
+    check("so is the declaration an error points back to",
+        SHIFTED_SOURCE.substr(related.start, related.length), "width");
+
+    const hints = plugin.provideInlayHints(
+        SHIFTED, {start: 0, length: SHIFTED_SOURCE.length}, {includeInlayVariableTypeHints: true}
+    );
+    check("an inlay hint sits after the name it types",
+        hints.map(hint => SHIFTED_SOURCE.slice(0, hint.position).split("\n").pop().trim() + hint.text).join(" | "),
+        "const doubled: number");
+
+    const [, , missing] = plugin.getSemanticDiagnostics(SHIFTED);
+    const [fix] = plugin.getCodeFixesAtPosition(
+        SHIFTED, missing.start, missing.start + missing.length, [missing.code], {}, {}
+    );
+    check("a quick fix writes inside the class, not past the end of the file",
+        fix.changes[0].textChanges[0].span.start < SHIFTED_SOURCE.indexOf("export {"), true);
+
+    const callPosition = SHIFTED_SOURCE.indexOf("this.panel.open(") + "this.panel.open(".length;
+    const signatureHelp = plugin.getSignatureHelpItems(SHIFTED, callPosition, {});
+    check("signature help answers about the call the cursor is in",
+        (signatureHelp?.items || []).map(item => item.prefixDisplayParts.map(part => part.text).join("")).join(" | "),
+        "open(");
+    check("its applicable span is where the arguments are written", signatureHelp?.applicableSpan.start, callPosition);
 
     const outline = plugin.getNavigationTree(storesFile);
     const chatMessage = outline.childItems.find(item => item.text === "ChatMessage");

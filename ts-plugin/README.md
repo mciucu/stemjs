@@ -228,8 +228,9 @@ directions.
 
 ## What it costs
 
-Because the declarations are appended and the rename is length-neutral, every offset in the original file stays
-valid, and the editor keeps working against the text you actually have. Everything downstream is ordinary type
+Because the declarations are appended and the rename is length-neutral, the file keeps its shape; the one thing
+written into it is a JSX assertion, and every offset past one is put back before the editor sees it, so the editor
+keeps working against the text you actually have. Everything downstream is ordinary type
 resolution: completion, hover, go-to-definition and real errors for members that don't exist - it doesn't suppress
 anything except what it generated itself. Three things are the plugin's own to clean up, all of them against spans
 it created: the implicit `any` on a placeholder, placeholders offered in completions, and a result that lands on a
@@ -308,8 +309,9 @@ completions, diagnostics, outline).
 
 - `transform.js` - decides what to declare and what to rename for a file. The only part with any real logic.
 - `index.js` - the language service plugin: feeds the augmented text to the compiler, hides the appended region
-  from anything the editor might display or apply as an edit (diagnostics, renames, formatting, code fixes), and
-  maps results on a relocated member back to the member itself.
+  from anything the editor might display or apply as an edit (diagnostics, renames, formatting, code fixes), maps
+  results on a relocated member back to the member itself, and puts every span it hands over into the columns the
+  file has.
 - `checker.js` - builds a program over the augmented text and drops our own noise from the diagnostics. Shared
   by the command line and the tests, so the two can't disagree about what counts as an error.
 - `numericCoercion.js`, `jsxChildren.js` - the two diagnostic rules above, shared by `checker.js` and `index.js`

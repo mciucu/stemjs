@@ -151,7 +151,8 @@ class TabArea extends UI.Element<TabAreaOptions> {
         </Switcher>;
     }
 
-    getChildrenToRender() {
+    // The base's hook type, since a subclass may wrap these in more of its own before they are flattened
+    getChildrenToRender(): UIChild {
         let tabTitles = [];
         let tabPanels = [];
         let activeTab;

@@ -1,12 +1,12 @@
 // TypeScript language service plugin for Stem's decorators: makes `this.styleSheet` resolve to the style
 // sheet passed to @registerStyle, and an un-annotated `@field(X) name` resolve to what X loads.
 //
-// See transform.js for what gets declared and why. Two things are true of the text the compiler is handed:
-// the declarations are appended past the end of the file, and an un-annotated @field member is renamed to
-// an equal-length placeholder. So the file keeps its exact shape and offsets mean the same thing on both
-// sides - everything this file does is to keep the two halves from showing through: the appended region is
-// hidden from results the editor displays, and anything that lands on a relocated member is mapped back to
-// where that member is actually written.
+// See transform.js for what gets declared and why. The declarations are appended past the end of the file and
+// an un-annotated @field member is renamed to an equal-length placeholder, but a JSX assertion is inserted
+// where it is needed, so a position past one means different things on the two sides - everything this file
+// does is to keep that from showing through: the appended region is hidden from results the editor displays,
+// anything that lands on a relocated member is mapped back to where that member is written, and every span
+// the editor is handed is put back in the columns the file actually has.
 
 const {getAugmentedSource, toSourceOffset, toAugmentedOffset} = require("./transform");
 const {isNumericCoercion} = require("./numericCoercion");
@@ -62,29 +62,40 @@ function init(modules) {
             return augmentedFiles.has(fileName) ? version + "+stem" : version;
         };
 
+        // A file is augmented when the compiler first asks for its snapshot, which is later than the editor can
+        // hand us a position for it, so a reader that could be the first one makes that happen
+        const synchronized = new Set();
+        const augmentedFile = (fileName) => {
+            if (!synchronized.has(fileName)) {
+                synchronized.add(fileName);
+                languageService.getProgram();
+            }
+            return augmentedFiles.get(fileName);
+        };
+
         const isOurs = (fileName, start) => {
-            const augmented = augmentedFiles.get(fileName);
+            const augmented = augmentedFile(fileName);
             return Boolean(augmented) && start >= augmented.originalLength;
         };
 
         // The member a position falls in, on the side of the file the user has open. Inclusive of the end,
         // so a cursor resting right after the name still counts as being on it.
         const fieldAtSource = (fileName, position) => {
-            const augmented = augmentedFiles.get(fileName);
+            const augmented = augmentedFile(fileName);
             return augmented && augmented.fields.find(
                 field => position >= field.sourceStart && position <= field.sourceStart + field.name.length
             );
         };
 
         const fieldAtAppended = (fileName, start) => {
-            const augmented = augmentedFiles.get(fileName);
+            const augmented = augmentedFile(fileName);
             return augmented && augmented.fields.find(
                 field => start >= field.appendedStart && start < field.appendedStart + field.name.length
             );
         };
 
         const shiftsOf = (fileName) => {
-            const augmented = augmentedFiles.get(fileName);
+            const augmented = augmentedFile(fileName);
             return (augmented && augmented.shifts) || [];
         };
 
@@ -107,6 +118,21 @@ function init(modules) {
             return {start: field.sourceStart + (textSpan.start - field.appendedStart), length: textSpan.length};
         };
 
+        // A span the editor paints is measured in the text as written, and an assertion inserted inside it isn't
+        const toSourceRange = (fileName, {start, length}) => {
+            const shifts = shiftsOf(fileName);
+            const sourceStart = toSourceOffset(shifts, start);
+            return {start: sourceStart, length: toSourceOffset(shifts, start + length) - sourceStart};
+        };
+
+        const toSourceDiagnostic = (fileName, diagnostic) => ({
+            ...diagnostic,
+            ...toSourceRange(fileName, diagnostic),
+            relatedInformation: diagnostic.relatedInformation?.map(
+                related => (related.file ? {...related, ...toSourceRange(related.file.fileName, related)} : related)
+            ),
+        });
+
         // Results that landed in the appended region are moved back to the member, or dropped if they point
         // at something else of ours (the interface declaration itself, say) that has nowhere to go
         const mapSpans = (items, defaultFileName) => (items || []).map(item => {
@@ -121,7 +147,7 @@ function init(modules) {
         }).filter(Boolean);
 
         const restoreNames = (fileName, text) => {
-            const augmented = augmentedFiles.get(fileName);
+            const augmented = augmentedFile(fileName);
             if (!augmented || typeof text !== "string") {
                 return text;
             }
@@ -136,7 +162,7 @@ function init(modules) {
         // ...?" being the likely one), so the name is put back on the way out
         const restoreDiagnosticNames = (diagnostic) => {
             const fileName = diagnostic.file && diagnostic.file.fileName;
-            if (!fileName || !augmentedFiles.has(fileName)) {
+            if (!fileName || !augmentedFile(fileName)) {
                 return diagnostic;
             }
             const restoreChain = (messageText) => {
@@ -170,9 +196,10 @@ function init(modules) {
                     return false;
                 }
                 // A placeholder is un-annotated on purpose; its implicit any is ours to answer for, not the user's
-                const field = fieldAtSource(fileName, diagnostic.start);
-                return !field || diagnostic.start >= field.sourceStart + field.name.length;
-            }).map(restoreDiagnosticNames);
+                const start = toSourceOffset(shiftsOf(fileName), diagnostic.start);
+                const field = fieldAtSource(fileName, start);
+                return !field || start >= field.sourceStart + field.name.length;
+            }).map(restoreDiagnosticNames).map(diagnostic => toSourceDiagnostic(fileName, diagnostic));
         }
 
         proxy.getQuickInfoAtPosition = (fileName, position) => {
@@ -190,6 +217,46 @@ function init(modules) {
                 return quickInfo;
             }
             return {...quickInfo, textSpan: {start: field.sourceStart, length: field.name.length}};
+        };
+
+        // A display part can carry a jump target, which is a span like any other
+        const toSourceDisplayPart = (defaultFileName, part) => {
+            const fileName = part.file || defaultFileName;
+            const text = restoreNames(fileName, part.text);
+            if (!part.span) {
+                return {...part, text};
+            }
+            const [mapped] = mapSpans([{fileName, textSpan: part.span}], fileName);
+            return mapped ? {...part, text, span: mapped.textSpan} : {text};
+        };
+
+        // Hints are placed by offset rather than by node, so the appended half is never asked about and what
+        // comes back is put where the editor draws it
+        proxy.provideInlayHints = (fileName, span, preferences) => {
+            const augmented = augmentedFile(fileName);
+            if (!augmented) {
+                return languageService.provideInlayHints(fileName, span, preferences);
+            }
+            const shifts = augmented.shifts;
+            const start = toAugmentedOffset(shifts, span.start);
+            const end = Math.min(toAugmentedOffset(shifts, span.start + span.length), augmented.originalLength);
+            const hints = languageService.provideInlayHints(
+                fileName, {start, length: Math.max(end - start, 0)}, preferences
+            ) || [];
+            return hints.map(hint => ({
+                ...hint,
+                position: toSourceOffset(shifts, hint.position),
+                text: restoreNames(fileName, hint.text),
+                displayParts: hint.displayParts?.map(part => toSourceDisplayPart(fileName, part)),
+            }));
+        };
+
+        proxy.getSignatureHelpItems = (fileName, position, options) => {
+            const result = languageService.getSignatureHelpItems(fileName, toAppendedPosition(fileName, position), options);
+            if (!result) {
+                return result;
+            }
+            return {...result, applicableSpan: toSourceRange(fileName, result.applicableSpan)};
         };
 
         for (const key of ["getReferencesAtPosition", "getImplementationAtPosition", "getTypeDefinitionAtPosition",
@@ -245,7 +312,9 @@ function init(modules) {
 
         const keepOurEditsOut = (changes) => (changes || []).map(change => ({
             ...change,
-            textChanges: change.textChanges.filter(textChange => !isOurs(change.fileName, textChange.span.start)),
+            textChanges: change.textChanges
+                .filter(textChange => !isOurs(change.fileName, textChange.span.start))
+                .map(textChange => ({...textChange, span: toSourceRange(change.fileName, textChange.span)})),
         })).filter(change => change.textChanges.length > 0);
 
         for (const key of ["getFormattingEditsForDocument", "getFormattingEditsForRange", "getFormattingEditsAfterKeystroke"]) {
@@ -254,9 +323,13 @@ function init(modules) {
             );
         }
 
-        proxy.getCodeFixesAtPosition = (...args) => (languageService.getCodeFixesAtPosition(...args) || [])
-            .filter(fix => !writesAPlaceholder(fix.changes))
-            .map(fix => ({...fix, changes: keepOurEditsOut(fix.changes)}));
+        proxy.getCodeFixesAtPosition = (fileName, start, end, ...args) => {
+            const fixes = languageService.getCodeFixesAtPosition(
+                fileName, toAppendedPosition(fileName, start), toAppendedPosition(fileName, end), ...args
+            ) || [];
+            return fixes.filter(fix => !writesAPlaceholder(fix.changes))
+                .map(fix => ({...fix, changes: keepOurEditsOut(fix.changes)}));
+        };
 
         proxy.getCombinedCodeFix = (...args) => {
             const result = languageService.getCombinedCodeFix(...args);
@@ -267,8 +340,17 @@ function init(modules) {
             proxy[key] = (...args) => keepOurEditsOut(languageService[key](...args));
         }
 
-        proxy.getEditsForRefactor = (...args) => {
-            const result = languageService.getEditsForRefactor(...args);
+        const toAppendedRange = (fileName, positionOrRange) => (typeof positionOrRange === "number"
+            ? toAppendedPosition(fileName, positionOrRange)
+            : {pos: toAppendedPosition(fileName, positionOrRange.pos), end: toAppendedPosition(fileName, positionOrRange.end)});
+
+        proxy.getApplicableRefactors = (fileName, positionOrRange, ...args) =>
+            languageService.getApplicableRefactors(fileName, toAppendedRange(fileName, positionOrRange), ...args);
+
+        proxy.getEditsForRefactor = (fileName, formatOptions, positionOrRange, ...args) => {
+            const result = languageService.getEditsForRefactor(
+                fileName, formatOptions, toAppendedRange(fileName, positionOrRange), ...args
+            );
             return result ? {...result, edits: keepOurEditsOut(result.edits)} : result;
         };
 
