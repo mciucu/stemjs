@@ -25,6 +25,7 @@ const SHIFTED_SOURCE = [
     `        const count: number = "not a number";`,
     `        const doubled = count * 2;`,
     `        const box: {width: number} = {width: "wide"};`,
+    `        // TODO: nothing here`,
     `        this.panel.open();`,
     `        this.missingMember();`,
     `    }`,
@@ -38,13 +39,15 @@ function createPlugin(ts) {
     const {config} = ts.readConfigFile(configPath, ts.sys.readFile);
     const {options, fileNames} = ts.parseJsonConfigFileContent(config, ts.sys, FIXTURE);
 
+    const readSnapshot = (fileName) => {
+        const text = fileName === SHIFTED ? SHIFTED_SOURCE : ts.sys.readFile(fileName);
+        return text === undefined ? undefined : ts.ScriptSnapshot.fromString(text);
+    };
+
     const host = {
         getScriptFileNames: () => [...fileNames, SHIFTED],
         getScriptVersion: () => "1",
-        getScriptSnapshot: (fileName) => {
-            const text = fileName === SHIFTED ? SHIFTED_SOURCE : ts.sys.readFile(fileName);
-            return text === undefined ? undefined : ts.ScriptSnapshot.fromString(text);
-        },
+        getScriptSnapshot: readSnapshot,
         getCurrentDirectory: () => FIXTURE,
         getCompilationSettings: () => options,
         getDefaultLibFileName: (settings) => ts.getDefaultLibFilePath(settings),
@@ -56,16 +59,19 @@ function createPlugin(ts) {
     };
 
     const languageService = ts.createLanguageService(host, ts.createDocumentRegistry());
-    return init({typescript: ts}).create({
+    const plugin = init({typescript: ts}).create({
         languageService,
         languageServiceHost: host,
         project: {projectService: {logger: {info: () => {}}}},
         config: OPTIONS,
     });
+    // create() replaced the host's snapshots; raw reads the files as they are, which is what the editor shows
+    const raw = ts.createLanguageService({...host, getScriptSnapshot: readSnapshot}, ts.createDocumentRegistry());
+    return {plugin, raw};
 }
 
 module.exports = (ts, check) => {
-    const plugin = createPlugin(ts);
+    const {plugin, raw} = createPlugin(ts);
     const storesFile = path.join(FIXTURE, "stores.ts");
     const text = ts.sys.readFile(storesFile);
 
@@ -157,6 +163,50 @@ module.exports = (ts, check) => {
         (signatureHelp?.items || []).map(item => item.prefixDisplayParts.map(part => part.text).join("")).join(" | "),
         "open(");
     check("its applicable span is where the arguments are written", signatureHelp?.applicableSpan.start, callPosition);
+
+    const spanText = (span) => SHIFTED_SOURCE.substr(span.start, span.length);
+
+    const outlining = plugin.getOutliningSpans(SHIFTED);
+    check("every outlining span is a block in the file",
+        outlining.every(span => spanText(span.textSpan).trimStart().startsWith("{")), true);
+    const assignBlock = outlining.find(span => spanText(span.hintSpan).startsWith("assign(): void"));
+    check("and stops at the brace that closes it", assignBlock && spanText(assignBlock.textSpan).endsWith("}"), true);
+
+    const [todo] = plugin.getTodoComments(SHIFTED, [{text: "TODO", priority: 0}]);
+    check("a todo is marked where it is written", SHIFTED_SOURCE.substr(todo.position, 4), "TODO");
+
+    const bracePosition = SHIFTED_SOURCE.indexOf("assign(): void {") + "assign(): void ".length;
+    check("brace matching finds the pair",
+        plugin.getBraceMatchingAtPosition(SHIFTED, bracePosition).map(spanText).join(""), "{}");
+
+    const selection = plugin.getSmartSelectionRange(SHIFTED, SHIFTED_SOURCE.indexOf("const count") + "const ".length);
+    check("selection starts at the name under the caret", spanText(selection.textSpan), "count");
+
+    const holder = plugin.getNavigationTree(SHIFTED).childItems.find(item => item.text === "Holder");
+    check("the outline's span is the class as written",
+        spanText(holder.spans[0]).startsWith("class Holder") && spanText(holder.spans[0]).endsWith("}"), true);
+    check("and its name span is the name", spanText(holder.nameSpan), "Holder");
+
+    const hierarchy = plugin.prepareCallHierarchy(SHIFTED, SHIFTED_SOURCE.indexOf("assign(): void") + 2);
+    const called = Array.isArray(hierarchy) ? hierarchy[0] : hierarchy;
+    check("call hierarchy points at the method name", spanText(called.selectionSpan), "assign");
+    check("and covers the method through to its end", spanText(called.span).endsWith("}"), true);
+
+    const boxPosition = SHIFTED_SOURCE.indexOf("const box");
+    const upToBox = SHIFTED_SOURCE.slice(0, boxPosition).split("\n");
+    check("a position is reported at the line and column the file has",
+        JSON.stringify(plugin.toLineColumnOffset(SHIFTED, boxPosition)),
+        JSON.stringify({line: upToBox.length - 1, character: upToBox[upToBox.length - 1].length}));
+
+    // Nothing is inserted or appended as far as the editor's colours are concerned
+    const wholeFile = {start: 0, length: SHIFTED_SOURCE.length};
+    const listSpans = (entries) => entries.map(entry => `${entry.textSpan.start}+${entry.textSpan.length}`).join(" ");
+    check("classification says what a service without the plugin says",
+        listSpans(plugin.getSemanticClassifications(SHIFTED, wholeFile)),
+        listSpans(raw.getSemanticClassifications(SHIFTED, wholeFile)));
+    check("and so does its encoded form",
+        plugin.getEncodedSyntacticClassifications(SHIFTED, wholeFile).spans.join(),
+        raw.getEncodedSyntacticClassifications(SHIFTED, wholeFile).spans.join());
 
     const outline = plugin.getNavigationTree(storesFile);
     const chatMessage = outline.childItems.find(item => item.text === "ChatMessage");

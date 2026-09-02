@@ -125,6 +125,28 @@ function init(modules) {
             return {start: sourceStart, length: toSourceOffset(shifts, start + length) - sourceStart};
         };
 
+        const toSourceSpans = (fileName, spans) => (spans || []).map(span => toSourceRange(fileName, span));
+
+        // A span the editor has no text for - inside an insertion, or in the appended half - maps to nothing
+        const toSourceSpanOrNone = (fileName, span) => {
+            if (isOurs(fileName, span.start)) {
+                return undefined;
+            }
+            const mapped = toSourceRange(fileName, span);
+            return span.length > 0 && mapped.length === 0 ? undefined : mapped;
+        };
+
+        // The editor only knows the half of the file it has, so a span it asks about stops where that half does
+        const toAugmentedSpan = (fileName, {start, length}) => {
+            const shifts = shiftsOf(fileName);
+            const augmented = augmentedFile(fileName);
+            const augmentedStart = toAugmentedOffset(shifts, start);
+            const augmentedEnd = Math.min(
+                toAugmentedOffset(shifts, start + length), augmented ? augmented.originalLength : Infinity
+            );
+            return {start: augmentedStart, length: Math.max(augmentedEnd - augmentedStart, 0)};
+        };
+
         const toSourceDiagnostic = (fileName, diagnostic) => ({
             ...diagnostic,
             ...toSourceRange(fileName, diagnostic),
@@ -139,8 +161,11 @@ function init(modules) {
             const fileName = item.fileName || defaultFileName;
             if (!isOurs(fileName, item.textSpan.start)) {
                 const shifts = shiftsOf(fileName);
-                return shifts.length === 0 ? item
-                    : {...item, textSpan: {...item.textSpan, start: toSourceOffset(shifts, item.textSpan.start)}};
+                return shifts.length === 0 ? item : {
+                    ...item,
+                    textSpan: toSourceRange(fileName, item.textSpan),
+                    contextSpan: item.contextSpan && toSourceRange(fileName, item.contextSpan),
+                };
             }
             const textSpan = toSourceSpan(fileName, item.textSpan);
             return textSpan ? {...item, textSpan, contextSpan: undefined} : null;
@@ -233,16 +258,8 @@ function init(modules) {
         // Hints are placed by offset rather than by node, so the appended half is never asked about and what
         // comes back is put where the editor draws it
         proxy.provideInlayHints = (fileName, span, preferences) => {
-            const augmented = augmentedFile(fileName);
-            if (!augmented) {
-                return languageService.provideInlayHints(fileName, span, preferences);
-            }
-            const shifts = augmented.shifts;
-            const start = toAugmentedOffset(shifts, span.start);
-            const end = Math.min(toAugmentedOffset(shifts, span.start + span.length), augmented.originalLength);
-            const hints = languageService.provideInlayHints(
-                fileName, {start, length: Math.max(end - start, 0)}, preferences
-            ) || [];
+            const hints = languageService.provideInlayHints(fileName, toAugmentedSpan(fileName, span), preferences) || [];
+            const shifts = shiftsOf(fileName);
             return hints.map(hint => ({
                 ...hint,
                 position: toSourceOffset(shifts, hint.position),
@@ -258,6 +275,77 @@ function init(modules) {
             }
             return {...result, applicableSpan: toSourceRange(fileName, result.applicableSpan)};
         };
+
+        // Asked about a caret and answering with nothing the editor has to place
+        for (const key of ["getJsxClosingTagAtPosition", "getDocCommentTemplateAtPosition", "getCompletionEntrySymbol",
+                           "getIndentationAtPosition", "isValidBraceCompletionAtPosition"]) {
+            proxy[key] = (fileName, position, ...args) =>
+                languageService[key](fileName, toAppendedPosition(fileName, position), ...args);
+        }
+
+        // ...and the same asked for one span back
+        for (const key of ["getBreakpointStatementAtPosition", "getSpanOfEnclosingComment"]) {
+            proxy[key] = (fileName, position, ...args) => {
+                const span = languageService[key](fileName, toAppendedPosition(fileName, position), ...args);
+                return span && toSourceRange(fileName, span);
+            };
+        }
+
+        // The line is the same on both sides, since nothing inserted carries a newline; the column is not
+        proxy.toLineColumnOffset = (fileName, position) => {
+            const augmentedPosition = toAppendedPosition(fileName, position);
+            const {line, character} = languageService.toLineColumnOffset(fileName, augmentedPosition);
+            const lineStart = toSourceOffset(shiftsOf(fileName), augmentedPosition - character);
+            return {line, character: position - lineStart};
+        };
+
+        proxy.getNameOrDottedNameSpan = (fileName, startPos, endPos) => {
+            const span = languageService.getNameOrDottedNameSpan(
+                fileName, toAppendedPosition(fileName, startPos), toAppendedPosition(fileName, endPos)
+            );
+            return span && toSourceRange(fileName, span);
+        };
+
+        proxy.getBraceMatchingAtPosition = (fileName, position) => toSourceSpans(
+            fileName, languageService.getBraceMatchingAtPosition(fileName, toAppendedPosition(fileName, position))
+        );
+
+        proxy.getLinkedEditingRangeAtPosition = (fileName, position) => {
+            const result = languageService.getLinkedEditingRangeAtPosition(fileName, toAppendedPosition(fileName, position));
+            return result && {...result, ranges: toSourceSpans(fileName, result.ranges)};
+        };
+
+        // Selection widens through a chain of enclosing spans, so it is mapped all the way up
+        proxy.getSmartSelectionRange = (fileName, position) => {
+            const toSourceSelection = (range) => ({
+                ...range,
+                textSpan: toSourceRange(fileName, range.textSpan),
+                parent: range.parent && toSourceSelection(range.parent),
+            });
+            const range = languageService.getSmartSelectionRange(fileName, toAppendedPosition(fileName, position));
+            return range && toSourceSelection(range);
+        };
+
+        // Renaming what we generated is refused rather than offered against a span the file doesn't have
+        proxy.getRenameInfo = (fileName, position, ...args) => {
+            const info = languageService.getRenameInfo(fileName, toAppendedPosition(fileName, position), ...args);
+            if (!info.canRename) {
+                return info;
+            }
+            const [mapped] = mapSpans([{textSpan: info.triggerSpan}], fileName);
+            return mapped ? {...info, triggerSpan: mapped.textSpan}
+                : {canRename: false, localizedErrorMessage: "You cannot rename this element."};
+        };
+
+        proxy.findReferences = (fileName, position) => {
+            const symbols = languageService.findReferences(fileName, toAppendedPosition(fileName, position));
+            return symbols && symbols.map(symbol => ({
+                definition: mapSpans([symbol.definition], fileName)[0],
+                references: mapSpans(symbol.references, fileName),
+            })).filter(symbol => symbol.definition);
+        };
+
+        proxy.getFileReferences = (fileName) => mapSpans(languageService.getFileReferences(fileName), fileName);
 
         for (const key of ["getReferencesAtPosition", "getImplementationAtPosition", "getTypeDefinitionAtPosition",
                            "findRenameLocations"]) {
@@ -302,7 +390,16 @@ function init(modules) {
                 return result;
             }
             // A $stem member is a phantom that only types something; nothing should ever write it
-            return {...result, entries: result.entries.filter(entry => !placeholderNames.has(entry.name) && !entry.name.startsWith("$stem"))};
+            const entries = result.entries
+                .filter(entry => !placeholderNames.has(entry.name) && !entry.name.startsWith("$stem"))
+                .map(entry => (entry.replacementSpan
+                    ? {...entry, replacementSpan: toSourceRange(fileName, entry.replacementSpan)} : entry));
+            return {
+                ...result,
+                entries,
+                optionalReplacementSpan: result.optionalReplacementSpan
+                    && toSourceRange(fileName, result.optionalReplacementSpan),
+            };
         };
 
         // Renaming a class member the editor knows only as a placeholder would be a rename to a placeholder
@@ -317,11 +414,23 @@ function init(modules) {
                 .map(textChange => ({...textChange, span: toSourceRange(change.fileName, textChange.span)})),
         })).filter(change => change.textChanges.length > 0);
 
+        // Formatting is the one thing that can't be handed over: the formatter reflows the assertions along with
+        // the code, so an edit's own text can carry them, which no amount of moving its span would undo
         for (const key of ["getFormattingEditsForDocument", "getFormattingEditsForRange", "getFormattingEditsAfterKeystroke"]) {
             proxy[key] = (fileName, ...args) => (languageService[key](fileName, ...args) || []).filter(
                 edit => !isOurs(fileName, edit.span.start)
             );
         }
+
+        proxy.getCompletionEntryDetails = (fileName, position, ...args) => {
+            const details = languageService.getCompletionEntryDetails(fileName, toAppendedPosition(fileName, position), ...args);
+            if (!details?.codeActions) {
+                return details;
+            }
+            return {...details, codeActions: details.codeActions.map(
+                action => ({...action, changes: keepOurEditsOut(action.changes)})
+            )};
+        };
 
         proxy.getCodeFixesAtPosition = (fileName, start, end, ...args) => {
             const fixes = languageService.getCodeFixesAtPosition(
@@ -344,8 +453,26 @@ function init(modules) {
             ? toAppendedPosition(fileName, positionOrRange)
             : {pos: toAppendedPosition(fileName, positionOrRange.pos), end: toAppendedPosition(fileName, positionOrRange.end)});
 
-        proxy.getApplicableRefactors = (fileName, positionOrRange, ...args) =>
-            languageService.getApplicableRefactors(fileName, toAppendedRange(fileName, positionOrRange), ...args);
+        for (const key of ["getApplicableRefactors", "getMoveToRefactoringFileSuggestions"]) {
+            proxy[key] = (fileName, positionOrRange, ...args) =>
+                languageService[key](fileName, toAppendedRange(fileName, positionOrRange), ...args);
+        }
+
+        proxy.preparePasteEditsForFile = (fileName, copiedTextRanges) => languageService.preparePasteEditsForFile(
+            fileName, copiedTextRanges.map(range => toAppendedRange(fileName, range))
+        );
+
+        proxy.getPasteEdits = (args, formatOptions) => {
+            const result = languageService.getPasteEdits({
+                ...args,
+                pasteLocations: args.pasteLocations.map(range => toAppendedRange(args.targetFile, range)),
+                copiedFrom: args.copiedFrom && {
+                    ...args.copiedFrom,
+                    range: args.copiedFrom.range.map(range => toAppendedRange(args.copiedFrom.file, range)),
+                },
+            }, formatOptions);
+            return {...result, edits: keepOurEditsOut(result.edits)};
+        };
 
         proxy.getEditsForRefactor = (fileName, formatOptions, positionOrRange, ...args) => {
             const result = languageService.getEditsForRefactor(
@@ -358,6 +485,8 @@ function init(modules) {
         const restoreNavigationItem = (fileName, item) => ({
             ...item,
             text: restoreNames(fileName, item.text),
+            spans: toSourceSpans(fileName, item.spans),
+            nameSpan: item.nameSpan && toSourceRange(fileName, item.nameSpan),
             childItems: item.childItems && item.childItems
                 .filter(child => !isOurs(fileName, child.spans[0].start))
                 .map(child => restoreNavigationItem(fileName, child)),
@@ -374,7 +503,83 @@ function init(modules) {
 
         proxy.getNavigateToItems = (...args) => (languageService.getNavigateToItems(...args) || [])
             .filter(item => !isOurs(item.fileName, item.textSpan.start))
-            .map(item => ({...item, name: restoreNames(item.fileName, item.name)}));
+            .map(item => ({
+                ...item,
+                name: restoreNames(item.fileName, item.name),
+                textSpan: toSourceRange(item.fileName, item.textSpan),
+            }));
+
+        proxy.getOutliningSpans = (fileName) => languageService.getOutliningSpans(fileName)
+            .filter(span => !isOurs(fileName, span.textSpan.start))
+            .map(span => ({
+                ...span,
+                textSpan: toSourceRange(fileName, span.textSpan),
+                hintSpan: toSourceRange(fileName, span.hintSpan),
+            }));
+
+        proxy.getTodoComments = (fileName, descriptors) => languageService.getTodoComments(fileName, descriptors)
+            .filter(comment => !isOurs(fileName, comment.position))
+            .map(comment => ({...comment, position: toSourceOffset(shiftsOf(fileName), comment.position)}));
+
+        // A call hierarchy item names the file it is in, and the calls into one are spans in that file
+        const toSourceCallHierarchyItem = (item) => ({
+            ...item,
+            span: toSourceRange(item.file, item.span),
+            selectionSpan: toSourceRange(item.file, item.selectionSpan),
+        });
+
+        proxy.prepareCallHierarchy = (fileName, position) => {
+            const result = languageService.prepareCallHierarchy(fileName, toAppendedPosition(fileName, position));
+            if (!result) {
+                return result;
+            }
+            return Array.isArray(result) ? result.map(toSourceCallHierarchyItem) : toSourceCallHierarchyItem(result);
+        };
+
+        proxy.provideCallHierarchyIncomingCalls = (fileName, position) =>
+            languageService.provideCallHierarchyIncomingCalls(fileName, toAppendedPosition(fileName, position)).map(
+                call => ({from: toSourceCallHierarchyItem(call.from), fromSpans: toSourceSpans(call.from.file, call.fromSpans)})
+            );
+
+        proxy.provideCallHierarchyOutgoingCalls = (fileName, position) =>
+            languageService.provideCallHierarchyOutgoingCalls(fileName, toAppendedPosition(fileName, position)).map(
+                call => ({to: toSourceCallHierarchyItem(call.to), fromSpans: toSourceSpans(fileName, call.fromSpans)})
+            );
+
+        for (const key of ["getSyntacticClassifications", "getSemanticClassifications"]) {
+            proxy[key] = (fileName, span, ...args) => languageService[key](fileName, toAugmentedSpan(fileName, span), ...args)
+                .map(classified => ({...classified, textSpan: toSourceSpanOrNone(fileName, classified.textSpan)}))
+                .filter(classified => classified.textSpan);
+        }
+
+        // The encoded form is a flat run of start, length and classification, three numbers per span
+        for (const key of ["getEncodedSyntacticClassifications", "getEncodedSemanticClassifications"]) {
+            proxy[key] = (fileName, span, ...args) => {
+                const result = languageService[key](fileName, toAugmentedSpan(fileName, span), ...args);
+                const spans = [];
+                for (let index = 0; index + 2 < result.spans.length; index += 3) {
+                    const mapped = toSourceSpanOrNone(fileName, {start: result.spans[index], length: result.spans[index + 1]});
+                    if (mapped) {
+                        spans.push(mapped.start, mapped.length, result.spans[index + 2]);
+                    }
+                }
+                return {...result, spans};
+            };
+        }
+
+        // Toggling a comment writes only the marker, so the range it is asked about is all there is to move
+        for (const key of ["toggleLineComment", "toggleMultilineComment", "commentSelection", "uncommentSelection"]) {
+            proxy[key] = (fileName, textRange) => (languageService[key](fileName, toAppendedRange(fileName, textRange)) || [])
+                .filter(edit => !isOurs(fileName, edit.span.start))
+                .map(edit => ({...edit, span: toSourceRange(fileName, edit.span)}));
+        }
+
+        // The project picks the TypeScript, and one that never had a method leaves nothing here to wrap
+        for (const key of Object.keys(proxy)) {
+            if (typeof languageService[key] !== "function") {
+                delete proxy[key];
+            }
+        }
 
         log("loaded");
         return proxy;

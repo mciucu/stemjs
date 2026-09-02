@@ -236,6 +236,10 @@ anything except what it generated itself. Three things are the plugin's own to c
 it created: the implicit `any` on a placeholder, placeholders offered in completions, and a result that lands on a
 relocated member, which is mapped back to where that member is written.
 
+Formatting is the one thing an offset can't be put back for: tsserver's formatter reflows the assertions along with
+the code, so an edit's own text can carry them. Editors that format with their own engine - WebStorm and PyCharm
+among them - never ask it to.
+
 The one real cost is that **an un-annotated `@field` only has a type when the plugin is running**. Plain `tsc`
 reports it as an implicit `any`, so command-line checking has to go through `typecheck.js` (below).
 
