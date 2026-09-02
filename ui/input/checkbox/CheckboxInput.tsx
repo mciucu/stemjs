@@ -1,4 +1,4 @@
-import {UI, type UIChild, type UICleanChild} from "../../UIBase";
+import {UI, type UIChild, type UICleanChild, type UIRenderable} from "../../UIBase";
 import {type StyleRules, StyleSheet} from "../../Style";
 import {styleRule} from "../../../decorators/Style";
 import {registerStyle} from "../../style/Theme";
@@ -54,7 +54,7 @@ export class CheckboxInputStyle extends StyleSheet {
 
 export interface CheckboxInputOptions {
     initialValue?: boolean | null;
-    label?: UICleanChild;
+    label?: UICleanChild | UIRenderable;
     disabled?: boolean;
 }
 

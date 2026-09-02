@@ -1,4 +1,4 @@
-import {BaseUIElement, UI, UIElement, type UIChild, type UICleanChild} from "./UIBase";
+import {BaseUIElement, UI, UIElement, type UIChild, type UICleanChild, type UIRenderable} from "./UIBase";
 import {BasicLevelStyleSheet} from "./GlobalStyle";
 import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";
@@ -10,7 +10,8 @@ import {type LevelType, type SizeType} from "./Constants";
 // Type definitions
 export type IconType = string | BaseUIElement | ((options: any) => BaseUIElement);
 export type MakeIconFunction = (icon: IconType, options?: any) => BaseUIElement | null;
-export type MakeTextFunction = (text: UICleanChild, options?: any) => BaseUIElement;
+// A UIRenderable is accepted because the default below renders through String(), so its toString() is what shows
+export type MakeTextFunction = (text: UICleanChild | UIRenderable, options?: any) => BaseUIElement;
 
 export interface SimpleStyledElementOptions {
     icon?: IconType;
@@ -43,7 +44,7 @@ export function MakeIcon(icon: IconType, options?: any): BaseUIElement | null {
 }
 
 // Same as for icons, but for text
-let MakeTextFunc: MakeTextFunction = (text: UICleanChild, _options?: any): BaseUIElement => {
+let MakeTextFunc: MakeTextFunction = (text: UICleanChild | UIRenderable, _options?: any): BaseUIElement => {
     if (text instanceof BaseUIElement) {
         return text;
     }
@@ -54,7 +55,7 @@ export function SetMakeText(func: MakeTextFunction): void {
     MakeTextFunc = func;
 }
 
-export function MakeText(text: UICleanChild, options?: any): BaseUIElement {
+export function MakeText(text: UICleanChild | UIRenderable, options?: any): BaseUIElement {
     return MakeTextFunc(text, options);
 }
 

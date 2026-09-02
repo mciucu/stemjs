@@ -9,7 +9,7 @@ const MoneyErrors = {
     INVALID_AMOUNT: "Invalid amount",
 };
 
-interface MoneyLike {
+export interface MoneyLike {
     amount?: number;
     balance?: number;
     currency?: Currency | string | number;
