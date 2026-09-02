@@ -34,7 +34,7 @@ export interface RouteOptions {
     doNotCache?: boolean;
 }
 
-interface RouteSnapshot {
+export interface RouteSnapshot {
     expr: string[];
     url: string;
     path: string;

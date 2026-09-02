@@ -59,7 +59,7 @@ export function StateDependentElement<T extends new (...args: any[]) => UIElemen
         }
 
         renderError(): UIChild {
-            let renderError: UIChild | ((error: any, message?: string) => UIChild) = StateDependentElement.renderError;
+            let renderError: UIChild | ((error?: any, message?: string) => UIChild) = StateDependentElement.renderError;
             if (typeof renderError === "function") {
                 renderError = renderError(this.options.error);
             }

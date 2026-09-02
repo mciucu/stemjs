@@ -276,8 +276,14 @@ The plugin only affects editors. `typecheck.js` runs the same transform through 
 `npm run typecheck` should call:
 
 ```sh
-node stem-core/ts-plugin/typecheck.js [--filter <path substring>]
+node stem-core/ts-plugin/typecheck.js [--filter <path substring>] [--verbose]
 NO_STEM_PLUGIN=1 node stem-core/ts-plugin/typecheck.js      # same run without the augmentation, to compare
+```
+
+It prints one line per diagnostic - file, position and the first line of the message. The type dumps
+TypeScript appends to an assignability error are behind `--verbose`.
+
+```sh
 STEM_PLUGIN_DEBUG=1 node stem-core/ts-plugin/typecheck.js   # report errors in what we generate, instead of hiding them
 ```
 

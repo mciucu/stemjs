@@ -77,7 +77,7 @@ function UpdateEntryRecursively(entry, value) {
 
 // TODO @Andrei This should also inherit BaseInputElement
 // One node of the tree: a value, whether it is checked, and any children
-interface TreeEntry {
+export interface TreeEntry {
     value?: any;
     label?: UICleanChild;
     checked?: boolean;

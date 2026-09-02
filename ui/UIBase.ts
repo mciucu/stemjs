@@ -21,7 +21,8 @@ export interface UIRenderable {
     toUI(parent?: any): UICleanChild;
 }
 
-export type UIChild = Iterable<UIChild> | UICleanChild | UIRenderable | null | undefined | false;
+// A function is called by cleanChildren (unwrapElementWithFunc) and its result used, so lazy children are children
+export type UIChild = Iterable<UIChild> | UICleanChild | UIRenderable | (() => UIChild) | null | undefined | false;
 // node.style coerces and applyStyleToNode calls a function value, so both spellings are the value
 export type StyleValue<T> = T | number | (() => T | number);
 export type StyleObject = {[Key in keyof CSSStyleDeclaration]?: StyleValue<CSSStyleDeclaration[Key]>};

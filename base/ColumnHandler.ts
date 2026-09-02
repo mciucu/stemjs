@@ -9,7 +9,7 @@ export type ColumnMapper<BaseType, ResultType> =
     (obj: BaseType, rowIndex?: number, columnIndex?: number, row?: any) => ResultType;
 
 // TODO @Mihai this might make sense to templatized, depending on the object type for ColumnMapper
-export interface ColumnOptions<BaseType, ResultType> {
+export interface ColumnOptions<BaseType, ResultType = any> {
     headerName?: UIChild | (() => UIChild);
     value?: ColumnMapper<BaseType, ResultType>;
     name?: string;
