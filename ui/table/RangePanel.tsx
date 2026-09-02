@@ -1,4 +1,4 @@
-import {type ExtendedOptions, UI, UIElement, type UIElementOptions, type UIChild, type HTMLTagType} from "../UIBase";
+import {type ExtendedOptions, UI, UIElement, type UIChild, type HTMLTagType} from "../UIBase";
 import {Button} from "../button/Button";
 import {NumberInput} from "../input/Input";
 import {RangePanelStyle} from "./RangePanelStyle";
@@ -88,7 +88,7 @@ export class EntriesManager<T = any> extends Dispatchable {
 }
 
 
-export interface RangeTableOptions extends UIElementOptions {
+export interface RangeTableOptions {
     rowHeight?: number;
 }
 

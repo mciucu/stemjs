@@ -1,4 +1,4 @@
-import {UI, type UIChild} from "../ui/UIBase";
+import {UI, type StyleObject, type UIChild} from "../ui/UIBase";
 import {Route, Router} from "../ui/Router";
 import {GlobalContainer} from "../ui/global-container/GlobalContainer";
 import {Dispatcher} from "../base/Dispatcher";
@@ -10,9 +10,8 @@ interface StemAppOptions {
 }
 
 interface RouterOptions {
-    style: {
-        height: string;
-    };
+    // Spread onto the Router, so whatever the app needs to lay itself out
+    style: StyleObject;
     [key: string]: any;
 }
 

@@ -88,6 +88,38 @@ module.exports = (ts, check) => {
     check("every rule name is renamed in the source half",
         ["title", "heading"].every(name => styles.result.fields.some(field => field.name === name)), true);
 
+    const nested = augment(ts, "nested.tsx");
+    const nestedStyle = 'get styleSheet(): import("@stemjs/ui/Style").StyleRules<InstanceType<typeof PopupStyle>>;';
+    const nestedInterface = nested.result.text.slice(0, nested.result.originalLength).match(/\} interface Popup \{[^}]*\}/);
+    check("a class inside a function gets its interface written next to it", Boolean(nestedInterface), true);
+    check("with its style sheet in it", nestedInterface && nestedInterface[0].includes(nestedStyle), true);
+    check("and nothing about it is appended, where it would merge with nothing",
+        nested.appended.includes("interface Popup {"), false);
+
+    const written = augment(ts, "options.tsx");
+    const WRITTEN = 'import("@stemjs/ui/UIBase").WrittenOptions';
+    check("a class that respells options gets the tag shape respelled from it",
+        written.appended.includes(`interface Sheet {$stemJsxOptions: ${WRITTEN}<NonNullable<Sheet["options"]>>;}`), true);
+    check("a class that inherits options is left to the base's",
+        written.appended.includes("interface Holder"), false);
+    check("a mixin's class expression gets it inside its body, from the annotation",
+        written.result.text.includes(`class Draggable extends Base { declare $stemJsxOptions: ${WRITTEN}<NonNullable<ElementOptions<{handle?: string}>>>;`), true);
+    check("ExtendedOptions keeps the base's tag shape under the new options",
+        written.appended.includes('interface Wide {$stemJsxOptions: NonNullable<Sheet["$stemJsxOptions"]> & {wide?: boolean};}'), true);
+
+    // The base classes themselves: UIElement's tag shape is the written twin of its OptionsType default, so
+    // ExtraOptions stays bare and a generic tag infers; and the property is named once, globally, from here
+    const basePath = path.join(__dirname, "..", "..", "ui", "UIBase.ts");
+    const base = getAugmentedSource(ts, basePath, fs.readFileSync(basePath, "utf8"), OPTIONS);
+    const baseAppended = base.text.slice(base.originalLength);
+    check("UIElement's tag shape is the written twin of its options default",
+        baseAppended.includes('interface UIElement<ExtraOptions = {}, NodeType extends (HTMLElement | SVGElement) = HTMLElement, TagType extends string = HTMLTagType, OptionsType extends UIElementOptions<TagType> = UIOptions<NodeType, ExtraOptions, TagType>> {$stemJsxOptions: import("@stemjs/ui/UIBase").WrittenUIOptions<NodeType, ExtraOptions, TagType>;}'), true);
+    check("BaseUIElement's is the written twin of UIElementOptions",
+        baseAppended.includes('interface BaseUIElement<NodeType extends ChildNode = SVGElement | HTMLElement | Text> {$stemJsxOptions: import("@stemjs/ui/UIBase").WrittenUIElementOptions<string>;}'), true);
+    check("the property a tag is read off is named once, from UIBase",
+        baseAppended.includes("declare global {namespace JSX {interface ElementAttributesProperty {$stemJsxOptions: {};}}}"), true);
+    check("and not from anywhere else", written.appended.includes("ElementAttributesProperty"), false);
+
     const enums = augment(ts, "enums.ts");
     let restoredEnums = enums.result.text.slice(0, enums.result.originalLength);
     for (const field of enums.result.fields) {

@@ -29,6 +29,10 @@ export interface DashboardTitle {get styleSheet(): StyleRules<InstanceType<typeo
 with an object literal but holds the generated class name at runtime, and a property decorator can't retype it
 either.
 
+A class declared inside a function - a mixin, or one built per call - is in that function's declaration space,
+where an interface appended at the end of the file would merge with nothing. Its interface is inserted on one line
+right after the class instead, and the positions after it are mapped back the same way a JSX assertion's are.
+
 ## `@field(X)`
 
 A field with no type annotation gets the type its spec loads, plus the raw id that comes with a foreign key:
@@ -157,6 +161,71 @@ It stays narrow deliberately:
 `test/fixture/numeric.ts` asserts both directions: the coercing forms compile, and the four that must keep
 reporting carry `@ts-expect-error`.
 
+## What a tag takes, and what an element holds
+
+`createElement` normalizes two options as it builds an element: the children are collected into a
+`UICleanChild[]` whatever spelling they arrive in, and a string `ref` is resolved into the `RefLinkOptions` it
+names. So `this.options` is narrower than a tag. `stem-core/ui/UIBase.ts` says what is held - `UIElementOptions`,
+`UIOptions` - and derives what a tag takes from it: `WrittenUIElementOptions`, `WrittenUIOptions`. A constructor
+takes what is held: only `createElement` normalizes, and it has by the time it constructs.
+
+TypeScript reads a tag's attributes off one property, `JSX.ElementAttributesProperty`. Stem's source declares no
+such property - it would be a field nothing reads. The plugin names it once, globally, in `UIBase.ts`'s augmented
+text, and declares it for every class that declares `options`, from that annotation. **Without the plugin,
+TypeScript falls back to the constructor's parameter**, which is what is held, so a string ref or a lone child
+reports - like an un-annotated `@field`, JSX needs the plugin running:
+
+```ts
+class UIElement<..., OptionsType extends UIElementOptions<TagType> = UIOptions<NodeType, ExtraOptions, TagType>> {
+    declare options: OptionsType;                     // a type parameter answers with its default, and
+}                                                     // a held alias with its written twin:
+// appended in memory:
+interface UIElement<...> {$stemJsxOptions: import("stem-core/ui/UIBase").WrittenUIOptions<NodeType, ExtraOptions, TagType>;}
+
+class Router extends Switcher {
+    declare options: ExtendedOptions<Switcher, RouterOptions>;   // keeps the base's tag shape under its own
+}
+// appended in memory:
+interface Router {$stemJsxOptions: NonNullable<Switcher["$stemJsxOptions"]> & RouterOptions;}
+
+class Sheet extends UIElement {
+    declare options: ElementOptions<SheetOptions>;    // anything else is mapped from what is held
+}
+// appended in memory:
+interface Sheet {$stemJsxOptions: import("stem-core/ui/UIBase").WrittenOptions<NonNullable<Sheet["options"]>>;}
+```
+
+A mixin's class expression can't merge with an interface, so it gets the member inside its body instead,
+written from its annotation. A class that inherits `options` needs nothing.
+
+The twins matter for inference: `ExtraOptions` stays a bare constituent of `WrittenUIOptions`, so a generic
+tag - `<Select options={…} onChange={value => …}>` - still infers from its attributes. A mapped type over the
+same intersection hands everything to `ExtraOptions` and leaves the value type unknown, which is why the mapped
+`WrittenOptions` is reserved for a respelling of the class's own shape, where the class is concrete. Two other
+shapes were measured and are worth not repeating: deriving the property from `this["options"]` on the base
+recurses in every mixin (TS2589), and an optional property reads as `T | undefined` under `strictNullChecks`.
+
+One consequence in the source: an extra-options interface must not `extends UIElementOptions`. `UIOptions`
+intersects the base in anyway, and restating it drags the held `ref` and `children` into the written
+intersection, where they reject a string ref and a lone child.
+
+`test/fixture/options.tsx` asserts a respelled option reaches its tag from a declaration, from a mixin and
+through `ExtendedOptions`, that a string ref and a lone child are accepted as written, and that what is held is
+the array. `test/transform.test.js` pins what `UIBase.ts` itself gets.
+
+## A single JSX child against a list of children
+
+An element that narrows its children - `Switcher` to elements, `SVGOptions` to SVG children - intersects that
+with what a tag takes, and TypeScript, counting the children written in the tag from React's convention that a
+lone child is passed through as itself, checks that one child against the list. It reports as TS2745 on the
+tag, or, once `strictNullChecks` makes an optional prop a union, as TS2322 on the child, or TS2747 when the
+child is text. All three are the same mistake about a convention stem does not follow, so all three are dropped.
+
+The child is not left unchecked: it is checked against the prop's **entry** type, which is what it becomes. A
+child the list can't hold reports exactly as before, and so does a bad child among several - the rule only
+applies where TypeScript's count is what made the difference. `test/fixture/children.tsx` asserts both
+directions.
+
 ## What it costs
 
 Because the declarations are appended and the rename is length-neutral, every offset in the original file stays
@@ -237,8 +306,8 @@ completions, diagnostics, outline).
   maps results on a relocated member back to the member itself.
 - `checker.js` - builds a program over the augmented text and drops our own noise from the diagnostics. Shared
   by the command line and the tests, so the two can't disagree about what counts as an error.
-- `numericCoercion.js` - the rule above, shared by `checker.js` and `index.js` so the editor and the command
-  line agree about which operators are fine.
+- `numericCoercion.js`, `jsxChildren.js` - the two diagnostic rules above, shared by `checker.js` and `index.js`
+  so the editor and the command line agree about what counts.
 - `typecheck.js` - the command-line counterpart, a CLI over `checker.js`.
 - `loadTypeScript.js` - finds the project's TypeScript from wherever we're run.
 - `test/` - see above.

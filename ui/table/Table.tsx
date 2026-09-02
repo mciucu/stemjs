@@ -1,4 +1,4 @@
-import {UI, UIElement, type UIElementOptions, type UIChild, type HTMLTagType} from "../UIBase";
+import {UI, UIElement, type PartialOptions, type UIChild, type HTMLTagType} from "../UIBase";
 import {TableStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
 import {ColumnHandler, type ColumnLike} from "../../base/ColumnHandler";
@@ -6,7 +6,7 @@ import {ColumnHandler, type ColumnLike} from "../../base/ColumnHandler";
 // TODO @types
 UI.Element;
 
-export interface TableRowOptions<BaseType> extends UIElementOptions {
+export interface TableRowOptions<BaseType> {
     columns?: ColumnHandler<BaseType>[];
     parent?: UIElement<any>;
     entry?: BaseType;
@@ -33,7 +33,7 @@ export class TableRow<BaseType = any> extends UIElement<TableRowOptions<BaseType
     }
 }
 
-export interface TableOptions<BaseType> extends UIElementOptions {
+export interface TableOptions<BaseType> {
     entries?: BaseType[];
     columns?: ColumnLike<BaseType>[];
     rowClass?: typeof TableRow<BaseType>;
@@ -93,7 +93,7 @@ export class Table<BaseType = any> extends UIElement<TableOptions<BaseType>, HTM
         return <RowClass {...this.getRowOptions(entry, rowIndex)} />;
     }
 
-    getRowOptions(entry: BaseType, rowIndex: number): TableRowOptions<BaseType> {
+    getRowOptions(entry: BaseType, rowIndex: number): PartialOptions<TableRow<BaseType>> {
         const columns = this.getSafeColumns();
         return {
             entry,

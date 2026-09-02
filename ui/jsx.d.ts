@@ -1,9 +1,10 @@
-import {BaseUIElement, UIElement, UIOptions, HTMLTagType, SVGTagType} from "./UIBase";
+import {BaseUIElement, UIElement, WrittenUIOptions, HTMLTagType, SVGTagType} from "./UIBase";
 
+// What a tag takes, not what the element holds
 type IntrinsicElementsMap = {
-    [Key in HTMLTagType]: UIOptions<HTMLElementTagNameMap[Key]>;
+    [Key in HTMLTagType]: WrittenUIOptions<HTMLElementTagNameMap[Key]>;
 } & {
-    [Key in SVGTagType]: UIOptions<SVGElementTagNameMap[Key]>;
+    [Key in SVGTagType]: WrittenUIOptions<SVGElementTagNameMap[Key]>;
 };
 
 declare global {
@@ -14,9 +15,9 @@ declare global {
 
         interface ElementClass extends BaseUIElement<any> {}
 
-        interface ElementAttributesProperty {
-            options: {};
-        }
+        // No ElementAttributesProperty: a tag is written with more than `options` holds, and the ts-plugin
+        // declares what each class's tag takes. Without it TypeScript falls back to the constructor's
+        // parameter, which is what is held, so a string ref or a lone child reports
 
         interface ElementChildrenAttribute {
             children: {};

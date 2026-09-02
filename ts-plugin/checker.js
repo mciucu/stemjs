@@ -4,6 +4,7 @@
 const path = require("path");
 const {getAugmentedSource, toSourceOffset} = require("./transform");
 const {isNumericCoercion} = require("./numericCoercion");
+const {isCollectedChild} = require("./jsxChildren");
 
 const PLUGIN_NAME = "ts-plugin-registered-styles";
 
@@ -124,6 +125,9 @@ function getProjectDiagnostics(ts, projectRoot, filter = null, previewNoCheck = 
             return false;
         }
         if (isNumericCoercion(ts, checker, diagnostic)) {
+            return false;
+        }
+        if (isCollectedChild(ts, checker, diagnostic, options)) {
             return false;
         }
         return !filter || diagnostic.file.fileName.includes(filter);

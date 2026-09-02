@@ -10,6 +10,7 @@
 
 const {getAugmentedSource, toSourceOffset, toAugmentedOffset} = require("./transform");
 const {isNumericCoercion} = require("./numericCoercion");
+const {isCollectedChild} = require("./jsxChildren");
 
 function init(modules) {
     const ts = modules.typescript;
@@ -165,6 +166,9 @@ function init(modules) {
                 if (isNumericCoercion(ts, languageService.getProgram().getTypeChecker(), diagnostic)) {
                     return false;
                 }
+                if (isCollectedChild(ts, languageService.getProgram().getTypeChecker(), diagnostic, compilerOptions)) {
+                    return false;
+                }
                 // A placeholder is un-annotated on purpose; its implicit any is ours to answer for, not the user's
                 const field = fieldAtSource(fileName, diagnostic.start);
                 return !field || diagnostic.start >= field.sourceStart + field.name.length;
@@ -230,7 +234,8 @@ function init(modules) {
             if (!result) {
                 return result;
             }
-            return {...result, entries: result.entries.filter(entry => !placeholderNames.has(entry.name))};
+            // A $stem member is a phantom that only types something; nothing should ever write it
+            return {...result, entries: result.entries.filter(entry => !placeholderNames.has(entry.name) && !entry.name.startsWith("$stem"))};
         };
 
         // Renaming a class member the editor knows only as a placeholder would be a rename to a placeholder

@@ -2,7 +2,7 @@
 import {Device} from "../../base/Device";
 import {unwrapArray} from "../../base/Utils";
 import {Divider} from "./Divider";
-import {type ElementOptions, UI, UIElement, type UIElementOptions} from "../UIBase";
+import {type ElementOptions, UI, UIElement} from "../UIBase";
 import {registerStyle} from "../style/Theme";
 import {SectionDividerStyle} from "./Style";
 import {Orientation, type OrientationType} from "../Constants";
@@ -47,7 +47,7 @@ export class DividerBar extends Divider<DividerBarOptions> {
     - All the children it's dividing
     - An option on how to redivide the sizes of the children
  */
-export interface SectionDividerOptions extends UIElementOptions {
+export interface SectionDividerOptions {
     orientation?: OrientationType;
     autoCollapse?: boolean;
 }

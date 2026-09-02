@@ -1,11 +1,11 @@
-import {UI, type UIElementOptions, type UIChild, UIElement} from "./UIBase";
+import {UI, type UIChild, UIElement} from "./UIBase";
 import {styleRule, StyleSheet} from "./Style";
 import {registerStyle} from "./style/Theme";
 import {Router} from "./Router";
 import {Direction, type DirectionType} from "./Constants";
 import {NodeAttributes} from "./NodeAttributes";
 
-export interface AnchoredPopupOptions extends UIElementOptions {
+export interface AnchoredPopupOptions {
     anchor: UIElement;
     offset?: number;
     toggleOnSameAnchor?: boolean;

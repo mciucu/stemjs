@@ -1,11 +1,11 @@
-import {UI, UIElement, type UIElementOptions, type UIEventHandler, type UIChild, type HTMLTagType} from "../UIBase";
+import {UI, UIElement, type UIEventHandler, type UIChild, type HTMLTagType} from "../UIBase";
 import {DOMAttributesMap, NodeAttributes} from "../NodeAttributes";
 import {InputStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
 import {StemDate} from "../../time/Date";
 import {CleanupJobs, type RemoveHandle} from "../../base/Dispatcher";
 
-export interface InputableElementOptions<ValueType> extends UIElementOptions {
+export interface InputableElementOptions<ValueType> {
     initialValue?: ValueType;
     value?: any;
     readOnly?: boolean;
@@ -15,6 +15,8 @@ export interface InputableElementOptions<ValueType> extends UIElementOptions {
 
 export interface InputOptions<ValueType> extends InputableElementOptions<ValueType> {
     type?: string;
+    // Wired through addKeyUpListener
+    onKeyUp?: UIEventHandler;
     // Applied with noValue, which only ever tests it for truthiness
     autofocus?: boolean | string;
     // The attribute map spells it in lower case, next to the node's own readOnly

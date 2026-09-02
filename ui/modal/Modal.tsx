@@ -2,7 +2,7 @@ import {ButtonGroup} from "../button/ButtonGroup";
 import {Button, type ButtonOptions} from "../button/Button";
 import {FloatingWindow} from "./FloatingWindow";
 import {ModalStyle} from "./Style";
-import {UI, UIElement, type StyleObject, type UIChild, type UIElementOptions, type BaseUIElement} from "../UIBase";
+import {UI, UIElement, type StyleObject, type UIChild} from "../UIBase";
 import {Dispatcher, type RemoveHandle} from "../../base/Dispatcher";
 import {registerStyle} from "../style/Theme";
 import {Level, type LevelType, Size} from "../Constants";
@@ -11,7 +11,7 @@ import {NodeAttributes} from "../NodeAttributes";
 import {isString} from "../../base/Utils";
 
 
-export interface ModalOptions extends UIElementOptions {
+export interface ModalOptions {
     closeButton?: boolean;
     destroyOnHide?: boolean;
     visible?: boolean;

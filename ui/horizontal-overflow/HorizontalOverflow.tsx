@@ -1,4 +1,4 @@
-import {BaseUIElement, UI, type UIChild, UIElement} from "../UIBase";
+import {BaseUIElement, UI, UIElement} from "../UIBase";
 import {FAIcon} from "../FontAwesome";
 import {registerStyle} from "../style/Theme";
 import {HorizontalOverflowStyle} from "./Style";
@@ -8,8 +8,6 @@ import {HorizontalOverflowStyle} from "./Style";
 interface HorizontalOverflowOptions {
     // How much of the visible width one arrow click scrolls
     swipePercent?: number;
-    // Rendered into pusherContainer, and mutated in place by appendChild/eraseChild
-    children?: UIChild[];
 }
 
 @registerStyle(HorizontalOverflowStyle)

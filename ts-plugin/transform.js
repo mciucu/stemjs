@@ -106,6 +106,11 @@ const THIS_CONSTRUCTOR_STATIC = "this." + CONSTRUCTOR_MEMBER + ".";
 const DEFAULT_STEM_ROOT = "stem-core";
 const STYLE_MODULE = "/ui/Style";
 const STATE_MODULE = "/state/StoreField";
+const UI_MODULE = "/ui/UIBase";
+// What a tag may be written with, which JSX.ElementAttributesProperty names. Both are declared here and
+// nowhere in the source: for every class that declares `options`, from that annotation.
+const JSX_OPTIONS_MEMBER = "$stemJsxOptions";
+const OPTIONS_MEMBER = "options";
 
 function getScriptKind(ts, fileName) {
     if (fileName.endsWith(".tsx")) {
@@ -358,6 +363,8 @@ const JSX_HELPER = `type ${JSX_HELPER_NAME}<T> = 0 extends 1 & T ? any :`
     + ` T extends abstract new (...args: any[]) => infer R ? R : JSX.Element;`;
 // A capitalised tag somewhere in the file. Generic arguments match too; they simply yield no insertions.
 const HAS_COMPONENT_TAG = /<[A-Z][\w.]*[\s/>]/;
+// A class respelling what it holds, which is the only one whose tag shape needs respelling too
+const RESPELLS_OPTIONS = /\boptions\s*[?!]?\s*:/;
 
 // A Stem JSX element is an instance of its tag's class; under React's own runtime it is an element, and the
 // assertion would retype every component that returns one. Redirecting JSX is how a project says which it is.
@@ -383,6 +390,116 @@ function collectJsxAssertions(ts, sourceFile) {
     return insertions;
 }
 
+// A class that respells `options` gets the tag shape respelled to match. One that doesn't inherits the base's,
+// which UIElement already derives from its generic, so nothing needs declaring for it.
+function respellsOptions(ts, classNode) {
+    return declaresMember(classNode.members, OPTIONS_MEMBER);
+}
+
+function optionsAnnotation(ts, classNode) {
+    const member = classNode.members.find(member => ts.isPropertyDeclaration(member) &&
+        ts.isIdentifier(member.name) && member.name.text === OPTIONS_MEMBER);
+    return member ? member.type : null;
+}
+
+// The held aliases in UIBase that have a written twin, by name
+const WRITTEN_TWINS = new Map([
+    ["UIOptions", "WrittenUIOptions"],
+    ["UIElementOptions", "WrittenUIElementOptions"],
+]);
+const EXTENDED_OPTIONS = "ExtendedOptions";
+
+// Emitted on one line, so a comment inside would swallow the rest of it
+function oneLine(text) {
+    return /\/[/*]/.test(text) ? null : text.replace(/\s+/g, " ");
+}
+
+function typeReference(ts, typeNode, sourceFile) {
+    if (!typeNode || !ts.isTypeReferenceNode(typeNode) || !ts.isIdentifier(typeNode.typeName)) {
+        return null;
+    }
+    const args = (typeNode.typeArguments || []).map(arg => oneLine(arg.getText(sourceFile)));
+    return args.includes(null) ? null : {name: typeNode.typeName.text, args};
+}
+
+// The written shape for what a class holds. A held alias answers with its twin, which keeps ExtraOptions a
+// bare constituent so a generic tag still infers; ExtendedOptions<Base, Own> keeps the base's own tag shape
+// under Own; a type parameter answers with its default. Anything else - an interface of the class's own, an
+// Omit, an intersection - is mapped from `held`, which is exact for a concrete class.
+function writtenTypeFor(ts, classNode, typeNode, sourceFile, uiModule, held) {
+    const reference = typeReference(ts, typeNode, sourceFile);
+    if (reference) {
+        const twin = WRITTEN_TWINS.get(reference.name);
+        if (twin) {
+            return `import("${uiModule}").${twin}` + (reference.args.length ? `<${reference.args.join(", ")}>` : "");
+        }
+        if (reference.name === EXTENDED_OPTIONS && reference.args.length === 2) {
+            return `NonNullable<${reference.args[0]}["${JSX_OPTIONS_MEMBER}"]> & ${reference.args[1]}`;
+        }
+        const param = (classNode.typeParameters || []).find(param => param.name.text === reference.name);
+        if (param && param.default) {
+            return writtenTypeFor(ts, classNode, param.default, sourceFile, uiModule, held);
+        }
+    }
+    return `import("${uiModule}").WrittenOptions<NonNullable<${held}>>`;
+}
+
+function jsxOptionsDeclaration(ts, classNode, sourceFile, uiModule, options) {
+    if (!classNode.name || !usesStemJsx(options) || !respellsOptions(ts, classNode) ||
+            declaresMember(classNode.members, JSX_OPTIONS_MEMBER)) {
+        return "";
+    }
+    const held = `${classNode.name.text}${getTypeArgumentText(classNode)}["${OPTIONS_MEMBER}"]`;
+    const written = writtenTypeFor(ts, classNode, optionsAnnotation(ts, classNode), sourceFile, uiModule, held);
+    return `${JSX_OPTIONS_MEMBER}: ${written};`;
+}
+
+// A class expression - a mixin's result - can't merge with an interface, and has no name to index from outside
+// its body. The member goes inside the body instead, written from the annotation it respells `options` with.
+function inlineJsxOptionsDeclaration(ts, classNode, sourceFile, uiModule, options) {
+    if (!usesStemJsx(options) || declaresMember(classNode.members, JSX_OPTIONS_MEMBER)) {
+        return null;
+    }
+    const annotation = optionsAnnotation(ts, classNode);
+    const held = annotation && oneLine(annotation.getText(sourceFile));
+    if (!held) {
+        return null;
+    }
+    return {
+        offset: classNode.members.pos,
+        text: ` declare ${JSX_OPTIONS_MEMBER}: ${writtenTypeFor(ts, classNode, annotation, sourceFile, uiModule, held)};`,
+    };
+}
+
+// A class inside a function body is in its own declaration space, so its merged interface has to go there
+// too - appending it at the end of the file would declare something else entirely. The interface is written
+// on one line right after the class, which is a statement position in every body a class can be declared in.
+function collectNestedClassInterfaces(ts, sourceFile, styleModule, uiModule, options) {
+    const insertions = [];
+    const visit = (node) => {
+        if (ts.isClassExpression(node)) {
+            const inline = inlineJsxOptionsDeclaration(ts, node, sourceFile, uiModule, options);
+            if (inline) {
+                insertions.push(inline);
+            }
+        }
+        if (ts.isClassDeclaration(node) && node.name && node.parent !== sourceFile) {
+            let members = jsxOptionsDeclaration(ts, node, sourceFile, uiModule, options);
+            const styleName = !declaresMember(node.members, STYLE_MEMBER) && getRegisteredStyle(ts, node, sourceFile);
+            if (styleName) {
+                members += `get ${STYLE_MEMBER}(): import("${styleModule}").StyleRules<InstanceType<typeof ${styleName}>>;`;
+            }
+            if (members) {
+                const typeParams = getTypeParameterText(node, sourceFile);
+                insertions.push({offset: node.end, text: ` interface ${node.name.text}${typeParams} {${members}}`});
+            }
+        }
+        ts.forEachChild(node, visit);
+    };
+    ts.forEachChild(sourceFile, visit);
+    return insertions;
+}
+
 // Returns {text, originalLength, fields, insertions} for the augmented file, or null when there's nothing to do.
 // `fields` pairs each renamed member with the declaration that replaced it, for the plugin to map between.
 function getAugmentedSource(ts, fileName, text, options = {}) {
@@ -391,14 +508,16 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
     const hasEnum = text.includes("@" + ENUM_DECORATOR);
     const hasStore = text.includes("@" + STORE_DECORATOR) || EXTENDS_STORE_OBJECT.test(text);
     const hasComponentTag = usesStemJsx(options) && HAS_COMPONENT_TAG.test(text);
+    const hasSubclass = usesStemJsx(options) && RESPELLS_OPTIONS.test(text);
     if (!text.includes(STYLE_DECORATOR) && !text.includes(THEME_REGISTER) && !text.includes("@" + FIELD_DECORATOR) &&
-            !hasStyleRule && !usesThisConstructor && !hasEnum && !hasStore && !hasComponentTag) {
+            !hasStyleRule && !usesThisConstructor && !hasEnum && !hasStore && !hasComponentTag && !hasSubclass) {
         return null;
     }
 
     const stemRoot = options.stemRoot || DEFAULT_STEM_ROOT;
     const styleModule = stemRoot + STYLE_MODULE;
     const stateModule = stemRoot + STATE_MODULE;
+    const uiModule = stemRoot + UI_MODULE;
     const sourceFile = ts.createSourceFile(fileName, text, ts.ScriptTarget.ESNext, true, getScriptKind(ts, fileName));
 
     // Only a module can carry a `declare global` block, so a plain script gets no registry entry
@@ -486,6 +605,11 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
             }
         }
 
+        const jsxOptions = alreadyDeclares(JSX_OPTIONS_MEMBER) ? "" : jsxOptionsDeclaration(ts, statement, sourceFile, uiModule, options);
+        if (jsxOptions) {
+            appended += `${prefix}interface ${className}${typeParams} {${jsxOptions}}\n`;
+        }
+
         const styleName = getRegisteredStyle(ts, statement, sourceFile);
         if (styleName && !alreadyDeclares(STYLE_MEMBER)) {
             // StyleRules is what corrects each rule from the object literal it's declared with to the class name it is
@@ -568,11 +692,18 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
         appended += "}\n";
     }
 
-    const insertions = hasComponentTag ? collectJsxAssertions(ts, sourceFile) : [];
-    if (insertions.length > 0) {
+    // The property a tag's attributes are read off is named in the global scope, once, from UIBase. Without
+    // the plugin there is no such property, and a tag is checked against the constructor's parameter instead.
+    if (usesStemJsx(options) && fileName.replace(/\\/g, "/").endsWith(UI_MODULE + ".ts")) {
+        appended += `declare global {namespace JSX {interface ElementAttributesProperty {${JSX_OPTIONS_MEMBER}: {};}}}\n`;
+    }
+
+    const jsxAssertions = hasComponentTag ? collectJsxAssertions(ts, sourceFile) : [];
+    if (jsxAssertions.length > 0) {
         appended = JSX_HELPER + "\n" + appended;
     }
-    if (appended === "") {
+    const insertions = [...jsxAssertions, ...collectNestedClassInterfaces(ts, sourceFile, styleModule, uiModule, options)];
+    if (appended === "" && insertions.length === 0) {
         return null;
     }
 
@@ -641,4 +772,4 @@ function toAugmentedOffset(shifts, position) {
     return position + shift;
 }
 
-module.exports = {getAugmentedSource, toSourceOffset, toAugmentedOffset};
+module.exports = {getAugmentedSource, toSourceOffset, toAugmentedOffset, usesStemJsx};

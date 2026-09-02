@@ -1,8 +1,8 @@
-import {TextUIElement, UI, type UIElementOptions, type UIChild} from "./UIBase";
+import {TextUIElement, UI, type UIChild} from "./UIBase";
 import {dashCase, isFunction, isNumber, isString} from "../base/Utils";
 import {NodeAttributes, defaultToPixelsAttributes} from "./NodeAttributes";
 
-interface StyleInstanceOptions extends UIElementOptions {
+interface StyleInstanceOptions {
     value?: string; // The rule text, which render() computes from the attributes below
     selector?: string;
     key?: string;

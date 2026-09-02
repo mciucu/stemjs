@@ -1,9 +1,9 @@
 // Contains classes to abstract some generic Font Awesome usecases.
-import {UI, type UIElementOptions} from "./UIBase";
+import {UI} from "./UIBase";
 import {Direction, type DirectionType} from "./Constants";
 import {NodeAttributes} from "./NodeAttributes";
 
-export interface FAIconOptions extends UIElementOptions {
+export interface FAIconOptions {
     icon?: string;
     size?: string;
 }
@@ -16,7 +16,7 @@ export interface FASortIconOptions extends FAIconOptions {
     direction?: DirectionType;
 }
 
-class FAIcon extends UI.Primitive("i")<FAIconOptions> {
+class FAIcon<ExtraOptions extends FAIconOptions = FAIconOptions> extends UI.Primitive("i")<ExtraOptions> {
     getIcon(): string {
         return this.options.icon || "";
     }
@@ -35,9 +35,7 @@ class FAIcon extends UI.Primitive("i")<FAIconOptions> {
     }
 }
 
-class FACollapseIcon extends FAIcon {
-    declare options: FACollapseIconOptions;
-
+class FACollapseIcon extends FAIcon<FACollapseIconOptions> {
     getIcon(): string {
         if (this.options.collapsed) {
             return "angle-right";
@@ -56,9 +54,7 @@ class FACollapseIcon extends FAIcon {
     }
 }
 
-class FASortIcon extends FAIcon {
-    declare options: FASortIconOptions;
-
+class FASortIcon extends FAIcon<FASortIconOptions> {
     getIcon(): string {
         if (this.options.direction === Direction.UP) {
             return "sort-asc";

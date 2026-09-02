@@ -37,10 +37,13 @@ export type RefLinkOptions = {
 
 
 // Type definitions
+
+// What an element holds. createElement collects the children into an array and resolves a string ref, so
+// those two are narrower here than in a tag.
 export interface UIElementOptions<TagType extends string = HTMLTagType> {
-    children?: UIChild;
+    children?: UICleanChild[];
     title?: UIChild;
-    ref?: RefLinkOptions | string; // TODO @cleanup. There's a difference between the options for createElement and the options after they are cleaned.
+    ref?: RefLinkOptions;
     key?: string | number;
     active?: boolean; // Tabs or switchers can put this on children
     tabHref?: string; // A tab area reads this off the panel to link its tab
@@ -66,6 +69,22 @@ export interface UIElementOptions<TagType extends string = HTMLTagType> {
     //[key: string]: any;
 }
 
+// The two createElement normalizes
+type NormalizedOptions = "children" | "ref";
+
+// The same options as a tag takes them, which is what the ts-plugin declares for each class from these
+export interface WrittenUIElementOptions<TagType extends string = HTMLTagType> extends Omit<UIElementOptions<TagType>, NormalizedOptions> {
+    children?: UIChild;
+    ref?: RefLinkOptions | string;
+}
+
+// Held options turned back into written ones, for a class that respells `options`. Mapped, so only for a
+// concrete class: a generic tag infers through the intersection below, not through this. A narrowing of the
+// children the respelling inherited - to SVG children, say - is kept, so the tag stays within its base's.
+export type WrittenOptions<Options> = {
+    [Key in keyof Options as Exclude<Key, NormalizedOptions>]: Options[Key];
+} & Pick<WrittenUIElementOptions, NormalizedOptions> & (Options extends {children?: infer Held} ? UICleanChild[] extends Held ? unknown : {children?: Held} : unknown);
+
 // The keys of T that aren't readonly
 type WritableKeys<T> = {
     [Key in keyof T]-?: (<G>() => G extends {[P in Key]: T[Key]} ? 1 : 2) extends
@@ -82,6 +101,9 @@ export type OverriddenNodeMembers = "children" | "nodeType" | "style" | "title" 
 export type NodeOptions<NodeType> = Partial<Omit<Pick<NodeType, WritableKeys<NodeType>>, OverriddenNodeMembers>>;
 
 export type UIOptions<NodeType extends (SVGElement | HTMLElement), ExtraOptions = {}, TagType extends string = HTMLTagType> = NodeOptions<NodeType> & UIElementOptions<TagType> & ExtraOptions;
+
+// The same as a tag takes it. ExtraOptions stays a bare constituent, so a generic element infers it from the tag.
+export type WrittenUIOptions<NodeType extends (SVGElement | HTMLElement), ExtraOptions = {}, TagType extends string = HTMLTagType> = NodeOptions<NodeType> & WrittenUIElementOptions<TagType> & ExtraOptions;
 
 // For a class extending a Stem UI class that doesn't pass its options generic along
 export type ElementOptions<ExtraOptions = {}, NodeType extends (SVGElement | HTMLElement) = HTMLElement> = UIOptions<NodeType, ExtraOptions>;
@@ -117,10 +139,10 @@ export interface UINamespace {
     TextElement: typeof TextUIElement;
     Element: typeof UIElement;
     SVGElement: typeof UIElement<any, any, any>;
-    createElement<K extends HTMLTagType>(tag: K, options?: UIElementOptions | null, ...children: any[]): UIElement<{}, HTMLElementTagNameMap[K]>;
-    createElement<K extends SVGTagType>(tag: K, options?: UIElementOptions | null, ...children: any[]): UIElement<{}, SVGElementTagNameMap[K]>;
+    createElement<K extends HTMLTagType>(tag: K, options?: WrittenUIElementOptions | null, ...children: any[]): UIElement<{}, HTMLElementTagNameMap[K]>;
+    createElement<K extends SVGTagType>(tag: K, options?: WrittenUIElementOptions | null, ...children: any[]): UIElement<{}, SVGElementTagNameMap[K]>;
     createElement<UIClass extends BaseUIElement<any>>(tag: new (options: any) => UIClass, options?: any, ...children: any[]): UIClass;
-    createElement(tag: any, options?: UIElementOptions | null, ...children: any[]): BaseUIElement | null;
+    createElement(tag: any, options?: WrittenUIElementOptions | null, ...children: any[]): BaseUIElement | null;
     str: (value: any) => any;
     T: (value: string) => BaseUIElement; // Assigned by Translation.ts
     // The return carries whatever was passed, so extra options go on the result, not here
@@ -147,8 +169,8 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
     applyRef(): void {
         // createElement resolves a string ref against the render stack before options are ever read
         if (this.options?.ref) {
-            const obj = (this.options.ref as RefLinkOptions).parent;
-            const name = (this.options.ref as RefLinkOptions).name ?? (this.options.ref as RefLinkOptions).key; // TODO: should be key
+            const obj = this.options.ref.parent;
+            const name = this.options.ref.name ?? this.options.ref.key; // TODO: should be key
             obj[name] = this;
         }
 
@@ -158,8 +180,8 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
 
     removeRef(): void {
         if (this.options?.ref) {
-            const obj = (this.options.ref as RefLinkOptions).parent;
-            const name = (this.options.ref as RefLinkOptions).name;
+            const obj = this.options.ref.parent;
+            const name = this.options.ref.name;
             if (obj[name] === this) {
                 obj[name] = undefined;
             }
@@ -287,6 +309,7 @@ export class UIElement<
     children: BaseUIElement[] = [];
     declare options: OptionsType;
 
+    // What is held, not what a tag takes: only createElement normalizes, and it has by the time it constructs
     constructor(options: OptionsType = {} as OptionsType) {
         super();
         this.children = [];  // These are the rendered children
@@ -683,7 +706,7 @@ export class UIElement<
             throw "Can't properly handle appendChild, you need to implement it for " + this.constructor;
         }
         this.options.children = this.options.children || [];
-        (this.options.children as UICleanChild[]).push(child);
+        this.options.children.push(child);
         child.mount(this, null);
         return child;
     }
@@ -694,10 +717,10 @@ export class UIElement<
         }
         position = position || 0;
 
-        this.options!.children = this.options!.children || [];
-        (this.options!.children as UICleanChild[]).splice(position, 0, child);
+        this.options.children = this.options.children || [];
+        this.options.children.splice(position, 0, child);
 
-        const nextChildNode = position + 1 < (this.options!.children as UICleanChild[]).length ? this.children[position + 1].node : null;
+        const nextChildNode = position + 1 < this.options.children.length ? this.children[position + 1].node : null;
 
         (child as UIElement).mount(this, nextChildNode);
 
@@ -706,7 +729,7 @@ export class UIElement<
 
     eraseChild(child: BaseUIElement, destroy: boolean = true): BaseUIElement | null {
         if (!this.options?.children) return null;
-        let index = (this.options.children as UICleanChild[]).indexOf(child);
+        let index = this.options.children.indexOf(child);
 
         if (index < 0) {
             // child not found
@@ -716,14 +739,14 @@ export class UIElement<
     }
 
     eraseChildAtIndex(index: number, destroy: boolean = true): BaseUIElement | null {
-        if (!this.options?.children || index < 0 || index >= (this.options.children as UICleanChild[]).length) {
-            console.error("Erasing child at invalid index ", index, (this.options.children as UICleanChild[])?.length || 0);
+        if (!this.options?.children || index < 0 || index >= this.options.children.length) {
+            console.error("Erasing child at invalid index ", index, this.options.children?.length || 0);
             return null;
         }
         if (this.children !== this.options.children) {
             throw "Can't properly handle eraseChild, you need to implement it for " + this.constructor;
         }
-        let erasedChild = (this.options.children as UICleanChild[]).splice(index, 1)[0] as BaseUIElement;
+        let erasedChild = this.options.children.splice(index, 1)[0] as BaseUIElement;
         if (destroy) {
             erasedChild.destroyNode();
         } else {
@@ -850,13 +873,13 @@ function isSVGTag(tag: string): tag is SVGTagType {
 }
 
 // Written once to cover every declared overload, which is why the implementation type is looser
-UI.createElement = function (tag: typeof BaseUIElement<any> | HTMLTagType | SVGTagType, options?: UIElementOptions | null, ...children: any[]): BaseUIElement | null {
+UI.createElement = function (tag: typeof BaseUIElement<any> | HTMLTagType | SVGTagType, options?: WrittenUIElementOptions | null, ...children: any[]): BaseUIElement | null {
     if (!tag) {
         console.error("Create element needs a valid object tag, did you mistype a class name?");
         return null;
     }
 
-    options = options || {} as UIElementOptions;
+    options = options || {} as WrittenUIElementOptions;
 
     options.children = cleanChildren(children);
 
@@ -892,7 +915,7 @@ UI.createElement = function (tag: typeof BaseUIElement<any> | HTMLTagType | SVGT
         return new UIElement<void, HTMLElementTagNameMap[typeof tag]>(options as any);
     }
 
-    return new (tag as typeof UIElement)(options);
+    return new (tag as typeof UIElement)(options as UIElementOptions); // Normalized above, so this is what is held
 } as UINamespace["createElement"];
 
 UI.Element = UIElement;

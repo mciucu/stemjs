@@ -1,8 +1,8 @@
-import {UI, type UIElementOptions} from "../UIBase";
+import {type PartialOptions, UI} from "../UIBase";
 import {FloatingWindowStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
 
-export interface FloatingWindowOptions extends UIElementOptions {
+export interface FloatingWindowOptions {
     // Where the window mounts, since it escapes its parent's subtree
     parentNode?: HTMLElement;
     transitionTime?: number;
@@ -11,7 +11,7 @@ export interface FloatingWindowOptions extends UIElementOptions {
 
 @registerStyle(FloatingWindowStyle)
 export class FloatingWindow<ExtraOptions extends FloatingWindowOptions = FloatingWindowOptions> extends UI.Element<ExtraOptions> {
-    getDefaultOptions(): Partial<FloatingWindowOptions> {
+    getDefaultOptions(): PartialOptions<FloatingWindow> {
         return {
             transitionTime: 0,
             style: {
