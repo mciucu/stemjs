@@ -77,6 +77,7 @@ export interface CardPanelOptions extends SimpleStyledElementOptions {
 @registerStyle(CardPanelStyle)
 export class CardPanel extends SimpleStyledElement<CardPanelOptions> {
     declare panelTitle?: UIElement;
+    declare panelBody?: UIElement;
 
     getHeaderStyleSheet() {
         return CardPanelHeaderStyle.getInstance();
