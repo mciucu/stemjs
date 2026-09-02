@@ -127,7 +127,7 @@ export class StemDate extends BaseDate {
         return timeUnit.getDateValue(this);
     }
 
-    isSame(date: DateInput, timeUnit: TimeUnit) {
+    isSame(date: DateInput, timeUnit?: TimeUnit) {
         if (!timeUnit) {
             return this.equals(date);
         }

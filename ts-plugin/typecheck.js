@@ -2,9 +2,9 @@
 // Command-line counterpart of the editor plugin: type-checks the project with the same awareness of
 // @registerStyle and @field. An un-annotated @field only has a type because of this, so this is what
 // `npm run typecheck` should run - plain `tsc` sees the field as an implicit any.
-// Usage: node stem-core/ts-plugin/typecheck.js [--filter <substring>] [--preview] [--verbose]
+// Usage: node stem-core/ts-plugin/typecheck.js [--filter <substring>] [--preview] [--verbose | --quiet]
 // --preview reports what the project would say with every @ts-nocheck lifted, without touching a file.
-// One line per diagnostic by default; --verbose prints TypeScript's full message chains.
+// One line per diagnostic by default; --verbose prints the full message chains, --quiet only counts per file.
 
 const path = require("path");
 const loadTypeScript = require("./loadTypeScript");
@@ -40,6 +40,15 @@ function main() {
         // Nothing to print
     } else if (process.argv.includes("--verbose")) {
         process.stdout.write(ts.formatDiagnostics(diagnostics, formatHost));
+    } else if (process.argv.includes("--quiet")) {
+        const perFile = new Map();
+        for (const diagnostic of diagnostics) {
+            const fileName = diagnostic.file ? path.relative(projectRoot, diagnostic.file.fileName) : "";
+            perFile.set(fileName, (perFile.get(fileName) || 0) + 1);
+        }
+        for (const [fileName, count] of [...perFile].sort((a, b) => b[1] - a[1])) {
+            process.stdout.write(`${String(count).padStart(4)}  ${fileName}\n`);
+        }
     } else {
         process.stdout.write(diagnostics.map(formatOneLine).join("\n") + "\n");
     }
