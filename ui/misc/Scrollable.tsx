@@ -93,7 +93,7 @@ export class ScrollableMixin<ExtraOptions extends ScrollableOptions = Scrollable
         this.node.scrollTop = this.options.scrollTop || this.node.scrollTop;
     }
 
-    scrollToHeight(height) {
+    scrollToHeight(height: number) {
         this.node.scrollTop = height;
     }
 
@@ -115,7 +115,7 @@ interface InfiniteScrollableOptions extends ScrollableOptions {
 }
 
 export class InfiniteScrollable extends ScrollableMixin<InfiniteScrollableOptions> {
-    setOptions(options) {
+    setOptions(options: typeof this.options) {
         options = Object.assign({
             entries: [],
             entryComparator: (a, b) => {
@@ -153,7 +153,7 @@ export class InfiniteScrollable extends ScrollableMixin<InfiniteScrollableOption
         this.insertEntry(entry, this.options.entries.length);
     }
 
-    insertEntry(entry, index) {
+    insertEntry(entry, index: number) {
         let entries = this.options.entries;
         if (index == null) {
             index = 0;

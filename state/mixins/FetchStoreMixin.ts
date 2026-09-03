@@ -33,8 +33,8 @@ export const FetchStoreMixin = <
     objectType: string,
     storeOptions: FetchMixinOptions = {},
     BaseClass?: StoreClass<T>
-) =>
-class AjaxFetchStore extends BaseStore(objectType, storeOptions, BaseClass) {
+) => {
+class AjaxFetchStore extends BaseStore<StoreClass<StoreObject>>(objectType, storeOptions, BaseClass) {
     static fetchJobs: FetchJob<T, FetchOptions>[] = [];
     static fetchTimeout?: number;
     static fetchTimeoutDuration: number = storeOptions.fetchTimeoutDuration || 50;
@@ -138,4 +138,9 @@ class AjaxFetchStore extends BaseStore(objectType, storeOptions, BaseClass) {
         clearTimeout(this.fetchTimeout);
         this.fetchTimeout = undefined;
     }
+}
+
+// A mapped type over a class drops its construct signature, so the statics stay inferred and the one the
+// caller sees is this: a store of T, whose objects every Store static then answers with as T
+return AjaxFetchStore as Omit<typeof AjaxFetchStore, "prototype"> & (new (...args: any[]) => AjaxFetchStore & T);
 };

@@ -344,12 +344,27 @@ function collectFields(ts, classNode, sourceFile) {
 // invisible to every offset in the file. It keeps as much of the real name as the `$<counter>` suffix
 // leaves room for, so the rare placeholder that reaches the screen still reads as the field it stands in
 // for. Nothing real ends in `$<digits>`, so it can't collide with a name the file already uses.
-function makePlaceholder(name, index) {
-    const suffix = "$" + index;
-    if (name.length < suffix.length) {
-        return null;
+// A renamed member still takes part in inheritance, so a base and a subclass in different files must not
+// land on the same placeholder - two rules called className would otherwise report as mismatched overrides.
+// The suffix names the file as well as the member's position, in as many characters as the name can spare.
+function fileTag(fileName) {
+    let hash = 0;
+    for (let index = 0; index < fileName.length; index += 1) {
+        hash = (hash * 31 + fileName.charCodeAt(index)) % 100;
     }
-    return name.slice(0, name.length - suffix.length) + suffix;
+    return hash;
+}
+
+// StyleRules skips a stand-in by matching `${string}$${number}`, so everything after the $ stays decimal
+function makePlaceholder(name, index, hash = 0) {
+    for (const tagLength of [2, 1, 0]) {
+        const tag = tagLength ? String(hash % Math.pow(10, tagLength)).padStart(tagLength, "0") : "";
+        const suffix = "$" + tag + index;
+        if (name.length >= suffix.length) {
+            return name.slice(0, name.length - suffix.length) + suffix;
+        }
+    }
+    return null;
 }
 
 // TypeScript types every JSX expression as JSX.Element, whatever the tag, and jsxFactory drives emit
@@ -522,6 +537,7 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
 
     // Only a module can carry a `declare global` block, so a plain script gets no registry entry
     const isModule = ts.isExternalModule(sourceFile);
+    const tag = fileTag(fileName);
     const impliedFields = [];
     let appended = "";
 
@@ -574,7 +590,7 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
                 !hasMergedNamespace(ts, sourceFile, className)) {
             let entryDeclarations = "";
             for (const entry of collectEnumEntries(ts, statement, sourceFile)) {
-                const placeholder = makePlaceholder(entry.name, impliedFields.length + 1);
+                const placeholder = makePlaceholder(entry.name, impliedFields.length + 1, tag);
                 if (!placeholder) {
                     continue;
                 }
@@ -623,7 +639,7 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
             rule => !interfaceDeclaresMember(ts, sourceFile, className, rule.name));
         let ruleDeclarations = "";
         for (const rule of styleRules) {
-            const placeholder = makePlaceholder(rule.name, impliedFields.length + 1);
+            const placeholder = makePlaceholder(rule.name, impliedFields.length + 1, tag);
             if (!placeholder) {
                 continue;
             }
@@ -665,7 +681,7 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
             if (fieldInfo.isAnnotated || interfaceDeclaresMember(ts, sourceFile, className, fieldInfo.name)) {
                 continue;
             }
-            const placeholder = makePlaceholder(fieldInfo.name, impliedFields.length + relocated.length + 1);
+            const placeholder = makePlaceholder(fieldInfo.name, impliedFields.length + relocated.length + 1, tag);
             if (placeholder) {
                 relocated.push({...fieldInfo, placeholder});
             }

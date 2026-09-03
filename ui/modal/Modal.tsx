@@ -139,7 +139,8 @@ export class Modal<ExtraOptions extends ModalOptions = ModalOptions> extends UI.
         document.body.classList.add("unscrollable");
     }
 
-    static show(options={}) {
+    // Typed off the constructor rather than off Modal, so a subclass's show answers with its own class
+    static show<ModalType extends Modal>(this: new (options?: any) => ModalType, options = {}): ModalType {
         let modal = new this(options);
         modal.show();
         return modal;

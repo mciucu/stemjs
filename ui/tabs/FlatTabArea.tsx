@@ -1,4 +1,4 @@
-import {type ExtendedOptions, UI, UIElement} from "../UIBase";
+import {type ExtendedOptions, UI, UIElement, type NodeAttributes} from "../UIBase";
 import {FlatTabAreaStyle, FlatTabAreaHorizontalOverflowStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
 import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
@@ -15,7 +15,7 @@ interface FlatTabTitleOptions {
 export class FlatTabTitle extends BasicTabTitle {
     declare options: ExtendedOptions<BasicTabTitle, FlatTabTitleOptions>;
 
-    setActive(active) {
+    setActive(active: boolean) {
         super.setActive(active);
         if (active) {
             this.options.activeTabTitleDispatcher.setActive(this, () => {
@@ -39,7 +39,7 @@ export class FlatTabTitleArea extends TabTitleArea<FlatTabTitleOptions> {
         return super.styleSheet as unknown as StyleRules<FlatTabAreaStyle>;
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         super.extraNodeAttributes(attr);
         attr.addClass(this.styleSheet.nav);
     }

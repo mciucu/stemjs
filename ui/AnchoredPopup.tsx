@@ -81,7 +81,7 @@ export class AnchoredPopup extends UIElement<AnchoredPopupOptions> {
         return this.lastShownModal as InstanceType<T>;
     }
 
-    getDefaultOptions(options?): Record<string, any> | undefined {
+    getDefaultOptions(options?: typeof this.options): Record<string, any> | undefined {
         return {
             ...super.getDefaultOptions(options),
             anchor: null,

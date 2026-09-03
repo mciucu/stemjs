@@ -1,6 +1,6 @@
 // TODO: This class is incomplete for horizontal orientation and more than 2 panels.
 
-import {type ElementOptions, UI, UIElement, type UIChild} from "../UIBase";
+import {type ElementOptions, UI, UIElement, type UIChild, type NodeAttributes} from "../UIBase";
 import {registerStyle} from "../style/Theme";
 import {unwrapArray} from "../../base/Utils";
 import {DividerBar, SectionDivider, type SectionDividerOptions, type SectionDividerPanelOptions} from "./SectionDivider";
@@ -70,7 +70,7 @@ class BarCollapsePanel extends UI.Element<BarCollapsePanelOptions> {
     declare collapsed?: boolean;
     declare collapsedBarTitle?: UIElement;
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         const panelChild = this.getGivenChildren()[0];
         attr.addClass(this.styleSheet.barCollapsePanel);
         let panelSize = panelChild.options.size;
@@ -166,7 +166,7 @@ export class TitledSectionDivider extends SectionDivider<TitledSectionDividerOpt
         }
     }
 
-    collapseChild(index) {
+    collapseChild(index: number) {
         if (this.clearListeners) {
             this.clearListeners();
         }
@@ -203,7 +203,7 @@ export class TitledSectionDivider extends SectionDivider<TitledSectionDividerOpt
         }, this.styleSheet.transitionTime * 1000);
     }
 
-    expandChild(index) {
+    expandChild(index: number) {
         this.removeClass(this.styleSheet.paddingRemoved);
         this.addClass(this.styleSheet.animatedSectionDivider);
 

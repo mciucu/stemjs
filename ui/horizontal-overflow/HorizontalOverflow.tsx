@@ -1,4 +1,4 @@
-import {BaseUIElement, UI, UIElement} from "../UIBase";
+import {BaseUIElement, UI, UIElement, type NodeAttributes} from "../UIBase";
 import {FAIcon} from "../FontAwesome";
 import {registerStyle} from "../style/Theme";
 import {HorizontalOverflowStyle} from "./Style";
@@ -24,7 +24,7 @@ export class HorizontalOverflow extends UI.Element<HorizontalOverflowOptions> {
         }
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         super.extraNodeAttributes(attr);
         attr.addClass(this.styleSheet.horizontalOverflow);
     }

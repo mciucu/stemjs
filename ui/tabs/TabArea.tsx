@@ -1,4 +1,4 @@
-import {type ExtendedOptions, UI, UIElement, type PartialOptions, type UIChild} from "../UIBase";
+import {type BaseUIElement, type ExtendedOptions, UI, UIElement, type PartialOptions, type UIChild, type NodeAttributes} from "../UIBase";
 import {Switcher} from "../Switcher";
 import {Link} from "../primitives/Link";
 import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
@@ -17,7 +17,7 @@ interface BasicTabTitleOptions {
 class BasicTabTitle extends Link {
     declare options: ExtendedOptions<Link, BasicTabTitleOptions>;
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         // The sheet a tab title renders with is the TabArea's, passed down through options
         const styleSheet = this.styleSheet as unknown as StyleRules<DefaultTabAreaStyle>;
         attr.addClass(styleSheet.tab);
@@ -32,12 +32,12 @@ class BasicTabTitle extends Link {
         }
     }
 
-    canOverwrite(existingElement) {
+    canOverwrite(existingElement: BaseUIElement & {options?: {panel?: UIElement}}) {
         // Disable reusing with different panels, since we want to attach listeners to the panel
         return super.canOverwrite(existingElement) && this.options.panel === existingElement.options.panel;
     }
 
-    setActive(active) {
+    setActive(active: boolean) {
         this.options.active = active;
         this.redraw();
         if (active) {
@@ -109,11 +109,11 @@ class TabArea extends UI.Element<TabAreaOptions> {
         }
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         attr.addClass(this.styleSheet.tabArea);
     }
 
-    createTabPanel(panel) {
+    createTabPanel(panel: UIElement) {
         let tab = <BasicTabTitle panel={panel} activeTabDispatcher={this.activeTabDispatcher}
                                  active={panel.options.active} href={panel.options.tabHref}
                                  styleSheet={this.styleSheet} />;
@@ -121,7 +121,7 @@ class TabArea extends UI.Element<TabAreaOptions> {
         return [tab, panel];
     }
 
-    appendChild(panel, doMount?) {
+    appendChild(panel: UIElement, doMount?: boolean) {
         let [tabTitle, tabPanel] = this.createTabPanel(panel);
 
         (this.options.children as UIElement[]).push(panel);
@@ -131,7 +131,7 @@ class TabArea extends UI.Element<TabAreaOptions> {
         return panel;
     }
 
-    getTitleArea(tabTitles) {
+    getTitleArea(tabTitles: UIElement[]) {
         let titleAreaClass = this.styleSheet.nav;
         if (this.options.titleAreaClass) {
             titleAreaClass += " " + this.options.titleAreaClass;
@@ -141,7 +141,7 @@ class TabArea extends UI.Element<TabAreaOptions> {
         </TabTitleArea>;
     }
 
-    getSwitcher(tabPanels) {
+    getSwitcher(tabPanels: UIElement[]) {
         let switcherClass = this.styleSheet.switcher;
         if (this.options.panelClass) {
             switcherClass += " " + this.options.panelClass;
@@ -212,7 +212,7 @@ class TabArea extends UI.Element<TabAreaOptions> {
         ];
     }
 
-    setActive(panel) {
+    setActive(panel: UIElement) {
         this.activeTabDispatcher.setActive(panel);
     }
 
@@ -220,13 +220,13 @@ class TabArea extends UI.Element<TabAreaOptions> {
         return this.activeTabDispatcher.getActive();
     }
 
-    onSetActive(panel) {
+    onSetActive(panel: UIElement) {
         this.switcher.setActive(panel);
         this.activePanel = panel;
     }
 
     onMount() {
-        this.attachListener(this.activeTabDispatcher, (panel) => {
+        this.attachListener(this.activeTabDispatcher, (panel: UIElement) => {
             this.onSetActive(panel);
         });
 

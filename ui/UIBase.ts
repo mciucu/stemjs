@@ -9,6 +9,7 @@ import {
 } from "../base/Utils";
 import {CleanupJobs, Dispatchable, OncePerTickRunner, type RemoveHandle} from "../base/Dispatcher";
 import {DOMAttributesMap, NodeAttributes} from "./NodeAttributes";
+export type {NodeAttributes};
 import {Theme, type ThemeProps} from "./style/Theme";
 import {type StyleSheet} from "./Style";
 
@@ -378,6 +379,7 @@ export class UIElement<
         return (this.options?.nodeType || "div") as TagType;
     }
 
+    // Constructs directly rather than through createElement, so what it takes is the cleaned form already
     static create<T extends UIElement<any>>(this: new (options?: PartialOptions<T>) => T, parentNode: UIElement | HTMLElement, options?: PartialOptions<T>): T {
         const uiElement = new this(options);
         uiElement.mount(parentNode, null);

@@ -1,4 +1,4 @@
-import {type ElementOptions, UI, UIElement, type UICleanChild} from "../UIBase";
+import {type ElementOptions, UI, UIElement, type UICleanChild, type NodeAttributes} from "../UIBase";
 import {type StyleRules} from "../Style";
 import {NavStyle} from "./NavStyle";
 import {Switcher} from "../Switcher";
@@ -64,7 +64,7 @@ const NavElementInterface = <TBase extends Constructor<OrientedElement>>(BaseCla
         this.isToggled = this.getToggledState();
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         super.extraNodeAttributes(attr);
         if (this.getOrientation() === Orientation.HORIZONTAL) {
             // it is in the navbar
@@ -216,7 +216,7 @@ const NavElementInterface = <TBase extends Constructor<OrientedElement>>(BaseCla
 
 const NavElement = NavElementInterface(UI.Primitive("li", BasicOrientedElement));
 class NavLinkElement extends NavElementInterface(BasicOrientedLinkElement) {
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         super.extraNodeAttributes(attr);
         attr.addClass(this.styleSheet.navLinkElement);
     }
@@ -236,7 +236,7 @@ class NavSection extends UI.Primitive("ul")<NavSectionOptions> {
         return (this.options.styleSheet || (this.parent as OrientedElement).styleSheet) as StyleRules<NavStyle>;
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         if (this.getOrientation() === Orientation.HORIZONTAL) {
             // it is in the navbar
             attr.addClass(this.styleSheet.navSectionHorizontal);
@@ -263,7 +263,7 @@ class NavAnchoredNotifications extends NavSection {
     declare activeChild?: any;
     declare bodyListener?: any;
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         super.extraNodeAttributes(attr);
         attr.setStyle({
             position: "relative",

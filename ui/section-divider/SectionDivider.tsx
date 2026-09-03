@@ -2,7 +2,7 @@
 import {Device} from "../../base/Device";
 import {unwrapArray} from "../../base/Utils";
 import {Divider} from "./Divider";
-import {type ElementOptions, UI, UIElement} from "../UIBase";
+import {type ElementOptions, UI, UIElement, type NodeAttributes} from "../UIBase";
 import {registerStyle} from "../style/Theme";
 import {SectionDividerStyle} from "./Style";
 import {Orientation, type OrientationType} from "../Constants";
@@ -31,7 +31,7 @@ export class DividerBar extends Divider<DividerBarOptions> {
         document.body.classList.remove(this.styleSheet.noTextSelection);
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         super.extraNodeAttributes(attr);
         if (this.options.orientation === Orientation.VERTICAL) {
             attr.addClass(this.styleSheet.verticalDivider);
@@ -77,7 +77,7 @@ export class SectionDivider<ExtraOptions extends SectionDividerOptions = Section
         }, super.getDefaultOptions())
     }
 
-    constructor(options) {
+    constructor(options: SectionDivider<ExtraOptions>["options"]) {
         super(options);
         this.uncollapsedSizes = new WeakMap();
     }
@@ -86,7 +86,7 @@ export class SectionDivider<ExtraOptions extends SectionDividerOptions = Section
         return DividerBar;
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         if (this.getOrientation() === Orientation.VERTICAL) {
             attr.addClass(this.styleSheet.verticalSection);
         } else {
@@ -98,7 +98,7 @@ export class SectionDivider<ExtraOptions extends SectionDividerOptions = Section
         return this.options.orientation || Orientation.VERTICAL;
     }
 
-    getDimension(element) {
+    getDimension(element: UIElement) {
         if (this.getOrientation() === Orientation.HORIZONTAL) {
             return element.getWidth();
         } else {
@@ -106,7 +106,7 @@ export class SectionDivider<ExtraOptions extends SectionDividerOptions = Section
         }
     }
 
-    setDimension(element, size) {
+    setDimension(element: UIElement, size: number | string) {
         if (this.getOrientation() === Orientation.HORIZONTAL) {
             element.setWidth(size);
         } else {
@@ -124,7 +124,7 @@ export class SectionDivider<ExtraOptions extends SectionDividerOptions = Section
         }
     }
 
-    getHiddenDivider(index) {
+    getHiddenDivider(index: number) {
         let divider;
         for (let i = index; i < this.panels.length - 1; i += 1) {
             if (this.dividers[i].hasClass("hidden")) {
@@ -150,7 +150,7 @@ export class SectionDivider<ExtraOptions extends SectionDividerOptions = Section
         return null;
     }
 
-    getVisibleDivider(index) {
+    getVisibleDivider(index: number) {
         for (let i = index; i < this.panels.length - 1; i += 1) {
             if (!this.dividers[i].hasClass("hidden")) {
                 return this.dividers[i];
@@ -164,7 +164,7 @@ export class SectionDivider<ExtraOptions extends SectionDividerOptions = Section
         return null;
     }
 
-    collapseChild(index) {
+    collapseChild(index: number) {
         let parentSize = this.getDimension(this);
         let child = this.panels[index];
         let childSize = this.getDimension(child);
@@ -195,7 +195,7 @@ export class SectionDivider<ExtraOptions extends SectionDividerOptions = Section
         this.recalculateDimensions();
     }
 
-    expandChild(index) {
+    expandChild(index: number) {
         let parentSize = this.getDimension(this);
         let child = this.panels[index];
 
@@ -225,11 +225,11 @@ export class SectionDivider<ExtraOptions extends SectionDividerOptions = Section
         this.recalculateDimensions();
     }
 
-    isCollapsed(child) {
+    isCollapsed(child: UIElement) {
         return !this.getDimension(child);
     }
 
-    toggleChild(index) {
+    toggleChild(index: number) {
         if (this.isCollapsed(this.panels[index])) {
             this.expandChild(index);
         } else {
@@ -259,7 +259,7 @@ export class SectionDivider<ExtraOptions extends SectionDividerOptions = Section
         }
     }
 
-    getPreviousUnfixedChild(index) {
+    getPreviousUnfixedChild(index: number) {
         for (let i = index; i >= 0 ; i -= 1) {
             let panel = this.panels[i];
             if (!panel.hasClass("hidden") && !panel.options.fixed) {
@@ -269,7 +269,7 @@ export class SectionDivider<ExtraOptions extends SectionDividerOptions = Section
         return null;
     }
 
-    getNextUnfixedChild(index) {
+    getNextUnfixedChild(index: number) {
         for (let i = index + 1; i < this.panels.length; i += 1) {
             let panel = this.panels[i];
             if (!panel.hasClass("hidden") && !panel.options.fixed) {

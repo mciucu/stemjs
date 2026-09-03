@@ -2,7 +2,7 @@ import {StoreObject, type StoreClass} from "../state/Store";
 import {PropertyCache} from "../data-structures/PropertyCache";
 import {BaseUIElement} from "../ui/UIBase";
 import {type Constructor} from "../base/Utils";
-import type {Dispatchable} from "../base/Dispatcher";
+import {type Dispatchable} from "../base/Dispatcher";
 
 type UIElementConstructor = Constructor<BaseUIElement>;
 type RedrawHandler = (event: any) => void;

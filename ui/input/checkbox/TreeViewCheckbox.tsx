@@ -130,7 +130,7 @@ export class TreeViewCheckbox<ExtraOptions = {}> extends UI.Element<TreeViewChec
         }
     }
 
-    setOptions(options) {
+    setOptions(options: typeof this.options) {
         super.setOptions(options);
         UpdateCheckedValues(options.entries); // Recalculate implicit checked values
     }

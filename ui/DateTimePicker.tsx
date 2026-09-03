@@ -12,7 +12,7 @@ interface DateTimePickerOptions {
 export class DateTimePicker extends UI.Element<DateTimePickerOptions> {
     declare textInput?: TextInput;
 
-    setOptions(options) {
+    setOptions(options: typeof this.options) {
         options.format = options.format || "DD/MM/YYYY HH:mm:ss";
         super.setOptions(options);
         if (this.options.date) {
@@ -20,7 +20,7 @@ export class DateTimePicker extends UI.Element<DateTimePickerOptions> {
         }
     }
 
-    parseDateFromString(str, format) {
+    parseDateFromString(str: string, format) {
         if (format !== "DD/MM/YYYY HH:mm:ss") {
             throw Error("Format not supported!");
         }

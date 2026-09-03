@@ -1,5 +1,5 @@
 import {Draggable} from "../Draggable";
-import {type ElementOptions, UI, UIElement} from "../UIBase";
+import {type ElementOptions, UI, UIElement, type NodeAttributes} from "../UIBase";
 import {ProgressBar} from "../ProgressBar";
 import {Orientation} from "../Constants";
 import {Device} from "../../base/Device";
@@ -11,8 +11,6 @@ interface SlideBarOptions {
     // What the subclasses normalize height/width into
     size?: number;
     barSize?: number;
-    // The alias a caller may write instead, normalized into barSize
-    barWidth?: number;
 }
 
 export class SlideBar<ExtraOptions = {}> extends Draggable(UIElement) {
@@ -24,7 +22,7 @@ export class SlideBar<ExtraOptions = {}> extends Draggable(UIElement) {
         };
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         attr.setStyle("display", "inline-block");
         attr.setStyle("position", "relative");
         attr.setStyle("cursor", "pointer");
@@ -50,7 +48,7 @@ export class SlideBar<ExtraOptions = {}> extends Draggable(UIElement) {
         ];
     }
 
-    setValue(value) {
+    setValue(value: number) {
         value = Math.max(value, 0);
         value = Math.min(value, 1);
 
@@ -70,8 +68,14 @@ export class SlideBar<ExtraOptions = {}> extends Draggable(UIElement) {
     }
 }
 
-export class HorizontalSlideBar extends SlideBar {
-    setOptions(options) {
+// The aliases a caller may write instead, which setOptions normalizes into size and barSize
+interface HorizontalSlideBarOptions {
+    width?: number;
+    barWidth?: number;
+}
+
+export class HorizontalSlideBar extends SlideBar<HorizontalSlideBarOptions> {
+    setOptions(options: typeof this.options) {
         options.size = options.size || options.width || 100;
         options.barSize = options.barSize || options.barWidth || 5;
         super.setOptions(options);
@@ -114,13 +118,14 @@ export class HorizontalSlideBar extends SlideBar {
     }
 }
 
+// Same for the vertical one
 interface VerticalSlideBarOptions {
     height?: number;
     barHeight?: number;
 }
 
 export class VerticalSlideBar extends SlideBar<VerticalSlideBarOptions> {
-    setOptions(options) {
+    setOptions(options: typeof this.options) {
         options.size = options.size || options.height || 100;
         options.barSize = options.barSize || options.barHeight || 5;
         super.setOptions(options);

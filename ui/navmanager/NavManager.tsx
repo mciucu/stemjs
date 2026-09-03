@@ -1,4 +1,4 @@
-import {type ElementOptions, UI, UIElement} from "../UIBase";
+import {type ElementOptions, UI, UIElement, type NodeAttributes} from "../UIBase";
 import {changeParent} from "../Utils";
 import {registerStyle} from "../style/Theme";
 import {NavStyle} from "./NavStyle";
@@ -21,7 +21,7 @@ class SidePanelGroup extends UI.Element<SidePanelGroupOptions> {
         return this.options.styleSheet || (this.parent as any)?.styleSheet;
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         attr.addClass(this.styleSheet.sidePanelGroup);
         if (this.options.anchor === Direction.RIGHT) {
             attr.setStyle("right", 0);
@@ -72,7 +72,7 @@ class SidePanel extends UI.Element<SidePanelOptions> {
         }
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         if (this.options.anchor === Direction.RIGHT) {
             attr.addClass(this.styleSheet.rightSidePanel);
             attr.setStyle("right", "0");
@@ -81,7 +81,7 @@ class SidePanel extends UI.Element<SidePanelOptions> {
         }
     }
 
-    setVisible(value) {
+    setVisible(value: boolean) {
         this.visible = value;
         if (this.storageSerializer) {
             this.storageSerializer.set("visible", value);
@@ -222,7 +222,7 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
         return [];
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         attr.addClass(this.styleSheet.navManager);
     }
 

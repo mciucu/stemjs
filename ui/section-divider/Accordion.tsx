@@ -1,4 +1,5 @@
 import {UI, UIElement, cleanChildren} from "../UIBase";
+import {type NodeAttributes} from "../NodeAttributes";
 import {registerStyle} from "../style/Theme";
 import {getComputedStyle} from "../Utils";
 import {unwrapArray} from "../../base/Utils";
@@ -21,7 +22,7 @@ class AccordionDivider extends Divider {
         this.removeClass(this.styleSheet.grabbing);
     }
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         super.extraNodeAttributes(attr);
         attr.addClass(this.styleSheet.grab);
     }
@@ -30,7 +31,7 @@ class AccordionDivider extends Divider {
         return [<FACollapseIcon ref="collapseIcon" collapsed={false} className={this.styleSheet.collapseIcon}/>, this.options.children];
     }
 
-    setCollapsed(value) {
+    setCollapsed(value: boolean) {
         this.collapseIcon.setCollapsed(value);
     }
 
@@ -46,7 +47,7 @@ class Accordion extends UI.Element {
     declare panels: UIElement[];
     declare dividers: AccordionDivider[];
 
-    extraNodeAttributes(attr) {
+    extraNodeAttributes(attr: NodeAttributes) {
         attr.addClass(this.styleSheet.accordion);
     }
 
@@ -65,7 +66,7 @@ class Accordion extends UI.Element {
         return children;
     }
 
-    getNextVisibleChild(index) {
+    getNextVisibleChild(index: number) {
         for (let i = index; i < this.panels.length; i += 1) {
             if (!this.panels[i].hasClass("hidden")) {
                 return this.panels[i];
@@ -74,7 +75,7 @@ class Accordion extends UI.Element {
         return null;
     }
 
-    getPreviousVisibleChild(index) {
+    getPreviousVisibleChild(index: number) {
         for (let i = index - 1; i >= 0; i -= 1) {
             if (!this.panels[i].hasClass("hidden")) {
                 return this.panels[i];
