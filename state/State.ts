@@ -114,16 +114,6 @@ export class State extends Dispatchable {
         console.error("Websockets are not enabled, can't register stream:", streamName);
     }
 
-    get(objectType: string, id: StoreId): any {
-        const store = this.getStore(objectType);
-        if (store) {
-            return store.get(id);
-        } else {
-            console.error("GlobalState: Can't find store ", objectType);
-            return null;
-        }
-    }
-
     // Import the store for objectType and remove it from stateMap
     importStateFromTempMap(objectType: string, stateMap: Map<string, any[]>): void {
         const storeState = stateMap.get(objectType);
