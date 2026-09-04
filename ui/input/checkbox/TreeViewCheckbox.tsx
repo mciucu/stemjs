@@ -166,7 +166,7 @@ export class TreeViewCheckbox<ExtraOptions = {}> extends UI.Element<TreeViewChec
             onChange={() => {
                 // Update the parent when a child's state changes
                 entry.checked = CalcChecked(entry.children);
-                this.updateOptions(entry);
+                this.redraw();
                 this.dispatchChange(this.getValue());
             }}
             ref="subTree"

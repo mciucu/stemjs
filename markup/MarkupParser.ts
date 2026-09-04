@@ -65,13 +65,13 @@ export class StringStream {
     }
 
     char(): string {
-        let ch = this.string.charAt(this.pointer);
+        const ch = this.string.charAt(this.pointer);
         this.pointer += 1;
         return ch;
     }
 
     whitespace(whitespaceChar: RegExp = /\s/): string {
-        let whitespaceStart = this.pointer;
+        const whitespaceStart = this.pointer;
 
         while (!this.done() && whitespaceChar.test(this.at(0))) {
             this.pointer += 1;
@@ -87,7 +87,7 @@ export class StringStream {
             this.whitespace();
         }
 
-        let wordStart = this.pointer;
+        const wordStart = this.pointer;
         while (!this.done() && validChars.test(this.at(0))) {
             this.pointer += 1;
         }
@@ -99,7 +99,7 @@ export class StringStream {
             this.whitespace();
         }
 
-        let nanString = "NaN";
+        const nanString = "NaN";
         if (this.startsWith(nanString)) {
             this.advance(nanString.length);
             return NaN;
@@ -110,13 +110,13 @@ export class StringStream {
             sign = this.char();
         }
 
-        let infinityString = "Infinity";
+        const infinityString = "Infinity";
         if (this.startsWith(infinityString)) {
             this.advance(infinityString.length);
             return sign === "+" ? Infinity : -Infinity;
         }
 
-        let isDigit = (char: string) => {
+        const isDigit = (char: string) => {
             return (char >= "0" || char <= "9");
         };
 
@@ -124,11 +124,11 @@ export class StringStream {
             // hexadecimal number
             this.advance(2);
 
-            let isHexDigit = (char: string) => {
+            const isHexDigit = (char: string) => {
                 return isDigit(char) || (char >= "A" && char <= "F") ||(char >= "a" && char <= "f");
             };
 
-            let numberStart = this.pointer;
+            const numberStart = this.pointer;
             while (!this.done() && isHexDigit(this.at(0))) {
                 this.pointer += 1;
             }
@@ -136,7 +136,7 @@ export class StringStream {
             return parseInt(sign + this.string.substring(numberStart), 16);
         }
 
-        let numberStart = this.pointer;
+        const numberStart = this.pointer;
         while (!this.done() && isDigit(this.at(1))) {
             this.pointer += 1;
             if (this.peek() === ".") {
@@ -154,10 +154,11 @@ export class StringStream {
     line(delimiter: RegExp | string = /\r*\n/, maxLength: number = Infinity): string {
         if (delimiter instanceof RegExp) {
             // Treat regex differently. It will probably be slower.
-            let str = this.string.substring(this.pointer);
-            let delimiterMatch = str.match(delimiter);
+            const str = this.string.substring(this.pointer);
+            const delimiterMatch = str.match(delimiter);
 
-            let delimiterIndex, delimiterLength;
+            let delimiterIndex;
+            let delimiterLength;
             if (delimiterMatch === null) {
                 // End of string encountered
                 delimiterIndex = str.length;
@@ -183,12 +184,12 @@ export class StringStream {
         }
 
         if (delimiterIndex - this.pointer > maxLength) {
-            let result = this.string.substring(this.pointer, this.pointer + maxLength);
+            const result = this.string.substring(this.pointer, this.pointer + maxLength);
             this.advance(maxLength);
             return result;
         }
 
-        let result = this.string.substring(this.pointer, delimiterIndex);
+        const result = this.string.substring(this.pointer, delimiterIndex);
         this.pointer = delimiterIndex + delimiter.length;
         return result;
     }
@@ -207,7 +208,7 @@ export class StringStream {
     startsWith(prefix: string | RegExp): boolean {
         if (prefix instanceof RegExp) {
             // we modify the regex to only check for the beginning of the string
-            let regexPrefix = new RegExp("^" + prefix.toString().slice(1, -1));
+            const regexPrefix = new RegExp("^" + prefix.toString().slice(1, -1));
             return regexPrefix.test(this.string.substring(this.pointer));
         }
         return this.peek(prefix.length) === prefix;
@@ -225,7 +226,7 @@ export class StringStream {
     }
 
     clone(): StringStream {
-        let newStream = new StringStream(this.string);
+        const newStream = new StringStream(this.string);
         newStream.pointer = this.pointer;
         return newStream;
     }
@@ -236,7 +237,7 @@ function kmp(input: string): number[] {
         return [];
     }
 
-    let prefix = [0];
+    const prefix = [0];
     let prefixLength = 0;
 
     for (let i = 1; i < input.length; i += 1) {
@@ -275,17 +276,17 @@ class ModifierAutomation {
         let lastNode = this.startNode;
 
         let char = options.pattern.charAt(0);
-        let startPatternNode: AutomatonNode = {
+        const startPatternNode: AutomatonNode = {
             value: char,
             startNode: true,
         };
 
-        let patternPrefix = kmp(options.pattern);
-        let patternNode = [startPatternNode];
+        const patternPrefix = kmp(options.pattern);
+        const patternNode = [startPatternNode];
 
         if (options.leftWhitespace) {
             // We don't want to match if the first char is not preceeded by whitespace
-            let whitespaceNode: AutomatonNode = {
+            const whitespaceNode: AutomatonNode = {
                 value: " ",
                 whitespaceNode: true,
             };
@@ -306,12 +307,12 @@ class ModifierAutomation {
 
         for (let i = 1; i < options.pattern.length; i += 1) {
             let char = options.pattern[i];
-            let newNode: AutomatonNode = {
+            const newNode: AutomatonNode = {
                 value: char,
             };
             patternNode.push(newNode);
 
-            let backNode = (patternPrefix[i - 1] === 0) ? this.startNode : patternNode[patternPrefix[i - 1] - 1];
+            const backNode = (patternPrefix[i - 1] === 0) ? this.startNode : patternNode[patternPrefix[i - 1] - 1];
 
             lastNode.next = (input: string) => {
                 if (input === char) {
@@ -326,19 +327,19 @@ class ModifierAutomation {
 
         if (options.captureContent) {
             this.capture = [];
-            let captureNode: AutomatonNode = {
+            const captureNode: AutomatonNode = {
                 value: "",
                 captureNode: true,
             };
 
             // We treat the first character separately in order to support empty capture
             let char = options.endPattern.charAt(0);
-            let endCaptureNode: AutomatonNode = {
+            const endCaptureNode: AutomatonNode = {
                 value: char
             };
 
-            let endPatternPrefix = kmp(options.endPattern);
-            let endPatternNodes = [endCaptureNode];
+            const endPatternPrefix = kmp(options.endPattern);
+            const endPatternNodes = [endCaptureNode];
 
             lastNode.next = captureNode.next = (input: string) => {
                 return input === char ? endCaptureNode : captureNode;
@@ -347,12 +348,12 @@ class ModifierAutomation {
             lastNode = endCaptureNode;
             for (let i = 1; i < options.endPattern.length; i += 1) {
                 let char = options.endPattern[i];
-                let newNode: AutomatonNode = {
+                const newNode: AutomatonNode = {
                     value: char,
                 };
                 endPatternNodes.push(newNode);
 
-                let backNode = (endPatternPrefix[i - 1] === 0) ? captureNode : endPatternNodes[endPatternPrefix[i - 1] - 1];
+                const backNode = (endPatternPrefix[i - 1] === 0) ? captureNode : endPatternNodes[endPatternPrefix[i - 1] - 1];
 
                 lastNode.next = (input: string) => {
                     if (input === char) {
@@ -419,7 +420,7 @@ class Modifier<Content = (string | MarkupElement)[]> {
     }
 
     modify(currentArray: ParsedElement[], originalString: string): ParsedElement[] {
-        let matcher = new ModifierAutomation({
+        const matcher = new ModifierAutomation({
             pattern: this.pattern,
             captureContent: this.captureContent, // TODO: some elements should not wrap
             endPattern: this.endPattern,
@@ -428,7 +429,7 @@ class Modifier<Content = (string | MarkupElement)[]> {
 
         let arrayLocation = 0;
         let currentElement = currentArray[arrayLocation];
-        let newArray: ParsedElement[] = [];
+        const newArray: ParsedElement[] = [];
 
         for (let i = 0; i < originalString.length; i += 1) {
             let char = originalString[i];
@@ -448,19 +449,19 @@ class Modifier<Content = (string | MarkupElement)[]> {
             matcher.nextState(char);
 
             if (matcher.done()) {
-                let modifierStart = i - (matcher.steps - matcher.patternStep);
-                let modifierEnd = i - (matcher.steps - matcher.endPatternStep) + this.endPattern.length;
+                const modifierStart = i - (matcher.steps - matcher.patternStep);
+                const modifierEnd = i - (matcher.steps - matcher.endPatternStep) + this.endPattern.length;
 
-                let modifierCapture: ParsedElement[] = [];
+                const modifierCapture: ParsedElement[] = [];
 
                 while (newArray.length > 0 && modifierStart <= newArray[newArray.length - 1].start) {
-                    let element = newArray.pop();
+                    const element = newArray.pop();
 
                     modifierCapture.push(element);
                 }
 
                 if (newArray.length > 0 && modifierStart < newArray[newArray.length - 1].end) {
-                    let element = newArray.pop();
+                    const element = newArray.pop();
                     newArray.push({
                         isString: true,
                         start: element.start,
@@ -571,15 +572,16 @@ function LineStartModifierMixin<T extends new (...args: any[]) => Modifier>(Base
         }
 
         modify(currentArray: ParsedElement[], originalString: string): ParsedElement[] {
-            let newArray: ParsedElement[] = [];
+            const newArray: ParsedElement[] = [];
 
             for (let i = 0; i < currentArray.length; i += 1) {
-                let element = currentArray[i];
+                const element = currentArray[i];
                 if (this.isValidElement(element)) {
                     if (this.groupConsecutive) {
-                        let elements = [];
+                        const elements = [];
 
-                        let start, end;
+                        let start;
+                        let end;
                         start = currentArray[i].start;
                         while (i < currentArray.length) {
                             const item = currentArray[i];
@@ -615,10 +617,10 @@ function LineStartModifierMixin<T extends new (...args: any[]) => Modifier>(Base
         }
 
         wrapItem(content: (string | MarkupElement)[]): MarkupElement {
-            let firstChild = content[0] as string;
+            const firstChild = content[0] as string;
 
-            let patternIndex = firstChild.indexOf(this.pattern!);
-            let patternEnd = patternIndex + this.pattern!.length;
+            const patternIndex = firstChild.indexOf(this.pattern!);
+            const patternEnd = patternIndex + this.pattern!.length;
 
             content[0] = firstChild.substring(patternEnd);
 
@@ -669,13 +671,13 @@ export class BlockCodeModifier extends Modifier<string> {
             codeBlock = codeBlock.substring(codeBlock.indexOf(this.pattern) + this.pattern.length);
             codeBlock = codeBlock.substring(0, codeBlock.lastIndexOf(this.endPattern));
 
-            let firstLineEnd = codeBlock.indexOf("\n") + 1;
-            let firstLine = codeBlock.substring(0, firstLineEnd).trim();
+            const firstLineEnd = codeBlock.indexOf("\n") + 1;
+            const firstLine = codeBlock.substring(0, firstLineEnd).trim();
             codeBlock = codeBlock.substring(firstLineEnd);
 
             if (firstLine.length > 0) {
                 this.codeOptions = {};
-                let lineStream = new StringStream(firstLine);
+                const lineStream = new StringStream(firstLine);
                 this.codeOptions.aceMode = lineStream.word();
 
                 Object.assign(this.codeOptions, MarkupParser.parseOptions(lineStream));
@@ -718,13 +720,13 @@ class HeaderModifier extends LineStartModifierMixin(Modifier) {
     }
 
     wrap(content: (string | MarkupElement)[]): MarkupElement {
-        let firstChild = content[0];
+        const firstChild = content[0];
 
-        let hashtagIndex = firstChild.indexOf("#");
+        const hashtagIndex = firstChild.indexOf("#");
         let hashtagEnd = hashtagIndex + 1;
         let headerLevel = 1;
 
-        let nextChar = firstChild.charAt(hashtagEnd);
+        const nextChar = firstChild.charAt(hashtagEnd);
         if (nextChar >= "1" && nextChar <= "6") {
             headerLevel = parseInt(nextChar);
             hashtagEnd += 1;
@@ -781,7 +783,7 @@ class OrderedListModifier extends LineStartModifierMixin(Modifier) {
 
 class ParagraphModifier extends Modifier {
     modify(currentArray: ParsedElement[], originalString: string): ParsedElement[] {
-        let newArray: ParsedElement[] = [];
+        const newArray: ParsedElement[] = [];
         let capturedContent: ParsedElement[] = [];
         let arrayLocation = 0;
         let currentElement = currentArray[arrayLocation];
@@ -816,7 +818,8 @@ class ParagraphModifier extends Modifier {
                 lineStart = i + 1;
 
                 if (originalString[i + 1] === "\n") {
-                    let start, end;
+                    let start;
+                    let end;
                     start = i;
 
                     while (i + 1 < originalString.length && originalString[i + 1] === "\n") {
@@ -947,13 +950,13 @@ class LinkModifier extends Modifier {
     }
 
     modify(currentArray: ParsedElement[], originalString: string): ParsedElement[] {
-        let newArray: ParsedElement[] = [];
+        const newArray: ParsedElement[] = [];
         let arrayLocation = 0;
         let currentElement = currentArray[arrayLocation];
         let lineStart = 0;
 
-        let checkAndAddUrl = (start: number, end: number) => {
-            let substr = originalString.substring(start, end);
+        const checkAndAddUrl = (start: number, end: number) => {
+            const substr = originalString.substring(start, end);
             if (this.constructor.isCorrectUrl(substr)) {
                 if (currentElement.start < start) {
                     newArray.push({
@@ -1009,7 +1012,7 @@ class LinkModifier extends Modifier {
     }
 }
 
-let MarkupModifier = Modifier;
+const MarkupModifier = Modifier;
 
 export {MarkupModifier, HeaderModifier, ParagraphModifier, InlineCodeModifier, InlineLatexModifier, StrongModifier, LinkModifier, HorizontalRuleModifier, UnorderedListModifier, OrderedListModifier, InlineVarModifier, ItalicModifier};
 
@@ -1030,12 +1033,12 @@ class MarkupParser {
     parse(content: string): (string | MarkupElement)[] {
         if (!content) return [];
 
-        let result: (string | MarkupElement)[] = [];
+        const result: (string | MarkupElement)[] = [];
 
         let arr = this.parseUIElements(content);
 
         for (let i = this.modifiers.length - 1; i >= 0; i -= 1) {
-            let modifier = this.modifiers[i];
+            const modifier = this.modifiers[i];
 
             arr = modifier.modify(arr, content);
         }
@@ -1053,9 +1056,9 @@ class MarkupParser {
     }
 
     parseUIElements(content: string): ParsedElement[] {
-        let stream = new StringStream(content);
+        const stream = new StringStream(content);
 
-        let result: ParsedElement[] = [];
+        const result: ParsedElement[] = [];
         let textStart = 0;
 
         while (!stream.done()) {
@@ -1063,7 +1066,7 @@ class MarkupParser {
 
             if (char === "<" && (/[a-zA-Z]/).test(stream.at(0))) {
                 stream.pointer -= 1; //step back to beginning of ui element
-                let elementStart = stream.pointer;
+                const elementStart = stream.pointer;
                 let uiElement;
                 try {
                     uiElement = this.parseUIElement(stream);
@@ -1114,7 +1117,7 @@ class MarkupParser {
             throw Error("Invalid UIElement declaration.");
         }
 
-        let result: any = {};
+        const result: any = {};
 
         stream.char(); // skip the '<'
 
@@ -1133,7 +1136,7 @@ class MarkupParser {
 
     // optionsEnd cannot include whitespace or start with '='
     static parseOptions(stream: StringStream, optionsEnd?: RegExp): any {
-        let options: any = {};
+        const options: any = {};
 
         stream.whitespace();
 
@@ -1141,7 +1144,7 @@ class MarkupParser {
             // argument name is anything that comes before whitespace or '='
             stream.whitespace();
 
-            let validOptionName = /[\w$]/;
+            const validOptionName = /[\w$]/;
             let optionName;
             if (validOptionName.test(stream.at(0))) {
                 optionName = stream.word(validOptionName);
@@ -1225,12 +1228,12 @@ class MarkupParser {
     }
 
     parseTextLine(stream: StringStream): any[] {
-        let lastModifier = new Map();
+        const lastModifier = new Map();
 
         let capturedContent: any[] = [];
 
         // This will always be set to the last closed modifier
-        let capturedEnd = -1;
+        const capturedEnd = -1;
 
         let textStart = stream.pointer;
         let contentStart = stream.pointer;
@@ -1247,8 +1250,8 @@ class MarkupParser {
                     start: contentStart,
                     end: stream.pointer
                 });
-                let uiElementStart = stream.pointer;
-                let uiElement = this.parseUIElement(stream, (/\/*>/));
+                const uiElementStart = stream.pointer;
+                const uiElement = this.parseUIElement(stream, (/\/*>/));
                 capturedContent.push({
                     content: uiElement,
                     start: uiElementStart,
@@ -1266,7 +1269,7 @@ class MarkupParser {
             }
         }
 
-        let remainingContent = stream.string.substring(textStart, stream.pointer);
+        const remainingContent = stream.string.substring(textStart, stream.pointer);
         if (remainingContent.length > 0) {
             capturedContent.push(remainingContent);
         }
@@ -1292,6 +1295,9 @@ MarkupParser.modifiers = [
 ];
 
 // The diagnostic fields Gecko adds to a JSON.parse error
+// Anything JSON5 can express, which is what each of the parser's value functions below answers with
+type JSON5Value = string | number | boolean | null | JSON5Value[] | {[key: string]: JSON5Value};
+
 interface JSON5SyntaxError extends SyntaxError {
     at?: number;
     lineNumber?: number;
@@ -1310,11 +1316,13 @@ MarkupParser.parseJSON5 = (function() {
     // We are defining the function inside of another function to avoid creating
     // global variables.
 
-    let at,           // The index of the current character
-        lineNumber,   // The current line number
-        columnNumber, // The current column number
-        ch;           // The current character
-    let escapee = {
+    let at: number;           // The index of the current character
+    let lineNumber: number;   // The current line number
+    let columnNumber: number; // The current column number
+    // Left untyped on purpose: next() reassigns it from a closure, which TypeScript's narrowing
+    // does not see, so a `string` here turns every `ch === "x"` after a comparison into a false error
+    let ch;
+    const escapee: Record<string, string> = {
         "'": "'",
         '"': '"',
         '\\': '\\',
@@ -1326,16 +1334,16 @@ MarkupParser.parseJSON5 = (function() {
         r: '\r',
         t: '\t'
     };
-    let text;
+    let text: string;
 
-    let renderChar = (chr) => {
+    const renderChar = (chr: string) => {
         return chr === '' ? 'EOF' : "'" + chr + "'";
     };
 
-    let error = (m) => {
+    const error = (m: string) => {
         // Call error when something is wrong.
 
-        let error: JSON5SyntaxError = new SyntaxError();
+        const error: JSON5SyntaxError = new SyntaxError();
         // beginning of message suffix to agree with that provided by Gecko - see https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse
         error.message = m + " at line " + lineNumber + " column " + columnNumber + " of the JSON5 data. Still to read: " + JSON.stringify(text.substring(at - 1, at + 19));
         error.at = at;
@@ -1346,7 +1354,7 @@ MarkupParser.parseJSON5 = (function() {
         throw error;
     };
 
-    let next = (c?) => {
+    const next = (c?: string) => {
         // If a c parameter is provided, verify that it matches the current character.
 
         if (c && c !== ch) {
@@ -1366,14 +1374,14 @@ MarkupParser.parseJSON5 = (function() {
         return ch;
     };
 
-    let peek = () => {
+    const peek = () => {
         // Get the next character without consuming it or
         // assigning it to the ch varaible.
 
         return text.charAt(at);
     };
 
-    let identifier = () => {
+    const identifier = () => {
         // Parse an identifier. Normally, reserved words are disallowed here, but we
         // only use this for unquoted object keys, where reserved words are allowed,
         // so we don't check for those here. References:
@@ -1402,9 +1410,12 @@ MarkupParser.parseJSON5 = (function() {
         return key;
     };
 
-    let number = () => {
+    const number = () => {
         // Parse a number value.
-        var number, sign = '', string = '', base = 10;
+        let number;
+        let sign = '';
+        let string = '';
+        let base = 10;
 
         if (ch === '-' || ch === '+') {
             sign = ch;
@@ -1490,8 +1501,11 @@ MarkupParser.parseJSON5 = (function() {
 
     let string = () => {
         // Parse a string value.
-        let hex, i, string = '', uffff;
-        let delim; // double quote or single quote
+        let hex: number;
+        let i: number;
+        let string = '';
+        let uffff: number;
+        let delim: string; // double quote or single quote
 
         // When parsing for string values, we must look for ' or " and \ characters.
 
@@ -1536,7 +1550,7 @@ MarkupParser.parseJSON5 = (function() {
         error("Bad string");
     };
 
-    let inlineComment = () => {
+    const inlineComment = () => {
         // Skip an inline comment, assuming this is one. The current character should
         // be the second / character in the // pair that begins this inline comment.
         // To finish the inline comment, we look for a newline or the end of the text.
@@ -1554,7 +1568,7 @@ MarkupParser.parseJSON5 = (function() {
         } while (ch);
     };
 
-    let blockComment = () => {
+    const blockComment = () => {
         // Skip a block comment, assuming this is one. The current character should be
         // the * character in the /* pair that begins this block comment.
         // To finish the block comment, we look for an ending */ pair of characters,
@@ -1578,7 +1592,7 @@ MarkupParser.parseJSON5 = (function() {
         error("Unterminated block comment");
     };
 
-    let comment = () => {
+    const comment = () => {
         // Skip a comment, whether inline or block-level, assuming this is one.
         // Comments always begin with a / character.
 
@@ -1597,7 +1611,7 @@ MarkupParser.parseJSON5 = (function() {
         }
     };
 
-    let white = () => {
+    const white = () => {
         // Skip whitespace and comments.
         // Note that we're detecting comments by only a single / character.
         // This works since regular expressions are not valid JSON(5), but this will
@@ -1614,7 +1628,7 @@ MarkupParser.parseJSON5 = (function() {
         }
     };
 
-    let word = () => {
+    const word = () => {
         // true, false, or null.
 
         switch (ch) {
@@ -1656,11 +1670,9 @@ MarkupParser.parseJSON5 = (function() {
         error("Unexpected " + renderChar(ch));
     };
 
-    let value;
-
-    let array = () => {
+    const array = () => {
         // Parse an array value.
-        let array = [];
+        const array: JSON5Value[] = [];
 
         if (ch === '[') {
             next('[');
@@ -1691,11 +1703,11 @@ MarkupParser.parseJSON5 = (function() {
         error("Bad array");
     };
 
-    let object = () => {
+    const object = () => {
         // Parse an object value.
 
-        var key,
-            object = {};
+        let key: string;
+        const object: {[key: string]: JSON5Value} = {};
 
         if (ch === '{') {
             next('{');
@@ -1731,7 +1743,7 @@ MarkupParser.parseJSON5 = (function() {
         error("Bad object");
     };
 
-    value = () => {
+    const value: () => JSON5Value = () => {
         // Parse a JSON value. It could be an object, an array, a string, a number,
         // or a word.
 
@@ -1756,8 +1768,8 @@ MarkupParser.parseJSON5 = (function() {
     // Return the json_parse function. It will have access to all of the above
     // functions and variables.
 
-    return function (source, reviver) {
-        var result;
+    return function (source: unknown, reviver?: (key: string, value: JSON5Value) => JSON5Value) {
+        let result;
 
         text = String(source);
         at = 0;
@@ -1777,7 +1789,9 @@ MarkupParser.parseJSON5 = (function() {
         // result.
 
         return typeof reviver === 'function' ? (function walk(holder, key) {
-            var k, v, value = holder[key];
+            let k;
+            let v;
+            const value = holder[key];
             if (value && typeof value === 'object') {
                 for (k in value) {
                     if (Object.prototype.hasOwnProperty.call(value, k)) {
@@ -1800,10 +1814,10 @@ export {MarkupParser};
 
 // TODO: these should be in a unit test file, not here
 export function TestStringStream() {
-    let tests = [];
+    const tests = [];
 
     tests.push(() => {
-        let ss = new StringStream("Ala bala    portocala");
+        const ss = new StringStream("Ala bala    portocala");
 
         let temp;
 
@@ -1829,7 +1843,7 @@ export function TestStringStream() {
     });
 
     tests.push(() => {
-        let ss = new StringStream("Ala bala    portocala");
+        const ss = new StringStream("Ala bala    portocala");
 
         let temp;
 
@@ -1850,7 +1864,7 @@ export function TestStringStream() {
     });
 
     tests.push(() => {
-        let ss = new StringStream("Buna bate toba\n Bunica bate tare\nBunica bate tobaaa \nCu maciuca-n casa mare!");
+        const ss = new StringStream("Buna bate toba\n Bunica bate tare\nBunica bate tobaaa \nCu maciuca-n casa mare!");
 
         let temp;
 
