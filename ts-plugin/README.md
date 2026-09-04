@@ -122,6 +122,15 @@ still resolves through the general signature, at `StoreObject` precision.
 The global scope is what makes this work across files: a store module can add to the registry without
 knowing any path back to stem. A class with type parameters, or a file that isn't a module, is skipped.
 
+A store's own `objectType` is typed from that set too, rather than a bare string, and so are its
+`dependencies` - the stores whose objects have to be loaded before its own, each written as either spelling
+the registry holds or as the store class itself. A name nothing registered reports against the ones that do:
+
+```ts
+export class ContestTask extends BaseStore("ContestTask", {dependencies: ["contst"]}) {}
+// Type '"contst"' is not assignable to type 'StoreDependency'. Did you mean '"Contest"'?
+```
+
 A store object's class is also its own store, which `obj.getStore()` returns. Each store gets a member of its
 own naming that class, which `OwnStore` reads it back off. It isn't `constructor`: every object inherits one
 of those as `Function`, so declaring the class there would stop `{isoCode: "EUR"}` being a `Partial<Currency>`.

@@ -2,7 +2,7 @@
 // it registers under is the first argument of whatever it extends, and is not always the class name.
 // A store object's class is also its own store, which getStore() hands back with the statics it declares.
 
-import {GlobalState} from "@stemjs/state/State";
+import {GlobalState, type StoreObjectType} from "@stemjs/state/State";
 import {BaseStore, globalStore, StoreObject} from "@stemjs/state/Store";
 
 @globalStore
@@ -76,6 +76,11 @@ export const unknownNarrowed: Planet[] = GlobalState.getStore("NotAStore")!.all(
 // The class name is not the key - "MoonObject" was never registered
 // @ts-expect-error
 export const wrongKey: MoonObject[] = GlobalState.getStore("MoonObject")!.all();
+
+// A store answers with the name it registered under, which is what the registry is keyed on
+export const planetType: StoreObjectType = Planet.objectType;
+// @ts-expect-error nothing registers this name
+export const notAType: StoreObjectType = "NotAStore";
 
 // The own store is the class itself, so it holds this store's objects and this store's statics
 const planet = Planet.get("earth")!;

@@ -2,7 +2,7 @@
 // expect-error directive below asserts that the implied types are real and not a blanket any.
 import {BaseStore, globalStore} from "@stemjs/state/Store";
 import {field} from "@stemjs/state/StoreField";
-import {StoreId} from "@stemjs/state/State";
+import {StoreId, type StoreObjectType} from "@stemjs/state/State";
 import {StemDate} from "@stemjs/time/Date";
 
 @globalStore
@@ -30,6 +30,14 @@ export class Reaction extends BaseStore("Reaction") {
     declare messageId: StoreId;
     @field(ChatMessage) message;
 }
+
+// A dependency is another store, as the name it registered under or as the class itself
+export class Mention extends BaseStore("Mention", {dependencies: ["chatmessage", MessageThread]}) {}
+// A name nothing registered is a typo, and reports as one
+// @ts-expect-error
+export class Mistyped extends BaseStore("Mistyped", {dependencies: ["ChatMesage"]}) {}
+// What a store answers with is the names, the classes among them resolved
+export const mentionDependencies: StoreObjectType[] = Mention.dependencies;
 
 const message = ChatMessage.get("msg-1")!;
 export const at: StemDate = message.createdAt;

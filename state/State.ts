@@ -27,11 +27,14 @@ declare global {
     interface StemStoreRegistry {}
 }
 
+// Every name a store is registered under, and so every name a lookup by name can find
+export type StoreObjectType = keyof StemStoreRegistry;
+
 // getStore() hands back the store class itself, so its statics are callable on the result. Each one below
 // mirrors what StoreObject declares, which is where the shapes are decided.
 export interface StoreInterface<BaseType extends StoreObject = StoreObject> {
-    objectType: string;
-    dependencies: string[];
+    objectType: StoreObjectType;
+    dependencies: StoreObjectType[];
     getState(): State;
     applyEvent(event: StateEvent): BaseType | undefined;
     get(id: StoreId): BaseType | undefined;

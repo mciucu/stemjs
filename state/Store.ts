@@ -1,12 +1,14 @@
-// TODO @Mihai this should become the new Store
 import {CleanupJobs, Dispatchable, type ListenerHandle} from "../base/Dispatcher";
-import {GlobalState, type RawStateData, State, type StateData, type StoreEvent, type StoreId, type StoreIdOrNull, type StoreInterface} from "./State";
+import {GlobalState, type RawStateData, State, type StateData, type StoreEvent, type StoreId, type StoreIdOrNull, type StoreInterface, type StoreObjectType} from "./State";
 import {isNotNull, isString, toArray} from "../base/Utils";
 import {type FieldDescriptor} from "./StoreField";
 
+// Another store, as the name it registered under or as the class itself
+export type StoreDependency = StoreObjectType | StoreClass<any>;
+
 export interface StoreOptions {
     state?: State;
-    dependencies?: (string | StoreClass<any>)[]; // Other stores that should have their objects loaded before this
+    dependencies?: StoreDependency[]; // Other stores that should have their objects loaded before this
 }
 
 // Shorthand type for static method this parameter
@@ -93,9 +95,9 @@ export class StoreObject extends Dispatchable {
     declare static dispatchChange: Dispatchable["dispatchChange"];
     declare static addListener: Dispatchable["addListener"];
 
-    static objectType: string;
+    static objectType: StoreObjectType;
     static state: State = GlobalState;
-    static dependencies: string[] = [];
+    static dependencies: StoreObjectType[] = [];
     // Not polymorphic - a static property is resolved where it is written. What a given store holds is said by
     // StoreClass<T>, which every static below takes as `this`. Naming the class here instead would cost an
     // emitted self-reference alias, so `typeof this` stays.

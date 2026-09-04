@@ -1,10 +1,10 @@
 import {State, type StoreEvent} from "./State";
-import {type StoreClass, StoreObject, type StoreOptions} from "./Store";
+import {type StoreDependency, StoreObject, type StoreOptions} from "./Store";
 
 export class SingletonStore<T extends SingletonStore<T> = any> extends StoreObject {
     objectType: string;
     state?: State;
-    dependencies?: (string | StoreClass<any>)[];
+    dependencies?: StoreDependency[];
 
     constructor(objectType: string, options: StoreOptions = {}) {
         super({});
