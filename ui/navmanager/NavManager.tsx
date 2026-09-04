@@ -1,4 +1,4 @@
-import {type ElementOptions, UI, UIElement, type NodeAttributes} from "../UIBase";
+import {type ElementOptions, type PartialOptions, UI, type UIChild, UIElement, type NodeAttributes} from "../UIBase";
 import {changeParent} from "../Utils";
 import {registerStyle} from "../style/Theme";
 import {NavStyle} from "./NavStyle";
@@ -48,8 +48,8 @@ class SidePanel extends UI.Element<SidePanelOptions> {
     declare storageSerializer?: SessionStorageMap;
     declare visible?: boolean;
 
-    constructor(...args) {
-        super(...args);
+    constructor(options: PartialOptions<SidePanel>) {
+        super(options);
         this.initNode();
         this.applyVisibility();
     }
@@ -206,19 +206,19 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
         this.initRightSidePanel();
     }
 
-    getLeftSidePanelChildren() {
+    getLeftSidePanelChildren(): UIChild[] {
         return [];
     }
 
-    getRightSidePanelChildren() {
+    getRightSidePanelChildren(): UIChild[] {
         return [];
     }
 
-    getLeftConditionedChildren() {
+    getLeftConditionedChildren(): UIChild[] {
         return [];
     }
 
-    getRightConditionedChildren() {
+    getRightConditionedChildren(): UIChild[] {
         return [];
     }
 
@@ -304,11 +304,11 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
         return this.wrappedToggler;
     }
 
-    getLeftFixed() {
+    getLeftFixed(): UIChild[] {
         return [];
     }
 
-    getRightFixed() {
+    getRightFixed(): UIChild[] {
         return [];
     }
 
@@ -344,7 +344,7 @@ class NavManager extends UI.Primitive("nav")<NavManagerOptions> {
         return this.rightConditioned;
     }
 
-    toggleSidePanel(mainPanel, toggleEvent) {
+    toggleSidePanel(mainPanel: SidePanel, toggleEvent: string) {
         let secondaryPanel = (mainPanel == this.leftSidePanel ? this.rightSidePanel : this.leftSidePanel);
         mainPanel.toggle();
         this.dispatch(toggleEvent, mainPanel.visible);

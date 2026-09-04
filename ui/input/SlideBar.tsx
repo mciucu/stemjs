@@ -98,7 +98,7 @@ export class HorizontalSlideBar extends SlideBar<HorizontalSlideBarOptions> {
         };
     }
 
-    getOrientationAttribute() {
+    getOrientationAttribute(): "left" {
         return "left";
     }
 
@@ -108,10 +108,10 @@ export class HorizontalSlideBar extends SlideBar<HorizontalSlideBarOptions> {
 
     getDragConfig() {
         return {
-            onStart: (event) => {
+            onStart: (event: MouseEvent | TouchEvent) => {
                 this.setValue((Device.getEventX(event) - getOffset(this.progressBar)[this.getOrientationAttribute()]) / this.options.size);
             },
-            onDrag: (deltaX, deltaY) => {
+            onDrag: (deltaX: number, deltaY: number) => {
                 this.setValue(this.options.value + deltaX / this.options.size);
             },
         };
@@ -148,7 +148,7 @@ export class VerticalSlideBar extends SlideBar<VerticalSlideBarOptions> {
         };
     }
 
-    getOrientationAttribute() {
+    getOrientationAttribute(): "top" {
         return "top";
     }
 
@@ -158,10 +158,10 @@ export class VerticalSlideBar extends SlideBar<VerticalSlideBarOptions> {
 
     getDragConfig() {
         return {
-            onStart: (event) => {
+            onStart: (event: MouseEvent | TouchEvent) => {
                 this.setValue((Device.getEventY(event) - getOffset(this.progressBar)[this.getOrientationAttribute()]) / this.options.size);
             },
-            onDrag: (deltaX, deltaY) => {
+            onDrag: (deltaX: number, deltaY: number) => {
                 this.setValue(this.options.value + deltaY / this.options.size);
             },
         };

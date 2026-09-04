@@ -12,12 +12,12 @@ import {Divider} from "./Divider";
 class AccordionDivider extends Divider {
     declare collapseIcon?: FACollapseIcon;
 
-    dragMousedown(event) {
+    dragMousedown(event: Event) {
         document.body.classList.add(this.styleSheet.noTextSelection);
         this.addClass(this.styleSheet.grabbing);
     }
 
-    dragMouseup(event) {
+    dragMouseup(event: Event) {
         document.body.classList.remove(this.styleSheet.noTextSelection);
         this.removeClass(this.styleSheet.grabbing);
     }
@@ -41,6 +41,12 @@ class AccordionDivider extends Divider {
     }
 }
 
+
+// What Divider dispatches on mousedown: itself, and the pointer event that started the drag
+interface DividerMousedownEvent {
+    divider: AccordionDivider;
+    domEvent: MouseEvent | TouchEvent;
+}
 
 @registerStyle(AccordionStyle)
 class Accordion extends UI.Element {
@@ -84,8 +90,8 @@ class Accordion extends UI.Element {
         return null;
     }
 
-    dividerMousedownFunction(dividerEvent) {
-        let dragTriggered, panelsHeight, totalFlex;
+    dividerMousedownFunction(dividerEvent: DividerMousedownEvent) {
+        let dragTriggered: boolean, panelsHeight, totalFlex;
 
         let previousEvent = dividerEvent.domEvent;
         let index = this.dividers.indexOf(dividerEvent.divider);
@@ -104,7 +110,7 @@ class Accordion extends UI.Element {
             }
         }
 
-        let mouseMoveListener = this.addListener("dividerMousemove", (event) => {
+        let mouseMoveListener = this.addListener("dividerMousemove", (event: MouseEvent | TouchEvent) => {
             dragTriggered = true;
             if (index != -1 && nextPanel && previousPanel) {
                 // Calculate the height to transfer from one panel to another
@@ -136,7 +142,7 @@ class Accordion extends UI.Element {
         });
     }
 
-    toggleChild(child) {
+    toggleChild(child: UIElement) {
         let totalFlex = 0;
         for (let panel of this.panels) {
             if (!panel.hasClass("hidden")) {
@@ -177,7 +183,7 @@ class Accordion extends UI.Element {
         return childrenStatus;
     }
 
-    setChildrenStatus(childrenStatus) {
+    setChildrenStatus(childrenStatus: ReturnType<Accordion["getChildrenStatus"]>) {
         for (let i = 0; i < childrenStatus.length; i += 1) {
             this.panels[i].setStyle("flex", childrenStatus[i].flex);
             let collapsed = childrenStatus[i].collapsed;
@@ -191,7 +197,7 @@ class Accordion extends UI.Element {
     }
 
     onMount() {
-        this.addListener("dividerMousedown", (dividerEvent) => this.dividerMousedownFunction(dividerEvent));
+        this.addListener("dividerMousedown", (dividerEvent: DividerMousedownEvent) => this.dividerMousedownFunction(dividerEvent));
     }
 }
 
