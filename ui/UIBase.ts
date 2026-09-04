@@ -320,9 +320,7 @@ export class UIElement<
     }
 
     // Not Partial<this["options"]>: a `this` return type stays deferred, so no subclass could satisfy it
-    getDefaultOptions(_options?: this["options"]): Record<string, any> | undefined {
-        return undefined;
-    }
+    getDefaultOptions(_options?: this["options"]): Record<string, any> | void {}
 
     // Return our options without the UI specific fields, so they can be passed along
     getCleanedOptions(): Partial<this["options"]> {
@@ -338,9 +336,7 @@ export class UIElement<
         return options;
     }
 
-    getPreservedOptions(): Partial<this["options"]> | undefined {
-        return undefined;
-    }
+    getPreservedOptions(): Partial<this["options"]> | void {}
 
     setOptions(options: this["options"]): void {
         const defaultOptions = this.getDefaultOptions(options);

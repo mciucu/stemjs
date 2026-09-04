@@ -166,7 +166,7 @@ export class HorizontalOverflow extends UI.Element<HorizontalOverflowOptions> {
     }
 
     // This method should be overwritten, and it is called whenever the position of the elements is changed.
-    handleEventAndHandlePositionChange(callback) {
+    handleEventAndHandlePositionChange(callback: () => void) {
         callback();
     }
 

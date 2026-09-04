@@ -5,7 +5,7 @@ import {CheckboxInput} from "./CheckboxInput";
 
 
 // TODO this seems to be a good function to decorate with @unarray
-function UpdateCheckedValues(entry) {
+function UpdateCheckedValues(entry?: TreeEntry | TreeEntry[]) {
     if (Array.isArray(entry)) {
         for (const subEntry of entry) {
             UpdateCheckedValues(subEntry);
@@ -19,7 +19,7 @@ function UpdateCheckedValues(entry) {
 
     if (entry.checked === true || entry.checked === false) {
         if (entry.children) {
-            entry.children.forEach(subEntry => {
+            toArray(entry.children).forEach((subEntry: TreeEntry) => {
                 subEntry.checked = entry.checked;
             });
             UpdateCheckedValues(entry.children);
@@ -52,7 +52,7 @@ function CalcChecked(entries: TreeEntry | TreeEntry[] = []) {
 
 // entry can be a single entry or an Array of entries
 // value can be true, false or a Set of entries that should become true
-function UpdateEntryRecursively(entry, value) {
+function UpdateEntryRecursively(entry: TreeEntry | TreeEntry[], value: boolean | Set<TreeEntry>) {
     if (Array.isArray(entry)) {
         for (const subEntry of entry) {
             UpdateEntryRecursively(subEntry, value);
@@ -97,7 +97,7 @@ export class TreeViewCheckbox<ExtraOptions = {}> extends UI.Element<TreeViewChec
     declare childrenInputs?: UIElement;
     declare subTree?: TreeViewCheckbox;
 
-    static entryToValue(entry) {
+    static entryToValue(entry?: TreeEntry | TreeEntry[]) {
         if (!entry) {
             return [];
         }
@@ -119,7 +119,7 @@ export class TreeViewCheckbox<ExtraOptions = {}> extends UI.Element<TreeViewChec
         return this.options.entries;
     }
 
-    setValue(value, dispatchChange = true) {
+    setValue(value: boolean | TreeEntry[] | Set<TreeEntry>, dispatchChange = true) {
         if (Array.isArray(value)) {
             value = new Set(value); // We can take in true, false or a set of entries
         }
@@ -139,7 +139,7 @@ export class TreeViewCheckbox<ExtraOptions = {}> extends UI.Element<TreeViewChec
         return CalcChecked(this.options.entries) === true;
     }
 
-    renderCheckboxInput(entry) {
+    renderCheckboxInput(entry: TreeEntry) {
         return <CheckboxInput
             initialValue={entry.checked}
             label={entry.label || entry.value}
@@ -160,7 +160,7 @@ export class TreeViewCheckbox<ExtraOptions = {}> extends UI.Element<TreeViewChec
         />;
     }
 
-    renderSubTree(entry) {
+    renderSubTree(entry: TreeEntry) {
         return <TreeViewCheckbox
             entries={entry.children}
             onChange={() => {
@@ -173,7 +173,7 @@ export class TreeViewCheckbox<ExtraOptions = {}> extends UI.Element<TreeViewChec
         />
     }
 
-    renderCollapsibleController(entry) {
+    renderCollapsibleController(entry: TreeEntry) {
         const collapsibleIconStyle: StyleObject = {};
 
         if (!entry.children) {
@@ -183,7 +183,7 @@ export class TreeViewCheckbox<ExtraOptions = {}> extends UI.Element<TreeViewChec
         // TODO This shouldn't exist if we don't want to support collapsing
         return <CollapsibleControllerInput
             ref="collapsibleController"
-            initialValue={entry.collapsed ?? entry.children?.length > 3}
+            initialValue={entry.collapsed ?? toArray(entry.children).length > 3}
             target={() => this.childrenInputs}
             style={collapsibleIconStyle}
         />

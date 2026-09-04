@@ -23,11 +23,11 @@ export class DividerBar extends Divider<DividerBarOptions> {
         };
     }
 
-    dragMousedown(event) {
+    dragMousedown(event: MouseEvent) {
         document.body.classList.add(this.styleSheet.noTextSelection);
     }
 
-    dragMouseup(event) {
+    dragMouseup(event: MouseEvent) {
         document.body.classList.remove(this.styleSheet.noTextSelection);
     }
 
@@ -114,7 +114,7 @@ export class SectionDivider<ExtraOptions extends SectionDividerOptions = Section
         }
     }
 
-    getMinDimension(element) {
+    getMinDimension(element: SectionDividerPanel) {
         if (this.getOrientation() === Orientation.HORIZONTAL && element.options.hasOwnProperty("minWidth")) {
             return element.options.minWidth;
         } else if (this.getOrientation() === Orientation.VERTICAL && element.options.hasOwnProperty("minHeight")) {
@@ -279,7 +279,7 @@ export class SectionDivider<ExtraOptions extends SectionDividerOptions = Section
         return null;
     }
 
-    dividerMouseDownFunction(dividerEvent) {
+    dividerMouseDownFunction(dividerEvent: {divider: DividerBar, domEvent: MouseEvent}) {
         let previousEvent = dividerEvent.domEvent;
         const index = this.dividers.indexOf(dividerEvent.divider);
 
@@ -297,9 +297,9 @@ export class SectionDivider<ExtraOptions extends SectionDividerOptions = Section
             }
 
             const deltaFunction = (this.getOrientation() === Orientation.HORIZONTAL ?
-                                 (event) => Device.getEventX(event) :  (event) => Device.getEventY(event));
+                                 (event: MouseEvent) => Device.getEventX(event) :  (event: MouseEvent) => Device.getEventY(event));
 
-            const mouseMoveListener = this.addListener("dividerMousemove", (event) => {
+            const mouseMoveListener = this.addListener("dividerMousemove", (event: MouseEvent) => {
                 const delta = deltaFunction(event) - deltaFunction(previousEvent);
 
                 const nextSize = this.getDimension(nextPanel) - delta;
@@ -356,7 +356,7 @@ export class SectionDivider<ExtraOptions extends SectionDividerOptions = Section
     }
 
     onMount() {
-        this.addListener("dividerMousedown", (dividerEvent) => this.dividerMouseDownFunction(dividerEvent));
+        this.addListener("dividerMousedown", (dividerEvent: {divider: DividerBar, domEvent: MouseEvent}) => this.dividerMouseDownFunction(dividerEvent));
         setTimeout(() => {
             this.recalculateDimensions();
         });

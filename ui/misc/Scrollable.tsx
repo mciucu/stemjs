@@ -62,14 +62,14 @@ export class ScrollableMixin<ExtraOptions extends ScrollableOptions = Scrollable
         }
     }
 
-    pushChildTop(element, removeExcessBottom = true) {
+    pushChildTop(element: UIElement, removeExcessBottom = true) {
         if (removeExcessBottom) {
             this.removeExcessBottom();
         }
         this.insertChild(element, 0);
     }
 
-    pushChildBottom(element, removeExcessTop = true) {
+    pushChildBottom(element: UIElement, removeExcessTop = true) {
         if (removeExcessTop) {
             this.removeExcessTop();
         }

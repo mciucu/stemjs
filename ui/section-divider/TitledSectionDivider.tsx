@@ -3,7 +3,7 @@
 import {type ElementOptions, UI, UIElement, type UIChild, type NodeAttributes} from "../UIBase";
 import {registerStyle} from "../style/Theme";
 import {unwrapArray} from "../../base/Utils";
-import {DividerBar, SectionDivider, type SectionDividerOptions, type SectionDividerPanelOptions} from "./SectionDivider";
+import {DividerBar, SectionDivider, type SectionDividerOptions, type SectionDividerPanel, type SectionDividerPanelOptions} from "./SectionDivider";
 import {TitledDividerStyle} from "./Style";
 import {Orientation, type OrientationType} from "../Constants";
 import {FAIcon} from "../FontAwesome";
@@ -158,7 +158,7 @@ export class TitledSectionDivider extends SectionDivider<TitledSectionDividerOpt
         return TitledSectionDividerBar;
     }
 
-    setDimension(element, size) {
+    setDimension(element: SectionDividerPanel, size: number | string) {
         if (this.getOrientation() === Orientation.HORIZONTAL) {
             element.setWidth(size);
         } else {
