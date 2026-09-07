@@ -10,9 +10,17 @@ export interface ButtonGroupOptions extends SimpleStyledElementOptions {
     orientation?: OrientationType;
 }
 
-export interface RadioButtonGroupOptions extends SimpleStyledElementOptions {
-    givenOptions: any[];
+export interface RadioButtonGroupOptions<T = any> extends SimpleStyledElementOptions {
+    givenOptions: T[];
     index?: number;
+}
+
+// What setIndex dispatches, so a listener does not have to restate it
+export interface RadioButtonGroupSetIndex<T = any> {
+    index: number;
+    oldIndex: number;
+    value: T;
+    oldValue: T;
 }
 
 @registerStyle(ButtonGroupStyle)
@@ -29,11 +37,11 @@ export class ButtonGroup extends SimpleStyledElement<ButtonGroupOptions> {
 }
 
 @registerStyle(RadioButtonGroupStyle)
-export class RadioButtonGroup extends SimpleStyledElement<RadioButtonGroupOptions> {
+export class RadioButtonGroup<T = any> extends SimpleStyledElement<RadioButtonGroupOptions<T>> {
     private index: number = 0;
     private buttons: Button[] = [];
 
-    setOptions(options: RadioButtonGroupOptions): void {
+    setOptions(options: RadioButtonGroupOptions<T>): void {
         super.setOptions(options);
         this.index = this.options.index || 0; // TODO @cleanup This should be an input type
     }
@@ -56,7 +64,7 @@ export class RadioButtonGroup extends SimpleStyledElement<RadioButtonGroupOption
         return this.index;
     }
 
-    getValue(): any {
+    getValue(): T {
         return this.options.givenOptions[this.index];
     }
 

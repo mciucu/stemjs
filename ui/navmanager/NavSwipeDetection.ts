@@ -10,18 +10,18 @@ function touchEventHandler(
     ignoreCondition: (touchX: number) => boolean, 
     successCondition: (touchX: number, startX: number, duration: number) => boolean, 
     onSuccess: () => void, 
-    xType: string = "client"
+    xType: "clientX" | "pageX" | "screenX" = "clientX"
 ): (event: TouchEvent) => void {
     return (event: TouchEvent) => {
-        if (ignoreCondition(event.targetTouches[0][xType + "X"])) {
+        if (ignoreCondition(event.targetTouches[0][xType])) {
             return;
         }
-        let startX: number = event.targetTouches[0][xType + "X"];
+        let startX: number = event.targetTouches[0][xType];
         let panelToggler = new Dispatcher();
         let startTime: number = StemDate.now().valueOf();
 
         let touchCallback = (event: TouchEvent) => {
-            if (successCondition(event.targetTouches[0][xType + "X"], startX, StemDate.now().valueOf() - startTime)) {
+            if (successCondition(event.targetTouches[0][xType], startX, StemDate.now().valueOf() - startTime)) {
                 panelToggler.dispatch(true);
             }
         };

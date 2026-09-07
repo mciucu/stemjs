@@ -207,6 +207,7 @@ export class ActionModal<ExtraOptions extends ActionModalOptions = ActionModalOp
         return this.options.title || this.getActionName();
     }
 
+    // Left open: ErrorModal answers with the raw error when it carries no message, which UIChild excludes
     getBody() {
         return null;
     }
@@ -314,7 +315,7 @@ export class ConfirmModal extends ActionModal<ConfirmModalOptions> {
         super.hide();
     }
 
-    static async prompt<T = any>(options): Promise<T> {
+    static async prompt<T = any>(options: object): Promise<T> {
         return new Promise<T>((resolve) => {
             const modal = new this({...options, destroyOnHide: true});
             modal.resolvePromise = (value) => {

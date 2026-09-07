@@ -149,27 +149,27 @@ export class LabelStyle extends BasicLevelStyleSheet(labelColorToStyle) {
     };
 
     @styleRule
-    EXTRA_SMALL = {
+    xs = {
         fontSize: 10,
         padding: "0.05em 0.2em",
         borderWidth: "0.05em",
     };
 
     @styleRule
-    SMALL = {
+    sm = {
         fontSize: 10,
     };
 
     @styleRule
-    MEDIUM = {};
+    md = {};
 
     @styleRule
-    LARGE = {
+    lg = {
         fontSize: 14,
     };
 
     @styleRule
-    EXTRA_LARGE = {
+    xl = {
         fontSize: 17,
         padding: "0.05em 0.2em",
     };
@@ -216,26 +216,26 @@ export class BadgeStyle extends BasicLevelStyleSheet(badgeColorToStyle) {
     };
 
     @styleRule
-    EXTRA_SMALL = {
+    xs = {
         fontSize: "10px",
         padding: "0.1em 0.2em",
     };
 
     @styleRule
-    SMALL = {
+    sm = {
         fontSize: "10px",
     };
 
     @styleRule
-    MEDIUM = {};
+    md = {};
 
     @styleRule
-    LARGE = {
+    lg = {
         fontSize: "14px",
     };
 
     @styleRule
-    EXTRA_LARGE = {
+    xl = {
         fontSize: "17px",
         padding: "0.1em 0.2em",
     };

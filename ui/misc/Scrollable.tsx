@@ -107,20 +107,21 @@ export class ScrollableMixin<ExtraOptions extends ScrollableOptions = Scrollable
 }
 
 //TODO: this class would need some binary searches
-interface InfiniteScrollableOptions extends ScrollableOptions {
-    entries?: any[];
-    entryRenderer?: (entry: any) => BaseUIElement; // Inserted as a child directly, so it has to be an element
-    entryComparator?: (left: any, right: any) => number;
+interface InfiniteScrollableOptions<EntryType = any> extends ScrollableOptions {
+    entries?: EntryType[];
+    entryRenderer?: (entry: EntryType) => BaseUIElement; // Inserted as a child directly, so it has to be an element
+    entryComparator?: (left: EntryType, right: EntryType) => number;
     staticTop?: UIElement;
 }
 
-export class InfiniteScrollable extends ScrollableMixin<InfiniteScrollableOptions> {
+// The order entries fall back to, which anything without an id replaces with its own comparator
+const compareEntriesById = (a: {id: number}, b: {id: number}) => a.id - b.id;
+
+export class InfiniteScrollable<EntryType = any> extends ScrollableMixin<InfiniteScrollableOptions<EntryType>> {
     setOptions(options: typeof this.options) {
         options = Object.assign({
             entries: [],
-            entryComparator: (a, b) => {
-                return a.id - b.id;
-            },
+            entryComparator: compareEntriesById,
             firstRenderedEntry: 0,
             lastRenderedEntry: -1,
         }, options);
@@ -141,7 +142,7 @@ export class InfiniteScrollable extends ScrollableMixin<InfiniteScrollableOption
     getLastVisibleIndex() {
     }
 
-    renderEntry(entry): BaseUIElement {
+    renderEntry(entry: EntryType): BaseUIElement {
         if (this.options.entryRenderer) {
             return this.options.entryRenderer(entry);
         } else {
@@ -149,11 +150,11 @@ export class InfiniteScrollable extends ScrollableMixin<InfiniteScrollableOption
         }
     }
 
-    pushEntry(entry) {
+    pushEntry(entry: EntryType) {
         this.insertEntry(entry, this.options.entries.length);
     }
 
-    insertEntry(entry, index: number) {
+    insertEntry(entry: EntryType, index: number) {
         let entries = this.options.entries;
         if (index == null) {
             index = 0;

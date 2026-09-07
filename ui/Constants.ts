@@ -1,6 +1,7 @@
+// The values are the style rule each one selects, which is how every sheet keyed by an orientation reads
 export const Orientation = {
-    HORIZONTAL: 1,
-    VERTICAL: 2,
+    HORIZONTAL: "horizontal",
+    VERTICAL: "vertical",
 } as const;
 
 export type OrientationType = typeof Orientation[keyof typeof Orientation];
@@ -35,7 +36,9 @@ export const Size = {
     EXTRA_LARGE: "xl",
 } as const;
 
-export type SizeType = typeof Size[keyof typeof Size];
+// NONE is null, which `as const` cannot give a literal type to with strictNullChecks off, so it is
+// excluded from the derivation and added back
+export type SizeType = typeof Size[Exclude<keyof typeof Size, "NONE">] | null;
 
 export const VoteStatus = {
     NONE: null,
@@ -43,7 +46,7 @@ export const VoteStatus = {
     DISLIKE: 0,
 } as const;
 
-export type VoteStatusType = typeof VoteStatus[keyof typeof VoteStatus];
+export type VoteStatusType = typeof VoteStatus[Exclude<keyof typeof VoteStatus, "NONE">] | null;
 
 export const ActionStatus = {
     INITIAL: 1,

@@ -59,7 +59,8 @@ const NavElementInterface = <TBase extends Constructor<OrientedElement>>(BaseCla
     declare contentArea?: UIElement;
     declare collapseIcon?: FACollapseIcon;
 
-    constructor(...args) {
+    // A mixin class's constructor must be a single rest parameter of any[] (TS2545)
+    constructor(...args: any[]) {
         super(...args);
         this.isToggled = this.getToggledState();
     }
@@ -304,7 +305,7 @@ class NavAnchoredNotifications extends NavSection {
     }
 
     onMount() {
-        this.addListener("changeSwitcher", (content, child) => {
+        this.addListener("changeSwitcher", (content: UIElement, child: UIElement) => {
             if (this.activeChild == child) {
                 this.hide();
             } else {

@@ -45,7 +45,9 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     static langToolsSrc: string | null = null;
     static AceRange: any;
     
-    // Not protected: the workspace plugins and the template editor reach straight into the Ace instance
+    // Not protected: the workspace plugins and the template editor reach straight into the Ace instance.
+    // It stays any here: naming Ace.Editor needs an ace-builds type import, which downstream repos using
+    // CodeEditor do not have as a dependency; the app files that hold an editor name the types themselves
     ace: any;
     protected apiChange: boolean = false;
 

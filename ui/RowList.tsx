@@ -25,7 +25,7 @@ class RowListStyle extends BasicLevelSizeStyleSheet {
     };
 
     @styleRule
-    LARGE = {
+    lg = {
         minHeight: this.themeProps.ROW_LIST_ROW_HEIGHT_LARGE,
         paddingLeft: this.themeProps.ROW_LIST_ROW_PADDING_LARGE,
         paddingRight: this.themeProps.ROW_LIST_ROW_PADDING_LARGE,

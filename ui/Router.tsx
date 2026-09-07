@@ -1,4 +1,4 @@
-import {type BaseUIElement, type ExtendedOptions, UI, UIElement, type UIEventHandler} from "./UIBase";
+import {type BaseUIElement, type ExtendedOptions, UI, UIElement} from "./UIBase";
 import {Switcher} from "./Switcher";
 import {Dispatcher} from "../base/Dispatcher";
 import {PageTitleManager} from "../base/PageTitleManager";
@@ -7,7 +7,8 @@ import {unwrapArray, isString} from "../base/Utils";
 interface RouterOptions {
     // A subclass may answer with its own routes from getDefaultOptions instead of being handed them
     routes?: Route;
-    onChange?: UIEventHandler;
+    // What setURL dispatches, with the router appended once by dispatchChange and once by the wiring
+    onChange?: (urlParts: string[], page: RoutablePage, activePage: UIElement | undefined, router: Router) => void;
 }
 
 export interface ChangeURLOptions {

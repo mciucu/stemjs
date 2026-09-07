@@ -97,7 +97,7 @@ export class Table<BaseType = any> extends UIElement<TableOptions<BaseType>, HTM
         const columns = this.getSafeColumns();
         return {
             entry,
-            columns: columns as ColumnHandler<BaseType>[],
+            columns,
             rowIndex,
             parent: this,
             className: this.styleSheet.tableRow as string,

@@ -20,7 +20,7 @@ export class DateTimePicker extends UI.Element<DateTimePickerOptions> {
         }
     }
 
-    parseDateFromString(str: string, format) {
+    parseDateFromString(str: string, format: string) {
         if (format !== "DD/MM/YYYY HH:mm:ss") {
             throw Error("Format not supported!");
         }
@@ -61,7 +61,7 @@ export class DateTimePicker extends UI.Element<DateTimePickerOptions> {
         return this.parseDateFromString(str, format);
     }
 
-    setDate(date) {
+    setDate(date: StemDate) {
         this.options.date = date;
         this.options.dateString = date.format(this.options.format);
         if (this.textInput) {

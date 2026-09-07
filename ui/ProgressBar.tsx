@@ -64,25 +64,25 @@ export class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToSty
     };
 
     @styleRule
-    EXTRA_SMALL = {
+    xs = {
         fontSize: "8px",
     };
 
     @styleRule
-    SMALL = {
+    sm = {
         fontSize: "10px",
     };
 
     @styleRule
-    MEDIUM = {};
+    md = {};
 
     @styleRule
-    LARGE = {
+    lg = {
         fontSize: "14px",
     };
 
     @styleRule
-    EXTRA_LARGE = {
+    xl = {
         fontSize: "17px",
         padding: "0.1em 0.2em",
     };

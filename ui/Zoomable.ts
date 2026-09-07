@@ -106,7 +106,7 @@ class PinchZoomEventHandler {
     }
 
     recalculateCentroid(event: TouchEvent): void {
-        const touches = event.touches || [];
+        const touches: TouchList | Touch[] = event.touches || [];
         if (touches.length < 2) {
             this.pinchActive = false;
             return;

@@ -49,15 +49,16 @@ export class AjaxButton extends StateButton<AjaxButtonOptions> {
     }
 
     // TODO @types rename to makeRequest
+    // Left open: the handler is indexed by a name the loop below also installs, which no signature describes
     ajax(methodName: string, ...args: any[]) {
         this.setState(ActionStatus.RUNNING);
         let ajaxPromise = this.getAjaxHandler()[methodName](...args);
         ajaxPromise.getPromise().then(
-            (data) => {
+            (data: unknown) => {
                 this.setState(ActionStatus.SUCCESS);
                 this.scheduleStateReset();
             },
-            (error) => {
+            (error: unknown) => {
                 this.setState(ActionStatus.FAILED);
                 this.scheduleStateReset();
             }

@@ -29,7 +29,7 @@ export class CardPanelStyle extends BasicLevelStyleSheet(cardPanelColorToStyle) 
     };
 
     @styleRule
-    LARGE = {
+    lg = {
         minHeight: this.themeProps.CARD_PANEL_HEADER_HEIGHT_LARGE,
         paddingLeft: this.themeProps.CARD_PANEL_HEADING_PADDING_LARGE,
         paddingRight: this.themeProps.CARD_PANEL_HEADING_PADDING_LARGE,

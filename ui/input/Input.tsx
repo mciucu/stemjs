@@ -28,7 +28,6 @@ export interface NumberInputOptions extends InputOptions<number> {
     min?: number | string;
     max?: number | string;
     step?: number | string;
-    onKeyUp?: UIEventHandler;
 }
 
 export interface FileInputOptions extends InputOptions<FileList> {

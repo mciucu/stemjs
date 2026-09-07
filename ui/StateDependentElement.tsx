@@ -20,12 +20,16 @@ export interface StateDependentElementOptions {
 // StateDependentElement.renderLoading = () => <MyCustomLoadingAnimation />
 // StateDependentElement.renderError = (error) => <MyCustomErrorMessageClass error={error} />
 
+// What a page's state endpoint answers with: the store state under `state`, and the element's own
+// options beside it, both of which the page defines
+export type PageState = Record<string, any>;
+
 // A function declaration, not a const: only that form takes the hooks assigned below as its own properties
 export function StateDependentElement<T extends new (...args: any[]) => UIElement<any, any, any, any>>(BaseClass: T) {
     return class StateDependentElementClass extends DelayedElement(BaseClass) {
         declare options: ElementOptions<StateDependentElementOptions>;
         
-        importState(data: any): void {
+        importState(data: PageState): void {
             GlobalState.load(data);
             for (let key of Object.keys(data)) {
                 if (key !== "state") {
@@ -81,7 +85,7 @@ export function StateDependentElement<T extends new (...args: any[]) => UIElemen
 
         beforeRedrawNotLoaded(): void {
             Ajax.getJSON(this.getAjaxUrl(), this.getAjaxRequest()).then(
-                (data: any) => {
+                (data: PageState) => {
                     this.importState(data);
                     (this as any).setLoaded();
                 },

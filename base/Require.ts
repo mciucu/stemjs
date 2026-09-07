@@ -1,7 +1,7 @@
 import {Dispatchable} from "./Dispatcher";
 import {toArray} from "./Utils";
 
-class ScriptResolver extends Dispatchable {
+export class ScriptResolver extends Dispatchable {
     loaded: boolean;
     jobs: Function[];
 

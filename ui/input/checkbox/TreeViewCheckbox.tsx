@@ -88,7 +88,7 @@ export interface TreeEntry {
 
 interface TreeViewCheckboxOptions {
     entries?: TreeEntry | TreeEntry[];
-    onChange?: (...args: any[]) => void;
+    onChange?: (value: ReturnType<TreeViewCheckbox["getValue"]>, source: TreeViewCheckbox) => void;
 }
 
 export class TreeViewCheckbox<ExtraOptions = {}> extends UI.Element<TreeViewCheckboxOptions & ExtraOptions> {
@@ -97,7 +97,7 @@ export class TreeViewCheckbox<ExtraOptions = {}> extends UI.Element<TreeViewChec
     declare childrenInputs?: UIElement;
     declare subTree?: TreeViewCheckbox;
 
-    static entryToValue(entry?: TreeEntry | TreeEntry[]) {
+    static entryToValue(entry?: TreeEntry | TreeEntry[]): TreeEntry["value"][] {
         if (!entry) {
             return [];
         }

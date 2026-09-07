@@ -8,8 +8,6 @@ import {registerStyle} from "../style/Theme";
 import {GlobalStyle} from "../GlobalStyle";
 import {ColumnHandler} from "../../base/ColumnHandler";
 
-// TODO @types just putting here here to ensure it's not stripped for some strange reason
-UI.Element;
 
 export class TableRowInCollapsibleTable<BaseType> extends TableRow<BaseType> {
     getNodeType(): HTMLTagType {
@@ -134,7 +132,9 @@ export function CollapsibleTableInterface<BaseType, T extends Constructor<Table<
 
         setOptions(options: CollapsibleTableOptions<BaseType>): void {
             super.setOptions(options);
-            if (!(this.options.columns?.[0] as any)?.isToggleColumn) {
+            // Left standing: super has mapped every column into a handler, and the option still declares
+            // the falsy and tuple forms a tag may write, which nothing here can narrow away
+            if (!this.options.columns?.[0]?.isToggleColumn) {
                 this.options.columns = [this.getToggleColumn(), ...(this.options.columns || [])];
             }
         }

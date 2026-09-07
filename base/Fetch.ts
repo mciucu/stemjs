@@ -292,7 +292,7 @@ export class XHRPromise {
         this.getXHR().addEventListener(name, callback, ...args);
     }
 
-    addProgressListener(callback: EventListener, ...args: any[]): void {
+    addProgressListener(callback: (event: ProgressEvent) => void, ...args: any[]): void {
         this.addXHRListener("progress", callback, ...args);
     }
 }

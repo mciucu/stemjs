@@ -59,7 +59,7 @@ export class FlatTabTitleArea extends TabTitleArea<FlatTabTitleOptions> {
         ]
     }
 
-    setActiveBar(activeTab) {
+    setActiveBar(activeTab: FlatTabTitle) {
         let barLeft = 0;
         let barWidth = 0;
         for (const tab of unwrapArray<FlatTabTitle>(this.render())) {
@@ -78,7 +78,7 @@ export class FlatTabTitleArea extends TabTitleArea<FlatTabTitleOptions> {
         this.barWidth = barWidth;
     }
 
-    setActive(activeTab) {
+    setActive(activeTab: FlatTabTitle) {
         if (this.activeTab) {
             // Remove the border from the active tab and "prepare" the bar on the current active tab.
             this.setActiveBar(this.activeTab);
@@ -114,7 +114,7 @@ export class FlatTabTitleArea extends TabTitleArea<FlatTabTitleOptions> {
                 this.setActive(child);
             }
         }
-        this.attachListener(this.options.activeTabTitleDispatcher, (tab) => this.setActive(tab));
+        this.attachListener(this.options.activeTabTitleDispatcher, (tab: FlatTabTitle) => this.setActive(tab));
         this.addListener("resize", () => this.horizontalOverflow.dispatch("resize"));
     }
 }
@@ -125,7 +125,7 @@ export class FlatTabArea extends TabArea {
     activeTabTitleDispatcher = new SingleActiveElementDispatcher();
     declare titleArea?: FlatTabTitleArea;
 
-    getTitleArea(tabTitles) {
+    getTitleArea(tabTitles: UIElement[]) {
         return <FlatTabTitleArea
             ref="titleArea"
             styleSheet={this.styleSheet}
@@ -135,7 +135,7 @@ export class FlatTabArea extends TabArea {
         </FlatTabTitleArea>;
     }
 
-    createTabPanel(panel) {
+    createTabPanel(panel: UIElement) {
         const tab = <FlatTabTitle
             panel={panel}
             activeTabDispatcher={this.activeTabDispatcher}

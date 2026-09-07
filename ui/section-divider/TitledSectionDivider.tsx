@@ -55,10 +55,12 @@ interface TitledSectionDividerOptions extends SectionDividerOptions {
 
 // The children given to a TitledSectionDivider, before each is wrapped in a BarCollapsePanel
 interface TitledPanel extends UIElement<any, any, any> {
-    options: ElementOptions<{title?: UIChild; collapsed?: boolean}>;
+    options: ElementOptions<{title?: UIChild; collapsed?: boolean; size?: number}>;
 }
 
 interface BarCollapsePanelOptions extends SectionDividerPanelOptions {
+    // Exactly one, which the divider wraps and this panel reads its size and collapsed state off
+    children?: TitledPanel[];
     orientation?: OrientationType;
     collapsedSize?: number;
     title?: UIChild;
@@ -71,7 +73,7 @@ class BarCollapsePanel extends UI.Element<BarCollapsePanelOptions> {
     declare collapsedBarTitle?: UIElement;
 
     extraNodeAttributes(attr: NodeAttributes) {
-        const panelChild = this.getGivenChildren()[0];
+        const panelChild = (this.options.children || [])[0];
         attr.addClass(this.styleSheet.barCollapsePanel);
         let panelSize = panelChild.options.size;
         if (this.collapsed) {
@@ -94,7 +96,7 @@ class BarCollapsePanel extends UI.Element<BarCollapsePanelOptions> {
     }
 
     getChildrenToRender() {
-        this.collapsed = this.getGivenChildren()[0].options.collapsed;
+        this.collapsed = (this.options.children || [])[0].options.collapsed;
         const isFirst = this.parent.panels.indexOf(this) === 0;
         const isLast = this.parent.panels.indexOf(this) === this.parent.panels.length - 1;
         const firstCaret = isLast ? "left" : "right";

@@ -10,7 +10,7 @@ function isMarkupElement(content?: MarkupElement | string): content is MarkupEle
     return content != null && typeof content !== "string";
 }
 
-interface ParsedElement {
+export interface ParsedElement {
     content?: MarkupElement | string;
     start: number;
     end: number;
@@ -23,7 +23,7 @@ interface StringStreamOptions {
     [key: string]: any;
 }
 
-interface ModifierOptions {
+export interface ModifierOptions {
     pattern?: string;
     captureContent?: boolean;
     endPattern?: string;
@@ -1319,9 +1319,9 @@ MarkupParser.parseJSON5 = (function() {
     let at: number;           // The index of the current character
     let lineNumber: number;   // The current line number
     let columnNumber: number; // The current column number
-    // Left untyped on purpose: next() reassigns it from a closure, which TypeScript's narrowing
-    // does not see, so a `string` here turns every `ch === "x"` after a comparison into a false error
-    let ch;
+    // The character the parser is looking at; every next() call below assigns it back, which is what
+    // keeps a comparison from narrowing it for the rest of the branch
+    let ch: string;
     const escapee: Record<string, string> = {
         "'": "'",
         '"': '"',
@@ -1419,7 +1419,7 @@ MarkupParser.parseJSON5 = (function() {
 
         if (ch === '-' || ch === '+') {
             sign = ch;
-            next(ch);
+            ch = next(ch);
         }
 
         // support for Infinity (could tweak to allow other words):
@@ -1434,7 +1434,7 @@ MarkupParser.parseJSON5 = (function() {
         // support for NaN
         if (ch === 'N') {
             number = word();
-            if (!isNaN(number)) {
+            if (typeof number !== 'number' || !isNaN(number)) {
                 error('expected word to be NaN');
             }
             // ignore sign as -NaN also is NaN
@@ -1443,10 +1443,10 @@ MarkupParser.parseJSON5 = (function() {
 
         if (ch === '0') {
             string += ch;
-            next();
+            ch = next();
             if (ch === 'x' || ch === 'X') {
                 string += ch;
-                next();
+                ch = next();
                 base = 16;
             } else if (ch >= '0' && ch <= '9') {
                 error('Octal literal');
@@ -1457,7 +1457,7 @@ MarkupParser.parseJSON5 = (function() {
             case 10:
                 while (ch >= '0' && ch <= '9') {
                     string += ch;
-                    next();
+                    ch = next();
                 }
                 if (ch === '.') {
                     string += '.';
@@ -1467,21 +1467,21 @@ MarkupParser.parseJSON5 = (function() {
                 }
                 if (ch === 'e' || ch === 'E') {
                     string += ch;
-                    next();
+                    ch = next();
                     if (ch === '-' || ch === '+') {
                         string += ch;
-                        next();
+                        ch = next();
                     }
                     while (ch >= '0' && ch <= '9') {
                         string += ch;
-                        next();
+                        ch = next();
                     }
                 }
                 break;
             case 16:
                 while (ch >= '0' && ch <= '9' || ch >= 'A' && ch <= 'F' || ch >= 'a' && ch <= 'f') {
                     string += ch;
-                    next();
+                    ch = next();
                 }
                 break;
         }
@@ -1513,10 +1513,10 @@ MarkupParser.parseJSON5 = (function() {
             delim = ch;
             while (next()) {
                 if (ch === delim) {
-                    next();
+                    ch = next();
                     return string;
                 } else if (ch === '\\') {
-                    next();
+                    ch = next();
                     if (ch === 'u') {
                         uffff = 0;
                         for (i = 0; i < 4; i += 1) {
@@ -1529,7 +1529,7 @@ MarkupParser.parseJSON5 = (function() {
                         string += String.fromCharCode(uffff);
                     } else if (ch === '\r') {
                         if (peek() === '\n') {
-                            next();
+                            ch = next();
                         }
                     } else if (typeof escapee[ch] === 'string') {
                         string += escapee[ch];
@@ -1560,9 +1560,9 @@ MarkupParser.parseJSON5 = (function() {
         }
 
         do {
-            next();
+            ch = next();
             if (ch === '\n' || ch === '\r') {
-                next();
+                ch = next();
                 return;
             }
         } while (ch);
@@ -1579,11 +1579,11 @@ MarkupParser.parseJSON5 = (function() {
         }
 
         do {
-            next();
+            ch = next();
             while (ch === '*') {
-                next('*');
+                ch = next('*');
                 if (ch === '/') {
-                    next('/');
+                    ch = next('/');
                     return;
                 }
             }
@@ -1600,7 +1600,7 @@ MarkupParser.parseJSON5 = (function() {
             error("Not a comment");
         }
 
-        next('/');
+        ch = next('/');
 
         if (ch === '/') {
             inlineComment();
@@ -1621,7 +1621,7 @@ MarkupParser.parseJSON5 = (function() {
             if (ch === '/') {
                 comment();
             } else if (/\s/.test(ch)) {
-                next();
+                ch = next();
             } else {
                 return;
             }
@@ -1633,38 +1633,38 @@ MarkupParser.parseJSON5 = (function() {
 
         switch (ch) {
             case 't':
-                next('t');
-                next('r');
-                next('u');
-                next('e');
+                ch = next('t');
+                ch = next('r');
+                ch = next('u');
+                ch = next('e');
                 return true;
             case 'f':
-                next('f');
-                next('a');
-                next('l');
-                next('s');
-                next('e');
+                ch = next('f');
+                ch = next('a');
+                ch = next('l');
+                ch = next('s');
+                ch = next('e');
                 return false;
             case 'n':
-                next('n');
-                next('u');
-                next('l');
-                next('l');
+                ch = next('n');
+                ch = next('u');
+                ch = next('l');
+                ch = next('l');
                 return null;
             case 'I':
-                next('I');
-                next('n');
-                next('f');
-                next('i');
-                next('n');
-                next('i');
-                next('t');
-                next('y');
+                ch = next('I');
+                ch = next('n');
+                ch = next('f');
+                ch = next('i');
+                ch = next('n');
+                ch = next('i');
+                ch = next('t');
+                ch = next('y');
                 return Infinity;
             case 'N':
-                next('N');
-                next('a');
-                next('N');
+                ch = next('N');
+                ch = next('a');
+                ch = next('N');
                 return NaN;
         }
         error("Unexpected " + renderChar(ch));
@@ -1675,11 +1675,11 @@ MarkupParser.parseJSON5 = (function() {
         const array: JSON5Value[] = [];
 
         if (ch === '[') {
-            next('[');
+            ch = next('[');
             white();
             while (ch) {
                 if (ch === ']') {
-                    next(']');
+                    ch = next(']');
                     return array;   // Potentially empty array
                 }
                 // ES5 allows omitting elements in arrays, e.g. [,] and
@@ -1693,10 +1693,10 @@ MarkupParser.parseJSON5 = (function() {
                 // If there's no comma after this value, this needs to
                 // be the end of the array.
                 if (ch !== ',') {
-                    next(']');
+                    ch = next(']');
                     return array;
                 }
-                next(',');
+                ch = next(',');
                 white();
             }
         }
@@ -1710,11 +1710,11 @@ MarkupParser.parseJSON5 = (function() {
         const object: {[key: string]: JSON5Value} = {};
 
         if (ch === '{') {
-            next('{');
+            ch = next('{');
             white();
             while (ch) {
                 if (ch === '}') {
-                    next('}');
+                    ch = next('}');
                     return object;   // Potentially empty object
                 }
 
@@ -1727,16 +1727,16 @@ MarkupParser.parseJSON5 = (function() {
                 }
 
                 white();
-                next(':');
+                ch = next(':');
                 object[key] = value();
                 white();
                 // If there's no comma after this pair, this needs to be
                 // the end of the object.
                 if (ch !== ',') {
-                    next('}');
+                    ch = next('}');
                     return object;
                 }
-                next(',');
+                ch = next(',');
                 white();
             }
         }

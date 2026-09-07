@@ -1,4 +1,4 @@
-import {StyleSheet} from "./Style";
+import {StyleSheet, type StyleRuleObject} from "./Style";
 import {styleRule} from "../decorators/Style";
 import {enhance} from "./Color";
 import {Device} from "../base/Device";
@@ -110,30 +110,19 @@ Theme.setProperties({
     INPUT_BORDER_RADIUS: 4,
 });
 
+// A rule is named after the value that selects it, so a sheet only declares the levels and sizes it styles
+type LevelRules = {[Key in LevelType]?: StyleRuleObject};
+type SizeRules = {[Key in Exclude<SizeType, null>]?: StyleRuleObject};
+
+export interface BasicLevelSizeStyleSheet extends LevelRules, SizeRules {}
+
 export class BasicLevelSizeStyleSheet extends StyleSheet {
-    Level(level: LevelType): string | null {
-        if (!level) {
-            return null;
-        }
-        if (this[level]) {
-            return this[level];
-        }
-        for (let type of Object.keys(Level)) {
-            if (level == Level[type]) {
-                return this[type];
-            }
-        }
+    Level(level: LevelType) {
+        return level ? this[level] : null;
     }
 
-    Size(size: SizeType): string | null {
-        if (!size) {
-            return null;
-        }
-        for (let type of Object.keys(Size)) {
-            if (size == Size[type]) {
-                return this[type];
-            }
-        }
+    Size(size: SizeType) {
+        return size ? this[size] : null;
     }
 }
 
@@ -147,22 +136,22 @@ export const BasicLevelStyleSheet = (colorToStyleFunction: (color: string, textC
         BASE = this.colorStyleRule(this.themeProps.COLOR_BACKGROUND);
 
         @styleRule
-        PRIMARY = this.colorStyleRule(this.themeProps.COLOR_PRIMARY);
+        primary = this.colorStyleRule(this.themeProps.COLOR_PRIMARY);
 
         @styleRule
-        SECONDARY = this.colorStyleRule(this.themeProps.COLOR_SECONDARY);
+        secondary = this.colorStyleRule(this.themeProps.COLOR_SECONDARY);
 
         @styleRule
-        SUCCESS = this.colorStyleRule(this.themeProps.COLOR_SUCCESS);
+        success = this.colorStyleRule(this.themeProps.COLOR_SUCCESS);
 
         @styleRule
-        INFO = this.colorStyleRule(this.themeProps.COLOR_INFO);
+        info = this.colorStyleRule(this.themeProps.COLOR_INFO);
 
         @styleRule
-        WARNING = this.colorStyleRule(this.themeProps.COLOR_WARNING);
+        warning = this.colorStyleRule(this.themeProps.COLOR_WARNING);
 
         @styleRule
-        DANGER = this.colorStyleRule(this.themeProps.COLOR_DANGER);
+        error = this.colorStyleRule(this.themeProps.COLOR_DANGER);
     }
 
     return BasicLevelStyleClass;
@@ -171,7 +160,7 @@ export const BasicLevelStyleSheet = (colorToStyleFunction: (color: string, textC
 
 class FlexContainerStyle extends StyleSheet {
     @styleRule
-    HORIZONTAL = {
+    horizontal = {
         display: "flex",
         ">*": {
             marginLeft: 20,
@@ -183,7 +172,7 @@ class FlexContainerStyle extends StyleSheet {
     };
 
     @styleRule
-    VERTICAL = {
+    vertical = {
         display: "flex",
         flexDirection: "column",
         ">*": {
@@ -195,12 +184,8 @@ class FlexContainerStyle extends StyleSheet {
         }
     };
 
-    Orientation(orientation: OrientationType): CSSStyleObject | undefined {
-        for (let type of Object.keys(Orientation)) {
-            if (orientation == Orientation[type]) {
-                return this[type];
-            }
-        }
+    Orientation(orientation: OrientationType) {
+        return this[orientation];
     }
 }
 
@@ -212,26 +197,22 @@ class ContainerStyle extends StyleSheet {
     }
 
     @styleRule
-    EXTRA_SMALL = this.getSizeStyle(6, 15);
+    xs = this.getSizeStyle(6, 15);
 
     @styleRule
-    SMALL = this.getSizeStyle(4, 10);
+    sm = this.getSizeStyle(4, 10);
 
     @styleRule
-    MEDIUM = this.getSizeStyle(4, 6);
+    md = this.getSizeStyle(4, 6);
 
     @styleRule
-    LARGE = this.getSizeStyle(2, 3);
+    lg = this.getSizeStyle(2, 3);
 
     @styleRule
-    EXTRA_LARGE = this.getSizeStyle(2, 1);
+    xl = this.getSizeStyle(2, 1);
 
-    Size(size: SizeType): CSSStyleObject | undefined {
-        for (let type of Object.keys(Size)) {
-            if (size == Size[type]) {
-                return this[type];
-            }
-        }
+    Size(size: SizeType) {
+        return size ? this[size] : null;
     }
 }
 

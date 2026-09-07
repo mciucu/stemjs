@@ -48,6 +48,12 @@ interface DividerMousedownEvent {
     domEvent: MouseEvent | TouchEvent;
 }
 
+// One entry per panel, as setStyle takes it: the computed flex, or the number the defaults start at
+interface AccordionChildStatus {
+    flex: string | number;
+    collapsed: boolean;
+}
+
 @registerStyle(AccordionStyle)
 class Accordion extends UI.Element {
     declare panels: UIElement[];
@@ -161,8 +167,8 @@ class Accordion extends UI.Element {
         }
     }
 
-    getChildrenStatus() {
-        let childrenStatus = [];
+    getChildrenStatus(): AccordionChildStatus[] {
+        let childrenStatus: AccordionChildStatus[] = [];
         for (let panel of this.panels) {
             childrenStatus.push({
                 flex: getComputedStyle(panel.node, "flex"),
@@ -172,8 +178,8 @@ class Accordion extends UI.Element {
         return childrenStatus;
     }
 
-    getDefaultChildrenStatus() {
-        let childrenStatus = [];
+    getDefaultChildrenStatus(): AccordionChildStatus[] {
+        let childrenStatus: AccordionChildStatus[] = [];
         for (let panel of this.panels) {
             childrenStatus.push({
                 flex: 1,
@@ -183,7 +189,7 @@ class Accordion extends UI.Element {
         return childrenStatus;
     }
 
-    setChildrenStatus(childrenStatus: ReturnType<Accordion["getChildrenStatus"]>) {
+    setChildrenStatus(childrenStatus: AccordionChildStatus[]) {
         for (let i = 0; i < childrenStatus.length; i += 1) {
             this.panels[i].setStyle("flex", childrenStatus[i].flex);
             let collapsed = childrenStatus[i].collapsed;

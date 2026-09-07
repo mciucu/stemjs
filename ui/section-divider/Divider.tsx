@@ -9,11 +9,11 @@ export class Divider<ExtraOptions = {}> extends UI.Element<ExtraOptions> {
 
     dragMouseup(event: Event): void {};
 
-    dividerMousedownFunction(event) {
+    dividerMousedownFunction(event: Event) {
         this.dragMousedown(event);
         this.parent.dispatch("dividerMousedown", {divider: this, domEvent: event});
 
-        let dragMousemoveFunction = (event) => {
+        let dragMousemoveFunction = (event: MouseEvent | TouchEvent) => {
             this.dragMousemove(event);
             event.preventDefault(); // for touch devices
             this.parent.dispatch("dividerMousemove", event);
@@ -22,7 +22,7 @@ export class Divider<ExtraOptions = {}> extends UI.Element<ExtraOptions> {
         this.parent.addNodeListener("touchmove", dragMousemoveFunction);
         this.parent.addNodeListener("mousemove", dragMousemoveFunction);
 
-        let dragMouseupFunction = (event) => {
+        let dragMouseupFunction = (event: MouseEvent | TouchEvent) => {
             this.dragMouseup(event);
             this.parent.dispatch("dividerMouseup", event);
             this.parent.removeNodeListener("touchmove", dragMousemoveFunction);

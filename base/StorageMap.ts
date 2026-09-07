@@ -107,6 +107,14 @@ export class SessionStorageMap extends StorageMap {
 }
 
 // LocalStorageMap can be used to store data across all our tabs
+// What a change in another tab reports, once the raw key has been split back into map and key
+export interface StorageMapChange {
+    originalEvent: StorageEvent;
+    key: string;
+    oldValue: string | null;
+    newValue: string | null;
+}
+
 export class LocalStorageMap extends StorageMap {
     static CHANGE_DISPATCHABLE?: Dispatchable;
 

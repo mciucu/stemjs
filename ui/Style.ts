@@ -2,6 +2,7 @@ import {StyleElement, KeyframeElement, DynamicStyleElement} from "./StyleElement
 import {Dispatchable, type ListenerHandle} from "../base/Dispatcher";
 import {PREFERRED_CLASS_NAME_KEY} from "../decorators/Style";
 import {registerStyle, Theme, type ThemeProps} from "./style/Theme";
+import {type PartialOptions} from "./UIBase";
 
 export interface StyleSheetOptions {
     parent: HTMLElement;
@@ -90,7 +91,7 @@ class StyleSheet extends Dispatchable {
         if (this.styleElement) {
             return;
         }
-        const styleElementOptions = {
+        const styleElementOptions: PartialOptions<StyleElement> = {
             children: [],
             name: this.options.name,
         };

@@ -26,13 +26,13 @@ export function wrapStemInReact(React: any, StemClass: any): any {
     console.log(`Creating React wrapper for Stem class ${StemClass.name}`);
 
     class ReactComponent extends React.Component {
-        constructor(props) {
+        constructor(props: object) {
             super(props);
             stemInReactContext.stemRootComponentProps = this.props;
             this.stemElement = new StemClass({...this.props});
         }
 
-        shouldComponentUpdate(nextProps, nextState) {
+        shouldComponentUpdate(nextProps: object, nextState: object) {
             stemInReactContext.stemRootComponentProps = this.props;
             this.stemElement.updateOptions({...nextProps});
             return false;
@@ -51,7 +51,7 @@ export function wrapStemInReact(React: any, StemClass: any): any {
             }
         }
 
-        setNode(node) {
+        setNode(node: HTMLElement) {
             if (!node) {
                 return;
             }
@@ -67,7 +67,7 @@ export function wrapStemInReact(React: any, StemClass: any): any {
 
         render() {
             stemInReactContext.stemRootComponentProps = this.props;
-            return React.createElement(this.stemElement.getNodeType(), {ref: (node) => this.setNode(node)});
+            return React.createElement(this.stemElement.getNodeType(), {ref: (node: HTMLElement) => this.setNode(node)});
         }
     }
 

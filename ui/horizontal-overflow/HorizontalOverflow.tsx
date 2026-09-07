@@ -123,7 +123,7 @@ export class HorizontalOverflow extends UI.Element<HorizontalOverflowOptions> {
         }
     }
 
-    scrollContent(amount) {
+    scrollContent(amount: number) {
         const containerNode = this.pusherContainer.node;
         const target = containerNode.scrollLeft + amount * this.getWidth();
         this.scrollToOffset(amount < 0 ?

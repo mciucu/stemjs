@@ -41,7 +41,7 @@ export class FloatingWindow<ExtraOptions extends FloatingWindowOptions = Floatin
         }
     }
 
-    setParentNode(parentNode) {
+    setParentNode(parentNode: HTMLElement) {
         this.options.parentNode = parentNode;
     }
 

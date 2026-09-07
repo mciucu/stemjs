@@ -58,24 +58,24 @@ export class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
     };
 
     @styleRule
-    EXTRA_SMALL = {
+    xs = {
         fontSize: this.themeProps.FONT_SIZE_EXTRA_SMALL,
         padding: "0.2em 0.4em",
         borderWidth: "0.05em",
     };
 
     @styleRule
-    SMALL = {
+    sm = {
         fontSize: this.themeProps.FONT_SIZE_SMALL,
     };
 
     @styleRule
-    LARGE = {
+    lg = {
         fontSize: this.themeProps.FONT_SIZE_LARGE,
     };
 
     @styleRule
-    EXTRA_LARGE = {
+    xl = {
         fontSize: this.themeProps.FONT_SIZE_EXTRA_LARGE,
         padding: "0.2em 0.4em",
     };
@@ -83,7 +83,7 @@ export class ButtonStyle extends BasicLevelStyleSheet(buttonColorToStyle) {
 
 export class ButtonGroupStyle extends StyleSheet {
     @styleRule
-    HORIZONTAL = {
+    horizontal = {
         pointerEvents: "none",
         ">*": {
             marginLeft: "5px",
@@ -96,7 +96,7 @@ export class ButtonGroupStyle extends StyleSheet {
     };
 
     @styleRule
-    VERTICAL = {
+    vertical = {
         pointerEvents: "none",
         ">*": {
             marginTop: "5px",
@@ -109,11 +109,7 @@ export class ButtonGroupStyle extends StyleSheet {
     };
 
     Orientation(orientation: OrientationType) {
-        for (let type of Object.keys(Orientation)) {
-            if (orientation === Orientation[type]) {
-                return this[type];
-            }
-        }
+        return this[orientation];
     }
 }
 
