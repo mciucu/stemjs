@@ -11,6 +11,9 @@ declare global {
             exit(code?: number): never;
         }
     }
+
+    // Node's own global object, which carries gc only when the process was started with --expose-gc
+    var global: {gc?: () => void} | undefined;
 }
 
 export function MaybeGetGC(): (() => void) | undefined {
