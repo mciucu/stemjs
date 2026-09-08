@@ -1,5 +1,7 @@
 import {deepCopy} from "../base/Utils";
+import {type StyleRuleObject} from "../ui/Style";
 import {lazyInit} from "./LazyInitialize";
+import {type LegacyPropertyDescriptor} from "./Utils";
 
 interface StyleRuleOptions {
     targetMethodName?: string;
@@ -8,15 +10,18 @@ interface StyleRuleOptions {
     selector?: string;
 }
 
-interface StyleDescriptor extends PropertyDescriptor {
-    objInitializer?: () => any;
-    initializer: (() => any) | undefined;
+interface StyleDescriptor extends LegacyPropertyDescriptor {
+    objInitializer?: () => StyleRuleObject;
+    initializer: (() => StyleRuleObject) | undefined;
 }
 
-type StyleRuleFunction = () => any;
-type StyleRuleValue = any | StyleRuleFunction | any[];
+type StyleRuleFunction = () => StyleRuleObject;
 
-function evaluateStyleRuleObject(target: any, initializer: (() => any) | undefined, value: StyleRuleValue, _options: StyleRuleOptions): any {
+// What a @styleRule is written with: the object, a function that builds it, or an array merged into one.
+// The name is local: `StyleRuleValue` in ui/Style.ts is the class name a rule reads back as, not this
+type WrittenStyleRule = StyleRuleObject | StyleRuleFunction | (StyleRuleObject | StyleRuleFunction)[];
+
+function evaluateStyleRuleObject(target: object, initializer: (() => StyleRuleObject) | undefined, value: WrittenStyleRule, _options: StyleRuleOptions): StyleRuleObject {
     let result = initializer ? initializer.call(target) : value;
     if (typeof result === "function") {
         result = result();
@@ -37,7 +42,7 @@ function getKeyframesRuleKey(key: string | symbol): string {
 
 export const PREFERRED_CLASS_NAME_KEY = Symbol("PreferredClassName");
 
-function getPreferredClassName(cls: any, key: string | symbol, _descriptor: PropertyDescriptor): string {
+function getPreferredClassName(cls: object, key: string | symbol, _descriptor: PropertyDescriptor): string {
     if (key !== "container") {
         return String(key);
     }

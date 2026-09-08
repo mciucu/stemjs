@@ -3,6 +3,26 @@
 type BrowserName = "Opera" | "Firefox" | "Safari" | "Internet Explorer" | "Edge" | "Chrome" | "Unknown";
 type CoordinateReference = "client" | "page" | "screen";
 type CoordinateAxis = "X" | "Y";
+type CoordinateKey = `${CoordinateReference}${CoordinateAxis}`;
+
+// The vendor globals getBrowser tests for, each one absent from the DOM lib because no standard has them
+declare global {
+    interface Window {
+        opr?: {addons?: unknown};
+        opera?: unknown;
+        InstallTrigger?: unknown;
+        StyleMedia?: unknown;
+        chrome?: {webstore?: unknown};
+    }
+
+    interface Navigator {
+        msMaxTouchPoints?: number;
+    }
+
+    interface Document {
+        documentMode?: number;
+    }
+}
 
 interface TouchEvent extends Event {
     touches: TouchList;
@@ -23,8 +43,8 @@ interface EventWithCoordinates extends Partial<Event> {
 
 export function isTouchDevice(): boolean {
     return !!(("createTouch" in window.document) ||
-        ((navigator as any).maxTouchPoints > 0) ||
-        ((navigator as any).msMaxTouchPoints > 0) ||
+        (navigator.maxTouchPoints > 0) ||
+        (navigator.msMaxTouchPoints > 0) ||
         ("ontouchstart" in window));
 }
 
@@ -39,8 +59,9 @@ export function isMobileDevice(): boolean {
 }
 
 export function isLandscape(): boolean {
-    const orientation = (window.screen as any).orientation;
+    const orientation = window.screen.orientation;
 
+    // Left standing: screen.orientation is an object, so this has never matched - the numeric API was window.orientation
     if (orientation === -90 || orientation === 90) {
         return true;
     }
@@ -65,13 +86,14 @@ export function getEventTouch(event: TouchEvent): Touch | undefined {
 }
 
 export function getEventCoord(event: EventWithCoordinates, axis: CoordinateAxis, reference: CoordinateReference = "client"): number | undefined {
-    let coordName = reference + axis as keyof EventWithCoordinates;
-    if (event[coordName]) {
-        return event[coordName] as number;
+    const coordName: CoordinateKey = `${reference}${axis}`;
+    // Against null, not truthiness: a touch on the left or top edge is at 0
+    if (event[coordName] != null) {
+        return event[coordName];
     }
     if (event.touches) {
         const touch = getEventTouch(event as TouchEvent);
-        return touch ? (touch as any)[coordName] : undefined;
+        return touch ? touch[coordName] : undefined;
     }
     if (event.originalEvent) {
         return getEventCoord(event.originalEvent, axis, reference);
@@ -91,22 +113,22 @@ export function getEventY(event: EventWithCoordinates, reference: CoordinateRefe
 
 export function getBrowser(): BrowserName {
     // TODO: should try to use navigator
-    if (((window as any).opr && (window as any).opr.addons) || !!(window as any).opera || navigator.userAgent.indexOf(' OPR/') >= 0) {
+    if ((window.opr && window.opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0) {
         return "Opera";
     }
-    if (typeof (window as any).InstallTrigger !== 'undefined') {
+    if (typeof window.InstallTrigger !== 'undefined') {
         return "Firefox";
     }
     if (Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0) {
         return "Safari";
     }
-    if ((document as any).documentMode) {
+    if (document.documentMode) {
         return "Internet Explorer";
     }
-    if ((window as any).StyleMedia) {
+    if (window.StyleMedia) {
         return "Edge";
     }
-    if ((window as any).chrome && (window as any).chrome.webstore) {
+    if (window.chrome && window.chrome.webstore) {
         return "Chrome";
     }
     return "Unknown";

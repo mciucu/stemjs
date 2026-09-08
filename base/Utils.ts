@@ -235,7 +235,7 @@ export function slugify(string: string): string {
 }
 
 // If the first argument is a number, it's returned concatenated with the suffix, otherwise it's returned unchanged
-export function suffixNumber(value: any, suffix: string): any {
+export function suffixNumber<T>(value: T, suffix: string): T | string {
     return isNumber(value) ? value + suffix : value;
 }
 
@@ -287,11 +287,11 @@ export function isNotNullOrFalse<T>(obj: T | null | false): obj is T {
     return obj !== null && obj !== false;
 }
 
-export function isFunction(obj: any): obj is Function {
+export function isFunction(obj: unknown): obj is Function {
     return typeof obj === "function";
 }
 
-export function isBoolean(obj: any): obj is boolean {
+export function isBoolean(obj: unknown): obj is boolean {
     return obj === true || obj === false;
 }
 
@@ -303,7 +303,7 @@ export function isString(obj: any): obj is string {
     return (typeof obj === "string") || (obj instanceof String);
 }
 
-export function isNumericString(str: any, acceptPadding: boolean = false): boolean {
+export function isNumericString(str: unknown, acceptPadding: boolean = false): boolean {
     if (!isString(str)) {
         return false;
     }
@@ -314,7 +314,7 @@ export function isNumericString(str: any, acceptPadding: boolean = false): boole
     return !isNaN(str as any) && !isNaN(parseFloat(str));
 }
 
-export function isPlainObject(obj: any): obj is Record<string, any> {
+export function isPlainObject(obj: unknown): obj is Record<string, any> {
     if (!obj || typeof obj !== "object") {
         return false;
     }
@@ -480,21 +480,28 @@ export function deserializeCookie(name: string): any {
     return JSON.parse(decodeURIComponent(value));
 }
 
+// The counters uniqueId keeps between calls, hung on the function itself rather than on the module
+export declare namespace uniqueId {
+    let objectWeakMap: WeakMap<object, string>;
+    let constructorWeakMap: WeakMap<object, number>;
+    let totalObjectCount: number;
+}
+
 export function uniqueId(obj: object): string {
-    if (!(uniqueId as any).objectWeakMap) {
-        (uniqueId as any).objectWeakMap = new WeakMap();
-        (uniqueId as any).constructorWeakMap = new WeakMap();
-        (uniqueId as any).totalObjectCount = 0;
+    if (!uniqueId.objectWeakMap) {
+        uniqueId.objectWeakMap = new WeakMap();
+        uniqueId.constructorWeakMap = new WeakMap();
+        uniqueId.totalObjectCount = 0;
     }
-    let objectWeakMap = (uniqueId as any).objectWeakMap;
-    let constructorWeakMap = (uniqueId as any).constructorWeakMap;
+    let objectWeakMap = uniqueId.objectWeakMap;
+    let constructorWeakMap = uniqueId.constructorWeakMap;
     if (!objectWeakMap.has(obj)) {
         const objConstructor = (obj as any).constructor || (obj as any).__proto__ || Object;
         // Increment the object count
         const objIndex = (constructorWeakMap.get(objConstructor) || 0) + 1;
         constructorWeakMap.set(objConstructor, objIndex);
 
-        const objUniqueId = objIndex + "-" + (++(uniqueId as any).totalObjectCount);
+        const objUniqueId = objIndex + "-" + (++uniqueId.totalObjectCount);
         objectWeakMap.set(obj, objUniqueId);
     }
     return objectWeakMap.get(obj);
@@ -645,13 +652,13 @@ export function* filterIterator<T>(iter: Iterable<T>, func: (value: T) => boolea
 
 // Used so that a value or a function can be used anywhere
 // If the value is a function, it will call it at most maxIter (default 32) times
-export function resolveFuncValue<T>(value: T | (() => T), options: ResolveFuncValueOptions = {}): T {
+export function resolveFuncValue<T>(value: T | ((...args: any[]) => T), options: ResolveFuncValueOptions = {}): T {
     const {maxIter = 32, args = null, allowUnresolved = false} = options;
     let currentValue = value;
     let iterations = maxIter;
     
     while (iterations > 0 && isFunction(currentValue)) {
-        currentValue = (currentValue as any)(...(args || []));
+        currentValue = currentValue(...(args || []));
         iterations -= 1;
     }
     if (!allowUnresolved && iterations === 0) {

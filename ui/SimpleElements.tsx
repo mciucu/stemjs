@@ -1,5 +1,5 @@
-import {BaseUIElement, UI, UIElement, type UIChild, type UICleanChild, type UIRenderable} from "./UIBase";
-import {BasicLevelStyleSheet} from "./GlobalStyle";
+import {BaseUIElement, UI, UIElement, type UIChild, type UICleanChild, type UIRenderable, type WrittenUIElementOptions} from "./UIBase";
+import {BasicLevelStyleSheet, type CSSStyleObject} from "./GlobalStyle";
 import {registerStyle} from "./style/Theme";
 import {buildColors} from "./Color";
 import {styleRule} from "../decorators/Style";
@@ -8,10 +8,10 @@ import {NodeAttributes} from "./NodeAttributes";
 import {type LevelType, type SizeType} from "./Constants";
 
 // Type definitions
-export type IconType = string | BaseUIElement | ((options: any) => BaseUIElement);
-export type MakeIconFunction = (icon: IconType, options?: any) => BaseUIElement | null;
+export type IconType = string | BaseUIElement | ((options: WrittenUIElementOptions) => BaseUIElement);
+export type MakeIconFunction = (icon: IconType, options?: WrittenUIElementOptions) => BaseUIElement | null;
 // A UIRenderable is accepted because the default below renders through String(), so its toString() is what shows
-export type MakeTextFunction = (text: UICleanChild | UIRenderable, options?: any) => BaseUIElement;
+export type MakeTextFunction = (text: UICleanChild | UIRenderable, options?: WrittenUIElementOptions) => BaseUIElement;
 
 export interface SimpleStyledElementOptions {
     icon?: IconType;
@@ -20,9 +20,9 @@ export interface SimpleStyledElementOptions {
     size?: string;
 }
 
-export function DefaultMakeIcon(icon: IconType, options: any = {}): BaseUIElement | null {
+export function DefaultMakeIcon(icon: IconType, options: WrittenUIElementOptions = {}): BaseUIElement | null {
     if (isFunction(icon)) {
-        return (icon as (options: any) => UIElement)(options);
+        return icon(options);
     }
     if (icon instanceof UIElement) {
         return icon;
@@ -39,12 +39,12 @@ export function SetMakeIcon(func: MakeIconFunction): void {
     MakeIconFunc = func;
 }
 
-export function MakeIcon(icon: IconType, options?: any): BaseUIElement | null {
+export function MakeIcon(icon: IconType, options?: WrittenUIElementOptions): BaseUIElement | null {
     return MakeIconFunc(icon, options);
 }
 
 // Same as for icons, but for text
-let MakeTextFunc: MakeTextFunction = (text: UICleanChild | UIRenderable, _options?: any): BaseUIElement => {
+let MakeTextFunc: MakeTextFunction = (text: UICleanChild | UIRenderable, _options?: WrittenUIElementOptions): BaseUIElement => {
     if (text instanceof BaseUIElement) {
         return text;
     }
@@ -55,7 +55,7 @@ export function SetMakeText(func: MakeTextFunction): void {
     MakeTextFunc = func;
 }
 
-export function MakeText(text: UICleanChild | UIRenderable, options?: any): BaseUIElement {
+export function MakeText(text: UICleanChild | UIRenderable, options?: WrittenUIElementOptions): BaseUIElement {
     return MakeTextFunc(text, options);
 }
 
@@ -106,7 +106,7 @@ export class IconableInterface<T extends SimpleStyledElementOptions = SimpleStyl
 }
 
 // TODO: move this to another file
-let labelColorToStyle = (color: string): any => {
+let labelColorToStyle = (color: string): CSSStyleObject => {
     const colors = buildColors(color);
     let darker = {
         backgroundColor: colors[2],
@@ -189,7 +189,7 @@ export class Label extends UI.Primitive("span", IconableInterface) {
     }
 }
 
-let badgeColorToStyle = (color: string): any => {
+let badgeColorToStyle = (color: string): CSSStyleObject => {
     const colors = buildColors(color);
     return {
         backgroundColor: colors[1],

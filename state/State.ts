@@ -38,9 +38,9 @@ export interface StoreInterface<BaseType extends StoreObject = StoreObject> {
     getState(): State;
     applyEvent(event: StateEvent): BaseType | undefined;
     get(id: StoreId): BaseType | undefined;
-    importState(objects: any[]): void;
+    importState(objects: RawStoreObject[]): void;
     clear?(): void;
-    toJSON(): any[];
+    toJSON(): RawStoreObject[];
     getObjects(): Map<string, BaseType>;
     all(): BaseType[];
     filterBy(filter: Record<string, any>): BaseType[];
@@ -49,7 +49,13 @@ export interface StoreInterface<BaseType extends StoreObject = StoreObject> {
     addChangeListener(callback: Callback): RemoveHandle | CleanupJobs | undefined;
 }
 
-export type RawStateData = Record<string, any[]>;
+// The form a store object arrives in and goes back out as, before any field is read
+export interface RawStoreObject {
+    id?: StoreId;
+    [key: string]: unknown;
+}
+
+export type RawStateData = Record<string, RawStoreObject[]>;
 
 export interface StateLoadOptions {
     state?: RawStateData;
@@ -115,7 +121,7 @@ export class State extends Dispatchable {
     }
 
     // Import the store for objectType and remove it from stateMap
-    importStateFromTempMap(objectType: string, stateMap: Map<string, any[]>): void {
+    importStateFromTempMap(objectType: string, stateMap: Map<string, RawStoreObject[]>): void {
         const storeState = stateMap.get(objectType);
         stateMap.delete(objectType);
         if (storeState == null) {
@@ -150,7 +156,7 @@ export class State extends Dispatchable {
             return;
         }
         // Import everything in a map and then do an implicit topological sort by dependencies
-        const stateMap = new Map<string, any[]>();
+        const stateMap = new Map<string, RawStoreObject[]>();
         for (const [objectType, objects] of Object.entries(state)) {
             stateMap.set(objectType.toLowerCase(), objects);
         }

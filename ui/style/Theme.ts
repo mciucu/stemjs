@@ -12,17 +12,20 @@ export type ThemeProps = Record<string, any>;
 // carries UIElement's own generic construct signature, which no concrete subclass satisfies - Backlog item 12
 type ElementClassLike = abstract new (...args: any[]) => UIElement<any, any, any, any>;
 
+// A symbol index signature would say where the sheet is kept, but no class satisfies one as an argument
+type StyledElementClass = ElementClassLike & {theme?: Theme};
+
 export class Theme extends Dispatchable {
     static Global = new this(null, "Global");
 
-    classSet = new Set<ElementClassLike & {theme?: Theme}>();
+    classSet = new Set<StyledElementClass>();
     styleSheetInstances = new Map<typeof StyleSheet, StyleSheet>(); // map from StyleSheet class to instance
     updateThrottled: Function = (new CallThrottler({throttle: 50})).wrap(() => this.updateStyleSheets()); // TODO @cleanup CallThrottler syntax is really ugly
     name: string;
     baseTheme: Theme | null;
     properties: ThemeProps;
     propTypes: Record<string, ThemeType>;
-    props: any;
+    props: ThemeProps;
     styleSheetSymbol: symbol;
 
     constructor(baseTheme: Theme | null, name: string, props?: ThemeProps) {
@@ -65,18 +68,18 @@ export class Theme extends Dispatchable {
     }
 
     // A constructor type rather than `typeof UIElement`, which no concrete subclass satisfies - Backlog item 12
-    register(cls: ElementClassLike & {theme?: Theme}, styleSheet: typeof StyleSheet): void {
+    register(cls: StyledElementClass, styleSheet: typeof StyleSheet): void {
         cls.theme = this;
         cls[this.styleSheetSymbol] = styleSheet;
         this.classSet.add(cls);
     }
 
     // Answers with what register stored, which is the class rather than an instance
-    getStyleSheet(cls: any): typeof StyleSheet {
+    getStyleSheet(cls: StyledElementClass): typeof StyleSheet {
         return cls[this.styleSheetSymbol] || this.baseTheme?.getStyleSheet(cls);
     }
 
-    getProperty(key: string): any {
+    getProperty(key: string): ThemeProps[string] {
         if (this.properties.hasOwnProperty(key)) {
             // Return nulls as well
             return this.properties[key];
@@ -98,7 +101,7 @@ export class Theme extends Dispatchable {
         }
     }
 
-    getAllStyleSheets(): any[] {
+    getAllStyleSheets(): StyleSheet[] {
         // Deduplicated after resolving, since a cached instance and the class it was built from are two objects
         const styleSheets = [...this.styleSheetInstances.values()];
         for (const cls of this.classSet.values()) {
@@ -125,8 +128,7 @@ export class Theme extends Dispatchable {
         this.dispatch("afterUpdateStyleSheets");
     }
 
-    // TODO @branch styleSheet should have a type
-    static register(cls: any, styleSheet: any): void {
+    static register(cls: StyledElementClass, styleSheet: typeof StyleSheet): void {
         return this.Global.register(cls, styleSheet);
     }
 

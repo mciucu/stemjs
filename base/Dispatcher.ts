@@ -51,10 +51,11 @@ export class Dispatcher {
     // Assigned below, once Dispatchable is defined
     declare static Global: Dispatchable;
 
-    options: any;
+    // The base only stores them; a subclass that has options of its own redeclares this with their type
+    options: unknown;
     listeners: Callback[];
 
-    constructor(options: any = {}) {
+    constructor(options: unknown = {}) {
         this.options = options;
         this.listeners = [];
     }
@@ -268,12 +269,12 @@ export function getAttachCleanupJobMethod(methodName: string) {
 
 // TODO maybe this can be handle better through a Proxy?
 // Not sure if these should be added like this, but meh
-(Dispatchable.prototype as any).attachListener           = getAttachCleanupJobMethod("Listener");
-(Dispatchable.prototype as any).attachEventListener      = getAttachCleanupJobMethod("EventListener");
-(Dispatchable.prototype as any).attachCreateListener     = getAttachCleanupJobMethod("CreateListener");
-(Dispatchable.prototype as any).attachDeleteListener     = getAttachCleanupJobMethod("DeleteListener");
-(Dispatchable.prototype as any).attachChangeListener     = getAttachCleanupJobMethod("ChangeListener");
-(Dispatchable.prototype as any).attachListenerOnce       = getAttachCleanupJobMethod("ListenerOnce");
+Dispatchable.prototype.attachListener           = getAttachCleanupJobMethod("Listener");
+Dispatchable.prototype.attachEventListener      = getAttachCleanupJobMethod("EventListener");
+Dispatchable.prototype.attachCreateListener     = getAttachCleanupJobMethod("CreateListener");
+Dispatchable.prototype.attachDeleteListener     = getAttachCleanupJobMethod("DeleteListener");
+Dispatchable.prototype.attachChangeListener     = getAttachCleanupJobMethod("ChangeListener");
+Dispatchable.prototype.attachListenerOnce       = getAttachCleanupJobMethod("ListenerOnce");
 
 Dispatcher.Global = new Dispatchable();
 

@@ -2,22 +2,30 @@ import {TextUIElement, UI, type UIChild} from "./UIBase";
 import {dashCase, isFunction, isNumber, isString} from "../base/Utils";
 import {NodeAttributes, defaultToPixelsAttributes} from "./NodeAttributes";
 
+// The counter every generated class and keyframe name is numbered from
+declare global {
+    var styleInstanceCounter: number | undefined;
+}
+
+interface StyleAttributes {
+    selectorName?: string; // Written on the style object rather than the options, and moved across by render
+    [key: string]: string | number | Function | Array<string | number> | null | undefined;
+}
+
+type StyleAttributeValue = StyleAttributes[string];
+
 interface StyleInstanceOptions {
     value?: string; // The rule text, which render() computes from the attributes below
     selector?: string;
     key?: string;
-    attributes?: Record<string, any>;
-}
-
-interface StyleAttributes {
-    [key: string]: string | number | Function | Array<string | number> | null | undefined;
+    attributes?: StyleAttributes;
 }
 
 interface StyleElementOptions {
     name?: string;
 }
 
-interface DynamicStyleElementOptions extends StyleElementOptions {
+export interface DynamicStyleElementOptions extends StyleElementOptions {
     style?: StyleAttributes | (() => StyleAttributes);
     selectorName?: string;
 }
@@ -29,7 +37,7 @@ interface KeyframeElementOptions extends StyleElementOptions {
 // TODO: should this be actually better done throught the dynamic CSS API, without doing through the DOM?
 // So far it's actually better like this, since we want to edit the classes inline
 export class StyleInstance extends TextUIElement<StyleInstanceOptions> {
-    attributes: Map<string, any>;
+    attributes: Map<string, StyleAttributeValue>;
 
     constructor(options: StyleInstanceOptions) {
         super(options);
@@ -64,7 +72,7 @@ export class StyleInstance extends TextUIElement<StyleInstanceOptions> {
             }
 
             // TODO: if key starts with vendor-, replace it with the browser specific one (and the plain one)
-            const buildKeyValue = (key: string, value: any): string => key + ":" + value + ";";
+            const buildKeyValue = (key: string, value: StyleAttributeValue): string => key + ":" + value + ";";
 
             if (Array.isArray(value)) {
                 for (const v of value) {
@@ -81,7 +89,7 @@ export class StyleInstance extends TextUIElement<StyleInstanceOptions> {
         this.setOptions(element.options);
     }
 
-    setAttribute(name: string, value: any): void {
+    setAttribute(name: string, value: StyleAttributeValue): void {
         this.attributes.set(name, value);
         this.redraw();
     }
@@ -123,8 +131,8 @@ export class DynamicStyleElement extends StyleElement<DynamicStyleElementOptions
         if (this.className) {
             return this.className;
         }
-        (self as any).styleInstanceCounter = ((self as any).styleInstanceCounter || 0) + 1;
-        this.className = (this.options.name ||  "autocls") + "-" + (self as any).styleInstanceCounter;
+        self.styleInstanceCounter = (self.styleInstanceCounter || 0) + 1;
+        this.className = (this.options.name ||  "autocls") + "-" + self.styleInstanceCounter;
         return this.className;
     }
 
@@ -165,27 +173,27 @@ export class DynamicStyleElement extends StyleElement<DynamicStyleElementOptions
         return result;
     }
 
-    render(): UIChild {
+    render(): StyleInstance[] {
         // On a style element `style` is the rule body it generates, not the node's own inline style
         let style = (this.options.style || {}) as StyleAttributes | (() => StyleAttributes);
         if (typeof style === "function") {
             style = style();
         }
-        if ((style as any).selectorName) {
-            this.options.selectorName = (style as any).selectorName;
-            delete (style as any).selectorName;
+        if (style.selectorName) {
+            this.options.selectorName = style.selectorName;
+            delete style.selectorName;
         }
         return this.getStyleInstances(this.getSelector(), style);
     }
 
-    setStyle(key: string, value: any): void {
+    setStyle(key: string, value: StyleAttributeValue): void {
         if (this.options.style && typeof this.options.style === 'object') {
             (this.options.style as StyleAttributes)[key] = value;
             (this.children[0] as StyleInstance).setAttribute(key, value);
         }
     }
 
-    setSubStyle(_selector: string, _key: string, _value: any): void {
+    setSubStyle(_selector: string, _key: string, _value: StyleAttributeValue): void {
         throw Error("Implement me!");
     }
 
@@ -205,8 +213,8 @@ export class KeyframeElement extends StyleElement<KeyframeElementOptions> {
         if (this.keyframeName) {
             return this.keyframeName;
         }
-        (self as any).styleInstanceCounter = ((self as any).styleInstanceCounter || 0) + 1;
-        this.keyframeName = (this.options.name || "autokeyframe") + "-" + (self as any).styleInstanceCounter;
+        self.styleInstanceCounter = (self.styleInstanceCounter || 0) + 1;
+        this.keyframeName = (this.options.name || "autokeyframe") + "-" + self.styleInstanceCounter;
         return this.keyframeName;
     }
 

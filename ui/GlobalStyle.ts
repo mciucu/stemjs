@@ -7,7 +7,7 @@ import {Theme} from "./style/Theme";
 import {FloatType} from "./style/ThemeTypes";
 
 // Type definitions for CSS style objects
-interface CSSStyleObject {
+export interface CSSStyleObject {
     [key: string]: string | number | (() => string | number) | CSSStyleObject;
 }
 

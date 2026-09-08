@@ -200,22 +200,6 @@ class SortedSetNode<T, K> {
         }
         return this.right!.get(index - leftSize - 1);
     }
-
-    toJSON(): any {
-        let json: any = {
-            value: this.value,
-            key: this.key,
-            weight: this.weight,
-            size: this.size
-        };
-        if (this.left) {
-            json.left = this.left.toJSON();
-        }
-        if (this.right) {
-            json.right = this.right.toJSON();
-        }
-        return json;
-    }
 }
 
 
@@ -224,6 +208,8 @@ interface SortedSetOptions<K> {
     comparator?: ComparatorFunction<K>;
 }
 
+// The `value as any` defaults below say the key is the value when K was left as T, which is a relationship
+// TypeScript cannot state for a parameter default
 export class SortedSet<T, K = T> {
     private comparator: ComparatorFunction<K>;
     private nodeMap: Map<T, SortedSetNode<T, K>>;
@@ -359,10 +345,6 @@ export class SortedSet<T, K = T> {
 
     toArray(startIndex: number = 0, endIndex: number = this.size()): T[] {
         return Array.from(this.values(startIndex, endIndex));
-    }
-
-    toJSON(): any {
-        return this.rootNode?.toJSON() || {};
     }
 
     toString(): string {

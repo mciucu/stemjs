@@ -1,5 +1,5 @@
 import {dashCase, isNumber, isString, isPlainObject, setObjectPrototype, resolveFuncValue} from "../base/Utils";
-import {type StyleRuleValue} from "./Style";
+import {type StyleRuleObject, type StyleRuleValue} from "./Style";
 
 export const defaultToPixelsAttributes = new Set([
     "border-radius",
@@ -46,15 +46,24 @@ export const defaultToPixelsAttributes = new Set([
     "gap",
 ]);
 
+// What the map holds per attribute: the DOM name it is written under, which defaults to the option's own name
+export interface DOMAttributeDescriptor {
+    domName?: string;
+    noValue?: boolean; // The attribute is written bare, so the option is only ever tested for truthiness
+}
+
+// An attribute is named on its own, or paired with the DOM name it differs from
+export type DOMAttributeEntry = string | [string] | [string, DOMAttributeDescriptor];
+
 // Used to map from option key to a DOM attribute name.
 // Can recursively fall back to a base mapping, to allow extending of a parent class
 export class DOMAttributesMap {
-    allowedAttributesMap = new Map<string, any>();
+    allowedAttributesMap = new Map<string, DOMAttributeDescriptor>();
     reverseNameMap = new Map<string, string>();
     fallbackMapping: DOMAttributesMap | null;
     allowedPrefixes: string[];
 
-    constructor(fallbackMapping: DOMAttributesMap | null, allowedAttributesArray: any[] = [], allowedPrefixes: string[] = []) {
+    constructor(fallbackMapping: DOMAttributesMap | null, allowedAttributesArray: DOMAttributeEntry[] = [], allowedPrefixes: string[] = []) {
         this.fallbackMapping = fallbackMapping;
 
         for (let attribute of allowedAttributesArray) {
@@ -68,7 +77,7 @@ export class DOMAttributesMap {
         this.allowedPrefixes = allowedPrefixes;
     }
 
-    setAttribute(key: string, value?: any): void {
+    setAttribute(key: string, value?: DOMAttributeDescriptor): void {
         value = value || {};
         value.domName = value.domName || key;
 
@@ -76,7 +85,7 @@ export class DOMAttributesMap {
         this.reverseNameMap.set(value.domName, key);
     }
 
-    get(key: string): any {
+    get(key: string): DOMAttributeDescriptor | undefined {
         for (const prefix of this.allowedPrefixes) {
             if (key.startsWith(prefix)) {
                 return {
@@ -123,6 +132,10 @@ export class ClassNameSet extends Set {
 // Anything that stringifies to a class name. Style rules are DynamicStyleElements, not strings, so this is what
 // className has to accept for `className={this.styleSheet.someRule}` to typecheck.
 export type ClassNameValue = string | number | ClassNameSet | StyleRuleValue;
+
+// What addClass takes. It stringifies whatever it is handed, so a rule read off a sheet is as good as the
+// class name it stands for
+export type ClassNameArgument = ClassNameValue | StyleRuleObject | null | undefined;
 
 export type NodeElement = HTMLElement | SVGElement;
 
@@ -211,12 +224,13 @@ export class NodeAttributes {
         }
     }
 
-    static getClassArray(classes: any): string[] {
+    static getClassArray(classes: ClassNameArgument | ClassNameArgument[]): string[] {
         if (!classes) {
             return [];
         }
         if (Array.isArray(classes)) {
-            return classes.map(x => String(x).trim());
+            // Split each entry too: a rule set stringifies to several names, and classList.add takes one
+            return classes.flatMap(x => String(x).trim().split(" "));
         } else {
             return String(classes).trim().split(" ");
         }
@@ -229,6 +243,8 @@ export class NodeAttributes {
         return this.className as ClassNameSet;
     }
 
+    // Left open: the parameter is reassigned to the array form, and StyleRuleObject's index signature makes
+    // an array assignable to it too, so no declared union narrows to something iterable
     addClass(classes: any, node?: NodeElement): void {
         classes = this.constructor.getClassArray(classes);
 
@@ -251,7 +267,7 @@ export class NodeAttributes {
         }
     }
 
-    hasClass(className: string | any): boolean {
+    hasClass(className: string | {className: string}): boolean {
         return this.getClassNameSet().has(isString(className) ? className : className.className);
     }
 

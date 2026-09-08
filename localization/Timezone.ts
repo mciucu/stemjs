@@ -16,7 +16,7 @@ interface DateValues {
 }
 
 @makeEnum
-export class Timezone extends BaseEnum {
+export class Timezone extends BaseEnum<TimezoneConfig> {
     static LOCAL: TimezoneConfig = {value: "local", name: `Local timezone (${Timezone.getCurrentTimezoneName()})`};
     static UTC: TimezoneConfig = {value: "UTC", name: "Universal Time, Coordinated"};
     static US_EASTERN: TimezoneConfig = {value: "America/New_York", name: "US Eastern"};
@@ -27,7 +27,6 @@ export class Timezone extends BaseEnum {
     static CET: TimezoneConfig = {value: "Europe/Paris", name: "Europe Central"};
     static EET: TimezoneConfig = {value: "Europe/Bucharest", name: "Europe Eastern"};
 
-    declare value: string;
     private defaultFormatter: Intl.DateTimeFormat;
 
     constructor(config: TimezoneConfig) {

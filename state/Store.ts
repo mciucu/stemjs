@@ -1,10 +1,10 @@
 import {CleanupJobs, Dispatchable, type ListenerHandle} from "../base/Dispatcher";
-import {GlobalState, type RawStateData, State, type StateData, type StoreEvent, type StoreId, type StoreIdOrNull, type StoreInterface, type StoreObjectType} from "./State";
+import {GlobalState, type RawStateData, type RawStoreObject, State, type StateData, type StoreEvent, type StoreId, type StoreIdOrNull, type StoreInterface, type StoreObjectType} from "./State";
 import {isNotNull, isString, toArray} from "../base/Utils";
 import {type FieldDescriptor} from "./StoreField";
 
 // Another store, as the name it registered under or as the class itself
-export type StoreDependency = StoreObjectType | StoreClass<any>;
+export type StoreDependency = StoreObjectType | StoreClass<StoreObject>;
 
 export interface StoreOptions {
     state?: State;
@@ -78,8 +78,8 @@ export class StoreObject extends Dispatchable {
         return this[EventDispatcherSymbol]!.addListener(eventType, callback);
     }
 
-    toJSON(): any {
-        const obj: any = {};
+    toJSON(): RawStoreObject {
+        const obj: RawStoreObject = {};
         for (const key in this) {
             if (this.hasOwnProperty(key)) {
                 obj[key] = this[key];
@@ -111,7 +111,7 @@ export class StoreObject extends Dispatchable {
         return (value: any, _obj: any) => this.get(value);
     }
 
-    static loadRaw(responseOrState: StateData): any[] {
+    static loadRaw(responseOrState: StateData): RawStoreObject[] {
         const state = (responseOrState?.state || responseOrState || {}) as RawStateData;
 
         // Since the backend might have a different lettering case, need a more complex search here
@@ -217,7 +217,7 @@ export class StoreObject extends Dispatchable {
         return this.filterBy<T>(filter)[0];
     }
 
-    static toJSON<T extends StoreObject>(this: StoreClass<T>): any[] {
+    static toJSON<T extends StoreObject>(this: StoreClass<T>): RawStoreObject[] {
         return this.all<T>().map((entry: T) => entry.toJSON());
     }
 
@@ -275,13 +275,13 @@ export class StoreObject extends Dispatchable {
         return obj;
     }
 
-    static importState(objects: any[] = []): void {
+    static importState(objects: RawStoreObject[] = []): void {
         for (const obj of objects) {
             this.create(obj);
         }
     }
 
-    static makeEventFromObject(obj: any, eventExtra: any = null): StoreEvent {
+    static makeEventFromObject(obj: RawStoreObject | StoreObject, eventExtra: any = null): StoreEvent {
         return {
             isFake: true,
             type: "create",
@@ -293,7 +293,7 @@ export class StoreObject extends Dispatchable {
     }
 
     // Create a fake creation event, to insert the raw object
-    static create<T extends StoreObject>(this: StoreClass<T>, obj: any, eventExtra: any = null, dispatchEvent: boolean = true): T | undefined {
+    static create<T extends StoreObject>(this: StoreClass<T>, obj: RawStoreObject | StoreObject, eventExtra: any = null, dispatchEvent: boolean = true): T | undefined {
         if (!obj) {
             return;
         }

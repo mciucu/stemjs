@@ -1,11 +1,16 @@
 type HandleDescriptor = (target: any, key: string | symbol, descriptor: PropertyDescriptor, args: any[]) => PropertyDescriptor;
 
+// What a legacy decorator is handed: the field's initializer rides along on the descriptor, and the
+// standard PropertyDescriptor does not model it
+export interface LegacyPropertyDescriptor extends PropertyDescriptor {
+    initializer?: () => unknown;
+}
+
 export function isDescriptor(desc: any): desc is PropertyDescriptor {
     if (!desc?.hasOwnProperty) {
         return false;
     }
 
-    // `initializer` is what a legacy decorator descriptor carries, and PropertyDescriptor doesn't model it
     const keys = ["value", "initializer", "get", "set"];
 
     for (let key of keys) {

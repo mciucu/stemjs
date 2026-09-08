@@ -1,5 +1,7 @@
 import {Device} from "../base/Device";
-import {CleanupJobs} from "../base/Dispatcher";
+import {type CleanupHandle, CleanupJobs, type RemoveHandle} from "../base/Dispatcher";
+import {type UIElement} from "./UIBase";
+import {type Constructor} from "../base/Utils";
 
 interface ZoomEvent {
     x: number;
@@ -23,11 +25,12 @@ interface CentroidData {
     averageDist: number;
 }
 
-type ZoomEventHandler = new (uiElement: any, callback: (event: Event, delta: number) => void) => {
-    cleanup(): void;
-};
+type ZoomEventHandler = new (uiElement: ZoomableElement, callback: (event: Event, delta: number) => void) => CleanupHandle;
 
 type ZoomEventCallback = (event: Event, delta: number) => void;
+
+// All a handler needs of the element is somewhere to hang a DOM listener
+type ZoomableElement = Pick<UIElement, "addNodeListener">;
 
 function generateZoomEvent(rawEvent: Event, delta: number, unit: number = 200): ZoomEvent {
     return {
@@ -39,9 +42,9 @@ function generateZoomEvent(rawEvent: Event, delta: number, unit: number = 200): 
 }
 
 class WheelZoomEventHandler {
-    private eventHandler: any;
+    private eventHandler: RemoveHandle;
 
-    constructor(uiElement: any, callback: ZoomEventCallback) {
+    constructor(uiElement: ZoomableElement, callback: ZoomEventCallback) {
         this.eventHandler = uiElement.addNodeListener("wheel", (event: WheelEvent) => {
             // TODO: see if both of these are needed
             event.preventDefault();
@@ -57,14 +60,14 @@ class WheelZoomEventHandler {
 
 class PinchZoomEventHandler {
     private pinchActive: boolean;
-    private touchStartHandler: any;
-    private touchEndHandler: any;
-    private touchCancelHandler: any;
-    private touchMoveHandler: any;
+    private touchStartHandler: RemoveHandle;
+    private touchEndHandler: RemoveHandle;
+    private touchCancelHandler: RemoveHandle;
+    private touchMoveHandler: RemoveHandle;
     private centroid?: TouchCentroid;
     private averageDist?: number;
 
-    constructor(uiElement: any, callback: ZoomEventCallback) {
+    constructor(uiElement: ZoomableElement, callback: ZoomEventCallback) {
         this.pinchActive = false;
         this.touchStartHandler = uiElement.addNodeListener("touchstart", (event: TouchEvent) => {
             this.recalculateCentroid(event);
@@ -123,18 +126,17 @@ class PinchZoomEventHandler {
     }
 }
 
-export const Zoomable = <T extends new (...args: any[]) => any>(BaseClass: T) => class Zoomable extends BaseClass {
+export const Zoomable = <T extends Constructor<UIElement>>(BaseClass: T) => class Zoomable extends BaseClass {
     // Declared inside a function, so ts-plugin can't append a merged interface for it
-    declare ["constructor"]: Function & {EVENT_HANDLERS: ZoomEventHandler[]};
+    declare ["constructor"]: UIElement<any>["constructor"] & {EVENT_HANDLERS: ZoomEventHandler[]};
 
     static EVENT_HANDLERS: ZoomEventHandler[] = [WheelZoomEventHandler, PinchZoomEventHandler];
 
     private _zoomListeners: ZoomListener[] = [];
-    declare options: {
+    declare options: InstanceType<T>["options"] & {
         zoomLevel?: number;
         minZoomLevel?: number;
         maxZoomLevel?: number;
-        [key: string]: any;
     };
 
     getZoomLevel(): number {
@@ -164,7 +166,7 @@ export const Zoomable = <T extends new (...args: any[]) => any>(BaseClass: T) =>
             console.warn("Trying to add a listener twice!", callback);
             return new CleanupJobs([]);
         }
-        let eventHandlers: any[] = [];
+        let eventHandlers: CleanupHandle[] = [];
         for (const EventHandlerClass of this.constructor.EVENT_HANDLERS) {
             eventHandlers.push(new EventHandlerClass(this,
                 (event: Event, delta: number) => callback(generateZoomEvent(event, delta, unit))

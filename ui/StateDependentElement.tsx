@@ -6,8 +6,9 @@ import {GlobalState} from "../state/State";
 import {CardPanel} from "./CardPanel";
 import {Level} from "./Constants";
 
-// Type definitions
+// importState writes the response's own keys onto the options, and only the page knows what they are
 export interface StateDependentElementOptions {
+    // Left open: a rejection is whatever the endpoint threw, and an app hands its own error objects here
     error?: any;
     [key: string]: any;
 }
@@ -33,7 +34,7 @@ export function StateDependentElement<T extends new (...args: any[]) => UIElemen
             GlobalState.load(data);
             for (let key of Object.keys(data)) {
                 if (key !== "state") {
-                    (this.options as any)[key] = data[key];
+                    this.options[key] = data[key];
                 }
             }
         }
@@ -46,7 +47,7 @@ export function StateDependentElement<T extends new (...args: any[]) => UIElemen
             return url;
         }
 
-        getAjaxRequest(): any {
+        getAjaxRequest(): Record<string, unknown> {
             return {};
         }
 
@@ -87,12 +88,12 @@ export function StateDependentElement<T extends new (...args: any[]) => UIElemen
             Ajax.getJSON(this.getAjaxUrl(), this.getAjaxRequest()).then(
                 (data: PageState) => {
                     this.importState(data);
-                    (this as any).setLoaded();
+                    this.setLoaded();
                 },
                 (error: any) => {
                     console.error("Request error", error);
                     this.setError(error);
-                    (this as any).setLoaded();
+                    this.setLoaded();
                 }
             );
         }

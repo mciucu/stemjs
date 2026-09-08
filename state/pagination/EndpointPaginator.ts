@@ -1,7 +1,17 @@
 import {Dispatchable} from "../../base/Dispatcher";
 import {isDeepEqual} from "../../base/Utils";
 import {type StoreClass, StoreObject} from "../Store";
+import {type StateData} from "../State";
 import {LoadEndpoint} from "../../base/Fetch";
+
+// What a paginated endpoint answers with. Only these two are the paginator's; the rest is the endpoint's
+// own payload, which a caller reads and this class cannot name
+type PaginatedResponse = StateData & {count: number} & Record<string, any>;
+
+// The query the endpoint takes; only the page size is read here, the rest is passed through
+interface PaginationFilters extends Record<string, unknown> {
+    pageSize?: number;
+}
 
 export abstract class BasePaginator<T> extends Dispatchable {
     // Subclasses set this to suppress the pagination controls
@@ -62,16 +72,16 @@ export abstract class BasePaginator<T> extends Dispatchable {
 // TODO @types template by object type
 export class EndpointPaginator<T extends StoreObject> extends BasePaginator<T> {
     totalEntriesCount: number = 0; // The number of total objects we're paginating
-    lastResponse: any = null;
+    lastResponse: PaginatedResponse | null = null;
     lastResponseObjects: T[] = [];
     store: StoreClass<T>;
     endpoint: string;
-    filters: any;
-    storeFilters: any;
-    error: any = null;
+    filters: PaginationFilters;
+    storeFilters: PaginationFilters;
+    error: unknown = null;
     loadedLastPage: boolean = false;
 
-    constructor(store: StoreClass<T>, endpoint: string, apiFilters: any = {}, storeFilters: any = {}) {
+    constructor(store: StoreClass<T>, endpoint: string, apiFilters: PaginationFilters = {}, storeFilters: PaginationFilters = {}) {
         super();
         this.store = store;
         this.endpoint = endpoint;
@@ -80,7 +90,7 @@ export class EndpointPaginator<T extends StoreObject> extends BasePaginator<T> {
         this.pageSize = this.filters.pageSize || 10;
     }
 
-    getError(): any {
+    getError(): unknown {
         return this.error;
     }
 
@@ -135,7 +145,7 @@ export class EndpointPaginator<T extends StoreObject> extends BasePaginator<T> {
         return this.lastResponseObjects;
     }
 
-    async fetchNextPage(): Promise<any> {
+    async fetchNextPage(): Promise<T[]> {
         return this.fetchPage(this.lastPageRequested! + 1);
     }
 

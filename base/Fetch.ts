@@ -62,6 +62,9 @@ export type FetchPostprocessor = (payload: any, xhrPromise?: XHRPromise) => any;
 export type FetchErrorPostprocessor = (error: any) => any;
 export type FetchPreprocessor = (options: FetchOptions, input?: RequestInfo) => FetchOptions | void;
 
+// Called with whatever rejected the request, which every site passes exactly one of
+export type FetchErrorHandler = (error: any) => void;
+
 export interface FetchOptions extends Omit<RequestInit, "cache"> {
     url?: string;
     // Normalized to a RequestCache below, where false means a cache-busting parameter on the URL
@@ -69,13 +72,13 @@ export interface FetchOptions extends Omit<RequestInit, "cache"> {
     dataType?: DataType;
     onUploadProgress?: (event: ProgressEvent) => void;
     onDownloadProgress?: (event: ProgressEvent) => void;
-    onSuccess?: (...args: any[]) => void;
-    onError?: (...args: any[]) => void;
+    onSuccess?: (...args: any[]) => void; // Left open: resolve forwards its own arguments
+    onError?: FetchErrorHandler;
     onComplete?: () => void;
     success?: (...args: any[]) => void;
-    error?: (...args: any[]) => void;
+    error?: FetchErrorHandler;
     complete?: () => void;
-    errorHandler?: (...args: any[]) => void;
+    errorHandler?: FetchErrorHandler;
     postprocessors?: FetchPostprocessor[];
     errorPostprocessors?: FetchErrorPostprocessor[];
     preprocessors?: FetchPreprocessor[];

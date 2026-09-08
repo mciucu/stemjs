@@ -19,7 +19,7 @@ export interface ColumnOptions<BaseType, ResultType = any> {
 
 export type ColumnTuple<BaseType, ResultType = any> = [string, ColumnMapper<BaseType, ResultType>, ColumnOptions<BaseType, ResultType>?];
 export type ColumnInput<BaseType, ResultType = any> = ColumnOptions<BaseType, ResultType> | ColumnTuple<BaseType, ResultType>;
-export type ColumnLike<BaseType, ResultType = any> = ColumnHandler<BaseType, any> | ColumnInput<BaseType, any> | null | undefined | false;
+export type ColumnLike<BaseType, ResultType = any> = ColumnHandler<BaseType, ResultType> | ColumnInput<BaseType, ResultType> | null | undefined | false;
 
 export class ColumnHandler<BaseType, ResultType = any> implements ColumnOptions<BaseType, ResultType> {
     [key: string]: any;

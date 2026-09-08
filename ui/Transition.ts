@@ -1,23 +1,25 @@
 import {equal} from "../numerics/StemMath";
 
-interface TransitionOptions {
-    func: (t: number, context: any) => void;
-    context?: any;
+// Context is whatever the caller hands its own func. NoInfer keeps the object from narrowing it, since a
+// func is free to stash its own scratch values on the context between calls
+interface TransitionOptions<Context> {
+    func: (t: number, context: Context) => void;
+    context?: NoInfer<Context>;
     duration?: number;
     startTime?: number;
     dependsOn?: TransitionLike[];
 }
 
-interface ModifierOptions extends TransitionOptions {
-    reverseFunc: (context: any) => void;
+interface ModifierOptions<Context> extends TransitionOptions<Context> {
+    reverseFunc: (context: Context) => void;
 }
 
 // A list is a transition to everything that holds one: it answers every method the elements are asked for
 export type TransitionLike = Transition | TransitionList;
 
-export class Transition {
-    func: (t: number, context: any) => void;
-    context: any;
+export class Transition<Context = any> {
+    func: (t: number, context: Context) => void;
+    context: Context;
     duration: number;
     startTime: number;
     dependsOn: TransitionLike[];
@@ -26,7 +28,7 @@ export class Transition {
     pauseTime?: number;
     lastT?: number;
 
-    constructor(options: TransitionOptions) {
+    constructor(options: TransitionOptions<Context>) {
         this.func = options.func;
         this.context = options.context;
         this.duration = options.duration || 0;
@@ -169,10 +171,10 @@ export class Transition {
     }
 }
 
-export class Modifier extends Transition {
-    reverseFunc: (context: any) => void;
+export class Modifier<Context = any> extends Transition<Context> {
+    reverseFunc: (context: Context) => void;
 
-    constructor(options: ModifierOptions) {
+    constructor(options: ModifierOptions<Context>) {
         super(options);
         this.reverseFunc = options.reverseFunc;
         this.context = options.context;

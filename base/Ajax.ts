@@ -1,4 +1,4 @@
-import {fetch, XHRPromise, type FetchPreprocessor, type FetchPostprocessor, type FetchErrorPostprocessor, type FetchOptions, type URLFetchOptions} from "./Fetch";
+import {fetch, XHRPromise, type FetchPreprocessor, type FetchPostprocessor, type FetchErrorPostprocessor, type FetchErrorHandler, type FetchOptions, type URLFetchOptions} from "./Fetch";
 
 export class AjaxHandler {
     static _baseAjax: AjaxHandler | null = null;
@@ -6,9 +6,9 @@ export class AjaxHandler {
     preprocessors: FetchPreprocessor[];
     postprocessors: FetchPostprocessor[];
     errorPostprocessors: FetchErrorPostprocessor[];
-    errorHandler: ((...args: any[]) => void) | null;
+    errorHandler: FetchErrorHandler | null;
 
-    constructor(ajaxHandler?: AjaxHandler | null, errorHandler: ((...args: any[]) => void) | null = null) {
+    constructor(ajaxHandler?: AjaxHandler | null, errorHandler: FetchErrorHandler | null = null) {
         if (this.constructor._baseAjax === null) {
             this.constructor._baseAjax = this;
         } else if (arguments.length === 0) {
@@ -92,7 +92,7 @@ export class AjaxHandler {
         return [...inherited, ...this.errorPostprocessors];
     }
 
-    getErrorHandler(): ((...args: any[]) => void) | null | undefined {
+    getErrorHandler(): FetchErrorHandler | null | undefined {
         return this.errorHandler || this.parentHandler?.getErrorHandler();
     }
 }
@@ -101,7 +101,7 @@ export class FixedURLAjaxHandler {
     url: string;
     ajax: AjaxHandler;
 
-    constructor(url: string, ajaxHandler: AjaxHandler = Ajax, errorHandler: ((...args: any[]) => void) | null = null) {
+    constructor(url: string, ajaxHandler: AjaxHandler = Ajax, errorHandler: FetchErrorHandler | null = null) {
         this.ajax = new AjaxHandler(ajaxHandler, errorHandler);
         this.url = url;
     }

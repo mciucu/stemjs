@@ -5,7 +5,7 @@ import {type Constructor} from "../base/Utils";
 import {type Dispatchable} from "../base/Dispatcher";
 
 type UIElementConstructor = Constructor<BaseUIElement>;
-type RedrawHandler = (event: any) => void;
+type RedrawHandler = (event?: unknown) => void;
 // The decorator is handed store classes, while the scan over options finds store objects. Both end up
 // in the same set, and attachChangeListener takes either - or any other Dispatchable, which is how
 // services like iFrameUserDataService and serverStatisticsManager are passed here.
@@ -14,19 +14,20 @@ type ChangeSource = Dispatchable | StoreClass<any>;
 interface AutoRedrawableClass extends UIElementConstructor {
     autoRedrawImplemented?: boolean;
     prototype: BaseUIElement & {
+        // Left open: this constrains the classes the decorator accepts, and every narrowing of it rejects
+        // one - an options interface has no implicit index signature, so bivariance fails both ways
         setOptions: (options: any) => void;
         onMount: () => void;
-        enqueueRedraw: (event: any) => void;
+        enqueueRedraw: RedrawHandler;
         attachChangeListener: (obj: ChangeSource, handler: RedrawHandler) => void;
-        node?: any;
     };
 }
 
 // TODO: maybe have better names
-const autoRedrawListenersLazy = new PropertyCache<any, Set<ChangeSource>>("autoRedrawHandler", () => new Set());
+const autoRedrawListenersLazy = new PropertyCache<BaseUIElement, Set<ChangeSource>>("autoRedrawHandler", () => new Set());
 
 const redrawHandlerLazy = new PropertyCache<BaseUIElement, RedrawHandler>("autoRedrawListener", (obj: BaseUIElement) => {
-    return (event: any) => obj.enqueueRedraw(event);
+    return (event?: unknown) => obj.enqueueRedraw(event);
 });
 
 // Decorator that attaches a change listener on all store objects in options
@@ -48,7 +49,7 @@ export function autoredrawDecorator<T extends AutoRedrawableClass>(Cls: T, ...ar
 
         let listenerTargetSet = autoRedrawListenersLazy.get(this, listenersDefault);
 
-        const objArray = Object.values(options || {}).filter((obj: any): obj is StoreObject => {
+        const objArray = Object.values(options || {}).filter((obj: unknown): obj is StoreObject => {
             return (obj instanceof StoreObject) && !listenerTargetSet.has(obj);
         });
 

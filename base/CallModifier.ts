@@ -32,13 +32,20 @@ Available options:
     requestAnimationFrame instead of setTimeout, to execute before next frame redraw()
     - dropThrottled (boolean, default false): any throttled function call is not delayed, but dropped
  */
+// What a throttler is constructed with, which is the set of its own fields it copies over
+export interface CallThrottlerOptions {
+    debounce?: number;
+    throttle?: number | symbol;
+    dropThrottled?: boolean;
+}
+
 export class CallThrottler extends CallModifier {
     static ON_ANIMATION_FRAME = Symbol();
     static AUTOMATIC = Symbol();
 
     lastCallTime = 0;
-    pendingCall: any = null;
-    pendingCallArgs: any[] = [];
+    pendingCall: WrappedCall | null = null;
+    pendingCallArgs: unknown[] = [];
     pendingCallExpectedTime = 0;
     numCalls = 0;
     totalCallDuration = 0;
@@ -47,7 +54,7 @@ export class CallThrottler extends CallModifier {
     throttle?: number | symbol;
     dropThrottled?: boolean;
 
-    constructor(options: any = {}) {
+    constructor(options: CallThrottlerOptions = {}) {
         super();
         Object.assign(this, options);
     }
@@ -88,11 +95,16 @@ export class CallThrottler extends CallModifier {
         return executionDelay;
     }
 
-    replacePendingCall(wrappedFunc: any, funcCall: Function, funcCallArgs: any[]): void {
+    replacePendingCall(wrappedFunc: WrappedCall, funcCall: Function, funcCallArgs: unknown[]): void {
         this.cancel();
+        // Every path below runs funcCall, which forwards these, and cancel() has just emptied them
+        this.pendingCallArgs = funcCallArgs;
+
         if (this.isThrottleOnAnimationFrame()) {
             const cancelHandler = requestAnimationFrame(funcCall as FrameRequestCallback);
             wrappedFunc.cancel = () => cancelAnimationFrame(cancelHandler);
+            // Marked pending like the timeout path, so a second call in the same frame updates rather than schedules
+            this.pendingCall = wrappedFunc;
             return;
         }
 
@@ -106,11 +118,10 @@ export class CallThrottler extends CallModifier {
         const cancelHandler = setTimeout(funcCall, executionDelay || 0);
         wrappedFunc.cancel = () => clearTimeout(cancelHandler);
         this.pendingCall = wrappedFunc;
-        this.pendingCallArgs = funcCallArgs;
         this.pendingCallExpectedTime = timeNow + executionDelay;
     }
 
-    updatePendingCall(args: any[]): void {
+    updatePendingCall(args: unknown[]): void {
         this.pendingCallArgs = args;
         if (!this.isThrottleOnAnimationFrame()) {
             const timeNow = Date.now();
@@ -128,8 +139,10 @@ export class CallThrottler extends CallModifier {
                 this.replacePendingCall(wrappedFunc, funcCall, this.pendingCallArgs);
             } else {
                 this.lastCallTime = timeNow;
+                // Read before clearing, which empties the arguments this call is here to forward
+                const args = this.pendingCallArgs;
                 this.clearPendingCall();
-                func(...this.pendingCallArgs);
+                func(...args);
             }
         };
 

@@ -1,6 +1,6 @@
 import {unwrapArray, splitInChunks, isString} from "../../base/Utils";
 import {Ajax} from "../../base/Ajax";
-import {GlobalState, type StoreId} from "../State";
+import {GlobalState, type StateData, type StoreId} from "../State";
 import {type URLFetchOptions} from "../../base/Fetch";
 import {BaseStore, type StoreOptions, StoreObject, type StoreClass} from "../Store";
 
@@ -57,7 +57,8 @@ class AjaxFetchStore extends BaseStore<StoreClass<StoreObject>>(objectType, stor
                 return;
             }
         }
-        this.fetchJobs.push({id: id, success: successCallback, error: errorCallback, ...fetchOptions} as any);
+        // Left standing: a job is declared with the whole FetchOptions and pushed with a Partial of them
+        this.fetchJobs.push({id: id, success: successCallback, error: errorCallback, ...fetchOptions});
         if (!this.fetchTimeout) {
             this.fetchTimeout = setTimeout(() => {
                 this.executeAjaxFetch();
@@ -65,15 +66,15 @@ class AjaxFetchStore extends BaseStore<StoreClass<StoreObject>>(objectType, stor
         }
     };
 
-    static getFetchRequestData(entries: [StoreId, FetchJob<any>[]][]): FetchRequestData {
+    static getFetchRequestData(entries: [StoreId, FetchJob<T, FetchOptions>[]][]): FetchRequestData {
         return {
             ids: entries.map(entry => entry[0])
         };
     }
 
-    static getFetchRequestObject(entries: [StoreId, FetchJob<any>[]][]): URLFetchOptions {
+    static getFetchRequestObject(entries: [StoreId, FetchJob<T, FetchOptions>[]][]): URLFetchOptions {
         const requestData = this.getFetchRequestData(entries);
-        const fetchJobs: FetchJob<any>[] = unwrapArray(entries.map(entry => entry[1]));
+        const fetchJobs: FetchJob<T, FetchOptions>[] = unwrapArray(entries.map(entry => entry[1]));
 
         return {
             url: this.fetchURL,
@@ -81,9 +82,11 @@ class AjaxFetchStore extends BaseStore<StoreClass<StoreObject>>(objectType, stor
             dataType: "json",
             data: requestData,
             cache: "no-cache",
-            success: (data: any) => {
+            success: (data: StateData) => {
                 GlobalState.load(data);
                 for (let fetchJob of fetchJobs) {
+                    // Left standing: this static redeclares its own T, so what get answers with is the
+                    // store's own class rather than the type the factory was parameterised with
                     let obj = this.get(fetchJob.id);
                     if (obj) {
                         fetchJob.success(obj);
@@ -107,8 +110,8 @@ class AjaxFetchStore extends BaseStore<StoreClass<StoreObject>>(objectType, stor
     }
 
     //returns an array of ajax requests that have to be executed
-    static getFetchRequests(fetchJobs: FetchJob<any>[]): URLFetchOptions[] {
-        const idFetchJobs = new Map<StoreId, FetchJob<any>[]>();
+    static getFetchRequests(fetchJobs: FetchJob<T, FetchOptions>[]): URLFetchOptions[] {
+        const idFetchJobs = new Map<StoreId, FetchJob<T, FetchOptions>[]>();
 
         for (const fetchJob of fetchJobs) {
             let objectId = fetchJob.id;

@@ -1,17 +1,19 @@
-import {type ListenerHandle} from "../base/Dispatcher";
+import {type ListenerHandle, type RemoveHandle} from "../base/Dispatcher";
 const SINGLE_CLICK_EVENT = "SingleClick";
 const DOUBLE_CLICK_EVENT = "DoubleClick";
 
-// Type definitions for double clickable functionality
-type ClickCallback = (...args: any[]) => void;
+// What the adders take, and so what the onClick and onDoubleClick options are derived as
+type ClickCallback = (event: MouseEvent) => void;
 
 interface DoubleClickableOptions {
     doubleClickTimeout?: number;
+    // Left open: a redeclared options replaces the base's, and the bound has to stay wide enough for a
+    // mixed class to keep its own base's members - so there is nothing here to intersect with
     [key: string]: any;
 }
 
 export const DoubleClickable = <T extends new (...args: any[]) => any>(BaseClass: T) => class DoubleClickable extends BaseClass {
-    uniqueClickListener: any = null;
+    uniqueClickListener: RemoveHandle | null = null;
     singleClickTimeout: ReturnType<typeof setTimeout> | null = null;
     singleClickedAt: number | null = null;
     declare options: DoubleClickableOptions;

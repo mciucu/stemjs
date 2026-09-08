@@ -42,16 +42,23 @@ export interface RouteSnapshot {
     params: URLSearchParams;
 }
 
+export type URLPart = string | number;
+
+// What one matched route contributes: its slot values, or the whole part it captured
+type RouteArgs = string[] | string;
+
+// A route with slots pushes its match's args, which is a bare string when the route captures the whole
+// part - so argsArray nests, and args is what unwrapArray flattens it to
 interface GeneratorArgs {
-    args: any[];
-    argsArray: any[];
+    args: string[];
+    argsArray: RouteArgs[];
     doNotCache?: boolean;
 }
 
-// A page is any element class, and generatePage hands it GeneratorArgs as its options
-export type URLPart = string | number;
-
-type PageGenerator = (new (args: any) => BaseUIElement) | ((args: GeneratorArgs) => BaseUIElement);
+// A page is any element class, and generatePage hands it GeneratorArgs as its options. An arrow factory
+// carries no prototype, which is what tells the two apart
+type PageGenerator = ((new (args: GeneratorArgs) => BaseUIElement) | ((args: GeneratorArgs) => BaseUIElement))
+    & {prototype?: unknown};
 
 // What a Router needs of the elements it renders, beyond being an element
 export interface RoutablePage extends UIElement<any, any, any> {
@@ -325,7 +332,7 @@ export class Route {
         return this.options.beforeEnter;
     }
 
-    generatePage(pageGenerator: PageGenerator, ...argsArray: any[]): RoutablePage | null {
+    generatePage(pageGenerator: PageGenerator, ...argsArray: RouteArgs[]): RoutablePage | null {
         if (!pageGenerator) {
             return null;
         }
@@ -338,7 +345,7 @@ export class Route {
                 argsArray,
                 doNotCache: this.options.doNotCache,
             };
-            const page = ((pageGenerator as any).prototype instanceof UI.Element
+            const page = (pageGenerator.prototype instanceof UI.Element
                 ? new (pageGenerator as new (args: GeneratorArgs) => UIElement)(generatorArgs)
                 : (pageGenerator as (args: GeneratorArgs) => UIElement)(generatorArgs)) as RoutablePage;
             if (page && !page.pageTitle) {
@@ -368,7 +375,7 @@ export class Route {
         return pageGuard(this.getSnapshot());
     }
 
-    getPage(urlParts: string[], router?: Router, ...argsArray: any[]): RoutablePage | RouteRedirect | false {
+    getPage(urlParts: string[], router?: Router, ...argsArray: RouteArgs[]): RoutablePage | RouteRedirect | false {
         let match;
         let matchingRoute: Route | null = this.matchesOwnNode(urlParts) ? this : null;
 
@@ -425,7 +432,7 @@ export class TerminalRoute extends Route {
         return true;
     }
 
-    getPage(urlParts: string[], router?: Router, ...argsArray: any[]): RoutablePage | RouteRedirect | false {
+    getPage(urlParts: string[], router?: Router, ...argsArray: RouteArgs[]): RoutablePage | RouteRedirect | false {
         const page = super.getPage(urlParts, router, ...argsArray);
         // TODO: why is this in a setTimeout?
         clearTimeout(this.timeout);

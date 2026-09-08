@@ -1,6 +1,7 @@
 import {StemDate} from "../time/Date";
 import {isFunction, isString} from "../base/Utils";
 import {type StoreObject} from "./Store";
+import {type LegacyPropertyDescriptor} from "../decorators/Utils";
 import {GlobalState, type StoreId} from "./State";
 
 export interface FieldOptions {
@@ -15,7 +16,14 @@ export interface StoreObjectWithFields extends StoreObject {
     fieldDescriptors?: FieldDescriptor[];
 }
 
-export type FieldType = string | { makeFieldLoader?: (descriptor: FieldDescriptor) => (value: any, obj: any) => any; } | any;
+// The hook a spec may carry to load its own values: BaseEnum declares one, and Date is given one below
+export interface FieldLoaderSource {
+    makeFieldLoader?: (descriptor: FieldDescriptor) => (value: any, obj: any) => any;
+}
+
+// What @field takes: the name of a store, or a class - a primitive wrapper included. The `| any` this used
+// to end in collapsed the union, so none of the members said anything
+export type FieldType = string | (abstract new (...args: any[]) => unknown);
 
 // Legacy decorator signature for JavaScript compatibility
 export type LegacyDecorator = (target: any, propertyKey: string, descriptor?: PropertyDescriptor) => PropertyDescriptor;
@@ -53,10 +61,10 @@ export type FieldRawIds<Specs extends Record<string, unknown>, Omitted extends s
 export type FieldDecorator<Spec> = <Key extends string>(targetProto: {[K in Key]?: FieldValue<Spec> | null}, key: Key) => void;
 
 export class FieldDescriptor {
-    type: FieldType;
+    type: FieldType & FieldLoaderSource;
     targetProto?: any;
     key?: string;
-    rawDescriptor?: PropertyDescriptor;
+    rawDescriptor?: LegacyPropertyDescriptor;
     rawField?: string | symbol | ((key: string, descriptor?: FieldDescriptor) => string | symbol);
     cacheField?: false | symbol;
     loader?: (value: any, obj: any) => any;
@@ -68,7 +76,7 @@ export class FieldDescriptor {
         Object.assign(this, options);
     }
 
-    setTarget(targetProto: StoreObjectWithFields, key: string, rawDescriptor?: PropertyDescriptor): void {
+    setTarget(targetProto: StoreObjectWithFields, key: string, rawDescriptor?: LegacyPropertyDescriptor): void {
         if (!targetProto.fieldDescriptors) {
             targetProto.fieldDescriptors = [];
         }
@@ -80,8 +88,8 @@ export class FieldDescriptor {
     }
 
     // TODO Use this to support lazy initialization
-    getDefaultValue(obj: any): any {
-        const {initializer} = this.rawDescriptor as any;
+    getDefaultValue(obj: object): unknown {
+        const {initializer} = this.rawDescriptor;
         return initializer?.call(obj);
     }
 
@@ -162,14 +170,19 @@ export class FieldDescriptor {
 // `const Spec` keeps @field("Currency") at the literal type, so the spec survives into FieldValue
 export function field<const Spec extends FieldType>(type: Spec, options: FieldOptions = {}): FieldDecorator<Spec> {
     // The actual descriptor - supports both legacy JS decorators and can be gradually migrated to TS
-    return (targetProto: any, name: string, rawDescriptor?: PropertyDescriptor): PropertyDescriptor => {
+    return (targetProto: any, name: string, rawDescriptor?: LegacyPropertyDescriptor): PropertyDescriptor => {
         const fieldDescriptor = new FieldDescriptor(type, options);
         fieldDescriptor.setTarget(targetProto, name, rawDescriptor);
         return fieldDescriptor.makeDescriptor();
     };
 }
 
+// Date is one of the specs @field takes, so it carries the same loader hook the others declare
+declare global {
+    interface DateConstructor extends FieldLoaderSource {}
+}
+
 // Default handling of objects
-(Date as any).makeFieldLoader = (): ((value: any) => any) => {
+Date.makeFieldLoader = (): ((value: any) => any) => {
     return (value: any) => StemDate.optionally(value);
 }

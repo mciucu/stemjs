@@ -31,9 +31,12 @@ export interface ModifierOptions {
     [key: string]: any;
 }
 
+// The renderer hands its class map, and the constructor falls back to an empty Map; only `has` is asked of it
+type UIElementLookup = {has(tag: string): unknown};
+
 interface MarkupParserOptions {
     modifiers?: Modifier[];
-    uiElements?: any;
+    uiElements?: UIElementLookup;
 }
 
 interface AutomatonNode {
@@ -1018,10 +1021,10 @@ export {MarkupModifier, HeaderModifier, ParagraphModifier, InlineCodeModifier, I
 
 class MarkupParser {
     static modifiers: Modifier<any>[];
-    static parseJSON5: (json: string, reviver?: any) => any;
+    static parseJSON5: (json: string, reviver?: (key: string, value: JSON5Value) => JSON5Value) => JSON5Value;
     
     modifiers: Modifier[];
-    uiElements: any;
+    uiElements: UIElementLookup;
     
     constructor(options?: MarkupParserOptions) {
         options = options || {};
@@ -1227,56 +1230,6 @@ class MarkupParser {
         return options;
     }
 
-    parseTextLine(stream: StringStream): any[] {
-        const lastModifier = new Map();
-
-        let capturedContent: any[] = [];
-
-        // This will always be set to the last closed modifier
-        const capturedEnd = -1;
-
-        let textStart = stream.pointer;
-        let contentStart = stream.pointer;
-
-        while (!stream.done()) {
-            if (stream.startsWith(/\s+\r*\n/)) {
-                // end of line, stop here
-                break;
-            }
-
-            if (stream.at(0) === "<") {
-                capturedContent.push({
-                    content: stream.string.substring(contentStart, stream.pointer),
-                    start: contentStart,
-                    end: stream.pointer
-                });
-                const uiElementStart = stream.pointer;
-                const uiElement = this.parseUIElement(stream, (/\/*>/));
-                capturedContent.push({
-                    content: uiElement,
-                    start: uiElementStart,
-                    end: stream.pointer,
-                });
-                contentStart = stream.pointer;
-                continue;
-            }
-
-            let char = stream.char();
-
-            if (char === "\\") {
-                // escape next character
-                char += stream.char();
-            }
-        }
-
-        const remainingContent = stream.string.substring(textStart, stream.pointer);
-        if (remainingContent.length > 0) {
-            capturedContent.push(remainingContent);
-        }
-        stream.line(); // delete line endings
-
-        return capturedContent;
-    }
 }
 
 MarkupParser.modifiers = [

@@ -10,13 +10,11 @@ interface PlanetConfig {
 }
 
 @makeEnum
-export class Planet extends BaseEnum {
+export class Planet extends BaseEnum<PlanetConfig> {
     static EARTH: PlanetConfig = {value: "earth", name: "Earth", mass: 1};
     static MARS: PlanetConfig = {value: "mars", name: "Mars", mass: 0.107};
     // Long enough for a placeholder, and proves digits and underscores count as uppercase
     static ALPHA_CENTAURI_B: PlanetConfig = {value: "ac-b", name: "Alpha Centauri B", mass: 0.9};
-
-    declare value: string;
 
     describe(): string {
         return this.name + " " + this.value;
@@ -35,6 +33,16 @@ export const every: Planet[] = Planet.all();
 export const stored: Planet[] = Planet.allEntries;
 export const found: Planet | null = Planet.fromValue("earth");
 export const defaulted: Planet = Planet.getDefault();
+// The config is what says an entry's value is a string, so the class no longer redeclares it
+export const valued: string = Planet.EARTH.value;
+
+// A config is also how an enum says what its values are, which is what lets them be compared
+@makeEnum
+export class Priority extends BaseEnum<{value: number}> {
+    static LOW = 10;
+    static HIGH = 20;
+}
+export const ranked: boolean = Priority.HIGH.value >= Priority.LOW.value;
 
 // A lowercase static is not an entry, so it keeps the type it is written with
 @makeEnum

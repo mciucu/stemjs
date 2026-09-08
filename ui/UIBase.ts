@@ -19,7 +19,7 @@ export type UICleanChild = BaseUIElement | string | number;
 
 // So classes can signal that they can be converted to UI elements, or at least string-represented in the UI
 export interface UIRenderable {
-    toUI(parent?: any): UICleanChild;
+    toUI(parent?: BaseUIElement): UICleanChild;
 }
 
 // A function is called by cleanChildren (unwrapElementWithFunc) and its result used, so lazy children are children
@@ -45,6 +45,9 @@ export type EventOptions<Element> = {
 
 // Called with the event, then the element itself
 export type UIEventHandler = (...args: any[]) => any;
+
+// The trailing arguments a node listener forwards to addEventListener
+type NodeListenerOptions = [(boolean | AddEventListenerOptions)?];
 export type RefLinkOptions = {
     // Only ever assigned into by applyRef, so anything indexable qualifies
     parent: Dispatchable | any[] | Record<string, any>;
@@ -145,18 +148,17 @@ export interface NumericSizeOptions {
 }
 
 export const RenderStack: BaseUIElement[] = []; //keeps track of objects that are redrawing, to know where to assign refs automatically
-export const redrawPerTickRunner = new OncePerTickRunner((obj: BaseUIElement, event: any) => obj.node && obj.redraw(event));
+export const redrawPerTickRunner = new OncePerTickRunner((obj: BaseUIElement, event?: unknown) => obj.node && obj.redraw(event));
 
 // TODO Maybe get rid of the UI namespace
 export interface UINamespace {
     TextElement: typeof TextUIElement;
     Element: typeof UIElement;
     SVGElement: typeof UIElement<any, any, any>;
-    createElement<K extends HTMLTagType>(tag: K, options?: WrittenUIElementOptions | null, ...children: any[]): UIElement<{}, HTMLElementTagNameMap[K]>;
-    createElement<K extends SVGTagType>(tag: K, options?: WrittenUIElementOptions | null, ...children: any[]): UIElement<{}, SVGElementTagNameMap[K]>;
-    createElement<UIClass extends BaseUIElement<any>>(tag: new (options: any) => UIClass, options?: any, ...children: any[]): UIClass;
-    createElement(tag: any, options?: WrittenUIElementOptions | null, ...children: any[]): BaseUIElement | null;
-    str: (value: any) => any;
+    createElement<K extends HTMLTagType>(tag: K, options?: WrittenUIElementOptions | null, ...children: UIChild[]): UIElement<{}, HTMLElementTagNameMap[K]>;
+    createElement<K extends SVGTagType>(tag: K, options?: WrittenUIElementOptions | null, ...children: UIChild[]): UIElement<{}, SVGElementTagNameMap[K]>;
+    createElement<UIClass extends BaseUIElement<any>>(tag: new (options: any) => UIClass, options?: any, ...children: UIChild[]): UIClass;
+    createElement(tag: any, options?: WrittenUIElementOptions | null, ...children: UIChild[]): BaseUIElement | null;
     T: (value: string) => BaseUIElement; // Assigned by Translation.ts
     // The return carries whatever was passed, so extra options go on the result, not here
     Primitive: <T extends string = keyof HTMLElementTagNameMap, BaseClassType extends Constructor<UIElement<any, any, any>> = typeof UIElement>(nodeType: T, BaseClass?: BaseClassType) => BaseClassType;
@@ -203,7 +205,7 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
 
     // Calls a queueMicrotask(() => this.redraw()), but only if one isn't already enqueued
     // The enqueued task will be canceled if a redraw is manually called in the meantime
-    enqueueRedraw(event?: any): void {
+    enqueueRedraw(event?: unknown): void {
         redrawPerTickRunner.maybeEnqueue(this, event);
     }
 
@@ -220,7 +222,7 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
 
     abstract mount(parent: UIElement<any, any, any> | HTMLElement, nextSibling?: Node | null): void;
 
-    abstract redraw(event?: any): void;
+    abstract redraw(event?: unknown): void;
 
     abstract createNode(): NodeType;
 
@@ -463,8 +465,9 @@ export class UIElement<
         this.context = extraContext ? {...context, ...extraContext} : context;
     }
 
-    // TODO @types these children are clean
-    getChildrenForRedraw(): any[] {
+    // The reads in redraw below are left standing: it turns each primitive into a TextElement in place,
+    // and an array mutation is not a narrowing, so every element read after it reports
+    getChildrenForRedraw(): UICleanChild[] {
         RenderStack.push(this);
         const children = cleanChildren(this.getChildrenToRender());
         RenderStack.pop();
@@ -472,7 +475,7 @@ export class UIElement<
     }
 
     // The overload lets an override take redrawPerTickRunner's event without this body declaring one
-    redraw(event?: any): boolean | void;
+    redraw(event?: unknown): boolean | void;
     redraw(): boolean | void {
         if (!this.node) {
             console.error("Element not yet mounted. Redraw aborted!", this);
@@ -485,7 +488,7 @@ export class UIElement<
 
         if (newChildren === this.children) {
             for (const child of newChildren) {
-                child.redraw();
+            child.redraw();
             }
 
             this.applyNodeAttributes();
@@ -820,21 +823,22 @@ export class UIElement<
     }
 
     // A known DOM event name says which event the callback gets, so a listener does not have to widen it
-    addNodeListener<Name extends keyof HTMLElementEventMap>(name: Name, callback: (event: HTMLElementEventMap[Name]) => void, ...args: any[]): RemoveHandle;
-    addNodeListener(name: string, callback: EventListener, ...args: any[]): RemoveHandle;
-    addNodeListener(name: string, callback: EventListener, ...args: any[]): RemoveHandle {
-        (this.node as HTMLElement).addEventListener(name, callback, ...(args as []));
+    addNodeListener<Name extends keyof HTMLElementEventMap>(name: Name, callback: (event: HTMLElementEventMap[Name]) => void, ...args: NodeListenerOptions): RemoveHandle;
+    addNodeListener(name: string, callback: EventListener, ...args: NodeListenerOptions): RemoveHandle;
+    addNodeListener(name: string, callback: EventListener, ...args: NodeListenerOptions): RemoveHandle {
+        (this.node as HTMLElement).addEventListener(name, callback, ...args);
         const handler = {
             remove: () => {
-                this.removeNodeListener(name, callback);
+                this.removeNodeListener(name, callback, ...args);
             }
         };
         this.addCleanupJob(handler);
         return handler;
     }
 
-    removeNodeListener(name: string, callback: EventListener): void {
-        this.node?.removeEventListener(name, callback);
+    // The options go back too: capture is part of a listener's identity, so removing without it removes nothing
+    removeNodeListener(name: string, callback: EventListener, ...args: NodeListenerOptions): void {
+        this.node?.removeEventListener(name, callback, ...args);
     }
 
     // TODO: methods can be automatically generated by addNodeListener(UI.Element, "dblclick", "DoubleClick") for instance
@@ -895,7 +899,7 @@ function isSVGTag(tag: string): tag is SVGTagType {
 }
 
 // Written once to cover every declared overload, which is why the implementation type is looser
-UI.createElement = function (tag: typeof BaseUIElement<any> | HTMLTagType | SVGTagType, options?: WrittenUIElementOptions | null, ...children: any[]): BaseUIElement | null {
+UI.createElement = function (tag: typeof BaseUIElement<any> | HTMLTagType | SVGTagType, options?: WrittenUIElementOptions | null, ...children: UIChild[]): BaseUIElement | null {
     if (!tag) {
         console.error("Create element needs a valid object tag, did you mistype a class name?");
         return null;
@@ -942,7 +946,6 @@ UI.createElement = function (tag: typeof BaseUIElement<any> | HTMLTagType | SVGT
 
 UI.Element = UIElement;
 
-UI.str = (value: string) => new TextUIElement(value);
 
 // Keep a map for every base class, and for each base class keep a map for each nodeType, to cache classes
 const primitiveMap: WeakMap<typeof UIElement, Map<string, typeof UIElement<any>>> = new WeakMap();
@@ -975,8 +978,15 @@ UI.Primitive = (<T extends keyof HTMLElementTagNameMap = keyof HTMLElementTagNam
     return resultClass as any;
 }) as UINamespace["Primitive"];
 
+// Hung on the node under STEM_DEBUG, so the element behind a node can be found from the console
+declare global {
+    interface Node {
+        stemElement?: BaseUIElement;
+    }
+}
+
 export function applyDebugFlags(element: BaseUIElement): void {
     if (globalThis.STEM_DEBUG && element.node) {
-        (element.node as any).stemElement = element;
+        element.node.stemElement = element;
     }
 }

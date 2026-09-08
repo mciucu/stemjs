@@ -1,11 +1,17 @@
 import {isString} from "../../base/Utils";
+import {type ThemeProps} from "./Theme";
+
+// A bare string is shorthand for the comment. Nothing reads these back, here or downstream
+export interface ThemeTypeOptions {
+    comment?: string;
+}
 
 export class ThemeType<T = any> {
     type: string;
     value: T;
-    options: any;
+    options: ThemeTypeOptions;
 
-    constructor(type: string, value: T, options?: any) {
+    constructor(type: string, value: T, options?: ThemeTypeOptions | string) {
         options = options || {};
         if (isString(options)) {
             options = {comment: options};
@@ -18,11 +24,11 @@ export class ThemeType<T = any> {
 
 // A theme value may be a function of the other props: Theme's props proxy passes every value
 // through resolveFuncValue(rawValue, {args: [this.props]}), which calls it until it isn't a function
-export type ThemeValue<T> = T | ((props: any) => T);
+export type ThemeValue<T> = T | ((props: ThemeProps) => T);
 
 // TODO this should also have a validator here for instance
-export function MakeThemeType<T>(type: string): (value: ThemeValue<T>, options?: any) => ThemeType<ThemeValue<T>> {
-    return (value: ThemeValue<T>, options: any = {}) => new ThemeType<ThemeValue<T>>(type, value, options);
+export function MakeThemeType<T>(type: string): (value: ThemeValue<T>, options?: ThemeTypeOptions | string) => ThemeType<ThemeValue<T>> {
+    return (value: ThemeValue<T>, options: ThemeTypeOptions | string = {}) => new ThemeType<ThemeValue<T>>(type, value, options);
 }
 
 export const ColorType = MakeThemeType<string>("Color");

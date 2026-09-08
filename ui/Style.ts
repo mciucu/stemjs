@@ -1,4 +1,5 @@
 import {StyleElement, KeyframeElement, DynamicStyleElement} from "./StyleElement";
+import {toArray} from "../base/Utils";
 import {Dispatchable, type ListenerHandle} from "../base/Dispatcher";
 import {PREFERRED_CLASS_NAME_KEY} from "../decorators/Style";
 import {registerStyle, Theme, type ThemeProps} from "./style/Theme";
@@ -152,7 +153,7 @@ class StyleSheet extends Dispatchable {
         if (arguments.length > 1) {
             style = Object.assign({}, style, ...args);
         }
-        let elementOptions: any = {style: style};
+        let elementOptions: PartialOptions<DynamicStyleElement> = {style: style};
 
         if (style[PREFERRED_CLASS_NAME_KEY]) {
             elementOptions.name = style[PREFERRED_CLASS_NAME_KEY];
@@ -161,7 +162,7 @@ class StyleSheet extends Dispatchable {
         let element = new DynamicStyleElement(elementOptions);
         this.elements.add(element);
         let styleInstances = element.render();
-        for (let styleInstance of styleInstances as any[]) {
+        for (let styleInstance of styleInstances) {
             this.styleElement!.appendChild(styleInstance);
         }
         return element;
@@ -199,11 +200,12 @@ class StyleSheet extends Dispatchable {
             }
         }
 
+        // A keyframe renders to its rule text where a style element renders to its instances, so what
+        // comes back is wrapped rather than spread - a string spreads into one child per character
         let children: any[] = [];
         for (let value of this.elements) {
             if (value instanceof StyleElement) {
-                let styleElements = value.render();
-                children.push(...(styleElements as any[]));
+                children.push(...toArray(value.render()));
             }
         }
         this.styleElement!.options.children = children;
