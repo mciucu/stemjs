@@ -7,7 +7,7 @@ import {GlobalState, type StoreId} from "./State";
 export interface FieldOptions {
     rawField?: string | symbol | ((key: string, descriptor?: FieldDescriptor) => string | symbol);
     cacheField?: boolean | symbol;
-    loader?: (value: any, obj: any) => any;
+    loader?: FieldLoader;
     isReadOnly?: boolean;
     [key: string]: any;
 }
@@ -16,18 +16,17 @@ export interface StoreObjectWithFields extends StoreObject {
     fieldDescriptors?: FieldDescriptor[];
 }
 
+// What a spec's loader is: the raw value off the wire, and the object it is being read on
+export type FieldLoader = (value: any, obj: StoreObjectWithFields) => unknown;
+
 // The hook a spec may carry to load its own values: BaseEnum declares one, and Date is given one below
 export interface FieldLoaderSource {
-    makeFieldLoader?: (descriptor: FieldDescriptor) => (value: any, obj: any) => any;
+    makeFieldLoader?: (descriptor: FieldDescriptor) => FieldLoader;
 }
 
 // What @field takes: the name of a store, or a class - a primitive wrapper included. The `| any` this used
 // to end in collapsed the union, so none of the members said anything
 export type FieldType = string | (abstract new (...args: any[]) => unknown);
-
-// Legacy decorator signature for JavaScript compatibility
-export type LegacyDecorator = (target: any, propertyKey: string, descriptor?: PropertyDescriptor) => PropertyDescriptor;
-export type FakedDecorated = (target: any, propertyKey: string) => void;
 
 // The value a spec loads into: @field(Date) reads back a StemDate, @field(User) a User.
 // ts-plugin/ declares un-annotated @field members with this, which is what makes the decorator imply the type.
@@ -62,12 +61,12 @@ export type FieldDecorator<Spec> = <Key extends string>(targetProto: {[K in Key]
 
 export class FieldDescriptor {
     type: FieldType & FieldLoaderSource;
-    targetProto?: any;
+    targetProto?: StoreObjectWithFields;
     key?: string;
     rawDescriptor?: LegacyPropertyDescriptor;
     rawField?: string | symbol | ((key: string, descriptor?: FieldDescriptor) => string | symbol);
     cacheField?: false | symbol;
-    loader?: (value: any, obj: any) => any;
+    loader?: FieldLoader;
     isReadOnly?: boolean;
     [key: string]: any;
 
@@ -131,7 +130,7 @@ export class FieldDescriptor {
         const {rawField, cacheField, loader, isReadOnly, key} = this;
 
         return {
-            get(this: any): any {
+            get(this: StoreObjectWithFields & Record<string | symbol, any>): any {
                 if (cacheField && this[cacheField]) {
                     return this[cacheField];
                 }
@@ -148,7 +147,7 @@ export class FieldDescriptor {
                 }
                 return result;
             },
-            set(this: any, value: any): void {
+            set(this: StoreObjectWithFields & Record<string | symbol, any>, value: any): void {
                 if (isReadOnly) {
                     throw `Not allowed to change field ${key}`;
                 }
@@ -170,6 +169,7 @@ export class FieldDescriptor {
 // `const Spec` keeps @field("Currency") at the literal type, so the spec survives into FieldValue
 export function field<const Spec extends FieldType>(type: Spec, options: FieldOptions = {}): FieldDecorator<Spec> {
     // The actual descriptor - supports both legacy JS decorators and can be gradually migrated to TS
+    // Left open: the declared type is FieldDecorator<Spec>, whose mapped targetProto no implementation matches
     return (targetProto: any, name: string, rawDescriptor?: LegacyPropertyDescriptor): PropertyDescriptor => {
         const fieldDescriptor = new FieldDescriptor(type, options);
         fieldDescriptor.setTarget(targetProto, name, rawDescriptor);
@@ -183,6 +183,6 @@ declare global {
 }
 
 // Default handling of objects
-Date.makeFieldLoader = (): ((value: any) => any) => {
+Date.makeFieldLoader = (): FieldLoader => {
     return (value: any) => StemDate.optionally(value);
 }

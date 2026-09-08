@@ -17,6 +17,14 @@ interface MoveAnimatable extends SVGUIElement {
     moveTransition?: (coords: Point, duration: number, dependsOn: TransitionLike[], startTime: number) => Transition;
 }
 
+// What each helper's func reads off its own context, which is what Transition infers its parameter from
+interface BlinkContext {
+    firstColor: string;
+    secondColor: string;
+    interval: number;
+    executeLastStep: boolean;
+}
+
 interface BlinkTransitionOptions {
     duration?: number;
     times?: number;
@@ -39,7 +47,7 @@ export function makeBlinkTransition(svgElement: SVGUIElement, options?: BlinkTra
     };
     Object.assign(config, options);
     return new Transition({
-        func: (t: number, context: any) => {
+        func: (t: number, context: BlinkContext) => {
             if (t > 1 - context.interval && !context.executeLastStep) {
                 svgElement.setColor(context.firstColor);
             } else {
@@ -63,6 +71,7 @@ export function makeOpacityTransition(svgElement: SVGUIElement, opacity: number,
         svgElement.options.opacity = 1;
     }
     return new Transition({
+        // Left open: the base SVG options declare opacity as `number | string`, and this multiplies it
         func: (t: number, context: any) => {
             svgElement.setOpacity((1 - t) * context.opacity + t * opacity);
         },
@@ -77,7 +86,7 @@ export function makeOpacityTransition(svgElement: SVGUIElement, opacity: number,
 
 export function makeColorTransition(svgElement: ColorAnimatable, color: string, duration: number, dependsOn: TransitionLike[] = [], startTime: number = 0): Transition {
     return new Transition({
-        func: (t: number, context: any) => {
+        func: (t: number, context: {color: string}) => {
             svgElement.setColor(Color.interpolate(context.color, color, t));
         },
         context: {
@@ -95,6 +104,7 @@ export function makeMoveTransition(svgElement: MoveAnimatable, coords: Point, du
     }
 
     return new Transition({
+        // Left open: the base SVG options declare x and y as `number | string`, and this multiplies them
         func: (t: number, context: any) => {
             const x = (1 - t) * context.x + t * coords.x;
             const y = (1 - t) * context.y + t * coords.y;
@@ -113,7 +123,7 @@ export function makeMoveTransition(svgElement: MoveAnimatable, coords: Point, du
 
 export function makeTextFillColorTransition(svgTextElement: SVGText, color: string, duration: number, dependsOn: TransitionLike[] = [], startTime: number = 0): Transition {
     return new Transition({
-        func: (t: number, context: any) => {
+        func: (t: number, context: {color: string}) => {
             svgTextElement.setColor(Color.interpolate(context.color, color, t), true);
         },
         context: {

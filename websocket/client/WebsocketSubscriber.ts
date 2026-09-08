@@ -4,6 +4,11 @@ import {toArray} from "../../base/Utils";
 import {DEFAULT_HEARTBEAT_MESSAGE, HEARTBEAT_INTERVAL_MS} from "../Shared";
 import {GlobalState} from "../../state/State";
 
+// Set by the page, not by us, so it is only ever read
+declare global {
+    var WEBSOCKET_URL: string | undefined;
+}
+
 type Callback = (...args: any[]) => void;
 
 interface WebsocketSubscriberInterface {
@@ -33,7 +38,7 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
     } as const;
 
     // TODO sync globally cleaner
-    static Global = (self as any).WEBSOCKET_URL ? new WebsocketSubscriber((self as any).WEBSOCKET_URL) : null;
+    static Global = self.WEBSOCKET_URL ? new WebsocketSubscriber(self.WEBSOCKET_URL) : null;
 
     streamHandlers: Map<string, WebsocketStreamHandler> = new Map();
     attemptedConnect: boolean = false;

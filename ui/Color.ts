@@ -380,9 +380,9 @@ export function buildColors(color: ColorInput, dark: boolean = true): string[] {
 
 export class ColorGenerator {
     static FIRST_COLORS: string[] = ["#337ab7", "#5cb85c",  "#f0ad4e", "#5bc0de", "#d9534f"];
-    static cache = new Map<any, string>();
+    static cache = new Map<number, string>();
 
-    static getPersistentColor(uniqueId: any): string {
+    static getPersistentColor(uniqueId: number): string {
         if (uniqueId < this.FIRST_COLORS.length) {
             return this.FIRST_COLORS[uniqueId];
         }

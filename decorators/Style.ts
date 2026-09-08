@@ -1,5 +1,5 @@
 import {deepCopy} from "../base/Utils";
-import {type StyleRuleObject} from "../ui/Style";
+import {type StyleRuleObject, type StyleSheet} from "../ui/Style";
 import {lazyInit} from "./LazyInitialize";
 import {type LegacyPropertyDescriptor} from "./Utils";
 
@@ -66,10 +66,10 @@ function styleRuleWithOptions(...optionsArgs: StyleRuleOptions[]): FakedDecorato
     }
     let targetMethodName = options.targetMethodName || "css";
 
-    function styleRuleDecorator(target: any, key: string | symbol, descriptor: StyleDescriptor): PropertyDescriptor {
+    function styleRuleDecorator(target: object, key: string | symbol, descriptor: StyleDescriptor): PropertyDescriptor {
         const {initializer, value} = descriptor;
 
-        descriptor.objInitializer = function (this: any) {
+        descriptor.objInitializer = function (this: StyleSheet) {
             let style = evaluateStyleRuleObject(this, initializer, value, options);
 
             if (options.selector) {
@@ -94,7 +94,7 @@ function styleRuleWithOptions(...optionsArgs: StyleRuleOptions[]): FakedDecorato
         // Change the prototype of this object to be able to access the old descriptor/value
         (target as any)[options.getKey!(key)] = {...descriptor};
 
-        descriptor.initializer = function (this: any) {
+        descriptor.initializer = function (this: StyleSheet) {
             let style = descriptor.objInitializer!.call(this);
             return (this as any)[targetMethodName](style);
         };

@@ -53,7 +53,7 @@ export class AjaxHandler {
         return this.fetch(url, ...args, {method: "GET"});
     }
 
-    getJSON(url: string, data?: any, ...args: FetchOptions[]): XHRPromise | undefined {
+    getJSON(url: string, data?: FetchOptions["data"], ...args: FetchOptions[]): XHRPromise | undefined {
         return this.get(url, {dataType: "json", data: data}, ...args);
     }
 
@@ -61,7 +61,7 @@ export class AjaxHandler {
         return this.fetch(url, ...args, {method: "POST"});
     }
 
-    postJSON(url: string, data?: any, ...args: FetchOptions[]): XHRPromise | undefined {
+    postJSON(url: string, data?: FetchOptions["data"], ...args: FetchOptions[]): XHRPromise | undefined {
         return this.post(url, {dataType: "json", data: data}, ...args);
     }
 
@@ -110,7 +110,7 @@ export class FixedURLAjaxHandler {
         return this.ajax.get(this.url, ...args);
     }
 
-    getJSON(data?: any, ...args: FetchOptions[]): XHRPromise | undefined {
+    getJSON(data?: FetchOptions["data"], ...args: FetchOptions[]): XHRPromise | undefined {
         return this.ajax.getJSON(this.url, data, ...args);
     }
 
@@ -118,7 +118,7 @@ export class FixedURLAjaxHandler {
         return this.ajax.post(this.url, ...args);
     }
 
-    postJSON(data?: any, ...args: FetchOptions[]): XHRPromise | undefined {
+    postJSON(data?: FetchOptions["data"], ...args: FetchOptions[]): XHRPromise | undefined {
         return this.ajax.postJSON(this.url, data, ...args);
     }
 }

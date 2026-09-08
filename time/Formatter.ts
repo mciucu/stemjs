@@ -1,13 +1,14 @@
 import {isString} from "../base/Utils";
 
-type TokenFormatterFunction = (value: any) => string | number;
-type TokenEntry = [string, TokenFormatterFunction];
+// What the tokens format, which a formatter's entries are all written against
+type TokenFormatterFunction<Value> = (value: Value) => string | number;
+type TokenEntry<Value> = [string, TokenFormatterFunction<Value>];
 
-export class TokenFormatter {
-    private tokenMap: Map<string, TokenFormatterFunction>;
+export class TokenFormatter<Value = any> {
+    private tokenMap: Map<string, TokenFormatterFunction<Value>>;
 
-    constructor(tokens: TokenEntry[]) {
-        this.tokenMap = new Map<string, TokenFormatterFunction>();
+    constructor(tokens: TokenEntry<Value>[]) {
+        this.tokenMap = new Map<string, TokenFormatterFunction<Value>>();
         for (const [token, formatter] of tokens) {
             this.tokenMap.set(token, formatter);
         }
@@ -52,7 +53,7 @@ export class TokenFormatter {
         return tokens;
     }
 
-    evalToken(value: any, token: string): string {
+    evalToken(value: Value, token: string): string {
         const func = this.tokenMap.get(token);
         if (!func) {
             return token;
@@ -64,7 +65,7 @@ export class TokenFormatter {
         return result;
     }
 
-    format(value: any, str: string): string {
+    format(value: Value, str: string): string {
         let tokens = this.splitToTokens(str);
         tokens = tokens.map((token: string) => this.evalToken(value, token));
         return tokens.join("");

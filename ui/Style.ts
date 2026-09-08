@@ -3,7 +3,7 @@ import {toArray} from "../base/Utils";
 import {Dispatchable, type ListenerHandle} from "../base/Dispatcher";
 import {PREFERRED_CLASS_NAME_KEY} from "../decorators/Style";
 import {registerStyle, Theme, type ThemeProps} from "./style/Theme";
-import {type PartialOptions} from "./UIBase";
+import {type PartialOptions, type UIResolvedChild} from "./UIBase";
 
 export interface StyleSheetOptions {
     parent: HTMLElement;
@@ -62,7 +62,9 @@ class StyleSheet extends Dispatchable {
     declare styleElement?: StyleElement;
     declare themeProps?: ThemeProps;
     declare _firstUpdate?: boolean;
-    declare container?: any; // The default for most style sheets
+    // The commonest rule name, left open because @styleRule cannot retype the object literal a subclass
+    // writes, so every subclass's container is declared as that literal rather than as what it becomes
+    declare container?: any;
 
     constructor(options: Partial<StyleSheetOptions> = {}) {
         super();
@@ -118,7 +120,7 @@ class StyleSheet extends Dispatchable {
 
         for (const key in this.prototype) {
             // Just hit the getter to instantiate the style
-            if (!(styleSheet as any)[key]) {
+            if (!(styleSheet as Record<string, unknown>)[key]) {
                 console.log("This is here to prevent a bundling optimization bug");
             }
         }
@@ -202,52 +204,14 @@ class StyleSheet extends Dispatchable {
 
         // A keyframe renders to its rule text where a style element renders to its instances, so what
         // comes back is wrapped rather than spread - a string spreads into one child per character
-        let children: any[] = [];
+        let children: UIResolvedChild[] = [];
         for (let value of this.elements) {
             if (value instanceof StyleElement) {
-                children.push(...toArray(value.render()));
+                children.push(...toArray<UIResolvedChild>(value.render()));
             }
         }
         this.styleElement!.options.children = children;
         this.styleElement!.redraw();
-    }
-}
-
-// Helper class, meant to only keep one class active for an element from a set of classes
-// TODO @types remove
-class ExclusiveClassSet {
-    classList: any[];
-    element: any;
-
-    constructor(classList: any[], element: any) {
-        // TODO: check that classList is an array (or at least iterable)
-        this.classList = classList;
-        this.element = element;
-    }
-
-    // TODO @typing deprecate this?
-    static fromObject(obj: any, element: any): ExclusiveClassSet {
-        let classList: any[] = [];
-        for (let key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                classList.push(obj[key]);
-            }
-        }
-        return Object.assign(new ExclusiveClassSet(classList, element), obj);
-    }
-
-    set(element: any, classInstance?: any): void {
-        if (!classInstance) {
-            classInstance = element;
-            element = this.element;
-        }
-        for (let cls of this.classList) {
-            if (cls === classInstance) {
-                element.addClass(cls);
-            } else {
-                element.removeClass(cls);
-            }
-        }
     }
 }
 
@@ -269,7 +233,7 @@ function focus(style: StyleRuleObject): StyleRuleObject {
     return wrapCSS(":focus", style);
 }
 
-export {StyleSheet, ExclusiveClassSet, wrapCSS, hover, focus, active};
+export {StyleSheet, wrapCSS, hover, focus, active};
 
 export * from "../decorators/Style";
 export {registerStyle}

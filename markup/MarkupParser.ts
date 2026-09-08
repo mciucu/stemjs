@@ -264,7 +264,6 @@ class ModifierAutomation {
     node: AutomatonNode;
     patternStep?: number;
     endPatternStep?: number;
-    capture?: any[];
 
     // build automaton from string
     constructor(options: ModifierOptions) {
@@ -329,7 +328,6 @@ class ModifierAutomation {
         lastNode.patternLastNode = true;
 
         if (options.captureContent) {
-            this.capture = [];
             const captureNode: AutomatonNode = {
                 value: "",
                 captureNode: true,
@@ -405,7 +403,7 @@ class ModifierAutomation {
 
 // Content is whatever processChildren hands to wrap, which differs per modifier
 class Modifier<Content = (string | MarkupElement)[]> {
-    wrap(content: Content, options?: any): MarkupElement {
+    wrap(content: Content, options?: Record<string, any>): MarkupElement {
         throw Error("Modifier does not wrap");
     }
 
@@ -416,7 +414,7 @@ class Modifier<Content = (string | MarkupElement)[]> {
     tag?: string;
     itemTag?: string;
     groupConsecutive?: boolean;
-    codeOptions?: any;
+    codeOptions?: Record<string, any> | null;
 
     constructor(options?: ModifierOptions) {
         Object.assign(this, options);
@@ -698,7 +696,7 @@ export class BlockCodeModifier extends Modifier<string> {
         }
     }
 
-    wrap(content: string, options?: any): MarkupElement {
+    wrap(content: string, options?: Record<string, any>): MarkupElement {
         const codeHighlighter = this.getElement(content);
         const extraOptions = this.codeOptions;
         if (extraOptions) {
@@ -1133,13 +1131,13 @@ class MarkupParser {
         return result;
     }
 
-    parseOptions(stream: StringStream, optionsEnd?: RegExp): any {
+    parseOptions(stream: StringStream, optionsEnd?: RegExp): Record<string, any> {
         return this.constructor.parseOptions(stream, optionsEnd);
     }
 
     // optionsEnd cannot include whitespace or start with '='
-    static parseOptions(stream: StringStream, optionsEnd?: RegExp): any {
-        const options: any = {};
+    static parseOptions(stream: StringStream, optionsEnd?: RegExp): Record<string, any> {
+        const options: Record<string, any> = {};
 
         stream.whitespace();
 

@@ -3,7 +3,7 @@ export function enqueueIfNotLoaded(target: any, key: string, descriptor: Propert
     const method = descriptor.value;
     return {
         ...descriptor,
-        value: function(...args: any[]) {
+        value: function(this: EnqueueableMethodInterface, ...args: any[]) {
             if (this.isLoaded()) {
                 return method.call(this, ...args);
             } else {

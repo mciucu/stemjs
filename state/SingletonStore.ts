@@ -1,7 +1,7 @@
 import {State, type StoreEvent} from "./State";
 import {type StoreDependency, StoreObject, type StoreOptions} from "./Store";
 
-export class SingletonStore<T extends SingletonStore<T> = any> extends StoreObject {
+export class SingletonStore extends StoreObject {
     objectType: string;
     state?: State;
     dependencies?: StoreDependency[];
@@ -13,21 +13,21 @@ export class SingletonStore<T extends SingletonStore<T> = any> extends StoreObje
         this.dependencies = options.dependencies;
     }
 
-    get(): T {
-        return this as any as T;
+    get(): this {
+        return this;
     }
 
-    all(): T[] {
-        return [this as any as T];
+    all(): this[] {
+        return [this];
     }
 
-    applyEvent(event: StoreEvent): T {
+    applyEvent(event: StoreEvent): this {
         Object.assign(this, event.data);
         this.dispatchChange(event);
-        return this as any as T;
+        return this;
     }
 
-    importState(obj: any): void {
+    importState(obj: unknown): void {
         Object.assign(this, obj);
         this.dispatchChange(obj);
     }

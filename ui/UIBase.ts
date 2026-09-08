@@ -87,6 +87,13 @@ export interface UIElementOptions<TagType extends string = HTMLTagType> extends 
     //[key: string]: any;
 }
 
+// What an element passes down to its children, merged at each level. Left open: getExtraContext is the
+// extension point, and a subclass adds whatever it wants read further down
+export interface UIContext {
+    theme?: Theme;
+    [key: string]: any;
+}
+
 // The two createElement normalizes
 type NormalizedOptions = "children" | "ref";
 
@@ -200,7 +207,7 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
     declare node?: NodeType;
     declare parent?: UIElement;
     declare options?: UIElementOptions<string>; // Tag-agnostic: an SVG element answers with its own tag set
-    declare context?: any;
+    declare context?: UIContext;
 
     canOverwrite(existingChild: BaseUIElement): boolean {
         return this.constructor === existingChild.constructor &&
@@ -477,8 +484,7 @@ export class UIElement<
         return this.render();
     }
 
-    // TODO @types type this
-    getExtraContext(): any {
+    getExtraContext(): UIContext | null {
         const theme = this.options?.theme;
         if (theme) {
             return {theme};
@@ -486,7 +492,7 @@ export class UIElement<
         return null;  // cleanObject({theme}, {emptyAsNull: true});
     }
 
-    updateContext(context: any = this.parent?.context): void {
+    updateContext(context: UIContext = this.parent?.context): void {
         const extraContext = this.getExtraContext();
         this.context = extraContext ? {...context, ...extraContext} : context;
     }
@@ -605,11 +611,11 @@ export class UIElement<
         attr.apply(this.node, this.constructor.domAttributesMap);
     }
 
-    setAttribute(key: string, value: any): void {
+    setAttribute(key: string, value: unknown): void {
         this.getOptionsAsNodeAttributes().setAttribute(key, value, this.node, this.constructor.domAttributesMap);
     }
 
-    setStyle(key: string | Record<string, any>, value?: any): void {
+    setStyle(key: string | Record<string, StyleValue<string>>, value?: StyleValue<string>): void {
         if (typeof key === "object") {
             for (const [styleKey, styleValue] of Array.from(Object.entries(key))) {
                 this.setStyle(styleKey, styleValue);

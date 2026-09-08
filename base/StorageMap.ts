@@ -5,7 +5,8 @@ import {type ListenerHandle} from "./Dispatcher";
 // All keys are prefixed with our custom name, so we don't have to worry about polluting the global storage namespace
 // Keys must be strings, and values are modified by the serialize/deserialize methods,
 // which by default involve JSON conversion
-export class StorageMap extends Dispatchable {
+// The value type is what serialize writes and deserialize reads back, so a map holding one shape can say so
+export class StorageMap<Value = any> extends Dispatchable {
     static SEPARATOR = "-@#%-";
     
     storage: Storage;
@@ -28,16 +29,16 @@ export class StorageMap extends Dispatchable {
     }
 
     // Method to serialize the values
-    serialize(value: any): string {
+    serialize(value: Value): string {
         return JSON.stringify(value);
     }
 
     // Method to deserialize the value (which can be null if there is no value)
-    deserialize(value: string | null): any {
+    deserialize(value: string | null): Value {
         return value && JSON.parse(value);
     }
 
-    set(key: string, value: any): boolean {
+    set(key: string, value: Value): boolean {
         try {
             this.storage.setItem(this.getRawKey(key), this.serialize(value));
         } catch(e) {
@@ -54,7 +55,7 @@ export class StorageMap extends Dispatchable {
         return this.storage.getItem(this.getRawKey(key));
     }
 
-    get(key: string, defaultValue: any = null): any {
+    get(key: string, defaultValue: Value = null): Value {
         const value = this.getRaw(key);
         if (value == null) {
             return defaultValue;
@@ -79,15 +80,15 @@ export class StorageMap extends Dispatchable {
         return result;
     }
 
-    values(): any[] {
+    values(): Value[] {
         return this.keys().map(key => this.get(key));
     }
 
-    entries(): [string, any][] {
-        return this.keys().map(key => [key, this.get(key)]);
+    entries(): [string, Value][] {
+        return this.keys().map((key): [string, Value] => [key, this.get(key)]);
     }
 
-    [Symbol.iterator](): [string, any][] {
+    [Symbol.iterator](): [string, Value][] {
         return this.entries();
     }
 
@@ -100,22 +101,23 @@ export class StorageMap extends Dispatchable {
 }
 
 // SessionStorageMap can be used to preserve data on tab refreshes
-export class SessionStorageMap extends StorageMap {
+export class SessionStorageMap<Value = any> extends StorageMap<Value> {
     constructor(name: string = "") {
         super(window.sessionStorage, name);
     }
 }
 
 // LocalStorageMap can be used to store data across all our tabs
-// What a change in another tab reports, once the raw key has been split back into map and key
-export interface StorageMapChange {
+// What a change in another tab reports, once the raw key has been split back into map and key.
+// The values arrive raw, and addChangeListener deserializes them in place before handing the event on
+export interface StorageMapChange<Value = string | null> {
     originalEvent: StorageEvent;
     key: string;
-    oldValue: string | null;
-    newValue: string | null;
+    oldValue: Value;
+    newValue: Value;
 }
 
-export class LocalStorageMap extends StorageMap {
+export class LocalStorageMap<Value = any> extends StorageMap<Value> {
     static CHANGE_DISPATCHABLE?: Dispatchable;
 
     constructor(name: string = "") {
@@ -152,10 +154,13 @@ export class LocalStorageMap extends StorageMap {
     // Only works if we're being backed by Window.localStorage and only received events from other tabs (not the current tab)
     // The event has the following fields: key, oldValue, newValue, url, storageArea, originalEvent
     // The key is modified to be the same the one you used in the map
-    addChangeListener(callback: (event: any) => void, doDeserialization: boolean = true): ListenerHandle {
+    addChangeListener(callback: (event: StorageMapChange<Value>) => void, doDeserialization?: true): ListenerHandle;
+    addChangeListener(callback: (event: StorageMapChange) => void, doDeserialization: false): ListenerHandle;
+    addChangeListener(callback: (event: StorageMapChange<any>) => void, doDeserialization: boolean = true): ListenerHandle {
         let realCallback = callback;
         if (doDeserialization) {
-            realCallback = (event: any) => {
+            // The raw values are replaced in place, so what the caller reads is the same object deserialized
+            realCallback = (event) => {
                 event.oldValue = this.deserialize(event.oldValue);
                 event.newValue = this.deserialize(event.newValue);
                 callback(event);

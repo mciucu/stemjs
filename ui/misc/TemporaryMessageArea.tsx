@@ -1,5 +1,6 @@
 import {type ElementOptions, TextUIElement, UI, type PartialOptions} from "../UIBase";
 import {NodeAttributes} from "../NodeAttributes";
+import {type TimeoutHandler} from "../../base/Utils";
 
 export interface TemporaryMessageAreaOptions {
     value?: string;
@@ -8,8 +9,8 @@ export interface TemporaryMessageAreaOptions {
 
 export class TemporaryMessageArea extends UI.Primitive("span") {
     declare options: ElementOptions<TemporaryMessageAreaOptions>;
-    clearValueTimeout?: any;
-    textElement: any;
+    clearValueTimeout?: TimeoutHandler;
+    textElement: TextUIElement;
 
     getDefaultOptions() {
         return {

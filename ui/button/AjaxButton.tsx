@@ -1,4 +1,5 @@
 import {Ajax} from "../../base/Ajax";
+import {type FetchOptions} from "../../base/Fetch";
 import {ActionStatus} from "../Constants";
 import {StateButton} from "./StateButton";
 
@@ -66,13 +67,13 @@ export class AjaxButton extends StateButton<AjaxButtonOptions> {
         return ajaxPromise;
     }
 
-    ajaxCall(data: any) {
+    ajaxCall(data: FetchOptions["data"]) {
         return this.ajax("fetch", data);
     }
 }
 
 for (const methodName of ["fetch", "request", "get", "post", "getJSON", "postJSON"]) {
-    (AjaxButton.prototype as any)[methodName] = function(...args: any[]) {
+    (AjaxButton.prototype as any)[methodName] = function(this: AjaxButton, ...args: any[]) {
         return this.ajax(methodName, ...args);
     }
 }

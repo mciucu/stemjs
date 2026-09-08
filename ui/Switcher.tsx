@@ -127,7 +127,7 @@ export class Switcher extends UIElement<SwitcherOptions> {
     updateChild(child: UIElement): void {
         if (this.getChildProperties(child).redrawIndex < this.numRedraws) {
             if (!child.node) {
-                child.mount(this as any);
+                child.mount(this);
             } else {
                 child.redraw();
             }
@@ -141,7 +141,7 @@ export class Switcher extends UIElement<SwitcherOptions> {
         }
         this.options.children.push(child);
         if (doMount) {
-            child.mount(this as any);
+            child.mount(this);
         }
         if (this.options.children.length === 1) {
             this.setActive(child);
@@ -218,7 +218,7 @@ export class Switcher extends UIElement<SwitcherOptions> {
     }
 
     onMount(): void {
-        this.addListener("shouldRedrawChild", (event: any) => {
+        this.addListener("shouldRedrawChild", (event: {child: UIElement}) => {
             if (event.child.isInDocument()) {
                 event.child.redraw();
             } else {

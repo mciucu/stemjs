@@ -5,6 +5,7 @@ import {registerStyle} from "../../style/Theme";
 import {Device} from "../../../base/Device";
 import {BaseInputElement} from "../BaseInputElement";
 import {MakeIcon, MakeText} from "../../SimpleElements";
+import {type NodeAttributes} from "../../NodeAttributes";
 
 
 export class CheckboxInputStyle extends StyleSheet {
@@ -73,7 +74,7 @@ export class CheckboxInput extends BaseInputElement<boolean | null, CheckboxInpu
         };
     }
 
-    extraNodeAttributes(attr: any): void {
+    extraNodeAttributes(attr: NodeAttributes): void {
         super.extraNodeAttributes(attr);
         if (this.options.disabled) {
             // TODO actually implement disabled

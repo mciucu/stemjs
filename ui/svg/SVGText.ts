@@ -29,7 +29,7 @@ export class SVGText extends SVGPrimitive("text") {
         ["textAnchor", {domName: "text-anchor"}]
     ]);
 
-    getDefaultOptions(options?: any): Partial<any> {
+    getDefaultOptions(options?: this["options"]): Partial<this["options"]> {
         return {
             text: "",
             fontSize: "15px",

@@ -135,7 +135,7 @@ export class Table<BaseType = any> extends UIElement<TableOptions<BaseType>, HTM
     }
 
     getEntryKey(entry: BaseType, index: number): string | number {
-        return (entry as any)?.id ?? index;
+        return (entry as {id?: string | number})?.id ?? index;
     }
 
     renderRows(): UIChild {

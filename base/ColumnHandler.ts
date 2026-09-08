@@ -2,11 +2,11 @@
 // Takes in an array ["Name", obj => obj.field, options] or simply an array of options
 
 import {isNotNullOrFalse} from "./Utils";
-import {type UIChild} from "../ui/UIBase";
+import {type UIChild, type UIElement} from "../ui/UIBase";
 
 // Table.renderEntryCell hands a mapper all four: the entry, where it sits, and the row rendering it
 export type ColumnMapper<BaseType, ResultType> =
-    (obj: BaseType, rowIndex?: number, columnIndex?: number, row?: any) => ResultType;
+    (obj: BaseType, rowIndex?: number, columnIndex?: number, row?: UIElement) => ResultType;
 
 // TODO @Mihai this might make sense to templatized, depending on the object type for ColumnMapper
 export interface ColumnOptions<BaseType, ResultType = any> {

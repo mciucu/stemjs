@@ -7,7 +7,7 @@ export interface TimePassedSpanOptions {
 
 export class TimePassedSpan extends UI.Primitive("span") {
     declare options: ElementOptions<TimePassedSpanOptions>;
-    private _updateListener?: any;
+    private _updateListener?: ListenerHandle;
     private static updateFunction?: number;
     private static TIME_DISPATCHER?: Dispatchable;
 

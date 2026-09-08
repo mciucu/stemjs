@@ -7,20 +7,22 @@ declare global {
     interface StemPluginRegistry {}
 }
 
-export class Plugin extends Dispatchable {
-    parent: any;
+// The host is what a plugin is constructed against, and a subclass naming it makes its own linkToParent
+// a checked override rather than an accidentally compatible one
+export class Plugin<Parent = any> extends Dispatchable {
+    parent: Parent;
 
-    constructor(parent: any) {
+    constructor(parent: Parent) {
         super();
         this.linkToParent(parent);
     }
 
-    linkToParent(parent: any): void {
+    linkToParent(parent: Parent): void {
         this.parent = parent;
     }
 
     // Implemented by the plugins that need to undo what they attached; called when the host unmounts
-    remove?(parent?: any): void | Promise<void>;
+    remove?(parent?: Parent): void | Promise<void>;
 
     name(): string {
         return this.constructor.pluginName();
@@ -31,13 +33,17 @@ export class Plugin extends Dispatchable {
     }
 }
 
+// What registerPlugin takes. A class naming its host is not assignable to `typeof Plugin`, whose construct
+// signature is generic, and constructing is all this needs to do
+export type PluginConstructor = new (parent: any) => Plugin;
+
 // TODO: rename this to use Mixin in title
 export const Pluginable = function <T extends new (...args: any[]) => any>(BaseClass: T) {
     return class Pluginable extends BaseClass {
         plugins?: Map<string, Plugin>;
 
         // TODO: this should probably take in a plugin instance also
-        registerPlugin(PluginClass: typeof Plugin): void {
+        registerPlugin(PluginClass: PluginConstructor): void {
             if (!this.plugins) {
                 this.plugins = new Map<string, Plugin>();
             }

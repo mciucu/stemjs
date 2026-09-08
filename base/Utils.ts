@@ -1,7 +1,7 @@
 // TypeScript type definitions
 type UnwrapFunc<T = any> = (element: T) => T | undefined;
 type VersioningFunc = (str: string, index: number | string) => string;
-type FilterFunc = (key: string, value: any) => boolean;
+type FilterFunc = (key: string, value: unknown) => boolean;
 
 // Browser timer types (to avoid Node.js conflicts)
 export type TimeoutHandler = ReturnType<typeof setTimeout>;
@@ -34,7 +34,7 @@ interface Base64Options {
 
 interface ResolveFuncValueOptions {
     maxIter?: number;
-    args?: any[] | null;
+    args?: unknown[] | null;
     allowUnresolved?: boolean;
 }
 
@@ -176,7 +176,7 @@ export function isIterable(obj: any): obj is Iterable<any> {
     return obj[Symbol.iterator] !== undefined;
 }
 
-export function defaultComparator(a: any, b: any): number {
+export function defaultComparator(a: unknown, b: unknown): number {
     if (a == null && b == null) {
         return 0;
     }
@@ -208,7 +208,7 @@ interface MultikeySortOptions {
 }
 
 // Sort by a tuple of keys, comparing lexicographically. Returns a new array, keys are evaluated once per element.
-export function multikeySort<T>(array: T[], keyFunc: (obj: T) => any, options: MultikeySortOptions = {}): T[] {
+export function multikeySort<T>(array: T[], keyFunc: (obj: T) => unknown, options: MultikeySortOptions = {}): T[] {
     const sign = options.desc ? -1 : 1;
     const entries = array.map(obj => ({keys: toArray(keyFunc(obj)), obj}));
     entries.sort((a, b) => {
@@ -295,11 +295,11 @@ export function isBoolean(obj: unknown): obj is boolean {
     return obj === true || obj === false;
 }
 
-export function isNumber(obj: any): obj is number {
+export function isNumber(obj: unknown): obj is number {
     return (typeof obj === "number") || (obj instanceof Number);
 }
 
-export function isString(obj: any): obj is string {
+export function isString(obj: unknown): obj is string {
     return (typeof obj === "string") || (obj instanceof String);
 }
 
@@ -324,11 +324,11 @@ export function isPlainObject(obj: unknown): obj is Record<string, any> {
     return true;
 }
 
-function FILTER_NULLS(_key: string, value: any): boolean {
+function FILTER_NULLS(_key: string, value: unknown): boolean {
     return value != null;
 }
 
-function FILTER_NULLS_AND_EMPTY_STR(_key: string, value: any): boolean {
+function FILTER_NULLS_AND_EMPTY_STR(_key: string, value: unknown): boolean {
     return value != null && value !== "";
 }
 
@@ -348,7 +348,7 @@ export function cleanObject(obj: Record<string, any>, options: CleanObjectOption
     return cleanedObject;
 }
 
-export function deepSetAttr(obj: Record<string, any>, keys: string[], value: any): void {
+export function deepSetAttr(obj: Record<string, any>, keys: string[], value: unknown): void {
     keys.forEach((key, index) => {
         if (index + 1 < keys.length) {
             if (!obj[key]) {
@@ -361,7 +361,7 @@ export function deepSetAttr(obj: Record<string, any>, keys: string[], value: any
     });
 }
 
-export function deepGetAttr(obj: any, keys: string[]): any {
+export function deepGetAttr(obj: Record<string, any>, keys: string[]): any {
     for (const key of keys) {
         obj = obj && obj[key];
     }
@@ -405,7 +405,7 @@ export function deepCopy<T = any>(...sources: any[]): T {
 	return target;
 }
 
-export function isDeepEqual(obj1: any, obj2: any): boolean {
+export function isDeepEqual(obj1: unknown, obj2: unknown): boolean {
     // Different types means different variables.
     if (typeof obj1 !== typeof obj2) {
         return false;
@@ -468,7 +468,7 @@ export function setCookie(name: string, value: string | number, maxAge: number =
     document.cookie = cookie;
 }
 
-export function serializeCookie(name: string, value: any, maxAge: number = 60*60*4): void {
+export function serializeCookie(name: string, value: unknown, maxAge: number = 60*60*4): void {
     setCookie(name, encodeURIComponent(JSON.stringify(value)), maxAge);
 }
 
@@ -508,7 +508,7 @@ export function uniqueId(obj: object): string {
 }
 
 // args[0] is a string where the "%[number]" block will be replaced by the args[number]
-export function evaluateSprintf(...args: any[]): string {
+export function evaluateSprintf(...args: [string, ...any[]]): string {
     let str = args[0];
 
     for (let index = 1; index < args.length; index += 1) {
@@ -547,7 +547,7 @@ function appendNumberInParanthesis(str: string, index: number | string): string 
 }
 
 // Starting from the suggestion, tries a bunch of versioning values until one is free (passes checkFunc)
-export function findFirstFreeVersion(suggestion: string, checkFunc: (str: string) => any, versioning: VersioningFunc = appendNumberInParanthesis): string {
+export function findFirstFreeVersion(suggestion: string, checkFunc: (str: string) => unknown, versioning: VersioningFunc = appendNumberInParanthesis): string {
     for (let index = 0; index < 100; index++) {
         const str = versioning(suggestion, index);
         if (!checkFunc(str)) {

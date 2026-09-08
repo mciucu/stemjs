@@ -9,10 +9,14 @@ export interface BaseFetchOptions {
     force?: boolean;
 }
 
+// Called with whatever the request rejected with, or with nothing when the response simply did not carry
+// the object; FetchErrorHandler is the wrong type here because it requires the argument
+export type FetchJobErrorHandler = (error?: any) => void;
+
 export type FetchJob<T extends StoreObject, ExtraOptions = {}> = {
     id: StoreId;
     success: (obj: T) => void;
-    error?: (error?: any) => void;
+    error?: FetchJobErrorHandler;
 } & ExtraOptions;
 
 export interface FetchRequestData {
@@ -49,7 +53,7 @@ class AjaxFetchStore extends BaseStore<StoreClass<StoreObject>>(objectType, stor
     }
 
     // TODO Deprecate this and move to only fetch
-    static fetchSync<StoredType extends T & AjaxFetchStore>(this: StoreClass<StoredType> & typeof AjaxFetchStore, id: StoreId, successCallback: (obj: StoredType) => void, errorCallback?: (error?: any) => void, fetchOptions: Partial<FetchOptions> = {}): void {
+    static fetchSync<StoredType extends T & AjaxFetchStore>(this: StoreClass<StoredType> & typeof AjaxFetchStore, id: StoreId, successCallback: (obj: StoredType) => void, errorCallback?: FetchJobErrorHandler, fetchOptions: Partial<FetchOptions> = {}): void {
         if (!fetchOptions.force) {
             let obj = this.get(id);
             if (obj) {

@@ -1,4 +1,4 @@
-import {type ElementOptions, UI, UIElement, type UICleanChild, type NodeAttributes} from "../UIBase";
+import {type ElementOptions, UI, UIElement, type UIChild, type UICleanChild, type NodeAttributes} from "../UIBase";
 import {type StyleRules} from "../Style";
 import {NavStyle} from "./NavStyle";
 import {Switcher} from "../Switcher";
@@ -44,7 +44,7 @@ const BasicOrientedLinkElement = BasicOrientedElementInterface(Link);
 
 
 interface NavElementOptions extends BasicOrientedElementOptions {
-    value?: any;
+    value?: UIChild;
     href?: string;
     sessionKey?: string;
     persistent?: boolean;
@@ -261,8 +261,9 @@ class NavSection extends UI.Primitive("ul")<NavSectionOptions> {
 
 class NavAnchoredNotifications extends NavSection {
     declare switcher?: Switcher;
-    declare activeChild?: any;
-    declare bodyListener?: any;
+    declare activeChild?: UIElement;
+    // Kept so hide() can pass the same callback back to removeEventListener
+    declare bodyListener?: () => void;
 
     extraNodeAttributes(attr: NodeAttributes) {
         super.extraNodeAttributes(attr);
@@ -294,8 +295,9 @@ class NavAnchoredNotifications extends NavSection {
     show(content?: UIElement, child?: UIElement) {
         this.activeChild = child;
         this.switcher.removeClass("hidden");
-        (this.switcher.setActive as any)(content, child);
-        this.bodyListener = document.body.addEventListener("click", () => this.hide());
+        this.switcher.setActive(content);
+        this.bodyListener = () => this.hide();
+        document.body.addEventListener("click", this.bodyListener);
     }
 
     hide() {

@@ -12,7 +12,7 @@ const MoneyErrors = {
 export interface MoneyLike {
     amount?: number;
     balance?: number;
-    currency?: Currency | string | number;
+    currency?: CurrencyLike;
     currencyId?: string | number;
     getCurrency?: () => Currency;
 }
@@ -26,6 +26,12 @@ interface FieldDescriptor {
     currencyField?: string;
 }
 
+// What a Money is built from: an amount in the currency's smallest units, or a money-shaped value
+export type MoneyAmount = number | string | MoneyLike;
+
+// A currency, or what resolves to one: its ISO code or its id
+export type CurrencyLike = Currency | string | number;
+
 export class Money {
     static useFormatter: boolean = false; // TODO: preserving behaviour now, reconsider defaults
 
@@ -34,7 +40,7 @@ export class Money {
     private currency: Currency;
 
     // Also accepts an object {amount, currency} as single argument
-    constructor(amount: number | string | MoneyLike, currency?: Currency | string | number) {
+    constructor(amount: MoneyAmount, currency?: CurrencyLike) {
         this.amount = amount as number;
         if (!currency) {
             // Amount is valid to be 0, that's why we need ?? instead of ||
@@ -61,7 +67,7 @@ export class Money {
         }
     }
 
-    static optionally(obj: any, currency?: Currency | string | number): Money | null | undefined {
+    static optionally(obj: MoneyAmount, currency?: CurrencyLike): Money | null | undefined {
         if (obj != null) {
             try {
                 return new this(obj, currency);
@@ -73,12 +79,12 @@ export class Money {
         return null;
     }
 
-    static makeFieldLoader(fieldDescriptor: FieldDescriptor): (value: any, obj: any) => Money | null | undefined {
+    static makeFieldLoader(fieldDescriptor: FieldDescriptor): (value: any, obj: Record<string, any>) => Money | null | undefined {
         const currencyFieldName = fieldDescriptor.currencyField || "currency";
-        return (value: any, obj: any) => this.optionally(value, obj[currencyFieldName] || obj[currencyFieldName + "Id"]);
+        return (value: any, obj: Record<string, any>) => this.optionally(value, obj[currencyFieldName] || obj[currencyFieldName + "Id"]);
     }
 
-    static format(amount: number | string | MoneyLike, currency?: Currency | string | number): string {
+    static format(amount: MoneyAmount, currency?: CurrencyLike): string {
         return (new Money(amount, currency)).toMainUnitString();
     }
 

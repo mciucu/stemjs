@@ -290,7 +290,7 @@ export class StemDate extends BaseDate {
     }
 
     // Just to keep moment compatibility, until we actually implement locales
-    locale(_loc: any) {
+    locale(_loc: unknown) {
         return this;
     }
 
@@ -367,7 +367,7 @@ export class StemDate extends BaseDate {
         return this.getStartOfYear().add(TimeUnit.YEAR).subtract(TimeUnit.MILLISECOND);
     }
 
-    static formatter: TokenFormatter = new TokenFormatter([
+    static formatter: TokenFormatter<StemDate> = new TokenFormatter([
         ["ISO", date => date.toISOString()],
 
         ["Y", date => date.getFullYear()],

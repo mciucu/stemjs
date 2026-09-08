@@ -20,9 +20,15 @@ export function parseHeaders(xhr: XMLHttpRequest): Headers {
     return headers;
 }
 
+// A value a query parameter is written with, which URLSearchParams stringifies
+export type URLParamValue = string | number | boolean;
+
+// How a request's query is written: a plain object of values, or an already built URLSearchParams
+export type URLSearchParamsSource = Record<string, URLParamValue | URLParamValue[]> | URLSearchParams;
+
 // Creates a new URLSearchParams object from a plain object
 // Fields that are arrays are spread
-export function getURLSearchParams(data: any, arrayKeySuffix: string = "[]"): URLSearchParams {
+export function getURLSearchParams(data: URLSearchParamsSource, arrayKeySuffix: string = "[]"): URLSearchParams {
     if (!isPlainObject(data)) {
         return data;
     }
@@ -82,7 +88,7 @@ export interface FetchOptions extends Omit<RequestInit, "cache"> {
     postprocessors?: FetchPostprocessor[];
     errorPostprocessors?: FetchErrorPostprocessor[];
     preprocessors?: FetchPreprocessor[];
-    urlParams?: any;
+    urlParams?: URLSearchParamsSource;
     urlSearchParams?: URLSearchParams;
     arraySearchParamSuffix?: string;
     disableStateImport?: boolean;
@@ -92,6 +98,8 @@ export interface FetchOptions extends Omit<RequestInit, "cache"> {
     type?: string;
     // Only read when truthy, so false is how a caller says to leave the header off
     contentType?: string | false;
+    // Left open: it is a plain object, which becomes the query on a GET and a FormData otherwise, but every
+    // caller writes a named request interface, and those carry no index signature to match against
     data?: any;
 
 }
@@ -136,7 +144,7 @@ export class XHRPromise {
                 // Response has methods to return these as promises
                 const {dataType} = options;
                 if (dataType && typeof response[dataType] === "function") {
-                    const responsePromise = response[dataType]() as Promise<any>;
+                    const responsePromise = response[dataType]();
                     // TODO: should whitelist dataType to json, blob
                     responsePromise.then((data) => {
                         this.resolve(data);
@@ -208,7 +216,7 @@ export class XHRPromise {
         return parseHeaders(this.xhr);
     }
 
-    send(body: any): void {
+    send(body: XMLHttpRequestBodyInit | null): void {
         this.getXHR().send(body);
     }
 
@@ -385,7 +393,8 @@ export function fetch(input: RequestInfo | URLFetchOptions, ...args: FetchOption
         }
     }
 
-    // TODO @types is this that safe?
+    // The branch above returned for a plain object, so what is left is a RequestInfo - which no guard states,
+    // since a Request is an object too
     return new XHRPromise(input as RequestInfo, options);
 }
 
@@ -397,9 +406,9 @@ fetch.polyfill = true;
 
 
 // TODO @cleanup @Mihai normalize how api clients are implemented, they should have a standard interface to be usable inside Stem methods
-export type LoaderFunction = (url: string, params?: any) => Promise<any>;
+export type LoaderFunction = (url: string, params?: URLSearchParamsSource) => Promise<any>;
 
-let CurrentLoaderFunc: LoaderFunction = (url: string, params?: any) => {
+let CurrentLoaderFunc: LoaderFunction = (url: string, params?: URLSearchParamsSource) => {
     return fetch(url, {urlParams: params}) as any as Promise<any>;
 }
 
@@ -407,6 +416,6 @@ export function SetLoaderFunc(func: LoaderFunction): void {
     CurrentLoaderFunc = func;
 }
 
-export function LoadEndpoint(url: string, params?: any) {
+export function LoadEndpoint(url: string, params?: URLSearchParamsSource) {
     return CurrentLoaderFunc(url, params);
 }

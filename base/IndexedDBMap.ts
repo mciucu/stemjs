@@ -48,7 +48,7 @@ export class IndexedDBMap {
         }
     }
 
-    async set(key: string, value: any): Promise<boolean> {
+    async set(key: string, value: unknown): Promise<boolean> {
         try {
             const db = await this.getDB();
             return new Promise((resolve, reject) => {

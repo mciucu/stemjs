@@ -36,6 +36,7 @@ export const VirtualObjectStoreMixin = (objectType: string) => class VirtualStor
     }
 
     // TODO: we probably shouldn't have getVirtualObject take in an event
+    // Left open: an inferred return exposes that the mixin's static side does not extend its base (TS2417)
     static getVirtualObject(event: StoreEvent): any {
         return this.objects.get("temp-" + event.virtualId);
     }
@@ -51,6 +52,7 @@ export const VirtualObjectStoreMixin = (objectType: string) => class VirtualStor
         this.dispatch("updateObjectId", object, oldId);
     }
 
+    // Left open for the same reason as getVirtualObject above
     static applyCreateOrUpdateEvent(event: StoreEvent, sendDispatch: boolean = true): any {
         if (event.virtualId) {
             let existingVirtualObject = this.getVirtualObject(event);

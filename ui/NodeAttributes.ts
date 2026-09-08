@@ -1,5 +1,6 @@
 import {dashCase, isNumber, isString, isPlainObject, setObjectPrototype, resolveFuncValue} from "../base/Utils";
 import {type StyleRuleObject, type StyleRuleValue} from "./Style";
+import {type StyleValue} from "./UIBase";
 
 export const defaultToPixelsAttributes = new Set([
     "border-radius",
@@ -139,6 +140,7 @@ export type ClassNameArgument = ClassNameValue | StyleRuleObject | null | undefi
 
 export type NodeElement = HTMLElement | SVGElement;
 
+
 export class NodeAttributes {
     [key: string]: any;
     static defaultAttributesMap: DOMAttributesMap;
@@ -150,7 +152,7 @@ export class NodeAttributes {
     declare styleString?: string;
     declare whitelistedAttributes?: Record<string, boolean>;
 
-    constructor(obj?: any) {
+    constructor(obj?: Record<string, any>) {
         Object.assign(this, obj);
         // className and style should be deep copied to be modifiable, the others shallow copied
         if (this.className instanceof ClassNameSet) {
@@ -164,7 +166,7 @@ export class NodeAttributes {
 
     // Change the attribute & apply it, regardless if it exists in the attribute map (in that case it's whitelisted)
     // TODO: should this use the domName or the reverseName? Still needs work
-    setAttribute(key: string, value: any, node?: NodeElement, attributesMap: DOMAttributesMap = this.constructor.defaultAttributesMap): void {
+    setAttribute(key: string, value: unknown, node?: NodeElement, attributesMap: DOMAttributesMap = this.constructor.defaultAttributesMap): void {
         // TODO: might want to find a better way than whitelistAttributes field to do this
         if (!attributesMap.has(key)) {
             this.whitelistedAttributes = this.whitelistedAttributes || {}; // TODO: reconsider the whitelisted attributes
@@ -176,7 +178,7 @@ export class NodeAttributes {
         }
     }
 
-    applyStyleToNode(key: string, value: any, node?: NodeElement): void {
+    applyStyleToNode(key: string, value: StyleValue<string>, node?: NodeElement): void {
         if (typeof value === "function") {
             value = value();
         }
@@ -196,7 +198,7 @@ export class NodeAttributes {
         }
     }
 
-    setStyle(key: string | Record<string, any>, value?: any, node?: NodeElement): void {
+    setStyle(key: string | Record<string, StyleValue<string>>, value?: StyleValue<string>, node?: NodeElement): void {
         value = resolveFuncValue(value);
         if (!isString(key)) {
             // If the key is not a string, it should be a plain object
@@ -243,8 +245,8 @@ export class NodeAttributes {
         return this.className as ClassNameSet;
     }
 
-    // Left open: the parameter is reassigned to the array form, and StyleRuleObject's index signature makes
-    // an array assignable to it too, so no declared union narrows to something iterable
+    // Left open, here and in removeClass: the parameter is reassigned to the array form, and StyleRuleObject's
+    // index signature makes an array assignable to it too, so no declared union narrows to something iterable
     addClass(classes: any, node?: NodeElement): void {
         classes = this.constructor.getClassArray(classes);
 

@@ -1,6 +1,7 @@
 import {Device} from "../../base/Device";
 import {Dispatcher} from "../../base/Dispatcher";
 import {StemDate} from "../../time/Time";
+import {type NavManager} from "./NavManager";
 
 let DEFAULT_MAX_DISTANCE_FROM_SIDE: number = 25; // Pixels
 let minSwipeDistance: number = 60;    // Pixels
@@ -41,7 +42,7 @@ function touchEventHandler(
     }
 }
 
-function initializeSwipeRight(navManager: any, maxDistance: number = DEFAULT_MAX_DISTANCE_FROM_SIDE, minDistance: number = minSwipeDistance, minSpeed: number = minSwipeSpeed): void {
+function initializeSwipeRight(navManager: NavManager, maxDistance: number = DEFAULT_MAX_DISTANCE_FROM_SIDE, minDistance: number = minSwipeDistance, minSpeed: number = minSwipeSpeed): void {
     document.addEventListener("touchstart", touchEventHandler(
         (touchX: number) => (navManager.leftSidePanel.visible ||
                         window.pageXOffset !== 0 ||
@@ -56,7 +57,7 @@ function initializeSwipeRight(navManager: any, maxDistance: number = DEFAULT_MAX
     ));
 }
 
-function initializeSwipeLeft(navManager: any, maxDistance: number = DEFAULT_MAX_DISTANCE_FROM_SIDE, minDistance: number = minSwipeDistance, minSpeed: number = minSwipeSpeed): void {
+function initializeSwipeLeft(navManager: NavManager, maxDistance: number = DEFAULT_MAX_DISTANCE_FROM_SIDE, minDistance: number = minSwipeDistance, minSpeed: number = minSwipeSpeed): void {
     document.addEventListener("touchstart", touchEventHandler(
         (touchX: number) => (navManager.rightSidePanel.visible || window.innerWidth - touchX > maxDistance),
         (touchX: number, startX: number, duration: number) => (startX - touchX >= minDistance && (startX - touchX) / duration >= minSpeed),
@@ -69,7 +70,7 @@ function initializeSwipeLeft(navManager: any, maxDistance: number = DEFAULT_MAX_
     ));
 }
 
-function initializeSwipeEvents(navManager: any, maxDistanceFromSide: number = DEFAULT_MAX_DISTANCE_FROM_SIDE, minDistance: number = minSwipeDistance, minSpeed: number = minSwipeSpeed): void {
+function initializeSwipeEvents(navManager: NavManager, maxDistanceFromSide: number = DEFAULT_MAX_DISTANCE_FROM_SIDE, minDistance: number = minSwipeDistance, minSpeed: number = minSwipeSpeed): void {
     if (!Device.isTouchDevice()) {
         return;
     }

@@ -117,7 +117,7 @@ export function SortableTableInterface<BaseType, T extends Constructor<Table<Bas
                 }
 
                 for (const column of this.columnSortingOrder) {
-                    const cmpRes = colCmp(a, b, column, (column as any).sortDescending);
+                    const cmpRes = colCmp(a, b, column, column.sortDescending);
 
                     if (cmpRes) {
                         return cmpRes;

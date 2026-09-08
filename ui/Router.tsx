@@ -25,12 +25,12 @@ export interface RouteMatch {
     urlParts: string[];
 }
 
-// A guard either renders a page, or redirects with the arguments changeURL takes
+// Where a guard sends the router instead, spelled as the arguments changeURL takes
 export type RouteRedirect = [string | URLPart[], ChangeURLOptions?];
 
 export interface RouteOptions {
     title?: string;
-    beforeEnter?: (snapshot: RouteSnapshot) => UIElement | RouteRedirect | null;
+    beforeEnter?: (snapshot: RouteSnapshot) => RouteRedirect | null;
     cachePage?: boolean;
     doNotCache?: boolean;
 }
@@ -328,7 +328,7 @@ export class Route {
         return this.options.title;
     }
 
-    getPageGuard(): ((snapshot: RouteSnapshot) => UIElement | RouteRedirect | null) | undefined {
+    getPageGuard(): RouteOptions["beforeEnter"] {
         return this.options.beforeEnter;
     }
 
@@ -366,7 +366,7 @@ export class Route {
         return urlParts.length === 0;
     }
 
-    executeGuard(): UIElement | RouteRedirect | null {
+    executeGuard(): RouteRedirect | null {
         const pageGuard = this.getPageGuard();
         if (!pageGuard) {
             return null;
@@ -408,7 +408,8 @@ export class Route {
             return guardResult;
         }
 
-        return this.generatePage(guardResult as unknown as PageGenerator, ...argsArray);
+        // Unreachable: a guard answers with a redirect, which the branch above returns, or with nothing
+        return this.generatePage(guardResult, ...argsArray);
     }
 
     getSnapshot(): RouteSnapshot {

@@ -227,7 +227,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     @enqueueIfNotLoaded
     setAceMode(aceMode: string | {aceMode: string}): void {
         if (aceMode.hasOwnProperty("aceMode")) {
-            aceMode = (aceMode as any).aceMode;
+            aceMode = (aceMode as {aceMode: string}).aceMode;
         }
         this.getAce().getSession().setMode("ace/mode/" + aceMode);
     }
@@ -239,7 +239,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     @enqueueIfNotLoaded
     setAceKeyboardHandler(keyboardHandler: AceNamed): void {
         if (keyboardHandler.hasOwnProperty("aceName")) {
-            keyboardHandler = (keyboardHandler as any).aceName;
+            keyboardHandler = (keyboardHandler as {aceName: string}).aceName;
         }
         this.getAce().setKeyboardHandler("ace/keyboard/" + keyboardHandler);
     }
@@ -251,7 +251,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     @enqueueIfNotLoaded
     setAceTheme(theme: AceNamed): void {
         if (theme.hasOwnProperty("aceName")) {
-            theme = (theme as any).aceName;
+            theme = (theme as {aceName: string}).aceName;
         }
         this.getAce().setTheme("ace/theme/" + theme);
     }

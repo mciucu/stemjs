@@ -3,7 +3,7 @@ import {sanitizeUrlFromOptions} from "./Link";
 import {type RemoveHandle} from "../../base/Dispatcher";
 
 export class Image extends UI.Primitive("img")<{}, HTMLImageElement> {
-    setOptions(options: any): any {
+    setOptions(options: this["options"]): void {
         return super.setOptions(sanitizeUrlFromOptions(options, "src"));
     }
 

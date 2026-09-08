@@ -19,6 +19,7 @@ export class Theme extends Dispatchable {
     static Global = new this(null, "Global");
 
     classSet = new Set<StyledElementClass>();
+    missingProps = new Set<string>();
     styleSheetInstances = new Map<typeof StyleSheet, StyleSheet>(); // map from StyleSheet class to instance
     updateThrottled: Function = (new CallThrottler({throttle: 50})).wrap(() => this.updateStyleSheets()); // TODO @cleanup CallThrottler syntax is really ugly
     name: string;
@@ -44,7 +45,8 @@ export class Theme extends Dispatchable {
                 const rawValue = this.getProperty(key);
                 const value = resolveFuncValue(rawValue, {args: [this.props]});
 
-                if (globalThis.STEM_DEBUG && value === undefined) {
+                if (globalThis.STEM_DEBUG && value === undefined && !this.missingProps.has(key)) {
+                    this.missingProps.add(key);
                     console.warn("Failed to find theme prop", key);
                 }
 

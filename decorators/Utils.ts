@@ -1,4 +1,4 @@
-type HandleDescriptor = (target: any, key: string | symbol, descriptor: PropertyDescriptor, args: any[]) => PropertyDescriptor;
+type HandleDescriptor = (target: object, key: string | symbol, descriptor: PropertyDescriptor, args: unknown[]) => PropertyDescriptor;
 
 // What a legacy decorator is handed: the field's initializer rides along on the descriptor, and the
 // standard PropertyDescriptor does not model it
@@ -22,19 +22,22 @@ export function isDescriptor(desc: any): desc is PropertyDescriptor {
     return false;
 }
 
+// Either the descriptor a direct application produces, or the decorator a factory call answers with
+export type DecorateResult = PropertyDescriptor | ((target: object, key: string | symbol, descriptor: PropertyDescriptor) => PropertyDescriptor);
+
 // TODO @types what should entryArgs really be?
-export function decorate(handleDescriptor: HandleDescriptor, entryArgs: any[]): any {
+export function decorate(handleDescriptor: HandleDescriptor, entryArgs: any[]): DecorateResult {
     if (isDescriptor(entryArgs[entryArgs.length - 1])) {
         return handleDescriptor(...entryArgs as [any, string | symbol, PropertyDescriptor], []);
     } else {
-        return function (target: any, key: string | symbol, descriptor: PropertyDescriptor) {
+        return function (target: object, key: string | symbol, descriptor: PropertyDescriptor) {
             return handleDescriptor(target, key, descriptor, entryArgs);
         };
     }
 }
 
 export function createDefaultSetter<T>(key: string | symbol): (newValue: T) => T {
-    return function set(this: any, newValue: T): T {
+    return function set(this: object, newValue: T): T {
         Object.defineProperty(this, key, {
             configurable: true,
             writable: true,

@@ -3,17 +3,12 @@ import {styleRule} from "../decorators/Style";
 import {enhance} from "./Color";
 import {Device} from "../base/Device";
 import {Orientation, Level, Size, type LevelType, type SizeType, type OrientationType} from "./Constants";
-import {Theme} from "./style/Theme";
+import {Theme, type ThemeProps} from "./style/Theme";
 import {FloatType} from "./style/ThemeTypes";
 
 // Type definitions for CSS style objects
 export interface CSSStyleObject {
     [key: string]: string | number | (() => string | number) | CSSStyleObject;
-}
-
-// TODO @types move to Theme?
-interface ThemeProps {
-    [key: string]: string | number | ((props: ThemeProps) => string | number);
 }
 
 export function getTextColor(backgroundColor: string): string {
@@ -35,6 +30,7 @@ Theme.setProperties({
     COLOR_DANGER: "#d9534f",
 
     COLOR_LINK: "#337ab7",
+    TEXT_PRIMARY_COLOR: (props: ThemeProps) => getTextColor(props.COLOR_BACKGROUND),
 
     FONT_SIZE_EXTRA_SMALL: 10,
     FONT_SIZE_SMALL: 12,
@@ -69,6 +65,7 @@ Theme.setProperties({
     TOGGLE_DISABLED_BACKGROUND: "#78AAB2",
     TOGGLE_SHADOW: "0 1px 1px 0 rgba(0,0,0,.14), 0 2px 1px -1px rgba(0,0,0,.12), 0 1px 3px 0 rgba(0,0,0,.2)",
 
+    CARD_BORDER_RADIUS: (props: ThemeProps) => props.BASE_BORDER_RADIUS,
     CARD_HEADER_BACKGROUND_COLOR: "#ccc",
     CARD_HEADER_TEXT_COLOR: "#222",
     CARD_HEADER_HEIGHT: "",
@@ -95,6 +92,14 @@ Theme.setProperties({
     NAV_MANAGER_NAVBAR_HEIGHT: 50,
     NAV_MANAGER_BOX_SHADOW_NAVBAR: "0px 0px 10px rgb(0, 0, 0)",
     NAV_MANAGER_BOX_SHADOW_SIDE_PANEL: "0px 0px 10px #202e3e",
+    NAV_MANAGER_COLOR_NAV_BAR: (props: ThemeProps) => props.COLOR_PRIMARY,
+    NAV_MANAGER_COLOR_SIDE_PANEL: (props: ThemeProps) => enhance(props.COLOR_PRIMARY, 0.05),
+    NAV_MANAGER_NAV_BAR_BACKGROUND_COLOR: (props: ThemeProps) => props.NAV_MANAGER_COLOR_NAV_BAR,
+    NAV_MANAGER_NAV_BAR_HOVER_COLOR: (props: ThemeProps) => enhance(props.NAV_MANAGER_COLOR_NAV_BAR, 0.1),
+    NAV_MANAGER_SIDE_PANEL_BACKGROUND_COLOR: (props: ThemeProps) => props.NAV_MANAGER_COLOR_SIDE_PANEL,
+    NAV_MANAGER_SIDE_PANEL_HOVER_COLOR: (props: ThemeProps) => enhance(props.NAV_MANAGER_COLOR_SIDE_PANEL, 0.1),
+    NAV_MANAGER_HR_COLOR: (props: ThemeProps) => enhance(props.NAV_MANAGER_COLOR_SIDE_PANEL, 0.15),
+    NAV_MANAGER_TEXT_COLOR: (props: ThemeProps) => enhance(props.COLOR_PRIMARY, 1),
 
     MAIN_CONTAINER_EXTRA_PADDING_TOP_DESKTOP: 0,
     MAIN_CONTAINER_EXTRA_PADDING_TOP_MOBILE: 0,
@@ -104,10 +109,24 @@ Theme.setProperties({
     FLAT_TAB_AREA_LINE_HEIGHT: 30,
     FLAT_TAB_AREA_PADDING_SIDES: 10,
     FLAT_TAB_AREA_UNDERLINE_HEIGHT: 3,
+    FLAT_TAB_AREA_TAB_STYLE: {},
 
     INPUT_BACKGROUND: "#fff",
     INPUT_BORDER_COLOR: "#E5EAE9",
     INPUT_BORDER_RADIUS: 4,
+    INPUT_DEFAULT_HEIGHT: "auto",
+
+    CHECKBOX_SIZE: "1.14em",
+    CHECKBOX_BORDER_COLOR: (props: ThemeProps) => props.BASE_BORDER_COLOR,
+    CHECKBOX_BORDER_RADIUS: (props: ThemeProps) => props.BASE_BORDER_RADIUS,
+    CHECKBOX_ENABLED_BACKGROUND_COLOR: (props: ThemeProps) => props.COLOR_PRIMARY,
+    CHECKBOX_CHECKMARK_COLOR: (props: ThemeProps) => props.COLOR_BACKGROUND,
+
+    POPUP_BACKGROUND: (props: ThemeProps) => props.COLOR_BACKGROUND,
+    POPUP_SHADOW: (props: ThemeProps) => props.BASE_BOX_SHADOW,
+    POPUP_BORDER: "none",
+    POPUP_MAX_HEIGHT: "none",
+    POPUP_MAX_WIDTH: "none",
 });
 
 // A rule is named after the value that selects it, so a sheet only declares the levels and sizes it styles

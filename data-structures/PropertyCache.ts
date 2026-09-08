@@ -1,7 +1,10 @@
 import {isString} from "../base/Utils";
 
+// The cached value is written onto the object under the cache's own symbol, which no declaration of T carries
+type SymbolCache<R> = Record<symbol, R>;
+
 // Basically a WeakMap with a default getter and which provides control over the Symbol key
-export class PropertyCache<T = any, R = any> {
+export class PropertyCache<T extends object = any, R = any> {
     private key: symbol;
     private getter: (obj: T) => R;
 
@@ -21,9 +24,9 @@ export class PropertyCache<T = any, R = any> {
 
     get(obj: T, getter: (obj: T) => R = this.getter): R {
         const key = this.key;
-        if ((obj as any).hasOwnProperty(key)) {
-            return (obj as any)[key];
+        if ((obj as SymbolCache<R>).hasOwnProperty(key)) {
+            return (obj as SymbolCache<R>)[key];
         }
-        return (obj as any)[key] = getter(obj);
+        return (obj as SymbolCache<R>)[key] = getter(obj);
     }
 }

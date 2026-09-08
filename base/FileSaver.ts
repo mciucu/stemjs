@@ -70,7 +70,7 @@ export class FileSaver extends Dispatchable {
                 if (!popup) {
                     window.location.href = url;
                 }
-                url = undefined as any; // release reference before dispatching
+                url = undefined; // release reference before dispatching
                 this.readyState = FileSaver.DONE;
             };
             reader.readAsDataURL(blob);
@@ -94,7 +94,7 @@ export class FileSaver extends Dispatchable {
         this.revoke(objectUrl);
     }
 
-    static saveAs(blob: Blob | string | any[], fileName: string, blobOptions: BlobOptions = {type: "text/plain;charset=utf-8"}): FileSaver {
+    static saveAs(blob: Blob | string | BlobPart[], fileName: string, blobOptions: BlobOptions = {type: "text/plain;charset=utf-8"}): FileSaver {
         if (!(blob instanceof Blob)) {
             let value = blob;
             if (!Array.isArray(value)) {

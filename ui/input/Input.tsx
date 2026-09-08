@@ -1,4 +1,4 @@
-import {UI, UIElement, type UIEventHandler, type UIChild, type HTMLTagType} from "../UIBase";
+import {UI, UIElement, type UIEventHandler, type UIChild, type HTMLTagType, type WrittenUIOptions} from "../UIBase";
 import {DOMAttributesMap, NodeAttributes} from "../NodeAttributes";
 import {InputStyle} from "./Style";
 import {registerStyle} from "../style/Theme";
@@ -7,10 +7,11 @@ import {CleanupJobs, type RemoveHandle} from "../../base/Dispatcher";
 
 export interface InputableElementOptions<ValueType> {
     initialValue?: ValueType;
+    // Left open: a tag writes what the DOM will coerce - a number or a StoreId into a text input
     value?: any;
     readOnly?: boolean;
     // Every inputable answers addChangeListener, which is what makes this one an option
-    onChange?: (value: ValueType, element: any) => void;
+    onChange?: (value: ValueType, element: InputableElement<ValueType>) => void;
 }
 
 export interface InputOptions<ValueType> extends InputableElementOptions<ValueType> {
@@ -100,7 +101,7 @@ export class InputableElement<
         }
     }
 
-    addChangeListener(callback: (value: any, element: this) => void): CleanupJobs {
+    addChangeListener(callback: (value: ValueType, element: this) => void): CleanupJobs {
         const callbackWrapper = () => {
             callback(this.getValue(), this);
         }
@@ -433,7 +434,7 @@ export class TextArea extends InputableElement<string, TextAreaOptions, HTMLText
         return result;
     }
 
-    setValue(value: any): void {
+    setValue(value: string): void {
         this.options.value = value;
         this.node.value = value;
     }
@@ -454,10 +455,10 @@ export class Select<ValueType, ExtraOptions = {}> extends InputableElement<Value
 
     render(): UIChild {
         this.givenOptions = this.options.options || [];
-        let selectOptions: any[] = [];
+        let selectOptions: UIChild[] = [];
 
         for (let i = 0; i < this.givenOptions.length; i += 1) {
-            let options: any = {
+            let options: WrittenUIOptions<HTMLOptionElement, {}, "option"> = {
                 key: i
             };
             if (this.givenOptions[i] == this.options.selected) {

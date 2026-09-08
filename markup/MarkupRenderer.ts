@@ -130,6 +130,8 @@ export class MarkupRenderer extends UIElement<MarkupRendererOptions> {
         return this.options.value;
     }
 
+    // Left open: it converts children in place, so the field it writes back holds UI elements where the
+    // declared markup children were
     convertToUI(value: any): any {
         if (value instanceof UI.TextElement || value instanceof UI.Element) {
             // TODO: investigate this!
@@ -164,7 +166,7 @@ const SafeUriEnhancer = <T extends Constructor<UIElement>>(BaseClass: T, attribu
     // Declared inside a function, so ts-plugin can't append a merged interface for it
     declare ["constructor"]: UIElement["constructor"] & {isSafeUri(uri: string): boolean};
 
-    setOptions(options: any): any {
+    setOptions(options: this["options"]): void {
         if (options[attribute] && !this.constructor.isSafeUri(options[attribute])) {
             // Emptied rather than unset, so no default can ever be what a hostile URI falls back to
             options = {...options, [attribute]: ""};

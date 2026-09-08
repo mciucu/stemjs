@@ -10,7 +10,7 @@ export class NavIcon extends NavElement {
         attr.addClass(this.styleSheet.icon);
     }
 
-    getValue(): any[] {
+    getValue(): UIChild[] {
         return [
             this.getIcon(),
             this.getContent()

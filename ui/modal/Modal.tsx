@@ -248,7 +248,7 @@ export class ActionModal<ExtraOptions extends ActionModalOptions = ActionModalOp
 
 
 // modalOptions is whatever the modal being wrapped accepts, not merely what every ActionModal accepts
-type ActionModalClass = (new (...args: any[]) => UIElement<any, any, any, any>) & {show(options?: any): any};
+type ActionModalClass = (new (...args: any[]) => UIElement<any, any, any, any>) & {show(options?: Record<string, any>): unknown};
 
 export const ActionModalButton = <T extends ActionModalClass>(ActionModal: T) =>
     class ActionModalButton extends Button<ButtonOptions & {modalOptions?: NonNullable<InstanceType<T>["options"]>}> {
@@ -315,12 +315,12 @@ export class ConfirmModal extends ActionModal<ConfirmModalOptions> {
         super.hide();
     }
 
-    static async prompt<T = any>(options: object): Promise<T> {
-        return new Promise<T>((resolve) => {
+    static async prompt(options: object): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
             const modal = new this({...options, destroyOnHide: true});
             modal.resolvePromise = (value) => {
                 modal.resolved = true;
-                resolve(value as any);
+                resolve(value);
             };
             modal.show();
         });

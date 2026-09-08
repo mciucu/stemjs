@@ -25,12 +25,9 @@ interface CentroidData {
     averageDist: number;
 }
 
-type ZoomEventHandler = new (uiElement: ZoomableElement, callback: (event: Event, delta: number) => void) => CleanupHandle;
+type ZoomEventHandler = new (uiElement: UIElement, callback: (event: Event, delta: number) => void) => CleanupHandle;
 
 type ZoomEventCallback = (event: Event, delta: number) => void;
-
-// All a handler needs of the element is somewhere to hang a DOM listener
-type ZoomableElement = Pick<UIElement, "addNodeListener">;
 
 function generateZoomEvent(rawEvent: Event, delta: number, unit: number = 200): ZoomEvent {
     return {
@@ -44,7 +41,7 @@ function generateZoomEvent(rawEvent: Event, delta: number, unit: number = 200): 
 class WheelZoomEventHandler {
     private eventHandler: RemoveHandle;
 
-    constructor(uiElement: ZoomableElement, callback: ZoomEventCallback) {
+    constructor(uiElement: UIElement, callback: ZoomEventCallback) {
         this.eventHandler = uiElement.addNodeListener("wheel", (event: WheelEvent) => {
             // TODO: see if both of these are needed
             event.preventDefault();
@@ -67,7 +64,7 @@ class PinchZoomEventHandler {
     private centroid?: TouchCentroid;
     private averageDist?: number;
 
-    constructor(uiElement: ZoomableElement, callback: ZoomEventCallback) {
+    constructor(uiElement: UIElement, callback: ZoomEventCallback) {
         this.pinchActive = false;
         this.touchStartHandler = uiElement.addNodeListener("touchstart", (event: TouchEvent) => {
             this.recalculateCentroid(event);

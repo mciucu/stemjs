@@ -163,11 +163,12 @@ export class Dispatchable {
         }
     }
 
-    addListenerGeneric(methodName: keyof Dispatcher, name: DispatcherName | DispatcherName[], callback: Callback): ListenerHandle {
+    // The two adders below are the only callers, and naming them is what lets both lookups resolve
+    addListenerGeneric(methodName: "addListener" | "addListenerOnce", name: DispatcherName | DispatcherName[], callback: Callback): ListenerHandle {
         if (Array.isArray(name)) {
-            return new CleanupJobs(name.map(x => (this as any)[methodName](x, callback)));
+            return new CleanupJobs(name.map(x => this[methodName](x, callback)));
         }
-        return (this.getDispatcher(name) as any)[methodName](callback);
+        return this.getDispatcher(name)[methodName](callback);
     }
 
     addListener(name: DispatcherName | DispatcherName[], callback: Callback): ListenerHandle {

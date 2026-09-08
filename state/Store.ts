@@ -1,7 +1,7 @@
 import {CleanupJobs, Dispatchable, type ListenerHandle} from "../base/Dispatcher";
 import {GlobalState, type RawStateData, type RawStoreObject, State, type StateData, type StoreEvent, type StoreId, type StoreIdOrNull, type StoreInterface, type StoreObjectType} from "./State";
 import {isNotNull, isString, toArray} from "../base/Utils";
-import {type FieldDescriptor} from "./StoreField";
+import {type FieldDescriptor, type StoreObjectWithFields} from "./StoreField";
 
 // Another store, as the name it registered under or as the class itself
 export type StoreDependency = StoreObjectType | StoreClass<StoreObject>;
@@ -103,12 +103,12 @@ export class StoreObject extends Dispatchable {
     // emitted self-reference alias, so `typeof this` stays.
     static objects = new Map<string, InstanceType<typeof this>>();
 
-    static makeFieldLoader<T extends StoreObject>(this: StoreClass<T>, fieldDescriptor: FieldDescriptor): (value: any, obj: any) => T | undefined {
+    static makeFieldLoader<T extends StoreObject>(this: StoreClass<T>, fieldDescriptor: FieldDescriptor): (value: any, obj: StoreObjectWithFields) => T | undefined {
         fieldDescriptor.cacheField = false;
         fieldDescriptor.rawField = fieldDescriptor.rawField || (key => key + "Id");
 
         // TODO resolve through the object's own store, once a state can own its stores instead of everything growing in the global one
-        return (value: any, _obj: any) => this.get(value);
+        return (value: any, _obj: StoreObjectWithFields) => this.get(value);
     }
 
     static loadRaw(responseOrState: StateData): RawStoreObject[] {
@@ -156,7 +156,7 @@ export class StoreObject extends Dispatchable {
     }
 
     static getObjectIdForEvent(event: StoreEvent): string {
-        const id = event.objectId || (event.data as any)?.id;
+        const id = event.objectId || event.data?.id;
         return String(id);
     }
 
@@ -175,7 +175,8 @@ export class StoreObject extends Dispatchable {
         return this.objects.values() as IterableIterator<T>;
     }
 
-    static comparator?: (a: any, b: any) => number;
+    // A store sorts its own type, which a static cannot name; the base is what every one of them is
+    static comparator?: (a: StoreObject, b: StoreObject) => number;
 
     static all<T extends StoreObject>(this: StoreClass<T>): T[] {
         const values = Array.from(this.values());
@@ -281,7 +282,7 @@ export class StoreObject extends Dispatchable {
         }
     }
 
-    static makeEventFromObject(obj: RawStoreObject | StoreObject, eventExtra: any = null): StoreEvent {
+    static makeEventFromObject(obj: RawStoreObject | StoreObject, eventExtra: Record<string, any> | null = null): StoreEvent {
         return {
             isFake: true,
             type: "create",
@@ -293,7 +294,7 @@ export class StoreObject extends Dispatchable {
     }
 
     // Create a fake creation event, to insert the raw object
-    static create<T extends StoreObject>(this: StoreClass<T>, obj: RawStoreObject | StoreObject, eventExtra: any = null, dispatchEvent: boolean = true): T | undefined {
+    static create<T extends StoreObject>(this: StoreClass<T>, obj: RawStoreObject | StoreObject, eventExtra: Record<string, any> | null = null, dispatchEvent: boolean = true): T | undefined {
         if (!obj) {
             return;
         }

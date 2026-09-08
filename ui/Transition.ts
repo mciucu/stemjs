@@ -229,7 +229,6 @@ export class TransitionList {
     pauseTime?: number;
     onNewFrame?: (fraction: number) => void;
     animationFrameId?: number;
-    context?: any;
     duration?: number;
 
     constructor(startTime: number = 0) {
@@ -241,7 +240,6 @@ export class TransitionList {
 
     toString(): string {
         return  "{\n"+
-                "   context: " + this.context + "\n"+
                 "   duration: " + this.duration + "\n"+
                 "   startTime: " + this.startTime + "\n"+
                 "   dependsOn: " + this.dependsOn + "\n"+

@@ -1,4 +1,5 @@
 import {NodeAttributes, DOMAttributesMap} from "../NodeAttributes";
+import {type StyleValue} from "../UIBase";
 
 // Setting these attributes as styles in mozilla has no effect.
 // To maintain compatibility between moz and webkit, whenever
@@ -21,7 +22,7 @@ export class SVGNodeAttributes extends NodeAttributes {
         }
     }
 
-    setStyle(attributeName: string | Record<string, any>, value?: any, node?: SVGElement): void {
+    setStyle(attributeName: string | Record<string, StyleValue<string>>, value?: StyleValue<string>, node?: SVGElement): void {
         super.setStyle(attributeName, value, node);
         if (typeof attributeName === "string" && MozStyleElements.has(attributeName)) {
             this.setAttribute(attributeName, value, node);

@@ -242,7 +242,7 @@ export class KeyframeElement extends StyleElement<KeyframeElementOptions> {
         return result + "}";
     }
 
-    render(): UIChild {
+    render(): string {
         return "@keyframes " + this.getKeyframeName() + this.getKeyframeInstance(this.options.keyframe || {});
     }
 }

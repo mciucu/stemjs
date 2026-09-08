@@ -98,17 +98,6 @@ export class SVGUIElement<
         return this.getScreenCoordinatedForPoint({x: Device.getEventX(event), y: Device.getEventY(event)});
     }
 
-    saveState() {
-        let state: any = {};
-        state.options = {...this.options};
-        return state;
-    }
-
-    setState(state: any): void {
-        debugger;
-        this.setOptions(state.options);
-    }
-
     // TODO @cleanup deprecate
     getOptionsAsNodeAttributes(): SVGNodeAttributes {
         return setObjectPrototype(this.options, SVGNodeAttributes);

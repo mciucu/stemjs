@@ -1,5 +1,4 @@
 import {StyleSheet, styleRule} from "../Style";
-import {enhance} from "../Color";
 
 
 export class NavStyle extends StyleSheet {
@@ -9,19 +8,15 @@ export class NavStyle extends StyleSheet {
     getColors() {
         const themeProps = this.themeProps;
 
-        const navManagerColor = themeProps.COLOR_PRIMARY;
-        const navBarColor = themeProps.NAV_MANAGER_COLOR_NAV_BAR || navManagerColor;
-        const sidePanelColor = themeProps.NAV_MANAGER_COLOR_SIDE_PANEL || enhance(navManagerColor, 0.05);
-
         this.colors = {
             boxShadowNavManager: themeProps.NAV_MANAGER_BOX_SHADOW_NAVBAR,
             boxShadowSidePanel: themeProps.NAV_MANAGER_BOX_SHADOW_SIDE_PANEL,
-            sidepanelBackground: themeProps.NAV_MANAGER_SIDE_PANEL_BACKGROUND_COLOR || sidePanelColor,
-            sidepanelHover: themeProps.NAV_MANAGER_SIDE_PANEL_HOVER_COLOR || enhance(sidePanelColor, 0.1),
-            navbarBackground: themeProps.NAV_MANAGER_NAV_BAR_BACKGROUND_COLOR || navBarColor,
-            navbarHover: themeProps.NAV_MANAGER_NAV_BAR_HOVER_COLOR || enhance(navBarColor, 0.1),
-            hr: themeProps.NAV_MANAGER_HR_COLOR || enhance(sidePanelColor, 0.15),
-            text: themeProps.NAV_MANAGER_TEXT_COLOR || enhance(navManagerColor, 1),
+            sidepanelBackground: themeProps.NAV_MANAGER_SIDE_PANEL_BACKGROUND_COLOR,
+            sidepanelHover: themeProps.NAV_MANAGER_SIDE_PANEL_HOVER_COLOR,
+            navbarBackground: themeProps.NAV_MANAGER_NAV_BAR_BACKGROUND_COLOR,
+            navbarHover: themeProps.NAV_MANAGER_NAV_BAR_HOVER_COLOR,
+            hr: themeProps.NAV_MANAGER_HR_COLOR,
+            text: themeProps.NAV_MANAGER_TEXT_COLOR,
         };
 
         return this.colors;

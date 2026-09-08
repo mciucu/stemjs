@@ -1,4 +1,5 @@
 import {NavManager} from "./NavManager";
+import {type Dispatchable} from "../../base/Dispatcher";
 import {Badge, type SimpleStyledElementOptions} from "../SimpleElements";
 import {NodeAttributes} from "../NodeAttributes";
 
@@ -49,7 +50,7 @@ export class NavCounterBadge extends Badge<NavCounterBadgeOptions> {
         this.setValue(0);
     }
 
-    attachListenerForAction(obj: any, eventName: string, action: (...args: any[]) => void, condition?: (...args: any[]) => boolean): void {
+    attachListenerForAction(obj: Dispatchable, eventName: string, action: (...args: any[]) => void, condition?: (...args: any[]) => boolean): void {
         this.attachListener(obj, eventName, (...args: any[]) => {
             if (!condition || !(typeof condition === "function") || condition(...args)) {
                 action(...args);
@@ -57,11 +58,11 @@ export class NavCounterBadge extends Badge<NavCounterBadgeOptions> {
         });
     }
 
-    attachListenerForIncrement(obj: any, eventName: string, condition?: (...args: any[]) => boolean): void {
+    attachListenerForIncrement(obj: Dispatchable, eventName: string, condition?: (...args: any[]) => boolean): void {
         this.attachListenerForAction(obj, eventName, () => this.increment(), condition);
     }
 
-    attachListenerForReset(obj: any, eventName: string, condition?: (...args: any[]) => boolean): void {
+    attachListenerForReset(obj: Dispatchable, eventName: string, condition?: (...args: any[]) => boolean): void {
         this.attachListenerForAction(obj, eventName, () => this.reset(), condition);
     }
 }

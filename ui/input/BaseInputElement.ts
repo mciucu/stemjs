@@ -32,7 +32,7 @@ export class BaseInputElement<T = any, ExtraOptions = {}> extends UIElement<Inpu
         return valueA === valueB;
     }
 
-    setOptions(options: any): void {
+    setOptions(options: this["options"]): void {
         const oldInitialValue = this.options?.initialValue;
         super.setOptions(options);
         const {initialValue} = this.options;

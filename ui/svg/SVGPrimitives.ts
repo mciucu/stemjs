@@ -54,7 +54,7 @@ export class SVGGroup extends SVGPrimitive("g") {
 // Both type arguments, since naming the options stops "path" being inferred
 export class SVGPath extends SVGPrimitive<SVGPathOptions, "path">("path") {
 
-    getDefaultOptions(options?: any): Partial<any> {
+    getDefaultOptions(options?: this["options"]): Partial<this["options"]> {
         return {
             d: ""
         }
@@ -105,7 +105,7 @@ export class SVGPath extends SVGPrimitive<SVGPathOptions, "path">("path") {
 export class SVGCircle extends SVGPrimitive("circle") {
     declare options: SVGPrimitiveOptions<"circle"> & SVGCircleOptions;
 
-    getDefaultOptions(options?: any): Partial<any> {
+    getDefaultOptions(options?: this["options"]): Partial<this["options"]> {
         return {
             radius: 0,
             center: {x: 0, y: 0}
@@ -236,7 +236,7 @@ export class SVGRect extends SVGPrimitive("rect") {
 export class SVGLine extends SVGPrimitive("line") {
     declare options: SVGPrimitiveOptions<"line"> & SVGLineOptions;
 
-    getDefaultOptions(options?: any): Partial<any> {
+    getDefaultOptions(options?: this["options"]): Partial<this["options"]> {
         return {
             fill: "black",
             stroke: "black"
@@ -261,7 +261,7 @@ export class SVGLine extends SVGPrimitive("line") {
 export class Polygon extends SVGPath {
     declare options: ExtendedOptions<SVGPath, PolygonOptions>;
 
-    getDefaultOptions(options?: any): Partial<any> {
+    getDefaultOptions(options?: this["options"]): Partial<this["options"]> {
         return {
             points: []
         };

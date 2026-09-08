@@ -26,8 +26,12 @@ let translationMap: TranslationMap | null = null;
 export const TranslationElements = new Set<TranslationTextElement>();
 
 
-export class TranslationTextElement extends TextUIElement<TextElementOptions, string | any[]> {
-    constructor(value: string | any[]) {
+// What a translatable holds: a plain string, or a sprintf format followed by the values to interpolate.
+// The array cannot be a tuple: setValue builds it with Array.from(arguments)
+export type TranslationValue = string | any[];
+
+export class TranslationTextElement extends TextUIElement<TextElementOptions, TranslationValue> {
+    constructor(value: TranslationValue) {
         if (arguments.length === 1) {
             super(value);
         } else {
@@ -36,7 +40,7 @@ export class TranslationTextElement extends TextUIElement<TextElementOptions, st
         }
     }
 
-    setValue(value: string | any[]): void {
+    setValue(value: TranslationValue): void {
         if (arguments.length > 1) {
             this.value = Array.from(arguments);
         } else {
