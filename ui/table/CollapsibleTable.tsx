@@ -132,9 +132,7 @@ export function CollapsibleTableInterface<BaseType, T extends Constructor<Table<
 
         setOptions(options: CollapsibleTableOptions<BaseType>): void {
             super.setOptions(options);
-            // Left standing: super has mapped every column into a handler, and the option still declares
-            // the falsy and tuple forms a tag may write, which nothing here can narrow away
-            if (!this.options.columns?.[0]?.isToggleColumn) {
+            if (!ColumnHandler.isToggleColumn(this.options.columns?.[0])) {
                 this.options.columns = [this.getToggleColumn(), ...(this.options.columns || [])];
             }
         }

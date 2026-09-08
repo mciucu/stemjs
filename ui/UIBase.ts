@@ -567,9 +567,9 @@ export class UIElement<
             }
         }
 
-        // Left standing, and the only one: the loop above resolved every entry to an element and wrote it
-        // back, which is a narrowing of the array in place that no type can state
-        this.children = newChildren;
+        // The loop above resolved every entry to an element and wrote it back, which is a narrowing of the
+        // array in place - the one thing here that has to be asserted rather than shown
+        this.children = newChildren as BaseUIElement[];
 
         // TODO this end logic is duplicated
         this.applyNodeAttributes();

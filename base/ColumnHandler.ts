@@ -10,6 +10,7 @@ export type ColumnMapper<BaseType, ResultType> =
 
 // TODO @Mihai this might make sense to templatized, depending on the object type for ColumnMapper
 export interface ColumnOptions<BaseType, ResultType = any> {
+    isToggleColumn?: boolean; // Set by the collapsible table on the column it prepends
     headerName?: UIChild | (() => UIChild);
     value?: ColumnMapper<BaseType, ResultType>;
     name?: string;
@@ -38,6 +39,11 @@ export class ColumnHandler<BaseType, ResultType = any> implements ColumnOptions<
             this.index = index;
         }
         this.name = this.name || this.headerName;
+    }
+
+    // Asked here because a column is written in several forms and only some of them carry the flag
+    static isToggleColumn(column: ColumnLike<any>): boolean {
+        return Boolean((column as ColumnOptions<any>)?.isToggleColumn);
     }
 
     // If an entry already as a ColumnHandler, it's left as-is

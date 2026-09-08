@@ -59,13 +59,6 @@ export function isMobileDevice(): boolean {
 }
 
 export function isLandscape(): boolean {
-    const orientation = window.screen.orientation;
-
-    // Left standing: screen.orientation is an object, so this has never matched - the numeric API was window.orientation
-    if (orientation === -90 || orientation === 90) {
-        return true;
-    }
-
     if (!isMobileDevice()) {
         return window.innerWidth > window.innerHeight;
     }

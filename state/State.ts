@@ -1,5 +1,5 @@
 import {type Callback, type CleanupJobs, Dispatchable, type RemoveHandle} from "../base/Dispatcher";
-import {isString} from "../base/Utils";
+import {isString, toArray} from "../base/Utils";
 // Store imports this module back, so the reference has to stay erasable
 import {type StoreObject} from "./Store";
 
@@ -186,7 +186,8 @@ export class State extends Dispatchable {
     toJSON(): Record<string, any> {
         const state: Record<string, any> = {};
         for (const store of this.stores.values()) {
-            state[store.objectType] = store.toJSON();
+            // A singleton store is its own object, so it answers with one rather than a list of them
+            state[store.objectType] = toArray(store.toJSON());
         }
         return state;
     }

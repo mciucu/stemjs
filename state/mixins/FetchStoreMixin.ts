@@ -35,21 +35,21 @@ export const FetchStoreMixin = <
     BaseClass?: StoreClass<T>
 ) => {
 class AjaxFetchStore extends BaseStore<StoreClass<StoreObject>>(objectType, storeOptions, BaseClass) {
-    static fetchJobs: FetchJob<T, FetchOptions>[] = [];
+    static fetchJobs: FetchJob<T, Partial<FetchOptions>>[] = [];
     static fetchTimeout?: number;
     static fetchTimeoutDuration: number = storeOptions.fetchTimeoutDuration || 50;
     static fetchURL: string = storeOptions.fetchURL || "";
     static fetchType: string = storeOptions.fetchType || "GET";
     static maxFetchObjectCount: number = storeOptions.maxFetchObjectCount || 256;
 
-    static async fetch<T extends StoreObject & AjaxFetchStore>(this: StoreClass<T> & typeof AjaxFetchStore, id: StoreId, fetchOptions: Partial<FetchOptions> = {}): Promise<T> {
+    static async fetch<StoredType extends T & AjaxFetchStore>(this: StoreClass<StoredType> & typeof AjaxFetchStore, id: StoreId, fetchOptions: Partial<FetchOptions> = {}): Promise<StoredType> {
         return new Promise((resolve, reject) => {
-            this.fetchSync<T>(id, resolve, reject, fetchOptions);
+            this.fetchSync<StoredType>(id, resolve, reject, fetchOptions);
         });
     }
 
     // TODO Deprecate this and move to only fetch
-    static fetchSync<T extends StoreObject & AjaxFetchStore>(this: StoreClass<T> & typeof AjaxFetchStore, id: StoreId, successCallback: (obj: T) => void, errorCallback?: (error?: any) => void, fetchOptions: Partial<FetchOptions> = {}): void {
+    static fetchSync<StoredType extends T & AjaxFetchStore>(this: StoreClass<StoredType> & typeof AjaxFetchStore, id: StoreId, successCallback: (obj: StoredType) => void, errorCallback?: (error?: any) => void, fetchOptions: Partial<FetchOptions> = {}): void {
         if (!fetchOptions.force) {
             let obj = this.get(id);
             if (obj) {
@@ -57,7 +57,9 @@ class AjaxFetchStore extends BaseStore<StoreClass<StoreObject>>(objectType, stor
                 return;
             }
         }
-        // Left standing: a job is declared with the whole FetchOptions and pushed with a Partial of them
+        // Left standing, with the one below: the T these statics redeclare is what lets a caller infer the
+        // store's own type from the receiver, so PublicUser.fetch answers with a PublicUser. Dropping it
+        // types the queue exactly and costs four call sites their type instead
         this.fetchJobs.push({id: id, success: successCallback, error: errorCallback, ...fetchOptions});
         if (!this.fetchTimeout) {
             this.fetchTimeout = setTimeout(() => {
@@ -66,15 +68,15 @@ class AjaxFetchStore extends BaseStore<StoreClass<StoreObject>>(objectType, stor
         }
     };
 
-    static getFetchRequestData(entries: [StoreId, FetchJob<T, FetchOptions>[]][]): FetchRequestData {
+    static getFetchRequestData(entries: [StoreId, FetchJob<T, Partial<FetchOptions>>[]][]): FetchRequestData {
         return {
             ids: entries.map(entry => entry[0])
         };
     }
 
-    static getFetchRequestObject(entries: [StoreId, FetchJob<T, FetchOptions>[]][]): URLFetchOptions {
+    static getFetchRequestObject(this: StoreClass<T> & typeof AjaxFetchStore, entries: [StoreId, FetchJob<T, Partial<FetchOptions>>[]][]): URLFetchOptions {
         const requestData = this.getFetchRequestData(entries);
-        const fetchJobs: FetchJob<T, FetchOptions>[] = unwrapArray(entries.map(entry => entry[1]));
+        const fetchJobs: FetchJob<T, Partial<FetchOptions>>[] = unwrapArray(entries.map(entry => entry[1]));
 
         return {
             url: this.fetchURL,
@@ -85,9 +87,7 @@ class AjaxFetchStore extends BaseStore<StoreClass<StoreObject>>(objectType, stor
             success: (data: StateData) => {
                 GlobalState.load(data);
                 for (let fetchJob of fetchJobs) {
-                    // Left standing: this static redeclares its own T, so what get answers with is the
-                    // store's own class rather than the type the factory was parameterised with
-                    let obj = this.get(fetchJob.id);
+                    let obj = this.get(fetchJob.id);  // see fetchSync
                     if (obj) {
                         fetchJob.success(obj);
                     } else {
@@ -110,8 +110,8 @@ class AjaxFetchStore extends BaseStore<StoreClass<StoreObject>>(objectType, stor
     }
 
     //returns an array of ajax requests that have to be executed
-    static getFetchRequests(fetchJobs: FetchJob<T, FetchOptions>[]): URLFetchOptions[] {
-        const idFetchJobs = new Map<StoreId, FetchJob<T, FetchOptions>[]>();
+    static getFetchRequests(this: StoreClass<T> & typeof AjaxFetchStore, fetchJobs: FetchJob<T, Partial<FetchOptions>>[]): URLFetchOptions[] {
+        const idFetchJobs = new Map<StoreId, FetchJob<T, Partial<FetchOptions>>[]>();
 
         for (const fetchJob of fetchJobs) {
             let objectId = fetchJob.id;
@@ -128,7 +128,7 @@ class AjaxFetchStore extends BaseStore<StoreClass<StoreObject>>(objectType, stor
         return fetchChunks.map((chunkEntries) => this.getFetchRequestObject(chunkEntries));
     }
 
-    static executeAjaxFetch(): void {
+    static executeAjaxFetch(this: StoreClass<T> & typeof AjaxFetchStore): void {
         const fetchJobs = this.fetchJobs;
         this.fetchJobs = [];
 
