@@ -22,7 +22,7 @@ export function parseHeaders(xhr: XMLHttpRequest): Headers {
 
 // Creates a new URLSearchParams object from a plain object
 // Fields that are arrays are spread
-export function getURLSearchParams(data: any, arrayKeySuffix: string = "[]"): URLSearchParams | any {
+export function getURLSearchParams(data: any, arrayKeySuffix: string = "[]"): URLSearchParams {
     if (!isPlainObject(data)) {
         return data;
     }
@@ -288,11 +288,11 @@ export class XHRPromise {
         this.getXHR().abort();
     }
 
-    addXHRListener(name: string, callback: EventListener, ...args: any[]): void {
+    addXHRListener(name: string, callback: EventListener, ...args: [(boolean | AddEventListenerOptions)?]): void {
         this.getXHR().addEventListener(name, callback, ...args);
     }
 
-    addProgressListener(callback: (event: ProgressEvent) => void, ...args: any[]): void {
+    addProgressListener(callback: (event: ProgressEvent) => void, ...args: [(boolean | AddEventListenerOptions)?]): void {
         this.addXHRListener("progress", callback, ...args);
     }
 }
