@@ -24,6 +24,8 @@ export interface UIRenderable {
 
 // A function is called by cleanChildren (unwrapElementWithFunc) and its result used, so lazy children are children
 export type UIChild = Iterable<UIChild> | UICleanChild | UIRenderable | (() => UIChild) | null | undefined | false;
+// What cleanChildren leaves: it flattens and resolves functions, but a renderable is only converted at redraw
+export type UIResolvedChild = UICleanChild | UIRenderable;
 // node.style coerces and applyStyleToNode calls a function value, so both spellings are the value
 export type StyleValue<T> = T | number | (() => T | number);
 export type StyleObject = {[Key in keyof CSSStyleDeclaration]?: StyleValue<CSSStyleDeclaration[Key]>};
@@ -62,7 +64,7 @@ export type RefLinkOptions = {
 // those two are narrower here than in a tag.
 // EventOptions gets no TagType: in a parameter position it would break assignability across tags
 export interface UIElementOptions<TagType extends string = HTMLTagType> extends EventOptions<UIElement<any, any, any, any>> {
-    children?: UICleanChild[];
+    children?: UIResolvedChild[];
     title?: UIChild;
     ref?: RefLinkOptions;
     key?: string | number;
@@ -166,8 +168,32 @@ export interface UINamespace {
 
 export const UI: UINamespace = {} as UINamespace;
 
-export function cleanChildren(children: UIChild): UICleanChild[] {
+export function cleanChildren(children: UIChild): UIResolvedChild[] {
     return unwrapArray(children, unwrapElementWithFunc);
+}
+
+// Both probe the way the code they replaced did, optional because a toUI() may answer with nothing
+function isElement(child: UIResolvedChild): child is BaseUIElement {
+    return Boolean((child as BaseUIElement)?.getNodeType);
+}
+
+function isRenderable(child: UIResolvedChild): child is UIRenderable {
+    return Boolean((child as UIRenderable)?.toUI);
+}
+
+// A child that is not an element becomes one: its own toUI, or its text
+function resolveChildElement(child: UIResolvedChild, parent: BaseUIElement): BaseUIElement {
+    let element = child;
+    if (!isElement(element)) {
+        if (isRenderable(element)) {
+            element = element.toUI(parent);
+        }
+        // No toUI(), or toUI() gave back a plain value
+        if (!isElement(element)) {
+            element = new UI.TextElement(String(element));
+        }
+    }
+    return element;
 }
 
 export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HTMLElement | Text> extends Dispatchable {
@@ -465,9 +491,7 @@ export class UIElement<
         this.context = extraContext ? {...context, ...extraContext} : context;
     }
 
-    // The reads in redraw below are left standing: it turns each primitive into a TextElement in place,
-    // and an array mutation is not a narrowing, so every element read after it reports
-    getChildrenForRedraw(): UICleanChild[] {
+    getChildrenForRedraw(): UIResolvedChild[] {
         RenderStack.push(this);
         const children = cleanChildren(this.getChildrenToRender());
         RenderStack.pop();
@@ -487,8 +511,8 @@ export class UIElement<
         let newChildren = this.getChildrenForRedraw();
 
         if (newChildren === this.children) {
-            for (const child of newChildren) {
-            child.redraw();
+            for (const child of this.children) {
+                child.redraw();
             }
 
             this.applyNodeAttributes();
@@ -499,40 +523,37 @@ export class UIElement<
 
         const domNode = this.node;
         const childrenKeyMap = this.getElementKeyMap(this.children);
+        // The resolved child the last turn wrote back, which is what newChildren[i - 1] holds
+        let prevChild: BaseUIElement | null = null;
 
         for (let i = 0; i < newChildren.length; i++) {
-            let newChild = newChildren[i];
-            let prevChildNode = (i > 0) ? newChildren[i - 1].node : null;
+            let newChild = resolveChildElement(newChildren[i], this);
+            let prevChildNode = prevChild ? prevChild.node : null;
             let currentChildNode = (prevChildNode) ? prevChildNode.nextSibling : domNode.firstChild;
 
-            // Not a UIElement, to be converted to a TextElement probably
-            if (!newChild.getNodeType) {
-                if (newChild.toUI) {
-                    newChild = newChild.toUI(this); // TODO move this inside the unwrap logic
-                }
-                // No toUI(), or toUI() gave back a plain value
-                if (!newChild?.getNodeType) {
-                    newChild = new UI.TextElement(String(newChild));
-                }
+            // Written back, since cleanChildren may have answered with the caller's own array and the
+            // identity with options.children is what appendChild and its siblings check for
+            if (newChild !== newChildren[i]) {
                 newChildren[i] = newChild;
             }
 
             const newChildKey = newChild.options?.key || ("autokey" + i);
             const existingChild = childrenKeyMap?.get(newChildKey);
 
-            if (existingChild && newChildren[i].canOverwrite(existingChild)) {
+            if (existingChild && newChild.canOverwrite(existingChild)) {
                 // We're replacing an existing child element, it might be the very same object
-                if (existingChild !== newChildren[i]) {
-                    newChildren[i] = this.overwriteChild(existingChild, newChildren[i]);
+                if (existingChild !== newChild) {
+                    newChildren[i] = newChild = this.overwriteChild(existingChild, newChild);
                 }
-                newChildren[i].redraw();
-                if (newChildren[i].node !== currentChildNode) {
-                    domNode.insertBefore(newChildren[i].node!, currentChildNode);
+                newChild.redraw();
+                if (newChild.node !== currentChildNode) {
+                    domNode.insertBefore(newChild.node!, currentChildNode);
                 }
             } else {
                 // Getting here means we are not replacing anything, should just render
                 newChild.mount(this, currentChildNode);
             }
+            prevChild = newChild;
         }
 
         if (this.children.length) {
@@ -546,6 +567,8 @@ export class UIElement<
             }
         }
 
+        // Left standing, and the only one: the loop above resolved every entry to an element and wrote it
+        // back, which is a narrowing of the array in place that no type can state
         this.children = newChildren;
 
         // TODO this end logic is duplicated
