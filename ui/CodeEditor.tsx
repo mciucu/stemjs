@@ -241,7 +241,13 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
         if (keyboardHandler.hasOwnProperty("aceName")) {
             keyboardHandler = (keyboardHandler as {aceName: string}).aceName;
         }
-        this.getAce().setKeyboardHandler("ace/keyboard/" + keyboardHandler);
+        const name = String(keyboardHandler);
+        // "ace" means Ace's own built-in bindings, which have no module behind it - prefixing sends the
+        // loader after a keybinding-ace.js that does not exist. Reset with null rather than the string:
+        // Editor.setKeyboardHandler skips the module load for either, but passes the value on to
+        // KeyBinding.addKeyboardHandler, which only bails on a falsy one. A string reaches $handlers and
+        // then throws on every keypress, since "ace".handleKeyboard is undefined.
+        this.getAce().setKeyboardHandler(name === "ace" ? null : "ace/keyboard/" + name);
     }
 
     getAceMode(): any {

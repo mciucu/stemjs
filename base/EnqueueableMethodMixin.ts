@@ -1,5 +1,5 @@
 import {type Constructor} from "./Utils";
-export function enqueueIfNotLoaded(target: any, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
+export function enqueueIfNotLoaded(target: object, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
     const method = descriptor.value;
     return {
         ...descriptor,
@@ -16,22 +16,25 @@ export function enqueueIfNotLoaded(target: any, key: string, descriptor: Propert
 
 
 
+// A method held until the element is loaded, with the arguments it was called with
+type QueuedCall = [(...args: any[]) => unknown, any[]];
+
 interface EnqueueableMethodInterface {
-    methodCallQueue?: [Function, any[]][];
+    methodCallQueue?: QueuedCall[];
     isLoaded(): boolean;
-    enqueueMethodCall(method: Function, args: any[]): void;
+    enqueueMethodCall(method: QueuedCall[0], args: any[]): void;
     resolveQueuedMethods(): void;
 }
 
 export function EnqueueableMethodMixin<TBase extends Constructor>(BaseClass: TBase) {
     return class EnqueueableMethodClass extends BaseClass implements EnqueueableMethodInterface {
-        methodCallQueue?: [Function, any[]][];
+        methodCallQueue?: QueuedCall[];
 
         isLoaded(): boolean {
             throw Error("Not implemented!");
         }
 
-        enqueueMethodCall(method: Function, args: any[]): void {
+        enqueueMethodCall(method: QueuedCall[0], args: any[]): void {
             this.methodCallQueue = this.methodCallQueue || [];
             this.methodCallQueue.push([method, args]);
         }

@@ -1,6 +1,6 @@
 import {type StoreEvent, type StoreId} from "../State";
 import {isString} from "../../base/Utils";
-import {BaseStore, type StoreClass} from "../Store";
+import {BaseStore, type StoreClass, type StoreObject} from "../Store";
 import {Dispatchable} from "../../base/Dispatcher";
 
 export const VirtualObjectStoreMixin = (objectType: string) => class VirtualStoreObject extends BaseStore(objectType) {
@@ -36,9 +36,9 @@ export const VirtualObjectStoreMixin = (objectType: string) => class VirtualStor
     }
 
     // TODO: we probably shouldn't have getVirtualObject take in an event
-    // Left open: an inferred return exposes that the mixin's static side does not extend its base (TS2417)
-    static getVirtualObject(event: StoreEvent): any {
-        return this.objects.get("temp-" + event.virtualId);
+    // The map is the base's, so it is typed by the base's instance; what a temp id parks is one of ours
+    static getVirtualObject(event: StoreEvent): VirtualStoreObject | undefined {
+        return this.objects.get("temp-" + event.virtualId) as VirtualStoreObject;
     }
 
     static applyUpdateObjectId<T extends VirtualStoreObject>(this: StoreClass<T> & Dispatchable, object: T, id: string): void {
@@ -52,8 +52,7 @@ export const VirtualObjectStoreMixin = (objectType: string) => class VirtualStor
         this.dispatch("updateObjectId", object, oldId);
     }
 
-    // Left open for the same reason as getVirtualObject above
-    static applyCreateOrUpdateEvent(event: StoreEvent, sendDispatch: boolean = true): any {
+    static applyCreateOrUpdateEvent<T extends StoreObject>(this: StoreClass<T> & Dispatchable & typeof VirtualStoreObject, event: StoreEvent, sendDispatch: boolean = true): T {
         if (event.virtualId) {
             let existingVirtualObject = this.getVirtualObject(event);
             if (existingVirtualObject) {
@@ -61,6 +60,6 @@ export const VirtualObjectStoreMixin = (objectType: string) => class VirtualStor
             }
         }
 
-        return super.applyCreateOrUpdateEvent(event, sendDispatch);
+        return super.applyCreateOrUpdateEvent<T>(event, sendDispatch);
     }
 };

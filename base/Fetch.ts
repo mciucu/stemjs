@@ -64,8 +64,8 @@ export function composeURL(url: string | Request, urlSearchParams?: URLSearchPar
 
 type DataType = "arrayBuffer" | "blob" | "formData" | "json" | "text";
 
-export type FetchPostprocessor = (payload: any, xhrPromise?: XHRPromise) => any;
-export type FetchErrorPostprocessor = (error: any) => any;
+export type FetchPostprocessor = (payload: any, xhrPromise?: XHRPromise) => unknown;
+export type FetchErrorPostprocessor = (error: any) => unknown;
 export type FetchPreprocessor = (options: FetchOptions, input?: RequestInfo) => FetchOptions | void;
 
 // Called with whatever rejected the request, which every site passes exactly one of
@@ -327,7 +327,7 @@ export function jQueryCompatibilityPreprocessor(options: FetchOptions): FetchOpt
             options.urlParams = options.urlParams || options.data;
             if (options.cache === false) {
                 options.urlParams = getURLSearchParams(options.urlParams, options.arraySearchParamSuffix);
-                options.urlParams.set("_", Date.now());
+                options.urlParams.set("_", String(Date.now()));
             }
         } else {
             let formData = new FormData();

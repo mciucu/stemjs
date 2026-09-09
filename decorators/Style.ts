@@ -54,8 +54,8 @@ function getPreferredClassName(cls: object, key: string | symbol, _descriptor: P
     return className + "-container";
 }
 
-// TODO @types faking it for Typescript, we're actually using old decorators
-type FakedDecoratorType = (target: any, key: string | symbol, descriptor?: any) => any;
+// TS1271 requires a legacy decorator to answer with void or any, so the return cannot be narrowed
+type FakedDecoratorType = (target: object, key: string | symbol, descriptor?: PropertyDescriptor) => any;
 
 // TODO: this function can be made a lot more generic, to wrap plain object initializer with inheritance support
 function styleRuleWithOptions(...optionsArgs: StyleRuleOptions[]): FakedDecoratorType {

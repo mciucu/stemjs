@@ -1,11 +1,42 @@
 import {Dispatchable} from "../../base/Dispatcher";
 import {resolveFuncValue} from "../../base/Utils";
 import {CallThrottler} from "../../base/CallModifier";
-import {ThemeType} from "./ThemeTypes";
+import {ThemeType, type ThemeValue} from "./ThemeTypes";
 import type {StyleSheet} from "../Style"; // Type-only on purpose: a runtime edge here would close a cycle
 import type {UIElement} from "../UIBase"; // Type-only on purpose: a runtime edge here would close a cycle
 
-export type ThemeProps = Record<string, any>;
+declare global {
+    // Every module that sets theme properties registers them here, so a reader sees the union of all of them.
+    // A contributor extends it from its own literal rather than restating the names
+    interface StemThemeProps {
+        // Parked by the constructor, so a prop function can reach the theme it is being resolved against
+        theme: Theme;
+    }
+}
+
+// What reading one written prop answers with, following the two unwrappings setProperties and the props
+// proxy perform: a ThemeType hands over the value it wraps, and a function is called with the other props.
+// Recursive because the two compose - ColorType() wraps a ThemeValue, which may itself be the function
+type ResolvedThemeValue<Written> =
+    Written extends ThemeType<infer Wrapped> ? ResolvedThemeValue<Wrapped> :
+    Written extends (props: any) => infer Resolved ? Resolved :
+    Written;
+
+// What a contributor's literal reads back as, which is what it registers
+export type ResolvedThemeProps<Written> = {
+    [Key in keyof Written]: ResolvedThemeValue<Written[Key]>;
+};
+
+// What one prop may be written as: the value, a function of the other props, or either wrapped in a ThemeType
+export type WrittenThemeValue<Resolved> = ThemeValue<Resolved> | ThemeType<ThemeValue<Resolved>>;
+
+// What a theme holds, read through Theme.props or an element's themeProps. Left open besides the registry
+// so a repo that has not registered its own props still reads them; drop the fallback to catch typos
+export type ThemeProps = StemThemeProps & Record<string, any>;
+
+// What setProperties takes: any subset, each value written directly or as a function of the others.
+// Left open besides, since a key can be computed and a downstream repo may not have registered its own
+export type WrittenThemeProps = {[Key in keyof StemThemeProps]?: WrittenThemeValue<StemThemeProps[Key]>} & Record<string, any>;
 
 
 // What @registerStyle decorates: any class that makes elements, abstract ones included. `typeof UIElement`
@@ -24,7 +55,7 @@ export class Theme extends Dispatchable {
     updateThrottled: Function = (new CallThrottler({throttle: 50})).wrap(() => this.updateStyleSheets()); // TODO @cleanup CallThrottler syntax is really ugly
     name: string;
     baseTheme: Theme | null;
-    properties: ThemeProps;
+    properties: WrittenThemeProps;
     propTypes: Record<string, ThemeType>;
     props: ThemeProps;
     styleSheetSymbol: symbol;
@@ -40,6 +71,7 @@ export class Theme extends Dispatchable {
 
         this.propTypes = {};
 
+        // The proxy resolves each value as it is read, so what it presents is the resolved form of its target
         this.props = new Proxy(this.properties, {
             get: (_properties, key: string, _receiver) => {
                 const rawValue = this.getProperty(key);
@@ -57,7 +89,7 @@ export class Theme extends Dispatchable {
                 // TODO this should also update all themes that inherit from us
                 return true;
             }
-        });
+        }) as ThemeProps;
 
         this.styleSheetSymbol = Symbol(this.name + "StyleSheet");
 
@@ -81,7 +113,7 @@ export class Theme extends Dispatchable {
         return cls[this.styleSheetSymbol] || this.baseTheme?.getStyleSheet(cls);
     }
 
-    getProperty(key: string): ThemeProps[string] {
+    getProperty(key: string): unknown {
         if (this.properties.hasOwnProperty(key)) {
             // Return nulls as well
             return this.properties[key];
@@ -89,7 +121,7 @@ export class Theme extends Dispatchable {
         return this.baseTheme?.getProperty(key);
     }
 
-    setProperties(properties: ThemeProps, update: boolean = true): void {
+    setProperties(properties: WrittenThemeProps, update: boolean = true): void {
         for (const [key, value] of Object.entries(properties)) {
             if (value instanceof ThemeType) {
                 this.properties[key] = value.value;
@@ -134,7 +166,7 @@ export class Theme extends Dispatchable {
         return this.Global.register(cls, styleSheet);
     }
 
-    static setProperties(properties: ThemeProps): void {
+    static setProperties(properties: WrittenThemeProps): void {
         this.Global.setProperties(properties);
     }
 

@@ -1,4 +1,4 @@
-import {StemDate} from "../time/Date";
+import {StemDate, type DateInput} from "../time/Date";
 import {isFunction, isString} from "../base/Utils";
 import {type StoreObject} from "./Store";
 import {type LegacyPropertyDescriptor} from "../decorators/Utils";
@@ -130,7 +130,7 @@ export class FieldDescriptor {
         const {rawField, cacheField, loader, isReadOnly, key} = this;
 
         return {
-            get(this: StoreObjectWithFields & Record<string | symbol, any>): any {
+            get(this: StoreObjectWithFields & Record<string | symbol, any>): unknown {
                 if (cacheField && this[cacheField]) {
                     return this[cacheField];
                 }
@@ -147,7 +147,7 @@ export class FieldDescriptor {
                 }
                 return result;
             },
-            set(this: StoreObjectWithFields & Record<string | symbol, any>, value: any): void {
+            set(this: StoreObjectWithFields & Record<string | symbol, any>, value: unknown): void {
                 if (isReadOnly) {
                     throw `Not allowed to change field ${key}`;
                 }
@@ -184,5 +184,5 @@ declare global {
 
 // Default handling of objects
 Date.makeFieldLoader = (): FieldLoader => {
-    return (value: any) => StemDate.optionally(value);
+    return (value: DateInput) => StemDate.optionally(value);
 }

@@ -28,7 +28,7 @@ export type DecorateResult = PropertyDescriptor | ((target: object, key: string 
 // TODO @types what should entryArgs really be?
 export function decorate(handleDescriptor: HandleDescriptor, entryArgs: any[]): DecorateResult {
     if (isDescriptor(entryArgs[entryArgs.length - 1])) {
-        return handleDescriptor(...entryArgs as [any, string | symbol, PropertyDescriptor], []);
+        return handleDescriptor(...entryArgs as [object, string | symbol, PropertyDescriptor], []);
     } else {
         return function (target: object, key: string | symbol, descriptor: PropertyDescriptor) {
             return handleDescriptor(target, key, descriptor, entryArgs);

@@ -3,7 +3,7 @@ import {NOOP_FUNCTION} from "./Utils";
 // What wrap answers with: it forwards whatever it is called with, and carries the handles for
 // cancelling or flushing the call it is holding
 export interface WrappedCall {
-    (...args: any[]): any;
+    (...args: any[]): unknown;
     originalFunc: Function;
     cancel: () => void;
     flush: () => void;
@@ -14,7 +14,7 @@ export class CallModifier {
         throw new Error("Implement wrap method");
     }
 
-    call(func: Function): any {
+    call(func: Function): unknown {
         return this.wrap(func)();
     }
 

@@ -61,7 +61,7 @@ export class MultiMap<K = any, V = any> {
         return null;
     }
 
-    forEach(callback: (value: V, key: K, map: this) => void, context?: any): void {
+    forEach(callback: (value: V, key: K, map: this) => void, context?: unknown): void {
         for (const [key, value] of this.entries()) {
             callback.call(context, value, key, this);
         }

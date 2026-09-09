@@ -361,7 +361,7 @@ export function deepSetAttr(obj: Record<string, any>, keys: string[], value: unk
     });
 }
 
-export function deepGetAttr(obj: Record<string, any>, keys: string[]): any {
+export function deepGetAttr(obj: Record<string, any>, keys: string[]): unknown {
     for (const key of keys) {
         obj = obj && obj[key];
     }
@@ -472,7 +472,7 @@ export function serializeCookie(name: string, value: unknown, maxAge: number = 6
     setCookie(name, encodeURIComponent(JSON.stringify(value)), maxAge);
 }
 
-export function deserializeCookie(name: string): any {
+export function deserializeCookie(name: string): unknown {
     const value = getCookie(name);
     if (!value) {
         return value;
@@ -566,6 +566,8 @@ export function base64Encode(value: any, options: Base64Options = {}): string {
     return btoa(value);
 }
 
+// Left open rather than unknown: with jsonFormat it answers with a parsed payload whose fields callers
+// read directly, and narrowing it is a change for each of them rather than for this declaration
 export function base64Decode(value: string, options: Base64Options = {}): any {
     const {jsonFormat = true} = options;
     let decoded = atob(value);

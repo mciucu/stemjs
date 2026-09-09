@@ -35,7 +35,7 @@ export class Plugin<Parent = any> extends Dispatchable {
 
 // What registerPlugin takes. A class naming its host is not assignable to `typeof Plugin`, whose construct
 // signature is generic, and constructing is all this needs to do
-export type PluginConstructor = new (parent: any) => Plugin;
+export type PluginConstructor = new (parent: unknown) => Plugin;
 
 // TODO: rename this to use Mixin in title
 export const Pluginable = function <T extends new (...args: any[]) => any>(BaseClass: T) {

@@ -1,4 +1,4 @@
-import {decorate, createDefaultSetter} from "./Utils";
+import {decorate, createDefaultSetter, type DecorateResult} from "./Utils";
 
 interface LazyDescriptor extends PropertyDescriptor {
     initializer?: () => unknown;
@@ -35,6 +35,9 @@ function handleDescriptor(target: object, key: string | symbol, descriptor: Lazy
     };
 }
 
-export function lazyInit(...args: any[]): any {
+// Applied directly it answers with the descriptor; called as a factory it answers with the decorator
+export function lazyInit(target: object, key: string | symbol, descriptor: PropertyDescriptor): PropertyDescriptor;
+export function lazyInit(...args: unknown[]): DecorateResult;
+export function lazyInit(...args: any[]): DecorateResult {
     return decorate(handleDescriptor, args);
 }

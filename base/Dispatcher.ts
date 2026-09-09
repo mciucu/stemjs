@@ -373,14 +373,14 @@ export class CleanupJobs {
 // Class for events that should only happen once. Any listener added after the first firing will be automatically called with those arguments.
 // Useful for caching initializations for instance.
 export class OnceDispatcher extends Dispatcher {
-    private declare dispatchArgs?: any[];
+    private declare dispatchArgs?: unknown[];
 
     dispatch(...args: any[]): void {
         this.dispatchArgs = args; // Save the arguments
         super.dispatch(...args);
     }
 
-    haveDispatched(): any[] | undefined {
+    haveDispatched(): unknown[] | undefined {
         return this.dispatchArgs;
     }
 

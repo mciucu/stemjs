@@ -3,7 +3,7 @@ import {styleRule} from "../decorators/Style";
 import {enhance} from "./Color";
 import {Device} from "../base/Device";
 import {Orientation, Level, Size, type LevelType, type SizeType, type OrientationType} from "./Constants";
-import {Theme, type ThemeProps} from "./style/Theme";
+import {Theme, type ResolvedThemeProps, type ThemeProps} from "./style/Theme";
 import {FloatType} from "./style/ThemeTypes";
 
 // Type definitions for CSS style objects
@@ -15,7 +15,8 @@ export function getTextColor(backgroundColor: string): string {
     return enhance(backgroundColor, 1);
 }
 
-Theme.setProperties({
+// Named so the registry below can derive the prop names and types from it rather than restate them
+const GLOBAL_THEME_PROPS = {
     // TODO use _COLOR as a suffix
     COLOR_BACKGROUND: "#fff",
     COLOR_BACKGROUND_ALTERNATIVE: "#eee",
@@ -127,7 +128,13 @@ Theme.setProperties({
     POPUP_BORDER: "none",
     POPUP_MAX_HEIGHT: "none",
     POPUP_MAX_WIDTH: "none",
-});
+};
+
+Theme.setProperties(GLOBAL_THEME_PROPS);
+
+declare global {
+    interface StemThemeProps extends ResolvedThemeProps<typeof GLOBAL_THEME_PROPS> {}
+}
 
 // A rule is named after the value that selects it, so a sheet only declares the levels and sizes it styles
 type LevelRules = {[Key in LevelType]?: StyleRuleObject};

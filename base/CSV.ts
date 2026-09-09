@@ -20,7 +20,7 @@ interface CSVColumn {
     key: string;
     originalName: string;
     required?: boolean;
-    loader?: (value: string) => any;
+    loader?: (value: string) => unknown;
     [key: string]: any;
 }
 

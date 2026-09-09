@@ -79,9 +79,9 @@ export class Money {
         return null;
     }
 
-    static makeFieldLoader(fieldDescriptor: FieldDescriptor): (value: any, obj: Record<string, any>) => Money | null | undefined {
+    static makeFieldLoader(fieldDescriptor: FieldDescriptor): (value: MoneyAmount, obj: Record<string, any>) => Money | null | undefined {
         const currencyFieldName = fieldDescriptor.currencyField || "currency";
-        return (value: any, obj: Record<string, any>) => this.optionally(value, obj[currencyFieldName] || obj[currencyFieldName + "Id"]);
+        return (value: MoneyAmount, obj: Record<string, any>) => this.optionally(value, obj[currencyFieldName] || obj[currencyFieldName + "Id"]);
     }
 
     static format(amount: MoneyAmount, currency?: CurrencyLike): string {
