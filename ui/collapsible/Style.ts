@@ -1,3 +1,4 @@
+import type {StyleRuleObject} from "../Style";
 import {StyleSheet, styleRule, styleRuleInherit} from "../Style";
 import {CardPanelStyle} from "../CardPanel";
 import {enhance} from "../Color";
@@ -40,7 +41,7 @@ class CollapsibleStyle extends StyleSheet {
 
 class CollapsiblePanelStyle extends CardPanelStyle {
     @styleRuleInherit
-    container = {
+    container: StyleRuleObject = {
         boxShadow: null,
         borderWidth: 1,
         borderColor: "#ccc !important",

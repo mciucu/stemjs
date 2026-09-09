@@ -11,7 +11,7 @@ import {CleanupJobs, Dispatchable, OncePerTickRunner, type RemoveHandle} from ".
 import {DOMAttributesMap, NodeAttributes} from "./NodeAttributes";
 export type {NodeAttributes};
 import {Theme, type ThemeProps} from "./style/Theme";
-import {type StyleSheet} from "./Style";
+import type {StyleSheet} from "./Style"; // Type-only on purpose: a runtime edge here would close a cycle
 
 export type SVGTagType = keyof SVGElementTagNameMap;
 export type HTMLTagType = keyof HTMLElementTagNameMap;

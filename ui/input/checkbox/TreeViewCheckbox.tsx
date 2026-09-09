@@ -88,7 +88,9 @@ export interface TreeEntry {
 
 interface TreeViewCheckboxOptions {
     entries?: TreeEntry | TreeEntry[];
-    onChange?: (value: ReturnType<TreeViewCheckbox["getValue"]>, source: TreeViewCheckbox) => void;
+    // The linearized values: every dispatchChange below calls getValue() with no arguments. Spelled out
+    // rather than taken from ReturnType<getValue>, which would follow whichever overload is declared last.
+    onChange?: (value: TreeEntry["value"][], source: TreeViewCheckbox) => void;
 }
 
 export class TreeViewCheckbox<ExtraOptions = {}> extends UI.Element<TreeViewCheckboxOptions & ExtraOptions> {
@@ -110,6 +112,9 @@ export class TreeViewCheckbox<ExtraOptions = {}> extends UI.Element<TreeViewChec
         ]);
     }
 
+    // Overloaded so a caller knows which of the two shapes it gets: the linearized values, or the entries as given
+    getValue(options?: {linearize?: true}): TreeEntry["value"][];
+    getValue(options: {linearize: false}): TreeEntry | TreeEntry[];
     getValue({linearize = true} = {}) {
         if (linearize) {
             // TODO @Mihai a bit tricky to implement this, since we don't want to recursively expand non-array entries by default.

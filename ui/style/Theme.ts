@@ -2,8 +2,8 @@ import {Dispatchable} from "../../base/Dispatcher";
 import {resolveFuncValue} from "../../base/Utils";
 import {CallThrottler} from "../../base/CallModifier";
 import {ThemeType} from "./ThemeTypes";
-import {type StyleSheet} from "../Style";
-import {type UIElement} from "../UIBase";
+import type {StyleSheet} from "../Style"; // Type-only on purpose: a runtime edge here would close a cycle
+import type {UIElement} from "../UIBase"; // Type-only on purpose: a runtime edge here would close a cycle
 
 export type ThemeProps = Record<string, any>;
 

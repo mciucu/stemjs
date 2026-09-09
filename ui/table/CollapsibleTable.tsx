@@ -150,7 +150,7 @@ export function CollapsibleTableInterface<BaseType, T extends Constructor<Table<
         }
 
         getToggleColumn(): ColumnHandler<BaseType> {
-            return new ColumnHandler({
+            return new ColumnHandler<BaseType>({
                 isToggleColumn: true,
                 value: () => null,
                 cellStyle: {

@@ -1,6 +1,6 @@
 import {dashCase, isNumber, isString, isPlainObject, setObjectPrototype, resolveFuncValue} from "../base/Utils";
-import {type StyleRuleObject, type StyleRuleValue} from "./Style";
-import {type StyleValue} from "./UIBase";
+import type {StyleRuleObject, StyleRuleValue} from "./Style"; // Type-only on purpose: a runtime edge here would close a cycle
+import type {StyleValue} from "./UIBase"; // Type-only on purpose: a runtime edge here would close a cycle
 
 export const defaultToPixelsAttributes = new Set([
     "border-radius",
