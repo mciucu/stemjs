@@ -386,7 +386,8 @@ export function fetch(input: RequestInfo | URLFetchOptions, ...args: FetchOption
     if (urlParams) {
         // Change the URL of the request to add a query
         const urlSearchParams = getURLSearchParams(urlParams, options.arraySearchParamSuffix);
-        if ((input as any) instanceof Request) {
+        // Cast because the union admits a string, and instanceof refuses a left side that might be a primitive
+        if ((input as unknown) instanceof Request) {
             input = new Request(composeURL((input as unknown as Request).url, urlSearchParams), input as RequestInit);
         } else {
             input = new Request(composeURL(input, urlSearchParams), {});
@@ -406,10 +407,11 @@ fetch.polyfill = true;
 
 
 // TODO @cleanup @Mihai normalize how api clients are implemented, they should have a standard interface to be usable inside Stem methods
-export type LoaderFunction = (url: string, params?: URLSearchParamsSource) => Promise<any>;
+// PromiseLike, not Promise: the default loader answers with an XHRPromise, which is thenable and not one
+export type LoaderFunction = (url: string, params?: URLSearchParamsSource) => PromiseLike<any>;
 
 let CurrentLoaderFunc: LoaderFunction = (url: string, params?: URLSearchParamsSource) => {
-    return fetch(url, {urlParams: params}) as any as Promise<any>;
+    return fetch(url, {urlParams: params});
 }
 
 export function SetLoaderFunc(func: LoaderFunction): void {

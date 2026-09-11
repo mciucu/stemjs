@@ -140,7 +140,7 @@ export class Table<BaseType = any> extends UIElement<TableOptions<BaseType>, HTM
 
     renderRows(): UIChild {
         const entries = this.getEntries();
-        this.rows = entries.map((entry, index) => this.makeRow(entry, index)) as any;
+        this.rows = entries.map((entry, index) => this.makeRow(entry, index));
         return this.rows;
     }
 

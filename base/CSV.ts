@@ -38,10 +38,8 @@ export class CSVBuilder<BaseType> {
         this.columns = ColumnHandler.mapColumns(columns);
     }
 
-    // Left open rather than unknown: the body reassigns it through String(), and an assignment does not
-    // narrow a parameter declared unknown the way a guard would
-    static escapeEntry(str: any): string {
-        str = String(str);
+    static escapeEntry(value: unknown): string {
+        let str = String(value);
         if (str.includes(",")) {
             // TODO: this doesn't support \n or \r in the string
             str = '"' + str.replace('"', '""') + '"';
@@ -265,8 +263,8 @@ export class CSVColumnMapper {
         return this.columns.map(col => row[col.index]);
     }
 
-    toObject(row: string[]): Record<string, any> {
-        let obj: Record<string, any> = {};
+    toObject(row: string[]): Record<string, unknown> {
+        const obj: Record<string, unknown> = {};
         for (const col of this.columns) {
             const value = row[col.index];
             obj[col.key] = col.loader ? col.loader(value) : value;
