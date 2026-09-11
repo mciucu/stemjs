@@ -245,12 +245,8 @@ export class NodeAttributes {
         return this.className as ClassNameSet;
     }
 
-    // Left open, here and in removeClass: the parameter is reassigned to the array form, and StyleRuleObject's
-    // index signature makes an array assignable to it too, so no declared union narrows to something iterable
-    addClass(classes: any, node?: NodeElement): void {
-        classes = this.constructor.getClassArray(classes);
-
-        for (const cls of classes) {
+    addClass(classes: ClassNameArgument | ClassNameArgument[], node?: NodeElement): void {
+        for (const cls of this.constructor.getClassArray(classes)) {
             this.getClassNameSet().add(cls);
             if (node) {
                 node.classList.add(cls);
@@ -258,10 +254,8 @@ export class NodeAttributes {
         }
     }
 
-    removeClass(classes: any, node?: NodeElement): void {
-        classes = this.constructor.getClassArray(classes);
-
-        for (const cls of classes) {
+    removeClass(classes: ClassNameArgument | ClassNameArgument[], node?: NodeElement): void {
+        for (const cls of this.constructor.getClassArray(classes)) {
             this.getClassNameSet().delete(cls);
             if (node) {
                 node.classList.remove(cls);

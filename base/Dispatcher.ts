@@ -12,8 +12,14 @@ export interface CleanupHandle {
 
 export type CleanupJob = RemoveHandle | CleanupHandle | Function;
 
-// What the add*Listener family answers with: one handle, or a bundle of them for an array of names
-export type ListenerHandle = DispatcherHandle | CleanupJobs;
+// A handle from the add*Listener family: callers reach for either name, so one answers to both, which is
+// what DispatcherHandle has always done by delegating cleanup() to remove()
+export interface ListenerRemover extends RemoveHandle, CleanupHandle {}
+
+// What the add*Listener family answers with: one handle, or a bundle of them for an array of names.
+// An interface rather than DispatcherHandle, so an adder wrapping something else - Ace's session, a DOM
+// node - can answer with a handle of its own instead of with nothing
+export type ListenerHandle = ListenerRemover | CleanupJobs;
 
 function implementsRemoveHandle(job: CleanupJob): job is RemoveHandle {
     return "remove" in job && isFunction(job.remove);
@@ -233,16 +239,23 @@ export class Dispatchable {
     }
 
     // These methods are added dynamically to the prototype below via getAttachCleanupJobMethod.
-    // They call obj.add[MethodName](...args) and register the result as a cleanup job.
-    declare attachListener: (obj: any, ...args: any[]) => CleanupJob;
-    declare attachEventListener: (obj: any, ...args: any[]) => CleanupJob;
-    declare attachCreateListener: (obj: any, ...args: any[]) => CleanupJob;
-    declare attachDeleteListener: (obj: any, ...args: any[]) => CleanupJob;
-    declare attachChangeListener: (obj: any, ...args: any[]) => CleanupJob;
-    declare attachListenerOnce: (obj: any, ...args: any[]) => CleanupJob;
+    // They call obj.add[MethodName](...args) and register the result as a cleanup job, so each one takes
+    // and answers with whatever the adder it forwards to declares
+    declare attachListener: <T extends {addListener(...args: any[]): any}>(
+        obj: T, ...args: Parameters<T["addListener"]>) => ReturnType<T["addListener"]>;
+    declare attachEventListener: <T extends {addEventListener(...args: any[]): any}>(
+        obj: T, ...args: Parameters<T["addEventListener"]>) => ReturnType<T["addEventListener"]>;
+    declare attachCreateListener: <T extends {addCreateListener(...args: any[]): any}>(
+        obj: T, ...args: Parameters<T["addCreateListener"]>) => ReturnType<T["addCreateListener"]>;
+    declare attachDeleteListener: <T extends {addDeleteListener(...args: any[]): any}>(
+        obj: T, ...args: Parameters<T["addDeleteListener"]>) => ReturnType<T["addDeleteListener"]>;
+    declare attachChangeListener: <T extends {addChangeListener(...args: any[]): any}>(
+        obj: T, ...args: Parameters<T["addChangeListener"]>) => ReturnType<T["addChangeListener"]>;
+    declare attachListenerOnce: <T extends {addListenerOnce(...args: any[]): any}>(
+        obj: T, ...args: Parameters<T["addListenerOnce"]>) => ReturnType<T["addListenerOnce"]>;
 
-    // TODO @Mihai when can this return an undefined? Shouldn't be possible
-    addChangeListener(callback: Callback): DispatcherHandle | CleanupJobs | undefined {
+    // Answers with nothing when the dispatcher refuses the callback: not a function, or already registered
+    addChangeListener(callback: Callback): ListenerHandle | undefined {
         return this.addListener("change", callback);
     }
 
@@ -251,19 +264,23 @@ export class Dispatchable {
     }
 }
 
-// Creates a method that calls the method methodName on obj, and adds the result as a cleanup task
+// Creates a method that calls the method methodName on obj, and adds the result as a cleanup task.
+// An adder that answers with nothing is asked for its remover instead, which is how a DOM target is
+// detached: addEventListener returns void and removeEventListener takes the same arguments back. Stem's own
+// add<Name>Listener family has no matching remove<Name>Listener, and calling one threw at cleanup time, so
+// the remover is only used when the object actually has it - a Dispatcher that refused a duplicate callback
+// and an enqueued CodeEditor call both registered nothing, and have nothing to undo.
 export function getAttachCleanupJobMethod(methodName: string) {
-    let addMethodName = "add" + methodName;
-    let removeMethodName = "remove" + methodName;
+    const addMethodName = "add" + methodName;
+    const removeMethodName = "remove" + methodName;
     return function (this: Dispatchable, obj: any, ...args: any[]) {
         let handler = obj[addMethodName](...args);
-        // TODO: This should be changed. It is bad to receive 2 different types of handlers.
-        if (!handler) {
-            handler = () => {
-                obj[removeMethodName](...args);
-            }
+        if (!handler && isFunction(obj[removeMethodName])) {
+            handler = () => obj[removeMethodName](...args);
         }
-        this.addCleanupJob(handler);
+        if (handler) {
+            this.addCleanupJob(handler);
+        }
         return handler;
     }
 }

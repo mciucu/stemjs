@@ -6,6 +6,7 @@ import {registerStyle} from "./style/Theme";
 import {EnqueueableMethodMixin, enqueueIfNotLoaded} from "../base/EnqueueableMethodMixin";
 import {ensure} from "../base/Require";
 import {NodeAttributes} from "./NodeAttributes";
+import {type ListenerRemover} from "../base/Dispatcher";
 
 // Type definitions for Ace Editor
 declare global {
@@ -36,6 +37,8 @@ export interface CodeEditorOptions {
     enableBasicAutocompletion?: boolean;
     enableLiveAutocompletion?: boolean;
     enableSnippets?: boolean;
+    liveAutocompletionDelay?: number; // Milliseconds
+    liveAutocompletionThreshold?: number;
     // addListenersFromOptions wires this to addAceSessionChangeListener
     onAceSessionChange?: (...args: any[]) => void;
     onAceChange?: (...args: any[]) => any;
@@ -70,6 +73,8 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
             showLineNumber: true,
             showPrintMargin: false,
             printMarginSize: 80,
+            liveAutocompletionDelay: 100,
+            liveAutocompletionThreshold: 3,
         };
         options = Object.assign(defaultOptions, options);
 
@@ -194,6 +199,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
                     this.setBasicAutocompletion(this.options.enableBasicAutocompletion!);
                     this.setLiveAutocompletion(this.options.enableLiveAutocompletion!);
                     this.setSnippets(this.options.enableSnippets!);
+                    this.applyCompleterOptions();
                 });
             }
         }
@@ -325,8 +331,29 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     @enqueueIfNotLoaded
     setLiveAutocompletion(value: boolean): void {
         this.getAce().setOptions({
-            enableLiveAutocompletion: value
+            enableLiveAutocompletion: value,
+            liveAutocompletionDelay: this.options.liveAutocompletionDelay,
+            liveAutocompletionThreshold: this.options.liveAutocompletionThreshold
         });
+    }
+
+    // Ace's own defaults assume a semantic completer will do the narrowing, and we only have
+    // the keyword, snippet and document-word ones
+    @enqueueIfNotLoaded
+    applyCompleterOptions(): void {
+        const {Autocomplete} = window.ace.require("ace/autocomplete");
+        // getCompletionPrefix reaches for a sibling through this, so it stays a method call
+        const util = window.ace.require("ace/autocomplete/util");
+        const completer = Autocomplete.for(this.getAce());
+        completer.exactMatch = true; // A substring hit anywhere in the candidate is noise
+        // Reassigned rather than wrapped, so applying the options twice does not stack
+        completer.showPopup = function (editor: any, options: any) {
+            // A number starts no identifier, signed included: Ace counts the sign into the prefix
+            if (this.autoShown && /^-?\d/.test(util.getCompletionPrefix(editor))) {
+                return;
+            }
+            Autocomplete.prototype.showPopup.call(this, editor, options);
+        };
     }
 
     @enqueueIfNotLoaded
@@ -440,11 +467,14 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
         this.getAce().on("change", callback);
     }
 
+    // Answers with a handle when Ace is up; @enqueueIfNotLoaded answers null before that, and the queued
+    // call carries no way to remove what it will later add
     @enqueueIfNotLoaded
-    addChangeListener(callback: Function): undefined {
-        this.getAce().getSession().addEventListener("change", callback);
-        // TODO We should return the handler to remove the listener here
-        return undefined;
+    addChangeListener(callback: Function): ListenerRemover {
+        const session = this.getAce().getSession();
+        session.addEventListener("change", callback);
+        const remove = () => session.removeEventListener("change", callback);
+        return {remove, cleanup: remove};
     }
 
     @enqueueIfNotLoaded

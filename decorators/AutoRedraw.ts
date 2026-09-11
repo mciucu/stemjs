@@ -19,7 +19,7 @@ interface AutoRedrawableClass extends UIElementConstructor {
         setOptions: (options: any) => void;
         onMount: () => void;
         enqueueRedraw: RedrawHandler;
-        attachChangeListener: (obj: ChangeSource, handler: RedrawHandler) => void;
+        attachChangeListener: Dispatchable["attachChangeListener"];
     };
 }
 

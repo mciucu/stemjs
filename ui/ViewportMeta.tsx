@@ -43,6 +43,6 @@ export class ViewportMeta extends UI.Primitive("meta")<ViewportMetaOptions, HTML
     }
 
     onMount(): void {
-        window.addEventListener("resize", () => this.maybeUpdate());
+        this.attachEventListener(window, "resize", () => this.maybeUpdate());
     }
 }

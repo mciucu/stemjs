@@ -1,7 +1,7 @@
 import {Dispatchable} from "../../base/Dispatcher";
 import {isDeepEqual} from "../../base/Utils";
 import {type StoreClass, StoreObject} from "../Store";
-import {type StateData} from "../State";
+import {type StateData, type StoreFilter} from "../State";
 import {LoadEndpoint} from "../../base/Fetch";
 
 // What a paginated endpoint answers with. Only these two are the paginator's; the rest is the endpoint's
@@ -77,11 +77,12 @@ export class EndpointPaginator<T extends StoreObject> extends BasePaginator<T> {
     store: StoreClass<T>;
     endpoint: string;
     filters: PaginationFilters;
-    storeFilters: PaginationFilters;
+    // What the store is filtered by once the page has landed, which is a different question from the query
+    storeFilters: StoreFilter<T>;
     error: unknown = null;
     loadedLastPage: boolean = false;
 
-    constructor(store: StoreClass<T>, endpoint: string, apiFilters: PaginationFilters = {}, storeFilters: PaginationFilters = {}) {
+    constructor(store: StoreClass<T>, endpoint: string, apiFilters: PaginationFilters = {}, storeFilters: StoreFilter<T> = {}) {
         super();
         this.store = store;
         this.endpoint = endpoint;

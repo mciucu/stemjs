@@ -1,5 +1,5 @@
 import {CleanupJobs, Dispatchable, type ListenerHandle} from "../base/Dispatcher";
-import {GlobalState, type RawStateData, type RawStoreObject, State, type StateData, type StoreEvent, type StoreId, type StoreIdOrNull, type StoreInterface, type StoreObjectType} from "./State";
+import {GlobalState, type RawStateData, type RawStoreObject, State, type StateData, type StoreEvent, type StoreFilter, type StoreId, type StoreIdOrNull, type StoreInterface, type StoreObjectType} from "./State";
 import {isNotNull, isString, toArray} from "../base/Utils";
 import {type FieldDescriptor, type StoreObjectWithFields} from "./StoreField";
 
@@ -94,6 +94,7 @@ export class StoreObject extends Dispatchable {
     declare static dispatch: Dispatchable["dispatch"];
     declare static dispatchChange: Dispatchable["dispatchChange"];
     declare static addListener: Dispatchable["addListener"];
+    declare static addChangeListener: Dispatchable["addChangeListener"];
 
     static objectType: StoreObjectType;
     static state: State = GlobalState;
@@ -192,7 +193,7 @@ export class StoreObject extends Dispatchable {
     }
 
     // TODO Stores should have configurable indexes from FK ids, for quick filtering
-    static filterBy<T extends StoreObject>(this: StoreClass<T>, filter: Record<string, any>): T[] {
+    static filterBy<T extends StoreObject>(this: StoreClass<T>, filter: StoreFilter<T>): T[] {
         const entries = Object.entries(filter); // Some minimal caching
 
         return this.filter<T>((obj: T) => {
@@ -213,7 +214,7 @@ export class StoreObject extends Dispatchable {
         });
     }
 
-    static findBy<T extends StoreObject>(this: StoreClass<T>, filter: Record<string, any>): T | undefined {
+    static findBy<T extends StoreObject>(this: StoreClass<T>, filter: StoreFilter<T>): T | undefined {
         // TODO - need a better implementation with rapid termination
         return this.filterBy<T>(filter)[0];
     }

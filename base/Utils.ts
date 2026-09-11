@@ -314,6 +314,9 @@ export function isNumericString(str: unknown, acceptPadding: boolean = false): b
     return !isNaN(str as any) && !isNaN(parseFloat(str));
 }
 
+// The guard replaces rather than intersects, on purpose. `obj is T & Record<string, any>` keeps the caller's
+// type and makes it indexable, but it also keeps the union members this excludes at runtime - a Request in
+// Fetch's input, a string in NodeAttributes' style - and no guard type can say "plain object, not a Request"
 export function isPlainObject(obj: unknown): obj is Record<string, any> {
     if (!obj || typeof obj !== "object") {
         return false;

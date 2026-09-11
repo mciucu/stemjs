@@ -154,8 +154,10 @@ export class LocalStorageMap<Value = any> extends StorageMap<Value> {
     // Only works if we're being backed by Window.localStorage and only received events from other tabs (not the current tab)
     // The event has the following fields: key, oldValue, newValue, url, storageArea, originalEvent
     // The key is modified to be the same the one you used in the map
-    addChangeListener(callback: (event: StorageMapChange<Value>) => void, doDeserialization?: true): ListenerHandle;
+    // The deserializing form is declared last so that attachChangeListener, which reads the arity off the
+    // last signature, sees the one every caller actually uses
     addChangeListener(callback: (event: StorageMapChange) => void, doDeserialization: false): ListenerHandle;
+    addChangeListener(callback: (event: StorageMapChange<Value>) => void, doDeserialization?: true): ListenerHandle;
     addChangeListener(callback: (event: StorageMapChange<any>) => void, doDeserialization: boolean = true): ListenerHandle {
         let realCallback = callback;
         if (doDeserialization) {

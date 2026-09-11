@@ -3,6 +3,7 @@ import {styleRule} from "./Style";
 import {registerStyle} from "./style/Theme"
 import {SimpleStyledElement} from "./SimpleElements";
 import {BasicLevelSizeStyleSheet} from "./GlobalStyle";
+import {type LevelType, type SizeType} from "./Constants";
 
 
 class RowListStyle extends BasicLevelSizeStyleSheet {
@@ -49,8 +50,8 @@ export interface RowListOptions<ValueType = any> {
     alternateColors?: boolean;
     rows: ValueType[];
     rowParser: (row: ValueType) => UIChild;
-    level?: string;
-    size?: string;
+    level?: LevelType;
+    size?: SizeType;
 }
 
 //TODO @cleanup just delete this?

@@ -38,6 +38,8 @@ export class CSVBuilder<BaseType> {
         this.columns = ColumnHandler.mapColumns(columns);
     }
 
+    // Left open rather than unknown: the body reassigns it through String(), and an assignment does not
+    // narrow a parameter declared unknown the way a guard would
     static escapeEntry(str: any): string {
         str = String(str);
         if (str.includes(",")) {

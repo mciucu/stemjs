@@ -95,6 +95,11 @@ export const FullScreenable = function <T extends new (...args: any[]) => UIElem
                 this.dispatch("resize");
             };
             document.addEventListener("fullscreenchange", fullScreenFunction);
+            // The flag goes back with the listener, so a remounted element attaches its own again
+            this.addCleanupJob(() => {
+                document.removeEventListener("fullscreenchange", fullScreenFunction);
+                this._attachedFullscreenHandler = false;
+            });
         }
     };
 };

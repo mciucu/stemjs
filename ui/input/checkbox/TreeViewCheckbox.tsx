@@ -76,7 +76,9 @@ function UpdateEntryRecursively(entry: TreeEntry | TreeEntry[], value: boolean |
 }
 
 // TODO @Andrei This should also inherit BaseInputElement
-// One node of the tree: a value, whether it is checked, and any children
+// One node of the tree: a value, whether it is checked, and any children.
+// The value stays open: the tree view is not generic in what its nodes hold, and making it so is a change
+// of shape rather than of type
 export interface TreeEntry {
     value?: any;
     label?: UICleanChild;

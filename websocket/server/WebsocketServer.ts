@@ -1,5 +1,5 @@
-import {createClient as redisCreateClient, RedisClientType} from "redis";
-import {App as WSApp, WebSocket, us_listen_socket, HttpResponse, HttpRequest, us_socket_context_t} from "uWebSockets.js";
+import {createClient as redisCreateClient} from "redis";
+import {App as WSApp, WebSocket, us_listen_socket, HttpResponse, HttpRequest, us_socket_context_t, type TemplatedApp} from "uWebSockets.js";
 import {CheckStreamPermission, IdentifySessionId, LoadSessionId, RPCCaller} from "./PermissionChecking";
 import {DEFAULT_HEARTBEAT_MESSAGE, HEARTBEAT_INTERVAL_MS} from "../Shared";
 import {type AppConfig} from "./AppConfig";
@@ -68,10 +68,10 @@ export class WebsocketServer {
     connections = new Set<WSConnection>();
     connectionsBy: Record<ConnectionKey, ConnectionMap> = Object.fromEntries(CONNECTION_KEYS.map(key => [key, new Map<string, Set<WSConnection>>()])) as Record<ConnectionKey, ConnectionMap>;
     appConfig: AppConfig;
-    rawServer?: any;
-    redisClient?: RedisClientType;
+    rawServer?: TemplatedApp;
+    redisClient?: ReturnType<typeof redisCreateClient>; // The client createClient hands back, which RedisClientType is only half of
     rpcCaller?: RPCCaller;
-    extraConfig?: any;
+    extraConfig?: unknown; // Only ever checked for having arrived; the server decides what is in it
 
     constructor(appConfig: AppConfig) {
         this.appConfig = appConfig;
@@ -262,8 +262,8 @@ export class WebsocketServer {
         this.redisClient = redisCreateClient({ url: this.appConfig.redisEndpoint });
 
         // It seems like redisClient will do the reconnection itself, we just need to know when that happens
-        (this.redisClient as any).on("error", (error: Error) => console.error("Redis error", error));
-        (this.redisClient as any).on("reconnecting", (message: any) => console.error("Redis reconnecting", message));
+        this.redisClient.on("error", (error: Error) => console.error("Redis error", error));
+        this.redisClient.on("reconnecting", (message: unknown) => console.error("Redis reconnecting", message));
 
         await this.redisClient.connect();
         await this.redisClient.pSubscribe("*", (message: string, streamName: string) => {

@@ -5,9 +5,10 @@ interface HttpRequest {
     getHeader(name: string): string | undefined;
 }
 
+// Everything beside the type is the query's own payload, which is serialized and never read here
 interface QueryData {
     type: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 interface QueryResponse {
@@ -78,7 +79,7 @@ export class RPCCaller extends Dispatchable {
 
 
     // TODO batch these together, once every 20ms
-    async query(type: string, data: Record<string, any> = {}): Promise<any> {
+    async query(type: string, data: Record<string, unknown> = {}): Promise<any> {
         const queryData: QueryData = {
             type,
             ...data,

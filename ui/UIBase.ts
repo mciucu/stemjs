@@ -81,7 +81,8 @@ export interface UIElementOptions<TagType extends string = HTMLTagType> extends 
     width?: number | string;
     href?: string;
     theme?: Theme;
-    // The element that owns this one, which components read to call back into it
+    // The element that owns this one, which components read to call back into it. Left open because that
+    // is the point: each consumer calls its own owner's methods, so a class narrows this in its own options
     parent?: any;
     styleSheet?: StyleSheet | typeof StyleSheet;
     //[key: string]: any;
@@ -367,7 +368,8 @@ export class UIElement<
         this.setOptions(options); // TODO maybe this actually needs to be removed, since on a copy we don't want the default options of the other object
     }
 
-    // Not Partial<this["options"]>: a `this` return type stays deferred, so no subclass could satisfy it
+    // Not Partial<this["options"]>: a `this` return type stays deferred, so no subclass could satisfy it -
+    // measured again at 51 errors, every one a `this` assignability cascade and not a single option typo
     getDefaultOptions(_options?: this["options"]): Record<string, any> | void {}
 
     // Return our options without the UI specific fields, so they can be passed along

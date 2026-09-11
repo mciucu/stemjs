@@ -16,8 +16,8 @@ export type MakeTextFunction = (text: UICleanChild | UIRenderable, options?: Wri
 export interface SimpleStyledElementOptions {
     icon?: IconType;
     label?: UIChild;
-    level?: string;
-    size?: string;
+    level?: LevelType;
+    size?: SizeType;
 }
 
 export function DefaultMakeIcon(icon: IconType, options: WrittenUIElementOptions = {}): BaseUIElement | null {
@@ -60,6 +60,8 @@ export function MakeText(text: UICleanChild | UIRenderable, options?: WrittenUIE
 }
 
 export class SimpleStyledElement<T extends SimpleStyledElementOptions = SimpleStyledElementOptions> extends UIElement<T> {
+    // The parent stays `any`: typing it as an optionally-styled parent makes the `&&` chain evaluate to
+    // `"" | LevelType`, which the declared return then rejects. `this.options.level` on its own is clean
     getLevel(): LevelType | undefined {
         return this.options.level || (this.parent && (this.parent as any).getLevel && (this.parent as any).getLevel());
     }

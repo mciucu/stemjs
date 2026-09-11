@@ -30,6 +30,10 @@ declare global {
 // Every name a store is registered under, and so every name a lookup by name can find
 export type StoreObjectType = keyof StemStoreRegistry;
 
+// What filterBy matches against. Only the names are checked: a value may be a list, any member of which
+// matches, and the comparison itself is loose, so a string id stands for the numeric field it names
+export type StoreFilter<T> = {[Key in keyof T]?: unknown};
+
 // getStore() hands back the store class itself, so its statics are callable on the result. Each one below
 // mirrors what StoreObject declares, which is where the shapes are decided.
 export interface StoreInterface<BaseType extends StoreObject = StoreObject> {
@@ -43,8 +47,8 @@ export interface StoreInterface<BaseType extends StoreObject = StoreObject> {
     toJSON(): RawStoreObject[];
     getObjects(): Map<string, BaseType>;
     all(): BaseType[];
-    filterBy(filter: Record<string, any>): BaseType[];
-    findBy(filter: Record<string, any>): BaseType | undefined;
+    filterBy(filter: StoreFilter<BaseType>): BaseType[];
+    findBy(filter: StoreFilter<BaseType>): BaseType | undefined;
     // Every store is a Dispatchable
     addChangeListener(callback: Callback): RemoveHandle | CleanupJobs | undefined;
 }
@@ -183,8 +187,8 @@ export class State extends Dispatchable {
         }
     }
 
-    toJSON(): Record<string, any> {
-        const state: Record<string, any> = {};
+    toJSON(): RawStateData {
+        const state: RawStateData = {};
         for (const store of this.stores.values()) {
             // A singleton store is its own object, so it answers with one rather than a list of them
             state[store.objectType] = toArray(store.toJSON());

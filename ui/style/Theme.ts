@@ -31,7 +31,8 @@ export type ResolvedThemeProps<Written> = {
 export type WrittenThemeValue<Resolved> = ThemeValue<Resolved> | ThemeType<ThemeValue<Resolved>>;
 
 // What a theme holds, read through Theme.props or an element's themeProps. Left open besides the registry
-// so a repo that has not registered its own props still reads them; drop the fallback to catch typos
+// until every contributor has registered; dropping the fallback is what turns an unregistered name from an
+// `any` into a typo, and costs whatever is still unregistered downstream
 export type ThemeProps = StemThemeProps & Record<string, any>;
 
 // What setProperties takes: any subset, each value written directly or as a function of the others.

@@ -286,14 +286,14 @@ export function RangeTableInterface<BaseType, BaseTable extends Constructor<Tabl
             this.addListener("resize", () => {
                 this.setScroll();
             });
-            window.addEventListener("resize", () => {
+            this.attachEventListener(window, "resize", () => {
                 this.setScroll();
             });
         }
 
         addTableAPIListeners(): void {
-            // This event isn't used anywhere but this is how range updates should be made.
-            this.addListener("entriesChange", (event: any) => {
+            // Nothing dispatches this today, but it is how a range update should arrive
+            this.addListener("entriesChange", (event: {leftIndex: number; rightIndex: number}) => {
                 if (!(event.leftIndex >= this.highIndex || event.rightIndex < this.lowIndex)) {
                     this.setScroll();
                 }
@@ -317,7 +317,7 @@ export function RangeTableInterface<BaseType, BaseTable extends Constructor<Tabl
                 this.footer.setStyle("marginLeft", this.node.scrollLeft);
                 this.container.setStyle("marginLeft", -this.node.scrollLeft);
             });
-            window.addEventListener("resize", () => {
+            this.attachEventListener(window, "resize", () => {
                 this.tableContainer.setStyle("marginLeft", 0);
                 this.footer.setStyle("marginLeft", 0);
                 this.container.setStyle("marginLeft", 0);
