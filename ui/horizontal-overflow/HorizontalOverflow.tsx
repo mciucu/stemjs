@@ -1,3 +1,4 @@
+import {type PartialOptions} from "../UIBase";
 import {BaseUIElement, UI, UIElement, type NodeAttributes} from "../UIBase";
 import {FAIcon} from "../FontAwesome";
 import {registerStyle} from "../style/Theme";
@@ -18,7 +19,7 @@ export class HorizontalOverflow extends UI.Element<HorizontalOverflowOptions> {
     declare swipeHelperChild?: UIElement;
     declare pusherContainer?: UIElement;
 
-    getDefaultOptions() {
+    getDefaultOptions(): PartialOptions<HorizontalOverflow> {
         return {
             swipePercent: .5,
         }

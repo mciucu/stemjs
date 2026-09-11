@@ -1,6 +1,8 @@
 import {isFunction, type TimeoutHandler, type IntervalHandler} from "./Utils";
 
-export type Callback = Function;
+// Callable rather than Function, so a listener's arguments and the fact it is called reach the checker.
+// The arguments stay open: dispatch forwards whatever the dispatcher was called with
+export type Callback = (...args: any[]) => void;
 
 export interface RemoveHandle {
     remove: () => void;
@@ -20,6 +22,10 @@ export interface ListenerRemover extends RemoveHandle, CleanupHandle {}
 // An interface rather than DispatcherHandle, so an adder wrapping something else - Ace's session, a DOM
 // node - can answer with a handle of its own instead of with nothing
 export type ListenerHandle = ListenerRemover | CleanupJobs;
+
+// What an attach method answers with. An adder that answers with nothing has its remover wrapped into a
+// cleanup job instead, so a DOM target - addEventListener returns void - hands back one of those
+export type AttachedHandle<Added> = [Added] extends [void] ? CleanupJob | undefined : Added;
 
 function implementsRemoveHandle(job: CleanupJob): job is RemoveHandle {
     return "remove" in job && isFunction(job.remove);
@@ -240,19 +246,20 @@ export class Dispatchable {
 
     // These methods are added dynamically to the prototype below via getAttachCleanupJobMethod.
     // They call obj.add[MethodName](...args) and register the result as a cleanup job, so each one takes
-    // and answers with whatever the adder it forwards to declares
+    // what the adder it forwards to takes, and answers with what it answers - or with the remover built for
+    // it, when the adder answers with nothing
     declare attachListener: <T extends {addListener(...args: any[]): any}>(
-        obj: T, ...args: Parameters<T["addListener"]>) => ReturnType<T["addListener"]>;
+        obj: T, ...args: Parameters<T["addListener"]>) => AttachedHandle<ReturnType<T["addListener"]>>;
     declare attachEventListener: <T extends {addEventListener(...args: any[]): any}>(
-        obj: T, ...args: Parameters<T["addEventListener"]>) => ReturnType<T["addEventListener"]>;
+        obj: T, ...args: Parameters<T["addEventListener"]>) => AttachedHandle<ReturnType<T["addEventListener"]>>;
     declare attachCreateListener: <T extends {addCreateListener(...args: any[]): any}>(
-        obj: T, ...args: Parameters<T["addCreateListener"]>) => ReturnType<T["addCreateListener"]>;
+        obj: T, ...args: Parameters<T["addCreateListener"]>) => AttachedHandle<ReturnType<T["addCreateListener"]>>;
     declare attachDeleteListener: <T extends {addDeleteListener(...args: any[]): any}>(
-        obj: T, ...args: Parameters<T["addDeleteListener"]>) => ReturnType<T["addDeleteListener"]>;
+        obj: T, ...args: Parameters<T["addDeleteListener"]>) => AttachedHandle<ReturnType<T["addDeleteListener"]>>;
     declare attachChangeListener: <T extends {addChangeListener(...args: any[]): any}>(
-        obj: T, ...args: Parameters<T["addChangeListener"]>) => ReturnType<T["addChangeListener"]>;
+        obj: T, ...args: Parameters<T["addChangeListener"]>) => AttachedHandle<ReturnType<T["addChangeListener"]>>;
     declare attachListenerOnce: <T extends {addListenerOnce(...args: any[]): any}>(
-        obj: T, ...args: Parameters<T["addListenerOnce"]>) => ReturnType<T["addListenerOnce"]>;
+        obj: T, ...args: Parameters<T["addListenerOnce"]>) => AttachedHandle<ReturnType<T["addListenerOnce"]>>;
 
     // Answers with nothing when the dispatcher refuses the callback: not a function, or already registered
     addChangeListener(callback: Callback): ListenerHandle | undefined {

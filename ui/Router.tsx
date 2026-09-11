@@ -68,9 +68,13 @@ export interface RoutablePage extends UIElement<any, any, any> {
 
 export class Router extends Switcher {
     declare options: ExtendedOptions<Switcher, RouterOptions>;
+    // The statics below are reached through this.constructor, so a subclass gets its own
+    declare ["constructor"]: typeof Router;
 
     static Global: Router;
-    static globalSetURL: (urlParts: string[]) => void;
+    // Installed as the global router's own setURL by setGlobalRouter below, so it runs on that instance
+    // rather than on the class - which is what lets the two Blink apps reach getPageToRender and setActive
+    static globalSetURL: (this: Router, urlParts: string[]) => void;
     
     // TODO: This works bad with query params. Fix it!
     static localHistory: string[] = []; // If we want the router to not alter the window history, use this instead.
@@ -267,6 +271,8 @@ export class Router extends Switcher {
 }
 
 export class Route {
+    declare ["constructor"]: typeof Route;
+
     static ARG_KEY = "%s";
     expr: string[];
     pageGenerator: PageGenerator;

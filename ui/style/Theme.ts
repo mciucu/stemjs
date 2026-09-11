@@ -1,6 +1,6 @@
 import {Dispatchable} from "../../base/Dispatcher";
 import {resolveFuncValue} from "../../base/Utils";
-import {CallThrottler} from "../../base/CallModifier";
+import {CallThrottler, type WrappedCall} from "../../base/CallModifier";
 import {ThemeType, type ThemeValue} from "./ThemeTypes";
 import type {StyleSheet} from "../Style"; // Type-only on purpose: a runtime edge here would close a cycle
 import type {UIElement} from "../UIBase"; // Type-only on purpose: a runtime edge here would close a cycle
@@ -16,9 +16,11 @@ declare global {
 
 // What reading one written prop answers with, following the two unwrappings setProperties and the props
 // proxy perform: a ThemeType hands over the value it wraps, and a function is called with the other props.
-// Recursive because the two compose - ColorType() wraps a ThemeValue, which may itself be the function
+// A wrapper answers with what its maker declared rather than with the value it holds, so SizeType(14) still
+// reads back as string | number and a theme is free to override it with a CSS string.
+// Recursive because the two compose - a ThemeType built by hand wraps a ThemeValue, which may be the function
 type ResolvedThemeValue<Written> =
-    Written extends ThemeType<infer Wrapped> ? ResolvedThemeValue<Wrapped> :
+    Written extends ThemeType<any, infer Declared> ? ResolvedThemeValue<Declared> :
     Written extends (props: any) => infer Resolved ? Resolved :
     Written;
 
@@ -27,12 +29,14 @@ export type ResolvedThemeProps<Written> = {
     [Key in keyof Written]: ResolvedThemeValue<Written[Key]>;
 };
 
-// What one prop may be written as: the value, a function of the other props, or either wrapped in a ThemeType
-export type WrittenThemeValue<Resolved> = ThemeValue<Resolved> | ThemeType<ThemeValue<Resolved>>;
+// What one prop may be written as: the value, a function of the other props, or either wrapped in a ThemeType.
+// Unlike ThemeValue, the function's parameter is typed here: this is what a caller writes against a theme that
+// already exists, so naming ThemeProps costs nothing. Only a literal the registry reads its props back from
+// has to avoid mentioning it
+export type WrittenThemeValue<Resolved> = Resolved | ((props: ThemeProps) => Resolved) | ThemeType<ThemeValue<Resolved>>;
 
 // What a theme holds, read through Theme.props or an element's themeProps. Left open besides the registry
-// until every contributor has registered; dropping the fallback is what turns an unregistered name from an
-// `any` into a typo, and costs whatever is still unregistered downstream
+// so a repo that has not registered its own props still reads them; drop the index signature to catch typos
 export type ThemeProps = StemThemeProps & Record<string, any>;
 
 // What setProperties takes: any subset, each value written directly or as a function of the others.
@@ -53,7 +57,7 @@ export class Theme extends Dispatchable {
     classSet = new Set<StyledElementClass>();
     missingProps = new Set<string>();
     styleSheetInstances = new Map<typeof StyleSheet, StyleSheet>(); // map from StyleSheet class to instance
-    updateThrottled: Function = (new CallThrottler({throttle: 50})).wrap(() => this.updateStyleSheets()); // TODO @cleanup CallThrottler syntax is really ugly
+    updateThrottled: WrappedCall = (new CallThrottler({throttle: 50})).wrap(() => this.updateStyleSheets()); // TODO @cleanup CallThrottler syntax is really ugly
     name: string;
     baseTheme: Theme | null;
     properties: WrittenThemeProps;
@@ -61,7 +65,7 @@ export class Theme extends Dispatchable {
     props: ThemeProps;
     styleSheetSymbol: symbol;
 
-    constructor(baseTheme: Theme | null, name: string, props?: ThemeProps) {
+    constructor(baseTheme: Theme | null, name: string, props?: WrittenThemeProps) {
         super();
         this.name = name;
         this.baseTheme = baseTheme;
@@ -98,7 +102,7 @@ export class Theme extends Dispatchable {
     }
 
     // Create a new Theme, based on the current one
-    fork(name: string, extraProps?: ThemeProps): Theme {
+    fork(name: string, extraProps?: WrittenThemeProps): Theme {
         return new Theme(this, name, extraProps);
     }
 

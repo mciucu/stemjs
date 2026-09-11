@@ -19,7 +19,8 @@ interface ChildProperties {
 export class Switcher extends UIElement<SwitcherOptions> {
     numRedraws: number = 0;
     private childMap: WeakMap<UIElement, ChildProperties> = new WeakMap();
-    private activeChild?: UIElement;
+    // Not private: WidgetApp replaces setActive on the prototype and reads it from there
+    activeChild?: UIElement;
 
     getPreferredActive(): UIElement | undefined {
         const {children} = this.options;

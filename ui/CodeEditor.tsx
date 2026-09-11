@@ -4,6 +4,7 @@ import {UI, UIElement} from "./UIBase";
 import {StyleSheet, styleRule} from "./Style";
 import {registerStyle} from "./style/Theme";
 import {EnqueueableMethodMixin, enqueueIfNotLoaded} from "../base/EnqueueableMethodMixin";
+import type {Callback} from "../base/Dispatcher";
 import {ensure} from "../base/Require";
 import {NodeAttributes} from "./NodeAttributes";
 import {type ListenerRemover} from "../base/Dispatcher";
@@ -463,7 +464,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     }
 
     @enqueueIfNotLoaded
-    addAceChangeListener(callback: Function): void {
+    addAceChangeListener(callback: Callback): void {
         this.getAce().on("change", callback);
     }
 

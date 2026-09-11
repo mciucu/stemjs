@@ -18,7 +18,7 @@ export class CallModifier {
         return this.wrap(func)();
     }
 
-    toFunction(): Function {
+    toFunction(): (func: Function) => WrappedCall {
         return (func: Function) => this.wrap(func);
     }
 }

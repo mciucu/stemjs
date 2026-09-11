@@ -62,7 +62,7 @@ export function composeURL(url: string | Request, urlSearchParams?: URLSearchPar
     return urlString;
 }
 
-type DataType = "arrayBuffer" | "blob" | "formData" | "json" | "text";
+export type DataType = "arrayBuffer" | "blob" | "formData" | "json" | "text";
 
 export type FetchPostprocessor = (payload: any, xhrPromise?: XHRPromise) => unknown;
 export type FetchErrorPostprocessor = (error: any) => unknown;

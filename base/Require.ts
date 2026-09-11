@@ -1,9 +1,12 @@
 import {Dispatchable} from "./Dispatcher";
 import {toArray} from "./Utils";
 
+// What resolve() queues: onLoad hands each one the resolver it was registered on
+type ScriptResolverJob = (resolver: ScriptResolver) => void;
+
 export class ScriptResolver extends Dispatchable {
     loaded: boolean;
-    jobs: Function[];
+    jobs: ScriptResolverJob[];
 
     constructor(scriptPath: string) {
         super();
@@ -26,7 +29,7 @@ export class ScriptResolver extends Dispatchable {
         this.jobs = [];
     }
 
-    resolve(callback: Function): void {
+    resolve(callback: ScriptResolverJob): void {
         if (this.loaded) {
             callback(this);
             return;
@@ -48,7 +51,7 @@ async function ensureSingle(script: string) {
     });
 }
 
-export async function ensure(scripts: string | string[], callback?: Function) {
+export async function ensure(scripts: string | string[], callback?: (...results: ScriptResolver[]) => void) {
     scripts = toArray(scripts);
     const promises = scripts.map(script => ensureSingle(script));
     return Promise.all(promises).then(function (results) {

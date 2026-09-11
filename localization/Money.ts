@@ -36,7 +36,9 @@ export class Money {
     static useFormatter: boolean = false; // TODO: preserving behaviour now, reconsider defaults
 
     defaultDecimalsDisplayed: number = 2; // TODO: this should be a property of the currency
-    private amount: number;
+    // Not private: two blinkpay flow files read it directly. getAmount() is the accessor everything
+    // inside this class uses, and just answers with this
+    amount: number;
     private currency: Currency;
 
     // Also accepts an object {amount, currency} as single argument

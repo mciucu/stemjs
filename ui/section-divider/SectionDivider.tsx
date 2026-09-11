@@ -1,3 +1,4 @@
+import {type PartialOptions} from "../UIBase";
 // TODO: Too much "hidden"
 import {Device} from "../../base/Device";
 import {unwrapArray} from "../../base/Utils";
@@ -16,7 +17,7 @@ interface DividerBarOptions {
 // options.orientation is the orientation of the divided elements
 @registerStyle(SectionDividerStyle)
 export class DividerBar extends Divider<DividerBarOptions> {
-    getDefaultOptions() {
+    getDefaultOptions(): PartialOptions<DividerBar> {
         return {
             ...super.getDefaultOptions(),
             orientation: Orientation.HORIZONTAL,

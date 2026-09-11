@@ -1,6 +1,6 @@
 import {StyleElement, KeyframeElement, DynamicStyleElement} from "./StyleElement";
 import {toArray} from "../base/Utils";
-import {Dispatchable, type ListenerHandle} from "../base/Dispatcher";
+import {type Callback, Dispatchable, type ListenerHandle} from "../base/Dispatcher";
 import {PREFERRED_CLASS_NAME_KEY} from "../decorators/Style";
 import {registerStyle, Theme, type ThemeProps} from "./style/Theme";
 import {type PartialOptions, type UIResolvedChild} from "./UIBase";
@@ -182,7 +182,7 @@ class StyleSheet extends Dispatchable {
         return element;
     }
 
-    addBeforeUpdateListener(callback: Function): ListenerHandle {
+    addBeforeUpdateListener(callback: Callback): ListenerHandle {
         return this.addListener("beforeUpdate", callback);
     }
 
