@@ -9,7 +9,6 @@ export interface FieldOptions {
     cacheField?: boolean | symbol;
     loader?: FieldLoader;
     isReadOnly?: boolean;
-    [key: string]: any;
 }
 
 export interface StoreObjectWithFields extends StoreObject {
@@ -68,6 +67,7 @@ export class FieldDescriptor {
     cacheField?: false | symbol;
     loader?: FieldLoader;
     isReadOnly?: boolean;
+    // Object.assign copies the options over, and a descriptor is read by name at runtime
     [key: string]: any;
 
     constructor(type: FieldType, options: FieldOptions = {}) {

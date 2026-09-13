@@ -59,7 +59,7 @@ export function StateDependentElement<T extends new (...args: any[]) => UIElemen
             return renderLoading;
         }
 
-        setError(error: any): void {
+        setError(error: unknown): void {
             this.options.error = error;
         }
 
@@ -90,7 +90,7 @@ export function StateDependentElement<T extends new (...args: any[]) => UIElemen
                     this.importState(data);
                     this.setLoaded();
                 },
-                (error: any) => {
+                (error: unknown) => {
                     console.error("Request error", error);
                     this.setError(error);
                     this.setLoaded();

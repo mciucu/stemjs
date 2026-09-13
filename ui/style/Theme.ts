@@ -37,7 +37,8 @@ export type WrittenThemeValue<Resolved> = Resolved | ((props: ThemeProps) => Res
 
 // What a theme holds, read through Theme.props or an element's themeProps. Left open besides the registry
 // so a repo that has not registered its own props still reads them; drop the index signature to catch typos.
-// Measured: dropping it costs this repo nothing and Blink five reads of props no contributor registers
+// Measured against a synced mirror: dropping both index signatures costs this repo nothing and Blink seven,
+// every one a prop set by a second setProperties call the registry never sees
 export type ThemeProps = StemThemeProps & Record<string, any>;
 
 // What setProperties takes: any subset, each value written directly or as a function of the others.

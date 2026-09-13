@@ -188,7 +188,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
         }
 
         if (this.options.value) {
-            this.setValue(this.options.value, -1);
+            this.setValue(this.options.value);
         }
         if (this.options.hasOwnProperty("enableBasicAutocompletion") ||
             this.options.hasOwnProperty("enableLiveAutocompletion")) {
@@ -212,7 +212,8 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     }
 
     @enqueueIfNotLoaded
-    setValue(sourceCode: string, fakeUserChange?: any): void {
+    // Only ever tested for truthiness, and callers pass whatever says "yes" to them
+    setValue(sourceCode: string, fakeUserChange?: unknown): void {
         // We need to wrap the ace call in these flags so any event listeners can know if this change
         // was done by us or by the user
         this.apiChange = !fakeUserChange;
@@ -471,7 +472,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     // Answers with a handle when Ace is up; @enqueueIfNotLoaded answers null before that, and the queued
     // call carries no way to remove what it will later add
     @enqueueIfNotLoaded
-    addChangeListener(callback: Function): ListenerRemover {
+    addChangeListener(callback: Callback): ListenerRemover {
         const session = this.getAce().getSession();
         session.addEventListener("change", callback);
         const remove = () => session.removeEventListener("change", callback);

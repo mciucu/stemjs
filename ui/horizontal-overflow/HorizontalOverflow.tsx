@@ -77,12 +77,14 @@ export class HorizontalOverflow extends UI.Element<HorizontalOverflowOptions> {
 
     // Whichever child the scroller is currently closest to
     getActiveChild(): UIElement | undefined {
-        const children = this.options.children || [];
+        // Cast once, the way checkForOverflow does: held children are UIResolvedChild, and this scroller
+        // only ever holds elements
+        const children = (this.options.children || []) as UIElement[];
         const scrollLeft = this.pusherContainer.node.scrollLeft;
         let closest;
         let closestDistance = Infinity;
         for (const child of children) {
-            const distance = Math.abs(this.getChildOffset(child as UIElement) - scrollLeft);
+            const distance = Math.abs(this.getChildOffset(child) - scrollLeft);
             if (distance < closestDistance) {
                 closestDistance = distance;
                 closest = child;

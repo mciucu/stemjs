@@ -64,6 +64,8 @@ export function composeURL(url: string | Request, urlSearchParams?: URLSearchPar
 
 export type DataType = "arrayBuffer" | "blob" | "formData" | "json" | "text";
 
+// The payload stays open where the internals below use `unknown`: a postprocessor is written against one
+// endpoint and reads its fields, so `unknown` costs a cast at every one - measured at 8 downstream
 export type FetchPostprocessor = (payload: any, xhrPromise?: XHRPromise) => unknown;
 export type FetchErrorPostprocessor = (error: any) => unknown;
 export type FetchPreprocessor = (options: FetchOptions, input?: RequestInfo) => FetchOptions | void;
@@ -113,8 +115,8 @@ export class XHRPromise {
     request: Request;
     xhr: XMLHttpRequest;
     promise: Promise<any>;
-    promiseResolve: (value?: any) => void;
-    promiseReject: (reason?: any) => void;
+    promiseResolve: (value?: unknown) => void;
+    promiseReject: (reason?: unknown) => void;
     _chained?: boolean;
 
     constructor(request: RequestInfo, options: FetchOptions = {}) {
@@ -228,7 +230,7 @@ export class XHRPromise {
         return this.options.errorPostprocessors || fetch.defaultErrorPostprocessors;
     }
 
-    resolve(payload: any): void {
+    resolve(payload: unknown): void {
         for (const postprocessor of this.getPostprocessors()) {
             try {
                 payload = postprocessor(payload, this) || payload;
@@ -248,7 +250,7 @@ export class XHRPromise {
         }
     }
 
-    reject(error: any): void {
+    reject(error: unknown): void {
         for (const postprocessor of this.getErrorPostprocessors()) {
             error = postprocessor(error) || error;
         }

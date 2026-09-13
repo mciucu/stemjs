@@ -335,9 +335,9 @@ function FILTER_NULLS_AND_EMPTY_STR(_key: string, value: unknown): boolean {
     return value != null && value !== "";
 }
 
-export function cleanObject(obj: Record<string, any>, options: CleanObjectOptions = {}): Record<string, any> | null {
+export function cleanObject(obj: Record<string, unknown>, options: CleanObjectOptions = {}): Record<string, unknown> | null {
     const {skipEmptyString = true, filterFunc = null, emptyAsNull = false} = options;
-    const cleanedObject: Record<string, any> = {};
+    const cleanedObject: Record<string, unknown> = {};
     const filterFunction = filterFunc || (skipEmptyString ? FILTER_NULLS_AND_EMPTY_STR : FILTER_NULLS);
     
     for (const [key, value] of Object.entries(obj)) {

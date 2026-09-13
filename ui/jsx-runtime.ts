@@ -2,7 +2,9 @@
 import {UI, BaseUIElement, UIElement, type UIElementOptions, type HTMLTagType, type SVGTagType} from "./UIBase";
 import {SVGUIElement} from "./svg/SVGBase";
 
-// The new JSX transform expects jsx/jsxs with (type, props, key) signature
+// The new JSX transform expects jsx/jsxs with (type, props, key) signature. props stays open here: the
+// ts-plugin checks a tag's attributes against the class's own $stemJsxOptions before the transform runs,
+// so narrowing it would restate that check in a place that cannot see which class the tag names
 export function jsx<K extends HTMLTagType>(type: K, props: any, key?: string | number): UIElement<{}, HTMLElementTagNameMap[K]>;
 export function jsx<K extends SVGTagType>(type: K, props: any, key?: string | number): SVGUIElement<{}, SVGElementTagNameMap[K]>;
 export function jsx<T extends BaseUIElement>(type: new (options?: any) => T, props: any, key?: string | number): T;

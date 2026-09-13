@@ -152,7 +152,7 @@ export class Router extends Switcher {
         }
 
         options.state = options.state || {};
-        const historyArgs: [any, string, string] = [options.state, PageTitleManager.getTitle(), url];
+        const historyArgs: Parameters<History["pushState"]> = [options.state, PageTitleManager.getTitle(), url];
         if (this.useLocalHistory) {
             if (options.replaceHistory) {
                 this.localHistory.pop();

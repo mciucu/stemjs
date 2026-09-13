@@ -2,7 +2,7 @@ import {ButtonGroup} from "../button/ButtonGroup";
 import {Button, type ButtonOptions} from "../button/Button";
 import {FloatingWindow} from "./FloatingWindow";
 import {ModalStyle} from "./Style";
-import {UI, UIElement, type StyleObject, type UIChild} from "../UIBase";
+import {UI, UIElement, type PartialOptions, type StyleObject, type UIChild} from "../UIBase";
 import {Dispatcher, type RemoveHandle} from "../../base/Dispatcher";
 import {registerStyle} from "../style/Theme";
 import {Level, type LevelType, Size} from "../Constants";
@@ -139,8 +139,9 @@ export class Modal<ExtraOptions extends ModalOptions = ModalOptions> extends UI.
         document.body.classList.add("unscrollable");
     }
 
-    // Typed off the constructor rather than off Modal, so a subclass's show answers with its own class
-    static show<ModalType extends Modal>(this: new (options?: unknown) => ModalType, options = {}): ModalType {
+    // Typed off the constructor rather than off Modal, so a subclass's show answers with its own class,
+    // and takes that class's own options so a tag-less call is checked the way a tag would be
+    static show<ModalType extends Modal>(this: new (options?: PartialOptions<ModalType>) => ModalType, options: PartialOptions<ModalType> = {}): ModalType {
         let modal = new this(options);
         modal.show();
         return modal;

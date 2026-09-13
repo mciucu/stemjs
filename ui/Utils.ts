@@ -20,8 +20,7 @@ export function getOffset(element: NodeLike): Offset {
     let left = 0;
     let top = 0;
     while (node) {
-        const nodeStyle = node.style || {};
-        if (nodePosition === "absolute" && (nodeStyle as any).position === "relative") {
+        if (nodePosition === "absolute" && node.style?.position === "relative") {
             return {left, top};
         }
         left += node.offsetLeft;

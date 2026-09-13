@@ -185,6 +185,8 @@ export class NodeAttributes {
         if (isNumber(value) && value != 0 && defaultToPixelsAttributes.has(dashCase(key))) {
             value = value + "px";
         }
+        // CSSStyleDeclaration is indexable by number, not by an arbitrary property name, and the key here is
+        // whatever an options object carried. Naming the shape instead buys nothing: value is already declared
         if (node && (node.style as any)[key] !== value) {
             (node.style as any)[key] = value;
         }

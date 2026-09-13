@@ -19,16 +19,11 @@ export interface ParsedElement {
     isDummy?: boolean;
 }
 
-interface StringStreamOptions {
-    [key: string]: any;
-}
-
 export interface ModifierOptions {
     pattern?: string;
     captureContent?: boolean;
     endPattern?: string;
     leftWhitespace?: boolean;
-    [key: string]: any;
 }
 
 // The renderer hands its class map, and the constructor falls back to an empty Map; only `has` is asked of it
@@ -54,7 +49,7 @@ export class StringStream {
     string: string;
     pointer: number;
 
-    constructor(string: string, options?: StringStreamOptions) {
+    constructor(string: string) {
         this.string = string;
         this.pointer = 0;
     }
@@ -403,7 +398,7 @@ class ModifierAutomation {
 
 // Content is whatever processChildren hands to wrap, which differs per modifier
 class Modifier<Content = (string | MarkupElement)[]> {
-    wrap(content: Content, options?: Record<string, any>): MarkupElement {
+    wrap(content: Content, options?: Record<string, unknown>): MarkupElement {
         throw Error("Modifier does not wrap");
     }
 
@@ -414,7 +409,7 @@ class Modifier<Content = (string | MarkupElement)[]> {
     tag?: string;
     itemTag?: string;
     groupConsecutive?: boolean;
-    codeOptions?: Record<string, any> | null;
+    codeOptions?: Record<string, unknown> | null;
 
     constructor(options?: ModifierOptions) {
         Object.assign(this, options);
@@ -696,7 +691,7 @@ export class BlockCodeModifier extends Modifier<string> {
         }
     }
 
-    wrap(content: string, options?: Record<string, any>): MarkupElement {
+    wrap(content: string, options?: Record<string, unknown>): MarkupElement {
         const codeHighlighter = this.getElement(content);
         const extraOptions = this.codeOptions;
         if (extraOptions) {
@@ -1118,11 +1113,9 @@ class MarkupParser {
             throw Error("Invalid UIElement declaration.");
         }
 
-        const result: any = {};
-
         stream.char(); // skip the '<'
 
-        result.tag = stream.word();
+        const result: MarkupElement = {tag: stream.word()};
         stream.whitespace();
 
         Object.assign(result, this.parseOptions(stream, delimiter));
@@ -1131,13 +1124,13 @@ class MarkupParser {
         return result;
     }
 
-    parseOptions(stream: StringStream, optionsEnd?: RegExp): Record<string, any> {
+    parseOptions(stream: StringStream, optionsEnd?: RegExp): Record<string, unknown> {
         return this.constructor.parseOptions(stream, optionsEnd);
     }
 
     // optionsEnd cannot include whitespace or start with '='
-    static parseOptions(stream: StringStream, optionsEnd?: RegExp): Record<string, any> {
-        const options: Record<string, any> = {};
+    static parseOptions(stream: StringStream, optionsEnd?: RegExp): Record<string, unknown> {
+        const options: Record<string, unknown> = {};
 
         stream.whitespace();
 
@@ -1206,7 +1199,7 @@ class MarkupParser {
                                 bracketCount -= 1;
                             } else {
                                 // JSON ends here
-                                options[optionName] = jsonString.length > 0 ? (this as any).parseJSON5(jsonString) : undefined;
+                                options[optionName] = jsonString.length > 0 ? this.parseJSON5(jsonString) : undefined;
                                 validJSON = true;
                                 break;
                             }

@@ -1,25 +1,29 @@
 import {NOOP_FUNCTION} from "./Utils";
 
+// What gets wrapped. Callable rather than Function, so the wrapper can call it; the arguments stay open
+// because every path forwards whatever the wrapper was handed
+export type WrappableCall = (...args: any[]) => any;
+
 // What wrap answers with: it forwards whatever it is called with, and carries the handles for
 // cancelling or flushing the call it is holding
 export interface WrappedCall {
     (...args: any[]): unknown;
-    originalFunc: Function;
+    originalFunc: WrappableCall;
     cancel: () => void;
     flush: () => void;
 }
 
 export class CallModifier {
-    wrap(_func: Function): WrappedCall {
+    wrap(_func: WrappableCall): WrappedCall {
         throw new Error("Implement wrap method");
     }
 
-    call(func: Function): unknown {
+    call(func: WrappableCall): unknown {
         return this.wrap(func)();
     }
 
-    toFunction(): (func: Function) => WrappedCall {
-        return (func: Function) => this.wrap(func);
+    toFunction(): (func: WrappableCall) => WrappedCall {
+        return (func: WrappableCall) => this.wrap(func);
     }
 }
 
@@ -95,13 +99,13 @@ export class CallThrottler extends CallModifier {
         return executionDelay;
     }
 
-    replacePendingCall(wrappedFunc: WrappedCall, funcCall: Function, funcCallArgs: unknown[]): void {
+    replacePendingCall(wrappedFunc: WrappedCall, funcCall: () => void, funcCallArgs: unknown[]): void {
         this.cancel();
         // Every path below runs funcCall, which forwards these, and cancel() has just emptied them
         this.pendingCallArgs = funcCallArgs;
 
         if (this.isThrottleOnAnimationFrame()) {
-            const cancelHandler = requestAnimationFrame(funcCall as FrameRequestCallback);
+            const cancelHandler = requestAnimationFrame(funcCall);
             wrappedFunc.cancel = () => cancelAnimationFrame(cancelHandler);
             // Marked pending like the timeout path, so a second call in the same frame updates rather than schedules
             this.pendingCall = wrappedFunc;
@@ -129,7 +133,7 @@ export class CallThrottler extends CallModifier {
         }
     }
 
-    wrap(func: Function): WrappedCall {
+    wrap(func: WrappableCall): WrappedCall {
         const funcCall = () => {
             const timeNow = Date.now();
             // The expected time when the function should be executed next might have been changed

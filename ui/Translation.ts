@@ -36,10 +36,15 @@ export class TranslationTextElement extends TextUIElement<TextElementOptions, Tr
             super(value);
         } else {
             super("");
+            // The callee is cast to a pure rest signature: `arguments` is not a tuple, and a spread cannot
+            // reach a parameter list that starts with a required one
             (this.setValue as (...args: any[]) => void)(...arguments as any);
         }
     }
 
+    // Variadic in practice: extra arguments are the sprintf values, read off `arguments` rather than declared.
+    // Declaring a rest parameter here changes the emitted parameter list of a function that reads `arguments`,
+    // and nothing in either repository calls this with more than one, so the signature stays as it is
     setValue(value: TranslationValue): void {
         if (arguments.length > 1) {
             this.value = Array.from(arguments);
