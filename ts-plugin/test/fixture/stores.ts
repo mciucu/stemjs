@@ -48,9 +48,8 @@ export const mentionDependencies: StoreObjectType[] = Mention.dependencies;
 
 const category = Category.get(1)!;
 export const categoryParent: Category | undefined = category.parent;
-// A self key keeps the open id: the raw ids reach the class through its extends clause, where naming the
-// class they belong to would be circular. `parent?` carries the null through to the key, as any spec does
-export const categoryParentId: StoreId | null = category.parentId;
+// A self key is as narrow as the class's own id, like any other, and `parent?` carries the null into it
+export const categoryParentId: number | null = category.parentId;
 // @ts-expect-error a self field is the class, not the bare StoreObject every string spec answers with
 export const notSelf: {nonsense: number} = category.parent;
 

@@ -672,8 +672,18 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
         const specs = [];
         const omittedRawIds = [];
         const relocated = [];
+        // A self key cannot go through FieldRawIds: that reaches the class through its extends clause, where
+        // naming the class is circular. Emitted as a plain member instead, which can say `X["id"]` freely
+        const selfRawIds = [];
         for (const fieldInfo of fields) {
-            specs.push(`${fieldInfo.name}: ${fieldInfo.specType}`);
+            if (fieldInfo.specType.startsWith('"self"')) {
+                if (!alreadyDeclares(fieldInfo.name + "Id")) {
+                    const nullable = fieldInfo.isOptional ? " | null" : "";
+                    selfRawIds.push(`    ${fieldInfo.name}Id: ${className}["id"]${nullable};\n`);
+                }
+            } else {
+                specs.push(`${fieldInfo.name}: ${fieldInfo.specType}`);
+            }
             if (alreadyDeclares(fieldInfo.name + "Id")) {
                 omittedRawIds.push(JSON.stringify(fieldInfo.name + "Id"));
             }
@@ -694,6 +704,7 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
         const rawIdsAlias = `$StemRawIds$${className}`;
         appended += `type ${rawIdsAlias} = ${rawIds};\n`;
         appended += `${prefix}interface ${className}${typeParams} extends ${rawIdsAlias} {\n`;
+        appended += selfRawIds.join("");
         for (const fieldInfo of relocated) {
             appended += "    ";
             impliedFields.push({
