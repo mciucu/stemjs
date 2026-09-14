@@ -270,6 +270,10 @@ export class Router extends Switcher {
     }
 }
 
+// The constructor flattens what it is handed, so a caller may pass a map over a list rather than
+// spread it, at any depth
+type NestedRoutes = Route | NestedRoutes[];
+
 export class Route {
     declare ["constructor"]: typeof Route;
 
@@ -287,7 +291,7 @@ export class Route {
         };
     }
 
-    constructor(expr: string | string[], pageGenerator: PageGenerator, subroutes: Route[] = [], options: RouteOptions | string = {}) {
+    constructor(expr: string | string[], pageGenerator: PageGenerator, subroutes: NestedRoutes[] = [], options: RouteOptions | string = {}) {
         this.expr = (expr instanceof Array) ? expr : [expr];
         this.pageGenerator = pageGenerator;
         this.subroutes = unwrapArray(subroutes);
