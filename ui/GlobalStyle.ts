@@ -255,7 +255,7 @@ class ContainerStyle extends StyleSheet {
 
 
 class StyleUtils extends StyleSheet {
-    // TODO @types
+    // TODO @types consider getting rid of these from here
     get Utils() {
         return StyleUtils.getInstance();
     }

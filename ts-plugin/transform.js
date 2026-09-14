@@ -703,7 +703,11 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
                 appendedStart: appended.length,
             });
             const optional = fieldInfo.isOptional ? "?" : "";
-            appended += `${fieldInfo.name}${optional}: import("${stateModule}").FieldValue<${fieldInfo.specType}>;\n`;
+            // "self" is the one spec a class cannot write as a value - its own binding is still in the
+            // temporal dead zone when the decorator runs. Resolved for the member only: the raw ids reach
+            // the class through its extends clause, where naming the class it merges into is circular
+            const specType = fieldInfo.specType.replace('"self"', `typeof ${className}`);
+            appended += `${fieldInfo.name}${optional}: import("${stateModule}").FieldValue<${specType}>;\n`;
         }
         appended += "}\n";
     }

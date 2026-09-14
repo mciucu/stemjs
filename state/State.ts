@@ -42,6 +42,7 @@ export interface StoreInterface<BaseType extends StoreObject = StoreObject> {
     getState(): State;
     applyEvent(event: StateEvent): BaseType | undefined;
     get(id: StoreId): BaseType | undefined;
+    getRequired(id: StoreId): BaseType;
     importState(objects: RawStoreObject[]): void;
     clear?(): void;
     toJSON(): RawStoreObject[];

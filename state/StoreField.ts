@@ -9,6 +9,9 @@ export interface FieldOptions {
     cacheField?: boolean | symbol;
     loader?: FieldLoader;
     isReadOnly?: boolean;
+    // Whether the store this points into is guaranteed to have loaded. Defaults to whether the owning store
+    // declares it a dependency, which is the only thing that makes the guarantee true
+    guaranteed?: boolean;
 }
 
 export interface StoreObjectWithFields extends StoreObject {
@@ -50,8 +53,17 @@ type StoreConstructor = abstract new (...args: any[]) => StoreObject;
 // spec reads the raw value out of a symbol, so there's nothing extra to declare for it.
 type FieldRawIdKey<Key extends string, Spec> = Spec extends StoreConstructor | string ? `${Key}Id` : never;
 
+// The id the store being pointed at declares, so a foreign key is no wider than the object it names: a
+// store that says `declare id: number` gives every key into it a number. A name goes through the registry,
+// and anything neither - "self" among them - keeps the open StoreId
+type FieldRawIdValue<Spec> =
+    NonNullable<Spec> extends abstract new (...args: any[]) => {id: infer Id} ? Id :
+    NonNullable<Spec> extends keyof StemStoreRegistry ? StemStoreRegistry[NonNullable<Spec>]["id"] :
+    StoreId;
+
 export type FieldRawIds<Specs extends Record<string, unknown>, Omitted extends string = never> = Omit<{
-    [Key in keyof Specs as FieldRawIdKey<Key & string, Specs[Key]>]: null extends Specs[Key] ? StoreId | null : StoreId;
+    [Key in keyof Specs as FieldRawIdKey<Key & string, Specs[Key]>]:
+        null extends Specs[Key] ? FieldRawIdValue<Specs[Key]> | null : FieldRawIdValue<Specs[Key]>;
 }, Omitted>;
 
 // Checks a hand-written annotation against what the spec loads, for the fields the plugin leaves alone.
@@ -67,6 +79,7 @@ export class FieldDescriptor {
     cacheField?: false | symbol;
     loader?: FieldLoader;
     isReadOnly?: boolean;
+    guaranteed?: boolean;
     // Object.assign copies the options over, and a descriptor is read by name at runtime
     [key: string]: any;
 
@@ -93,18 +106,28 @@ export class FieldDescriptor {
     }
 
     makeDescriptor(): PropertyDescriptor {
-        // TODO "self" should mean type = this.targetProto
         if (isString(this.type)) {
             // We're a Foreign key
             this.rawField = this.rawField || ((key: string) => key + "Id"); // By default we'll add a suffix
             this.cacheField = false;
 
-            const storeName = (this.type === "self") ? null : this.type as string;
+            const owner = this.targetProto?.constructor as typeof StoreObject | undefined;
+            // "self" points back into the store the field is declared on, which is the one name a spec
+            // cannot write as a value - the class binding is not initialized yet when the decorator runs
+            const isSelf = this.type === "self";
+            const storeName = isSelf ? owner?.objectType : this.type as string;
+
+            // A key into a store the owner declares a dependency on is guaranteed to resolve, since the
+            // state loader imports dependencies first. `guaranteed` overrides it in either direction.
+            // Never for "self": one store's objects are created in payload order, so a child can precede
+            // the parent it points at
+            const guaranteed = this.guaranteed ?? (!isSelf && owner?.dependencies?.some(
+                dependency => dependency.toLowerCase() === storeName?.toLowerCase()));
 
             this.loader = (value: any, obj: StoreObjectWithFields) => {
                 // TODO Instead of calling GlobalState, the object should ALWAYS implement .getState()
                 const store = obj.getStore ? obj.getStore(storeName) : GlobalState.getStore(storeName);
-                return store?.get(value);
+                return guaranteed ? store?.getRequired(value) : store?.get(value);
             }
         }
 

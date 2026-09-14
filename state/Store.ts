@@ -108,8 +108,16 @@ export class StoreObject extends Dispatchable {
         fieldDescriptor.cacheField = false;
         fieldDescriptor.rawField = fieldDescriptor.rawField || (key => key + "Id");
 
+        // A field into a store the owner declares a dependency on is guaranteed, since the state loader
+        // imports dependencies first - the same rule getRequired states, decided here from the two object
+        // types rather than from either class's name. `guaranteed` overrides it in both directions, and an
+        // owner this cannot see keeps the plain lookup
+        const owner = fieldDescriptor.targetProto?.constructor as typeof StoreObject | undefined;
+        const guaranteed = fieldDescriptor.guaranteed ??
+            owner?.dependencies?.some(dependency => dependency.toLowerCase() === this.objectType);
+
         // TODO resolve through the object's own store, once a state can own its stores instead of everything growing in the global one
-        return (value: any, _obj: StoreObjectWithFields) => this.get(value);
+        return (value: any, _obj: StoreObjectWithFields) => guaranteed ? this.getRequired(value) : this.get(value);
     }
 
     static loadRaw(responseOrState: StateData): RawStoreObject[] {
@@ -145,6 +153,19 @@ export class StoreObject extends Dispatchable {
         }
         // The map is a static property, so it can't be polymorphic - StoreClass<T> is what says these are T
         return this.objects.get(String(id)) as T;
+    }
+
+    // A foreign key into one of the asking store's declared dependencies. importStateFromTempMap loads a
+    // store's dependencies before the store itself, so the object is there by the time anything can ask.
+    // Answering with T rather than T | undefined is what states that, and a miss says the state is wrong
+    static getRequired<T extends StoreObject>(this: StoreClass<T>, id: StoreIdOrNull): T {
+        const obj = this.get<T>(id);
+        // Only a key that names something is a broken promise; a nullable foreign key with nothing in it
+        // is simply absent, which get() already answers with nothing for
+        if (!obj && id != null) {
+            console.error("Missing", this.objectType, id, "- a declared dependency should have loaded it");
+        }
+        return obj;
     }
 
     static addObject<T extends StoreObject>(this: typeof StoreObject, id: StoreId, obj: T): void {

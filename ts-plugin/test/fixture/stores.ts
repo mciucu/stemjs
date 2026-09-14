@@ -31,6 +31,13 @@ export class Reaction extends BaseStore("Reaction") {
     @field(ChatMessage) message;
 }
 
+// "self" points back into the store the field is on, which no spec can name as a value
+@globalStore
+export class Category extends BaseStore("Category") {
+    declare id: number;
+    @field("self") parent?: Category;
+}
+
 // A dependency is another store, as the name it registered under or as the class itself
 export class Mention extends BaseStore("Mention", {dependencies: ["chatmessage", MessageThread]}) {}
 // A name nothing registered is a typo, and reports as one
@@ -38,6 +45,17 @@ export class Mention extends BaseStore("Mention", {dependencies: ["chatmessage",
 export class Mistyped extends BaseStore("Mistyped", {dependencies: ["ChatMesage"]}) {}
 // What a store answers with is the names, the classes among them resolved
 export const mentionDependencies: StoreObjectType[] = Mention.dependencies;
+
+const category = Category.get(1)!;
+export const categoryParent: Category | undefined = category.parent;
+// A self key keeps the open id: the raw ids reach the class through its extends clause, where naming the
+// class they belong to would be circular. `parent?` carries the null through to the key, as any spec does
+export const categoryParentId: StoreId | null = category.parentId;
+// @ts-expect-error a self field is the class, not the bare StoreObject every string spec answers with
+export const notSelf: {nonsense: number} = category.parent;
+
+// The key into a store is as narrow as the id that store declares
+export const categoryId: number = category.id;
 
 const message = ChatMessage.get("msg-1")!;
 export const at: StemDate = message.createdAt;
