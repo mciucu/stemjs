@@ -12,7 +12,7 @@ export interface StoreEvent {
     objectId?: StoreId;
     data?: any;
     isFake?: boolean;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 interface StateEvent extends StoreEvent {

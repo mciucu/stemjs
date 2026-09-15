@@ -49,7 +49,7 @@ export type EventOptions<Element> = {
 export type UIEventHandler = (...args: any[]) => unknown;
 
 // The trailing arguments a node listener forwards to addEventListener
-type NodeListenerOptions = [(boolean | AddEventListenerOptions)?];
+export type NodeListenerOptions = [(boolean | AddEventListenerOptions)?];
 export type RefLinkOptions = {
     // Only ever assigned into by applyRef, so anything indexable qualifies
     parent: Dispatchable | any[] | Record<string, any>;

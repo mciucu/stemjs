@@ -1,5 +1,5 @@
 import {Device} from "../base/Device";
-import {UI} from "./UIBase";
+import {UI, type NodeListenerOptions} from "./UIBase";
 
 // Type definitions for draggable functionality
 export interface DragListeners {
@@ -18,7 +18,16 @@ interface DragListenerWrapper extends DragListeners {
 
 type ClickCallback = () => void;
 
-export const Draggable = <T extends new (...args: any[]) => any>(BaseClass: T = UI.Element as any) => class Draggable extends BaseClass {
+// What this composes onto is a UIElement, written as the listeners it reaches for rather than as the
+// class, because naming the class costs a generic subclass its own base
+interface DraggableHost {
+    addClickListener(callback: ClickCallback): unknown;
+    removeClickListener(callback: ClickCallback): unknown;
+    addNodeListener(name: string, callback: EventListener, ...args: NodeListenerOptions): unknown;
+    removeNodeListener(name: string, callback: EventListener, ...args: NodeListenerOptions): unknown;
+}
+
+export const Draggable = <T extends new (...args: any[]) => DraggableHost>(BaseClass: T) => class Draggable extends BaseClass {
     private clickCallbacks = new Map<ClickCallback, () => void>();
     private clickDragListeners = new Map<ClickCallback, DragListeners>();
     private dragListeners: DragListenerWrapper[] = [];
@@ -166,4 +175,4 @@ export const Draggable = <T extends new (...args: any[]) => any>(BaseClass: T = 
     }
 };
 
-export const DraggableElement = Draggable();
+export const DraggableElement = Draggable(UI.Element);

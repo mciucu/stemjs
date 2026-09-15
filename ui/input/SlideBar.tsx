@@ -1,7 +1,7 @@
-import {Draggable} from "../Draggable";
-import {type ElementOptions, UI, UIElement, type NodeAttributes} from "../UIBase";
+import {Draggable, type DragListeners} from "../Draggable";
+import {type ElementOptions, type StyleObject, UI, UIElement, type NodeAttributes} from "../UIBase";
 import {ProgressBar} from "../ProgressBar";
-import {Orientation} from "../Constants";
+import {Orientation, type OrientationType} from "../Constants";
 import {Device} from "../../base/Device";
 import {getOffset} from "../Utils";
 
@@ -13,8 +13,19 @@ interface SlideBarOptions {
     barSize?: number;
 }
 
+// What each orientation's subclass answers, merged in so it can implement them as the methods they are
+export interface SlideBar<ExtraOptions> {
+    getOrientation(): OrientationType;
+    getOrientationAttribute(): "left" | "top";
+    getProgressBarStyle(): StyleObject;
+    getSliderStyle(): StyleObject;
+    getDragConfig(): DragListeners;
+}
+
 export class SlideBar<ExtraOptions = {}> extends Draggable(UIElement) {
     declare options: ElementOptions<SlideBarOptions & ExtraOptions>;
+    declare progressBar: ProgressBar;
+    declare slider: UIElement;
 
     getDefaultOptions(): Partial<ElementOptions<SlideBarOptions>> {
         return {
