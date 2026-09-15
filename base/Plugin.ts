@@ -38,7 +38,7 @@ export class Plugin<Parent = any> extends Dispatchable {
 export type PluginConstructor = new (parent: unknown) => Plugin;
 
 // TODO: rename this to use Mixin in title
-export const Pluginable = function <T extends new (...args: any[]) => any>(BaseClass: T) {
+export const Pluginable = function <T extends new (...args: any[]) => object>(BaseClass: T) {
     return class Pluginable extends BaseClass {
         plugins?: Map<string, Plugin>;
 

@@ -8,9 +8,9 @@ import {Level} from "./Constants";
 
 // importState writes the response's own keys onto the options, and only the page knows what they are
 export interface StateDependentElementOptions {
-    // Left open: a rejection is whatever the endpoint threw, and an app hands its own error objects here
-    error?: any;
-    [key: string]: any;
+    // A rejection is whatever the endpoint threw, and an app hands its own error objects here
+    error?: unknown;
+    [key: string]: unknown;
 }
 
 // You can configure the loading/error states by defining the "renderLoading" and "renderError" attributes of the
@@ -23,7 +23,7 @@ export interface StateDependentElementOptions {
 
 // What a page's state endpoint answers with: the store state under `state`, and the element's own
 // options beside it, both of which the page defines
-export type PageState = Record<string, any>;
+export type PageState = Record<string, unknown>;
 
 // A function declaration, not a const: only that form takes the hooks assigned below as its own properties
 export function StateDependentElement<T extends new (...args: any[]) => UIElement<any, any, any, any>>(BaseClass: T) {

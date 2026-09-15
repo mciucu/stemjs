@@ -52,7 +52,7 @@ interface MetricSummaryOptions {
     maxLength?: number;
 }
 
-interface MetricValue {
+export interface MetricValue {
     timestamp: number;
     value: number;
 }

@@ -154,7 +154,8 @@ export class InfiniteScrollable<EntryType = any> extends ScrollableMixin<Infinit
         this.insertEntry(entry, this.options.entries.length);
     }
 
-    insertEntry(entry: EntryType, index: number) {
+    // Without an index the entry is placed by entryComparator, which is what pushEntry skips
+    insertEntry(entry: EntryType, index?: number) {
         let entries = this.options.entries;
         if (index == null) {
             index = 0;
