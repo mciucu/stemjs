@@ -1,4 +1,4 @@
-import {type ElementOptions, UI, type UIChild, UIElement} from "./UIBase";
+import {type ElementOptions, type ExtendedOptions, UI, type UIChild, UIElement} from "./UIBase";
 import {ConcentricCirclesLoadingScreen} from "./ConcentricCirclesLoadingScreen";
 import {DelayedElement} from "./DelayedElement";
 import {Ajax} from "../base/Ajax";
@@ -12,6 +12,11 @@ export interface StateDependentElementOptions {
     error?: unknown;
     [key: string]: unknown;
 }
+
+// What a delayed page's options are: the wrapped element's, the loading and error ones above, and
+// whatever that page's own endpoint sends beside the state
+export type PageOptions<Wrapped extends {options?: any}, ExtraOptions = {}> =
+    ExtendedOptions<Wrapped, StateDependentElementOptions & ExtraOptions>;
 
 // You can configure the loading/error states by defining the "renderLoading" and "renderError" attributes of the
 // function somewhere globally in your app.

@@ -10,12 +10,13 @@ export interface StoreEvent {
     // Absent on an event built locally, where the applyX method being called is the type
     type?: string;
     objectId?: StoreId;
-    data?: any;
+    // The object itself on a create or update, and whatever the publisher sent on any other event
+    data?: RawStoreObject | StoreObject;
     isFake?: boolean;
     [key: string]: unknown;
 }
 
-interface StateEvent extends StoreEvent {
+export interface StateEvent extends StoreEvent {
     objectType?: string;
     state?: RawStateData; // events may have an extra state that is applied before the object
 }

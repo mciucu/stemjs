@@ -27,8 +27,7 @@ export class StoreObject extends Dispatchable {
     declare [EventDispatcherSymbol]?: Dispatchable;
     declare id: StoreId;
 
-    // Every field on it is copied onto this, so any object shape is a legitimate thing to build from;
-    // a subclass that knows what arrives narrows it to RawStoreObject or to a shape of its own
+    // Every field on it is copied onto this, so any object shape is a legitimate thing to build from
     constructor(obj?: object, _event?: StoreEvent) {
         super();
         Object.assign(this, obj);
