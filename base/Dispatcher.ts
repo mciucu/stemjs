@@ -2,6 +2,9 @@ import {isFunction, type TimeoutHandler, type IntervalHandler} from "./Utils";
 
 // Callable rather than Function, so a listener's arguments and the fact it is called reach the checker.
 // The arguments stay open: dispatch forwards whatever the dispatcher was called with
+// TODO @types a payload is bound to its event name where the listener is declared (setLanguageStore is one
+// example), and these open arguments are what let a class with static listeners satisfy such a signature.
+// An event-to-payload map would state the binding once, in one place, instead of per call site
 export type Callback = (...args: any[]) => void;
 
 export interface RemoveHandle {

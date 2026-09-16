@@ -6,7 +6,9 @@ interface TranslationMap {
     get(key: string): string | undefined;
 }
 
-// TODO @types use the proper LanguageStoreClass and other proper types
+// TODO @types use the proper LanguageStoreClass and other proper types. The Locale payload below is part of
+// the contract - it is what localeChange carries - and stays bound to the event name until Callback's open
+// arguments are replaced by the map described beside it
 interface LanguageStore {
     getLocale(): Locale | null;
     addListener(event: string, callback: (language: Locale) => void): void;
