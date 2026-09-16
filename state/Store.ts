@@ -56,13 +56,13 @@ export class StoreObject extends Dispatchable {
         this.dispatchChange(event);
     }
 
-    addDeleteListener(callback: (...args: any[]) => void): ListenerHandle {
+    addDeleteListener(callback: (event: StoreEvent, obj: this) => void): ListenerHandle {
         return this.addListener("delete", callback);
     }
 
     // Add a listener on updates from events with this specific type.
     // Can accept an array as eventType
-    addEventListener(eventType: string | string[], callback: (...args: any[]) => void): ListenerHandle {
+    addEventListener(eventType: string | string[], callback: (event: StoreEvent, obj: this) => void): ListenerHandle {
         if (Array.isArray(eventType)) {
             const handlers = eventType.map(e => this.addEventListener(e, callback));
             return new CleanupJobs(handlers);
@@ -328,9 +328,9 @@ export class StoreObject extends Dispatchable {
 
     // Add a listener on all object creation events
     // If fakeExisting, will also pass existing objects to your callback
-    static addCreateListener(callback: (...args: any[]) => void, fakeExisting?: boolean) {
+    static addCreateListener<T extends StoreObject>(this: StoreClass<T>, callback: (obj: T, event: StoreEvent) => void, fakeExisting?: boolean) {
         if (fakeExisting) {
-            for (const obj of this.objects.values()) {
+            for (const obj of this.values()) {
                 const event = this.makeEventFromObject(obj);
                 callback(obj, event);
             }
@@ -340,7 +340,7 @@ export class StoreObject extends Dispatchable {
     }
 
     // Add a listener for any object deletions
-    static addDeleteListener(callback: (...args: any[]) => void) {
+    static addDeleteListener<T extends StoreObject>(this: StoreClass<T>, callback: (obj: T, event: StoreEvent) => void) {
         return this.addListener("delete", callback);
     }
 }

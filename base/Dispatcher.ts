@@ -2,7 +2,7 @@ import {isFunction, type TimeoutHandler, type IntervalHandler} from "./Utils";
 
 // Callable rather than Function, so a listener's arguments and the fact it is called reach the checker.
 // The arguments stay open: dispatch forwards whatever the dispatcher was called with
-export type Callback = (...args: unknown[]) => void;
+export type Callback = (...args: any[]) => void;
 
 export interface RemoveHandle {
     remove: () => void;
