@@ -1,8 +1,9 @@
 import {type ElementOptions, UI} from "../UIBase";
 import {Dispatchable, type ListenerHandle} from "../../base/Dispatcher";
+import {StemDate, type DateInput} from "../../time/Date";
 
 export interface TimePassedSpanOptions {
-    timeStamp?: number;
+    timeStamp?: DateInput;
 }
 
 export class TimePassedSpan extends UI.Primitive("span") {
@@ -23,9 +24,8 @@ export class TimePassedSpan extends UI.Primitive("span") {
         };
     }
 
-    getTimeDeltaDisplay(timeStamp: number): string {
-        let timeNow = Date.now();
-        let timeDelta = parseInt(((timeNow - timeStamp * 1000) / 1000).toString());
+    getTimeDeltaDisplay(timeStamp: DateInput): string {
+        let timeDelta = parseInt(((StemDate.now() - StemDate.toDate(timeStamp)) / 1000).toString());
         let timeUnitsInSeconds = [31556926, 2629743, 604800, 86400, 3600, 60];
         let timeUnits = ["year", "month", "week", "day", "hour", "minute"];
         if (timeDelta < 0) {

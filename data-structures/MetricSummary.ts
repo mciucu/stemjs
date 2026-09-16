@@ -31,9 +31,9 @@ export const MetricType = {
 class ChunkAverager {
     private values: MaxLengthDeque<number>;
     private lastTimestamp: number | null;
-    private type: number;
+    private type: symbol;
 
-    constructor(type: number, duration: number, maxLength: number) {
+    constructor(type: symbol, duration: number, maxLength: number) {
         this.values = new MaxLengthDeque(maxLength);
         this.lastTimestamp = null;
         this.type = type;
@@ -76,7 +76,7 @@ export class MetricSummary extends Dispatchable {
         this.rawValues = new MaxLengthDeque(this.maxLength);
         this.averagers = [];
         for (let i = 0, duration = 5; i < 7; i++, duration *= 4) {
-            this.averagers.push(new ChunkAverager(type as any, duration, this.maxLength));
+            this.averagers.push(new ChunkAverager(type, duration, this.maxLength));
         }
     }
 

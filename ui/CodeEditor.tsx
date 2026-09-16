@@ -498,7 +498,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     }
 
     @enqueueIfNotLoaded
-    setUndoManager(undoManager: any): void {
+    setUndoManager(undoManager: unknown): void {
         this.getAce().getSession().setUndoManager(undoManager);
     }
 

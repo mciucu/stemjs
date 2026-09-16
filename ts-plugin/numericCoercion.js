@@ -10,6 +10,9 @@ const OPERAND_ERRORS = new Set([2362, 2363, 2365]);
 // readily, so an object reaching it is worth reporting even when it would coerce
 const NUMERIC_OPERATORS = new Set(["-", "*", "/", "%", "**", "<", ">", "<=", ">="]);
 
+// Both sides must share a unit here, and a bare number names none: a date less a count of seconds is off by 1000
+const SAME_UNIT_OPERATORS = new Set(["-", "<", ">", "<=", ">="]);
+
 function innermostNodeAt(ts, sourceFile, position) {
     let found = null;
     const visit = (node) => {
@@ -56,6 +59,12 @@ function coercesToNumber(ts, checker, type) {
     return isNumberLike(ts, type) || declaresNumericValueOf(ts, checker, type);
 }
 
+// A number with no unit of its own; zero reads the same in any unit, and nothing is known of `any`
+function isBareNumber(ts, type, operand) {
+    const isZero = ts.isNumericLiteral(operand) && Number(operand.text) === 0;
+    return !isZero && Boolean(type.flags & (ts.TypeFlags.NumberLike | ts.TypeFlags.BigIntLike | ts.TypeFlags.Enum));
+}
+
 // Whether this diagnostic is TypeScript objecting to an operand that the runtime reads as a number anyway
 function isNumericCoercion(ts, checker, diagnostic) {
     if (!OPERAND_ERRORS.has(diagnostic.code) || !diagnostic.file) {
@@ -66,9 +75,16 @@ function isNumericCoercion(ts, checker, diagnostic) {
     if (!operation) {
         return false;
     }
-    return [operation.left, operation.right].every(
-        operand => coercesToNumber(ts, checker, checker.getTypeAtLocation(operand))
-    );
+    const operands = [operation.left, operation.right];
+    const types = operands.map(operand => checker.getTypeAtLocation(operand));
+    if (!types.every(type => coercesToNumber(ts, checker, type))) {
+        return false;
+    }
+    if (!SAME_UNIT_OPERATORS.has(operation.operatorToken.getText())) {
+        return true;
+    }
+    const [leftIsBare, rightIsBare] = operands.map((operand, index) => isBareNumber(ts, types[index], operand));
+    return leftIsBare === rightIsBare;
 }
 
 module.exports = {isNumericCoercion};

@@ -52,7 +52,7 @@ export type UIEventHandler = (...args: any[]) => unknown;
 export type NodeListenerOptions = [(boolean | AddEventListenerOptions)?];
 export type RefLinkOptions = {
     // Only ever assigned into by applyRef, so anything indexable qualifies
-    parent: Dispatchable | any[] | Record<string, any>;
+    parent: Dispatchable | unknown[] | Record<string, unknown>;
     name?: string | number;
     key?: string;
 };
@@ -92,7 +92,7 @@ export interface UIElementOptions<TagType extends string = HTMLTagType> extends 
 // extension point, and a subclass adds whatever it wants read further down
 export interface UIContext {
     theme?: Theme;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 // The two createElement normalizes
@@ -711,7 +711,7 @@ export class UIElement<
         return {parent: this, name: name};
     }
 
-    refLinkArray(arrayName: string, index: number): { parent: any[]; name: number } {
+    refLinkArray(arrayName: string, index: number): RefLinkOptions {
         if (!this[arrayName]) {
             this[arrayName] = [];
         }

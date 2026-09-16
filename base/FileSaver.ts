@@ -110,13 +110,9 @@ export class FileSaver extends Dispatchable {
         this.saveLink.dispatchEvent(clickEvent);
     }
 
-    revoke(file: string | File): void {
+    revoke(objectUrl: string): void {
         setTimeout(() => {
-            if (typeof file === "string") {
-                window.URL.revokeObjectURL(file);
-            } else {
-                (file as any).remove();
-            }
+            window.URL.revokeObjectURL(objectUrl);
         }, 1000 * 40);
     }
 }

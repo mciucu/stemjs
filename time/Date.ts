@@ -21,6 +21,11 @@ export function SetDefaultDateFormat(dateFormat: DateFormatter): void {
 // now() answers with a date rather than a timestamp, so the static it replaces is not inherited
 const BaseDate = globalThis.Date as Omit<DateConstructor, "now"> & {new (...args: any[]): Date};
 
+// Rounded at the microsecond first, or float error can land just under a millisecond that Date then truncates
+function unixSecondsToMilliseconds(unixSeconds: number): number {
+    return Math.round(unixSeconds * 1e6) / 1e3;
+}
+
 export class StemDate extends BaseDate {
     declare timezone?: Timezone;
 
@@ -30,10 +35,11 @@ export class StemDate extends BaseDate {
     constructor(year: number, monthIndex: number, date?: number, hours?: number, minutes?: number, seconds?: number, ms?: number);
 
     constructor(...args: any[]) {
-        super(...(args as ConstructorParameters<typeof Date>));
-        if (args.length === 1 && isNumber(args[0]) && (+this) < MAX_AUTO_UNIX_TIME) {
-            this.setTime((+this) * 1000);
+        // Scaled before Date sees it, since Date drops the fraction of a second
+        if (args.length === 1 && isNumber(args[0]) && args[0] < MAX_AUTO_UNIX_TIME) {
+            args = [unixSecondsToMilliseconds(args[0])];
         }
+        super(...(args as ConstructorParameters<typeof Date>));
     }
 
     static create(value: DateInput): StemDate {
@@ -83,7 +89,7 @@ export class StemDate extends BaseDate {
     }
 
     static fromUnixSeconds(unixSeconds: number): StemDate {
-        return this.fromUnixMilliseconds(unixSeconds * 1000);
+        return this.fromUnixMilliseconds(unixSecondsToMilliseconds(unixSeconds));
     }
 
     // You don't usually need to call this in most cases, constructor uses MAX_AUX_UNIX_TIME
@@ -135,7 +141,7 @@ export class StemDate extends BaseDate {
         timeUnit = TimeUnit.toTimeUnit(timeUnit);
         const stemDate = this.constructor.toDate(date);
         let diff = this.diff(stemDate);
-        if (diff >= 2 * timeUnit) {
+        if (diff.toMilliseconds() >= 2 * timeUnit.getMilliseconds()) {
             // If the distance between the two dates is more than 2 standard lengths of the time unit
             // This would be wrong if you would have time unit that can sometimes last more than twice their canonical duration
             // Works correctly for all implemented time units
