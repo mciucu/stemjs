@@ -6,13 +6,13 @@ import {GlobalState} from "../state/State";
 
 interface StemAppOptions {
     routes: Route;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 interface RouterOptions {
     // Spread onto the Router, so whatever the app needs to lay itself out
     style: StyleObject;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 declare global {

@@ -2,7 +2,7 @@ import {isFunction, type TimeoutHandler, type IntervalHandler} from "./Utils";
 
 // Callable rather than Function, so a listener's arguments and the fact it is called reach the checker.
 // The arguments stay open: dispatch forwards whatever the dispatcher was called with
-export type Callback = (...args: any[]) => void;
+export type Callback = (...args: unknown[]) => void;
 
 export interface RemoveHandle {
     remove: () => void;
@@ -103,7 +103,7 @@ export class Dispatcher {
         return handler;
     }
 
-    async awaitOnce(): Promise<any> {
+    async awaitOnce(): Promise<unknown> {
         return new Promise((resolve) => {
             this.addListenerOnce((...args: any[]) => {
                 // A promise's resolve only takes a single argument
@@ -318,10 +318,10 @@ export class RunOnce {
 }
 
 export class OncePerTickRunner {
-    private callback: (obj: any, ...args: any[]) => void;
+    private callback: (obj: object, ...args: any[]) => void;
     private throttle: WeakMap<object, any[]>;
 
-    constructor(callback: (obj: any, ...args: any[]) => void) {
+    constructor(callback: (obj: object, ...args: any[]) => void) {
         this.callback = callback;
         this.throttle = new WeakMap();
     }
@@ -432,7 +432,7 @@ export class OnceDispatcher extends Dispatcher {
 // Class that can be used to pass around ownership of a resource.
 // It informs the previous owner of the change (once) and dispatches the new element for all listeners
 // TODO: a better name
-export class SingleActiveElementDispatcher<T = any> extends Dispatcher {
+export class SingleActiveElementDispatcher<T = unknown> extends Dispatcher {
     private _active?: T;
 
     setActive(element: T, addChangeListener?: (newElement: T) => void, forceDispatch?: boolean): void {

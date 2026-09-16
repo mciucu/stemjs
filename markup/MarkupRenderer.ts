@@ -13,7 +13,7 @@ export interface MarkupRendererOptions {
     parser?: MarkupParser;
     value?: MarkupValue;
     rawValue?: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 // TODO @types shouldn't this be in UIBase?

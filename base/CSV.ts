@@ -21,10 +21,10 @@ interface CSVColumn {
     originalName: string;
     required?: boolean;
     loader?: (value: string) => unknown;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
-type CSVColumnInput = [string | string[], Record<string, any>?];
+type CSVColumnInput = [string | string[], Record<string, unknown>?];
 
 // TODO: this should be a CSV writer, right?
 export class CSVBuilder<BaseType> {

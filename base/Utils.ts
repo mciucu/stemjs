@@ -169,7 +169,7 @@ export function splitInChunks<T>(array: T[], maxChunkSize: number): T[][] {
     return chunks;
 }
 
-export function isIterable(obj: any): obj is Iterable<any> {
+export function isIterable(obj: unknown): obj is Iterable<unknown> {
     if (obj == null) {
         return false;
     }

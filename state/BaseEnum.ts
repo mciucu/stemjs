@@ -12,20 +12,20 @@ export interface EnumOptions {
 }
 
 // The config a class is written with, read back off the class itself
-export type EnumConfigOf<T extends BaseEnum<any>> = NonNullable<T["enumConfig"]>;
+export type EnumConfigOf<T extends BaseEnum> = NonNullable<T["enumConfig"]>;
 
 // The `this` type of the statics below. A decorator can't retype the class it decorates, so an enum class only
 // ever inherits what BaseEnum declares: allEntries can't be T[], and every other member is generic in its own
 // T, which would only ever infer the constraint. NoInfer leaves the construct signature as the single site
 // that says what the entries are. The entries themselves have no inference site at all, so ts-plugin/ declares
 // those - and allEntries with them, a property having nothing to infer from.
-export interface EnumConstructor<T extends BaseEnum<any>> {
+export interface EnumConstructor<T extends BaseEnum> {
     new (obj: EnumConfigOf<T>): T;
-    allEntries: BaseEnum<any>[];
+    allEntries: BaseEnum[];
     defaultName(value: EnumValue): string;
     init(key: string, obj?: any): NoInfer<T>; // Left open: see the implementation
     all(): NoInfer<T>[];
-    fromValue(value: EnumValue | BaseEnum<any>): NoInfer<T> | null;
+    fromValue(value: EnumValue | BaseEnum): NoInfer<T> | null;
     makeFieldLoader(): (value: EnumValue) => NoInfer<T> | EnumValue;
 }
 
@@ -38,7 +38,7 @@ export class BaseEnum<Config extends EnumOptions = EnumOptions> {
     declare readonly enumConfig?: Config;
 
     // Set by makeEnum, so every enum class has it without declaring it
-    declare static allEntries: BaseEnum<any>[];
+    declare static allEntries: BaseEnum[];
 
     value: NonNullable<Config["value"]>;
     name: string;
@@ -78,7 +78,7 @@ export class BaseEnum<Config extends EnumOptions = EnumOptions> {
 
     // obj is left open: it is an EnumValue or an EnumOptions, and which one is remembered in a boolean
     // that no narrowing follows to the spread below
-    static init<T extends BaseEnum<any>>(this: EnumConstructor<T>, key: string, obj?: any): T {
+    static init<T extends BaseEnum>(this: EnumConstructor<T>, key: string, obj?: any): T {
         const objIsSimple = isString(obj) || isNumber(obj) || isBoolean(obj);
         // A branch, not an ||: an entry declared 0 or "" is a value the key must not replace
         const value = objIsSimple ? obj : key.toLowerCase();
@@ -93,12 +93,12 @@ export class BaseEnum<Config extends EnumOptions = EnumOptions> {
         });
     }
 
-    static all<T extends BaseEnum<any>>(this: EnumConstructor<T>): T[] {
+    static all<T extends BaseEnum>(this: EnumConstructor<T>): T[] {
         // Clone the Array to be able to make changes
         return Array.from(this.allEntries) as T[];
     }
 
-    static fromValue<T extends BaseEnum<any>>(this: EnumConstructor<T>, value: EnumValue | BaseEnum<any>): T | null {
+    static fromValue<T extends BaseEnum>(this: EnumConstructor<T>, value: EnumValue | BaseEnum): T | null {
         if (value instanceof this) {
             return value;
         }
@@ -110,14 +110,14 @@ export class BaseEnum<Config extends EnumOptions = EnumOptions> {
         return null;
     }
 
-    static makeFieldLoader<T extends BaseEnum<any>>(this: EnumConstructor<T>): (value: EnumValue) => T | EnumValue {
+    static makeFieldLoader<T extends BaseEnum>(this: EnumConstructor<T>): (value: EnumValue) => T | EnumValue {
         // TODO log if invalid value?
         return (value: EnumValue) => this.fromValue(value) || value;
     }
 }
 
 // Experimental enum maker method
-export function makeEnum<T extends BaseEnum<any>, C extends new (...args: any[]) => T & Record<string, any>>(cls: C): C & EnumConstructor<T> {
+export function makeEnum<T extends BaseEnum, C extends new (...args: any[]) => T & Record<string, any>>(cls: C): C & EnumConstructor<T> {
     // TODO: have it working so that if cls doesn't manually inherit BaseEnum, everything still works.
     //  Object.setPrototypeOf(cls, BaseEnum);
     //  cls.prototype.__proto__ = BaseEnum.prototype;

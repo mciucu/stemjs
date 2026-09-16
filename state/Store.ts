@@ -305,7 +305,7 @@ export class StoreObject extends Dispatchable {
         }
     }
 
-    static makeEventFromObject(obj: RawStoreObject | StoreObject, eventExtra: Record<string, any> | null = null): StoreEvent {
+    static makeEventFromObject(obj: RawStoreObject | StoreObject, eventExtra: Record<string, unknown> | null = null): StoreEvent {
         return {
             isFake: true,
             type: "create",
@@ -317,7 +317,7 @@ export class StoreObject extends Dispatchable {
     }
 
     // Create a fake creation event, to insert the raw object
-    static create<T extends StoreObject>(this: StoreClass<T>, obj: RawStoreObject | StoreObject, eventExtra: Record<string, any> | null = null, dispatchEvent: boolean = true): T | undefined {
+    static create<T extends StoreObject>(this: StoreClass<T>, obj: RawStoreObject | StoreObject, eventExtra: Record<string, unknown> | null = null, dispatchEvent: boolean = true): T | undefined {
         if (!obj) {
             return;
         }
@@ -345,9 +345,9 @@ export class StoreObject extends Dispatchable {
     }
 }
 
-export function globalStore<T extends new (...args: any[]) => any>(constructor: T): T {
+export function globalStore<T extends StoreInterface & (new (...args: any[]) => object)>(constructor: T): T {
     // Register the store with GlobalState immediately
-    GlobalState.addStore(constructor as any);
+    GlobalState.addStore(constructor);
     return constructor;
 }
 
