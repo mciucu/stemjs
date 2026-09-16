@@ -11,7 +11,7 @@ export interface BaseFetchOptions {
 
 // Called with whatever the request rejected with, or with nothing when the response simply did not carry
 // the object; FetchErrorHandler is the wrong type here because it requires the argument
-export type FetchJobErrorHandler = (error?: any) => void;
+export type FetchJobErrorHandler = (error?: unknown) => void;
 
 export type FetchJob<T extends StoreObject, ExtraOptions = {}> = {
     id: StoreId;
@@ -20,7 +20,7 @@ export type FetchJob<T extends StoreObject, ExtraOptions = {}> = {
 } & ExtraOptions;
 
 export interface FetchRequestData {
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface FetchMixinOptions extends StoreOptions {

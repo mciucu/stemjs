@@ -193,7 +193,7 @@ export class NodeAttributes {
     }
 
     // Should the style property have been passed in as a string, save it to the variable that will be applied before the string object.
-    ensureNoStringStyle(): void {
+    ensureNoStringStyle(): asserts this is {style?: Record<string, any>} {
         if (isString(this.style)) {
             this.styleString = this.style; // Keep in a temp value
             delete this.style;

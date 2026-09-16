@@ -50,19 +50,19 @@ export class NavCounterBadge extends Badge<NavCounterBadgeOptions> {
         this.setValue(0);
     }
 
-    attachListenerForAction(obj: Dispatchable, eventName: string, action: (...args: any[]) => void, condition?: (...args: any[]) => boolean): void {
-        this.attachListener(obj, eventName, (...args: any[]) => {
+    attachListenerForAction(obj: Dispatchable, eventName: string, action: (...args: unknown[]) => void, condition?: (...args: unknown[]) => boolean): void {
+        this.attachListener(obj, eventName, (...args: unknown[]) => {
             if (!condition || !(typeof condition === "function") || condition(...args)) {
                 action(...args);
             }
         });
     }
 
-    attachListenerForIncrement(obj: Dispatchable, eventName: string, condition?: (...args: any[]) => boolean): void {
+    attachListenerForIncrement(obj: Dispatchable, eventName: string, condition?: (...args: unknown[]) => boolean): void {
         this.attachListenerForAction(obj, eventName, () => this.increment(), condition);
     }
 
-    attachListenerForReset(obj: Dispatchable, eventName: string, condition?: (...args: any[]) => boolean): void {
+    attachListenerForReset(obj: Dispatchable, eventName: string, condition?: (...args: unknown[]) => boolean): void {
         this.attachListenerForAction(obj, eventName, () => this.reset(), condition);
     }
 }

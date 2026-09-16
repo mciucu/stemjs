@@ -28,7 +28,7 @@ export const TranslationElements = new Set<TranslationTextElement>();
 
 // What a translatable holds: a plain string, or a sprintf format followed by the values to interpolate.
 // The array cannot be a tuple: setValue builds it with Array.from(arguments)
-export type TranslationValue = string | any[];
+export type TranslationValue = string | unknown[];
 
 export class TranslationTextElement extends TextUIElement<TextElementOptions, TranslationValue> {
     constructor(value: TranslationValue) {
@@ -38,7 +38,7 @@ export class TranslationTextElement extends TextUIElement<TextElementOptions, Tr
             super("");
             // The callee is cast to a pure rest signature: `arguments` is not a tuple, and a spread cannot
             // reach a parameter list that starts with a required one
-            (this.setValue as (...args: any[]) => void)(...arguments as any);
+            (this.setValue as (...args: unknown[]) => void)(...arguments as any);
         }
     }
 
@@ -56,7 +56,7 @@ export class TranslationTextElement extends TextUIElement<TextElementOptions, Tr
         }
     }
 
-    evaluate(strings: string | string[], ...values: any[]): string {
+    evaluate(strings: string | string[], ...values: unknown[]): string {
         if (!Array.isArray(strings)) {
             strings = translationMap?.get(strings) || strings;
             return evaluateSprintf(strings, ...values);
@@ -78,7 +78,7 @@ export class TranslationTextElement extends TextUIElement<TextElementOptions, Tr
     getValue(): string {
         let {value} = this;
         if (Array.isArray(value)) {
-            value = this.evaluate(...value as [string | string[], ...any[]]);
+            value = this.evaluate(...value as [string | string[], ...unknown[]]);
         } else {
             value = (translationMap && translationMap.get(value)) ?? value;
         }
@@ -127,9 +127,8 @@ function setTranslationMap(_translationMap: TranslationMap): void {
 
 let languageStore: LanguageStore | null = null;
 
-// This function should be called to set the language store to watch for changes
-// The languageStore argumenent needs to implement .getLocale(), addListener("localChange", (language) =>{})
-// The language objects need to implement .buildTranslation(callback), where callback should be called with a translationMap
+// The store has to answer getLocale() and raise localeChange, and its locales have to build a translation
+// map through the callback buildTranslation is given
 export function setLanguageStore(_languageStore: LanguageStore): void {
     languageStore = _languageStore;
 

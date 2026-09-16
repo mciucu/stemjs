@@ -9,7 +9,7 @@ type RedrawHandler = (event?: unknown) => void;
 // The decorator is handed store classes, while the scan over options finds store objects. Both end up
 // in the same set, and attachChangeListener takes either - or any other Dispatchable, which is how
 // services like iFrameUserDataService and serverStatisticsManager are passed here.
-type ChangeSource = Dispatchable | StoreClass<any>;
+type ChangeSource = Dispatchable | StoreClass<StoreObject>;
 
 interface AutoRedrawableClass extends UIElementConstructor {
     autoRedrawImplemented?: boolean;

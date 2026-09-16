@@ -69,7 +69,7 @@ export function StateDependentElement<T extends new (...args: any[]) => UIElemen
         }
 
         renderError(): UIChild {
-            let renderError: UIChild | ((error?: any, message?: string) => UIChild) = StateDependentElement.renderError;
+            let renderError: UIChild | ((error?: {message?: string}) => UIChild) = StateDependentElement.renderError;
             if (typeof renderError === "function") {
                 renderError = renderError(this.options.error);
             }
@@ -107,10 +107,10 @@ export function StateDependentElement<T extends new (...args: any[]) => UIElemen
 
 StateDependentElement.renderLoading = (): UIChild => <ConcentricCirclesLoadingScreen />;
 
-StateDependentElement.renderError = (error: any, message?: string): UIChild => {
+StateDependentElement.renderError = (error: {message?: string}): UIChild => {
     return <div style={{maxWidth: "300px", margin: "0 auto", marginTop: "30px"}}>
             <CardPanel title={UI.T("Error in opening the URL")} level={Level.ERROR}>
-                <h3>{message || error.message}</h3>
+                <h3>{error.message}</h3>
             </CardPanel>
         </div>;
 };

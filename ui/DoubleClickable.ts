@@ -1,4 +1,4 @@
-import {type ListenerHandle, type RemoveHandle} from "../base/Dispatcher";
+import {type Dispatchable, type ListenerHandle, type RemoveHandle} from "../base/Dispatcher";
 const SINGLE_CLICK_EVENT = "SingleClick";
 const DOUBLE_CLICK_EVENT = "DoubleClick";
 
@@ -12,7 +12,10 @@ interface DoubleClickableOptions {
     [key: string]: any;
 }
 
-export const DoubleClickable = <T extends new (...args: any[]) => any>(BaseClass: T) => class DoubleClickable extends BaseClass {
+// Composed onto an element: the dispatcher half is named by its class, the click half by the one member it overrides
+type DoubleClickableHost = Dispatchable & {addClickListener(callback: (event: MouseEvent) => unknown): RemoveHandle};
+
+export const DoubleClickable = <T extends new (...args: any[]) => DoubleClickableHost>(BaseClass: T) => class DoubleClickable extends BaseClass {
     uniqueClickListener: RemoveHandle | null = null;
     singleClickTimeout: ReturnType<typeof setTimeout> | null = null;
     singleClickedAt: number | null = null;

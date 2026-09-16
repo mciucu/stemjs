@@ -96,11 +96,6 @@ export interface RangeTableOptions {
 // row height for functionality reasons.
 export function RangeTableInterface<BaseType, BaseTable extends Constructor<Table<BaseType>>>(TableClass: BaseTable) {
     class RangeTable extends TableClass {
-        constructor(...args: any[]) {
-            super(...args);
-        }
-
-
         lowIndex: number = 0;
         highIndex: number = 0;
         entriesManager?: EntriesManager<BaseType>;
