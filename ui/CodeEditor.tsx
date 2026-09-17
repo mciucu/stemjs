@@ -19,6 +19,14 @@ declare global {
 // Concatenated into an "ace/theme/..." path, so anything that stringifies to the name is one
 export type AceNamed = string | {aceName: string} | {toString(): string};
 
+// Ace's gutter annotation, named here rather than imported: ace-builds is not a dependency downstream
+export interface AceAnnotation {
+    row: number;
+    column: number;
+    text: string;
+    type: string;
+}
+
 export interface CodeEditorOptions {
     aceMode?: string;
     readOnly?: boolean;
@@ -222,7 +230,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     }
 
     @enqueueIfNotLoaded
-    setAceOptions(options: any): void {
+    setAceOptions(options: Record<string, unknown>): void {
         this.getAce().setOptions(options);
     }
 
@@ -256,10 +264,6 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
         // KeyBinding.addKeyboardHandler, which only bails on a falsy one. A string reaches $handlers and
         // then throws on every keypress, since "ace".handleKeyboard is undefined.
         this.getAce().setKeyboardHandler(name === "ace" ? null : "ace/keyboard/" + name);
-    }
-
-    getAceMode(): any {
-        return this.getAce().getSession().getMode();
     }
 
     @enqueueIfNotLoaded
@@ -366,7 +370,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     }
 
     @enqueueIfNotLoaded
-    setAnnotations(annotations: any[]): void {
+    setAnnotations(annotations: AceAnnotation[]): void {
         this.getAce().getSession().setAnnotations(annotations);
     }
 
@@ -410,13 +414,13 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     }
 
     @enqueueIfNotLoaded
-    addMarker(startLine: number, startCol: number, endLine: number, endCol: number, ...args: any[]): any {
+    addMarker(startLine: number, startCol: number, endLine: number, endCol: number, ...args: any[]): number {
         const Range = this.constructor.AceRange;
         return this.getAce().getSession().addMarker(new Range(startLine, startCol, endLine, endCol), ...args);
     }
 
     @enqueueIfNotLoaded
-    removeMarker(marker: any): void {
+    removeMarker(marker: number): void {
         this.getAce().getSession().removeMarker(marker);
     }
 
@@ -503,7 +507,7 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
     }
 
     @enqueueIfNotLoaded
-    setAceRendererOption(key: string, value: any): void {
+    setAceRendererOption(key: string, value: unknown): void {
         this.getAce().renderer.setOption(key, value);
     }
 
