@@ -1,3 +1,9 @@
+// TODO: nothing calls this. Blink's only import names stem-core/src/inteop/, a path that does not exist,
+// and the app goes through csabase/js/slate-wrapper/StemReactCompatibility instead, which has React's types,
+// a live getStemRootComponentProps, and the wrapper caching this copy duplicates.
+// Reviving it means keeping React out of stemjs: repos using CodeEditor have no react dependency, so the
+// handles stay parameters and the React-facing types stay open here.
+
 import {UI, BaseUIElement, RenderStack} from "../UIBase";
 
 // The custom tag the React bridge mounts into
