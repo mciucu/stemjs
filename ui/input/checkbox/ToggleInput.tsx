@@ -39,7 +39,7 @@ export class ToggleInputStyle extends StyleSheet {
 
 
 @registerStyle(ToggleInputStyle)
-export class ToggleInput extends BaseInputElement {
+export class ToggleInput extends BaseInputElement<boolean> {
     render() {
         const {styleSheet} = this;
         return <div className={styleSheet.pill + (this.getValue() && styleSheet.toggleOn)} />;

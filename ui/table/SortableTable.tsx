@@ -145,4 +145,18 @@ export function SortableTableInterface<BaseType, T extends Constructor<Table<Bas
     return SortableTable;
 }
 
-export const SortableTable = SortableTableInterface(Table<any>);
+// The mixin's own class, named without binding it: a second binding would show up in the emitted file
+type SortableTableClass = ReturnType<typeof SortableTableInterface<any, Constructor<Table<any>>>>;
+
+// What a subclass gets when it names its row: the parameter replaces the members carrying the row type,
+// and the ones the mixin adds stay as they are
+export type SortableTableOf<BaseType> = Omit<InstanceType<SortableTableClass>, keyof Table<BaseType>> & Table<BaseType>;
+
+// The same name in type position, so a subclass writes its options against what it extends
+export type SortableTable<BaseType = any> = SortableTableOf<BaseType>;
+
+// One class, applied once and shared, given a generic construct signature so `extends SortableTable<Foo>` says
+// what the rows are without building a second class per subclass
+export const SortableTable = SortableTableInterface(Table<any>) as unknown as Omit<SortableTableClass, "prototype"> & {
+    new <BaseType = any>(options?: SortableTableOptions<BaseType>): SortableTableOf<BaseType>;
+};
