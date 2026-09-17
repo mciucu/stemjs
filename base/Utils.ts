@@ -176,6 +176,15 @@ export function isIterable(obj: unknown): obj is Iterable<unknown> {
     return obj[Symbol.iterator] !== undefined;
 }
 
+// What a value sorts by: a date answers with its instant
+function numericSortKey(value: unknown): number | null {
+    if (isNumber(value)) {
+        return value;
+    }
+    const primitive = (value as {valueOf?: () => unknown})?.valueOf?.();
+    return isNumber(primitive) ? primitive : null;
+}
+
 export function defaultComparator(a: unknown, b: unknown): number {
     if (a == null && b == null) {
         return 0;
@@ -189,9 +198,10 @@ export function defaultComparator(a: unknown, b: unknown): number {
         return -1;
     }
 
-    // TODO: might want to use valueof here
-    if (isNumber(a) && isNumber(b)) {
-        return a - b;
+    // Numeric order wherever a value offers one, so a date sorts by time rather than by its text
+    const aNumber = numericSortKey(a), bNumber = numericSortKey(b);
+    if (aNumber != null && bNumber != null) {
+        return aNumber - bNumber;
     }
 
     let aStr = a.toString();
