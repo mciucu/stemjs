@@ -91,7 +91,8 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
             options.aceMode = options.aceMode.toLowerCase();
         }
 
-        if (options.aceMode === "cpp" || options.aceMode === "c") {
+        // Ace ships one mode for the C family, and markup writes the language's own name
+        if (options.aceMode === "cpp" || options.aceMode === "c++" || options.aceMode === "c") {
             options.aceMode = "c_cpp";
         }
 
@@ -198,19 +199,15 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
         if (this.options.value) {
             this.setValue(this.options.value);
         }
-        if (this.options.hasOwnProperty("enableBasicAutocompletion") ||
-            this.options.hasOwnProperty("enableLiveAutocompletion")) {
-            const {langToolsSrc} = this.constructor;
-            if (!langToolsSrc) {
-                console.warn("Autocompletion requires setting 'langToolSrc' in CodeEditor");
-            } else {
-                ensure([langToolsSrc], () => {
-                    this.setBasicAutocompletion(this.options.enableBasicAutocompletion!);
-                    this.setLiveAutocompletion(this.options.enableLiveAutocompletion!);
-                    this.setSnippets(this.options.enableSnippets!);
-                    this.applyCompleterOptions();
-                });
-            }
+        if (
+            this.options.hasOwnProperty("enableBasicAutocompletion") ||
+            this.options.hasOwnProperty("enableLiveAutocompletion") ||
+            this.options.hasOwnProperty("enableSnippets")
+        ) {
+            this.setBasicAutocompletion(this.options.enableBasicAutocompletion!);
+            this.setLiveAutocompletion(this.options.enableLiveAutocompletion!);
+            this.setSnippets(this.options.enableSnippets!);
+            this.applyCompleterOptions();
         }
     }
 
@@ -327,46 +324,60 @@ export class CodeEditor extends EnqueueableMethodMixin(UIElement<CodeEditorOptio
         return this.getAce().getPrintMarginColumn();
     }
 
+    // ext-language_tools is what defines the three enable* options and the completers, so anything set
+    // before it loads is dropped by Ace with a "misspelled option" warning. Callbacks run in the order
+    // they were queued, so a later caller still wins.
+    ensureLangTools(callback: () => void): void {
+        const {langToolsSrc} = this.constructor;
+        if (!langToolsSrc) {
+            console.warn("Autocompletion requires setting 'langToolsSrc' in CodeEditor");
+            return;
+        }
+        ensure([langToolsSrc], callback);
+    }
+
     @enqueueIfNotLoaded
     setBasicAutocompletion(value: boolean): void {
-        this.getAce().setOptions({
+        this.ensureLangTools(() => this.getAce().setOptions({
             enableBasicAutocompletion: value
-        });
+        }));
     }
 
     @enqueueIfNotLoaded
     setLiveAutocompletion(value: boolean): void {
-        this.getAce().setOptions({
+        this.ensureLangTools(() => this.getAce().setOptions({
             enableLiveAutocompletion: value,
             liveAutocompletionDelay: this.options.liveAutocompletionDelay,
             liveAutocompletionThreshold: this.options.liveAutocompletionThreshold
-        });
+        }));
     }
 
     // Ace's own defaults assume a semantic completer will do the narrowing, and we only have
     // the keyword, snippet and document-word ones
     @enqueueIfNotLoaded
     applyCompleterOptions(): void {
-        const {Autocomplete} = window.ace.require("ace/autocomplete");
-        // getCompletionPrefix reaches for a sibling through this, so it stays a method call
-        const util = window.ace.require("ace/autocomplete/util");
-        const completer = Autocomplete.for(this.getAce());
-        completer.exactMatch = true; // A substring hit anywhere in the candidate is noise
-        // Reassigned rather than wrapped, so applying the options twice does not stack
-        completer.showPopup = function (editor: any, options: any) {
-            // A number starts no identifier, signed included: Ace counts the sign into the prefix
-            if (this.autoShown && /^-?\d/.test(util.getCompletionPrefix(editor))) {
-                return;
-            }
-            Autocomplete.prototype.showPopup.call(this, editor, options);
-        };
+        this.ensureLangTools(() => {
+            const {Autocomplete} = window.ace.require("ace/autocomplete");
+            // getCompletionPrefix reaches for a sibling through this, so it stays a method call
+            const util = window.ace.require("ace/autocomplete/util");
+            const completer = Autocomplete.for(this.getAce());
+            completer.exactMatch = true; // A substring hit anywhere in the candidate is noise
+            // Reassigned rather than wrapped, so applying the options twice does not stack
+            completer.showPopup = function (editor: any, options: any) {
+                // A number starts no identifier, signed included: Ace counts the sign into the prefix
+                if (this.autoShown && /^-?\d/.test(util.getCompletionPrefix(editor))) {
+                    return;
+                }
+                Autocomplete.prototype.showPopup.call(this, editor, options);
+            };
+        });
     }
 
     @enqueueIfNotLoaded
     setSnippets(value: boolean): void {
-        this.getAce().setOptions({
+        this.ensureLangTools(() => this.getAce().setOptions({
             enableSnippets: value
-        });
+        }));
     }
 
     @enqueueIfNotLoaded
