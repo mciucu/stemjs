@@ -489,7 +489,12 @@ function inlineJsxOptionsDeclaration(ts, classNode, sourceFile, uiModule, option
 // A class inside a function body is in its own declaration space, so its merged interface has to go there
 // too - appending it at the end of the file would declare something else entirely. The interface is written
 // on one line right after the class, which is a statement position in every body a class can be declared in.
-function collectNestedClassInterfaces(ts, sourceFile, styleModule, uiModule, options) {
+//
+// It carries the class's @styleRule members as well, on the same terms as a top-level class's: each one is
+// renamed to a placeholder and declared here under its real name. The only difference is where the
+// declaration lands, and so how its offset is known - an appended one is measured from the appended region,
+// an inserted one only from where the edit loop writes it, which is what `fields` below is for.
+function collectNestedClassInterfaces(ts, sourceFile, styleModule, uiModule, options, impliedFields, tag) {
     const insertions = [];
     const visit = (node) => {
         if (ts.isClassExpression(node)) {
@@ -499,14 +504,36 @@ function collectNestedClassInterfaces(ts, sourceFile, styleModule, uiModule, opt
             }
         }
         if (ts.isClassDeclaration(node) && node.name && node.parent !== sourceFile) {
+            const className = node.name.text;
             let members = jsxOptionsDeclaration(ts, node, sourceFile, uiModule, options);
             const styleName = !declaresMember(node.members, STYLE_MEMBER) && getRegisteredStyle(ts, node, sourceFile);
             if (styleName) {
                 members += `get ${STYLE_MEMBER}(): import("${styleModule}").StyleRules<InstanceType<typeof ${styleName}>>;`;
             }
+            const typeParams = getTypeParameterText(node, sourceFile);
+            const header = ` interface ${className}${typeParams} {`;
+            // Where each relocated rule's name sits in the text below, for the edit loop to turn into an offset
+            const fields = [];
+            const styleRules = collectStyleRules(ts, node, sourceFile).filter(
+                rule => !interfaceDeclaresMember(ts, sourceFile, className, rule.name));
+            for (const rule of styleRules) {
+                const placeholder = makePlaceholder(rule.name, impliedFields.length + 1, tag);
+                if (!placeholder) {
+                    continue;
+                }
+                const field = {
+                    name: rule.name,
+                    placeholder,
+                    sourceStart: rule.nameStart,
+                    appendedStart: 0, // filled in once the edit loop knows where the interface was written
+                    inline: true,
+                };
+                impliedFields.push(field);
+                fields.push({field, offsetInText: header.length + members.length});
+                members += `${rule.name}: import("${styleModule}").StyleRuleObject;`;
+            }
             if (members) {
-                const typeParams = getTypeParameterText(node, sourceFile);
-                insertions.push({offset: node.end, text: ` interface ${node.name.text}${typeParams} {${members}}`});
+                insertions.push({offset: node.end, text: header + members + "}", fields});
             }
         }
         ts.forEachChild(node, visit);
@@ -733,7 +760,10 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
     if (jsxAssertions.length > 0) {
         appended = JSX_HELPER + "\n" + appended;
     }
-    const insertions = [...jsxAssertions, ...collectNestedClassInterfaces(ts, sourceFile, styleModule, uiModule, options)];
+    const insertions = [
+        ...jsxAssertions,
+        ...collectNestedClassInterfaces(ts, sourceFile, styleModule, uiModule, options, impliedFields, tag),
+    ];
     if (appended === "" && insertions.length === 0) {
         return null;
     }
@@ -746,15 +776,22 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
     // Both are applied in one pass, in source order, so the shift each one contributes stays accountable.
     const edits = [
         ...impliedFields.map(field => ({offset: field.sourceStart, skip: field.name.length, text: field.placeholder, field})),
-        ...insertions.map(insertion => ({offset: insertion.offset, skip: 0, text: insertion.text})),
+        ...insertions.map(insertion => ({offset: insertion.offset, skip: 0, text: insertion.text, insertion})),
     ].sort((a, b) => a.offset - b.offset);
 
     let shift = 0;
     for (const edit of edits) {
-        rewritten += text.slice(cursor, edit.offset) + edit.text;
+        rewritten += text.slice(cursor, edit.offset);
+        // Where this edit's text starts in the augmented file, which is what an inserted declaration's
+        // offset has to be measured from - everything before it has been written by now
+        const writtenAt = rewritten.length;
+        rewritten += edit.text;
         cursor = edit.offset + edit.skip;
         if (edit.field) {
             edit.field.sourceStart += 0; // the name stays where the user wrote it
+        }
+        for (const {field, offsetInText} of (edit.insertion && edit.insertion.fields) || []) {
+            field.appendedStart = writtenAt + offsetInText;
         }
         shift += edit.text.length - edit.skip;
         edit.shiftAfter = shift;
@@ -763,6 +800,11 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
 
     const originalLength = text.length + shift;
     for (const fieldInfo of impliedFields) {
+        // An inserted declaration already sits at a known offset; only an appended one moves with the halves
+        if (fieldInfo.inline) {
+            delete fieldInfo.inline;
+            continue;
+        }
         fieldInfo.appendedStart += originalLength + 1; // +1 for the newline that separates the two halves
     }
 
@@ -803,4 +845,4 @@ function toAugmentedOffset(shifts, position) {
     return position + shift;
 }
 
-module.exports = {getAugmentedSource, toSourceOffset, toAugmentedOffset, usesStemJsx};
+module.exports = {getAugmentedSource, getRegisteredStyle, toSourceOffset, toAugmentedOffset, usesStemJsx};

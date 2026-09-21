@@ -11,6 +11,7 @@
 const {getAugmentedSource, toSourceOffset, toAugmentedOffset} = require("./transform");
 const {isNumericCoercion} = require("./numericCoercion");
 const {isCollectedChild} = require("./jsxChildren");
+const {isRegisteredStyleReplacement} = require("./registeredStyle");
 
 function init(modules) {
     const ts = modules.typescript;
@@ -218,6 +219,9 @@ function init(modules) {
                     return false;
                 }
                 if (isCollectedChild(ts, languageService.getProgram().getTypeChecker(), diagnostic, compilerOptions)) {
+                    return false;
+                }
+                if (isRegisteredStyleReplacement(ts, languageService.getProgram().getTypeChecker(), diagnostic)) {
                     return false;
                 }
                 // A placeholder is un-annotated on purpose; its implicit any is ours to answer for, not the user's

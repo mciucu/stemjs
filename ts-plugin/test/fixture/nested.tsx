@@ -3,7 +3,7 @@
 // Same rule as for a top-level class, in the only place it can merge.
 
 import {UIElement} from "../../../ui/UIBase";
-import {registerStyle, styleRule, StyleSheet} from "../../../ui/Style";
+import {registerStyle, styleRule, styleRuleInherit, StyleSheet} from "../../../ui/Style";
 
 class PopupStyle extends StyleSheet {
     @styleRule
@@ -28,4 +28,48 @@ export function makePopup() {
     }
 
     return Popup;
+}
+
+
+// The rules of a sheet a function builds are declared in that same inserted interface, so they read as the
+// class names they hold rather than as the objects they are written with. Without it a subclass that
+// inherits one overrides an object with a class name, and the element reports as an incompatible extend -
+// which is what BasicLevelStyleSheet and DownloadButtonStyle did.
+export function makeLevelStyle(color: string) {
+    class LevelStyle extends StyleSheet {
+        @styleRule
+        level = {
+            color,
+        };
+    }
+
+    return LevelStyle;
+}
+
+const BaseLevelStyle = makeLevelStyle("red");
+
+class DerivedLevelStyle extends BaseLevelStyle {
+    @styleRuleInherit
+    level = {
+        fontWeight: "bold",
+    };
+}
+
+@registerStyle(BaseLevelStyle)
+class Framed extends UIElement {
+    framed(): string {
+        return this.styleSheet.level;
+    }
+}
+
+@registerStyle(DerivedLevelStyle)
+export class Rebuilt extends Framed {
+    rebuilt(): string {
+        return this.styleSheet.level;
+    }
+
+    missing(): string {
+        // @ts-expect-error
+        return this.styleSheet.levels;
+    }
 }

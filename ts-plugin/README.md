@@ -31,7 +31,13 @@ either.
 
 A class declared inside a function - a mixin, or one built per call - is in that function's declaration space,
 where an interface appended at the end of the file would merge with nothing. Its interface is inserted on one line
-right after the class instead, and the positions after it are mapped back the same way a JSX assertion's are.
+right after the class instead, and the positions after it are mapped back the same way a JSX assertion's are. That
+interface carries the class's `@styleRule` members too, on the same terms as a top-level class's: the only
+difference is that an inserted declaration's offset is known from where the edit loop writes it rather than from
+the start of the appended region. A sheet a *function* builds is as fully typed as one declared at the top level,
+which is what `BasicLevelStyleSheet` in `stem-core/ui/GlobalStyle.ts` relies on - without it its seven level rules
+read as the object `colorStyleRule` answers with, and every sheet inheriting one, `ButtonStyle` included, could
+not override it.
 
 ## `@field(X)`
 
@@ -235,6 +241,27 @@ child the list can't hold reports exactly as before, and so does a bad child amo
 applies where TypeScript's count is what made the difference. `test/fixture/children.tsx` asserts both
 directions.
 
+## A sheet a subclass registers for itself
+
+`registerStyle` replaces the sheet a class reads; it doesn't extend the one its base registered. So a
+subclass that registers a sheet of its own has a `styleSheet` of an unrelated type, and TypeScript reports the
+class as an incompatible override - the one thing a subclass doing exactly what the decorator is for always
+trips over, and one that no `@ts-expect-error` fits, since it lands on the class. The rule is stated instead:
+a sheet that doesn't extend the base's is a replacement, and replacing is not overriding.
+
+A sheet that **does** extend the base's is a real override, and there the check earns its keep - it is what
+catches a rule redeclared with the object it is written with rather than with what it becomes:
+
+```ts
+class ValuePropositionCardStyle extends ProductCardStyle {
+    clickable = {};   // the base declares StyleRuleObject, so the rule reads as a class name and this doesn't
+}
+```
+
+Only `styleSheet` is answered for either way. A class that also disagrees about something else reports as it
+did, because the diagnostic then names more than one property. `test/fixture/registeredStyle.tsx` asserts both
+directions.
+
 ## What it costs
 
 Because the declarations are appended and the rename is length-neutral, the file keeps its shape; the one thing
@@ -327,7 +354,7 @@ completions, diagnostics, outline).
   file has.
 - `checker.js` - builds a program over the augmented text and drops our own noise from the diagnostics. Shared
   by the command line and the tests, so the two can't disagree about what counts as an error.
-- `numericCoercion.js`, `jsxChildren.js` - the two diagnostic rules above, shared by `checker.js` and `index.js`
+- `numericCoercion.js`, `jsxChildren.js`, `registeredStyle.js` - the three diagnostic rules above, shared by `checker.js` and `index.js`
   so the editor and the command line agree about what counts.
 - `typecheck.js` - the command-line counterpart, a CLI over `checker.js`.
 - `loadTypeScript.js` - finds the project's TypeScript from wherever we're run.

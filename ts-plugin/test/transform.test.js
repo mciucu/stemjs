@@ -96,6 +96,14 @@ module.exports = (ts, check) => {
     check("and nothing about it is appended, where it would merge with nothing",
         nested.appended.includes("interface Popup {"), false);
 
+    const nestedRule = nested.result.text.match(/\} interface LevelStyle \{[^}]*\}/);
+    check("a sheet built by a function gets its rules in that interface too",
+        nestedRule && nestedRule[0].includes('level: import("@stemjs/ui/Style").StyleRuleObject;'), true);
+    const levelField = nested.result.fields.find(field => field.name === "level");
+    check("its rule is relocated like any other", Boolean(levelField && levelField.placeholder), true);
+    check("and the declaration it was relocated to is where the field says it is",
+        nested.result.text.substr(levelField.appendedStart, "level".length), "level");
+
     const written = augment(ts, "options.tsx");
     const WRITTEN = 'import("@stemjs/ui/UIBase").WrittenOptions';
     check("a class that respells options gets the tag shape respelled from it",
