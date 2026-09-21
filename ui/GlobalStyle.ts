@@ -2,7 +2,7 @@ import {StyleSheet, type StyleRuleObject} from "./Style";
 import {styleRule} from "../decorators/Style";
 import {enhance} from "./Color";
 import {Device} from "../base/Device";
-import {type LevelType, type SizeType, type OrientationType} from "./Constants";
+import {type LevelType, type SizeType} from "./Constants";
 import {Theme, type ResolvedThemeProps, type ThemeProps} from "./style/Theme";
 import {BorderType, BoxShadowType, ColorType, FloatType, FontFamilyType, FontWeightType, ObjectType,
         SizeType as ThemeSizeType} from "./style/ThemeTypes"; // ./Constants exports a SizeType too
@@ -195,79 +195,7 @@ export const BasicLevelStyleSheet = (colorToStyleFunction: (color: string, textC
 };
 
 
-class FlexContainerStyle extends StyleSheet {
-    @styleRule
-    horizontal = {
-        display: "flex",
-        ">*": {
-            marginLeft: 20,
-            flex: "1",
-        },
-        ">:first-child": {
-            marginLeft: 0,
-        },
-    };
-
-    @styleRule
-    vertical = {
-        display: "flex",
-        flexDirection: "column",
-        ">*": {
-            marginTop: 20,
-            flex: "1",
-        },
-        ">:first-child": {
-            marginTop: 0,
-        }
-    };
-
-    Orientation(orientation: OrientationType) {
-        return this[orientation];
-    }
-}
-
-class ContainerStyle extends StyleSheet {
-    getSizeStyle(mobilePixels: number, desktopPercent: number): CSSStyleObject {
-        return {
-            margin: Device.isMobileDevice() ? `0 ${mobilePixels}px` : `0% ${desktopPercent}%`,
-        }
-    }
-
-    @styleRule
-    xs = this.getSizeStyle(6, 15);
-
-    @styleRule
-    sm = this.getSizeStyle(4, 10);
-
-    @styleRule
-    md = this.getSizeStyle(4, 6);
-
-    @styleRule
-    lg = this.getSizeStyle(2, 3);
-
-    @styleRule
-    xl = this.getSizeStyle(2, 1);
-
-    Size(size: SizeType) {
-        return size ? this[size] : null;
-    }
-}
-
-
 class StyleUtils extends StyleSheet {
-    // TODO @types consider getting rid of these from here
-    get Utils() {
-        return StyleUtils.getInstance();
-    }
-
-    get Container() {
-        return ContainerStyle.getInstance();
-    }
-
-    get FlexContainer() {
-        return FlexContainerStyle.getInstance();
-    }
-
     extraTop = (): number => this.themeProps[Device.isMobileDevice() ? "MAIN_CONTAINER_EXTRA_PADDING_TOP_MOBILE" :
         "MAIN_CONTAINER_EXTRA_PADDING_TOP_DESKTOP"];
 

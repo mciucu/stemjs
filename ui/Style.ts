@@ -39,7 +39,6 @@ export type StyleRules<T> = {
     // ts-plugin renames each @styleRule field and re-declares the real name, so skip the stand-ins it leaves
     [Key in keyof T as Key extends `${string}$${number}` | "container" ? never : Key]:
         Key extends keyof StyleSheet ? T[Key] :
-        T[Key] extends StyleSheet ? T[Key] : // a nested style sheet, such as GlobalStyle.Utils, is not a rule
         T[Key] extends (...args: any[]) => any ? T[Key] : // a method, which @styleRule is never on
         // The plugin declares every rule as StyleRuleObject, and its symbol key is what tells a rule apart
         // from a plain object field such as an inline style two rules share

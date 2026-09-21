@@ -30,7 +30,7 @@ export const FullScreenable = function <T extends new (...args: any[]) => UIElem
         extraNodeAttributes(attr: NodeAttributes): void {
             super.extraNodeAttributes(attr);
             if (this.options.fullContainer) {
-                attr.addClass(GlobalStyle.Utils.fullContainer);
+                attr.addClass(GlobalStyle.fullContainer);
             } else {
                 attr.setStyle("height", "100%");
             }
@@ -45,7 +45,7 @@ export const FullScreenable = function <T extends new (...args: any[]) => UIElem
         setFullScreenStyle(): void {
             this.addClass(this.getStyleSheet().fullScreen);
             if (this.options.fullContainer) {
-                this.removeClass(GlobalStyle.Utils.fullContainer);
+                this.removeClass(GlobalStyle.fullContainer);
                 this.setStyle("height", "100%");
             }
         }
@@ -61,7 +61,7 @@ export const FullScreenable = function <T extends new (...args: any[]) => UIElem
         unsetFullScreenStyle(): void {
             this.removeClass(this.getStyleSheet().fullScreen);
             if (this.options.fullContainer) {
-                this.addClass(GlobalStyle.Utils.fullContainer);
+                this.addClass(GlobalStyle.fullContainer);
                 this.setStyle("height", null);
             }
         }
