@@ -49,11 +49,12 @@ export interface TextAreaOptions extends InputableElementOptions<string> {
     onKeyUp?: UIEventHandler;
 }
 
-export interface SelectOptions<ValueType> extends InputableElementOptions<ValueType> {
-    options?: ValueType[];
-    selected?: ValueType;
-    formatter?: (obj: ValueType) => string;
-    serializer?: (obj: ValueType) => string;
+// TODO @Mihai @types do we even want to allow ValueType different than OptionType?
+export interface SelectOptions<OptionType, ValueType = OptionType> extends InputableElementOptions<ValueType> {
+    options?: OptionType[];
+    selected?: OptionType;
+    formatter?: (obj: OptionType) => string;
+    serializer?: (obj: OptionType) => string;
 }
 
 // TODO rename to BaseInputElement
@@ -446,8 +447,11 @@ export class TextArea extends InputableElement<string, TextAreaOptions, HTMLText
 
 
 // TODO this element is inconsistent with the rest. Properly fix the initialValue pattern
-export class Select<ValueType, ExtraOptions = {}> extends InputableElement<ValueType, SelectOptions<ValueType> & ExtraOptions, HTMLSelectElement> {
-    givenOptions: ValueType[] = [];
+// OptionType is what the options are, ValueType what getValue answers with. They are the same thing unless a
+// subclass converts between them, as a select standing for a boolean does.
+export class Select<OptionType, ExtraOptions = {}, ValueType = OptionType>
+        extends InputableElement<ValueType, SelectOptions<OptionType, ValueType> & ExtraOptions, HTMLSelectElement> {
+    givenOptions: OptionType[] = [];
 
     getNodeType(): HTMLTagType {
         return "select"
@@ -470,7 +474,7 @@ export class Select<ValueType, ExtraOptions = {}> extends InputableElement<Value
         return selectOptions;
     }
 
-    serializeEntry(obj: ValueType): string {
+    serializeEntry(obj: OptionType): string {
         const formatter = this.options.formatter || this.options.serializer;
         if (formatter) {
             return formatter(obj);
@@ -484,16 +488,17 @@ export class Select<ValueType, ExtraOptions = {}> extends InputableElement<Value
         attr.addClass(this.styleSheet.select || "");
     }
 
-    get(): ValueType {
+    get(): OptionType {
         let selectedIndex = this.getIndex();
         return this.givenOptions[selectedIndex];
     }
 
+    // The identity by default; a subclass that sets ValueType converts, and overrides both of these
     getValue(): ValueType {
-        return this.get();
+        return this.get() as unknown as ValueType;
     }
 
-    set(value: ValueType): void {
+    set(value: OptionType): void {
         for (let i = 0; i < this.givenOptions.length; i++) {
             if (this.givenOptions[i] === value) {
                 this.setIndex(i);
@@ -504,7 +509,7 @@ export class Select<ValueType, ExtraOptions = {}> extends InputableElement<Value
     }
 
     setValue(value: ValueType): void {
-        this.set(value);
+        this.set(value as unknown as OptionType);
     }
 
     getIndex(): number {
