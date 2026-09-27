@@ -202,8 +202,8 @@ export class XHRPromise {
             if (options.body instanceof FormData) {
                 this.send(options.body);
             } else if (isApplicationTypeJson) {
-                // if the request has a JSON body, convert object body to JSON and sent it.
-                this.send(JSON.stringify(options.body));
+                // A body that is already a string was serialized by the caller
+                this.send(typeof options.body === "string" ? options.body : JSON.stringify(options.body));
             } else {
                 request.blob().then((blob) => {
                     // The blob can be a FormData when we're polyfilling the Request class
@@ -331,6 +331,8 @@ export function jQueryCompatibilityPreprocessor(options: FetchOptions): FetchOpt
                 options.urlParams = getURLSearchParams(options.urlParams, options.arraySearchParamSuffix);
                 options.urlParams.set("_", String(Date.now()));
             }
+        } else if (options.contentType === "application/json") {
+            options.body = JSON.stringify(options.data);
         } else {
             let formData = new FormData();
             for (const key of Object.keys(options.data)) {

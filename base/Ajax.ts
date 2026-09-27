@@ -65,6 +65,11 @@ export class AjaxHandler {
         return this.post(url, {dataType: "json", data: data}, ...args);
     }
 
+    // Unlike postJSON, which sends a FormData, this sends the data itself as a JSON body
+    postJSONBody(url: string, data?: FetchOptions["data"], ...args: FetchOptions[]): XHRPromise | undefined {
+        return this.post(url, {dataType: "json", contentType: "application/json", data: data}, ...args);
+    }
+
     addPreprocessor(preprocessor: FetchPreprocessor): void {
         this.preprocessors.push(preprocessor);
     }

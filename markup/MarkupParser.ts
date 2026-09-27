@@ -1014,7 +1014,7 @@ export {MarkupModifier, HeaderModifier, ParagraphModifier, InlineCodeModifier, I
 
 class MarkupParser {
     static modifiers: Modifier<any>[];
-    static parseJSON5: (json: string, reviver?: (key: string, value: JSON5Value) => JSON5Value) => JSON5Value;
+    static parseJSON5: (json: string) => JSON5Value;
     
     modifiers: Modifier[];
     uiElements: UIElementLookup;
@@ -1712,7 +1712,7 @@ MarkupParser.parseJSON5 = (function() {
     // Return the json_parse function. It will have access to all of the above
     // functions and variables.
 
-    return function (source: unknown, reviver?: (key: string, value: JSON5Value) => JSON5Value) {
+    return function (source: unknown) {
         let result;
 
         text = String(source);
@@ -1726,30 +1726,7 @@ MarkupParser.parseJSON5 = (function() {
             error("Syntax error");
         }
 
-        // If there is a reviver function, we recursively walk the new structure,
-        // passing each name/value pair to the reviver function for possible
-        // transformation, starting with a temporary root object that holds the result
-        // in an empty key. If there is not a reviver function, we simply return the
-        // result.
-
-        return typeof reviver === 'function' ? (function walk(holder, key) {
-            let k;
-            let v;
-            const value = holder[key];
-            if (value && typeof value === 'object') {
-                for (k in value) {
-                    if (Object.prototype.hasOwnProperty.call(value, k)) {
-                        v = walk(value, k);
-                        if (v !== undefined) {
-                            value[k] = v;
-                        } else {
-                            delete value[k];
-                        }
-                    }
-                }
-            }
-            return reviver.call(holder, key, value);
-        }({'': result}, '')) : result;
+        return result;
     };
 })();
 
