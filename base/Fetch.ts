@@ -100,7 +100,7 @@ export interface FetchOptions extends Omit<RequestInit, "cache"> {
     type?: string;
     // Only read when truthy, so false is how a caller says to leave the header off
     contentType?: string | false;
-    // Left open: it is a plain object, which becomes the query on a GET and a FormData otherwise, but every
+    // Left open: it is a plain object, which becomes the query on a GET, a JSON body under a JSON content type and a FormData otherwise, but every
     // caller writes a named request interface, and those carry no index signature to match against
     data?: any;
 
