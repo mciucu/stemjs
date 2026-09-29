@@ -60,7 +60,7 @@ export function SortableTableInterface<BaseType, T extends Constructor<Table<Bas
             const sortableStyleSheet = this.getSortableStyleSheet(); // TODO: use properly
 
             let sortIcon = <span style={{opacity: 0.4}}>{MakeIcon("sort")}</span>;
-            if (this.sortBy === column) {
+            if (this.isSortedBy(column)) {
                 if (this.sortDescending) {
                     sortIcon = MakeIcon("sort-desc");
                 } else {
@@ -78,11 +78,16 @@ export function SortableTableInterface<BaseType, T extends Constructor<Table<Bas
             </div>;
         }
 
+        // A table may rebuild its columns on every render, so the sorted one is recognised by its position
+        isSortedBy(column: ColumnHandler<BaseType>): boolean {
+            return this.sortBy?.index === column.index;
+        }
+
         sortByColumn(column: ColumnHandler<BaseType>): void {
-            if (column === this.sortBy) {
+            if (this.isSortedBy(column)) {
                 this.sortDescending = (this.sortDescending != true);
             } else {
-                this.sortDescending = true;
+                this.sortDescending = column.sortDescending ?? true; // A column that states no direction starts descending
             }
 
             this.sortBy = column;

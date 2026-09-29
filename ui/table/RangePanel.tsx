@@ -134,6 +134,7 @@ export function RangeTableInterface<BaseType, BaseTable extends Constructor<Tabl
         }
 
         extraNodeAttributes(attr: NodeAttributes): void {
+            super.extraNodeAttributes(attr);
             attr.addClass(this.getRangePanelStyleSheet().default);
         }
 
@@ -262,10 +263,18 @@ export function RangeTableInterface<BaseType, BaseTable extends Constructor<Tabl
         addCompatibilityListeners(): void {
             // The physical table has z-index -1 so it does not respond to mouse events, as it is "behind" fake panel.
             // The following listeners repair that.
-            this.addNodeListener("mousedown", () => {
-                this.container.setStyle("pointerEvents", "all");
+            let forwardClick = false;
+            this.addNodeListener("mousedown", (event: MouseEvent) => {
+                // A press on a part of the table that takes pointer events already gets its native click
+                forwardClick = !event.composedPath().includes(this.container.node);
+                if (forwardClick) {
+                    this.container.setStyle("pointerEvents", "all");
+                }
             });
             this.container.addNodeListener("mouseup", (event: MouseEvent) => {
+                if (!forwardClick) {
+                    return;
+                }
                 const mouseDownEvent = new MouseEvent("click", event);
                 const domElement = document.elementFromPoint(event.clientX, event.clientY);
                 setTimeout(() => {

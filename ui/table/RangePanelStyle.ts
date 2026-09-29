@@ -60,6 +60,10 @@ export class RangePanelStyle extends StyleSheet {
         top: "0px",
         position: "absolute",
         pointerEvents: "none",
+        // Nothing lies under the header, so it can be hovered and clicked directly
+        ">thead": {
+            pointerEvents: "auto",
+        },
         ">tbody>tr>td": {
             height: `${this.rowHeight}px !important`,
             whiteSpace: "nowrap !important",
