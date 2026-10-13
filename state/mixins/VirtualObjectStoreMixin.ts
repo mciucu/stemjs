@@ -41,7 +41,7 @@ export const VirtualObjectStoreMixin = (objectType: string) => class VirtualStor
         return this.objects.get("temp-" + event.virtualId) as VirtualStoreObject;
     }
 
-    static applyUpdateObjectId<T extends VirtualStoreObject>(this: StoreClass<T> & Dispatchable, object: T, id: string): void {
+    static applyUpdateObjectId<T extends VirtualStoreObject>(this: StoreClass<T> & Dispatchable, object: T, id: StoreId): void {
         if (object.id === id) {
             return;
         }

@@ -224,7 +224,7 @@ export class NodeAttributes {
             delete this.style[key];
         }
         if (node?.style[key]) {
-            delete node.style[key];
+            node.style[key] = ""; // A style property is an accessor on the prototype, so delete would leave it
         }
     }
 

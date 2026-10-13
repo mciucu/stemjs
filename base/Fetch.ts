@@ -80,6 +80,7 @@ export interface FetchOptions extends Omit<RequestInit, "cache"> {
     dataType?: DataType;
     onUploadProgress?: (event: ProgressEvent) => void;
     onDownloadProgress?: (event: ProgressEvent) => void;
+    timeout?: number; // In milliseconds, after which the request is given up on as a network error is
     onSuccess?: (...args: any[]) => void; // Left open: resolve forwards its own arguments
     onError?: FetchErrorHandler;
     onComplete?: () => void;
@@ -163,14 +164,17 @@ export class XHRPromise {
                 this.reject(new TypeError("Network error"));
             };
 
-            // TODO: need to have an options to pass setting to xhr (like timeout value)
             xhr.ontimeout = () => {
                 this.reject(new TypeError("Network timeout"));
             };
 
             xhr.open(request.method, request.url, true);
 
-            const {onUploadProgress, onDownloadProgress} = this.options;
+            const {onUploadProgress, onDownloadProgress, timeout} = this.options;
+
+            if (timeout) {
+                xhr.timeout = timeout;
+            }
 
             if (onUploadProgress) {
                xhr.upload.onprogress = onUploadProgress;
