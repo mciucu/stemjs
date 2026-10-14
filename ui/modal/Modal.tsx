@@ -208,7 +208,6 @@ export class ActionModal<ExtraOptions extends ActionModalOptions = ActionModalOp
         return this.options.title || this.getActionName();
     }
 
-    // Left open: ErrorModal answers with the raw error when it carries no message, which UIChild excludes
     getBody() {
         return null;
     }
@@ -340,7 +339,8 @@ export class ErrorModal extends ActionModal<ErrorModalOptions> {
 
     getBody() {
         const {error} = this.options;
-        return (isString(error) ? error : error?.message) || error;
+        // An error object without a message is shown as its JSON, since it cannot render as it is
+        return isString(error) ? error : error?.message || JSON.stringify(error);
     }
 
     getFooter() {
