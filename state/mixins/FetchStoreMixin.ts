@@ -1,6 +1,6 @@
 import {unwrapArray, splitInChunks, isString} from "../../base/Utils";
 import {Ajax} from "../../base/Ajax";
-import {GlobalState, type StateData, type StoreId} from "../State";
+import {type StoreId} from "../State";
 import {type URLFetchOptions} from "../../base/Fetch";
 import {BaseStore, type StoreOptions, StoreObject, type StoreClass} from "../Store";
 
@@ -88,8 +88,7 @@ class AjaxFetchStore extends BaseStore<StoreClass<StoreObject>>(objectType, stor
             dataType: "json",
             data: requestData,
             cache: "no-cache",
-            success: (data: StateData) => {
-                GlobalState.load(data);
+            success: () => {
                 for (let fetchJob of fetchJobs) {
                     let obj = this.get(fetchJob.id);  // see fetchSync
                     if (obj) {
