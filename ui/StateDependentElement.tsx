@@ -2,7 +2,6 @@ import {type ElementOptions, type ExtendedOptions, UI, type UIChild, UIElement} 
 import {ConcentricCirclesLoadingScreen} from "./ConcentricCirclesLoadingScreen";
 import {DelayedElement} from "./DelayedElement";
 import {Ajax} from "../base/Ajax";
-import {GlobalState} from "../state/State";
 import {CardPanel} from "./CardPanel";
 import {Level} from "./Constants";
 
@@ -35,8 +34,8 @@ export function StateDependentElement<T extends new (...args: any[]) => UIElemen
     return class StateDependentElementClass extends DelayedElement(BaseClass) {
         declare options: ElementOptions<StateDependentElementOptions>;
         
+        // The state itself is the app's Ajax layer's to import, so only the response's other keys are this element's
         importState(data: PageState): void {
-            GlobalState.load(data);
             for (let key of Object.keys(data)) {
                 if (key !== "state") {
                     this.options[key] = data[key];
