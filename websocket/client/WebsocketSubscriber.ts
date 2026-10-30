@@ -1,7 +1,7 @@
 import {Dispatchable} from "../../base/Dispatcher";
 import {WebsocketStreamHandler} from "./WebsocketStreamHandler";
 import {toArray} from "../../base/Utils";
-import {DEFAULT_HEARTBEAT_MESSAGE, HEARTBEAT_INTERVAL_MS} from "../Shared";
+import {DEFAULT_HEARTBEAT_MESSAGE, HEARTBEAT_INTERVAL_MS, RECONNECT_JITTER_MS} from "../Shared";
 import {GlobalState} from "../../state/State";
 
 // Set by the page, not by us, so it is only ever read
@@ -49,6 +49,7 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
     numConnectionAttempts: number = 0;
     retryDefaultTimeout: number = 3000;
     retryMaxTimeout: number = 30000;
+    retryJitter: number = RECONNECT_JITTER_MS;
     heartbeatMessage: string = DEFAULT_HEARTBEAT_MESSAGE;
     urls: string[];
     reconnectTimeout?: ReturnType<typeof setTimeout>;
@@ -157,7 +158,7 @@ export class WebsocketSubscriber extends Dispatchable implements WebsocketSubscr
     }
 
     tryReconnect(): void {
-        const reconnectWait = this.calcRetryTimeout(this.failedReconnectAttempts);
+        const reconnectWait = this.calcRetryTimeout(this.failedReconnectAttempts) + Math.random() * this.retryJitter;
         this.failedReconnectAttempts++;
 
         if (!this.reconnectTimeout) {

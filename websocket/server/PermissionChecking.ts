@@ -59,7 +59,6 @@ export async function CheckStreamPermission(rpcCaller: RPCCaller, userId: string
     }
 
     const response = await rpcCaller.query("permission", {userId, streamName});
-    // We're ignoring the failed response
     return response || [false, "Unknown reason"];
 }
 
@@ -79,6 +78,7 @@ export class RPCCaller extends Dispatchable {
 
 
     // TODO batch these together, once every 20ms
+    // A failed call throws, so that a missing answer is never taken for a denial or for an anonymous visitor
     async query(type: string, data: Record<string, unknown> = {}): Promise<any> {
         const queryData: QueryData = {
             type,
@@ -88,11 +88,14 @@ export class RPCCaller extends Dispatchable {
         const payload = JSON.stringify({queries: [queryData]});
         try {
             const response = await fetch(this.endpoint, {...FETCH_ARGS, body: payload});
+            if (!response.ok) {
+                throw new Error(`RPC ${type} answered ${response.status}`);
+            }
             const responseData: QueryResponse = await response.json();
             return responseData.queries[0].response;
         } catch (error) {
             this.stats.numFailedRequests += 1;
-            return null;
+            throw error;
         }
     }
 }

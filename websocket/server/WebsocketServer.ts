@@ -138,7 +138,18 @@ export class WebsocketServer {
                     ? new URLSearchParams(request.getQuery()).get("sessionId")
                     : null;
                 const sessionId = LoadSessionId(request) || queryParamSessionId;
-                const userId = sessionId ? await IdentifySessionId(rpcCaller!, sessionId) : null;
+                let userId = null;
+                if (sessionId) {
+                    try {
+                        userId = await IdentifySessionId(rpcCaller!, sessionId);
+                    } catch (error) {
+                        // Refused rather than opened as anonymous, so the client reconnects with its backoff
+                        if (!upgradeAborted.aborted) {
+                            response.cork(() => response.writeStatus("503 Service Unavailable").end());
+                        }
+                        return;
+                    }
+                }
 
                 if (upgradeAborted.aborted) {
                     return;
@@ -181,7 +192,13 @@ export class WebsocketServer {
 
                 if (command === "s") {
                     const {userId} = wsConnection.getUserData();
-                    const allowed = await CheckStreamPermission(rpcCaller!, userId, streamName);
+                    let allowed: [boolean, string];
+                    try {
+                        allowed = await CheckStreamPermission(rpcCaller!, userId, streamName);
+                    } catch (error) {
+                        // Left unanswered, so the client's resubscribe timer asks again
+                        return;
+                    }
 
                     if (wsConnection.isClosed) {
                         // The socket might have closed while we're waiting
@@ -245,7 +262,11 @@ export class WebsocketServer {
         }
         for (let i = 0; i < online.length; i += ONLINE_STATUS_BATCH_SIZE) {
             const batch = online.slice(i, i + ONLINE_STATUS_BATCH_SIZE);
-            await this.rpcCaller!.query("online-status-update", {online: batch});
+            try {
+                await this.rpcCaller!.query("online-status-update", {online: batch});
+            } catch (error) {
+                // Counted in the RPC stats, and the next tick sends every online user again
+            }
         }
     }
 
@@ -278,7 +299,7 @@ export class WebsocketServer {
     async init() {
         this.rpcCaller = new RPCCaller(this.appConfig);
 
-        this.extraConfig = await callWithRetry(() => this.rpcCaller!.query("config"));
+        this.extraConfig = await callWithRetry(() => this.rpcCaller!.query("config").catch(() => null));
 
         if (this.extraConfig == null) {
             console.error("Failed to get a config response after retries, shutting down!");
