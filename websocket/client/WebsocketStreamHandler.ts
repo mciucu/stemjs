@@ -18,16 +18,12 @@ export class WebsocketStreamHandler extends Dispatcher {
     static SUBSCRIBED = Symbol();
     static UNSUBSCRIBED = Symbol();
 
-    static MISSING_MESSAGE = "INVALID_MESSAGE_MISSING_FROM_ROLLING_WINDOW";
-
     websocketSubscriber: WebsocketSubscriber;
     streamName: string;
     declare options: StreamHandlerOptions;
     bytesReceived: number;
     isIndexed: boolean;
     lastMessageIndex: number;
-    messageBuffer: Map<number, string>;
-    missedPackets: number;
     status: symbol;
     subscribeTryCount: number;
     resendSubscribeTimeout?: ReturnType<typeof setTimeout>;
@@ -40,8 +36,6 @@ export class WebsocketStreamHandler extends Dispatcher {
         this.bytesReceived = 0;
         this.isIndexed = false;
         this.lastMessageIndex = -1;
-        this.messageBuffer = new Map();
-        this.missedPackets = 0;
         this.subscribeTryCount = 0;
         this.resetStatus();
     }
@@ -86,7 +80,6 @@ export class WebsocketStreamHandler extends Dispatcher {
         // Re-baseline the index: the server has no replay, so a post-gap message would buffer forever.
         this.isIndexed = false;
         this.lastMessageIndex = -1;
-        this.messageBuffer.clear();
     }
 
     processPacket(packet: string): void {
@@ -116,36 +109,14 @@ export class WebsocketStreamHandler extends Dispatcher {
         }
     }
 
+    // Delivered as it arrives, since the server never sends a message again and each publisher's own stay in order
     processIndexedMessage(index: number, message: string) {
         this.isIndexed = true;
-        if (this.lastMessageIndex === -1) {
-            this.lastMessageIndex = index;
-            this.processVanillaPacket(message);
-        } else if (this.lastMessageIndex + 1 === index) {
-            this.lastMessageIndex = index;
-            this.processVanillaPacket(message);
-            ++index;
-            while (this.messageBuffer.has(index)) {
-                message = this.messageBuffer.get(index)!;
-                this.messageBuffer.delete(index);
-                this.lastMessageIndex = index;
-                this.processVanillaPacket(message);
-                ++index;
-            }
-        } else {
-            this.messageBuffer.set(index, message);
-        }
-    }
-
-    processMissedPacket(packet: string) {
-        this.processIndexedMessage(parseInt(packet), WebsocketStreamHandler.MISSING_MESSAGE);
+        this.lastMessageIndex = Math.max(this.lastMessageIndex, index);
+        this.processVanillaPacket(message);
     }
 
     processVanillaPacket(packet: string) {
-        if (packet == WebsocketStreamHandler.MISSING_MESSAGE) {
-            this.missedPackets++;
-        }
-
         if (!this.options.rawMessage) {
             try {
                 packet = JSON.parse(packet);
