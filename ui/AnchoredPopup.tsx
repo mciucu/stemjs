@@ -107,18 +107,20 @@ export class AnchoredPopup extends UIElement<AnchoredPopupOptions> {
         const {offset, direction} = this.options;
         const {top, left, width, bottom} = this.anchorRect;
         const deltaX = Math.max(0, left + this.bodyRect.left + this.getWidth() / 2 + width / 2 + window.scrollX - this.bodyRect.right + 20);
+        // Kept inside the page on the left too, as deltaX keeps it on the right
+        const popupLeft = Math.max(20 - this.bodyRect.left - window.scrollX, left - this.bodyRect.left - window.scrollX + width / 2 - deltaX - this.getWidth() / 2);
         if (direction === Direction.DOWN) {
             const deltaY = Math.max(0, bottom + offset + this.getHeight() - this.bodyRect.bottom - window.scrollY + 20);
             attr.setStyle({
                 top: Math.round(bottom + offset - this.bodyRect.top - window.scrollY - deltaY),
-                left: Math.round(left - this.bodyRect.left - window.scrollX + width / 2 - deltaX - this.getWidth() / 2),
+                left: Math.round(popupLeft),
             });
         }
         if (direction === Direction.UP) {
             const deltaY = Math.min(0, top - offset - this.getHeight() - this.bodyRect.top - window.scrollY - 20);
             attr.setStyle({
                 top: Math.round(top - this.getHeight() - offset - this.bodyRect.top - window.scrollY - deltaY),
-                left: Math.round(left - this.bodyRect.left - window.scrollX + width / 2 - deltaX - this.getWidth() / 2),
+                left: Math.round(popupLeft),
             });
         }
     }
