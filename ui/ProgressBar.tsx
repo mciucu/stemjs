@@ -28,6 +28,7 @@ const progressBarColorToStyle = (color: string): CSSStyleObject => {
 export class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToStyle) {
     @styleRule
     container = {
+        position: "relative",
         height: 20,
         marginBottom: 20,
         overflow: "hidden",
@@ -41,15 +42,26 @@ export class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToSty
         float: "left",
         width: "0",
         height: "100%",
-        lineHeight: "20px",
-        color: "#fff",
-        textAlign: "center",
         backgroundColor: "#337ab7",
         boxShadow: "inset 0 -1px 0 rgba(0, 0, 0, .15)",
         transition: "width .25s ease",
-        fontColor: "#ffffff",
-        fontSize: 12,
         ...this.colorStyleRule(this.themeProps.COLOR_PRIMARY),
+    };
+
+    // Over the whole bar, so it stays whole at any fill, with text painted by a gradient that turns at the fill's edge
+    @styleRule
+    label = {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        lineHeight: "20px",
+        fontSize: 12,
+        textAlign: "center",
+        whiteSpace: "nowrap",
+        color: "transparent",
+        "-webkit-background-clip": "text",
+        backgroundClip: "text",
     };
 
     @styleRule
@@ -91,7 +103,7 @@ export class ProgressBarStyle extends BasicLevelStyleSheet(progressBarColorToSty
 @registerStyle(ProgressBarStyle)
 export class ProgressBar extends SimpleStyledElement<ProgressBarOptions> {
     render(): UIChild {
-        const valueInPercent = (this.options.value || 0) * 100;
+        const valueInPercent = Math.min(Math.max(this.options.value || 0, 0), 1) * 100;
         let orientation: OrientationType = Orientation.HORIZONTAL;
         if (this.options.hasOwnProperty("orientation")) {
             orientation = this.options.orientation!;
@@ -134,18 +146,16 @@ export class ProgressBar extends SimpleStyledElement<ProgressBarOptions> {
             barOptions.style.backgroundColor = this.options.color;
         }
 
-        return <div {...barOptions}>
-            <span>{this.options.label}</span>
-        </div>;
+        const {label} = this.options;
+        const labelStyle = {backgroundImage: `linear-gradient(to right, #fff ${valueInPercent}%, #333 ${valueInPercent}%)`};
+
+        return [
+            <div {...barOptions} />,
+            label != null && <span className={this.styleSheet.label} style={labelStyle}>{label}</span>,
+        ];
     }
 
     set(value: number): void {
-        // TODO @cleanup clamp
-        if (value < 0) {
-            value = 0;
-        } else if (value > 1) {
-            value = 1;
-        }
         this.options.value = value;
         this.redraw();
     }
