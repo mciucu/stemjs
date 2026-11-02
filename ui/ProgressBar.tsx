@@ -127,7 +127,9 @@ export class ProgressBar extends SimpleStyledElement<ProgressBarOptions> {
             style: barStyle,
         };
 
-        if (this.options.disableTransition) {
+        const {label} = this.options;
+        // The label's colours turn at once, so a fill still moving would leave its text on the wrong background
+        if (this.options.disableTransition || label != null) {
             Object.assign(barOptions.style, {
                 transition: "none",
             });
@@ -146,7 +148,6 @@ export class ProgressBar extends SimpleStyledElement<ProgressBarOptions> {
             barOptions.style.backgroundColor = this.options.color;
         }
 
-        const {label} = this.options;
         const labelStyle = {backgroundImage: `linear-gradient(to right, #fff ${valueInPercent}%, #333 ${valueInPercent}%)`};
 
         return [

@@ -77,7 +77,7 @@ export class WebsocketStreamHandler extends Dispatcher {
         this.clearResubscribeTimeout();
         this.status = WebsocketStreamHandler.NONE;
         this.subscribeTryCount = 0;
-        // Re-baseline the index: the server has no replay, so a post-gap message would buffer forever.
+        // Re-baseline the index: the server has no replay, so there's nothing earlier to ask it for
         this.isIndexed = false;
         this.lastMessageIndex = -1;
     }
