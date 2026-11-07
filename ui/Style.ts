@@ -59,7 +59,8 @@ class StyleSheet extends Dispatchable {
     options: StyleSheetOptions;
     elements: Set<DynamicStyleElement | KeyframeElement>;
     declare styleElement?: StyleElement;
-    declare themeProps?: ThemeProps;
+    // Set in the constructor, so every rule may read it
+    declare themeProps: ThemeProps;
     declare _firstUpdate?: boolean;
     // The commonest rule name, left open because @styleRule cannot retype the object literal a subclass
     // writes, so every subclass's container is declared as that literal rather than as what it becomes

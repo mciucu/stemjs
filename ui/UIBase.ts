@@ -426,8 +426,11 @@ export class UIElement<
     }
 
     // Constructs directly rather than through createElement, so what it takes is the cleaned form already
-    static create<T extends UIElement<any>>(this: new (options?: PartialOptions<T>) => T, parentNode: UIElement | HTMLElement, options?: PartialOptions<T>): T {
-        const uiElement = new this(options);
+    // The options may be partial: getDefaultOptions fills in the rest (and Popup.show-style helpers forward partial options here).
+    // `this` asks for a constructor of the class's own options, not Partial ones: under strictFunctionTypes, requiring one that
+    // accepts Partial options rejected every class with a required option.
+    static create<T extends UIElement<any>>(this: new (options?: NonNullable<T["options"]>) => T, parentNode: UIElement | HTMLElement, options?: PartialOptions<T>): T {
+        const uiElement = new this(options as NonNullable<T["options"]>);
         uiElement.mount(parentNode, null);
         uiElement.dispatch("mount", uiElement);
         return uiElement;

@@ -2,7 +2,8 @@
 // Command-line counterpart of the editor plugin: type-checks the project with the same awareness of
 // @registerStyle and @field. An un-annotated @field only has a type because of this, so this is what
 // `npm run typecheck` should run - plain `tsc` sees the field as an implicit any.
-// Usage: node stem-core/ts-plugin/typecheck.js [--filter <substring>] [--preview] [--verbose | --quiet]
+// Usage: node stem-core/ts-plugin/typecheck.js [--project <tsconfig>] [--filter <substring>] [--preview] [--verbose | --quiet]
+// --project checks a tsconfig other than the project's tsconfig.json (e.g. one that covers only the Stem code).
 // --preview reports what the project would say with every @ts-nocheck lifted, without touching a file.
 // One line per diagnostic by default; --verbose prints the full message chains, --quiet only counts per file.
 
@@ -29,7 +30,10 @@ function main() {
     const filterIndex = process.argv.indexOf("--filter");
     const filter = filterIndex === -1 ? null : process.argv[filterIndex + 1];
 
-    const diagnostics = getProjectDiagnostics(ts, projectRoot, filter, process.argv.includes("--preview"));
+    const projectIndex = process.argv.indexOf("--project");
+    const configFile = projectIndex === -1 ? null : process.argv[projectIndex + 1];
+
+    const diagnostics = getProjectDiagnostics(ts, projectRoot, filter, process.argv.includes("--preview"), configFile);
 
     const formatHost = {
         getCanonicalFileName: fileName => fileName,

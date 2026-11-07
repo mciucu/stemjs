@@ -65,12 +65,18 @@ export interface SectionDividerPanel extends UIElement<any, any, any> {
     collapsed?: boolean;
 }
 
+// A plain div that declares the panel options, since an intrinsic <div> doesn't take minHeight or fixed
+export class SectionPanel extends UI.Element<SectionDividerPanelOptions> {}
+
 @registerStyle(SectionDividerStyle)
 export class SectionDivider<ExtraOptions extends SectionDividerOptions = SectionDividerOptions> extends UI.Element<ExtraOptions> {
     declare panels: SectionDividerPanel[];
     declare dividers: DividerBar[];
     declare uncollapsedSizes: WeakMap<SectionDividerPanel, number>;
     declare clearListeners?: (() => void) | null;
+    // Sizes set by dragging or collapsing. A parent's redraw hands each panel fresh options, which hold its style,
+    // so without these a redraw put every panel back to its first size
+    sizes = new WeakMap<UIElement, number | string>();
 
     getDefaultOptions(): Partial<SectionDividerOptions> {
         return Object.assign({
@@ -113,6 +119,22 @@ export class SectionDivider<ExtraOptions extends SectionDividerOptions = Section
         } else {
             element.setHeight(size);
         }
+        this.sizes.set(element, size);
+    }
+
+    redraw() {
+        const result = super.redraw();
+        // getChildrenToRender listed the elements render() had just built, but a redraw keeps the mounted ones and copies
+        // the new options into them: list those, or a divider pressed after a redraw isn't found and dragging does nothing
+        const DividerBarClass = this.getDividerBarClass();
+        this.dividers = this.children.filter(child => child instanceof DividerBarClass) as DividerBar[];
+        this.panels = this.children.filter(child => !(child instanceof DividerBarClass)) as SectionDividerPanel[];
+        for (const panel of this.panels) {
+            if (this.sizes.has(panel)) {
+                this.setDimension(panel, this.sizes.get(panel)!);
+            }
+        }
+        return result;
     }
 
     getMinDimension(element: SectionDividerPanel) {

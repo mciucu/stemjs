@@ -12,6 +12,7 @@ const {getAugmentedSource, toSourceOffset, toAugmentedOffset} = require("./trans
 const {isNumericCoercion} = require("./numericCoercion");
 const {isCollectedChild} = require("./jsxChildren");
 const {isRegisteredStyleReplacement} = require("./registeredStyle");
+const {isSkippedStemSource} = require("./stemSources");
 
 function init(modules) {
     const ts = modules.typescript;
@@ -211,7 +212,7 @@ function init(modules) {
         }
 
         for (const key of ["getSemanticDiagnostics", "getSyntacticDiagnostics", "getSuggestionDiagnostics"]) {
-            proxy[key] = (fileName) => languageService[key](fileName).filter(diagnostic => {
+            proxy[key] = (fileName) => isSkippedStemSource(config, fileName) ? [] : languageService[key](fileName).filter(diagnostic => {
                 if (isOurs(fileName, diagnostic.start)) {
                     return false;
                 }

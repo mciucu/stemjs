@@ -11,6 +11,10 @@ export function jsx<T extends BaseUIElement>(type: new (options?: any) => T, pro
 export function jsx(type: any, props: any, key?: string | number): BaseUIElement;
 export function jsx(type: any, props: any, key?: string | number): BaseUIElement {
     const {children, ...restProps} = props || {};
+    // The automatic transform passes key on its own, outside props
+    if (key !== undefined) {
+        restProps.key = key;
+    }
     if (children !== undefined) {
         return UI.createElement(type, restProps, children);
     }
@@ -23,6 +27,9 @@ export function jsxs<T extends BaseUIElement>(type: new (options?: any) => T, pr
 export function jsxs(type: any, props: any, key?: string | number): BaseUIElement;
 export function jsxs(type: any, props: any, key?: string | number): BaseUIElement {
     const {children, ...restProps} = props || {};
+    if (key !== undefined) {
+        restProps.key = key;
+    }
     if (children !== undefined) {
         return UI.createElement(type, restProps, ...children);
     }

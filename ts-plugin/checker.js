@@ -6,6 +6,7 @@ const {getAugmentedSource, toSourceOffset} = require("./transform");
 const {isNumericCoercion} = require("./numericCoercion");
 const {isCollectedChild} = require("./jsxChildren");
 const {isRegisteredStyleReplacement} = require("./registeredStyle");
+const {isSkippedStemSource} = require("./stemSources");
 
 const PLUGIN_NAME = "ts-plugin-registered-styles";
 
@@ -18,8 +19,9 @@ function sourceFileFor(ts, fileName, augmented) {
     return sourceFiles.get(fileName);
 }
 
-function parseConfig(ts, projectRoot) {
-    const configPath = ts.findConfigFile(projectRoot, ts.sys.fileExists, "tsconfig.json");
+// configFile names a tsconfig other than the project's tsconfig.json, relative to projectRoot
+function parseConfig(ts, projectRoot, configFile = null) {
+    const configPath = configFile ? path.resolve(projectRoot, configFile) : ts.findConfigFile(projectRoot, ts.sys.fileExists, "tsconfig.json");
     const {config, error} = ts.readConfigFile(configPath, ts.sys.readFile);
     if (error) {
         throw new Error(ts.flattenDiagnosticMessageText(error.messageText, "\n"));
@@ -107,11 +109,12 @@ function restoreNames(augmented, messageText) {
 
 // The diagnostics the user is answerable for, in the project rooted at projectRoot. previewNoCheck
 // answers what a file would report if it weren't silenced, which is how a migration measures itself.
-function getProjectDiagnostics(ts, projectRoot, filter = null, previewNoCheck = false) {
-    const {options, fileNames} = parseConfig(ts, projectRoot);
+function getProjectDiagnostics(ts, projectRoot, filter = null, previewNoCheck = false, configFile = null) {
+    const {options, fileNames} = parseConfig(ts, projectRoot, configFile);
     const augmentedFiles = new Map();
     const program = ts.createProgram(fileNames, options, createAugmentingHost(ts, options, augmentedFiles, previewNoCheck));
     const checker = program.getTypeChecker();
+    const pluginConfig = getPluginConfig(options);
 
     return ts.getPreEmitDiagnostics(program).filter(diagnostic => {
         // Project-wide diagnostics have no file to match against, so a filtered run isn't asking about them
@@ -120,6 +123,9 @@ function getProjectDiagnostics(ts, projectRoot, filter = null, previewNoCheck = 
         }
         // Third-party sources aren't ours to fix, and skipLibCheck only spares us the .d.ts ones
         if (diagnostic.file.fileName.includes("node_modules")) {
+            return false;
+        }
+        if (isSkippedStemSource(pluginConfig, diagnostic.file.fileName)) {
             return false;
         }
         if (isOurs(augmentedFiles.get(path.normalize(diagnostic.file.fileName)), diagnostic.start)) {

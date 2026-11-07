@@ -359,3 +359,16 @@ completions, diagnostics, outline).
 - `typecheck.js` - the command-line counterpart, a CLI over `checker.js`.
 - `loadTypeScript.js` - finds the project's TypeScript from wherever we're run.
 - `test/` - see above.
+
+## A project stricter than Stem
+
+Stem is written without `strict`, so a project that turns it on gets Stem's own sources reported along with its
+own. `skipStemCheck` leaves Stem's sources out of what the checker and the editor report, the way `skipLibCheck`
+leaves out `.d.ts` files. Stem's declarations still apply, read with the project's settings:
+
+```json
+"plugins": [{"name": "ts-plugin-registered-styles", "skipStemCheck": true}]
+```
+
+Stem is recognized as the folder that holds this plugin, so a copy of Stem in the project and one in a submodule
+both work.
