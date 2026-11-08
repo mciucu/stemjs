@@ -405,6 +405,8 @@ NodeAttributes.defaultAttributesMap = new DOMAttributesMap(null, [
     ["height"],
     ["width"],
     ["tabIndex"],
+    ["draggable"],
+    ["spellcheck"],
     ["data"],
     //["value"], // Value is intentionally disabled
 ], [
