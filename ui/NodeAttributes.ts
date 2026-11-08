@@ -141,6 +141,15 @@ export type ClassNameArgument = ClassNameValue | StyleRuleObject | null | undefi
 export type NodeElement = HTMLElement | SVGElement;
 
 
+// Writing an attribute is not free even with the same value: an <img> or <iframe> given its src again loads it again (and fires
+// load, whose handler may redraw, which writes it again). So a redraw writes only what changed.
+function setChangedAttribute(node: NodeElement, name: string, value: unknown): void {
+    const text = String(value);
+    if (node.getAttribute(name) !== text) {
+        node.setAttribute(name, text);
+    }
+}
+
 export class NodeAttributes {
     [key: string]: any;
     static defaultAttributesMap: DOMAttributesMap;
@@ -293,7 +302,7 @@ export class NodeAttributes {
             }
         }
         if (typeof value !== "undefined") {
-            node.setAttribute(attributeOptions.domName, value);
+            setChangedAttribute(node, attributeOptions.domName, value);
         } else {
             node.removeAttribute(attributeOptions.domName);
         }
@@ -339,7 +348,7 @@ export class NodeAttributes {
                     }
                 }
                 if (value != null) {
-                    node.setAttribute(attributeName, value);
+                    setChangedAttribute(node, attributeName, value);
                     addedAttributes[key] = true;
                 } else {
                     node.removeAttribute(attributeName);
