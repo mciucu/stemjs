@@ -1,4 +1,4 @@
-import {RenderStack, UIElement, type PartialOptions} from "./UIBase";
+import {getChildKey, RenderStack, UIElement, type PartialOptions} from "./UIBase";
 import {GlobalStyle} from "./GlobalStyle";
 import {NodeAttributes} from "./NodeAttributes";
 
@@ -65,7 +65,7 @@ export class Switcher extends UIElement<SwitcherOptions> {
         let keyMap = this.getElementKeyMap(existingChildren) || new Map();
         for (let i = 0; i < newChildren.length; i += 1) {
             let newChild = newChildren[i];
-            let newChildKey = (newChild.options?.key) || ("autokey" + i);
+            let newChildKey = getChildKey(newChildren, i, newChild);
             let existingChild = keyMap.get(newChildKey);
             if (existingChild === newChild) {
                 continue;

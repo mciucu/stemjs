@@ -180,8 +180,35 @@ export interface UINamespace {
 
 export const UI: UINamespace = {} as UINamespace;
 
+// Where each child was written, when a false or null was dropped: what was dropped keeps its place, so an unkeyed child,
+// matched by its place, isn't shifted by a sibling before it that comes or goes. With nothing dropped, the places are the indices.
+const writtenSlots = new WeakMap<readonly UIResolvedChild[], readonly number[]>();
+
 export function cleanChildren(children: UIChild): UIResolvedChild[] {
-    return unwrapArray(children, unwrapElementWithFunc);
+    if (!Array.isArray(children) || !children.some(child => child == null || child === false)) {
+        return unwrapArray(children, unwrapElementWithFunc);
+    }
+    const cleaned: UIResolvedChild[] = [];
+    const slots: number[] = [];
+    let slot = 0;
+    for (const child of children) {
+        const part = unwrapArray(child, unwrapElementWithFunc);
+        for (const resolved of part) {
+            cleaned.push(resolved);
+            slots.push(slot++);
+        }
+        if (!part.length) {
+            slot += 1;
+        }
+    }
+    writtenSlots.set(cleaned, slots);
+    return cleaned;
+}
+
+// An element's key among its siblings: its own, else the slot it was written in
+export function getChildKey(children: readonly UIResolvedChild[], index: number, child: BaseUIElement): string | number {
+    const slots = writtenSlots.get(children);
+    return child.options?.key || ("autokey" + (slots?.length === children.length ? slots[index] : index));
 }
 
 // Both probe the way the code they replaced did, optional because a toUI() may answer with nothing
@@ -480,7 +507,7 @@ export class UIElement<
         const childrenKeyMap = new Map<string | number, BaseUIElement>();
 
         for (let i = 0; i < elements.length; i += 1) {
-            const childKey = elements[i].options?.key || ("autokey" + i); // TODO @cleanup an element shouldn't have missing options
+            const childKey = getChildKey(elements, i, elements[i]);
 
             childrenKeyMap.set(childKey, elements[i]);
         }
@@ -551,7 +578,7 @@ export class UIElement<
                 newChildren[i] = newChild;
             }
 
-            const newChildKey = newChild.options?.key || ("autokey" + i);
+            const newChildKey = getChildKey(newChildren, i, newChild);
             const existingChild = childrenKeyMap?.get(newChildKey);
 
             if (existingChild && newChild.canOverwrite(existingChild)) {
