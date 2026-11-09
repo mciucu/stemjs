@@ -151,7 +151,11 @@ export class DynamicStyleElement extends StyleElement<DynamicStyleElementOptions
                 continue;
             }
             const isProperValue = (isString(value) || isNumber(value) || isFunction(value) || Array.isArray(value));
-            if (isProperValue) {
+            if (value instanceof KeyframeElement) {
+                // A @keyframesRule (animationName: this.spin) stands for its generated name, as a @styleRule does for its class
+                ownStyle[key] = value.getKeyframeName();
+                haveOwnStyle = true;
+            } else if (isProperValue) {
                 ownStyle[key] = value;
                 haveOwnStyle = true;
             } else {
