@@ -943,12 +943,13 @@ UI.createElement = function (tag: typeof BaseUIElement<any> | HTMLTagType | SVGT
             }
         }
 
-        if (options.key) {
-            console.error("Warning! UI Element cannot have both a key and a ref fieldname. Key will be overriden.\n" +
-                          "Are you using the options from another object? Shame!", options);
+        // An element can set both a key and a ref: they add up, so the key works as the element's version
+        const refKey = "_ref" + options.ref.name;
+        if (options.key == null) {
+            options.key = refKey;
+        } else if (options.key !== refKey && !String(options.key).startsWith(refKey + ":")) {
+            options.key = refKey + ":" + options.key;
         }
-
-        options.key = "_ref" + options.ref.name;
     }
 
     if (options.hasOwnProperty("class")) {
