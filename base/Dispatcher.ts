@@ -253,8 +253,18 @@ export class Dispatchable {
     // it, when the adder answers with nothing
     declare attachListener: <T extends {addListener(...args: any[]): any}>(
         obj: T, ...args: Parameters<T["addListener"]>) => AttachedHandle<ReturnType<T["addListener"]>>;
-    declare attachEventListener: <T extends {addEventListener(...args: any[]): any}>(
-        obj: T, ...args: Parameters<T["addEventListener"]>) => AttachedHandle<ReturnType<T["addEventListener"]>>;
+    // A DOM target's own overloads first: Parameters<> only sees an adder's last overload, which for the DOM takes a plain
+    // Event, so `attachEventListener(window, "keydown", event => ...)` would hand the listener an Event, not a KeyboardEvent
+    declare attachEventListener: {
+        <K extends keyof WindowEventMap>(obj: Window, type: K, listener: (this: Window, event: WindowEventMap[K]) => any,
+            options?: boolean | AddEventListenerOptions): CleanupJob | undefined;
+        <K extends keyof DocumentEventMap>(obj: Document, type: K, listener: (this: Document, event: DocumentEventMap[K]) => any,
+            options?: boolean | AddEventListenerOptions): CleanupJob | undefined;
+        <K extends keyof HTMLElementEventMap>(obj: HTMLElement, type: K, listener: (this: HTMLElement, event: HTMLElementEventMap[K]) => any,
+            options?: boolean | AddEventListenerOptions): CleanupJob | undefined;
+        <T extends {addEventListener(...args: any[]): any}>(
+            obj: T, ...args: Parameters<T["addEventListener"]>): AttachedHandle<ReturnType<T["addEventListener"]>>;
+    };
     declare attachCreateListener: <T extends {addCreateListener(...args: any[]): any}>(
         obj: T, ...args: Parameters<T["addCreateListener"]>) => AttachedHandle<ReturnType<T["addCreateListener"]>>;
     declare attachDeleteListener: <T extends {addDeleteListener(...args: any[]): any}>(

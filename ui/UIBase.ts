@@ -917,7 +917,8 @@ export class UIElement<
         return this.addNodeListener("mouseleave", callback);
     }
 
-    addDoubleClickListener(callback: EventListener): RemoveHandle {
+    // Typed as addClickListener is, so an onDoubleClick option's handler gets its MouseEvent
+    addDoubleClickListener(callback: (event: MouseEvent) => unknown): RemoveHandle {
         return this.addNodeListener("dblclick", callback);
     }
 
