@@ -4,6 +4,7 @@
 
 const path = require("path");
 const {getProjectDiagnostics} = require("../checker");
+const {stemRootDiagnostic} = require("../stemSources");
 
 const FIXTURE = path.join(__dirname, "fixture");
 
@@ -27,4 +28,11 @@ module.exports = (ts, check) => {
     };
     const reported = [...new Set(diagnostics.filter(isNumeric).map(exportAt))].sort();
     check("numeric.ts reports exactly the operations it should", reported.join(", "), NUMERIC_REPORTED.join(", "));
+
+    const configPath = ts.findConfigFile(FIXTURE, ts.sys.fileExists, "tsconfig.json");
+    const {options} = ts.parseJsonConfigFileContent(ts.readConfigFile(configPath, ts.sys.readFile).config, ts.sys, FIXTURE);
+    check("a stemRoot that resolves reports nothing", stemRootDiagnostic(ts, {stemRoot: "@stemjs"}, options, FIXTURE), "null");
+    const unresolved = stemRootDiagnostic(ts, {}, options, FIXTURE);
+    check("a stemRoot that doesn't resolve says so", unresolved && ts.flattenDiagnosticMessageText(unresolved.messageText, " ").split(",")[0],
+        `Stem's ts-plugin can't find "stem-core/ui/UIBase"`);
 };

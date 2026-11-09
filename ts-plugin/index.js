@@ -12,7 +12,7 @@ const {getAugmentedSource, toSourceOffset, toAugmentedOffset} = require("./trans
 const {isNumericCoercion} = require("./numericCoercion");
 const {isCollectedChild} = require("./jsxChildren");
 const {isRegisteredStyleReplacement} = require("./registeredStyle");
-const {isSkippedStemSource} = require("./stemSources");
+const {isSkippedStemSource, stemRootDiagnostic} = require("./stemSources");
 
 function init(modules) {
     const ts = modules.typescript;
@@ -231,6 +231,16 @@ function init(modules) {
                 return !field || start >= field.sourceStart + field.name.length;
             }).map(restoreDiagnosticNames).map(diagnostic => toSourceDiagnostic(fileName, diagnostic));
         }
+
+        // Looked up once, as soon as there's a file the plugin added declarations to
+        let stemRootProblem;
+        proxy.getCompilerOptionsDiagnostics = () => {
+            const diagnostics = languageService.getCompilerOptionsDiagnostics();
+            if (stemRootProblem === undefined && augmentedFiles.size > 0) {
+                stemRootProblem = stemRootDiagnostic(ts, config, compilerOptions, host.getCurrentDirectory());
+            }
+            return stemRootProblem ? [...diagnostics, stemRootProblem] : diagnostics;
+        };
 
         proxy.getQuickInfoAtPosition = (fileName, position) => {
             const field = fieldAtSource(fileName, position);

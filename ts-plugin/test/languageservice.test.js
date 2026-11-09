@@ -34,7 +34,7 @@ const SHIFTED_SOURCE = [
     `export {Holder, UI};`,
 ].join("\n");
 
-function createPlugin(ts) {
+function createPlugin(ts, pluginConfig = OPTIONS) {
     const configPath = ts.findConfigFile(FIXTURE, ts.sys.fileExists, "tsconfig.json");
     const {config} = ts.readConfigFile(configPath, ts.sys.readFile);
     const {options, fileNames} = ts.parseJsonConfigFileContent(config, ts.sys, FIXTURE);
@@ -63,7 +63,7 @@ function createPlugin(ts) {
         languageService,
         languageServiceHost: host,
         project: {projectService: {logger: {info: () => {}}}},
-        config: OPTIONS,
+        config: pluginConfig,
     });
     // create() replaced the host's snapshots; raw reads the files as they are, which is what the editor shows
     const raw = ts.createLanguageService({...host, getScriptSnapshot: readSnapshot}, ts.createDocumentRegistry());
@@ -72,6 +72,12 @@ function createPlugin(ts) {
 
 module.exports = (ts, check) => {
     const {plugin, raw} = createPlugin(ts);
+    const stemRootReported = (languageService) => {
+        languageService.getSemanticDiagnostics(path.join(FIXTURE, "stores.ts")); // a file the plugin adds declarations to
+        return languageService.getCompilerOptionsDiagnostics().some(diagnostic => diagnostic.code === 99001);
+    };
+    check("the editor reports nothing about a stemRoot that resolves", stemRootReported(plugin), false);
+    check("the editor reports a stemRoot that doesn't resolve", stemRootReported(createPlugin(ts, {}).plugin), true);
     const storesFile = path.join(FIXTURE, "stores.ts");
     const text = ts.sys.readFile(storesFile);
 

@@ -6,7 +6,7 @@ const {getAugmentedSource, toSourceOffset} = require("./transform");
 const {isNumericCoercion} = require("./numericCoercion");
 const {isCollectedChild} = require("./jsxChildren");
 const {isRegisteredStyleReplacement} = require("./registeredStyle");
-const {isSkippedStemSource} = require("./stemSources");
+const {isSkippedStemSource, stemRootDiagnostic} = require("./stemSources");
 
 const PLUGIN_NAME = "ts-plugin-registered-styles";
 
@@ -115,8 +115,9 @@ function getProjectDiagnostics(ts, projectRoot, filter = null, previewNoCheck = 
     const program = ts.createProgram(fileNames, options, createAugmentingHost(ts, options, augmentedFiles, previewNoCheck));
     const checker = program.getTypeChecker();
     const pluginConfig = getPluginConfig(options);
+    const stemRootProblem = augmentedFiles.size > 0 ? stemRootDiagnostic(ts, pluginConfig, options, projectRoot) : null;
 
-    return ts.getPreEmitDiagnostics(program).filter(diagnostic => {
+    return [...(stemRootProblem ? [stemRootProblem] : []), ...ts.getPreEmitDiagnostics(program)].filter(diagnostic => {
         // Project-wide diagnostics have no file to match against, so a filtered run isn't asking about them
         if (!diagnostic.file) {
             return !filter;

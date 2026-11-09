@@ -107,6 +107,7 @@ const DEFAULT_STEM_ROOT = "stem-core";
 const STYLE_MODULE = "/ui/Style";
 const STATE_MODULE = "/state/StoreField";
 const UI_MODULE = "/ui/UIBase";
+const getStemRoot = (options) => options.stemRoot || DEFAULT_STEM_ROOT;
 // What a tag may be written with, which JSX.ElementAttributesProperty names. Both are declared here and
 // nowhere in the source: for every class that declares `options`, from that annotation.
 const JSX_OPTIONS_MEMBER = "$stemJsxOptions";
@@ -556,7 +557,7 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
         return null;
     }
 
-    const stemRoot = options.stemRoot || DEFAULT_STEM_ROOT;
+    const stemRoot = getStemRoot(options);
     const styleModule = stemRoot + STYLE_MODULE;
     const stateModule = stemRoot + STATE_MODULE;
     const uiModule = stemRoot + UI_MODULE;
@@ -845,4 +846,4 @@ function toAugmentedOffset(shifts, position) {
     return position + shift;
 }
 
-module.exports = {getAugmentedSource, getRegisteredStyle, toSourceOffset, toAugmentedOffset, usesStemJsx};
+module.exports = {getAugmentedSource, getRegisteredStyle, getStemRoot, toSourceOffset, toAugmentedOffset, usesStemJsx, UI_MODULE};

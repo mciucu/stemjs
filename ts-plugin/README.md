@@ -305,7 +305,8 @@ so a project that consumes stem without registering the plugin reads it as `any`
 
 If stem isn't importable as `stem-core` from your files, say where it is - the modules the plugin references
 all move together, so the directory is the only thing to set:
-`{"name": "ts-plugin-registered-styles", "stemRoot": "your/path/to/stem"}`.
+`{"name": "ts-plugin-registered-styles", "stemRoot": "your/path/to/stem"}`. If it doesn't resolve, the checker and the
+editor say so (TS99001), since everything the plugin declares would otherwise type as `any` without an error.
 
 3. Make sure the editor uses the project's TypeScript, not its own bundled copy - a language service plugin is
    loaded by the `tsserver` that's running. In VS Code that's *TypeScript: Select TypeScript Version → Use
