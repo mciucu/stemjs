@@ -153,7 +153,6 @@ function setChangedAttribute(node: NodeElement, name: string, value: unknown): v
 export class NodeAttributes {
     [key: string]: any;
     static defaultAttributesMap: DOMAttributesMap;
-    static defaultEventsMap: DOMAttributesMap;
     
     // Type hint for style property when it exists (not automatically created)
     declare style?: Record<string, any> | string;
@@ -414,9 +413,41 @@ NodeAttributes.defaultAttributesMap = new DOMAttributesMap(null, [
     "aria-",
 ]);
 
-NodeAttributes.defaultEventsMap = new DOMAttributesMap(null, [
-    ["click"],
-    ["mouseenter"],
-    ["mouseleave"],
-    ["doubleClick", {domName: "dblclick"}],
-]);
+// The DOM events an element takes as options by default, onKeyDown={...} listening to "keydown" on its node: an option's
+// name and the event it listens to. A class's own adder for one wins (addXListener for onX), in the types too: a class
+// with an addScrollListener of its own makes its onScroll its own, called as that adder calls it. onChange isn't here: on
+// every element it is Stem's own change event (Dispatchable's addChangeListener).
+export const DOM_NODE_EVENTS = {
+    Click: "click",
+    DoubleClick: "dblclick",
+    MouseEnter: "mouseenter",
+    MouseLeave: "mouseleave",
+    KeyDown: "keydown",
+    KeyUp: "keyup",
+    Input: "input",
+    Focus: "focus",
+    Blur: "blur",
+    FocusIn: "focusin",
+    FocusOut: "focusout",
+    MouseDown: "mousedown",
+    MouseUp: "mouseup",
+    MouseMove: "mousemove",
+    ContextMenu: "contextmenu",
+    AuxClick: "auxclick",
+    Scroll: "scroll",
+    DragStart: "dragstart",
+    DragEnd: "dragend",
+    DragEnter: "dragenter",
+    DragOver: "dragover",
+    DragLeave: "dragleave",
+    Drop: "drop",
+    Paste: "paste",
+    Load: "load",
+    Error: "error",
+} as const satisfies Record<string, keyof HTMLElementEventMap>;
+
+// How an element's tag takes the ones it has no adder for: each handler gets its own event type, then the element
+export type DOMNodeEventOptions<Element> = {
+    [Name in keyof typeof DOM_NODE_EVENTS as `add${Name}Listener` extends keyof Element ? never : `on${Name}`]?:
+        (event: HTMLElementEventMap[(typeof DOM_NODE_EVENTS)[Name]], element: Element) => unknown;
+};

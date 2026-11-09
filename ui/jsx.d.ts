@@ -1,8 +1,8 @@
-import {BaseUIElement, UIElement, WrittenUIOptions, HTMLTagType, SVGTagType} from "./UIBase";
+import {BaseUIElement, UIElement, WrittenUIOptions, HTMLTagType, SVGTagType, ElementEventOptions} from "./UIBase";
 
-// What a tag takes, not what the element holds
+// What a tag takes, not what the element holds. Its events (ElementEventOptions) are handed the element with its own node type
 type IntrinsicElementsMap = {
-    [Key in HTMLTagType]: WrittenUIOptions<HTMLElementTagNameMap[Key]>;
+    [Key in HTMLTagType]: WrittenUIOptions<HTMLElementTagNameMap[Key]> & ElementEventOptions<UIElement<{}, HTMLElementTagNameMap[Key]>>;
 } & {
     [Key in SVGTagType]: WrittenUIOptions<SVGElementTagNameMap[Key]>;
 };
@@ -22,5 +22,9 @@ declare global {
         interface ElementChildrenAttribute {
             children: {};
         }
+
+        // A class's tag also takes its events, worked out from the element it makes: its own adders win over the DOM's
+        type LibraryManagedAttributes<Component, Props> =
+            Component extends abstract new (...args: any) => infer Element ? Props & ElementEventOptions<Element> : Props;
     }
 }

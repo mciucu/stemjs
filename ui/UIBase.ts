@@ -8,7 +8,7 @@ import {
     type Nullable, isFunction, type Constructor
 } from "../base/Utils";
 import {CleanupJobs, Dispatchable, OncePerTickRunner, type RemoveHandle} from "../base/Dispatcher";
-import {DOMAttributesMap, NodeAttributes} from "./NodeAttributes";
+import {DOM_NODE_EVENTS, DOMAttributesMap, type DOMNodeEventOptions, NodeAttributes} from "./NodeAttributes";
 export type {NodeAttributes};
 import {Theme, type ThemeProps} from "./style/Theme";
 import type {StyleSheet} from "./Style"; // Type-only on purpose: a runtime edge here would close a cycle
@@ -47,6 +47,10 @@ export type EventOptions<Element> = {
 
 // Called with the event, then the element itself
 export type UIEventHandler = (...args: any[]) => unknown;
+
+// The events a tag of this element takes: its own adders' (addScrollListener makes onScroll its own, called as the adder
+// calls it), and DOM_NODE_EVENTS for every other name. jsx.d.ts adds them to each tag, from the element the tag makes.
+export type ElementEventOptions<Element> = EventOptions<Element> & DOMNodeEventOptions<Element>;
 
 // The trailing arguments a node listener forwards to addEventListener
 export type NodeListenerOptions = [(boolean | AddEventListenerOptions)?];
@@ -352,7 +356,6 @@ export class UIElement<
     OptionsType extends UIElementOptions<TagType> = UIOptions<NodeType, ExtraOptions, TagType>
 > extends BaseUIElement<NodeType> {
     static domAttributesMap: DOMAttributesMap = NodeAttributes.defaultAttributesMap;
-    static nodeEventsMap: DOMAttributesMap = NodeAttributes.defaultEventsMap;
     static theme?: Theme;
 
     children: BaseUIElement[] = [];
@@ -690,9 +693,11 @@ export class UIElement<
 
                 // Left standing: an `add${string}Listener` index signature would swallow every adder name in EventOptions
                 const haveListenerMethod = (typeof this[addListenerMethodName] === "function");
-                const nodeEvent = this.constructor.nodeEventsMap.getKeyFromDOMName(eventType.toLowerCase());
+                // Without an adder of its own, the DOM event of that name on its node, if there is one
+                const domEvent = !haveListenerMethod && DOM_NODE_EVENTS.hasOwnProperty(eventType)
+                    ? DOM_NODE_EVENTS[eventType as keyof typeof DOM_NODE_EVENTS] : null;
 
-                if (haveListenerMethod || nodeEvent) {
+                if (haveListenerMethod || domEvent) {
                     this[handlerMethodName] = (...args: any[]) => {
                         if (isFunction(this.options[key])) {
                             this.options[key](...args, this);
@@ -702,8 +707,8 @@ export class UIElement<
                     // Actually add the listener
                     if (haveListenerMethod) {
                         this[addListenerMethodName](this[handlerMethodName]);
-                    } else {
-                        this.addNodeListener(eventType.toLowerCase(), this[handlerMethodName]);
+                    } else if (domEvent) {
+                        this.addNodeListener(domEvent, this[handlerMethodName]);
                     }
                 }
             }
@@ -906,24 +911,6 @@ export class UIElement<
     removePressStopListener(callback: EventListener): void {
         this.removeNodeListener("mouseup", callback);
         this.removeNodeListener("touchend", callback);
-    }
-
-    // Named so EventOptions derives them; the nodeEventsMap fallback serves the same two events
-    addMouseEnterListener(callback: (event: MouseEvent) => void): RemoveHandle {
-        return this.addNodeListener("mouseenter", callback);
-    }
-
-    addMouseLeaveListener(callback: (event: MouseEvent) => void): RemoveHandle {
-        return this.addNodeListener("mouseleave", callback);
-    }
-
-    // Typed as addClickListener is, so an onDoubleClick option's handler gets its MouseEvent
-    addDoubleClickListener(callback: (event: MouseEvent) => unknown): RemoveHandle {
-        return this.addNodeListener("dblclick", callback);
-    }
-
-    removeDoubleClickListener(callback: EventListener): void {
-        this.removeNodeListener("dblclick", callback);
     }
 }
 
