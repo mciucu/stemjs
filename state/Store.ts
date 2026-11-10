@@ -179,7 +179,7 @@ export class StoreObject extends Dispatchable {
     }
 
     static getObjectIdForEvent(event: StoreEvent): string {
-        const id = event.objectId || event.data?.id;
+        const id = event.objectId ?? event.data?.id;
         return String(id);
     }
 
