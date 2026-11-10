@@ -2,12 +2,12 @@ import {StoreObject, type StoreClass} from "../state/Store";
 import {PropertyCache} from "../data-structures/PropertyCache";
 import {BaseUIElement} from "../ui/UIBase";
 import {type Constructor} from "../base/Utils";
-import {type Dispatchable} from "../base/Dispatcher";
+import {type Dispatchable, type ListenerHandle} from "../base/Dispatcher";
 
 type UIElementConstructor = Constructor<BaseUIElement>;
 type RedrawHandler = (event?: unknown) => void;
 // The decorator is handed store classes, while the scan over options finds store objects. Both end up
-// in the same set, and attachChangeListener takes either - or any other Dispatchable, which is how
+// in the same set, and addChangeListener takes either - or any other Dispatchable, which is how
 // services like iFrameUserDataService and serverStatisticsManager are passed here.
 type ChangeSource = Dispatchable | StoreClass<StoreObject>;
 
@@ -19,51 +19,53 @@ interface AutoRedrawableClass extends UIElementConstructor {
         setOptions: (options: any) => void;
         onMount: () => void;
         enqueueRedraw: RedrawHandler;
-        attachChangeListener: Dispatchable["attachChangeListener"];
     };
 }
 
-// TODO: maybe have better names
-const autoRedrawListenersLazy = new PropertyCache<BaseUIElement, Set<ChangeSource>>("autoRedrawHandler", () => new Set());
+// Per element, while it is mounted: the listener on each source it redraws on
+const listenersLazy = new PropertyCache<BaseUIElement, Map<ChangeSource, ListenerHandle | undefined>>("autoRedrawListeners", () => new Map());
 
 const redrawHandlerLazy = new PropertyCache<BaseUIElement, RedrawHandler>("autoRedrawListener", (obj: BaseUIElement) => {
     return (event?: unknown) => obj.enqueueRedraw(event);
 });
 
-// Decorator that attaches a change listener on all store objects in options
-// The logic is very crude, but works in most cases
-export function autoredrawDecorator<T extends AutoRedrawableClass>(Cls: T, ...args: ChangeSource[]): T {
-    const listenersDefault = () => new Set([...args]);
-    // TODO: we only need to do this once, throw an error if applying multiple times to the same class
+// Makes the element listen to exactly these sources: the new ones are attached, the ones left out removed
+function listenTo(element: BaseUIElement, wantedSources: Set<ChangeSource>): void {
+    const listenerBySource = listenersLazy.get(element);
+    for (const [source, handle] of listenerBySource) {
+        if (!wantedSources.has(source)) {
+            handle?.cleanup();
+            listenerBySource.delete(source);
+        }
+    }
+    for (const source of wantedSources) {
+        if (!listenerBySource.has(source)) {
+            const handle = source.addChangeListener(redrawHandlerLazy.get(element));
+            listenerBySource.set(source, handle);
+        }
+    }
+}
 
+// Decorator that redraws an element when the stores passed to it, or the store objects in its options, change.
+// The objects are the ones its current options hold, and only while it is mounted.
+export function autoredrawDecorator<T extends AutoRedrawableClass>(Cls: T, ...args: ChangeSource[]): T {
+    // TODO: we only need to do this once, throw an error if applying multiple times to the same class
     if (Cls.autoRedrawImplemented) {
         console.error("Can't use autoredraw on a class that inherited another class using autoredraw");
         return Cls;
     }
-
     Cls.autoRedrawImplemented = true;
+
+    const changeSourcesOf = (options: object | undefined) => {
+        const storeObjects = Object.values(options || {}).filter((value): value is StoreObject => value instanceof StoreObject);
+        return new Set<ChangeSource>([...args, ...storeObjects]);
+    };
+
     const oldSetOptions = Cls.prototype.setOptions;
-    // TODO: optimize to only attach after onMount
     Cls.prototype.setOptions = function setOptions(options: any) {
         oldSetOptions.call(this, options);
-
-        let listenerTargetSet = autoRedrawListenersLazy.get(this, listenersDefault);
-
-        const objArray = Object.values(options || {}).filter((obj: unknown): obj is StoreObject => {
-            return (obj instanceof StoreObject) && !listenerTargetSet.has(obj);
-        });
-
-        // TODO: we don't remove listeners here, just results in some extra redraws when reassigning options
-
-        // Add the new extra ones, and attach the lister if mounted
-        for (let obj of objArray) {
-            // Technically we could just add these listeners, but this would also leave us with listeners on temp ui elements
-            // TODO: probably need to remove at cleanup
-            if (this.node) {
-                this.attachChangeListener(obj, redrawHandlerLazy.get(this));
-            }
-
-            listenerTargetSet.add(obj);
+        if (this.node) {
+            listenTo(this, changeSourcesOf(this.options));
         }
     };
 
@@ -71,11 +73,8 @@ export function autoredrawDecorator<T extends AutoRedrawableClass>(Cls: T, ...ar
     const oldOnMount = Cls.prototype.onMount;
     Cls.prototype.onMount = function onMount() {
         oldOnMount.call(this);
-        const listenerTargetSet = autoRedrawListenersLazy.get(this, listenersDefault);
-        for (const obj of listenerTargetSet) {
-            const redrawHandler = redrawHandlerLazy.get(this);
-            this.attachChangeListener(obj, redrawHandler);
-        }
+        listenTo(this, changeSourcesOf(this.options));
+        this.addCleanupJob(() => listenTo(this, new Set()));
     };
 
     return Cls;
