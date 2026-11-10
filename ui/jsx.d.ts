@@ -1,10 +1,11 @@
 import {BaseUIElement, UIElement, WrittenUIOptions, HTMLTagType, SVGTagType, ElementEventOptions} from "./UIBase";
+import {type SVGAttributeOptions} from "./svg/SVGBase";
 
 // What a tag takes, not what the element holds. Its events (ElementEventOptions) are handed the element with its own node type
 type IntrinsicElementsMap = {
     [Key in HTMLTagType]: WrittenUIOptions<HTMLElementTagNameMap[Key]> & ElementEventOptions<UIElement<{}, HTMLElementTagNameMap[Key]>>;
 } & {
-    [Key in SVGTagType]: WrittenUIOptions<SVGElementTagNameMap[Key]>;
+    [Key in SVGTagType]: WrittenUIOptions<SVGElementTagNameMap[Key]> & SVGAttributeOptions;
 };
 
 declare global {

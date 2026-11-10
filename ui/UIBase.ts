@@ -941,7 +941,13 @@ export class UIElement<
     }
 }
 
-const SVG_TAGS = new Set(["svg", "g", "defs", "radialGradient", "stop", "ellipse", "clipPath", "ellipse", "path", "text"]); // TODO @types full set
+// Every SVG tag but the four HTML also has (a, script, style, title), which build HTML elements
+const SVG_TAGS = new Set(["animate", "animateMotion", "animateTransform", "circle", "clipPath", "defs", "desc", "ellipse", "feBlend",
+    "feColorMatrix", "feComponentTransfer", "feComposite", "feConvolveMatrix", "feDiffuseLighting", "feDisplacementMap", "feDistantLight",
+    "feDropShadow", "feFlood", "feFuncA", "feFuncB", "feFuncG", "feFuncR", "feGaussianBlur", "feImage", "feMerge", "feMergeNode",
+    "feMorphology", "feOffset", "fePointLight", "feSpecularLighting", "feSpotLight", "feTile", "feTurbulence", "filter", "foreignObject",
+    "g", "image", "line", "linearGradient", "marker", "mask", "metadata", "mpath", "path", "pattern", "polygon", "polyline",
+    "radialGradient", "rect", "set", "stop", "svg", "switch", "symbol", "text", "textPath", "tspan", "use", "view"]);
 
 function isSVGTag(tag: string): tag is SVGTagType {
     return SVG_TAGS.has(tag);

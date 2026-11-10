@@ -1,5 +1,5 @@
 import {type OverriddenNodeMembers, type SVGTagType, UI, UIElement} from "../UIBase";
-import {DOMAttributesMap} from "../NodeAttributes";
+import {type DOMAttributeDescriptor, DOMAttributesMap} from "../NodeAttributes";
 import {setObjectPrototype} from "../../base/Utils";
 import {SVGNodeAttributes} from "./SVGNodeAttributes";
 import {Device} from "../../base/Device";
@@ -53,6 +53,30 @@ export interface SVGOptions {
     translate?: string;
     color?: string;
 }
+
+// The SVG attributes a plain SVG node element writes, as SVG spells them, besides any written with a hyphen (stroke-linejoin),
+// which it writes too and JSX doesn't check. One list for both: what typechecks is what reaches the node (AllSVGAttributesMap).
+const SVG_ATTRIBUTE_NAMES = [
+    "x", "y", "x1", "y1", "x2", "y2", "cx", "cy", "r", "rx", "ry", "fr", "fx", "fy", "d", "points", "pathLength",
+    "width", "height", "viewBox", "preserveAspectRatio", "transform", "href", "fill", "stroke", "opacity", "cursor",
+    "display", "visibility", "overflow", "filter", "mask", "direction", "gradientUnits", "gradientTransform",
+    "spreadMethod", "offset", "patternUnits", "patternContentUnits", "patternTransform", "markerUnits", "markerWidth",
+    "markerHeight", "refX", "refY", "orient", "maskUnits", "maskContentUnits", "clipPathUnits", "dx", "dy", "rotate",
+    "textLength", "lengthAdjust", "startOffset", "method", "spacing", "side", "filterUnits", "primitiveUnits", "in",
+    "in2", "result", "mode", "type", "values", "stdDeviation", "edgeMode", "operator", "k1", "k2", "k3", "k4",
+    "kernelMatrix", "kernelUnitLength", "order", "divisor", "bias", "targetX", "targetY", "preserveAlpha", "scale",
+    "xChannelSelector", "yChannelSelector", "baseFrequency", "numOctaves", "seed", "stitchTiles", "surfaceScale",
+    "diffuseConstant", "specularConstant", "specularExponent", "limitingConeAngle", "pointsAtX", "pointsAtY",
+    "pointsAtZ", "azimuth", "elevation", "z", "tableValues", "slope", "intercept", "amplitude", "exponent", "radius",
+    "attributeName", "begin", "dur", "end", "min", "max", "repeatCount", "repeatDur", "restart", "calcMode",
+    "keyTimes", "keySplines", "keyPoints", "from", "to", "by", "additive", "accumulate", "path", "systemLanguage",
+    "requiredExtensions",
+] as const;
+type SVGAttributeName = typeof SVG_ATTRIBUTE_NAMES[number];
+const SVG_ATTRIBUTES: ReadonlySet<string> = new Set(SVG_ATTRIBUTE_NAMES);
+
+export type SVGAttributeOptions = {[Name in SVGAttributeName]?: number | string}
+    & Pick<SVGOptions, "strokeWidth" | "strokeDasharray" | "strokeLinecap" | "stopColor" | "clipPath">;
 
 // TODO Simplify this class
 export class SVGUIElement<
@@ -251,4 +275,26 @@ export function SVGPrimitive<ExtraOptions = {}, T extends keyof SVGElementTagNam
     return resultClass as any;
 }
 
-UI.SVGElement = SVGUIElement;
+// For a plain SVG node element (<path d="…" stroke-linejoin="round"/>): besides what the maps it extends name, it writes
+// every SVG attribute, as SVG spells it, and any option with a hyphen. Nothing else is an attribute, so Stem's own options
+// never reach the node. Only these elements write them all: an SVG class keeps the ones its map names.
+class AllSVGAttributesMap extends DOMAttributesMap {
+    static isAttribute(name: string): boolean {
+        return SVG_ATTRIBUTES.has(name) || name.includes("-");
+    }
+
+    get(key: string): DOMAttributeDescriptor | undefined {
+        return super.get(key) ?? (AllSVGAttributesMap.isAttribute(key) ? {domName: key} : undefined);
+    }
+
+    getKeyFromDOMName(name: string): string | undefined {
+        return super.getKeyFromDOMName(name) ?? (AllSVGAttributesMap.isAttribute(name) ? name : undefined);
+    }
+}
+
+// What createElement builds for an SVG node type written as a string
+class SVGNodeElement extends SVGUIElement {
+    static domAttributesMap = new AllSVGAttributesMap(SVGUIElement.domAttributesMap);
+}
+
+UI.SVGElement = SVGNodeElement;
