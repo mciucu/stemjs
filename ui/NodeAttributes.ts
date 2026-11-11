@@ -45,6 +45,8 @@ export const defaultToPixelsAttributes = new Set([
     "width",
     "word-spacing",
     "gap",
+    "column-gap",
+    "row-gap",
 ]);
 
 // What the map holds per attribute: the DOM name it is written under, which defaults to the option's own name
