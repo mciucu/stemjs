@@ -150,6 +150,9 @@ function setChangedAttribute(node: NodeElement, name: string, value: unknown): v
     }
 }
 
+// Detached, so applyStyle building a style there costs the browser no style work
+let styleScratch: HTMLElement | null = null;
+
 export class NodeAttributes {
     [key: string]: any;
     static defaultAttributesMap: DOMAttributesMap;
@@ -277,8 +280,8 @@ export class NodeAttributes {
         return this.getClassNameSet().has(isString(className) ? className : className.className);
     }
 
-    // Apply the attribute only if it's in the attributesMap
-    applyAttribute(key: string, node: NodeElement, attributesMap: DOMAttributesMap): void {
+    // Apply the attribute only if it's in the attributesMap, returning the DOM name it was written under
+    applyAttribute(key: string, node: NodeElement, attributesMap: DOMAttributesMap): string | undefined {
         let attributeOptions = attributesMap.get(key);
         if (!attributeOptions) {
             if (this.whitelistedAttributes && (key in this.whitelistedAttributes)) {
@@ -294,17 +297,14 @@ export class NodeAttributes {
             value = value();
         }
         if (attributeOptions.noValue) {
-            if (value) {
-                value = "";
-            } else {
-                value = undefined;
-            }
+            value = value ? "" : undefined;
         }
-        if (typeof value !== "undefined") {
-            setChangedAttribute(node, attributeOptions.domName, value);
-        } else {
+        if (value == null) {
             node.removeAttribute(attributeOptions.domName);
+            return;
         }
+        setChangedAttribute(node, attributeOptions.domName, value);
+        return attributeOptions.domName;
     }
 
     applyClassName(node: NodeElement): void {
@@ -321,59 +321,44 @@ export class NodeAttributes {
     }
 
     apply(node: NodeElement, attributesMap: DOMAttributesMap): void {
-        const addedAttributes: Record<string, boolean> = {};
-
-        // First update existing node attributes and delete old ones
-        // TODO: optimize to not run this if the node was freshly created
-        const nodeAttributes = node.attributes;
-        for (let i = nodeAttributes.length - 1; i >= 0; i--) {
-            const attr = nodeAttributes[i];
-            const attributeName = attr.name;
-            if (attributeName === "style" || attributeName === "class") {
-                // TODO: maybe should do work here?
-                continue;
-            }
-
-            const key = attributesMap.getKeyFromDOMName(attributeName);
-
-            if (key && this.hasOwnProperty(key)) {
-                let value = this[key];
-                const attributeOptions = attributesMap.get(key);
-                if (attributeOptions?.noValue) {
-                    if (value) {
-                        value = "";
-                    } else {
-                        value = undefined;
-                    }
-                }
-                if (value != null) {
-                    setChangedAttribute(node, attributeName, value);
-                    addedAttributes[key] = true;
-                } else {
-                    node.removeAttribute(attributeName);
-                }
-            } else {
-                node.removeAttribute(attributeName);
+        // Write this element's attributes, then remove the node's others. In lowercase, as HTML keeps names (tabIndex is tabindex)
+        const writtenNames: string[] = [];
+        for (const key in this) {
+            const name = this.applyAttribute(key, node, attributesMap);
+            if (name) {
+                writtenNames.push(name.toLowerCase());
             }
         }
-        // Add new attributes
-        for (const key in this) {
-            if (addedAttributes[key]) {
-                continue;
+        for (const name of node.getAttributeNames()) {
+            if (name !== "style" && name !== "class" && !writtenNames.includes(name.toLowerCase())) {
+                node.removeAttribute(name);
             }
-            this.applyAttribute(key, node, attributesMap);
         }
 
         this.applyClassName(node);
+        this.applyStyle(node);
+    }
 
-        node.removeAttribute("style");
+    // The node's style becomes exactly this element's (one set from outside goes), built on a detached element and written only
+    // when its text differs: writing even the same style makes the browser recompute it. A node with no style is written directly
+    applyStyle(node: NodeElement): void {
         this.ensureNoStringStyle();
+        const scratch = node.hasAttribute("style") ? (styleScratch ??= document.createElement("div")) : null;
+        const target = scratch || node;
+        scratch?.removeAttribute("style");
         if (this.styleString) {
-            node.style = this.styleString;
+            target.style.cssText = this.styleString;
         }
-        if (this.style) {
-            for (const key of Object.keys(this.style)) {
-                this.applyStyleToNode(key, this.style[key], node);
+        const style = this.style || {};
+        for (const key of Object.keys(style)) {
+            this.applyStyleToNode(key, style[key], target);
+        }
+        if (scratch) {
+            const cssText = scratch.getAttribute("style");
+            if (!cssText) {
+                node.removeAttribute("style");
+            } else if (node.getAttribute("style") !== cssText) {
+                node.setAttribute("style", cssText);
             }
         }
     }
