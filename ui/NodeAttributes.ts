@@ -370,6 +370,7 @@ export class NodeAttributes {
 NodeAttributes.defaultAttributesMap = new DOMAttributesMap(null, [
     ["id"],
     ["action"],
+    ["autofocus", {noValue: true}],
     ["checked", {noValue: true}],
     ["colSpan", {domName: "colspan"}],
     ["default"],

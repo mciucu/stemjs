@@ -18,8 +18,6 @@ export interface InputOptions<ValueType> extends InputableElementOptions<ValueTy
     type?: string;
     // Wired through addKeyUpListener
     onKeyUp?: UIEventHandler;
-    // Applied with noValue, which only ever tests it for truthiness
-    autofocus?: boolean | string;
     // The attribute map spells it in lower case, next to the node's own readOnly
     readonly?: boolean;
 }
@@ -133,7 +131,6 @@ export class Input<
 > extends InputableElement<ValueType, ExtraOptions, HTMLInputElement> {
     static domAttributesMap = new DOMAttributesMap(UI.Element.domAttributesMap, [
         ["autocomplete"],
-        ["autofocus", {noValue: true}],
         ["formaction"],
         ["maxLength", {domName: "maxlength"}],
         ["minLength", {domName: "minlength"}],

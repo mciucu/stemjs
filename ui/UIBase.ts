@@ -84,6 +84,8 @@ export interface UIElementOptions<TagType extends string = HTMLTagType> extends 
     height?: number | string;
     width?: number | string;
     href?: string;
+    // Written bare, so only its truthiness counts: the control a dialog focuses as it opens
+    autofocus?: boolean | string;
     theme?: Theme;
     // The element that owns this one, which components read to call back into it. Left open because that
     // is the point: each consumer calls its own owner's methods, so a class narrows this in its own options
