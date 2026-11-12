@@ -127,8 +127,11 @@ export type OverriddenNodeMembers = "children" | "nodeType" | "style" | "title" 
     // A method is never an attribute, and intersecting one leaves a type nothing satisfies
     | "animate";
 
+// A token list (an iframe's sandbox) is written as its attribute: the tokens in a string
+type WrittenAs<Value> = Value extends DOMTokenList ? string : Value;
+
 // Options land on the node as attributes, so a readonly DOM member can never be one
-export type NodeOptions<NodeType> = Partial<Omit<Pick<NodeType, WritableKeys<NodeType>>, OverriddenNodeMembers>>;
+export type NodeOptions<NodeType> = Partial<{[Key in Exclude<WritableKeys<NodeType>, OverriddenNodeMembers>]: WrittenAs<NodeType[Key]>}>;
 
 export type UIOptions<NodeType extends (SVGElement | HTMLElement), ExtraOptions = {}, TagType extends string = HTMLTagType> = NodeOptions<NodeType> & UIElementOptions<TagType> & ExtraOptions;
 
