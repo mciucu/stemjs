@@ -12,6 +12,9 @@ declare global {
         // Parked by the constructor, so a prop function can reach the theme it is being resolved against
         theme: Theme;
     }
+
+    // A repo whose every theme prop is in StemThemeProps declares `complete: true` here, which closes ThemeProps to any other name
+    interface StemThemeRegistry {}
 }
 
 // What reading one written prop answers with, following the two unwrappings setProperties and the props
@@ -35,15 +38,14 @@ export type ResolvedThemeProps<Written> = {
 // has to avoid mentioning it
 export type WrittenThemeValue<Resolved> = Resolved | ((props: ThemeProps) => Resolved) | ThemeType<ThemeValue<Resolved>>;
 
-// What a theme holds, read through Theme.props or an element's themeProps. Left open besides the registry
-// so a repo that has not registered its own props still reads them; drop the index signature to catch typos.
-// Measured against a synced mirror: dropping both index signatures costs this repo nothing and Blink seven,
-// every one a prop set by a second setProperties call the registry never sees
-export type ThemeProps = StemThemeProps & Record<string, any>;
+// Props outside the registry read as `any`, until a repo declares its registry complete: then they are type errors
+type Unregistered = StemThemeRegistry extends {complete: true} ? unknown : Record<string, any>;
 
-// What setProperties takes: any subset, each value written directly or as a function of the others.
-// Left open besides, since a key can be computed and a downstream repo may not have registered its own
-export type WrittenThemeProps = {[Key in keyof StemThemeProps]?: WrittenThemeValue<StemThemeProps[Key]>} & Record<string, any>;
+// What a theme holds, read through Theme.props or an element's themeProps
+export type ThemeProps = StemThemeProps & Unregistered;
+
+// What setProperties takes: any subset, each value written directly or as a function of the others
+export type WrittenThemeProps = {[Key in keyof StemThemeProps]?: WrittenThemeValue<StemThemeProps[Key]>} & Unregistered;
 
 
 // What @registerStyle decorates: any class that makes elements, abstract ones included. `typeof UIElement`
@@ -100,7 +102,10 @@ export class Theme extends Dispatchable {
 
         this.styleSheetSymbol = Symbol(this.name + "StyleSheet");
 
-        window.addEventListener("resize", () => this.updateThrottled());
+        // A theme can be made where there is no window (a test, a process that only reads its props), and has no resize to follow there
+        if (typeof window !== "undefined") {
+            window.addEventListener("resize", () => this.updateThrottled());
+        }
     }
 
     // Create a new Theme, based on the current one
