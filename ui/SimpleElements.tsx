@@ -1,6 +1,6 @@
 import {BaseUIElement, UI, UIElement, type UIChild, type UICleanChild, type UIRenderable, type WrittenUIElementOptions} from "./UIBase";
 import {BasicLevelStyleSheet, type CSSStyleObject} from "./GlobalStyle";
-import {registerStyle} from "./style/Theme";
+import {registerStyle} from "./Style";
 import {buildColors} from "./Color";
 import {styleRule} from "../decorators/Style";
 import {isFunction} from "../base/Utils";

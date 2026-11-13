@@ -2,7 +2,7 @@ import {UI, type StyleObject, type UIChild} from "./UIBase";
 import {buildColors} from "./Color";
 import {BasicLevelStyleSheet, type CSSStyleObject} from "./GlobalStyle";
 import {styleRule} from "../decorators/Style";
-import {registerStyle} from "./style/Theme";
+import {registerStyle} from "./Style";
 import {Orientation, type OrientationType} from "./Constants";
 import {SimpleStyledElement, type SimpleStyledElementOptions} from "./SimpleElements";
 import {BaseUIElement} from "./UIBase";

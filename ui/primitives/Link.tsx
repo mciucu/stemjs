@@ -1,6 +1,5 @@
 import {type PartialOptions, UI, type UIChild} from "../UIBase";
-import {styleRule, StyleSheet} from "../Style";
-import {registerStyle} from "../style/Theme";
+import {styleRule, StyleSheet, registerStyle} from "../Style";
 import {isLocalUrl, isString, trimLocalUrl} from "../../base/Utils";
 import {Router} from "../Router";
 

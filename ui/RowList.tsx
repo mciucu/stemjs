@@ -1,6 +1,5 @@
 import {UI, type UIChild} from "./UIBase";
-import {styleRule} from "./Style";
-import {registerStyle} from "./style/Theme"
+import {styleRule, registerStyle} from "./Style";
 import {SimpleStyledElement} from "./SimpleElements";
 import {BasicLevelSizeStyleSheet} from "./GlobalStyle";
 import {type LevelType, type SizeType} from "./Constants";

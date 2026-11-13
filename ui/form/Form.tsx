@@ -1,6 +1,6 @@
 import {FormStyle} from "./Style";
 import {type ElementOptions, TextUIElement, UI, type UIChild} from "../UIBase";
-import {registerStyle} from "../style/Theme";
+import {registerStyle} from "../Style";
 import {NodeAttributes} from "../NodeAttributes";
 
 @registerStyle(FormStyle)

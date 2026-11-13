@@ -4,7 +4,7 @@ import {Device} from "../../base/Device";
 import {unwrapArray} from "../../base/Utils";
 import {Divider} from "./Divider";
 import {type ElementOptions, UI, UIElement, type NodeAttributes} from "../UIBase";
-import {registerStyle} from "../style/Theme";
+import {registerStyle} from "../Style";
 import {SectionDividerStyle} from "./Style";
 import {Orientation, type OrientationType} from "../Constants";
 

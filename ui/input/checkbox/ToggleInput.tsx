@@ -1,6 +1,5 @@
 import {UI} from "../../UIBase";
-import {styleRule, StyleSheet} from "../../Style";
-import {registerStyle} from "../../style/Theme";
+import {styleRule, StyleSheet, registerStyle} from "../../Style";
 import {BaseInputElement} from "../BaseInputElement";
 
 

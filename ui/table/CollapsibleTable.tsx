@@ -2,9 +2,8 @@ import {type ExtendedOptions, UI, type UIChild, type HTMLTagType} from "../UIBas
 import {Table, TableRow, type TableOptions, type TableRowOptions} from "./Table";
 import {type Constructor} from "../../base/Utils";
 import {CollapsibleMixin} from "../collapsible/CollapsibleMixin";
-import {StyleSheet} from "../Style";
+import {StyleSheet, registerStyle} from "../Style";
 import {styleRule} from "../../decorators/Style";
-import {registerStyle} from "../style/Theme";
 import {GlobalStyle} from "../GlobalStyle";
 import {ColumnHandler} from "../../base/ColumnHandler";
 

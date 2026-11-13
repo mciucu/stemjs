@@ -2,7 +2,7 @@ import {UI, type UIChild} from "../UIBase";
 import {Button} from "./Button";
 import {SimpleStyledElement, type SimpleStyledElementOptions} from "../SimpleElements";
 import {Orientation, type OrientationType} from "../Constants";
-import {registerStyle} from "../style/Theme";
+import {registerStyle} from "../Style";
 import {ButtonGroupStyle, RadioButtonGroupStyle} from "./ButtonStyle";
 import {NodeAttributes} from "../NodeAttributes";
 

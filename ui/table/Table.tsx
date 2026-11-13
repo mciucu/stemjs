@@ -1,6 +1,6 @@
 import {UI, UIElement, type PartialOptions, type UIChild, type HTMLTagType} from "../UIBase";
 import {TableStyle} from "./Style";
-import {registerStyle} from "../style/Theme";
+import {registerStyle} from "../Style";
 import {ColumnHandler, type ColumnLike} from "../../base/ColumnHandler";
 
 // TODO @types

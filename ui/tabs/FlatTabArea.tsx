@@ -1,8 +1,7 @@
 import {type ExtendedOptions, UI, UIElement, type NodeAttributes} from "../UIBase";
 import {FlatTabAreaStyle, FlatTabAreaHorizontalOverflowStyle} from "./Style";
-import {registerStyle} from "../style/Theme";
 import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
-import {type StyleRules} from "../Style";
+import {type StyleRules, registerStyle} from "../Style";
 import {TabTitleArea, BasicTabTitle, TabArea} from "./TabArea";
 import {HorizontalOverflow} from "../horizontal-overflow/HorizontalOverflow";
 import {unwrapArray} from "../../base/Utils";

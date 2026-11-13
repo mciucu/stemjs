@@ -1,6 +1,6 @@
 import {UI, UIElement, cleanChildren} from "../UIBase";
 import {type NodeAttributes} from "../NodeAttributes";
-import {registerStyle} from "../style/Theme";
+import {registerStyle} from "../Style";
 import {getComputedStyle} from "../Utils";
 import {unwrapArray} from "../../base/Utils";
 import {Device} from "../../base/Device";

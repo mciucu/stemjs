@@ -3,7 +3,7 @@
 // the mismatch it catches is left to report.
 
 import {styleRule, StyleSheet} from "../../../ui/Style";
-import {registerStyle} from "../../../ui/style/Theme";
+import {registerStyle} from "../../../ui/Style";
 import {UIElement} from "../../../ui/UIBase";
 
 class FramedStyle extends StyleSheet {

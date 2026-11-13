@@ -1,5 +1,5 @@
 import {UI} from "../UIBase";
-import {registerStyle} from "../style/Theme";
+import {registerStyle} from "../Style";
 import {GlobalContainerStyle} from "./Style";
 import {Device} from "../../base/Device";
 

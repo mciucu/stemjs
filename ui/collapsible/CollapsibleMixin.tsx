@@ -2,10 +2,9 @@ import {UI, UIElement} from "../UIBase";
 import {CollapsibleStyle} from "./Style";
 import {GlobalStyle} from "../GlobalStyle";
 import {MakeIcon} from "../SimpleElements";
-import {registerStyle} from "../style/Theme";
 import {type Constructor, isFunction} from "../../base/Utils";
 import {BaseInputElement} from "../input/BaseInputElement";
-import {type StyleRules, styleRule, StyleSheet} from "../Style";
+import {type StyleRules, styleRule, StyleSheet, registerStyle} from "../Style";
 
 
 export interface CollapsibleOptions {

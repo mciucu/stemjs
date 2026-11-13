@@ -1,6 +1,6 @@
 import {UIElement} from "../UIBase";
 import {FAIcon} from "../FontAwesome";
-import {registerStyle} from "../style/Theme";
+import {registerStyle} from "../Style";
 import {HorizontalOverflow} from "./HorizontalOverflow";
 import {PagedHorizontalOverflowStyle} from "./Style";
 

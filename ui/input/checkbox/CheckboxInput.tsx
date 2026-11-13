@@ -1,7 +1,6 @@
 import {UI, type UIChild, type UICleanChild, type UIRenderable} from "../../UIBase";
-import {type StyleRules, StyleSheet} from "../../Style";
+import {type StyleRules, StyleSheet, registerStyle} from "../../Style";
 import {styleRule} from "../../../decorators/Style";
-import {registerStyle} from "../../style/Theme";
 import {Device} from "../../../base/Device";
 import {BaseInputElement} from "../BaseInputElement";
 import {MakeIcon, MakeText} from "../../SimpleElements";

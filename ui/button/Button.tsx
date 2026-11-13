@@ -1,6 +1,6 @@
 import {type HTMLTagType, UI} from "../UIBase";
 import {IconableInterface, type SimpleStyledElementOptions} from "../SimpleElements";
-import {registerStyle} from "../style/Theme";
+import {registerStyle} from "../Style";
 import {ButtonStyle} from "./ButtonStyle";
 import {NodeAttributes} from "../NodeAttributes";
 

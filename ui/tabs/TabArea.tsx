@@ -2,8 +2,7 @@ import {type BaseUIElement, type ExtendedOptions, UI, UIElement, type PartialOpt
 import {Switcher} from "../Switcher";
 import {Link} from "../primitives/Link";
 import {SingleActiveElementDispatcher} from "../../base/Dispatcher";
-import {registerStyle} from "../style/Theme";
-import {type StyleRules} from "../Style";
+import {type StyleRules, registerStyle} from "../Style";
 import {DefaultTabAreaStyle} from "./Style";
 import {unwrapArray} from "../../base/Utils";
 

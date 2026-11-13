@@ -1,8 +1,7 @@
 import {type ElementOptions, type PartialOptions, UI, type UIChild, UIElement, type NodeAttributes} from "../UIBase";
 import {changeParent} from "../Utils";
-import {registerStyle} from "../style/Theme";
 import {NavStyle} from "./NavStyle";
-import {type StyleRules} from "../Style";
+import {type StyleRules, registerStyle} from "../Style";
 import {PagedHorizontalOverflow} from "../horizontal-overflow/PagedHorizontalOverflow";
 import {PagedHorizontalOverflowStyle} from "../horizontal-overflow/Style";
 import {LeftSideNavIcon, RightSideNavIcon, WrappedNavIcon} from "./NavIcon";

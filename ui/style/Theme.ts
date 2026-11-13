@@ -50,7 +50,7 @@ export type WrittenThemeProps = {[Key in keyof StemThemeProps]?: WrittenThemeVal
 
 // What @registerStyle decorates: any class that makes elements, abstract ones included. `typeof UIElement`
 // carries UIElement's own generic construct signature, which no concrete subclass satisfies - Backlog item 12
-type ElementClassLike = abstract new (...args: any[]) => UIElement<any, any, any, any>;
+export type ElementClassLike = abstract new (...args: any[]) => UIElement<any, any, any, any>;
 
 // A symbol index signature would say where the sheet is kept, but no class satisfies one as an argument
 type StyledElementClass = ElementClassLike & {theme?: Theme};
@@ -185,14 +185,4 @@ export class Theme extends Dispatchable {
     static get props() {
         return this.Global.props;
     }
-}
-
-// TODO @types move this to Style.ts, makes more sense to be there
-// Returning the widened class here is what a decorator can't do (microsoft/TypeScript#4881); the styleSheet
-// member is declared by ts-plugin/transform.js instead, so this only ever registers.
-export function registerStyle<T extends typeof StyleSheet>(styleClass: T, theme: Theme = Theme.Global) {
-    return function <ElementClass extends ElementClassLike>(target: ElementClass): ElementClass {
-        theme.register(target, styleClass);
-        return target;
-    };
 }

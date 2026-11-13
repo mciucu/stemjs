@@ -1,7 +1,7 @@
 // TODO: This class is incomplete for horizontal orientation and more than 2 panels.
 
 import {type ElementOptions, UI, UIElement, type UIChild, type NodeAttributes} from "../UIBase";
-import {registerStyle} from "../style/Theme";
+import {registerStyle} from "../Style";
 import {unwrapArray} from "../../base/Utils";
 import {DividerBar, SectionDivider, type SectionDividerOptions, type SectionDividerPanel, type SectionDividerPanelOptions} from "./SectionDivider";
 import {TitledDividerStyle} from "./Style";

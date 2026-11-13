@@ -1,7 +1,7 @@
 import {UI, UIElement, type UIEventHandler, type UIChild, type HTMLTagType, type WrittenUIOptions} from "../UIBase";
 import {DOMAttributesMap, NodeAttributes} from "../NodeAttributes";
 import {InputStyle} from "./Style";
-import {registerStyle} from "../style/Theme";
+import {registerStyle} from "../Style";
 import {StemDate} from "../../time/Date";
 import {CleanupJobs, type RemoveHandle} from "../../base/Dispatcher";
 

@@ -2,7 +2,7 @@ import {StyleElement, KeyframeElement, DynamicStyleElement} from "./StyleElement
 import {toArray} from "../base/Utils";
 import {type Callback, Dispatchable, type ListenerHandle} from "../base/Dispatcher";
 import {PREFERRED_CLASS_NAME_KEY} from "../decorators/Style";
-import {registerStyle, Theme, type ThemeProps} from "./style/Theme";
+import {type ElementClassLike, Theme, type ThemeProps} from "./style/Theme";
 import {type PartialOptions, type UIResolvedChild} from "./UIBase";
 
 export interface StyleSheetOptions {
@@ -233,7 +233,15 @@ function focus(style: StyleRuleObject): StyleRuleObject {
     return wrapCSS(":focus", style);
 }
 
+// Returning the widened class here is what a decorator can't do (microsoft/TypeScript#4881); the styleSheet
+// member is declared by ts-plugin/transform.js instead, so this only ever registers.
+export function registerStyle<T extends typeof StyleSheet>(styleClass: T, theme: Theme = Theme.Global) {
+    return function <ElementClass extends ElementClassLike>(target: ElementClass): ElementClass {
+        theme.register(target, styleClass);
+        return target;
+    };
+}
+
 export {StyleSheet, wrapCSS, hover, focus, active};
 
 export * from "../decorators/Style";
-export {registerStyle}

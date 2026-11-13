@@ -1,7 +1,7 @@
 import {type PartialOptions} from "../UIBase";
 import {BaseUIElement, UI, UIElement, type NodeAttributes} from "../UIBase";
 import {FAIcon} from "../FontAwesome";
-import {registerStyle} from "../style/Theme";
+import {registerStyle} from "../Style";
 import {HorizontalOverflowStyle} from "./Style";
 
 

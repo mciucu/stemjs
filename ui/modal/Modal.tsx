@@ -4,7 +4,7 @@ import {FloatingWindow} from "./FloatingWindow";
 import {ModalStyle} from "./Style";
 import {UI, UIElement, type PartialOptions, type StyleObject, type UIChild} from "../UIBase";
 import {Dispatcher, type RemoveHandle} from "../../base/Dispatcher";
-import {registerStyle} from "../style/Theme";
+import {registerStyle} from "../Style";
 import {Level, type LevelType, Size} from "../Constants";
 import {TemporaryMessageArea} from "../misc/TemporaryMessageArea";
 import {NodeAttributes} from "../NodeAttributes";

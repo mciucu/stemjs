@@ -1,6 +1,6 @@
 import {type PartialOptions, UI} from "../UIBase";
 import {FloatingWindowStyle} from "./Style";
-import {registerStyle} from "../style/Theme";
+import {registerStyle} from "../Style";
 
 export interface FloatingWindowOptions {
     // Where the window mounts, since it escapes its parent's subtree

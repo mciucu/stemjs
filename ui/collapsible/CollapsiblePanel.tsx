@@ -2,7 +2,7 @@ import {UI} from "../UIBase";
 import {CollapsibleMixin} from "./CollapsibleMixin";
 import {CardPanel} from "../CardPanel";
 import {CollapsiblePanelStyle} from "./Style";
-import {registerStyle} from "../style/Theme";
+import {registerStyle} from "../Style";
 import {GlobalStyle} from "../GlobalStyle";
 
 @registerStyle(CollapsiblePanelStyle)

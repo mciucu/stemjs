@@ -1,7 +1,6 @@
 import {UI} from "./UIBase";
 import {keyframesRule} from "../decorators/Style";
-import {registerStyle} from "./style/Theme";
-import {StyleSheet} from "./Style";
+import {StyleSheet, registerStyle} from "./Style";
 
 function getCircleStyle(size: number, borderSize: number, color: string, animationName: string, animationDuration: string) {
     return {

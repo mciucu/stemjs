@@ -1,8 +1,7 @@
 // Wrapper over the Ace code editor, needs ace to be loaded
 // TODO: should be renamed to AceCodeEditor?
 import {UI, UIElement} from "./UIBase";
-import {StyleSheet, styleRule} from "./Style";
-import {registerStyle} from "./style/Theme";
+import {StyleSheet, styleRule, registerStyle} from "./Style";
 import {EnqueueableMethodMixin, enqueueIfNotLoaded} from "../base/EnqueueableMethodMixin";
 import type {Callback} from "../base/Dispatcher";
 import {ensure} from "../base/Require";
