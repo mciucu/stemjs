@@ -283,6 +283,11 @@ export abstract class BaseUIElement<NodeType extends ChildNode = SVGElement | HT
         redrawPerTickRunner.clear(this);
     }
 
+    // Asked of an element that is redrawn, after it received new options: if it should redraw compared to old options?
+    needsRedraw(_prevOptions: this["options"]): boolean {
+        return true;
+    }
+
     // Lifecycle methods, called when the element was first inserted in the DOM, and before it's removed
     onMount(): void {}
 
@@ -589,9 +594,14 @@ export class UIElement<
             if (existingChild && newChild.canOverwrite(existingChild)) {
                 // We're replacing an existing child element, it might be the very same object
                 if (existingChild !== newChild) {
+                    const previousOptions = existingChild.options;
                     newChildren[i] = newChild = this.overwriteChild(existingChild, newChild);
+                    if (newChild.needsRedraw(previousOptions)) {
+                        newChild.redraw();
+                    }
+                } else {
+                    newChild.redraw();
                 }
-                newChild.redraw();
                 if (newChild.node !== currentChildNode) {
                     domNode.insertBefore(newChild.node!, currentChildNode);
                 }
