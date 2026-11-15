@@ -12,7 +12,7 @@ interface SwitcherOptions {
 interface ChildProperties {
     isMounted: boolean;
     redrawIndex: number;
-    isUpToDate?: boolean;
+    isUpToDate: boolean;
     scrollTop?: number;
 }
 
@@ -120,19 +120,23 @@ export class Switcher extends UIElement<SwitcherOptions> {
             this.childMap.set(child, {
                 isMounted: !!child.node,
                 redrawIndex: -1,
+                isUpToDate: true,
             });
         }
         return this.childMap.get(child)!;
     }
 
+    // Redraws a child the switcher redrew since, or one marked out of date while it was hidden (lazyRender, shouldRedrawChild)
     updateChild(child: UIElement): void {
-        if (this.getChildProperties(child).redrawIndex < this.numRedraws) {
+        const childProps = this.getChildProperties(child);
+        if (childProps.redrawIndex < this.numRedraws || !childProps.isUpToDate) {
             if (!child.node) {
                 child.mount(this);
             } else {
                 child.redraw();
             }
-            this.getChildProperties(child).redrawIndex = this.numRedraws;
+            childProps.redrawIndex = this.numRedraws;
+            childProps.isUpToDate = true;
         }
     }
 
