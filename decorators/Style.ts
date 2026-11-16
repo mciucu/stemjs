@@ -68,6 +68,10 @@ function styleRuleWithOptions(...optionsArgs: StyleRuleOptions[]): FakedDecorato
 
     function styleRuleDecorator(target: object, key: string | symbol, descriptor: StyleDescriptor): PropertyDescriptor {
         const {initializer, value} = descriptor;
+        // Another decorator's accessor, not the rule as written: said here, where the class is declared, not when first read
+        if (descriptor.get) {
+            throw new Error(`${target.constructor.name}.${String(key)} is decorated twice: a style rule takes one decorator`);
+        }
 
         descriptor.objInitializer = function (this: StyleSheet) {
             let style = evaluateStyleRuleObject(this, initializer, value, options);

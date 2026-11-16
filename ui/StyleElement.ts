@@ -34,6 +34,61 @@ interface KeyframeElementOptions extends StyleElementOptions {
     keyframe?: Record<string, StyleAttributes>;
 }
 
+// A style's key as CSS names the property: dashed, and a vendor's prefix (WebkitAppRegion, msTransform) with the dash before it
+export function cssPropertyName(key: string): string {
+    const dashed = dashCase(key);
+    return dashed !== key && /^(webkit|moz|ms)-/.test(dashed) ? "-" + dashed : dashed;
+}
+
+// A selector list's parts: split at the commas that are outside brackets, parentheses and quotes
+function splitSelectorList(selector: string): string[] {
+    const parts: string[] = [];
+    let depth = 0;
+    let quote = "";
+    let start = 0;
+    for (let i = 0; i < selector.length; i++) {
+        const char = selector[i];
+        if (quote) {
+            if (char === "\\") {
+                i++;
+            } else if (char === quote) {
+                quote = "";
+            }
+        } else if (char === '"' || char === "'") {
+            quote = char;
+        } else if (char === "(" || char === "[") {
+            depth++;
+        } else if (char === ")" || char === "]") {
+            depth--;
+        } else if (char === "," && depth === 0) {
+            parts.push(selector.slice(start, i));
+            start = i + 1;
+        }
+    }
+    parts.push(selector.slice(start));
+    return parts;
+}
+
+// A nested key's parts, each as it is appended to the parent's selector. The space around a comma isn't part of a selector,
+// so the parts after the first take the first one's leading space: " th, td" is a th and a td inside the parent
+export function nestedKeyParts(key: string): string[] {
+    if (!key.includes(",")) {
+        return [key];
+    }
+    const [first, ...rest] = splitSelectorList(key);
+    const leadingSpace = first.slice(0, first.length - first.trimStart().length);
+    return [first.trimEnd(), ...rest.map(part => leadingSpace + part.trim())];
+}
+
+// The selector of a rule nested under another. Either may be a list, and then each part of the parent takes each part of the key
+export function nestedSelector(parent: string, keyParts: string[]): string {
+    if (keyParts.length === 1 && !parent.includes(",")) {
+        return parent + keyParts[0];
+    }
+    const parentParts = splitSelectorList(parent).map(part => part.trim());
+    return parentParts.flatMap(parentPart => keyParts.map(keyPart => parentPart + keyPart)).join(",");
+}
+
 // TODO: should this be actually better done throught the dynamic CSS API, without doing through the DOM?
 // So far it's actually better like this, since we want to edit the classes inline
 export class StyleInstance extends TextUIElement<StyleInstanceOptions> {
@@ -64,12 +119,11 @@ export class StyleInstance extends TextUIElement<StyleInstanceOptions> {
                 continue;
             }
 
-            key = dashCase(key);
+            key = cssPropertyName(key);
 
             // A number for a size is in pixels, but a small line height (styleValueWithUnit)
             value = styleValueWithUnit(key, value);
 
-            // TODO: if key starts with vendor-, replace it with the browser specific one (and the plain one)
             const buildKeyValue = (key: string, value: StyleAttributeValue): string => key + ":" + value + ";";
 
             if (Array.isArray(value)) {
@@ -157,14 +211,14 @@ export class DynamicStyleElement extends StyleElement<DynamicStyleElementOptions
                 ownStyle[key] = value;
                 haveOwnStyle = true;
             } else {
-                // Check that this actually is a valid subselector
-                const firstChar = String(key).charAt(0);
-                if (!ALLOWED_SELECTOR_STARTS.has(firstChar)) {
+                // Check that this actually is a valid subselector, each part of it when it is a list
+                const keyParts = nestedKeyParts(String(key));
+                if (!keyParts.every(part => ALLOWED_SELECTOR_STARTS.has(part.charAt(0)))) {
                     console.error(`First character of your selector is invalid. The key is "${key}"`);
                     continue;
                 }
                 // TODO: maybe optimize for waste here?
-                const subStyle = this.getStyleInstances(selector + key, value as StyleAttributes);
+                const subStyle = this.getStyleInstances(nestedSelector(selector, keyParts), value as StyleAttributes);
                 result.push(...subStyle);
             }
         }
@@ -230,7 +284,7 @@ export class KeyframeElement extends StyleElement<KeyframeElementOptions> {
             if (value == null) {
                 continue;
             }
-            str += dashCase(key) + ":" + value + ";";
+            str += cssPropertyName(key) + ":" + value + ";";
         }
         return str + "}";
     }
