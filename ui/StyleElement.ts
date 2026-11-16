@@ -80,13 +80,18 @@ export function nestedKeyParts(key: string): string[] {
     return [first.trimEnd(), ...rest.map(part => leadingSpace + part.trim())];
 }
 
-// The selector of a rule nested under another. Either may be a list, and then each part of the parent takes each part of the key
+const ALLOWED_SELECTOR_STARTS = new Set([":", ">", " ", "+", "~", "[", "."]);
+
+// The selector of a rule nested under another. Either may be a list, and then each part of the parent takes each part of the key.
+// A later part of the key that can't follow a selector (a tag's name: the th of ">td,th") stands by itself, as it always has
 export function nestedSelector(parent: string, keyParts: string[]): string {
     if (keyParts.length === 1 && !parent.includes(",")) {
         return parent + keyParts[0];
     }
     const parentParts = splitSelectorList(parent).map(part => part.trim());
-    return parentParts.flatMap(parentPart => keyParts.map(keyPart => parentPart + keyPart)).join(",");
+    return keyParts.flatMap(keyPart => {
+        return ALLOWED_SELECTOR_STARTS.has(keyPart.charAt(0)) ? parentParts.map(parentPart => parentPart + keyPart) : [keyPart];
+    }).join(",");
 }
 
 // TODO: should this be actually better done throught the dynamic CSS API, without doing through the DOM?
@@ -163,8 +168,6 @@ export class StyleElement<ExtraOptions = {}> extends UI.Primitive("style")<Extra
     }
 }
 
-const ALLOWED_SELECTOR_STARTS = new Set([":", ">", " ", "+", "~", "[", "."]);
-
 // TODO: figure out how to work with animation frames, this only creates a wrapper class
 export class DynamicStyleElement extends StyleElement<DynamicStyleElementOptions> {
     className?: string;
@@ -211,9 +214,9 @@ export class DynamicStyleElement extends StyleElement<DynamicStyleElementOptions
                 ownStyle[key] = value;
                 haveOwnStyle = true;
             } else {
-                // Check that this actually is a valid subselector, each part of it when it is a list
+                // Check that this actually is a valid subselector
                 const keyParts = nestedKeyParts(String(key));
-                if (!keyParts.every(part => ALLOWED_SELECTOR_STARTS.has(part.charAt(0)))) {
+                if (!ALLOWED_SELECTOR_STARTS.has(keyParts[0].charAt(0))) {
                     console.error(`First character of your selector is invalid. The key is "${key}"`);
                     continue;
                 }

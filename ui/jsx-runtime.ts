@@ -1,8 +1,6 @@
 // JSX Runtime for StemJS
 import {UI, BaseUIElement, UIElement, type UIElementOptions, type HTMLTagType, type SVGTagType} from "./UIBase";
-import {type SVGUIElement} from "./svg/SVGBase";
-// Loaded for what it sets: the class createElement builds a plain SVG tag with (a type's import alone is dropped by a bundler)
-import "./svg/SVGBase";
+import {SVGUIElement} from "./svg/SVGBase";
 
 // The new JSX transform expects jsx/jsxs with (type, props, key) signature. props stays open here: the
 // ts-plugin checks a tag's attributes against the class's own $stemJsxOptions before the transform runs,
