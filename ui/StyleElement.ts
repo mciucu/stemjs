@@ -1,6 +1,6 @@
 import {TextUIElement, UI, type UIChild} from "./UIBase";
 import {dashCase, isFunction, isNumber, isString} from "../base/Utils";
-import {NodeAttributes, defaultToPixelsAttributes} from "./NodeAttributes";
+import {NodeAttributes, styleValueWithUnit} from "./NodeAttributes";
 
 // The counter every generated class and keyframe name is numbered from
 declare global {
@@ -66,10 +66,8 @@ export class StyleInstance extends TextUIElement<StyleInstanceOptions> {
 
             key = dashCase(key);
 
-            // If it's a size property, and the value is a number, assume it's in pixels
-            if (isNumber(value) && value != 0 && defaultToPixelsAttributes.has(key)) {
-                value = value + "px";
-            }
+            // A number for a size is in pixels, but a small line height (styleValueWithUnit)
+            value = styleValueWithUnit(key, value);
 
             // TODO: if key starts with vendor-, replace it with the browser specific one (and the plain one)
             const buildKeyValue = (key: string, value: StyleAttributeValue): string => key + ":" + value + ";";

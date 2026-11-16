@@ -15,7 +15,6 @@ export const defaultToPixelsAttributes = new Set([
     "border-width",
     "bottom",
     "font-size",
-    "font-stretch",
     "height",
     "layer-grid-char",
     "layer-grid-char-spacing",
@@ -48,6 +47,26 @@ export const defaultToPixelsAttributes = new Set([
     "column-gap",
     "row-gap",
 ]);
+
+// A line height up to this is a multiplier, as CSS reads a bare number there (1.4); above it, pixels (20)
+const LINE_HEIGHT_MULTIPLIER_MAX = 5;
+
+// A style's value as CSS takes it: a number for a size is in pixels. A line height is the one size where a bare number also
+// means something else, a multiple of the font size, so a small one stays as it is: 1.4 stays 1.4, 20 becomes 20px.
+// The key may be camelCase or dashed; it's only dashed for a number, as no other value takes a unit
+export function styleValueWithUnit<T>(key: string, value: T): T | string {
+    if (!isNumber(value) || value == 0) {
+        return value;
+    }
+    const dashedKey = dashCase(key);
+    if (!defaultToPixelsAttributes.has(dashedKey)) {
+        return value;
+    }
+    if (dashedKey === "line-height" && value <= LINE_HEIGHT_MULTIPLIER_MAX) {
+        return value;
+    }
+    return value + "px";
+}
 
 // What the map holds per attribute: the DOM name it is written under, which defaults to the option's own name
 export interface DOMAttributeDescriptor {
@@ -195,9 +214,7 @@ export class NodeAttributes {
         if (typeof value === "function") {
             value = value();
         }
-        if (isNumber(value) && value != 0 && defaultToPixelsAttributes.has(dashCase(key))) {
-            value = value + "px";
-        }
+        value = styleValueWithUnit(key, value);
         // CSSStyleDeclaration is indexable by number, not by an arbitrary property name, and the key here is
         // whatever an options object carried. Naming the shape instead buys nothing: value is already declared
         if (node && (node.style as any)[key] !== value) {

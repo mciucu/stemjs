@@ -140,7 +140,7 @@ export class LabelStyle extends BasicLevelStyleSheet(labelColorToStyle) {
         textAlign: "center",
         whiteSpace: "nowrap",
         verticalAlign: "bottom",
-        lineHeight: 4 / 3 + "",
+        lineHeight: 4 / 3,
         display: "inline-block",
         touchAction: "manipulation",
         ":disabled": {
