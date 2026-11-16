@@ -574,6 +574,26 @@ export class UIElement<
 
         const domNode = this.node;
         const childrenKeyMap = this.getElementKeyMap(this.children);
+        // Remove the children whose keys are gone before placing the rest.
+        // Needed to keep focus when a list drops rows above the focused one, among other things.
+        // Left in until the end, they can sit before the kept children, so every kept child gets moved in the DOM.
+        const removed = new Set<BaseUIElement>();
+        if (childrenKeyMap?.size) {
+            const newKeys = new Set<string | number>();
+            for (let i = 0; i < newChildren.length; i++) {
+                newChildren[i] = resolveChildElement(newChildren[i], this);
+                newKeys.add(getChildKey(newChildren, i, newChildren[i] as BaseUIElement));
+            }
+            // An element given again under another key is still a child: only the loop moves it
+            const given = new Set(newChildren);
+            for (const [key, child] of childrenKeyMap) {
+                if (!newKeys.has(key) && !given.has(child)) {
+                    child.destroyNode();
+                    removed.add(child);
+                    childrenKeyMap.delete(key);
+                }
+            }
+        }
         // The resolved child the last turn wrote back, which is what newChildren[i - 1] holds
         let prevChild: BaseUIElement | null = null;
 
@@ -617,7 +637,7 @@ export class UIElement<
             let newChildrenSet = new Set(newChildren);
 
             for (const currentChild of this.children) {
-                if (!newChildrenSet.has(currentChild)) {
+                if (!newChildrenSet.has(currentChild) && !removed.has(currentChild)) {
                     currentChild.destroyNode();
                 }
             }
