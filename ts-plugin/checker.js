@@ -174,8 +174,9 @@ function createProjectCheck(ts, projectRoot, {filter = null, previewNoCheck = fa
     // both were made under, as text. The builder goes with the files: what it remembers points into them.
     const kept = keepFiles ? {files: new Map(), builder: null, options: null} : null;
 
-    // The diagnostics the user is answerable for, the program they come from and the parsed tsconfig
-    return () => {
+    // The diagnostics the user is answerable for, the program they come from and the parsed tsconfig. A run may ask
+    // with a filter of its own.
+    return (runFilter = filter) => {
         const config = parseConfig(ts, projectRoot, configFile);
         const {options, fileNames} = config;
         const augmentedFiles = new Map();
@@ -213,7 +214,7 @@ function createProjectCheck(ts, projectRoot, {filter = null, previewNoCheck = fa
             // With noEmit, emitting writes only the build info
             builder.emit(undefined, writeBuildInfo);
         }
-        const diagnostics = projectDiagnostics(ts, projectRoot, program, options, augmentedFiles, preEmitDiagnostics, filter);
+        const diagnostics = projectDiagnostics(ts, projectRoot, program, options, augmentedFiles, preEmitDiagnostics, runFilter);
         return {diagnostics, program, config};
     };
 }

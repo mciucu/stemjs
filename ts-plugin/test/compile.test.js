@@ -2,13 +2,22 @@
 // directives are the real assertions: an implied type that came out as `any` leaves them unsatisfied, and
 // TypeScript reports that as an error of its own.
 
+const {spawnSync} = require("child_process");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const {createProjectCheck, getProjectDiagnostics} = require("../checker");
 const {stemRootDiagnostic} = require("../stemSources");
+const {warmAddress} = require("../warmChecker");
 
 const FIXTURE = path.join(__dirname, "fixture");
+
+// Run as a script with the checker's address: waits for the answer, so the checker has let go before the test goes on
+const STOP_WARM_CHECKER = `
+const socket = require("net").connect(process.argv[1], () => socket.write(JSON.stringify({fingerprint: null}) + "\\n"));
+socket.on("data", () => {});
+socket.on("error", () => {});
+`;
 
 // The exports of numeric.ts that must still report, which only the plugin's own output can show
 const NUMERIC_REPORTED = ["counted", "discounted", "looselyOrdered", "mislabelled", "overBudget", "scaled", "summed"];
@@ -59,6 +68,19 @@ module.exports = (ts, check) => {
         const keeping = createProjectCheck(ts, FIXTURE, {filter: path.join("test", "fixture"), keepFiles: true});
         keeping();
         check("and one that runs again on the files it kept", described(keeping().diagnostics), described(diagnostics));
+
+        // The command line through a warm checker prints what it prints by itself, the run that starts the checker
+        // and the one it answers from what it kept alike
+        const typecheck = (...flags) => {
+            const run = spawnSync(process.execPath, [path.join(__dirname, "..", "typecheck.js"), "--filter", path.join("test", "fixture"), ...flags], {cwd: FIXTURE, encoding: "utf8"});
+            return `${run.status} ${run.stdout} ${run.stderr}`;
+        };
+        const plain = typecheck();
+        const warmFlags = ["--incremental", path.join(buildInfoFolder, "warm.tsbuildinfo"), "--warm"];
+        check("a run through a warm checker prints what one by itself does", typecheck(...warmFlags), plain);
+        check("and so does the next, which the checker answers from its kept files", typecheck(...warmFlags), plain);
+        // Asking with no fingerprint is asking for another checker, so this one stops
+        spawnSync(process.execPath, ["-e", STOP_WARM_CHECKER, warmAddress(path.join(buildInfoFolder, "warm.tsbuildinfo"))]);
     } finally {
         fs.rmSync(buildInfoFolder, {recursive: true, force: true});
     }

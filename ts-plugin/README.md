@@ -328,6 +328,7 @@ TypeScript appends to an assignability error are behind `--verbose`; `--quiet` p
 ```sh
 node stem-core/ts-plugin/typecheck.js --incremental <file>  # keep what the run learns in <file>, a .tsbuildinfo
 node stem-core/ts-plugin/typecheck.js --watch [--incremental <file>]  # stay running, report again on each change
+node stem-core/ts-plugin/typecheck.js --incremental <file> --warm      # ask a checker kept running in the background
 ```
 
 `--incremental` makes the next run recheck only what an edit can affect: a file whose text changed, and every file
@@ -339,6 +340,15 @@ tsconfig its own. It is replaced whole after each run, so runs that overlap neve
 is parsing and binding every file again; `--watch` keeps them from one check to the next, so a change that alters no
 declaration reports in about a second. It prints a report after each check that read a changed file, and nothing for
 a change that changed no file's text. A tsconfig whose options changed starts over, and reports.
+
+`--warm` gives a one-shot run what `--watch` keeps: the run asks a checker in the background, which keeps the files it
+parsed and bound, checks the project as it is on disk, and answers with what the run prints and its exit code. The
+first run that finds none starts it (about as long as an `--incremental` run), and every run after answers in a second
+or two. The checker listens beside `<file>` (a socket, or a named pipe on Windows) and answers runs one at a time, so
+runs that overlap share it. It stops after 20 minutes with no run, and as soon as a run comes from other code (the
+plugin's sources, TypeScript or Node changed) or asks for another check (other options, `NO_STEM_PLUGIN`); that run
+starts the one it needs. A run whose checker stops before it answers checks by itself, and says so on stderr. The
+checker holds what a full run does in memory, about 1.5 GB for a project of a thousand files.
 
 ```sh
 STEM_PLUGIN_DEBUG=1 node stem-core/ts-plugin/typecheck.js   # report errors in what we generate, instead of hiding them
@@ -372,7 +382,8 @@ completions, diagnostics, outline).
   by the command line and the tests, so the two can't disagree about what counts as an error.
 - `numericCoercion.js`, `jsxChildren.js`, `registeredStyle.js` - the three diagnostic rules above, shared by `checker.js` and `index.js`
   so the editor and the command line agree about what counts.
-- `typecheck.js` - the command-line counterpart, a CLI over `checker.js`, with `--incremental` and `--watch`.
+- `typecheck.js` - the command-line counterpart, a CLI over `checker.js`, with `--incremental`, `--watch` and `--warm`.
+- `warmChecker.js` - the checker `--warm` keeps in the background: where it listens, how a run asks it, when it stops.
 - `loadTypeScript.js` - finds the project's TypeScript from wherever we're run.
 - `test/` - see above.
 

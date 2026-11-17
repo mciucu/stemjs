@@ -3,18 +3,21 @@
 // @registerStyle and @field. An un-annotated @field only has a type because of this, so this is what
 // `npm run typecheck` should run - plain `tsc` sees the field as an implicit any.
 // Usage: node stem-core/ts-plugin/typecheck.js [--project <tsconfig>] [--filter <substring>] [--preview] [--verbose | --quiet]
-//                                              [--incremental <file>] [--watch]
+//                                              [--incremental <file>] [--watch | --warm]
 // --project checks a tsconfig other than the project's tsconfig.json (e.g. one that covers only the Stem code).
 // --preview reports what the project would say with every @ts-nocheck lifted, without touching a file.
 // --incremental keeps what a run learns in <file> (a .tsbuildinfo, outside the sources), so the next run rechecks only
 // the files an edit can affect. The report is the same as a full run's.
 // --watch stays running and reports again each time a file the project reads changes.
+// --warm (with --incremental) asks a checker kept running in the background, which keeps the files it parsed, and starts
+// one if none answers (warmChecker.js). The report is the same.
 // One line per diagnostic by default; --verbose prints the full message chains, --quiet only counts per file.
 
 const fs = require("fs");
 const path = require("path");
 const loadTypeScript = require("./loadTypeScript");
 const {createProjectCheck} = require("./checker");
+const {askWarmChecker, serveWarmChecker, warmAddress, warmFingerprint} = require("./warmChecker");
 
 const ts = loadTypeScript();
 // The project being checked is the one we're run from
@@ -39,29 +42,49 @@ function formatOneLine(diagnostic) {
     return `${fileName}(${line + 1},${character + 1}): TS${diagnostic.code}: ${message}`;
 }
 
-function report(diagnostics) {
+// "verbose", "quiet" or "lines", as the command line asks
+function reportFormat() {
+    if (process.argv.includes("--verbose")) {
+        return "verbose";
+    }
+    return process.argv.includes("--quiet") ? "quiet" : "lines";
+}
+
+// What a run prints: the diagnostics on stdout, their count on stderr
+function formatReport(diagnostics, format) {
     const formatHost = {
         getCanonicalFileName: fileName => fileName,
         getCurrentDirectory: () => projectRoot,
         getNewLine: () => ts.sys.newLine,
     };
+    let stdout = "";
     if (diagnostics.length === 0) {
         // Nothing to print
-    } else if (process.argv.includes("--verbose")) {
-        process.stdout.write(ts.formatDiagnostics(diagnostics, formatHost));
-    } else if (process.argv.includes("--quiet")) {
+    } else if (format === "verbose") {
+        stdout = ts.formatDiagnostics(diagnostics, formatHost);
+    } else if (format === "quiet") {
         const perFile = new Map();
         for (const diagnostic of diagnostics) {
             const fileName = diagnostic.file ? path.relative(projectRoot, diagnostic.file.fileName) : "";
             perFile.set(fileName, (perFile.get(fileName) || 0) + 1);
         }
-        for (const [fileName, count] of [...perFile].sort((a, b) => b[1] - a[1])) {
-            process.stdout.write(`${String(count).padStart(4)}  ${fileName}\n`);
-        }
+        stdout = [...perFile].sort((a, b) => b[1] - a[1]).map(([fileName, count]) => `${String(count).padStart(4)}  ${fileName}\n`).join("");
     } else {
-        process.stdout.write(diagnostics.map(formatOneLine).join("\n") + "\n");
+        stdout = diagnostics.map(formatOneLine).join("\n") + "\n";
     }
-    console.error(`${diagnostics.length} errors`);
+    return {stdout, stderr: `${diagnostics.length} errors\n`, exitCode: diagnostics.length > 0 ? 1 : 0};
+}
+
+function print({stdout, stderr, exitCode}) {
+    process.stdout.write(stdout);
+    process.stderr.write(stderr);
+    process.exitCode = exitCode;
+}
+
+function report(diagnostics) {
+    const {stdout, stderr} = formatReport(diagnostics, reportFormat());
+    process.stdout.write(stdout);
+    process.stderr.write(stderr);
 }
 
 // The folders a change could come from: those the tsconfig includes, as deep as it does, the tsconfig's own, and the
@@ -132,17 +155,63 @@ function watch(check) {
     run();
 }
 
+// The warm checker's side: one check kept for every run that asks, each with its own filter and format
+function serve(warm, check) {
+    serveWarmChecker({
+        ...warm,
+        answer: request => {
+            try {
+                return formatReport(check(request.filter).diagnostics, request.format);
+            } catch (error) {
+                return {stdout: "", stderr: `${error.message}\n`, exitCode: 1};
+            }
+        },
+    });
+}
+
+// A run's side: what the warm checker answers, or a check of its own when none can
+async function askWarm(warm, checkHere) {
+    const answer = await askWarmChecker({
+        ...warm,
+        request: {filter: argument("--filter"), format: reportFormat()},
+        serveArguments: [__filename, ...process.argv.slice(2).filter(argument => argument !== "--warm"), "--serve"],
+        projectRoot,
+    });
+    if (answer.failed) {
+        process.stderr.write(`Checking here: ${answer.failed}.\n`);
+        print(formatReport(checkHere().diagnostics, reportFormat()));
+        return;
+    }
+    print(answer);
+}
+
 function main() {
     const keepWatching = process.argv.includes("--watch");
-    const check = createProjectCheck(ts, projectRoot, {
-        filter: argument("--filter"),
+    const serving = process.argv.includes("--serve");
+    const buildInfoFile = argument("--incremental");
+    const checkOptions = {
         previewNoCheck: process.argv.includes("--preview"),
         configFile: argument("--project"),
-        buildInfoFile: argument("--incremental"),
-        keepFiles: keepWatching,
-    });
+        buildInfoFile,
+    };
+    const check = createProjectCheck(ts, projectRoot, {...checkOptions, filter: argument("--filter"), keepFiles: keepWatching || serving});
     if (keepWatching) {
         watch(check);
+        return;
+    }
+    if (serving || process.argv.includes("--warm")) {
+        if (!buildInfoFile) {
+            console.error("--warm keeps its checker's address beside the build info: give it --incremental <file> too");
+            process.exitCode = 1;
+            return;
+        }
+        const buildInfoPath = path.resolve(projectRoot, buildInfoFile);
+        const warm = {address: warmAddress(buildInfoPath), fingerprint: warmFingerprint({...checkOptions, buildInfoPath, projectRoot})};
+        if (serving) {
+            serve(warm, check);
+        } else {
+            askWarm(warm, check);
+        }
         return;
     }
     const {diagnostics} = check();
