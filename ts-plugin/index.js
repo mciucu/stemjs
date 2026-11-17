@@ -13,6 +13,7 @@ const {isNumericCoercion} = require("./numericCoercion");
 const {isCollectedChild} = require("./jsxChildren");
 const {isRegisteredStyleReplacement} = require("./registeredStyle");
 const {isSkippedStemSource, stemRootDiagnostic} = require("./stemSources");
+const {childrenFieldDiagnostics} = require("./childrenField");
 
 function init(modules) {
     const ts = modules.typescript;
@@ -211,8 +212,15 @@ function init(modules) {
             proxy[key] = (...args) => method.apply(languageService, args);
         }
 
+        // The semantic ones with the plugin's own: a component field that replaces its child list
+        const reported = (key, fileName) => {
+            const own = languageService[key](fileName);
+            const program = languageService.getProgram();
+            const sourceFile = key === "getSemanticDiagnostics" && program && program.getSourceFile(fileName);
+            return sourceFile ? [...own, ...childrenFieldDiagnostics(ts, program.getTypeChecker(), sourceFile)] : own;
+        };
         for (const key of ["getSemanticDiagnostics", "getSyntacticDiagnostics", "getSuggestionDiagnostics"]) {
-            proxy[key] = (fileName) => isSkippedStemSource(config, fileName) ? [] : languageService[key](fileName).filter(diagnostic => {
+            proxy[key] = (fileName) => isSkippedStemSource(config, fileName) ? [] : reported(key, fileName).filter(diagnostic => {
                 if (isOurs(fileName, diagnostic.start)) {
                     return false;
                 }

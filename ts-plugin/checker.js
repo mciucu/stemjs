@@ -7,6 +7,7 @@ const {isNumericCoercion} = require("./numericCoercion");
 const {isCollectedChild} = require("./jsxChildren");
 const {isRegisteredStyleReplacement} = require("./registeredStyle");
 const {isSkippedStemSource, stemRootDiagnostic} = require("./stemSources");
+const {childrenFieldDiagnostics} = require("./childrenField");
 
 const PLUGIN_NAME = "ts-plugin-registered-styles";
 
@@ -117,7 +118,8 @@ function getProjectDiagnostics(ts, projectRoot, filter = null, previewNoCheck = 
     const pluginConfig = getPluginConfig(options);
     const stemRootProblem = augmentedFiles.size > 0 ? stemRootDiagnostic(ts, pluginConfig, options, projectRoot) : null;
 
-    return [...(stemRootProblem ? [stemRootProblem] : []), ...ts.getPreEmitDiagnostics(program)].filter(diagnostic => {
+    const childrenFields = program.getSourceFiles().filter(file => !file.isDeclarationFile).flatMap(file => childrenFieldDiagnostics(ts, checker, file));
+    return [...(stemRootProblem ? [stemRootProblem] : []), ...ts.getPreEmitDiagnostics(program), ...childrenFields].filter(diagnostic => {
         // Project-wide diagnostics have no file to match against, so a filtered run isn't asking about them
         if (!diagnostic.file) {
             return !filter;

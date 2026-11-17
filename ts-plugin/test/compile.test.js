@@ -15,7 +15,10 @@ module.exports = (ts, check) => {
     // Everything the fixture imports comes from stem itself, whose own diagnostics aren't what's under test
     const diagnostics = getProjectDiagnostics(ts, FIXTURE, path.join("test", "fixture"));
     const isNumeric = diagnostic => path.basename(diagnostic.file.fileName) === "numeric.ts";
-    const messages = diagnostics.filter(diagnostic => !isNumeric(diagnostic)).map(
+    const isChildrenField = diagnostic => path.basename(diagnostic.file.fileName) === "childrenField.tsx";
+    const fields = diagnostics.filter(isChildrenField).map(diagnostic => `${diagnostic.code} ${diagnostic.file.text.slice(diagnostic.start, diagnostic.start + diagnostic.length)} line ${diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start).line + 1}`);
+    check("a component's field named children reports, where it is declared", fields.join(" | "), "99002 children line 8");
+    const messages = diagnostics.filter(diagnostic => !isNumeric(diagnostic) && !isChildrenField(diagnostic)).map(
         diagnostic => `${path.basename(diagnostic.file.fileName)}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, " ")}`
     );
 
