@@ -20,6 +20,17 @@ class DashboardTitleStyle extends StyleSheet {
     };
 
     plainField = "20px";
+
+    // Short names: xs has room for a bare `$<counter>` while the counter is one digit, s never does
+    @styleRule
+    xs = {
+        width: 10,
+    };
+
+    @styleRule
+    s = {
+        width: 5,
+    };
 }
 
 @registerStyle(DashboardTitleStyle)

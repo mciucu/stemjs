@@ -65,12 +65,20 @@ module.exports = (ts, check) => {
         optional.appended.includes(`startedAt: ${FIELD_VALUE}<typeof Date>;`), true);
 
     const styles = augment(ts, "styles.tsx");
+    // From the last member back, so a longer placeholder put back doesn't move the ones before it
     let restoredStyles = styles.result.text.slice(0, styles.result.originalLength);
-    for (const field of styles.result.fields) {
-        restoredStyles = restoredStyles.slice(0, field.sourceStart) + field.name +
-            restoredStyles.slice(field.sourceStart + field.name.length);
+    for (const field of [...styles.result.fields].reverse()) {
+        const at = toAugmentedOffset(styles.result.shifts, field.sourceStart);
+        restoredStyles = restoredStyles.slice(0, at) + field.name + restoredStyles.slice(at + field.placeholder.length);
     }
     check("a .tsx source half differs only at the renamed members", restoredStyles, styles.text);
+    const shortRules = styles.result.fields.filter(field => field.name.length < 3);
+    check("a name too short for its placeholder is relocated anyway", shortRules.map(field => field.name).join(","), "xs,s");
+    // xs still fits a bare `$3`; s doesn't, so its placeholder is longer and recorded as a shift
+    check("the placeholders of short names", shortRules.map(field => `${field.placeholder.length > field.name.length}:${/\$\d+$/.test(field.placeholder)}`).join(","), "false:true,true:true");
+    check("only the longer one is a shift", styles.result.shifts.length, 1);
+    check("its placeholder's start maps back to the name as written",
+        shortRules.every(field => toSourceOffset(styles.result.shifts, toAugmentedOffset(styles.result.shifts, field.sourceStart)) === field.sourceStart), true);
     check("@registerStyle declares the style sheet",
         styles.appended.includes('export interface DashboardTitle {get styleSheet(): import("@stemjs/ui/Style").StyleRules<InstanceType<typeof DashboardTitleStyle>>;}'), true);
     check("a class that declares styleSheet is left alone",
@@ -86,7 +94,8 @@ module.exports = (ts, check) => {
     check("a plain field is not a rule",
         styles.appended.includes("plainField"), false);
     check("every rule name is renamed in the source half",
-        ["title", "heading"].every(name => styles.result.fields.some(field => field.name === name)), true);
+        ["title", "heading", "xs", "s"].every(name => styles.result.fields.some(field => field.name === name)), true);
+    check("a short rule is declared like any other", styles.appended.includes(`xs: ${STYLE_OBJECT};`) && styles.appended.includes(`    s: ${STYLE_OBJECT};`), true);
 
     const nested = augment(ts, "nested.tsx");
     const nestedStyle = 'get styleSheet(): import("@stemjs/ui/Style").StyleRules<InstanceType<typeof PopupStyle>>;';

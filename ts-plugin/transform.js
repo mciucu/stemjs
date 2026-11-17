@@ -21,7 +21,7 @@
 //
 // @field(SomeStore) gives the property the type its spec loads, plus the raw id that comes with a foreign
 // key. A class and a merged interface can't both declare the same member (TS2300), so an un-annotated
-// field first has to stop being a member: its *name* is replaced by an equal-length placeholder.
+// field first has to stop being a member: its *name* is replaced by a placeholder, of equal length where it fits.
 //
 //     @field(MessageThread) messageThread;      on disk
 //     @field(MessageThread) messageThre$1;      what the compiler parses
@@ -69,8 +69,9 @@
 // Only a class declared at the top level gets one, since a merged interface needs a name to attach to;
 // a class declared inside a function - what the mixins return - still needs a cast.
 //
-// Equal length is the whole point of the placeholder: the file keeps its exact shape, so a position means
-// the same thing to the editor and to the compiler. The decorator itself is untouched, so its argument
+// Equal length is the point of the placeholder: the file keeps its exact shape, so a position means the same
+// thing to the editor and to the compiler. A name too short for one is the exception, mapped like a JSX
+// assertion. The decorator itself is untouched, so its argument
 // keeps its type checking, its completion and its go-to-definition, and its import still counts as used.
 // FieldValue and FieldRawIds hold the semantics (Date loads a StemDate, only foreign keys get a raw id);
 // this file only decides which member goes where.
@@ -356,7 +357,9 @@ function fileTag(fileName) {
     return hash;
 }
 
-// StyleRules skips a stand-in by matching `${string}$${number}`, so everything after the $ stays decimal
+// A name too short for even the bare `$<counter>` (`xs`, from the tenth member on) gets a longer stand-in, recorded
+// as a shift like a JSX assertion. StyleRules skips a stand-in by matching `${string}$${number}`, so everything after
+// the $ stays decimal.
 function makePlaceholder(name, index, hash = 0) {
     for (const tagLength of [2, 1, 0]) {
         const tag = tagLength ? String(hash % Math.pow(10, tagLength)).padStart(tagLength, "0") : "";
@@ -365,7 +368,7 @@ function makePlaceholder(name, index, hash = 0) {
             return name.slice(0, name.length - suffix.length) + suffix;
         }
     }
-    return null;
+    return name + "$" + String(hash).padStart(2, "0") + index;
 }
 
 // TypeScript types every JSX expression as JSX.Element, whatever the tag, and jsxFactory drives emit
@@ -519,9 +522,6 @@ function collectNestedClassInterfaces(ts, sourceFile, styleModule, uiModule, opt
                 rule => !interfaceDeclaresMember(ts, sourceFile, className, rule.name));
             for (const rule of styleRules) {
                 const placeholder = makePlaceholder(rule.name, impliedFields.length + 1, tag);
-                if (!placeholder) {
-                    continue;
-                }
                 const field = {
                     name: rule.name,
                     placeholder,
@@ -619,9 +619,6 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
             let entryDeclarations = "";
             for (const entry of collectEnumEntries(ts, statement, sourceFile)) {
                 const placeholder = makePlaceholder(entry.name, impliedFields.length + 1, tag);
-                if (!placeholder) {
-                    continue;
-                }
                 entryDeclarations += "    const ";
                 impliedFields.push({
                     name: entry.name,
@@ -668,9 +665,6 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
         let ruleDeclarations = "";
         for (const rule of styleRules) {
             const placeholder = makePlaceholder(rule.name, impliedFields.length + 1, tag);
-            if (!placeholder) {
-                continue;
-            }
             ruleDeclarations += "    ";
             impliedFields.push({
                 name: rule.name,
@@ -719,10 +713,7 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
             if (fieldInfo.isAnnotated || interfaceDeclaresMember(ts, sourceFile, className, fieldInfo.name)) {
                 continue;
             }
-            const placeholder = makePlaceholder(fieldInfo.name, impliedFields.length + relocated.length + 1, tag);
-            if (placeholder) {
-                relocated.push({...fieldInfo, placeholder});
-            }
+            relocated.push({...fieldInfo, placeholder: makePlaceholder(fieldInfo.name, impliedFields.length + relocated.length + 1, tag)});
         }
 
         const omitArgument = omittedRawIds.length > 0 ? `, ${omittedRawIds.join(" | ")}` : "";
@@ -773,7 +764,7 @@ function getAugmentedSource(ts, fileName, text, options = {}) {
 
     let rewritten = "";
     let cursor = 0;
-    // A field placeholder is the same length as the name it stands in for; a JSX assertion is inserted.
+    // A field placeholder is the same length as the name it stands in for, but for a short name; a JSX assertion is inserted.
     // Both are applied in one pass, in source order, so the shift each one contributes stays accountable.
     const edits = [
         ...impliedFields.map(field => ({offset: field.sourceStart, skip: field.name.length, text: field.placeholder, field})),
