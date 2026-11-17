@@ -326,6 +326,21 @@ It prints one line per diagnostic - file, position and the first line of the mes
 TypeScript appends to an assignability error are behind `--verbose`; `--quiet` prints only a count per file.
 
 ```sh
+node stem-core/ts-plugin/typecheck.js --incremental <file>  # keep what the run learns in <file>, a .tsbuildinfo
+node stem-core/ts-plugin/typecheck.js --watch [--incremental <file>]  # stay running, report again on each change
+```
+
+`--incremental` makes the next run recheck only what an edit can affect: a file whose text changed, and every file
+that depends on one whose declarations changed. The rest of the report comes from `<file>`, so what is printed, and
+the exit code, are those of a full run. Every file's version is a hash of the text the compiler sees, which is the
+augmented one, so a change to the plugin's transform rechecks what it changes too; a different TypeScript or
+different compiler options start over. Keep `<file>` out of the sources (a build folder git ignores), and give each
+tsconfig its own. It is replaced whole after each run, so runs that overlap never read half of one. Most of a warm run
+is parsing and binding every file again; `--watch` keeps them from one check to the next, so a change that alters no
+declaration reports in about a second. It prints a report after each check that read a changed file, and nothing for
+a change that changed no file's text. A tsconfig whose options changed starts over, and reports.
+
+```sh
 STEM_PLUGIN_DEBUG=1 node stem-core/ts-plugin/typecheck.js   # report errors in what we generate, instead of hiding them
 ```
 
@@ -357,7 +372,7 @@ completions, diagnostics, outline).
   by the command line and the tests, so the two can't disagree about what counts as an error.
 - `numericCoercion.js`, `jsxChildren.js`, `registeredStyle.js` - the three diagnostic rules above, shared by `checker.js` and `index.js`
   so the editor and the command line agree about what counts.
-- `typecheck.js` - the command-line counterpart, a CLI over `checker.js`.
+- `typecheck.js` - the command-line counterpart, a CLI over `checker.js`, with `--incremental` and `--watch`.
 - `loadTypeScript.js` - finds the project's TypeScript from wherever we're run.
 - `test/` - see above.
 

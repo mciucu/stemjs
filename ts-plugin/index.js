@@ -3,10 +3,11 @@
 //
 // See transform.js for what gets declared and why. The declarations are appended past the end of the file and
 // an un-annotated @field member is renamed to an equal-length placeholder, but a JSX assertion is inserted
-// where it is needed (and a name too short for one gets a longer placeholder), so a position past one means different things on the two sides - everything this file
-// does is to keep that from showing through: the appended region is hidden from results the editor displays,
-// anything that lands on a relocated member is mapped back to where that member is written, and every span
-// the editor is handed is put back in the columns the file actually has.
+// where it is needed (and a name too short for one gets a longer placeholder), so a position past one means
+// different things on the two sides - everything this file does is to keep that from showing through: the
+// appended region is hidden from results the editor displays, anything that lands on a relocated member is
+// mapped back to where that member is written, and every span the editor is handed is put back in the columns
+// the file actually has.
 
 const {getAugmentedSource, toSourceOffset, toAugmentedOffset} = require("./transform");
 const {isNumericCoercion} = require("./numericCoercion");
@@ -402,7 +403,7 @@ function init(modules) {
             if (definitions.length === 0) {
                 return undefined;
             }
-            const textSpan = field ? {start: field.sourceStart, length: field.name.length} : result.textSpan;
+            const textSpan = field ? {start: field.sourceStart, length: field.name.length} : toSourceRange(fileName, result.textSpan);
             return {...result, textSpan, definitions};
         };
 

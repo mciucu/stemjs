@@ -214,6 +214,16 @@ module.exports = (ts, check) => {
         plugin.getEncodedSyntacticClassifications(SHIFTED, wholeFile).spans.join(),
         raw.getEncodedSyntacticClassifications(SHIFTED, wholeFile).spans.join());
 
+    // A name too short for an equal-length placeholder moves what follows it, the way a JSX assertion does
+    const shortFile = path.join(FIXTURE, "short.ts");
+    const shortText = ts.sys.readFile(shortFile);
+    const shortSpan = (span) => shortText.substr(span.start, span.length);
+    check("a short field leaks no diagnostics either",
+        plugin.getSemanticDiagnostics(shortFile).map(diagnostic => ts.flattenDiagnosticMessageText(diagnostic.messageText, " ")).join(" | "), "");
+    const shortUsage = plugin.getDefinitionAndBoundSpan(shortFile, shortText.indexOf("interval.b") + "interval.".length);
+    check("a usage past a short field is bound where it is written", shortSpan(shortUsage.textSpan), "b");
+    check("and defined at the field", shortUsage.definitions.map(definition => shortSpan(definition.textSpan)).join(), "b");
+
     const outline = plugin.getNavigationTree(storesFile);
     const chatMessage = outline.childItems.find(item => item.text === "ChatMessage");
     check("the outline shows real names", chatMessage.childItems.map(item => item.text).sort().join(","),

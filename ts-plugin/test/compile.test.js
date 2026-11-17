@@ -2,8 +2,10 @@
 // directives are the real assertions: an implied type that came out as `any` leaves them unsatisfied, and
 // TypeScript reports that as an error of its own.
 
+const fs = require("fs");
+const os = require("os");
 const path = require("path");
-const {getProjectDiagnostics} = require("../checker");
+const {createProjectCheck, getProjectDiagnostics} = require("../checker");
 const {stemRootDiagnostic} = require("../stemSources");
 
 const FIXTURE = path.join(__dirname, "fixture");
@@ -38,4 +40,26 @@ module.exports = (ts, check) => {
     const unresolved = stemRootDiagnostic(ts, {}, options, FIXTURE);
     check("a stemRoot that doesn't resolve says so", unresolved && ts.flattenDiagnosticMessageText(unresolved.messageText, " ").split(",")[0],
         `Stem's ts-plugin can't find "stem-core/ui/UIBase"`);
+
+    // An incremental check reports what a full one does, whether its diagnostics come from the checker, from the
+    // build info a previous process left, or from files kept by the same process
+    const described = list => list.map(diagnostic => [
+        diagnostic.file ? path.relative(FIXTURE, diagnostic.file.fileName) : "",
+        diagnostic.start,
+        diagnostic.code,
+        ts.flattenDiagnosticMessageText(diagnostic.messageText, " "),
+    ].join(":")).join(" | ");
+    const buildInfoFolder = fs.mkdtempSync(path.join(os.tmpdir(), "stem-typecheck-"));
+    const buildInfoFile = path.join(buildInfoFolder, "fixture.tsbuildinfo");
+    try {
+        const incremental = () => createProjectCheck(ts, FIXTURE, {filter: path.join("test", "fixture"), buildInfoFile})().diagnostics;
+        check("an incremental check reports what a full one does", described(incremental()), described(diagnostics));
+        check("and leaves its build info", fs.existsSync(buildInfoFile), true);
+        check("and so does one that starts from its build info", described(incremental()), described(diagnostics));
+        const keeping = createProjectCheck(ts, FIXTURE, {filter: path.join("test", "fixture"), keepFiles: true});
+        keeping();
+        check("and one that runs again on the files it kept", described(keeping().diagnostics), described(diagnostics));
+    } finally {
+        fs.rmSync(buildInfoFolder, {recursive: true, force: true});
+    }
 };
