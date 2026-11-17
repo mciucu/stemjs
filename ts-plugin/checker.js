@@ -4,7 +4,7 @@
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
-const {getAugmentedSource, toSourceOffset} = require("./transform");
+const {getAugmentedSource, restoreFieldNames, toSourceOffset} = require("./transform");
 const {isNumericCoercion} = require("./numericCoercion");
 const {isCollectedChild} = require("./jsxChildren");
 const {isRegisteredStyleReplacement} = require("./registeredStyle");
@@ -105,11 +105,7 @@ function restoreNames(augmented, messageText) {
             next: messageText.next && messageText.next.map(entry => restoreNames(augmented, entry)),
         };
     }
-    let restored = messageText;
-    for (const field of augmented.fields) {
-        restored = restored.split(field.placeholder).join(field.name);
-    }
-    return restored;
+    return restoreFieldNames(augmented.fields, messageText);
 }
 
 // The builder knows a file changed by its version, so the version is a hash of the text the compiler sees: an edit to

@@ -371,6 +371,13 @@ function makePlaceholder(name, index, hash = 0) {
     return name + "$" + String(hash).padStart(2, "0") + index;
 }
 
+// The names back in a text that speaks of their placeholders (a message, a hover). Whole identifiers, in one pass:
+// a bare placeholder (`$4`) is part of a longer one (`t$495`), which replacing them one at a time would rewrite.
+function restoreFieldNames(fields, text) {
+    const nameOfPlaceholder = new Map(fields.map(field => [field.placeholder, field.name]));
+    return text.replace(/[$\p{ID_Continue}]+/gu, identifier => nameOfPlaceholder.get(identifier) ?? identifier);
+}
+
 // TypeScript types every JSX expression as JSX.Element, whatever the tag, and jsxFactory drives emit
 // rather than inference, so UI.createElement's overloads are never consulted. The element itself is left
 // exactly as written and a type assertion is appended after it, which is enough to make the type real.
@@ -837,4 +844,4 @@ function toAugmentedOffset(shifts, position) {
     return position + shift;
 }
 
-module.exports = {getAugmentedSource, getRegisteredStyle, getStemRoot, toSourceOffset, toAugmentedOffset, usesStemJsx, UI_MODULE};
+module.exports = {getAugmentedSource, getRegisteredStyle, getStemRoot, restoreFieldNames, toSourceOffset, toAugmentedOffset, usesStemJsx, UI_MODULE};

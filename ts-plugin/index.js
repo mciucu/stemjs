@@ -9,7 +9,7 @@
 // mapped back to where that member is written, and every span the editor is handed is put back in the columns
 // the file actually has.
 
-const {getAugmentedSource, toSourceOffset, toAugmentedOffset} = require("./transform");
+const {getAugmentedSource, restoreFieldNames, toSourceOffset, toAugmentedOffset} = require("./transform");
 const {isNumericCoercion} = require("./numericCoercion");
 const {isCollectedChild} = require("./jsxChildren");
 const {isRegisteredStyleReplacement} = require("./registeredStyle");
@@ -177,14 +177,7 @@ function init(modules) {
 
         const restoreNames = (fileName, text) => {
             const augmented = augmentedFile(fileName);
-            if (!augmented || typeof text !== "string") {
-                return text;
-            }
-            let restored = text;
-            for (const field of augmented.fields) {
-                restored = restored.split(field.placeholder).join(field.name);
-            }
-            return restored;
+            return augmented && typeof text === "string" ? restoreFieldNames(augmented.fields, text) : text;
         };
 
         // A message can name a placeholder even when it's reported somewhere we leave alone ("did you mean

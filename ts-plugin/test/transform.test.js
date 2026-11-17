@@ -3,7 +3,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const {getAugmentedSource, toSourceOffset, toAugmentedOffset} = require("../transform");
+const {getAugmentedSource, restoreFieldNames, toSourceOffset, toAugmentedOffset} = require("../transform");
 
 const FIXTURE = path.join(__dirname, "fixture");
 // jsxFactory mirrors fixture/tsconfig.json: the classic Stem transform, where a tag is an instance
@@ -96,6 +96,10 @@ module.exports = (ts, check) => {
     check("every rule name is renamed in the source half",
         ["title", "heading", "xs", "s"].every(name => styles.result.fields.some(field => field.name === name)), true);
     check("a short rule is declared like any other", styles.appended.includes(`xs: ${STYLE_OBJECT};`) && styles.appended.includes(`    s: ${STYLE_OBJECT};`), true);
+    // The bare placeholder a two-letter name gets is part of the next member's, when the file's tag starts with its counter
+    const sharing = [{name: "xs", placeholder: "$4"}, {name: "title", placeholder: "t$495"}];
+    check("a placeholder that is part of another comes back as its own name",
+        restoreFieldNames(sharing, "Property 't$495' of S.$4 is not $4x"), "Property 'title' of S.xs is not $4x");
 
     const nested = augment(ts, "nested.tsx");
     const nestedStyle = 'get styleSheet(): import("@stemjs/ui/Style").StyleRules<InstanceType<typeof PopupStyle>>;';
