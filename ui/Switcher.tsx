@@ -90,8 +90,11 @@ export class Switcher extends UIElement<SwitcherOptions> {
 
         // This render may be required to update this.options.children
         RenderStack.push(this);
-        this.render();
-        RenderStack.pop();
+        try {
+            this.render();
+        } finally {
+            RenderStack.pop();
+        }
 
         if (!this.options.children || this.options.children.length === 0) {
             return false;

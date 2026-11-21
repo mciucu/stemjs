@@ -544,9 +544,11 @@ export class UIElement<
 
     getChildrenForRedraw(): UIResolvedChild[] {
         RenderStack.push(this);
-        const children = cleanChildren(this.getChildrenToRender());
-        RenderStack.pop();
-        return children;
+        try {
+            return cleanChildren(this.getChildrenToRender());
+        } finally {
+            RenderStack.pop(); // Even when the render threw, or the next string ref would resolve against this element
+        }
     }
 
     // The overload lets an override take redrawPerTickRunner's event without this body declaring one
