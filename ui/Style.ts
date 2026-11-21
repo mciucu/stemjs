@@ -116,11 +116,14 @@ class StyleSheet extends Dispatchable {
 
     // Generate an instance, and also make sure to instantiate all style elements
     static initialize(): void {
-        const styleSheet = this.getInstance();
+        this.getInstance().initializeRules();
+    }
 
-        for (const key in this.prototype) {
+    // Every rule of this sheet made now, rather than each the first time it is read
+    initializeRules(): void {
+        for (const key in Object.getPrototypeOf(this)) {
             // Just hit the getter to instantiate the style
-            if (!(styleSheet as Record<string, unknown>)[key]) {
+            if (!(this as unknown as Record<string, unknown>)[key]) {
                 console.log("This is here to prevent a bundling optimization bug");
             }
         }

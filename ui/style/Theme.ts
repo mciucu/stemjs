@@ -157,6 +157,14 @@ export class Theme extends Dispatchable {
         return [...new Set(styleSheets)];
     }
 
+    // Every rule of every style sheet of the theme made now, whatever has been drawn so far: the rules the document holds are
+    // then the same however it got there
+    initializeAllStyleSheets(): void {
+        for (const styleSheet of this.getAllStyleSheets()) {
+            styleSheet.initializeRules();
+        }
+    }
+
     getStyleSheetInstance<T extends typeof StyleSheet>(Cls: T): InstanceType<T> {
         let instance = this.styleSheetInstances.get(Cls);
         if (!instance) {
