@@ -119,12 +119,20 @@ class StyleSheet extends Dispatchable {
         this.getInstance().initializeRules();
     }
 
-    // Every rule of this sheet made now, rather than each the first time it is read
+    // Every rule of this sheet made now, rather than each the first time it is read. A base sheet's rules are made before a
+    // subclass's, so a subclass's rule that overrides one of the base's comes later in the document and wins, as it does when
+    // an element reads the base's rule first
     initializeRules(): void {
-        for (const key in Object.getPrototypeOf(this)) {
-            // Just hit the getter to instantiate the style
-            if (!(this as unknown as Record<string, unknown>)[key]) {
-                console.log("This is here to prevent a bundling optimization bug");
+        const prototypes: object[] = [];
+        for (let prototype = Object.getPrototypeOf(this); prototype && prototype !== StyleSheet.prototype; prototype = Object.getPrototypeOf(prototype)) {
+            prototypes.unshift(prototype);
+        }
+        for (const prototype of prototypes) {
+            for (const key of Object.keys(prototype)) {
+                // Just hit the getter to instantiate the style
+                if (!(this as unknown as Record<string, unknown>)[key]) {
+                    console.log("This is here to prevent a bundling optimization bug");
+                }
             }
         }
     }
