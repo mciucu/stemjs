@@ -258,7 +258,7 @@ export function decapitalize(text: string): string {
 }
 
 export function pluralize(count: number, text: string): string {
-    return `${count} ${text}${count > 1 ? "s" : ""}`;
+    return `${count} ${text}${count !== 1 ? "s" : ""}`;
 }
 
 export function titleCase(text: string): string {
@@ -597,6 +597,16 @@ export function eraseFirst<T>(array: T[], value: T): T[] {
         array.splice(index, 1);
     }
     return array;
+}
+
+// What a map (or a WeakMap) holds for a key, made by `make` and put in the map first when it holds nothing for it
+export function getOrSet<K, V>(map: {has(key: K): boolean; get(key: K): V | undefined; set(key: K, value: V): unknown}, key: K, make: (key: K) => NoInfer<V>): V {
+    if (map.has(key)) {
+        return map.get(key)!;
+    }
+    const value = make(key);
+    map.set(key, value);
+    return value;
 }
 
 export async function sleep(milliseconds: number): Promise<void> {
